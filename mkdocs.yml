@@ -1,0 +1,16 @@
+site_name: OSG Networking Area
+site_url: https://opensciencegrid.github.io/networking
+repo_url: https://github.com/opensciencegrid/networking
+theme: readthedocs
+
+extra_css:
+  - css/extra.css
+
+pages:
+  - Home: 'index.md'
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc(permalink=true)
+
