@@ -1,0 +1,14 @@
+{
+    "docs": [
+        {
+            "location": "/", 
+            "text": "OSG Networking Area\n\n\nWelcome to the home page of the OSG Networking Team documentation area! This is currently a work in progress as we migrate our TWiki documentation to GitHub. If you are looking for our full documentation, please visit the \nTWiki\n.", 
+            "title": "Home"
+        }, 
+        {
+            "location": "/#osg-networking-area", 
+            "text": "Welcome to the home page of the OSG Networking Team documentation area! This is currently a work in progress as we migrate our TWiki documentation to GitHub. If you are looking for our full documentation, please visit the  TWiki .", 
+            "title": "OSG Networking Area"
+        }
+    ]
+}
