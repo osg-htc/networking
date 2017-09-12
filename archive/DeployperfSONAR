@@ -1,0 +1,52 @@
+%LINKCSS%
+
+<!-- This is the default OSG documentation template. Please modify it in -->
+<!-- the sections indicated to create your topic.                        --> 
+
+<!-- By default the title is the WikiWord used to create this topic. If  -->
+<!-- you want to modify it to something more meaningful, just replace    -->
+<!-- %TOPIC% below with i.e "My Topic".                                  -->
+
+---+!! %SPACEOUT{ "Deploying !perfSONAR for OSG/WLCG" }%
+%TOC%
+
+%STARTINCLUDE%
+This  page provides  details for site admins installing, upgrading or  using  perfSONAR  in  WLCG/OSG.     The sections  below are intended to allow users  to  find  quickly the  specific information they are  interested in. 
+
+Our  *strong recommendation* for  anyone maintaining/using  perfSONAR is that they join either/both of the following mailing lists:
+   * *User's Mailing List*  The perfSONAR project maintains a mailing list for communication on matters of installation, configuration, bug reports, or general performance discussions:  https://lists.internet2.edu/sympa/subscribe/perfsonar-user
+   * *Announcement Mailing List* The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: https://lists.internet2.edu/sympa/subscribe/perfsonar-announce
+
+---+++ Overview of perfSONAR in WLCG/OSG 
+
+OSG is working to support the scientific networking needs of it's constituents and collaborators.   To do this, we are recommending all sites deploy perfSONAR so we can measure, monitor and diagnose the OSG (and WLCG) networks.
+
+The following topical sections provide details about perfSONAR for WLCG/OSG
+   * [[pSMotivation][Overview,  Motivation  and Requirements (new sites)]]
+   * [[InstallUpdatePS][Installation/upgrade guide]]
+   * [[TroubleFAQPS][Troubleshooting/FAQ]]
+   * [[ExGuidePS][Guide for experiments (storage APIs, dashboard, etc.)]]
+
+---++++ Changes for perfSONAR 4.0
+
+The final release of perfSONAR 4.0 was put into the perfSONAR repository on April 17, 2017.    All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days of that date.  This release incorporates possibly the largest single change in perfSONAR’s 15-year history, and the developers spent considerable time making sure it was right. 
+
+Highlights include:
+
+   * New scheduling software called pScheduler that provides increased visibility, extensibility and control in the measurement process. 
+   * !CentOS 7 support
+   * Debian perfsonar-toolkit bundle support
+   * Updated graphs
+   * Support for email alerting in !MaDDash
+
+For a more complete list of changes, see the full release notes at: http://www.perfsonar.net/release-notes/version-4-0/
+ 
+
+The [[https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics][WLCG Network Throughput Working Group]] is responsible for monitoring the WLCG/OSG instances and for defining and maintaining the mesh-configurations that we use to control perfSONAR testing.   Please contact them if you have questions or suggestions related to perfSONAR testing amongst WLCG sites.
+
+
+%STOPINCLUDE%
+
+%BOTTOMMATTER%
+
+-- Main.ShawnMcKee - 24 Jul 2017

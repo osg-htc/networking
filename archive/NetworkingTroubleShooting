@@ -1,0 +1,53 @@
+%LINKCSS%
+
+<!-- This is the default OSG documentation template. Please modify it in -->
+<!-- the sections indicated to create your topic.                        --> 
+
+<!-- By default the title is the WikiWord used to create this topic. If  -->
+<!-- you want to modify it to something more meaningful, just replace    -->
+<!-- %TOPIC% below with i.e "My Topic".                                  -->
+
+---+!! %SPACEOUT{ "Network  and Network Troubleshooting Documentation" }%
+%TOC%
+
+%STARTINCLUDE%
+This page will eventually include pointers to various network troubleshooting resources.   In general, when users suspect  a network problem the procedure is:
+
+   * *Document the problem*:  Basically you need to describe the problem you encountered.  Provide any relevant details like the exact command you used, any errors or warning you got and any problems you observed.  This can help you better understand the problem and will allow you to easily "hand-off" troubleshooting to an expert
+   * *Gather relevant data:*   Run tests (see Guide below) and capture the results.   
+   * *Contact your local network support* (this is sometimes where users don't know where to go).  Google or your campus web-pages should be able to help you find the right contact.
+   * *Escalate*, if the problem persists (Open a ticket with OSG or contact the Internet2 NOC) 
+
+We have a draft  version of the OSG [[%ATTACHURL%/20130204-OSG-Debug-SPM.docx][network debugging document]] that describes things in much more detail.  If you have comments, questions or suggestions, please contact Shawn !McKee.
+
+There is good documentation on the basic OSG command line network debugging tools at https://twiki.grid.iu.edu/bin/view/Documentation/Release3/NetworkPerformanceToolkit
+
+If you want to learn more there is a tutorial (from 2010) available at https://www.opensciencegrid.org/bin/view/Trash/ReleaseDocumentationNetworkPerformanceTroubleshootingHandsOn
+
+---++ Information on Contacting Network Support
+
+There are numerous regional and campus network operations centers that have their own ticketing systems for reporting problems.  I encourage you to identify how to contact your local campus network support personnel.  Suggestion:  try using Google with "YourUniversity network trouble ticket" as the search terms (of course substitute your university name for _YourUniversity_).
+
+Below are the links you can use to report problems to OSG or the major Research and Education networks.  If you can't determine who your local contact should be or they are unable to help you resolve the issue, you should open a ticket with one of these entities:
+
+*INTERNET2*: If you are located at a University in the United States you are likely connected to Internet2.   You can find the details on opening a ticket with Internet2 at:
+   * http://noc.net.internet2.edu/i2network/support.html
+This is your best bet for support beyond your campus.
+
+*ESNET*: If your problem involves a national laboratory in the United States, then you may want to contact ESnet:
+   * http://www.es.net/introducing-esnet5/tools/
+This page contains information on opening  ticket and pointers to relevant tools and documentation.  ESnet serves the Department of Energy national labs.
+
+*NLR*: If your connected to National  Lambda Rail (NLR) or you think your problem involves sites connect to NLR go to:
+   * http://noc.nlr.net/
+There is information on scheduled outages and an email address you can use to open a request for support.
+
+*OSG*: If you have questions or unusual problems you think are OSG related, feel free to contact the OSG NOC.  You can also open network related tickets and OSG can help to 'triage' your request and get it to the right people.  Details at:
+   * https://twiki.grid.iu.edu/bin/view/Trash/Trash/Trash/Trash/Integration/ITB092/TroubleTickets
+
+
+%STOPINCLUDE%
+
+%BOTTOMMATTER%
+
+-- Main.ShawnMcKee - 09 Sep 2012
