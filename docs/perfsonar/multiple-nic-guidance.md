@@ -6,7 +6,4 @@ The problem is that running both latency and bandwidth services on a single node
 network problems.    
 
 Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Fortunately the perfSONAR developers have provided a way to install both latency and bandwidth 
-measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory.
-
-Here we discuss the requirements and implications of deploying a perfSONAR server with multiple NICs.
-
+measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory.  See http://docs.perfsonar.net/manage_dual_xface.html for details on configuring this.
