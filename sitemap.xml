@@ -4,7 +4,89 @@
     
     <url>
      <loc>https://opensciencegrid.github.io/networking/</loc>
-     <lastmod>2017-08-28</lastmod>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/network-troubleshooting/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/network-troubleshooting/osg-debugging-document/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar-in-osg/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/deployment-models/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/register-ps-in-oim/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/register-ps-in-gocdb/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/multiple-nic-guidance/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/psetf/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/installation/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/faq/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/perfsonar/requirements/</loc>
+     <lastmod>2017-09-14</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
+    <url>
+     <loc>https://opensciencegrid.github.io/networking/osg-network-services/</loc>
+     <lastmod>2017-09-14</lastmod>
      <changefreq>daily</changefreq>
     </url>
     

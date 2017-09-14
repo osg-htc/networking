@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>perfSONAR in OSG - OSG Networking Area</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../css/extra.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "perfSONAR in OSG";
+    var mkdocs_page_input_path = "perfsonar-in-osg.md";
+    var mkdocs_page_url = "/perfsonar-in-osg/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> OSG Networking Area</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">OSG Networking Area</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Network Troubleshooting</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../network-troubleshooting/">Network Troubleshooting</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../network-troubleshooting/osg-debugging-document/">OSG Network Debugging Document</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">perfSONAR in OSG</span>
+    <ul class="subnav">
+                <li class=" current">
+                    
+    <a class="current" href="./">perfSONAR in OSG</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#overview-of-perfsonar">Overview of perfSONAR</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l4" href="#the-challenge">The Challenge</a></li>
+        
+            <li><a class="toctree-l4" href="#osg-networking">OSG Networking</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/deployment-models/">Deployment Models</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/register-ps-in-oim/">Register perfSONAR in OIM</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/register-ps-in-gocdb/">Register perfSONAR in GOCDB</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/multiple-nic-guidance/">Multiple NIC Guidance</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/psetf/">Monitoring perfSONAR with ETF</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/installation/">Installing perfSONAR</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/faq/">Frequently Asked Questions</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../perfsonar/requirements/">Requirements for perfSONAR</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../osg-network-services/">OSG Network Services</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">OSG Networking Area</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>perfSONAR in OSG &raquo;</li>
+        
+      
+    
+    <li>perfSONAR in OSG</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/opensciencegrid/networking/edit/master/docs/perfsonar-in-osg.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><span class="twiki-macro LINKCSS"></span></p>
+<h1 id="overview-of-perfsonar"><span class="twiki-macro SPACEOUT">Overview of perfSONAR</span><a class="headerlink" href="#overview-of-perfsonar" title="Permanent link">&para;</a></h1>
+<p><span class="twiki-macro STARTINCLUDE"></span> 
+For those not familiar with <code>perfSONAR</code>, this page provides a quick overview of what it is and why we recommend its deployment at OSG and WLCG sites.</p>
+<p>OSG is working to support the scientific networking needs of it's constituents and collaborators. To do this, we are recommending all sites deploy perfSONAR 
+so we can measure, monitor and diagnose the OSG (and WLCG) networks.</p>
+<h3 id="the-challenge">The Challenge<a class="headerlink" href="#the-challenge" title="Permanent link">&para;</a></h3>
+<p>Distributed scientific computing relies upon networks to interconnect resources and make them usable for scientific workflows. This dependency upon the network means that issues in 
+our networks can significantly impact the behavior of all the various cyber-infrastructure components that rely upon it. Compounding the problem is that networks, by their nature, are 
+distributed and typically involve many different "owners" and administrators. When a problem arises somewhere along a network path, it can be very difficult to identify and localize.</p>
+<p>This was the context for the formation of the perfSONAR collaboration (see <a href="https://www.perfsonar.net/about/mission-statement">https://www.perfsonar.net/about/mission-statement</a>). This collaboration is focused on developing and 
+deploying the <code>perfSONAR</code> software suite in support of network monitoring across the global set of research and education (R&amp;E) networks. The <strong>Open Science Grid</strong> (<strong>OSG</strong>) has chosen to 
+base the core of its network monitoring framework on <code>perfSONAR</code> because of both the capabilities of the toolkit for measuring our networks and its global acceptance as the defacto 
+network monitoring infrastructure of first choice.</p>
+<p>The <a href="https://www.perfsonar.net.about/what-is-perfsonar/">https://www.perfsonar.net.about/what-is-perfsonar/</a> provides a succinct summary: ``<em>perfSONAR is a network measurement toolkit designed to provide federated coverage of paths, 
+and help to establish end-to-end usage expectations. There are 1000s of perfSONAR instances deployed world wide, many of which are available for open testing of key measures of network 
+performance. This global infrastructure helps to identify and isolate problems as they happen, making the role of supporting network users easier for engineering teams, and increasing 
+productivity when utilizing network resources.</em>''</p>
+<h3 id="osg-networking">OSG Networking<a class="headerlink" href="#osg-networking" title="Permanent link">&para;</a></h3>
+<p><strong>How can OSG members and collaborators understand, maintain and effectively utilize the networks that form the basis of their distributed collaborations?</strong></p>
+<p>Our answer starts by providing visibility into our networks by the deployment of <code>perfSONAR</code>. perfSONAR allows us to regularly and consistently measure a set of network metrics that we 
+can use to understand how our networks are operating. When problems arise, the data, along with access to the <code>perfSONAR</code> tools, can be used to diagnose and localize problems. The 
+presence of perfSONAR toolkit deployments across our sites and networks makes identifying and fixing network problems feasible.</p>
+<p>We strongly recommend that all OSG (and WLCG) sites deploy <code>perfSONAR</code> toolkit instances as described in our <a href="../perfsonar/installation">installation guide</a>. Before installing you should consult 
+the <a href="../perfsonar/requirements">requirements</a> along with the guidance on <a href="../perfsonar/deployment-models">deployment models</a>. </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Installing perfSONAR not only benefits users at a site but will enable network engineers and OSG staff to much more effectively support those sites if network issues are suspected.</p>
+</div>
+<p>All OSG and WLCG sites should deploy <strong>two</strong> <code>perfSONAR</code> instances: one to measure latency/packet loss and one to measure bandwidth. 
+It is possible to install both versions on a single host with at least two NICs by following the instructions at <a href="http://docs.perfsonar.net/manage_dual_xface.html">http://docs.perfsonar.net/manage_dual_xface.html</a> but you should 
+read the <a href="../persfonar/multiple-nic-guidance">multiple NIC guidance page</a>. </p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is <strong>very important</strong> that the perfSONAR instances be located in the same subnet as the primary storage for the site. 
+This is to ensure that we are measuring as much of the network path involved with data transfer as possible.</p>
+</div>
+<p>Our <strong>strong recommendation</strong> for anyone maintaining/using perfSONAR is that they join either/both of the following mailing lists:</p>
+<ul>
+<li><strong>User's Mailing List</strong> The perfSONAR project maintains a mailing list for communication on matters of installation, configuration, bug reports, or general performance discussions: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">https://lists.internet2.edu/sympa/subscribe/perfsonar-user</a></li>
+<li><strong>Announcement Mailing List</strong> The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">https://lists.internet2.edu/sympa/subscribe/perfsonar-announce</a></li>
+</ul>
+<h4 id="changes-for-perfsonar-40">Changes for perfSONAR 4.0<a class="headerlink" href="#changes-for-perfsonar-40" title="Permanent link">&para;</a></h4>
+<p>The final release of perfSONAR 4.0 was put into the perfSONAR repository on April 17, 2017. All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days of that date. This release incorporates possibly the largest single change in perfSONAR’s 15-year history, and the developers spent considerable time making sure it was right.</p>
+<p>Highlights include:</p>
+<ul>
+<li>New scheduling software called pScheduler that provides increased visibility, extensibility and control in the measurement process.</li>
+<li>CentOS 7 support</li>
+<li>Debian perfsonar-toolkit bundle support</li>
+<li>Updated graphs</li>
+<li>Support for email alerting in MaDDash</li>
+</ul>
+<p>For a more complete list of changes, see the full release notes at: <a href="http://www.perfsonar.net/release-notes/version-4-0/">http://www.perfsonar.net/release-notes/version-4-0/</a></p>
+<p>The <a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics">WLCG Network Throughput Working Group</a> is responsible for monitoring the WLCG/OSG instances and for defining and maintaining the mesh-configurations that we use to control perfSONAR testing. Please contact them if you have questions or suggestions related to perfSONAR testing amongst WLCG sites.</p>
+<p><span class="twiki-macro STOPINCLUDE"></span></p>
+<p><span class="twiki-macro BOTTOMMATTER"></span></p>
+<p>-- Main.ShawnMcKee - 12 Sep 2017</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../perfsonar/deployment-models/" class="btn btn-neutral float-right" title="Deployment Models">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../network-troubleshooting/osg-debugging-document/" class="btn btn-neutral" title="OSG Network Debugging Document"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/opensciencegrid/networking" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../network-troubleshooting/osg-debugging-document/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../perfsonar/deployment-models/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../js/theme.js"></script>
+
+</body>
+</html>

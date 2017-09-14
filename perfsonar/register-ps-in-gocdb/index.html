@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Register perfSONAR in GOCDB - OSG Networking Area</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+  <link href="../../css/extra.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Register perfSONAR in GOCDB";
+    var mkdocs_page_input_path = "perfsonar/register-ps-in-gocdb.md";
+    var mkdocs_page_url = "/perfsonar/register-ps-in-gocdb/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> OSG Networking Area</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">OSG Networking Area</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Network Troubleshooting</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../network-troubleshooting/">Network Troubleshooting</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../network-troubleshooting/osg-debugging-document/">OSG Network Debugging Document</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">perfSONAR in OSG</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../perfsonar-in-osg/">perfSONAR in OSG</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../deployment-models/">Deployment Models</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../register-ps-in-oim/">Register perfSONAR in OIM</a>
+                </li>
+                <li class=" current">
+                    
+    <a class="current" href="./">Register perfSONAR in GOCDB</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l4" href="#this-section-describes-how-to-register-the-perfsonar-service-in-gocdb">This section describes how to register the perfSONAR service in GOCDB.</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../multiple-nic-guidance/">Multiple NIC Guidance</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../psetf/">Monitoring perfSONAR with ETF</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../installation/">Installing perfSONAR</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../faq/">Frequently Asked Questions</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../requirements/">Requirements for perfSONAR</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../../osg-network-services/">OSG Network Services</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">OSG Networking Area</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>perfSONAR in OSG &raquo;</li>
+        
+      
+    
+    <li>Register perfSONAR in GOCDB</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/opensciencegrid/networking/edit/master/docs/perfsonar/register-ps-in-gocdb.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><span class="twiki-macro LINKCSS"></span></p>
+<h1 id="register-perfsonar-service-in-gocdb"><span class="twiki-macro SPACEOUT">Register perfSONAR Service in GOCDB</span><a class="headerlink" href="#register-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h1>
+<p><span class="twiki-macro STARTINCLUDE"></span></p>
+<h2 id="this-section-describes-how-to-register-the-perfsonar-service-in-gocdb">This section describes how to register the perfSONAR service in GOCDB.<a class="headerlink" href="#this-section-describes-how-to-register-the-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h2>
+<p>In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service Endpoint</p>
+<ul>
+<li><a href="https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint">https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint</a></li>
+</ul>
+<p>You might not be able to access the page if you are not properly registered in GOC, so a snapshot can be found below. In filling the information please follow those simple guidelines:</p>
+<ul>
+<li>There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).</li>
+<li>For each form (i.e. for each service type) fill at least the important informations:<ul>
+<li>Hosting Site (drop-down menu, mandatory)</li>
+<li>Service Type (drop-down menu, mandatory)</li>
+<li>Host Name (free text, mandatory)</li>
+<li>Host IP (free text, optional)</li>
+<li>Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.</li>
+<li>Check "N" when asked "Is it a beta service"</li>
+<li>Check "Y" when asked "Is this service in production"</li>
+<li>Check "Y" when asked "Is this service monitored"</li>
+</ul>
+</li>
+</ul>
+<!-- -->
+
+<ul>
+<li>GOCDB screen shot for creating a Service Endpoint: <br /> <img alt="Screenshot" src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" /></li>
+</ul>
+<p><span class="twiki-macro STOPINCLUDE"></span></p>
+<p><span class="twiki-macro BOTTOMMATTER"></span></p>
+<p>-- Main.ShawnMcKee - 21 Oct 2014</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../multiple-nic-guidance/" class="btn btn-neutral float-right" title="Multiple NIC Guidance">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../register-ps-in-oim/" class="btn btn-neutral" title="Register perfSONAR in OIM"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/opensciencegrid/networking" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../register-ps-in-oim/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../multiple-nic-guidance/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../../js/theme.js"></script>
+
+</body>
+</html>

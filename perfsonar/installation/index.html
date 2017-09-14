@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Installing perfSONAR - OSG Networking Area</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+  <link href="../../css/extra.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Installing perfSONAR";
+    var mkdocs_page_input_path = "perfsonar/installation.md";
+    var mkdocs_page_url = "/perfsonar/installation/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> OSG Networking Area</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">OSG Networking Area</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Network Troubleshooting</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../network-troubleshooting/">Network Troubleshooting</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../network-troubleshooting/osg-debugging-document/">OSG Network Debugging Document</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">perfSONAR in OSG</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../perfsonar-in-osg/">perfSONAR in OSG</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../deployment-models/">Deployment Models</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../register-ps-in-oim/">Register perfSONAR in OIM</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../register-ps-in-gocdb/">Register perfSONAR in GOCDB</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../multiple-nic-guidance/">Multiple NIC Guidance</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../psetf/">Monitoring perfSONAR with ETF</a>
+                </li>
+                <li class=" current">
+                    
+    <a class="current" href="./">Installing perfSONAR</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#installation-and-upgrade-details">Installation and Upgrade Details</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l4" href="#updating-perfsonar">Updating perfSONAR</a></li>
+        
+            <li><a class="toctree-l4" href="#installing-perfsonar">Installing perfSONAR</a></li>
+        
+            <li><a class="toctree-l4" href="#osg-and-wlcg-configuration-notes">OSG and WLCG Configuration Notes</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../faq/">Frequently Asked Questions</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../requirements/">Requirements for perfSONAR</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../../osg-network-services/">OSG Network Services</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">OSG Networking Area</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>perfSONAR in OSG &raquo;</li>
+        
+      
+    
+    <li>Installing perfSONAR</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/opensciencegrid/networking/edit/master/docs/perfsonar/installation.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><span class="twiki-macro LINKCSS"></span></p>
+<h1 id="installation-and-upgrade-details"><span class="twiki-macro SPACEOUT">Installation and Upgrade Details</span><a class="headerlink" href="#installation-and-upgrade-details" title="Permanent link">&para;</a></h1>
+<p><span class="twiki-macro STARTINCLUDE"></span></p>
+<p>This page documents installing or upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult <a href="https://twiki.opensciencegrid.org/bin/view/Documentation/PSMotivation">https://twiki.opensciencegrid.org/bin/view/Documentation/PSMotivation</a> for an overview of perfSONAR.</p>
+<p>For any questions or help with WLCG perfSONAR setup, please email <code>wlcg-perfsonar-support 'at' cern.ch</code> or open GGUS ticket for <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">WLCG perfSONAR Monitoring Support Unit</a>. We strongly recommend anyone maintaining/using perfSONAR to join <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">https://lists.internet2.edu/sympa/subscribe/perfsonar-user</a> and <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">https://lists.internet2.edu/sympa/subscribe/perfsonar-announce</a></p>
+<p>Please follow the instructions for <a href="#UpgradeGuide">upgrading</a> or <a href="#InstallingperfSONAR">installing</a> perfSONAR as appropriate for your plans.</p>
+<h2 id="updating-perfsonar">Updating perfSONAR<a class="headerlink" href="#updating-perfsonar" title="Permanent link">&para;</a></h2>
+<p>Before updating, please read the release notes at <a href="http://docs.perfsonar.net/manage_update.html#special-upgrade-notes">http://docs.perfsonar.net/manage_update.html#special-upgrade-notes</a></p>
+<p>To update please run the following:</p>
+<div class="codehilite"><pre><span></span># yum clean all
+# yum update
+# reboot
+</pre></div>
+
+
+<p>Note, it's <strong>very important to reboot</strong> otherwise your update is incomplete. Please also note, that starting from v3.4 <code>yum</code> auto-updates are turned on by default. <strong>We strongly recommend keeping them turned on</strong>. With <code>yum</code> auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances.</p>
+<p>If you haven't yet added another (<code>non-root</code>) user to administer the web interface, you should run <code>/usr/lib/perfsonar/scripts/nptoolkit-configure.py</code> and do so, as suggested in <code>motd</code>. See <a href="http://docs.perfsonar.net/manage_users.html">http://docs.perfsonar.net/manage_users.html</a> for detailed instructions.</p>
+<p>Please backup your old <code>/etc/perfsonar/meshconfig-agent.conf</code> file and replace it with <code>/etc/perfsonar/meshconfig-agent.conf.rpmnew</code>.</p>
+<p>Then please verify/reconfigure your boxes following <a href="#ConfigPS">OSG and WLCG Configuration</a>. For any further questions, please consult <a href="https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS">Troubleshooting</a> pages, perfSONAR documentation (<a href="http://docs.perfsonar.net">http://docs.perfsonar.net</a>) or contact directly WLCG or OSG perfSONAR support units.</p>
+<h2 id="installing-perfsonar">Installing perfSONAR<a class="headerlink" href="#installing-perfsonar" title="Permanent link">&para;</a></h2>
+<p>perfSONAR 4.0 was released in April 2017. For sites running the previous version (3.x.y) the update should have automatically happened assuming that yum auto-updates were enabled and the <code>/etc/yum.repos.d/Internet2.repo</code> had 'enabled = 1'.</p>
+<p>The following information details how to install perfSONAR 4.0 for WLCG and OSG. For general troubleshooting please go <a href="https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS">here</a>, in case you have any questions please email <code>wlcg-perfsonar-support 'at' cern.ch</code> or open GGUS ticket for <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">WLCG perfSONAR support unit</a>. For OSG sites that don't participate in WLCG, please contact <a href="https://twiki.opensciencegrid.org/bin/view/Operations/WebHome">OSG operations</a>.</p>
+<p>The perfSONAR team has created very good documentation on the process. You can get information about your installation options at <a href="http://docs.perfsonar.net/install_getting.html#gettingchooseinstall">http://docs.perfsonar.net/install_getting.html#gettingchooseinstall</a></p>
+<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>For sites using perfSONAR Net Install - please follow <a href="http://docs.perfsonar.net/install_centos_netinstall.html#step-by-step-guide">http://docs.perfsonar.net/install_centos_netinstall.html#step-by-step-guide</a></li>
+<li>For sites using perfSONAR Full Install - please follow <a href="http://docs.perfsonar.net/install_centos_fullinstall.html#step-by-step-guide">http://docs.perfsonar.net/install_centos_fullinstall.html#step-by-step-guide</a></li>
+<li>For general configuration of perfSONAR - please follow <a href="http://docs.perfsonar.net/install_config_first_time.html">http://docs.perfsonar.net/install_config_first_time.html</a></li>
+</ul>
+<p>For sites the are currently registered but not yet updated to 4.0 we would strongly recommend reinstalling using CentOS 7.x (follow either the Full Install or the Net Install above). There is no need for sites to preserve their data from the OSG/WLCG perspective, since we have already been collecting your data centrally. The primary reason for this recommendation is that the next point release of perfSONAR (version 4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6 as a supported operating system.</p>
+<h2 id="osg-and-wlcg-configuration-notes">OSG and WLCG Configuration Notes<a class="headerlink" href="#osg-and-wlcg-configuration-notes" title="Permanent link">&para;</a></h2>
+<p>All perfSONAR instances for use in OSG and WLCG should be registered either in OIM or GOCDB. Please verify or register your instances at:</p>
+<ul>
+<li>For OSG, follow the details in <a href="../register-ps-in-oim">OIM</a></li>
+<li>For Non-OSG, follow the details in <a href="../register-ps-in-gocdb">GOCDB</a></li>
+</ul>
+<p>Please ensure you have added or updated your administrative information: <a href="http://docs.perfsonar.net/manage_admin_info.html">http://docs.perfsonar.net/manage_admin_info.html</a></p>
+<ul>
+<li>Adding communities is optional, but we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
+</ul>
+<p>Assuming your registration is for a <strong>new</strong> node or if you have changed the nodes FQDN, you will need to email <code>wlcg-perfsonar-support 'at' cern.ch</code> or open GGUS ticket for <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">WLCG perfSONAR support unit</a> so that your node can be added to one or more meshes. Please indicate if you have preferences for which meshes your node should be included in.</p>
+<p>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. OSG provides MCA (Mesh Configuration Adminstrator) GUI (see <a href="http://docs.perfsonar.net/mca.html">http://docs.perfsonar.net/mca.html</a> for details) to centrally define the network tests that need to be run. Each perfSONAR toolkit installation for OSG/WLCG should add the "auto" mesh URL in their <code>/etc/perfsonar/meshconfig-agent.conf</code> file:</p>
+<ul>
+<li>Set this to <code>http://meshconfig.grid.iu.edu/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>.</li>
+<li><code>&lt;mesh&gt; 
+        configuration_url &lt;http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org&gt;
+        validate_certificate 0 
+        required 1 
+&lt;/mesh&gt;     
+ # Replace the following with suitable values for your installation 
+ address psum01.aglt2.org 
+ admin_email &lt;smckee@umich.edu&gt; 
+ skip_redundant_tests 1</code></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Until your host is added to one or more meshes, the automesh configuration above won't be returning any tests (See above).</p>
+</div>
+<p>We <strong>strongly recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6)</p>
+<ul>
+<li>In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse is in place).</li>
+<li>All existing meshes will support both IPv4 and IPv6 testing. Sites with both IPv4 and IPv6 addresses testing to sites that also have both will run <strong>two</strong> tests. A side effect of this is that as more sites provide IPv6 addresses, the amount of testing will increase.</li>
+<li>At some future point when most sites have IPv6, we may need to adjust the testing frequency to reduce the overall amount of testing</li>
+<li>For more information on IPv6 see <a href="http://ipv6.web.cern.ch/">http://ipv6.web.cern.ch/</a></li>
+</ul>
+<h4 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h4>
+<p><strong>NOTE: As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances.</strong> This change is because of the new requirements introduced by pScheduler. If sites are unable to reach your instance on port 443, tests may not run and results may not be available.</p>
+<p>The perfSONAR toolkit is reviewed both internally and externally for security flaws. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.</p>
+<p>Some sites are concerned about having port 80 and/or 443 open. The working group would like to emphasize that these ports provide access to the perfSONAR web interface and are very useful to users and network administrators. <strong>Our recommendation is to keep them open</strong>, but for sites with strong concerns we have some rules documented below to customize iptables to block ports 80 and 443. It is <strong>required</strong> that either port 80 <strong>or</strong> port 443 be accessible from the OSG and WLCG monitoring subnets shown below. In addition port 443 <strong>must</strong> be accessible to all other perfSONAR instances that your node will test to. This is a new requirement as of the release of perfSONAR 4.0. <verbatim> # Port 443 must be open iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT</p>
+<p># Allow port 80 for specific monitoring subnets AT A MINIMUM (we recommend opening port 80 so others can view/access your perfSONAR Toolkit web GUI) #OSG monitoring subnet iptables -I INPUT 4 -p tcp --dport 80 -s 129.79.53.0/24 -j ACCEPT # CERN subnet iptables -I INPUT 4 -p tcp --dport 80 -s 137.138.0.0/17 -j ACCEPT # Infrastructure monitoring (hosted at AGLT2) iptables -I INPUT 4 -p tcp --dport 80 -s 192.41.231.110/32 -j ACCEPT # Replace <LOCAL\_SUBNET> appropriately to allow access from your local systems iptables -I INPUT 4 -p tcp --dport 80 -s <LOCAL\_SUBNET> -j ACCEPT # Reject ONLY if your site policy requires this #iptables -I INPUT 5 -p tcp --dport 80 -j REJECT</p>
+<p>/sbin/service iptables save </verbatim></p>
+<p>In case you have <strong>central/campus firewall</strong>, please ensure the following ports are opened on it for all your perfSONAR hosts: <verbatim> # General purpose ports needed to do perfSONAR measurements ICMP/type 255, NTP UDP port:123, TRACEROUTE/PING UDP ports: 33434-33634 OWAMP TCP port:861, UDP ports: 8760-9960 BWCTL TCP ports: 4823, 6001-6200, 5000-5900 UDP ports: 6001-6200, 5000-5900</p>
+<p># HTTP and/or HTTPS ports are needed to access your perfSONAR web interface # and the measurement archive and to check availability of your instances by the infrastructure monitoring # As of the release of perfSONAR 4.0 port 443 <strong>must</strong> be accessible to all other perfSONAR instances and the WLCG monitoring subnets HTTPS port 443 open to ALL # At a minimum either port 80 <strong>must</strong> be open to the WLCG monitoring subnets. # Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web. HTTP port 80 - open to ALL or at least for the following source subnets OSG_NET (129.79.53.0/24), AGLT2_NET (192.41.231.110/32) and CERN_NET (137.138.0.0/17) </verbatim></p>
+<p>For any further questions, please consult <a href="https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS">Troubleshooting</a> pages, perfSONAR documentation (<a href="http://docs.perfsonar.net">http://docs.perfsonar.net</a>) or contact <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">WLCG perfSONAR Monitoring Support Unit</a>.</p>
+<p>-</p>
+<p><span class="twiki-macro STOPINCLUDE"></span></p>
+<p><span class="twiki-macro BOTTOMMATTER"></span></p>
+<p>-- Main.ShawnMcKee - 13-Mar-2016</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../faq/" class="btn btn-neutral float-right" title="Frequently Asked Questions">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../psetf/" class="btn btn-neutral" title="Monitoring perfSONAR with ETF"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+    
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/opensciencegrid/networking" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../psetf/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../faq/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script src="../../js/theme.js"></script>
+
+</body>
+</html>
