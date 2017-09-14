@@ -1,0 +1,256 @@
+---+!! OSG Operations / Grid Operations Center at Indiana University 
+
+%STARTINCLUDE%
+<table width="100%" border="0"> 
+<tbody>
+ <tr>
+  <td width="30%"valign="top">%TOC% </td> 
+  <td width="10%"></td>
+  <td width="25%" valign="center">
+   <table border="1" cellpadding="1" cellspacing="0" >
+    <tr>
+     <td>
+      <table border="0" cellpadding="3" cellspacing="2">
+        <tr>
+         <td><h4>[[http://myosg.grid.iu.edu/miscstatus?count_sg_1&count_active=on&count_enabled=on&datasource=status][Operations Service Overview]]</h4>
+         </td>
+        </tr>
+        <tr>
+         <td><h4>Contact OSG Operations</h4>
+
+ - [[http://ticket.grid.iu.edu][Open a ticket]]<br/>
+ - Email: goc [at] opensciencegrid.org <br/>
+ - Mailing list: osg-operations [at] opensciencegrid dot org<br/>
+ - Phone Number: 317-278-9699<br/>
+ - [[https://oim.grid.iu.edu][Register with OSG]]<br/>
+ - Follow us on Twitter: @OSGGOC
+         </td>
+        </tr>
+     </table>
+      <table border="0" cellpadding="3" cellspacing="3">
+        <tr>
+          <td><h4>Weekly Teleconference</h4>
+ - Every Monday, 12:00pm Central<br/>
+ - [[https://IU.zoom.us/j/865253152][Video Link]]<br/>
+ - Phone: +1 408-638-0968 or +1 646-558-8656, PIN 865-253-152# <br/>
+ - [[ProductionMeetingMinutes][Meeting Minutes]]<br/>
+<div><!-- - [[GOCServiceUpdate033010][Upcoming Service Upgrade]] --> </div>
+        </td>
+        </tr>
+      </table>
+     </td>
+     </tr>
+    </table>
+  </td> 
+  <td width="20%"></td>
+</tr>
+</tbody>
+</table> 
+
+<!--  <td width="25%" align="right" valign="top">%TABLE{ sort="off" dataalign="left" tableborder="0" cellpadding="1" cellspacing="3" headerbg="#F3EDE7" databg="#F3EDE7"}% </td> -->
+
+
+---++ Introduction
+%DOC_STATUS_TABLE%
+---+++ Mission
+
+The mission of OSG Operations is to maintain and improve distributed high throughput computing services to support research communities.
+
+This is accomplished by:
+   * Operating and maintaining our services in a user-oriented, robust, and reliable manner.
+   * Developing a professional and skilled staff dedicated to a service philosophy.
+   * Managing resources responsibly, efficiently, and with accountability.
+   * Evaluating and continually improving the actions, methods and processes that allow the OSG to operate.
+
+---+++ Operations Activity Objectives and Scope
+
+OSG Operations activities can be split into two often overlapping areas: 
+   1. Operations Support: Focuses on OSG collaborator support and administrative and communication mechanisms that allow quick and accurate contact, tracking, and communication withing the collaboration, and 
+   1. Operations Infrastructure: Provides the technical services necessary to produce and disseminate vital information to the OSG community, along with the hardware structure necessary to make this information available. 
+
+---+++ The Grid Operations Center (GOC) at Indiana University
+
+Based at Indiana University, the GOC provides a single point of operational support for the  Open Science Grid (OSG). OSG Operations performs real time Grid monitoring and problem tracking, provides support to users, developers and systems administrators, maintains grid services, provides security incident response, and maintains information repositories. Operations provides the OIM Registration Database for the Support Centers, Virtual Organizations, and Services. A list of Operations Services is presented and/or linked off of [[http://myosg.grid.iu.edu/about][MyOSG]].
+
+The Grid Operations Center blog is located at [[http://osggoc.blogspot.com/]]. For more information see [[TheGOC][*What is the GOC?*]]
+
+---++ Weekly Operations Teleconference (Mondays)
+   * OSG Operations holds a weekly teleconference to discuss production issues, infrastructure changes, OSG tickets, and other operational concerns. OSG Operations Staff and New OSG Resource Registrants are required to attend, and all OSG Collaborators are welcome. 
+   * Every Monday, 1:00pm Eastern 
+   * Phone: +1-812-856-7060, access code 231000 
+   * [[ProductionMeetingMinutes][Meeting Minutes]] 
+
+---++ Contact Information
+   * Group Contact
+      * [[http://ticket.grid.iu.edu][Open a ticket]]<br/>
+      * Email GOC: goc [at] opensciencegrid.org <br/>
+      * Larger Operations Mailing list: osg-operations at opensciencegrid dot org ([[http://listserv.fnal.gov/archives/osg-operations.html][archive]])
+   * Members of OSG Operations
+      * OSG Operations Coordinator: Rob Quick 
+      * Support Team: Kyle Gross (Lead), Elizabeth Chism, Christopher Pipes, Alain Deximo
+      * Infrastructure Team: Scott Teige (Lead), [[http://sites.google.com/site/soichih/][Soichi Hayashi]], Thomas Lee
+
+---++ Training Sessions
+   * [[VDTSoftwareTraining][Operator Training, April 2012]] 
+   * Condor Week, May 2012
+   * [[GlideInWMSTraining][Glide In Training, July 2012]]
+   * [[HTCRefresherTraining][HTC Refresher, June 2014]]
+   * [[HTCondorCETraining][HTCondor CE Training, October 2014]] 
+---++ Operations Metrics
+   * [[MetricsReports][Ticket and Twiki Reports]]
+
+---++ Important Documents
+---+++ General
+   * [[ServiceLevelAgreements]] - Provides links to service level agreements the OSG Operations has signed with the OSG management, collaborators, VOs, etc.
+      * [[ReleaseSchedule][GOC Service Release Schedule]] - Lays out the scheduling used by Operations to release service updates, etc. to the test bed and to production services.
+      * [[ChangeMgmt][GOC Change Management Procedures]] 
+      * [[OSGPKIChangeMgmt][Change Management for OSG PKI]]
+   * OIMRegistrationInstructions
+
+---+++ [[http://ticket.grid.iu.edu/][Trouble Ticketing]] related
+   * [[https://ticket.grid.iu.edu/goc/list/open][Current Ticket Summary]] - Provides a list of currently open OSG tickets
+   * [[http://ticket.grid.iu.edu][Open a ticket]]
+   * [[TicketExpectations]] - Defines expectations for tickets opened
+   * [[http://docs.google.com/Doc?docid=0AQGl_1gJKDWDZGY5ZnR6anZfMjFmMmpzZmc1cA&hl=en][GOC-TX Ticket Exchange Settings]] - Documents ticket exchange setups between the GOC and various ticketing systems using by OSG support centers
+   * [[TicketExchange]] Requirements for exchanging tickets with attachments.
+   * [[QATicket][Daily Quality Assurance Procedures]]
+
+---+++ [[http://myosg.grid.iu.edu/][MyOSG]] related
+   * [[Operations/GettingResourceDataMyOSG][Getting Resource Data from !MyOSG]] - Provides information for end-user about extracting resource/service information from MyOSG
+   * [[UserContributedViews][A user contributed list of !MyOSG Views]] - Provides virtual grouping of information available from !MyOSG
+   * [[MyOSGRoadMap][Future Development of !MyOSG Road Map]]
+
+---+++ [[http://software.grid.iu.edu/pacman/tarballs/vo-package/][VO-Package]] related
+   * [[VOPackageReleases]]
+
+---+++ [[https://internal.grid.iu.edu/twiki/bin/view/Documentation/RSV/WebHome][RSV]] related 
+   * [[RsvSAMGridView]] - documents how the RSV-SAM system for interoperable resource monitoring is setup
+      * [[RsvSAMGridViewProblemList]] - running list of all known RSV-SAM issues
+
+---++ [[OpsServicePlanning][Operational Service Planning Documents]]
+
+---++ [[OpsRootCauseAnalysis][Root Cause Analysis Documents]]
+   * [[OasisWhitelistSigning][Failure to keep oasis whitelist signature current]]
+   * [[FirewallIssue20140714][OSG-XSEDE failure]]
+   * [[PerfSONARDataStoreRCA][PerfSONAR Datastore Outage Aug-Sept 2016]]
+
+---++ [[Operations.SupportWorkArea.WebHome][Support Desk Research Documents]]
+
+---++ Miscellaneous Documents
+   * [[FNALOpsF2FNov14][Operations Visit to FNAL Agenda]]
+   * [[OsgBlogs][OSG Blogs]]
+   * [[PostBDIIUpgradeChecks][Check Punchlist]] for Operations after a BDII Upgrade
+   * [[GOCServertoService][Server to Service Review]] - March, 2011
+   * [[BDIIPostMaintenanceDocument][Post BDII Maintenance Procedures]]
+   * [[IUPrivacyPolicy][Privacy notice for IU hosted services]]
+   * [[FNALOpsF2FMar2013][Operations Face to Face with FNAL Agenda]] - May 22-24 FNAL
+   * [[OSGTicketExchangeWithXSEDE][Meeting to Discuss XSEDE Ticket Exchange Service]]
+   * [[OASIS Status Update][OASIS Status Update]]
+   * [[DiscoveryToolRequirements][Requirements for a software version discovery tool]]
+   * [[OperationsServicesIPv6Compatibility][IPv6 Compatibility Document]]
+   * [[IUCloudTest][Test of Operational Service on IU Intelligent Infrastructure]]
+   * [[IndianaOpsRetreat][IU Staff Retreat]] - June 3rd, Bloomington
+   * [[OIMServiceTypes][OIM Service Types]]
+
+<!-- start: TWiki Web List Table -->
+---+ Collaborative OSG TWiki Webs
+<table>
+<tr>
+<td>
+   * Accounting.WebHome
+   * Trash/ArchivedDocumentation.WebHome
+   * Trash/Trash/Trash/Assessment.WebHome
+   * Trash/Trash/Blueprint.WebHome
+   * Trash/Trash/CampusGrids.WebHome
+   * Council.WebHome
+   * Documentation.WebHome
+   * [[Documentation/DocumentationTeam.WebHome][DocumentationTeam]]
+</td>
+<td>
+   * Education.WebHome
+   * Trash/Engagement.WebHome
+   * InformationServices.WebHome
+   * Trash/Trash/Integration.WebHome
+   * Interoperability.WebHome
+   * Management.WebHome
+   * Trash/Trash/MeasurementsAndMetrics.WebHome
+</td>
+<td>
+   * Trash/MonitoringInformation.WebHome
+   * Trash/Trash/OSGRA.WebHome
+   * Operations.WebHome
+   * Production.WebHome
+   * ReleaseDocumentation.WebHome
+   * Trash/Sandbox.WebHome
+   * Security.WebHome
+</td>
+<td>
+   * Trash/Trash/SiteCoordination.WebHome
+   * SoftwareTeam.WebHome
+   * Trash/Trash/SoftwareTools.WebHome
+   * Storage.WebHome
+   * TWiki.WebHome
+   * Trash/Tier3.WebHome
+   * Trash/Trash/VirtualOrganizations.WebHome
+</td>
+</tr>
+</table>
+<!-- end: TWiki Web List Table -->
+
+ <!-- CONTENT MANAGEMENT PROJECT
+############################################################################################################
+DOCUMENT OWNER
+======================
+ 
+   Thank you for claiming ownership for this document! Please fill in your FirstLast name here:
+   * Local OWNER          = RobQ
+
+   Please define the document area, choose one of the defined areas from the next line
+   DOC_AREA = (ComputeElement|General|Trash/Trash/Integration|Monitoring|Operations|Security|SmallSite|Storage|User|VO)
+   * Local DOC_AREA       = Operations
+ 
+   define the primary role the document serves, choose one of the defined roles from the next line
+   DOC_ROLE = (Any|Developer|Documenter|Scientist|Student|SysAdmin|VOManager)
+   * Local DOC_ROLE       = Any
+ 
+   Please define the document type, choose one of the defined types from the next line
+   DOC_TYPE = (HowTo|Installation|Knowledge|Navigation|Planning|Team|Training|Troubleshooting)
+   * Local DOC_TYPE       = Team
+ 
+   Please define if this document in general needs to be reviewed before release ( %YES% | %NO% )
+   * Local INCLUDE_REVIEW = %NO%
+ 
+   Please define if this document in general needs to be tested before release ( %YES% | %NO% )
+   * Local INCLUDE_TEST   = %NO%
+ 
+   change to %YES% once the document is ready to be reviewed and back to %NO% if that is not the case
+   * Local REVIEW_READY   = %NO%
+ 
+   change to %YES% once the document is ready to be tested and back to %NO% if that is not the case
+   * Local TEST_READY     = %NO%
+ 
+   change to %YES% only if the document has passed the review and the test (if applicable) and is ready for release
+   * Local RELEASE_READY  = %YES%
+ 
+ 
+DOCUMENT REVIEWER
+======================
+ 
+   Thank for reviewing this document! Please fill in your FirstLast name here:
+   * Local REVIEWER       = 
+ 
+   Please define the review status for this document to be in progress ( %IN_PROGRESS% ), failed ( %NO% ) or passed ( %YES% )
+   * Local REVIEW_PASSED  = %IN_PROGRESS%
+ 
+ 
+DOCUMENT TESTER
+======================
+ 
+   Thank for testing this document! Please fill in your FirstLast name here:
+   * Local TESTER         = 
+ 
+   Please define the test status for this document to be in progress ( %IN_PROGRESS% ), failed ( %NO% ) or passed ( %YES% )
+   * Local TEST_PASSED    = %IN_PROGRESS%
+############################################################################################################
+ -->
+ 

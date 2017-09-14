@@ -7,7 +7,21 @@ extra_css:
   - css/extra.css
 
 pages:
-  - Home: 'index.md'
+  - OSG Networking Area: 'index.md'
+  - Network Troubleshooting: 
+    - 'Network Troubleshooting': 'network-troubleshooting.md'
+    - 'OSG Network Debugging Document': 'network-troubleshooting/osg-debugging-document.md'
+  - perfSONAR in OSG: 
+    - 'perfSONAR in OSG': 'perfsonar-in-osg.md'
+    - 'Deployment Models': 'perfsonar/deployment-models.md'
+    - 'Register perfSONAR in OIM': 'perfsonar/register-ps-in-oim.md'
+    - 'Register perfSONAR in GOCDB': 'perfsonar/register-ps-in-gocdb.md'
+    - 'Multiple NIC Guidance': 'perfsonar/multiple-nic-guidance.md'
+    - 'Monitoring perfSONAR with ETF': 'perfsonar/psetf.md'
+    - 'Installing perfSONAR': 'perfsonar/installation.md'
+    - 'Frequently Asked Questions': 'perfsonar/faq.md'
+    - 'Requirements for perfSONAR': 'perfsonar/requirements.md'
+  - OSG Network Services: 'osg-network-services.md'
 
 markdown_extensions:
   - admonition
