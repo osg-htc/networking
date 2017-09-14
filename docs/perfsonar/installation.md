@@ -67,13 +67,13 @@ You will need to configure your instance(s) to use the OSG/WLCG mesh-configurati
 -   Set this to `http://meshconfig.grid.iu.edu/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`.
 -   ```
 	<mesh> 
-	    configuration_url <http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org>
+	    configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
 	    validate_certificate 0 
 	    required 1 
 </mesh> 	
  # Replace the following with suitable values for your installation 
  address psum01.aglt2.org 
- admin_email <smckee@umich.edu> 
+ admin_email smckee@umich.edu 
  skip_redundant_tests 1 
 ```
 
