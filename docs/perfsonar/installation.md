@@ -68,15 +68,15 @@ You will need to configure your instance(s) to use the OSG/WLCG mesh-configurati
 -   Below is an example set of lines for meshconfig-agent.conf
 
     ```
-    <mesh> 
+      <mesh> 
         configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
         validate_certificate 0 
         required 1 
-    </mesh> 	
-    # Replace the following with suitable values for your installation 
-    address psum01.aglt2.org 
-    admin_email smckee@umich.edu 
-    skip_redundant_tests 1 
+      </mesh> 	
+      # Replace the following with suitable values for your installation 
+      address psum01.aglt2.org 
+      admin_email smckee@umich.edu 
+      skip_redundant_tests 1 
     ```
 
 !!! note
@@ -130,10 +130,11 @@ availability of your instances by the infrastructure monitoring. As of the relea
 be accessible to all other perfSONAR instances and the WLCG monitoring subnets HTTPS port 443 open to ALL 
 
 !!! note 
-	At a minimum either port 80 **must** be open to the WLCG monitoring subnets. 
+	At a minimum port 80 **must** be open to the WLCG monitoring subnets below. 
 
 Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web. 
-HTTP port 80 - open to ALL or at least for the following source subnets 
+So set tcp port 80 - open to ALL **or** at least accessible from the following source subnets 
+
 -   OSG\_NET (129.79.53.0/24)
 -   AGLT2\_NET (192.41.231.110/32)
 -   CERN\_NET (137.138.0.0/17) 
