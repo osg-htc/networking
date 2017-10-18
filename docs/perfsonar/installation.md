@@ -6,7 +6,7 @@
 
 <span class="twiki-macro STARTINCLUDE"></span>
 
-This page documents installing or upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult <https://twiki.opensciencegrid.org/bin/view/Documentation/PSMotivation> for an overview of perfSONAR.
+This page documents installing or upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult <https://opensciencegrid.github.io/networking/perfsonar-in-osg/> for an overview of perfSONAR in OSG.
 
 For any questions or help with WLCG perfSONAR setup, please email `wlcg-perfsonar-support 'at' cern.ch` or open GGUS ticket for [WLCG perfSONAR Monitoring Support Unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ). We strongly recommend anyone maintaining/using perfSONAR to join <https://lists.internet2.edu/sympa/subscribe/perfsonar-user> and <https://lists.internet2.edu/sympa/subscribe/perfsonar-announce>
 
@@ -68,7 +68,7 @@ You will need to configure your instance(s) to use the OSG/WLCG mesh-configurati
 -   Below is an example set of lines for meshconfig-agent.conf
 
     ```
-      <mesh> 
+       <mesh> 
         configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
         validate_certificate 0 
         required 1 
