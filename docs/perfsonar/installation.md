@@ -119,7 +119,9 @@ To save your changes run `/sbin/service iptables save`
 In case you have **central/campus firewall**, please ensure the following ports are opened on it for all your perfSONAR hosts: 
 
     # General purpose ports needed to do perfSONAR measurements 
-    ICMP/type 255, NTP UDP port:123, 
+    ICMP/type 255
+    NTP UDP port:123
+    PSCHEDULER TCP port:443
     TRACEROUTE/PING UDP ports: 33434-33634 
     OWAMP TCP port:861, UDP ports: 8760-9960 
     BWCTL TCP ports: 4823, 6001-6200, 5000-5900 UDP ports: 6001-6200, 5000-5900
@@ -127,13 +129,12 @@ In case you have **central/campus firewall**, please ensure the following ports 
 
 HTTP and/or HTTPS ports are needed to access your perfSONAR web interface and the measurement archive and to check 
 availability of your instances by the infrastructure monitoring. As of the release of perfSONAR 4.0 port 443 **must** 
-be accessible to all other perfSONAR instances and the WLCG monitoring subnets HTTPS port 443 open to ALL 
+be accessible to all other perfSONAR instances you test with **and** the WLCG monitoring subnets
 
 !!! note 
 	At a minimum port 80 **must** be open to the WLCG monitoring subnets below. 
 
-Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web. 
-So set tcp port 80 - open to ALL **or** at least accessible from the following source subnets 
+Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web GUI but it must at least be accessible from the following source subnets: 
 
 -   OSG\_NET (129.79.53.0/24)
 -   AGLT2\_NET (192.41.231.110/32)
