@@ -80,7 +80,7 @@ You will need to configure your instance(s) to use the OSG/WLCG mesh-configurati
     ```
 
 !!! note
-	Until your host is added to one or more meshes, the automesh configuration above won't be returning any tests (See above).
+	Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
 
 We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6)
 
