@@ -99,6 +99,7 @@ The perfSONAR toolkit is reviewed both internally and externally for security fl
 Some sites are concerned about having port 80 and/or 443 open. The working group would like to emphasize that these ports provide access to the perfSONAR web interface and are very useful to users and network administrators. **Our recommendation is to keep them open**, but for sites with strong concerns we have some rules documented below to customize iptables to block ports 80 and 443. It is **required** that port 80 **and** port 443 be accessible from the OSG and WLCG monitoring subnets listed below. In addition port 443 **must** be accessible to all other perfSONAR instances that your node will test to. This is a new requirement as of the release of perfSONAR 4.0. 
 
 Below are example iptable rules to implement OSG/WLCG required access:
+
     # Port 443 must be open 
     iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT
     # Allow port 80 for specific monitoring subnets AT A MINIMUM (we recommend opening port 80 so others can view/access your perfSONAR Toolkit web GUI) 
@@ -117,7 +118,7 @@ Below are example iptable rules to implement OSG/WLCG required access:
 To save your changes run `/sbin/service iptables save` 
 
 !!! warning
-	In case you have **central/campus firewall**, please check the required port openings in the perfSONAR documentation at http://docs.perfsonar.net/manage_security.html 
+	In case you have **central/campus firewall**, please check the required port openings in the perfSONAR documentation at <http://docs.perfsonar.net/manage_security.html>  
 
 
 For any further questions, please consult [Troubleshooting](https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact [WLCG perfSONAR Monitoring Support Unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ).
