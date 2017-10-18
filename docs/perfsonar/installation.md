@@ -65,7 +65,8 @@ Assuming your registration is for a **new** node or if you have changed the node
 You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. OSG provides MCA (Mesh Configuration Adminstrator) GUI (see <http://docs.perfsonar.net/mca.html> for details) to centrally define the network tests that need to be run. Each perfSONAR toolkit installation for OSG/WLCG should add the "auto" mesh URL in their `/etc/perfsonar/meshconfig-agent.conf` file:
 
 -   Set this to `http://meshconfig.grid.iu.edu/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`.
--   ```
+-   Below is an example set of lines for meshconfig-agent.conf
+    ```
         <mesh> 
             configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
             validate_certificate 0 
@@ -89,7 +90,8 @@ We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv
 
 #### Security Considerations
 
-**NOTE: As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances.** This change is because of the new requirements introduced by pScheduler. If sites are unable to reach your instance on port 443, tests may not run and results may not be available.
+!!! warning As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances.
+This change is because of the new requirements introduced by pScheduler. If sites are unable to reach your instance on port 443, tests may not run and results may not be available.
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.
 
@@ -120,13 +122,17 @@ In case you have **central/campus firewall**, please ensure the following ports 
     OWAMP TCP port:861, UDP ports: 8760-9960 
     BWCTL TCP ports: 4823, 6001-6200, 5000-5900 UDP ports: 6001-6200, 5000-5900
 
-    # HTTP and/or HTTPS ports are needed to access your perfSONAR web interface 
-    # and the measurement archive and to check availability of your instances by the infrastructure monitoring 
-    # As of the release of perfSONAR 4.0 port 443 **must** be accessible to all other perfSONAR instances and the WLCG monitoring subnets HTTPS port 443 open to ALL 
-    # At a minimum either port 80 **must** be open to the WLCG monitoring subnets. 
-    # Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web. 
-    HTTP port 80 - open to ALL or at least for the following 
-    source subnets OSG\_NET (129.79.53.0/24), AGLT2\_NET (192.41.231.110/32) and CERN\_NET (137.138.0.0/17) 
+HTTP and/or HTTPS ports are needed to access your perfSONAR web interface and the measurement archive and to check 
+availability of your instances by the infrastructure monitoring. As of the release of perfSONAR 4.0 port 443 **must** 
+be accessible to all other perfSONAR instances and the WLCG monitoring subnets HTTPS port 443 open to ALL 
+
+!!! note At a minimum either port 80 **must** be open to the WLCG monitoring subnets. 
+
+Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web. 
+HTTP port 80 - open to ALL or at least for the following source subnets 
+* OSG\_NET (129.79.53.0/24)
+* AGLT2\_NET (192.41.231.110/32)
+* CERN\_NET (137.138.0.0/17) 
 
 For any further questions, please consult [Troubleshooting](https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact [WLCG perfSONAR Monitoring Support Unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ).
 
