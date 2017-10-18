@@ -66,10 +66,10 @@ You will need to configure your instance(s) to use the OSG/WLCG mesh-configurati
 
 -   Set this to `http://meshconfig.grid.iu.edu/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`.
 -   ```
-	<mesh> 
-	    configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
-	    validate_certificate 0 
-	    required 1 
+        <mesh> 
+            configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
+            validate_certificate 0 
+            required 1 
         </mesh> 	
         # Replace the following with suitable values for your installation 
         address psum01.aglt2.org 
@@ -95,7 +95,8 @@ The perfSONAR toolkit is reviewed both internally and externally for security fl
 
 Some sites are concerned about having port 80 and/or 443 open. The working group would like to emphasize that these ports provide access to the perfSONAR web interface and are very useful to users and network administrators. **Our recommendation is to keep them open**, but for sites with strong concerns we have some rules documented below to customize iptables to block ports 80 and 443. It is **required** that either port 80 **or** port 443 be accessible from the OSG and WLCG monitoring subnets shown below. In addition port 443 **must** be accessible to all other perfSONAR instances that your node will test to. This is a new requirement as of the release of perfSONAR 4.0. 
 
-    # Port 443 must be open iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT
+    # Port 443 must be open 
+    iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT
     # Allow port 80 for specific monitoring subnets AT A MINIMUM (we recommend opening port 80 so others can view/access your perfSONAR Toolkit web GUI) 
     # OSG monitoring subnet 
     iptables -I INPUT 4 -p tcp --dport 80 -s 129.79.53.0/24 -j ACCEPT 
@@ -108,24 +109,24 @@ Some sites are concerned about having port 80 and/or 443 open. The working group
     # Reject ONLY if your site policy requires this 
     #iptables -I INPUT 5 -p tcp --dport 80 -j REJECT
 
-/sbin/service iptables save 
+To save your changes run `/sbin/service iptables save` 
 
 
-In case you have **central/campus firewall**, please ensure the following ports are opened on it for all your perfSONAR hosts: <verbatim> 
-\# General purpose ports needed to do perfSONAR measurements 
-ICMP/type 255, NTP UDP port:123, 
-TRACEROUTE/PING UDP ports: 33434-33634 
-OWAMP TCP port:861, UDP ports: 8760-9960 
-BWCTL TCP ports: 4823, 6001-6200, 5000-5900 UDP ports: 6001-6200, 5000-5900
+In case you have **central/campus firewall**, please ensure the following ports are opened on it for all your perfSONAR hosts: 
 
-\# HTTP and/or HTTPS ports are needed to access your perfSONAR web interface 
-\# and the measurement archive and to check availability of your instances by the infrastructure monitoring 
-\# As of the release of perfSONAR 4.0 port 443 **must** be accessible to all other perfSONAR instances and the WLCG monitoring subnets HTTPS port 443 open to ALL 
-\# At a minimum either port 80 **must** be open to the WLCG monitoring subnets. 
-\# Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web. 
-HTTP port 80 - open to ALL or at least for the following 
-source subnets OSG\_NET (129.79.53.0/24), AGLT2\_NET (192.41.231.110/32) and CERN\_NET (137.138.0.0/17) 
-</verbatim>
+    # General purpose ports needed to do perfSONAR measurements 
+    ICMP/type 255, NTP UDP port:123, 
+    TRACEROUTE/PING UDP ports: 33434-33634 
+    OWAMP TCP port:861, UDP ports: 8760-9960 
+    BWCTL TCP ports: 4823, 6001-6200, 5000-5900 UDP ports: 6001-6200, 5000-5900
+
+    # HTTP and/or HTTPS ports are needed to access your perfSONAR web interface 
+    # and the measurement archive and to check availability of your instances by the infrastructure monitoring 
+    # As of the release of perfSONAR 4.0 port 443 **must** be accessible to all other perfSONAR instances and the WLCG monitoring subnets HTTPS port 443 open to ALL 
+    # At a minimum either port 80 **must** be open to the WLCG monitoring subnets. 
+    # Our recommendation is to have HTTP open to allow users and network admins access to the perfSONAR web. 
+    HTTP port 80 - open to ALL or at least for the following 
+    source subnets OSG\_NET (129.79.53.0/24), AGLT2\_NET (192.41.231.110/32) and CERN\_NET (137.138.0.0/17) 
 
 For any further questions, please consult [Troubleshooting](https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact [WLCG perfSONAR Monitoring Support Unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ).
 
