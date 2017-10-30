@@ -18,8 +18,8 @@ Network Troubleshooting
 -----------------------
 Users with network issues should check the [troubleshooting link](network-troubleshooting.md) below for initial guidance on how best to get their issue resolved. In addition, you can refer to the [ESNet network performance guide](https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/) for a detailed instructions on how to identify and isolate network performance issues using perfSONAR.
 
-OSG Network Service 
--------------------
+Network Service 
+---------------
 
 OSG operates an advance platform to collect, store, publish and analyse the network monitoring data it gathers from perfSONAR and other locations. All measurements are collected and available via streaming or through APIs. The following services are available:
 - [perfSONAR infrastructure monitoring](perfsonar/psetf.md) - collects data on existing perfSONAR network, monitors its state and reports on availability of core services
@@ -32,8 +32,8 @@ Network Analytics
 -----------------
 TBA
 
-Networking References
----------------------
+References
+-----------
 The [perfSONAR](http://docs.perfsonar.net/) toolkit is part of the [perfSONAR](http://www.perfsonar.net/) project. The current perfSONAR-PS toolkit is [available for download](http://docs.perfsonar.net/install_getting.html). 
 
 OSG supports a number of services for networking including a **central datastore** which hosts all the OSG/WLCG perfSONAR data.
