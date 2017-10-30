@@ -24,31 +24,7 @@
     </url>
         
     <url>
-     <loc>https://opensciencegrid.github.io/networking//perfsonar/requirements/</loc>
-     <lastmod>2017-10-30</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
      <loc>https://opensciencegrid.github.io/networking//perfsonar/installation/</loc>
-     <lastmod>2017-10-30</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://opensciencegrid.github.io/networking//perfsonar/register-ps-in-oim/</loc>
-     <lastmod>2017-10-30</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://opensciencegrid.github.io/networking//perfsonar/register-ps-in-gocdb/</loc>
-     <lastmod>2017-10-30</lastmod>
-     <changefreq>daily</changefreq>
-    </url>
-        
-    <url>
-     <loc>https://opensciencegrid.github.io/networking//perfsonar/multiple-nic-guidance/</loc>
      <lastmod>2017-10-30</lastmod>
      <changefreq>daily</changefreq>
     </url>
@@ -87,6 +63,12 @@
         
     <url>
      <loc>https://opensciencegrid.github.io/networking//osg-network-services/</loc>
+     <lastmod>2017-10-30</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://opensciencegrid.github.io/networking//osg-network-analytics/</loc>
      <lastmod>2017-10-30</lastmod>
      <changefreq>daily</changefreq>
     </url>
