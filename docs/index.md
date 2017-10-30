@@ -35,6 +35,11 @@ Network Analytics
 -----------------
 University of Chicago has setup an **analytics platform** (<https://twiki.cern.ch/twiki/bin/view/AtlasComputing/ATLASAnalytics>) using `Elastic Search` and `Kibana4` as well as `Jupyter` that can be used to access and analyse all the existing network measurements.
 
+Support and Feedback
+--------------------
+If you suspect a network problem and wish to follow up on it, please open a ticket with the appropriate support unit: For OSG sites please open a ticket with GOC; For WLCG sites please open a GGUS ticket to WLCG Network Throughput support. If you'd like to get help in setting up or debugging perfSONAR instance please open a ticket with GOC or via GGUS to WLCG perfSONAR support. For any other requests please contact GOC.
+
+
 References
 ----------
 - ESNet network performance tuning and debugging <https://fasterdata.es.net/>
