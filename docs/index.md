@@ -10,7 +10,7 @@ Network Monitoring in WLCG and OSG (perfSONAR)
 
 WLCG and OSG jointly operate a network of perfSONAR agents deployed world-wide, which provides an open platform that can be used to baseline network performance and debug any potential issues. The following subsections provide details on the motivation, deployment and operations of the perfSONARs in WLCG/OSG: 
 
-- [Motivation](perfsonar-in-osg.md)
+- [Motivation](perfsonar-in-osg.md) - overview, core concepts, motivation
 - [Deployment Guide](perfsonar/deployment-models.md) - deployment models and options, hardware requirements
 - [Installation and Administration Guide](perfsonar/installation.md) - installation, configuration and maintanance 
 - [Frequently Asked Questions](perfsonar/faq.md)
