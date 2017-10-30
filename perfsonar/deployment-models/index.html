@@ -165,14 +165,12 @@
 <li>Two bare metal servers, one for latency node, one for bandwidth node</li>
 <li>One bare metal server running both latency and bandwidth node together, please refer to </li>
 <li>Virtual Machine - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements</li>
-<li>Full-node VM is strongly preffered, so having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR with other </li>
-<li>Requires setting up SR-IOV for direct </li>
-<li>From ISO</li>
-<li>Using RPMS</li>
-<li>via container</li>
-<li>via virtual machine</li>
+<li>Full-node VM is strongly preffered, so having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with other might have an impact on the measuremenets and is therefore not recommended.</li>
+<li>VM needs to be configured to have SR-IOV to NIC as well as pinned CPUs to ensure bandwidth tests are not impacted (by switching CPUs)</li>
+<li>Succesfull full speed local bandwidth test should be conducted prior to putting the VM into production </li>
+<li>Container - this is currently planned to be fully supported from 4.1 (Q1 2018), but the main focus is on perfSONAR test point, which does not replace full toolkit installation is therefore not recommeneded</li>
+<li>Docker perfSONAR test instance can still be used to run tests and send results to local measurement archive</li>
 </ul>
-<p>This document discusses the various deployment models and their requirements, pros and cons.</p>
 <h3 id="perfsonar-hardware-requirements">perfSONAR Hardware Requirements<a class="headerlink" href="#perfsonar-hardware-requirements" title="Permanent link">&para;</a></h3>
 <p>There two different nodes participating in the network testing, latency node and bandwidth node, while both are running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported, 10G is recommended) as well as enough memory to support high bandwidth testing. Latency node on the other hand runs low bandwidth, but high frequency test, sending a continous stream of packets to measure delay and corresponding packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to continously store its results into local MA. The official hardware requirements are documented at http://docs.perfsonar.net/install_hardware_details.html. For WLCG/OSG deployment, we recommend at least the following for perfSONAR 4.0+:</p>
 <ul>
