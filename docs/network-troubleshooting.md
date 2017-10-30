@@ -40,9 +40,5 @@ This page contains information on opening ticket and pointers to relevant tools 
 
 -   <https://opensciencegrid.github.io/production/>
 
-<span class="twiki-macro STOPINCLUDE"></span>
-
-<span class="twiki-macro BOTTOMMATTER"></span>
-
--- Main.ShawnMcKee - 09 Sep 2017
-
+**WLCG**: WLCG has a dedicated support unit, which will assist in debugging the problem and triaging the issue. More details can be found at:
+- https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics#Network_Throughput_Support_Unit
