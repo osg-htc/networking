@@ -72,6 +72,9 @@
     <li class="toctree-l3"><a href="#perfsonar-hardware-requirements">perfSONAR Hardware Requirements</a></li>
     
 
+    <li class="toctree-l3"><a href="#multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance</a></li>
+    
+
     </ul>
                 </li>
                 <li class="">
@@ -163,7 +166,7 @@
 <ul>
 <li><strong>Bare metal</strong> - preffered option in one of two possible configurations:</li>
 <li>Two bare metal servers, one for latency node, one for bandwidth node</li>
-<li>One bare metal server running both latency and bandwidth node together provided that there are two separate NICs available</li>
+<li>One bare metal server running both latency and bandwidth node together provided that there are two separate NICs available, please refer to .</li>
 <li><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:</li>
 <li>Full-node VM is strongly preffered, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with other might have an impact on the measuremenets and is therefore not recommended. </li>
 <li>VM needs to be configured to have SR-IOV to NIC as well as pinned CPUs to ensure bandwidth tests are not impacted (by switching CPUs during the test)</li>
@@ -178,6 +181,29 @@
 <li>4core x86_66 CPU (2.7 Ghz+) with at least 8GB of RAM (if both latency and bandwidth on a single node than 16GB)</li>
 <li>SSD disk (128GB should be sufficient)</li>
 </ul>
+<h3 id="multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance<a class="headerlink" href="#multiple-nic-network-interface-card-guidance" title="Permanent link">&para;</a></h3>
+<p>There are few additional steps required in order to configure node with multiple network cards:</p>
+<ul>
+<li>Please setup source routing as described in the official documentation at http://docs.perfsonar.net/manage_dual_xface.html</li>
+<li>You'll need to register two hostnames in GOCDB/OIM (and have two reverse DNS entries) as you would normally for two separate nodes</li>
+<li>Instead of configuring just one auto-URL in the <code>/etc/perfsonar/meshconfig-agent.conf</code>, please add both, so you'll end up having something like this:</li>
+</ul>
+<div class="codehilite"><pre><span></span><span class="nt">&lt;mesh&gt;</span>
+    configuration_url https://meshconfig.grid.iu.edu/pub/auto/<span class="nt">&lt;hostname_nic1&gt;</span>
+    validate_certificate 0
+    required 1
+<span class="nt">&lt;/mesh&gt;</span>
+<span class="nt">&lt;mesh&gt;</span>
+    configuration_url https://meshconfig.grid.iu.edu/pub/auto/<span class="nt">&lt;hostname_nic2&gt;</span>
+    validate_certificate 0
+    required 1
+<span class="nt">&lt;/mesh&gt;</span>
+...
+</pre></div>
+
+
+<p>Many sites would prefer <strong>not</strong> to have to deploy two servers for cost, space and power reasons.  Fortunately the perfSONAR developers have provided a way to install both latency and bandwidth 
+measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory.  See <a href="http://docs.perfsonar.net/manage_dual_xface.html">manage-dual-xface</a> for details on configuring this.</p>
               
             </div>
           </div>
