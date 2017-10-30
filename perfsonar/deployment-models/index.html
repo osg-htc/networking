@@ -182,7 +182,7 @@
 <li>SSD disk (128GB should be sufficient)</li>
 </ul>
 <h3 id="multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance<a class="headerlink" href="#multiple-nic-network-interface-card-guidance" title="Permanent link">&para;</a></h3>
-<p>There are few additional steps required in order to configure node with multiple network cards:</p>
+<p>Many sites would prefer <strong>not</strong> to have to deploy two servers for cost, space and power reasons.  Fortunately the perfSONAR developers have provided a way to install both latency and bandwidth measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory. There are few additional steps required in order to configure node with multiple network cards:</p>
 <ul>
 <li>Please setup source routing as described in the official documentation at http://docs.perfsonar.net/manage_dual_xface.html</li>
 <li>You'll need to register two hostnames in GOCDB/OIM (and have two reverse DNS entries) as you would normally for two separate nodes</li>
@@ -200,10 +200,6 @@
 <span class="nt">&lt;/mesh&gt;</span>
 ...
 </pre></div>
-
-
-<p>Many sites would prefer <strong>not</strong> to have to deploy two servers for cost, space and power reasons.  Fortunately the perfSONAR developers have provided a way to install both latency and bandwidth 
-measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory.  See <a href="http://docs.perfsonar.net/manage_dual_xface.html">manage-dual-xface</a> for details on configuring this.</p>
               
             </div>
           </div>
