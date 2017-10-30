@@ -2,15 +2,15 @@
 
 The primary motivation for perfSONAR deployment is to test isolation, i.e. only one test should run on the host at a time. This ensures that test results are not impacted by other tests. Otherwise it is much more difficult to interpret test results, which may vary due to host effects rather then network effects. Taking this into account this means that perfSONAR measurement tools are much more accurate running on a dedicated hardware and while it may be useful to run them on other hosts such as Data Transfer Nodes the current recommendation is to have specific measurement machine. Thus the following deployment options are available: 
 
-- Bare metal - is a preffered option in two possible configurations:
+- **Bare metal** - is a preffered option in two possible configurations:
    - Two bare metal servers, one for latency node, one for bandwidth node
    - One bare metal server running both latency and bandwidth node together, please refer to 
-- Virtual Machine - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements
+- **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements
    - Full-node VM is strongly preffered, so having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with other might have an impact on the measuremenets and is therefore not recommended.
    - VM needs to be configured to have SR-IOV to NIC as well as pinned CPUs to ensure bandwidth tests are not impacted (by switching CPUs)
    - Succesfull full speed local bandwidth test should be conducted prior to putting the VM into production 
-- Container - this is currently planned to be fully supported from 4.1 (Q1 2018), but the main focus is on perfSONAR test point, which does not replace full toolkit installation is therefore not recommeneded
-   - Docker perfSONAR test instance can still be used to run tests and send results to local measurement archive
+- **Container** - this is currently planned to be fully supported from 4.1 (Q1 2018), but the main focus is on perfSONAR test point, which does not replace full toolkit installation and is therefore not recommeneded for WLCG/OSG use cases
+   - Docker perfSONAR test instance can still be used by sites to run tests and send results to local measurement archive, which could replace some of the on-site test instances
    
 
 ### perfSONAR Hardware Requirements
