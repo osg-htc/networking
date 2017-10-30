@@ -22,7 +22,7 @@ There are two different nodes participating in the network testing, latency node
 
 ### Multiple NIC (Network Interface Card) Guidance
 
-There are few additional steps required in order to configure node with multiple network cards:
+Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Fortunately the perfSONAR developers have provided a way to install both latency and bandwidth measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory. There are few additional steps required in order to configure node with multiple network cards:
 
 - Please setup source routing as described in the official documentation at http://docs.perfsonar.net/manage_dual_xface.html
 - You'll need to register two hostnames in GOCDB/OIM (and have two reverse DNS entries) as you would normally for two separate nodes
@@ -40,6 +40,3 @@ There are few additional steps required in order to configure node with multiple
 </mesh>
 ...
 ```
-
-Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Fortunately the perfSONAR developers have provided a way to install both latency and bandwidth 
-measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory.  See [manage-dual-xface](http://docs.perfsonar.net/manage_dual_xface.html) for details on configuring this.
