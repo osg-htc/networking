@@ -9,6 +9,7 @@ Network Monitoring in WLCG and OSG (perfSONAR)
 ----------------------------------------------
 
 WLCG and OSG jointly operate a network of perfSONAR agents deployed world-wide, which provides an open platform that can be used to baseline network performance and debug any potential issues. The following subsections provide details on the motivation, deployment and operations of the perfSONARs in WLCG/OSG: 
+
 - [Motivation](perfsonar-in-osg.md)
 - [Deployment Guide](perfsonar/deployment-models.md) - deployment models and options, hardware requirements
 - [Installation and Administration Guide](perfsonar/installation.md) - installation, configuration and maintanance 
@@ -22,11 +23,12 @@ Network Service
 ---------------
 
 OSG operates an advance platform to collect, store, publish and analyse the network monitoring data it gathers from perfSONAR and other locations. All measurements are collected and available via streaming or through APIs. The following services are available:
+
 - [perfSONAR infrastructure monitoring](perfsonar/psetf.md) - collects data on existing perfSONAR network, monitors its state and reports on availability of core services
 - *OSG Network Datastore* - central datastore holding all the network measurements and providing an API to expose them via JSON. Datastore is based on [ESMOND](http://software.es.net/esmond/), which supports the following [API](http://software.es.net/esmond/perfsonar_client_rest.html) and runs at this [endpoint](http://psds.grid.iu.edu/esmond/perfsonar/archive/?format=json).
 - *OSG Network Stream* - access to network measurements in near realtime is provided by the GOC RabbitMQ and CERN ActiveMQ messaging brokers.
-- *OSG Dashboards* - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure (http://psmad.grid.iu.edu/maddash-webui/index.cgi)
-- *WLCG Dashboards* - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. (http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16)
+- [*OSG Dashboards*](http://psmad.grid.iu.edu/maddash-webui/index.cgi)- set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure 
+- [*WLCG Dashboards*](http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16)- set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. 
 
 Network Analytics
 -----------------
