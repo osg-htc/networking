@@ -1,6 +1,6 @@
 ## perfSONAR Installation Guide 
 
-This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an [overview](perfsonar-in-osg.md) and possible [deployment options](perfsonar/deployment-models.md) before installing. For troubleshooting an existing installation please consult [FAQ](faq.md).
+This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an [overview](perfsonar-in-osg.md) and possible [deployment options](deployment-models.md) before installing. For troubleshooting an existing installation please consult [FAQ](faq.md).
 
 For any questions or help with WLCG perfSONAR setup, please contact [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG [GOC](). We strongly recommend anyone maintaining/using perfSONAR to join [perfsonar-user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
