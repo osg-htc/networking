@@ -164,21 +164,15 @@
                 <h3 id="perfsonar-deployment-options">perfSONAR Deployment Options<a class="headerlink" href="#perfsonar-deployment-options" title="Permanent link">&para;</a></h3>
 <p>The primary motivation for perfSONAR deployment is to test isolation, i.e. only one end-to-end test should run on a host at a time. This ensures that the test results are not impacted by the other tests. Otherwise it is much more difficult to interpret test results, which may vary due to host effects rather then network effects. Taking this into account it means that perfSONAR measurement tools are much more accurate running on a dedicated hardware and while it may be useful to run them on other hosts such as Data Transfer Nodes the current recommendation is to have specific measurement machine. In addition, as bandwidth testing could impact latency testing, we recommend to deploy two different nodes, each focused on specific set of tests. The following deployment options are currently available: </p>
 <ul>
-<li><strong>Bare metal</strong> - preffered option in one of two possible configurations:<ul>
+<li><strong>Bare metal</strong> - preffered option in one of two possible configurations:</li>
 <li>Two bare metal servers, one for latency node, one for bandwidth node</li>
 <li>One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to <a href="#multiple-nic-network-interface-card-guidance">dual NIC</a> section for more details on this.</li>
-</ul>
-</li>
-<li><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:<ul>
+<li><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:</li>
 <li>Full-node VM is strongly preffered, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended. </li>
 <li>VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)</li>
 <li>Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production </li>
-</ul>
-</li>
-<li><strong>Container</strong> - this is currently planned to be fully supported from version 4.1 (Q1 2018), but the main focus is on perfSONAR test point, which does not replace full toolkit installation as it doesn't include a local measurement archive and is therefore not recommeneded for WLCG/OSG use cases:<ul>
+<li><strong>Container</strong> - this is currently planned to be fully supported from version 4.1 (Q1 2018), but the main focus is on perfSONAR test point, which does not replace full toolkit installation as it doesn't include a local measurement archive and is therefore not recommeneded for WLCG/OSG use cases:</li>
 <li>Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a test-point which can send results to a local measurement archive running on the perfSONAR toolkit node. </li>
-</ul>
-</li>
 </ul>
 <h3 id="perfsonar-hardware-requirements">perfSONAR Hardware Requirements<a class="headerlink" href="#perfsonar-hardware-requirements" title="Permanent link">&para;</a></h3>
 <p>There are two different nodes participating in the network testing, latency node and bandwidth node, while both are running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported, 10G is recommended) as well as enough memory and CPU to support high bandwidth testing. Latency node on the other hand runs low bandwidth, but high frequency tests, sending a continuous stream of packets to measure delay and corresponding packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to continuously store its results into local measurement archive. The official hardware requirements are documented at http://docs.perfsonar.net/install_hardware_details.html. For WLCG/OSG deployment, we recommend at least the following for perfSONAR 4.0+:</p>
