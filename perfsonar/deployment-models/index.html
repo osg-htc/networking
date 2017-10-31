@@ -191,7 +191,7 @@
 <p>Many sites would prefer <strong>not</strong> to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5 there is a way to install both latency and bandwidth measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory. There are few additional steps required in order to configure node with multiple network cards:</p>
 <ul>
 <li>Please setup source routing as described in the official documentation at http://docs.perfsonar.net/manage_dual_xface.html</li>
-<li>You'll need to register two hostnames in <a href="register-ps-in-oim.md">OIM</a>/<a href="register-ps-in-gocdb.md">GOCDB</a> (and have two reverse DNS entries) as you would normally for two separate nodes</li>
+<li>You'll need to register two hostnames in <a href="../installation/">OIM</a>/<a href="../installation/">GOCDB</a> (and have two reverse DNS entries) as you would normally for two separate nodes</li>
 <li>Instead of configuring just one auto-URL in the <code>/etc/perfsonar/meshconfig-agent.conf</code>, please add both, so you'll end up having something like this:</li>
 </ul>
 <div class="codehilite"><pre><span></span><span class="nt">&lt;mesh&gt;</span>
