@@ -6,7 +6,7 @@ difficult to verify everything is working correctly.
 [perfSONAR monitoring instance](https://psetf.grid.iu.edu/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py) actively monitors the state of the infrastructure for both remote perfSONAR installation as well as central services. The instance is based on [ETF](http://etf.cern.ch/docs/latest/), which is an open source measurement middleware for functional/availability testing of the resources. In order to access the page you'll need to have x509 grid certificate loaded in the browser. 
 
 A sample initial dashboard is shown below:
-![dashboard](../img/etf.png")
+![dashboard](../img/etf.png)
 
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into three catogeries:
 
