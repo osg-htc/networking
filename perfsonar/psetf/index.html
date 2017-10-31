@@ -162,9 +162,9 @@ difficult to verify everything is working correctly.   </p>
 <p>A sample initial dashboard is shown below:
 <img src="../img/etf.png" alt="Drawing" style="width: 250px;"/></p>
 <p>You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into three catogeries:
-1. <em>Configuration tests</em> (<code>perfSONAR configuration:</code>) tests if the contact, organisation and meshes were set following our installation guide.
-2. <em>Service tests</em> (<code>perfSONAR services:</code>) check if different services are up and running correctly as well as if ports are reachable from OSG subnets.
-3. <em>Hardware test</em> (<code>perfSONAR hardware</code>) checks if the node conforms to the minimal hardware requirements (see <a href="../deployment-models/">Requirements</a>
+1. <em>Configuration tests</em> (<code>perfSONAR configuration:</code>) tests if the contact, organisation and meshes were following our installation guide
+2. <em>Service tests</em> (<code>perfSONAR services:</code>) check if different services are up and running correctly as well as if ports are reachable from OSG subnets
+3. <em>Hardware test</em> (<code>perfSONAR hardware</code>) checks if the node conforms to the minimal hardware requirements
 4. <em>Freshness tests</em> (<code>perfSONAR freshness</code>) is a high level test that checks what tests are available in the local measurement archive and compares this with the tests configured. There can be many different reasons why certain tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with measurement archive, therefore this test is informative and never reaches critical state. A special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results is stored centrally as compared to local measurement archive. </p>
 <p>This is sample snapshost for perfsonar-lt.cern.ch:
 <img src="../img/etf_page.png" alt="Drawing" style="width: 250px;"/></p>
