@@ -1,93 +1,47 @@
-<span class="twiki-macro LINKCSS"></span>
+## perfSONAR Installation and Maintenance 
 
-<span class="twiki-macro SPACEOUT">Installation and Upgrade Details</span>
-==========================================================================
+This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an [overview](perfsonar-in-osg.md) and possible [deployment options](perfsonar/deployment-models.md) before installing. For troubleshooting an existing installation please consult [FAQ](perfsonar/faq.md).
 
+For any questions or help with WLCG perfSONAR setup, please contact [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG [GOC](). We strongly recommend anyone maintaining/using perfSONAR to join [perfsonar-user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
-<span class="twiki-macro STARTINCLUDE"></span>
+## Installation/Update Guide
 
-This page documents installing or upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult <https://opensciencegrid.github.io/networking/perfsonar-in-osg/> for an overview of perfSONAR in OSG.
+Prior to installing please consult the [release notes](http://docs.perfsonar.net/manage_update.html#special-upgrade-notes). In case you have already an instance running and wish to update it then please consult our recommendations:
 
-For any questions or help with WLCG perfSONAR setup, please email `wlcg-perfsonar-support 'at' cern.ch` or open GGUS ticket for [WLCG perfSONAR Monitoring Support Unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ). We strongly recommend anyone maintaining/using perfSONAR to join <https://lists.internet2.edu/sympa/subscribe/perfsonar-user> and <https://lists.internet2.edu/sympa/subscribe/perfsonar-announce>
+* For sites the are currently registered but not yet updated to 4.0 we would strongly recommend reinstalling using CentOS 7. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.
+* perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use CentOS7 as this is the most common and best understood deployment.
+* Please backup `/etc/perfsonar/meshconfig-agent.conf`, which contains the current configuration
+* Local measurement archive backup is not needed as OSG/WLCG stores all ,easurements centrally. In case you'd like to perform the backup  anyway please follow the [migration guide](http://docs.perfsonar.net/install_migrate_centos7.html).
 
-Please follow the instructions for [upgrading](#UpgradeGuide) or [installing](#InstallingperfSONAR) perfSONAR as appropriate for your plans.
+There are two options to install perfSONAR toolkit, you can either use meta-package/bundle installation on an existing Centos7 or use an image. For bundle installation please follow the [bundle installation guide](http://docs.perfsonar.net/install_centos.html), for ISO image installation please follow the [toolkit full install guide](http://docs.perfsonar.net/install_centos_fullinstall.html) or [net install guide](http://docs.perfsonar.net/install_centos_netinstall.html). 
 
-Updating perfSONAR
--------------------
+!!! note
+In all cases, we **strongly recommend to enable auto-updates** during the installation process to keep the node up to date and reboot it after critical kernel updates are announced. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances. 
 
-Before updating, please read the release notes at <http://docs.perfsonar.net/manage_update.html#special-upgrade-notes>
+The following additional steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:
 
-To update please run the following:
-
-    # yum clean all
-    # yum update
-    # reboot
-
-Note, it's **very important to reboot** otherwise your update is incomplete. Please also note, that starting from v3.4 `yum` auto-updates are turned on by default. **We strongly recommend keeping them turned on**. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances.
-
-If you haven't yet added another (`non-root`) user to administer the web interface, you should run `/usr/lib/perfsonar/scripts/nptoolkit-configure.py` and do so, as suggested in `motd`. See <http://docs.perfsonar.net/manage_users.html> for detailed instructions.
-
-Please backup your old `/etc/perfsonar/meshconfig-agent.conf` file and replace it with `/etc/perfsonar/meshconfig-agent.conf.rpmnew`.
-
-Then please verify/reconfigure your boxes following [OSG and WLCG Configuration](#ConfigPS). For any further questions, please consult [Troubleshooting](https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact directly WLCG or OSG perfSONAR support units.
-
-Installing perfSONAR
---------------------
-
-perfSONAR 4.0 was released in April 2017. For sites running the previous version (3.x.y) the update should have automatically happened assuming that yum auto-updates were enabled and the `/etc/yum.repos.d/Internet2.repo` had 'enabled = 1'.
-
-The following information details how to install perfSONAR 4.0 for WLCG and OSG. For general troubleshooting please go [here](https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS), in case you have any questions please email `wlcg-perfsonar-support 'at' cern.ch` or open GGUS ticket for [WLCG perfSONAR support unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ). For OSG sites that don't participate in WLCG, please contact [OSG operations](https://twiki.opensciencegrid.org/bin/view/Operations/WebHome).
-
-The perfSONAR team has created very good documentation on the process. You can get information about your installation options at <http://docs.perfsonar.net/install_getting.html#gettingchooseinstall>
-
-### Installation
-
--   For sites using perfSONAR Net Install - please follow <http://docs.perfsonar.net/install_centos_netinstall.html#step-by-step-guide>
--   For sites using perfSONAR Full Install - please follow <http://docs.perfsonar.net/install_centos_fullinstall.html#step-by-step-guide>
--   For general configuration of perfSONAR - please follow <http://docs.perfsonar.net/install_config_first_time.html>
-
-For sites the are currently registered but not yet updated to 4.0 we would strongly recommend reinstalling using CentOS 7.x (follow either the Full Install or the Net Install above). There is no need for sites to preserve their data from the OSG/WLCG perspective, since we have already been collecting your data centrally. The primary reason for this recommendation is that the next point release of perfSONAR (version 4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6 as a supported operating system.
-
-OSG and WLCG Configuration Notes
---------------------------------
-
-All perfSONAR instances for use in OSG and WLCG should be registered either in OIM or GOCDB. Please verify or register your instances at:
-
--   For OSG, follow the details in [OIM](register-ps-in-oim)
--   For Non-OSG, follow the details in [GOCDB](register-ps-in-gocdb)
-
-Please ensure you have added or updated your administrative information: <http://docs.perfsonar.net/manage_admin_info.html>
-
--   Adding communities is optional, but we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.
-
-Assuming your registration is for a **new** node or if you have changed the nodes FQDN, you will need to email `wlcg-perfsonar-support 'at' cern.ch` or open GGUS ticket for [WLCG perfSONAR support unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) so that your node can be added to one or more meshes. Please indicate if you have preferences for which meshes your node should be included in.
-
-You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. OSG provides MCA (Mesh Configuration Adminstrator) GUI (see <http://docs.perfsonar.net/mca.html> for details) to centrally define the network tests that need to be run. Each perfSONAR toolkit installation for OSG/WLCG should add the "auto" mesh URL in their `/etc/perfsonar/meshconfig-agent.conf` file:
-
--   Set this to `http://meshconfig.grid.iu.edu/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`.
--   Below is an example set of lines for meshconfig-agent.conf
-
+1. Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](register-ps-in-oim). For non-OSG sites, follow the details in [GOCDB](register-ps-in-gocdb)
+2. Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
+3. Adding communities is optional, but we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.
+4. You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file `/etc/perfsonar/meshconfig-agent.conf`. Otherwise please set it to contain the following: 
+   * Add a mesh section with configuration_url pointing to `http://meshconfig.grid.iu.edu/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`.
+   * Below is an example set of lines for meshconfig-agent.conf
     ```
        <mesh> 
         configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
         validate_certificate 0 
         required 1 
       </mesh> 	
-      # Replace the following with suitable values for your installation 
-      address psum01.aglt2.org 
-      admin_email smckee@umich.edu 
-      skip_redundant_tests 1 
-    ```
-
-!!! note
+     ```
+5. If this is a **new instance** or you have changed the nodes FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add the node in one or more test meshes, which will then auto-configure the tests. You could also add any additional local tests via web interface or local mesh. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, HNSciCloud, etc.).
+     !!! note
 	Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
+6. We **recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
+7. Please check that both local and campus firewall has the necessary [ports open](#security_considerations)
+8. Once installation is finished, please **reboot** the node.
 
-We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6)
+For any further questions, please consult [FAQ](perfsonar/faq.md) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact directly WLCG or OSG perfSONAR support units.
 
--   In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse is in place).
--   All existing meshes will support both IPv4 and IPv6 testing. Sites with both IPv4 and IPv6 addresses testing to sites that also have both will run **two** tests. A side effect of this is that as more sites provide IPv6 addresses, the amount of testing will increase.
--   At some future point when most sites have IPv6, we may need to adjust the testing frequency to reduce the overall amount of testing
--   For more information on IPv6 see <http://ipv6.web.cern.ch/>
 
 #### Security Considerations
 
@@ -96,7 +50,7 @@ We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.
 
-Some sites are concerned about having port 80 and/or 443 open. The working group would like to emphasize that these ports provide access to the perfSONAR web interface and are very useful to users and network administrators. **Our recommendation is to keep them open**, but for sites with strong concerns we have some rules documented below to customize iptables to block ports 80 and 443. It is **required** that port 80 **and** port 443 be accessible from the OSG and WLCG monitoring subnets listed below. In addition port 443 **must** be accessible to all other perfSONAR instances that your node will test to. This is a new requirement as of the release of perfSONAR 4.0. 
+Some sites are concerned about having port 80 and/or 443 open. The working group would like to emphasize that these ports provide access to the perfSONAR web interface and are very useful to users and network administrators. **Our recommendation is to keep them open**, but for sites with strong concerns we have some rules documented below to customize iptables to block ports 80 and 443. It is **required** that either port 80 or port 443 are accessible from the OSG and WLCG monitoring subnets listed below. In addition port 443 **must** be accessible to all other perfSONAR instances that your node will test to. This is a new requirement as of the release of perfSONAR 4.0. 
 
 Below are example iptable rules to implement OSG/WLCG required access:
 
@@ -118,13 +72,5 @@ Below are example iptable rules to implement OSG/WLCG required access:
 To save your changes run `/sbin/service iptables save` 
 
 !!! warning
-	In case you have **central/campus firewall**, please check the required port openings in the perfSONAR documentation at <http://docs.perfsonar.net/manage_security.html>  
+	In case you have **central/campus firewall**, please check the required port openings in the [perfSONAR security documentation](http://docs.perfsonar.net/manage_security.html).  
 
-
-For any further questions, please consult [Troubleshooting](https://twiki.opensciencegrid.org/bin/view/Documentation/TroubleFAQPS) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact [WLCG perfSONAR Monitoring Support Unit](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ).
-
-<span class="twiki-macro STOPINCLUDE"></span>
-
-<span class="twiki-macro BOTTOMMATTER"></span>
-
--- Main.ShawnMcKee - 17-Oct-2017
