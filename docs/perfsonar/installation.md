@@ -12,6 +12,7 @@ Prior to installing please consult the [release notes](http://docs.perfsonar.net
 * perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use CentOS7 as this is the most common and best understood deployment.
 * Please backup `/etc/perfsonar/meshconfig-agent.conf`, which contains the current configuration
 * Local measurement archive backup is not needed as OSG/WLCG stores all ,easurements centrally. In case you'd like to perform the backup  anyway please follow the [migration guide](http://docs.perfsonar.net/install_migrate_centos7.html).
+* In case you're deploying single bare metal node with multiple NICs, please consult [Multiple NIC Guidance](deployment-models.md)
 
 The following options are available to install perfSONAR toolkit:
 
