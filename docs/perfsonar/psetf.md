@@ -9,10 +9,10 @@ A sample initial dashboard is shown below:
 ![dashboard](../img/etf.png)
 
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into three catogeries:
-1. Configuration tests (perfSONAR configuration:) tests if the contact, organisation and meshes were following our installation guide
-2. Service tests (perfSONAR services:) check if different services are up and running correctly as well as if ports are reachable from OSG subnets
-3. Hardware test (perfSONAR hardware) checks if the node conforms to the minimal hardware requirements
-4. Freshness tests (perfSONAR freshness) is a high level test that checks what tests are available in the local measurement archive and compares this with the tests configured. There can be many different reasons why certain tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with measurement archive, therefore this test is informative and never reaches critical state. A special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results is stored centrally as compared to local measurement archive. 
+1. *Configuration tests* (`perfSONAR configuration:`) tests if the contact, organisation and meshes were following our installation guide
+2. *Service tests* (`perfSONAR services:`) check if different services are up and running correctly as well as if ports are reachable from OSG subnets
+3. *Hardware test* (`perfSONAR hardware`) checks if the node conforms to the minimal hardware requirements
+4. *Freshness tests* (`perfSONAR freshness`) is a high level test that checks what tests are available in the local measurement archive and compares this with the tests configured. There can be many different reasons why certain tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with measurement archive, therefore this test is informative and never reaches critical state. A special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results is stored centrally as compared to local measurement archive. 
 
 This is sample snapshost for perfsonar-lt.cern.ch:
 ![etf_page](../img/etf_page.png)
