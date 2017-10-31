@@ -23,7 +23,7 @@ The following options are available to install perfSONAR toolkit:
 | Net ISO image installation       | [Toolkit NET install guide](http://docs.perfsonar.net/install_centos_netinstall.html)   |
 
 !!! note
-    In all cases, we **strongly recommend to enable auto-updates** during the installation process to keep the node up to date and        reboot it after critical kernel updates are announced. With `yum` auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. 
+    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4.0. With `yum` auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. 
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:
 
@@ -51,6 +51,17 @@ The following *additional* steps are needed to configure the toolkit to be used 
 * Once installation is finished, please **reboot** the node.
 
 For any further questions, please consult [FAQ](faq.md) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact directly WLCG or OSG perfSONAR support units.
+
+### Maintenance
+
+Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released. perfSONAR team has dropped support for web100 kernel, which means that stock kernels from centOS7 as well as any updates can be deployed as soon as they're released.
+
+In case you'd like to manually update the node then it can be done with the following set of commands:
+```
+# yum clean all
+# yum update
+# reboot
+```
 
 ### Security Considerations
 
