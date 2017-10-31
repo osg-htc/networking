@@ -12,6 +12,15 @@ We are maintaining a [Network Troubleshooting](network-troubleshooting.md) page 
 
 For OSG sites, please open a ticket with GOC. Otherwise please open a GGUS ticket (or assign an existing) one to WLCG Network Throughput support unit.
 
+#### Service Registration
+**I got an email after registering with lots of information in it...what do I do?** 
+
+This is part of the process. If you are a new site you will need to attend the next OSG operations meeting. If you are an existing site and have just registered perfSONAR instances you don't have to do anything but feel free to attend the next operations meeting if you have questions or concerns.
+
+**Once I registered, new tickets were opened concerning perfSONAR...What do I do?** 
+
+This is standard operating procedure and the tickets are to ensure that OSG operations properly gets your new perfSONAR instances registered. You don't have to do anything and the tickets will be closed by OSG operations staff.
+
 #### Infrastructure Monitoring (check\_mk metrics)
 
 * **perfSONAR services: versions** metric is failing.
