@@ -1,10 +1,10 @@
-## perfSONAR Installation and Maintenance 
+## perfSONAR Installation Guide 
 
 This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an [overview](perfsonar-in-osg.md) and possible [deployment options](perfsonar/deployment-models.md) before installing. For troubleshooting an existing installation please consult [FAQ](perfsonar/faq.md).
 
 For any questions or help with WLCG perfSONAR setup, please contact [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG [GOC](). We strongly recommend anyone maintaining/using perfSONAR to join [perfsonar-user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
-## Installation/Update Guide
+### Installation
 
 Prior to installing please consult the [release notes](http://docs.perfsonar.net/manage_update.html#special-upgrade-notes). In case you have already an instance running and wish to update it then please consult our recommendations:
 
@@ -42,8 +42,7 @@ The following additional steps are needed to configure the toolkit to be used in
 
 For any further questions, please consult [FAQ](perfsonar/faq.md) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact directly WLCG or OSG perfSONAR support units.
 
-
-#### Security Considerations
+### Security Considerations
 
 !!! warning 
 	As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances. This change is because of the new requirements introduced by pScheduler. If sites are unable to reach your instance on port 443, tests may not run and results may not be available.
