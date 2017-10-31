@@ -50,13 +50,11 @@ For any further questions, please consult [FAQ](perfsonar/faq.md) pages, perfSON
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.
 
-Some sites are concerned about having port 80 and/or 443 open. The working group would like to emphasize that these ports provide access to the perfSONAR web interface and are very useful to users and network administrators. **Our recommendation is to keep them open**, but for sites with strong concerns we have some rules documented below to customize iptables to block ports 80 and 443. It is **required** that either port 80 or port 443 are accessible from the OSG and WLCG monitoring subnets listed below. In addition port 443 **must** be accessible to all other perfSONAR instances that your node will test to. This is a new requirement as of the release of perfSONAR 4.0. 
-
-Below are example iptable rules to implement OSG/WLCG required access:
-
+For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However implementing the corresponding firewall rules would need to be done both locally and on the campus firewall. It's important to emphasize that port 443 provides access to the perfSONAR web interface and serves as a controller port for scheduling the tests, which is very useful to users and network administrators to debug network issues. Sites can optionally allow port 80, which could be restricted to a limited set of subnets, as shown in the rules below: 
+```
     # Port 443 must be open 
     iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT
-    # Allow port 80 for specific monitoring subnets AT A MINIMUM (we recommend opening port 80 so others can view/access your perfSONAR Toolkit web GUI) 
+    # Allow port 80 for specific monitoring subnets
     # OSG monitoring subnet 
     iptables -I INPUT 4 -p tcp --dport 80 -s 129.79.53.0/24 -j ACCEPT 
     # CERN subnet 
@@ -67,7 +65,7 @@ Below are example iptable rules to implement OSG/WLCG required access:
     iptables -I INPUT 4 -p tcp --dport 80 -s <LOCAL\_SUBNET> -j ACCEPT 
     # Reject ONLY if your site policy requires this 
     #iptables -I INPUT 5 -p tcp --dport 80 -j REJECT
-
+```
 
 To save your changes run `/sbin/service iptables save` 
 
