@@ -175,9 +175,9 @@
 <li>Local measurement archive backup is not needed as OSG/WLCG stores all ,easurements centrally. In case you'd like to perform the backup  anyway please follow the <a href="http://docs.perfsonar.net/install_migrate_centos7.html">migration guide</a>.</li>
 </ul>
 <p>The following options are available to install perfSONAR toolkit:</p>
-<p>| Meta-package/bundle installation | <a href="http://docs.perfsonar.net/install_centos.html">Bundle installation guide</a> |
-| Full ISO image installation | <a href="http://docs.perfsonar.net/install_centos_fullinstall.html">Toolkit full install guide</a> |
-| Net ISO image installation |  <a href="http://docs.perfsonar.net/install_centos_netinstall.html">Toolkit NET install guide</a>. |</p>
+<p>| Meta-package/bundle installation | <a href="http://docs.perfsonar.net/install_centos.html">Bundle installation guide</a>              |
+| Full ISO image installation      | <a href="http://docs.perfsonar.net/install_centos_fullinstall.html">Toolkit full install guide</a> |
+| Net ISO image installation       |  <a href="http://docs.perfsonar.net/install_centos_netinstall.html">Toolkit NET install guide</a>  |</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>In all cases, we <strong>strongly recommend to enable auto-updates</strong> during the installation process to keep the node up to date and        reboot it after critical kernel updates are announced. With <code>yum</code> auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. </p>
@@ -187,24 +187,28 @@
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in <a href="../register-ps-in-oim">OIM</a>. For non-OSG sites, follow the details in <a href="../register-ps-in-gocdb">GOCDB</a></li>
 <li>Please ensure you have added or updated your <a href="http://docs.perfsonar.net/manage_admin_info.html">administrative information</a></li>
 <li>Adding communities is optional, but we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
-<li>
-<p>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Otherwise please follow the steps below: </p>
-<ol>
-<li>Add a mesh section with configuration_url pointing to <code>http://meshconfig.grid.iu.edu/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>.</li>
-<li>Below is an example set of lines for <code>meshconfig-agent.conf</code></li>
+<li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Otherwise please follow the steps below: <ul>
+<li>Add a mesh section with configuration_url pointing to <code>http://meshconfig.grid.iu.edu/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. Below is an example set of lines for <code>meshconfig-agent.conf</code>:</li>
+</ul>
+</li>
 </ol>
-<p><code>&lt;mesh&gt; 
-    configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
-    validate_certificate 0 
-    required 1 
-  &lt;/mesh&gt;</code>
-5. If this is a <strong>new instance</strong> or you have changed the nodes FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add the node in one or more test meshes, which will then auto-configure the tests. You could also add any additional local tests via web interface or local mesh. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, HNSciCloud, etc.).</p>
-<p>!!! note
-Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).</p>
-</li>
-<li>
-<p>We <strong>recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</p>
-</li>
+<div class="codehilite"><pre><span></span>       <span class="nt">&lt;mesh&gt;</span> 
+        configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
+        validate_certificate 0 
+        required 1 
+      <span class="nt">&lt;/mesh&gt;</span>   
+</pre></div>
+
+
+<ol>
+<li>If this is a <strong>new instance</strong> or you have changed the nodes FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add the node in one or more test meshes, which will then auto-configure the tests. You could also add any additional local tests via web interface or local mesh. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, HNSciCloud, etc.).</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).</p>
+</div>
+<ol>
+<li>We <strong>recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</li>
 <li>Please check that both local and campus firewall has the necessary <a href="#security-considerations">port openings</a></li>
 <li>Once installation is finished, please <strong>reboot</strong> the node.</li>
 </ol>
