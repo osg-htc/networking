@@ -92,3 +92,75 @@ To save your changes run `/sbin/service iptables save`
 !!! warning
 	In case you have **central/campus firewall**, please check the required port openings in the [perfSONAR security documentation](http://docs.perfsonar.net/manage_security.html).  
 
+### Register perfSONAR Service in GOCDB
+
+This section describes how to register the perfSONAR service in GOCDB.
+
+In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service Endpoint
+
+-   <https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint>
+
+You might not be able to access the page if you are not properly registered in GOC, so a snapshot can be found below. In filling the information please follow those simple guidelines:
+
+-   There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).
+-   For each form (i.e. for each service type) fill at least the important informations:
+    -   Hosting Site (drop-down menu, mandatory)
+    -   Service Type (drop-down menu, mandatory)
+    -   Host Name (free text, mandatory)
+    -   Host IP (free text, optional)
+    -   Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
+    -   Check "N" when asked "Is it a beta service"
+    -   Check "Y" when asked "Is this service in production"
+    -   Check "Y" when asked "Is this service monitored"
+
+<!-- -->
+
+-   GOCDB screen shot for creating a Service Endpoint: <br /> ![Screenshot](../img/Screen_shot_2013-02-19_at_15.26.52.png)
+
+### Register perfSONAR in OIM
+!!! warning
+	These instructions were revised on October 1, 2013.** If you registered your perfSONAR instances in OIM following instructions prior to this date please update them using the following instructions. The summary of the change: Instead of registering one resource per "Site" and then having two services (latency and bandwidth) for that resource, the new instructions are to register each site/service combination as one resource. For example a Tier-2 with two sites (A,B) will now need to register 4 resources: **latency\_A**, **latency\_B**, **bandwidth\_A** and **bandwidth\_B**. 
+
+
+This section describes how to register your perfSONAR-PS instances in OIM. For general information about registering items in OIM see <https://twiki.grid.iu.edu/bin/view/Operations/OIMRegistrationInstructions>
+
+Each OSG site should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR instances.
+
+The example below uses AGLT2 (primarily an ATLAS Tier-2 center) which has two physical sites located at the University of Michigan in Ann Arbor and at Michigan State University in East Lansing.
+
+To begin registration, make sure you have your X509 certificate loaded in your browser and go to
+
+-   <https://oim.grid.iu.edu> (for registered users)
+-   <http://oim.grid.iu.edu> (for guest)
+
+<!-- -->
+
+-   The web page should be similar to this one with your site details. See notes on this screen capture: <br /> ![Screenshot1](../img/OIM_perfSONAR_reg_1.png)
+
+<!-- -->
+
+-   You need to create a name for the new resource. This example is the latency instance at the AGLT2 UM site: <br /> ![Screenshot2](../img/OSG-ps-register-latency.png)
+
+<!-- -->
+
+-   Please select the right service for the instance you are registering (either latency or bandwidth): <br /> ![Screenshot3](../img/OSG-ps-register-latency-service.png)
+
+<!-- -->
+
+-   More details about registering the site. You need to include relevant contact details. These instructions will apply to all perfSONAR-PS instances you register: <br /> ![Screenshot4](../img/OIM_perfSONAR_reg_4b.png)
+
+<!-- -->
+
+-   You need to agree to the OSG AUPs before submitting. These instructions will apply to each set of perfSONAR-PS instances you register: <br /> ![Screenshot5](../img/OIM_perfSONAR_reg_4c.png)
+
+<!-- -->
+
+-   If you have another site/service to enter you should add another resource and create a new name (similar to above). For this example we also need to register **perfSONAR\_UM\_bandwidth** which is the perfSONAR bandwidth instance for the University of Michigan AGLT2 site. Since AGLT2 also has a site at Michigan State University we will also need to create two more resources/services: **perfSONAR\_MSU\_latency** and **perfSONAR\_MSU\_bandwidth**. <br />
+
+<!-- -->
+
+-   This is similar what your "topology" should look like after **updating** to the new way of registering perfSONAR instances. Shown are both old and new entries. If you haven't registered before you won't see the old entries of course. <br /> ![Screenshot5](../img/OSG-ps-register-topology.png)
+
+After you have submitted each resource you should get an email confirming the requested registration with some details. **For sites that already have been running and registered in OIM there won't be much that you need to do.** In such a case you can choose to attend the next Monday meeting if you have questions or concerns. Details will be in the email that is sent. Also you should note that tickets will be created to track your new perfSONAR registrations. You don't have to take any action on them.
+
+If you have problems or questions please consult our [FAQ](faq.md) or alternatively open a ticket with GOC. 
