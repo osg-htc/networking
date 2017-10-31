@@ -64,11 +64,12 @@
             
     <li class="toctree-l3"><a href="#overview-of-perfsonar">Overview of perfSONAR</a></li>
     
+
+    <li class="toctree-l3"><a href="#motivation">Motivation</a></li>
+    
         <ul>
         
-            <li><a class="toctree-l4" href="#the-challenge">The Challenge</a></li>
-        
-            <li><a class="toctree-l4" href="#osg-networking">OSG Networking</a></li>
+            <li><a class="toctree-l4" href="#changes-for-perfsonar-40">Changes for perfSONAR 4.0</a></li>
         
         </ul>
     
@@ -163,44 +164,32 @@
           <div role="main">
             <div class="section">
               
-                <p><span class="twiki-macro LINKCSS"></span></p>
-<h1 id="overview-of-perfsonar"><span class="twiki-macro SPACEOUT">Overview of perfSONAR</span><a class="headerlink" href="#overview-of-perfsonar" title="Permanent link">&para;</a></h1>
-<p><span class="twiki-macro STARTINCLUDE"></span> 
-For those not familiar with <code>perfSONAR</code>, this page provides a quick overview of what it is and why we recommend its deployment at OSG and WLCG sites.</p>
-<p>OSG is working to support the scientific networking needs of it's constituents and collaborators. To do this, we are recommending all sites deploy perfSONAR 
-so we can measure, monitor and diagnose the OSG (and WLCG) networks.</p>
-<h3 id="the-challenge">The Challenge<a class="headerlink" href="#the-challenge" title="Permanent link">&para;</a></h3>
-<p>Distributed scientific computing relies upon networks to interconnect resources and make them usable for scientific workflows. This dependency upon the network means that issues in 
-our networks can significantly impact the behavior of all the various cyber-infrastructure components that rely upon it. Compounding the problem is that networks, by their nature, are 
-distributed and typically involve many different "owners" and administrators. When a problem arises somewhere along a network path, it can be very difficult to identify and localize.</p>
-<p>This was the context for the formation of the perfSONAR collaboration (see <a href="https://www.perfsonar.net/about/mission-statement">https://www.perfsonar.net/about/mission-statement</a>). This collaboration is focused on developing and 
-deploying the <code>perfSONAR</code> software suite in support of network monitoring across the global set of research and education (R&amp;E) networks. The <strong>Open Science Grid</strong> (<strong>OSG</strong>) has chosen to 
-base the core of its network monitoring framework on <code>perfSONAR</code> because of both the capabilities of the toolkit for measuring our networks and its global acceptance as the defacto 
-network monitoring infrastructure of first choice.</p>
-<p>The <a href="https://www.perfsonar.net.about/what-is-perfsonar/">https://www.perfsonar.net.about/what-is-perfsonar/</a> provides a succinct summary: ``<em>perfSONAR is a network measurement toolkit designed to provide federated coverage of paths, 
+                <h3 id="overview-of-perfsonar">Overview of perfSONAR<a class="headerlink" href="#overview-of-perfsonar" title="Permanent link">&para;</a></h3>
+<p>For those not familiar with <code>perfSONAR</code>, this page provides a quick overview of what it is and why we recommend its deployment at OSG and WLCG sites.</p>
+<p>OSG is working to support the scientific networking needs of it's constituents and collaborators. To do this, we are recommending all sites deploy perfSONAR so we can measure, monitor and diagnose the OSG (and WLCG) networks.</p>
+<h3 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h3>
+<p>Distributed scientific computing relies upon networks to interconnect resources and make them usable for scientific workflows. This dependency upon the network means that issues in our networks can significantly impact the behavior of all the various cyber-infrastructure components that rely upon it. Compounding the problem is that networks, by their nature, are distributed and typically involve many different "owners" and administrators. When a problem arises somewhere along a network path, it can be very difficult to identify and localize.</p>
+<p>This was the context for the formation of the <a href="https://www.perfsonar.net/about/mission-statement">perfSONAR collaboration</a>. This collaboration is focused on developing and deploying the <code>perfSONAR</code> software suite in support of network monitoring across the global set of research and education (R&amp;E) networks. The <strong>Open Science Grid</strong> (<strong>OSG</strong>) has chosen to base the core of its network monitoring framework on <code>perfSONAR</code> because of both the capabilities of the toolkit for measuring our networks and its global acceptance as the defacto network monitoring infrastructure of first choice.</p>
+<p>The <a href="https://www.perfsonar.net.about/what-is-perfsonar/">https://www.perfsonar.net.about/what-is-perfsonar/</a> provides a succinct summary: <em>perfSONAR is a network measurement toolkit designed to provide federated coverage of paths, 
 and help to establish end-to-end usage expectations. There are 1000s of perfSONAR instances deployed world wide, many of which are available for open testing of key measures of network 
 performance. This global infrastructure helps to identify and isolate problems as they happen, making the role of supporting network users easier for engineering teams, and increasing 
-productivity when utilizing network resources.</em>''</p>
-<h3 id="osg-networking">OSG Networking<a class="headerlink" href="#osg-networking" title="Permanent link">&para;</a></h3>
-<p><strong>How can OSG members and collaborators understand, maintain and effectively utilize the networks that form the basis of their distributed collaborations?</strong></p>
-<p>Our answer starts by providing visibility into our networks by the deployment of <code>perfSONAR</code>. perfSONAR allows us to regularly and consistently measure a set of network metrics that we 
-can use to understand how our networks are operating. When problems arise, the data, along with access to the <code>perfSONAR</code> tools, can be used to diagnose and localize problems. The 
-presence of perfSONAR toolkit deployments across our sites and networks makes identifying and fixing network problems feasible.</p>
-<p>We strongly recommend that all OSG (and WLCG) sites deploy <code>perfSONAR</code> toolkit instances as described in our <a href="../perfsonar/installation">installation guide</a>. Before installing you should consult 
-the <a href="../perfsonar/requirements">requirements</a> along with the guidance on <a href="../perfsonar/deployment-models">deployment models</a>. </p>
+productivity when utilizing network resources.</em></p>
+<p><strong>How can OSG/WLCG members and collaborators understand, maintain and effectively utilize the networks that form the basis of their distributed collaborations?</strong></p>
+<p>Our answer starts by providing visibility into our networks by the deployment of <code>perfSONAR</code>. perfSONAR allows us to regularly and consistently measure a set of network metrics that we can use to understand how our networks are operating. When problems arise, the data, along with access to the <code>perfSONAR</code> tools, can be used to diagnose and localize problems. The presence of perfSONAR toolkit deployments across our sites and networks makes identifying and fixing network problems feasible.</p>
+<p>We strongly recommend that all OSG (and WLCG) sites deploy <code>perfSONAR</code> toolkit instances as described in our <a href="../installation">installation guide</a>. Before installing you should consult the <a href="../deployment-models">requirements</a> along with the guidance on <a href="../deployment-models">deployment models</a>. </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Installing perfSONAR not only benefits users at a site but will enable network engineers and OSG staff to much more effectively support those sites if network issues are suspected.</p>
 </div>
 <p>All OSG and WLCG sites should deploy <strong>two</strong> <code>perfSONAR</code> instances: one to measure latency/packet loss and one to measure bandwidth. 
-It is possible to install both versions on a single host with at least two NICs by following the instructions at <a href="http://docs.perfsonar.net/manage_dual_xface.html">http://docs.perfsonar.net/manage_dual_xface.html</a> but you should 
-read the <a href="../persfonar/multiple-nic-guidance">multiple NIC guidance page</a>. </p>
+It is possible to install both versions on a single host with at least two NICs by following the instructions at <a href="../multiple-nic-guidance">multiple NIC guidance page</a>. </p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>It is <strong>very important</strong> that the perfSONAR instances be located in the same subnet as the primary storage for the site. 
 This is to ensure that we are measuring as much of the network path involved with data transfer as possible.</p>
 </div>
-<p>Our <strong>strong recommendation</strong> for anyone maintaining/using perfSONAR is that they join either/both of the following mailing lists:</p>
+<p>The <a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics">WLCG Network Throughput Working Group</a> is responsible for monitoring the WLCG/OSG instances and for defining and maintaining the mesh-configurations that we use to control perfSONAR testing. Please contact us if you have questions or suggestions related to perfSONAR testing amongst WLCG sites.</p>
+<p>For anyone maintaining/using perfSONAR we suggest to join either/both of the following mailing lists:</p>
 <ul>
 <li><strong>User's Mailing List</strong> The perfSONAR project maintains a mailing list for communication on matters of installation, configuration, bug reports, or general performance discussions: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">https://lists.internet2.edu/sympa/subscribe/perfsonar-user</a></li>
 <li><strong>Announcement Mailing List</strong> The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">https://lists.internet2.edu/sympa/subscribe/perfsonar-announce</a></li>
@@ -216,10 +205,6 @@ This is to ensure that we are measuring as much of the network path involved wit
 <li>Support for email alerting in MaDDash</li>
 </ul>
 <p>For a more complete list of changes, see the full release notes at: <a href="http://www.perfsonar.net/release-notes/version-4-0/">http://www.perfsonar.net/release-notes/version-4-0/</a></p>
-<p>The <a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics">WLCG Network Throughput Working Group</a> is responsible for monitoring the WLCG/OSG instances and for defining and maintaining the mesh-configurations that we use to control perfSONAR testing. Please contact them if you have questions or suggestions related to perfSONAR testing amongst WLCG sites.</p>
-<p><span class="twiki-macro STOPINCLUDE"></span></p>
-<p><span class="twiki-macro BOTTOMMATTER"></span></p>
-<p>-- Main.ShawnMcKee - 12 Sep 2017</p>
               
             </div>
           </div>
