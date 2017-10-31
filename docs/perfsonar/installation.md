@@ -1,6 +1,6 @@
 ## perfSONAR Installation Guide 
 
-This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an [overview](perfsonar-in-osg.md) and possible [deployment options](perfsonar/deployment-models.md) before installing. For troubleshooting an existing installation please consult [FAQ](perfsonar/faq.md).
+This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an [overview](perfsonar-in-osg.md) and possible [deployment options](perfsonar/deployment-models.md) before installing. For troubleshooting an existing installation please consult [FAQ](faq.md).
 
 For any questions or help with WLCG perfSONAR setup, please contact [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG [GOC](). We strongly recommend anyone maintaining/using perfSONAR to join [perfsonar-user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
@@ -13,7 +13,10 @@ Prior to installing please consult the [release notes](http://docs.perfsonar.net
 * Please backup `/etc/perfsonar/meshconfig-agent.conf`, which contains the current configuration
 * Local measurement archive backup is not needed as OSG/WLCG stores all ,easurements centrally. In case you'd like to perform the backup  anyway please follow the [migration guide](http://docs.perfsonar.net/install_migrate_centos7.html).
 
-There are two options to install perfSONAR toolkit, you can either use meta-package/bundle installation on an existing Centos7 or use an image. For bundle installation please follow the [bundle installation guide](http://docs.perfsonar.net/install_centos.html), for ISO image installation please follow the [toolkit full install guide](http://docs.perfsonar.net/install_centos_fullinstall.html) or [net install guide](http://docs.perfsonar.net/install_centos_netinstall.html). 
+The following options are available to install perfSONAR toolkit:
+| Meta-package/bundle installation | [Bundle installation guide](http://docs.perfsonar.net/install_centos.html) |
+| Full ISO image installation | [Toolkit full install guide](http://docs.perfsonar.net/install_centos_fullinstall.html) |
+| Net ISO image installation |  [Toolkit NET install guide](http://docs.perfsonar.net/install_centos_netinstall.html). |
 
 !!! note
     In all cases, we **strongly recommend to enable auto-updates** during the installation process to keep the node up to date and        reboot it after critical kernel updates are announced. With `yum` auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. 
@@ -35,6 +38,7 @@ The following additional steps are needed to configure the toolkit to be used in
       </mesh> 	
      ```
 5. If this is a **new instance** or you have changed the nodes FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add the node in one or more test meshes, which will then auto-configure the tests. You could also add any additional local tests via web interface or local mesh. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, HNSciCloud, etc.).
+
      !!! note
 	Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
 	
@@ -42,7 +46,7 @@ The following additional steps are needed to configure the toolkit to be used in
 7. Please check that both local and campus firewall has the necessary [ports open](#security-considerations)
 8. Once installation is finished, please **reboot** the node.
 
-For any further questions, please consult [FAQ](perfsonar/faq.md) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact directly WLCG or OSG perfSONAR support units.
+For any further questions, please consult [FAQ](faq.md) pages, perfSONAR documentation (<http://docs.perfsonar.net>) or contact directly WLCG or OSG perfSONAR support units.
 
 ### Security Considerations
 
