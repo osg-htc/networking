@@ -12,7 +12,7 @@ pages:
   - Network Monitoring (perfSONAR):
     - 'Motivation': 'perfsonar-in-osg.md'
     - 'Deployment': 'perfsonar/deployment-models.md'
-    - 'Installation and Operations': 'perfsonar/installation.md'
+    - 'Installation and Maintenance': 'perfsonar/installation.md'
     - 'Frequently Asked Questions': 'perfsonar/faq.md'
   - Network Troubleshooting: 
     - 'Network Troubleshooting': 'network-troubleshooting.md'
