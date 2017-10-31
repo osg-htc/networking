@@ -27,7 +27,7 @@ The following options are available to install perfSONAR toolkit:
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:
 
-* Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](register-ps-in-oim). For non-OSG sites, follow the details in [GOCDB](register-ps-in-gocdb)
+* Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](#register-perfsonar-service-in-oim). For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
 * Adding communities is optional, but we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file `/etc/perfsonar/meshconfig-agent.conf`. Otherwise please follow the steps below: 
