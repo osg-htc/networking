@@ -76,6 +76,8 @@
         
             <li><a class="toctree-l4" href="#installation">Installation</a></li>
         
+            <li><a class="toctree-l4" href="#maintenance">Maintenance</a></li>
+        
             <li><a class="toctree-l4" href="#security-considerations">Security Considerations</a></li>
         
         </ul>
@@ -200,7 +202,7 @@
 </table>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In all cases, we <strong>strongly recommend to enable auto-updates</strong> during the installation process to keep the node up to date and        reboot it after critical kernel updates are announced. With <code>yum</code> auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. </p>
+<p>In all cases, we <strong>strongly recommend to keep auto-updates enabled</strong> as this is the default settings starting from perfSONAR 4.0. With <code>yum</code> auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. </p>
 </div>
 <p>The following <em>additional</em> steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:</p>
 <ul>
@@ -233,6 +235,15 @@
 <li>Once installation is finished, please <strong>reboot</strong> the node.</li>
 </ul>
 <p>For any further questions, please consult <a href="../faq/">FAQ</a> pages, perfSONAR documentation (<a href="http://docs.perfsonar.net">http://docs.perfsonar.net</a>) or contact directly WLCG or OSG perfSONAR support units.</p>
+<h3 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h3>
+<p>Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released. perfSONAR team has dropped support for web100 kernel, which means that stock kernels from centOS7 as well as any updates can be deployed as soon as they're released.</p>
+<p>In case you'd like to manually update the node then it can be done with the following set of commands:</p>
+<div class="codehilite"><pre><span></span># yum clean all
+# yum update
+# reboot
+</pre></div>
+
+
 <h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
