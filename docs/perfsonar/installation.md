@@ -41,7 +41,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
        </mesh> 	
 ```
 
-* If this is a **new instance** or you have changed the nodes FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add the node in one or more test meshes, which will then auto-configure the tests. You could also add any additional local tests via web interface or local mesh. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, HNSciCloud, etc.).
+* If this is a **new instance** or you have changed the nodes FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add the node in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details, please check which tests are added via central meshes before adding any custom tests to avoid duplication). 
 
 !!! note
     Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
