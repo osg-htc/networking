@@ -164,7 +164,7 @@
             <div class="section">
               
                 <h2 id="perfsonar-installation-guide">perfSONAR Installation Guide<a class="headerlink" href="#perfsonar-installation-guide" title="Permanent link">&para;</a></h2>
-<p>This page documents installing/upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an <a href="perfsonar-in-osg.md">overview</a> and possible <a href="perfsonar/deployment-models.md">deployment options</a> before installing. For troubleshooting an existing installation please consult <a href="perfsonar/faq.md">FAQ</a>.</p>
+<p>This page documents installing/upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an <a href="perfsonar-in-osg.md">overview</a> and possible <a href="perfsonar/deployment-models.md">deployment options</a> before installing. For troubleshooting an existing installation please consult <a href="../faq/">FAQ</a>.</p>
 <p>For any questions or help with WLCG perfSONAR setup, please contact <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">GGUS</a> WLCG perfSONAR support unit or OSG <a href="">GOC</a>. We strongly recommend anyone maintaining/using perfSONAR to join <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">perfsonar-user</a> and <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">perfsonar-announce</a> mailing lists.</p>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
 <p>Prior to installing please consult the <a href="http://docs.perfsonar.net/manage_update.html#special-upgrade-notes">release notes</a>. In case you have already an instance running and wish to update it then please consult our recommendations:</p>
@@ -174,11 +174,14 @@
 <li>Please backup <code>/etc/perfsonar/meshconfig-agent.conf</code>, which contains the current configuration</li>
 <li>Local measurement archive backup is not needed as OSG/WLCG stores all ,easurements centrally. In case you'd like to perform the backup  anyway please follow the <a href="http://docs.perfsonar.net/install_migrate_centos7.html">migration guide</a>.</li>
 </ul>
-<p>There are two options to install perfSONAR toolkit, you can either use meta-package/bundle installation on an existing Centos7 or use an image. For bundle installation please follow the <a href="http://docs.perfsonar.net/install_centos.html">bundle installation guide</a>, for ISO image installation please follow the <a href="http://docs.perfsonar.net/install_centos_fullinstall.html">toolkit full install guide</a> or <a href="http://docs.perfsonar.net/install_centos_netinstall.html">net install guide</a>. </p>
+<p>The following options are available to install perfSONAR toolkit:
+| Meta-package/bundle installation | <a href="http://docs.perfsonar.net/install_centos.html">Bundle installation guide</a> |
+| Full ISO image installation | <a href="http://docs.perfsonar.net/install_centos_fullinstall.html">Toolkit full install guide</a> |
+| Net ISO image installation |  <a href="http://docs.perfsonar.net/install_centos_netinstall.html">Toolkit NET install guide</a>. |</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
+<p>In all cases, we <strong>strongly recommend to enable auto-updates</strong> during the installation process to keep the node up to date and        reboot it after critical kernel updates are announced. With <code>yum</code> auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. </p>
 </div>
-<p>In all cases, we <strong>strongly recommend to enable auto-updates</strong> during the installation process to keep the node up to date and reboot it after critical kernel updates are announced. With <code>yum</code> auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances. </p>
 <p>The following additional steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:</p>
 <ol>
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in <a href="../register-ps-in-oim">OIM</a>. For non-OSG sites, follow the details in <a href="../register-ps-in-gocdb">GOCDB</a></li>
@@ -186,20 +189,24 @@
 <li>Adding communities is optional, but we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
 <li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Otherwise please set it to contain the following: </li>
 <li>Add a mesh section with configuration_url pointing to <code>http://meshconfig.grid.iu.edu/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>.</li>
-<li>Below is an example set of lines for meshconfig-agent.conf
-    <code>&lt;mesh&gt; 
-        configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
-        validate_certificate 0 
-        required 1 
-      &lt;/mesh&gt;</code></li>
-<li>If this is a <strong>new instance</strong> or you have changed the nodes FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add the node in one or more test meshes, which will then auto-configure the tests. You could also add any additional local tests via web interface or local mesh. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, HNSciCloud, etc.).
-     !!! note
-    Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).</li>
-<li>We <strong>recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</li>
-<li>Please check that both local and campus firewall has the necessary <a href="#security_considerations">ports open</a></li>
+<li>
+<p>Below is an example set of lines for <code>meshconfig-agent.conf</code></p>
+<p><code>&lt;mesh&gt; 
+    configuration_url http://meshconfig.grid.iu.edu/pub/auto/psum01.aglt2.org
+    validate_certificate 0 
+    required 1 
+  &lt;/mesh&gt;</code>
+5. If this is a <strong>new instance</strong> or you have changed the nodes FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add the node in one or more test meshes, which will then auto-configure the tests. You could also add any additional local tests via web interface or local mesh. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, HNSciCloud, etc.).</p>
+<p>!!! note
+Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).</p>
+</li>
+<li>
+<p>We <strong>recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</p>
+</li>
+<li>Please check that both local and campus firewall has the necessary <a href="#security-considerations">ports open</a></li>
 <li>Once installation is finished, please <strong>reboot</strong> the node.</li>
 </ol>
-<p>For any further questions, please consult <a href="perfsonar/faq.md">FAQ</a> pages, perfSONAR documentation (<a href="http://docs.perfsonar.net">http://docs.perfsonar.net</a>) or contact directly WLCG or OSG perfSONAR support units.</p>
+<p>For any further questions, please consult <a href="../faq/">FAQ</a> pages, perfSONAR documentation (<a href="http://docs.perfsonar.net">http://docs.perfsonar.net</a>) or contact directly WLCG or OSG perfSONAR support units.</p>
 <h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
