@@ -14,27 +14,27 @@ The primary motivation for perfSONAR deployment is to test isolation, i.e. only 
    
 ### perfSONAR Hardware Requirements
 
-There are two different nodes participating in the network testing, latency node and bandwidth node, while both are running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported, 10G is recommended) as well as enough memory and CPU to support high bandwidth testing. Latency node on the other hand runs low bandwidth, but high frequency tests, sending a continuous stream of packets to measure delay and corresponding packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to continuously store its results into local measurement archive. The official hardware requirements are documented at http://docs.perfsonar.net/install_hardware_details.html. For WLCG/OSG deployment, we recommend at least the following for perfSONAR 4.0+:
+There are two different nodes participating in the network testing, latency node and bandwidth node, while both are running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported, 10G is recommended) as well as enough memory and CPU to support high bandwidth testing. Latency node on the other hand runs low bandwidth, but high frequency tests, sending a continuous stream of packets to measure delay and corresponding packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to continuously store its results into local measurement archive. The official hardware requirements are documented [here](http://docs.perfsonar.net/install_hardware_details.html). For WLCG/OSG deployment, we recommend at least the following for perfSONAR 4.0+:
 
 - 10G NIC for bandwidth node, 1G NIC for latency node (for higher NIC capacities please check what CPU/RAM, PCIe speed are needed to achieve max. throughput)
-- 4core x86_66 CPU (2.7 Ghz+) with at least 8GB of RAM (if both latency and bandwidth are on a single node than 16GB)
+- 4-core x86_64 CPU (2.7 Ghz+) with at least 8GB of RAM (if both latency and bandwidth are on a single node then 16GB)
 - SSD disk (128GB should be sufficient)
 
 ### Multiple NIC (Network Interface Card) Guidance
 
-Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5 there is a way to install both latency and bandwidth measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory. There are few additional steps required in order to configure node with multiple network cards:
+Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5+ there is a way to install both latency and bandwidth measurement services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing power and memory. There are few additional steps required in order to configure the node with multiple network cards:
 
-- Please setup source routing as described in the official documentation at http://docs.perfsonar.net/manage_dual_xface.html
-- You'll need to register two hostnames in [OIM](installation.md)/[GOCDB](installation.md) (and have two reverse DNS entries) as you would normally for two separate nodes
+- Please setup source routing as described in the [official documentation](http://docs.perfsonar.net/manage_dual_xface.html).
+- You'll need to register two hostnames in [OIM](installation.md)/[GOCDB](installation.md) (and have two reverse DNS entries) as you would normally for two separate nodes.
 - Instead of configuring just one auto-URL in the `/etc/perfsonar/meshconfig-agent.conf`, please add both, so you'll end up having something like this:
 ```
 <mesh>
-    configuration_url https://meshconfig.grid.iu.edu/pub/auto/<hostname_nic1>
+    configuration_url http://meshconfig.grid.iu.edu/pub/auto/<hostname_nic1>
     validate_certificate 0
     required 1
 </mesh>
 <mesh>
-    configuration_url https://meshconfig.grid.iu.edu/pub/auto/<hostname_nic2>
+    configuration_url http://meshconfig.grid.iu.edu/pub/auto/<hostname_nic2>
     validate_certificate 0
     required 1
 </mesh>
