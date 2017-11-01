@@ -82,6 +82,8 @@
         
             <li><a class="toctree-l4" href="#register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB</a></li>
         
+            <li><a class="toctree-l4" href="#register-perfsonar-in-oim">Register perfSONAR in OIM</a></li>
+        
         </ul>
     
 
@@ -168,16 +170,16 @@
             <div class="section">
               
                 <h2 id="perfsonar-installation-guide">perfSONAR Installation Guide<a class="headerlink" href="#perfsonar-installation-guide" title="Permanent link">&para;</a></h2>
-<p>This page documents installing/upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult an <a href="perfsonar-in-osg.md">overview</a> and possible <a href="../deployment-models/">deployment options</a> before installing. For troubleshooting an existing installation please consult <a href="../faq/">FAQ</a>.</p>
-<p>For any questions or help with WLCG perfSONAR setup, please contact <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">GGUS</a> WLCG perfSONAR support unit or OSG <a href="">GOC</a>. We strongly recommend anyone maintaining/using perfSONAR to join <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">perfsonar-user</a> and <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">perfsonar-announce</a> mailing lists.</p>
+<p>This page documents installing/upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult our <a href="perfsonar-in-osg.md">overview</a> and possible <a href="../deployment-models/">deployment options</a> before installing. For troubleshooting an existing installation please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting Guide</a>, <a href="http://docs.perfsonar.net/FAQ.html">FAQ</a> as well as WLCG/OSG specific <a href="../faq/">FAQ</a>.</p>
+<p>For any questions or help with WLCG perfSONAR setup, please contact <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">GGUS</a> WLCG perfSONAR support unit or OSG <a href="http://ticket.grid.iu.edu/submit">GOC</a>. We strongly recommend anyone maintaining/using perfSONAR to join <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">perfsonar-user</a> and <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">perfsonar-announce</a> mailing lists.</p>
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
-<p>Prior to installing please consult the <a href="http://docs.perfsonar.net/manage_update.html#special-upgrade-notes">release notes</a>. In case you have already an instance running and wish to update it then please consult our recommendations:</p>
+<p>Prior to installing please consult the <a href="https://www.perfsonar.net/">release notes</a> for the latest available release. In case you have already an instance running and wish to re-install/update it then please follow our recommendations:</p>
 <ul>
-<li>For sites the are currently registered but not yet updated to 4.0 we would strongly recommend reinstalling using CentOS 7. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.</li>
+<li>We recommend reinstalling using CentOS7 to all sites already running a registered instance or planning new installation. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.</li>
 <li>perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use CentOS7 as this is the most common and best understood deployment.</li>
-<li>Please backup <code>/etc/perfsonar/meshconfig-agent.conf</code>, which contains the current configuration</li>
-<li>Local measurement archive backup is not needed as OSG/WLCG stores all ,easurements centrally. In case you'd like to perform the backup  anyway please follow the <a href="http://docs.perfsonar.net/install_migrate_centos7.html">migration guide</a>.</li>
-<li>In case you're deploying single bare metal node with multiple NICs, please consult <a href="../deployment-models/">Multiple NIC Guidance</a></li>
+<li>Please backup <code>/etc/perfsonar/meshconfig-agent.conf</code>, which contains the current configuration.</li>
+<li>Local measurement archive backup is not needed as OSG/WLCG stores all measurements centrally. In case you'd like to perform the backup  anyway please follow the <a href="http://docs.perfsonar.net/install_migrate_centos7.html">migration guide</a>.</li>
+<li>In case you plan to deploy a single bare metal node with multiple NICs, please consult <a href="../deployment-models/">Multiple NIC Guidance</a></li>
 </ul>
 <p>The following options are available to install perfSONAR toolkit:</p>
 <table>
@@ -210,7 +212,6 @@
 <ul>
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in <a href="#register-perfsonar-service-in-oim">OIM</a>. For non-OSG sites, follow the details in <a href="#register-perfsonar-service-in-gocdb">GOCDB</a></li>
 <li>Please ensure you have added or updated your <a href="http://docs.perfsonar.net/manage_admin_info.html">administrative information</a></li>
-<li>Adding communities is optional, but we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
 <li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Otherwise please follow the steps below: <ul>
 <li>Add a mesh section with configuration_url pointing to <code>http://meshconfig.grid.iu.edu/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. Below is an example set of lines for <code>meshconfig-agent.conf</code>:</li>
 </ul>
@@ -225,7 +226,7 @@
 
 
 <ul>
-<li>If this is a <strong>new instance</strong> or you have changed the nodes FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add the node in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details, please check which tests are added via central meshes before adding any custom tests to avoid duplication). </li>
+<li>If this is a <strong>new instance</strong> or you have changed the node's FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. </li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -233,26 +234,21 @@
 </div>
 <ul>
 <li>We <strong>recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</li>
-<li>Please check that both local and campus firewall has the necessary <a href="#security-considerations">port openings</a></li>
+<li>Adding <em>communities</em> is optional, but we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
+<li>Please check that both <strong>local and campus firewall</strong> has the necessary <a href="#security-considerations">port openings</a>. Local iptables are configured automatically, but there are ways how to tune the existing set, please see the official <a href="http://docs.perfsonar.net/manage_security.html#adding-your-own-firewall-rules">firewall</a> guide for details.</li>
 <li>Once installation is finished, please <strong>reboot</strong> the node.</li>
 </ul>
-<p>For any further questions, please consult <a href="../faq/">FAQ</a> pages, perfSONAR documentation (<a href="http://docs.perfsonar.net">http://docs.perfsonar.net</a>) or contact directly WLCG or OSG perfSONAR support units.</p>
+<p>For any further questions, please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting Guide</a>, <a href="http://docs.perfsonar.net/FAQ.html">FAQ</a> as well as WLCG/OSG specific <a href="../faq/">FAQ</a> or contact directly WLCG or OSG perfSONAR support units.</p>
 <h3 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h3>
 <p>Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released. perfSONAR team has dropped support for web100 kernel, which means that stock kernels from centOS7 as well as any updates can be deployed as soon as they're released.</p>
-<p>In case you'd like to manually update the node then it can be done with the following set of commands:</p>
-<div class="codehilite"><pre><span></span># yum clean all
-# yum update
-# reboot
-</pre></div>
-
-
+<p>In case you'd like to manually update the node please follow the official <a href="http://docs.perfsonar.net/manage_update.html">guide</a>.</p>
 <h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances. This change is because of the new requirements introduced by pScheduler. If sites are unable to reach your instance on port 443, tests may not run and results may not be available.</p>
+<p>As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances. This change is needed as port 443 is now used as a controller port for pScheduler communication. If sites are unable to reach your instance on port 443, tests may not run and results may not be available.</p>
 </div>
 <p>The perfSONAR toolkit is reviewed both internally and externally for security flaws. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.</p>
-<p>For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However implementing the corresponding firewall rules would need to be done both locally and on the campus firewall. It's important to emphasize that port 443 provides access to the perfSONAR web interface and serves as a controller port for scheduling the tests, which is very useful to users and network administrators to debug network issues. Sites can optionally allow port 80, which could be restricted to a limited set of subnets, as shown in the rules below: </p>
+<p>For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues. Sites can optionally allow port 80, which could be restricted to a limited set of subnets, as shown in the rules below: </p>
 <div class="codehilite"><pre><span></span>    # Port 443 must be open 
     iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT
     # Allow port 80 for specific monitoring subnets
@@ -269,7 +265,7 @@
 </pre></div>
 
 
-<p>To save your changes run <code>/sbin/service iptables save</code> </p>
+<p>To save your changes please run <code>/sbin/service iptables save</code> </p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>In case you have <strong>central/campus firewall</strong>, please check the required port openings in the <a href="http://docs.perfsonar.net/manage_security.html">perfSONAR security documentation</a>.  </p>
@@ -300,6 +296,7 @@
 <ul>
 <li>GOCDB screen shot for creating a Service Endpoint: <br /> <img alt="Screenshot" src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" /></li>
 </ul>
+<h3 id="register-perfsonar-in-oim">Register perfSONAR in OIM<a class="headerlink" href="#register-perfsonar-in-oim" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>These instructions were revised on October 1, 2013.<strong> If you registered your perfSONAR instances in OIM following instructions prior to this date please update them using the following instructions. The summary of the change: Instead of registering one resource per "Site" and then having two services (latency and bandwidth) for that resource, the new instructions are to register each site/service combination as one resource. For example a Tier-2 with two sites (A,B) will now need to register 4 resources: </strong>latency_A<strong>, </strong>latency_B<strong>, </strong>bandwidth_A<strong> and </strong>bandwidth_B**. </p>
