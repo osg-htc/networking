@@ -60,12 +60,14 @@ In case you'd like to manually update the node please follow the official [guide
 
 ### Security Considerations
 
+The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see [Manage Security](http://docs.perfsonar.net/manage_security.html) for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.
+
 !!! warning 
-	As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances. This change is needed as port 443 is now used as a controller port for pScheduler communication. If sites are unable to reach your instance on port 443, tests may not run and results may not be available.
+	As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances. This change is needed as port 443 is now used as a controller port for test scheduling (pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available.
 
-The perfSONAR toolkit is reviewed both internally and externally for security flaws. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.
+For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues. 
 
-For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues. Sites can optionally allow port 80, which could be restricted to a limited set of subnets, as shown in the rules below: 
+Sites can optionally allow port 80, which could be restricted to a limited set of subnets, as shown in the rules below: 
 ```
     # Port 443 must be open 
     iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT
