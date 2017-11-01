@@ -27,7 +27,7 @@ OSG operates an advance platform to collect, store, publish and analyse the netw
 - [perfSONAR infrastructure monitoring](perfsonar/psetf.md) - monitors state of perfSONAR network and reports on availability of core services
 - *OSG Network Datastore* - central datastore holding all the network measurements and providing an API to expose them via JSON. Datastore is based on [ESMOND](http://software.es.net/esmond/), which supports the following [API](http://software.es.net/esmond/perfsonar_client_rest.html) and runs at this [endpoint](http://psds.grid.iu.edu/esmond/perfsonar/archive/?format=json).
 - *OSG Network Stream* - access to network measurements in near realtime is provided by the GOC RabbitMQ and CERN ActiveMQ messaging brokers.
-- *OSG Mesh Configuration Interface (MCA)* - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure (see [MCA](http://docs.perfsonar.net/mca.html) for details). In case you'd like to manage particular mesh, please contact our support channels. 
+- *OSG Mesh Configuration Interface (MCA)* - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure (see [MCA](http://docs.perfsonar.net/mca.html) for details). In case you'd like to start/manage particular mesh, please contact our support channels to get access.
 - [*OSG Dashboards*](http://psmad.grid.iu.edu/maddash-webui/index.cgi) - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure 
 - [*WLCG Dashboards*](http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16) - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. 
 
