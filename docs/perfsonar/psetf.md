@@ -7,7 +7,7 @@ difficult to verify everything is working correctly.
 
 A sample initial dashboard is shown below:
 
-<img src="https://opensciencegrid.github.io/networking/img/etf.png" width="250">
+<img src="https://opensciencegrid.github.io/networking/img/etf.png" width="800">
 
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into four categories:
 
