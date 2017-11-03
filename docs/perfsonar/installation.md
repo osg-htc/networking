@@ -23,11 +23,11 @@ The following options are available to install perfSONAR toolkit:
 | Net ISO image installation       | [Toolkit NET install guide](http://docs.perfsonar.net/install_centos_netinstall.html)   |
 
 !!! note
-    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4.0. With `yum` auto-updates in place there is a possibility that updated packages     can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on           perfSONAR instances. 
+    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4.0. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances. 
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:
 
-* Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](#register-perfsonar-service-in-oim). For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
+* Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](#register-perfsonar-in-oim). For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file `/etc/perfsonar/meshconfig-agent.conf`. Otherwise please follow the steps below: 
     * Add a mesh section with configuration_url pointing to `http://meshconfig.grid.iu.edu/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
@@ -66,25 +66,6 @@ The perfSONAR toolkit is reviewed both internally and externally for security fl
 	As of the release of perfSONAR 4.0 ALL perfSONAR instances need to have port 443 access to all other perfSONAR instances. This change is needed as port 443 is now used as a controller port for test scheduling (pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available.
 
 For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues. 
-
-Sites can optionally allow port 80, which could be restricted to a limited set of subnets, as shown in the rules below: 
-```
-    # Port 443 must be open 
-    iptables -I INPUT 4 -p tcp --dport 443 -j ACCEPT
-    # Allow port 80 for specific monitoring subnets
-    # OSG monitoring subnet 
-    iptables -I INPUT 4 -p tcp --dport 80 -s 129.79.53.0/24 -j ACCEPT 
-    # CERN subnet 
-    iptables -I INPUT 4 -p tcp --dport 80 -s 137.138.0.0/17 -j ACCEPT 
-    # Infrastructure monitoring (hosted at AGLT2) 
-    iptables -I INPUT 4 -p tcp --dport 80 -s 192.41.231.110/32 -j ACCEPT 
-    # Replace <LOCAL\_SUBNET> appropriately to allow access from your local systems 
-    iptables -I INPUT 4 -p tcp --dport 80 -s <LOCAL\_SUBNET> -j ACCEPT 
-    # Reject ONLY if your site policy requires this 
-    #iptables -I INPUT 5 -p tcp --dport 80 -j REJECT
-```
-
-To save your changes please run `/sbin/service iptables save` 
 
 !!! warning
 	In case you have **central/campus firewall**, please check the required port openings in the [perfSONAR security documentation](http://docs.perfsonar.net/manage_security.html).  
