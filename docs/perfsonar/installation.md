@@ -58,6 +58,8 @@ Provided that you have enabled auto-updates, the only thing that remains is to f
 
 In case you'd like to manually update the node please follow the official [guide](http://docs.perfsonar.net/manage_update.html).
 
+Using automated configuration tools for managing perfSONAR (such as Chef, Puppet, etc) - TBA. 
+
 ### Security Considerations
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see [Manage Security](http://docs.perfsonar.net/manage_security.html) for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.
