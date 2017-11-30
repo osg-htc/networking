@@ -9,7 +9,7 @@ Distributed scientific computing relies upon networks to interconnect resources 
 
 This was the context for the formation of the [perfSONAR collaboration](https://www.perfsonar.net/about/mission-statement). This collaboration is focused on developing and deploying the `perfSONAR` software suite in support of network monitoring across the global set of research and education (R&E) networks. The **Open Science Grid** (**OSG**) has chosen to base the core of its network monitoring framework on `perfSONAR` because of both the capabilities of the toolkit for measuring our networks and its global acceptance as the defacto network monitoring infrastructure of first choice.
 
-The <https://www.perfsonar.net.about/what-is-perfsonar/> provides a succinct summary: *perfSONAR is a network measurement toolkit designed to provide federated coverage of paths, 
+The <https://www.perfsonar.net/about/what-is-perfsonar/> provides a succinct summary: *perfSONAR is a network measurement toolkit designed to provide federated coverage of paths, 
 and help to establish end-to-end usage expectations. There are 1000s of perfSONAR instances deployed world wide, many of which are available for open testing of key measures of network 
 performance. This global infrastructure helps to identify and isolate problems as they happen, making the role of supporting network users easier for engineering teams, and increasing 
 productivity when utilizing network resources.*
@@ -18,13 +18,13 @@ productivity when utilizing network resources.*
 
 Our answer starts by providing visibility into our networks by the deployment of `perfSONAR`. perfSONAR allows us to regularly and consistently measure a set of network metrics that we can use to understand how our networks are operating. When problems arise, the data, along with access to the `perfSONAR` tools, can be used to diagnose and localize problems. The presence of perfSONAR toolkit deployments across our sites and networks makes identifying and fixing network problems feasible.
 
-We strongly recommend that all OSG (and WLCG) sites deploy `perfSONAR` toolkit instances as described in our [installation guide](installation). Before installing you should consult the [requirements](deployment-models) along with the guidance on [deployment models](deployment-models). 
+We strongly recommend that all OSG (and WLCG) sites deploy `perfSONAR` toolkit instances as described in our [installation guide](perfsonar/installation.md). Before installing you should consult the [requirements](perfsonar/deployment-models.md) along with the guidance on [deployment models](perfsonar/deployment-models.md). 
 
 !!! note
 	Installing perfSONAR not only benefits users at a site but will enable network engineers and OSG staff to much more effectively support those sites if network issues are suspected.
 
 All OSG and WLCG sites should deploy **two** `perfSONAR` instances: one to measure latency/packet loss and one to measure bandwidth. 
-It is possible to install both versions on a single host with at least two NICs by following the instructions at [multiple NIC guidance page](multiple-nic-guidance). 
+It is possible to install both versions on a single host with at least two NICs by following the instructions at [multiple NIC guidance page](perfsonar/deployment-models.md). 
 
 !!! warning
 	It is **very important** that the perfSONAR instances be located in the same subnet as the primary storage for the site. 
