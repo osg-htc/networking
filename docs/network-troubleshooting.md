@@ -32,7 +32,7 @@ This is typically a good choice for support beyond your campus.
 
 **ESNET**: If your problem involves a national laboratory in the United States, a university connected to ESnet or a trans-Atlantic network problem, then you may want to contact ESnet:
 
--   <http://www.es.net/introducing-esnet5/tools/>
+-   <http://es.net/about/contact-us/>
 
 This page contains information on opening ticket and pointers to relevant tools and documentation. ESnet serves the Department of Energy national labs.
 
