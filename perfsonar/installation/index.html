@@ -236,7 +236,7 @@
 </div>
 <ul>
 <li>We <strong>recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</li>
-<li>Adding <em>communities</em> is optional, but we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
+<li>Adding <em>communities</em> is optional, but if you do, we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the public lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
 <li>Please check that both <strong>local and campus firewall</strong> has the necessary <a href="#security-considerations">port openings</a>. Local iptables are configured automatically, but there are ways how to tune the existing set, please see the official <a href="http://docs.perfsonar.net/manage_security.html#adding-your-own-firewall-rules">firewall</a> guide for details.</li>
 <li>Once installation is finished, please <strong>reboot</strong> the node.</li>
 </ul>
@@ -244,7 +244,7 @@
 <h3 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h3>
 <p>Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released. perfSONAR team has dropped support for web100 kernel, which means that stock kernels from centOS7 as well as any updates can be deployed as soon as they're released.</p>
 <p>In case you'd like to manually update the node please follow the official <a href="http://docs.perfsonar.net/manage_update.html">guide</a>.</p>
-<p>Using automated configuration tools for managing perfSONAR (such as Chef, Puppet, etc) - TBA. </p>
+<p>Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but there are some community driven projects that could be helpful, such as <a href="http://github.com/HEP-Puppet/perfsonar">HEP-Puppet</a>. As perfSONAR manages most of its configuration automatically via packages and there is very little initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary interventions after auto-updates. </p>
 <h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
 <p>The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see <a href="http://docs.perfsonar.net/manage_security.html">Manage Security</a> for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.</p>
 <div class="admonition warning">
@@ -257,7 +257,7 @@
 <p>In case you have <strong>central/campus firewall</strong>, please check the required port openings in the <a href="http://docs.perfsonar.net/manage_security.html">perfSONAR security documentation</a>.  </p>
 </div>
 <h3 id="enabling-snmp-plugins">Enabling SNMP plugins<a class="headerlink" href="#enabling-snmp-plugins" title="Permanent link">&para;</a></h3>
-<p>TBA</p>
+<p>Since 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a <a href="http://www.perfsonar.net/release-notes/version-4-0-2/">beta feature</a> that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.</p>
 <h3 id="register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB<a class="headerlink" href="#register-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h3>
 <p>This section describes how to register the perfSONAR service in GOCDB.</p>
 <p>In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service Endpoint</p>
