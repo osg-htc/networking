@@ -46,7 +46,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
     Until your host is added (on http://meshconfig.grid.iu.edu ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
 	
 * We **recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
-* Adding *communities* is optional, but we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the lookup service. As noted in the documentation you can select from already registered communities as appropriate.
+* Adding *communities* is optional, but if you do, we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the public lookup service. As noted in the documentation you can select from already registered communities as appropriate.
 * Please check that both **local and campus firewall** has the necessary [port openings](#security-considerations). Local iptables are configured automatically, but there are ways how to tune the existing set, please see the official [firewall](http://docs.perfsonar.net/manage_security.html#adding-your-own-firewall-rules) guide for details.
 * Once installation is finished, please **reboot** the node.
 
@@ -58,7 +58,7 @@ Provided that you have enabled auto-updates, the only thing that remains is to f
 
 In case you'd like to manually update the node please follow the official [guide](http://docs.perfsonar.net/manage_update.html).
 
-Using automated configuration tools for managing perfSONAR (such as Chef, Puppet, etc) - TBA. 
+Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but there are some community driven projects that could be helpful, such as [HEP-Puppet](http://github.com/HEP-Puppet/perfsonar). As perfSONAR manages most of its configuration automatically via packages and there is very little initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary interventions after auto-updates. 
 
 ### Security Considerations
 
@@ -74,7 +74,7 @@ For sites that are concerned about having port 443 open, there is a possiblity t
 	
 ### Enabling SNMP plugins
 
-TBA
+Since 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a [beta feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.
 
 ### Register perfSONAR Service in GOCDB
 
