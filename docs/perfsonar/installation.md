@@ -74,7 +74,7 @@ For sites that are concerned about having port 443 open, there is a possiblity t
 	
 ### Enabling SNMP plugins
 
-Since 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a [beta feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.
+Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a [beta feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.
 
 ### Register perfSONAR Service in GOCDB
 
