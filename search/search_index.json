@@ -197,7 +197,7 @@
         }, 
         {
             "location": "/osg-network-analytics/", 
-            "text": "TBA", 
+            "text": "OSG Analytics platform\n \nhttp://atlas-kibana.mwt2.org:5601/app/kibana#/dashboard/Default?_g=()\n\n\nWLCG dashboards\n http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16", 
             "title": "Network Analytics"
         }
     ]
