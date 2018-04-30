@@ -25,11 +25,12 @@ Network Services
 OSG operates an advance platform to collect, store, publish and analyse the network monitoring data it gathers from perfSONAR and other locations. All measurements are collected and available via streaming or through APIs. The following services are available:
 
 - [perfSONAR infrastructure monitoring](perfsonar/psetf.md) - monitors state of perfSONAR network and reports on availability of core services
-- *OSG Network Datastore* - central datastore holding all the network measurements and providing an API to expose them via JSON. Datastore is based on [ESMOND](http://software.es.net/esmond/), which supports the following [API](http://software.es.net/esmond/perfsonar_client_rest.html) and runs at this [endpoint](http://psds.grid.iu.edu/esmond/perfsonar/archive/?format=json).
 - *OSG Network Stream* - access to network measurements in near realtime is provided by the GOC RabbitMQ and CERN ActiveMQ messaging brokers.
 - *OSG Mesh Configuration Interface (MCA)* - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure (see [MCA](http://docs.perfsonar.net/mca.html) for details). In case you'd like to start/manage particular mesh, please contact our support channels to get access.
-- [*OSG Dashboards*](http://psmad.grid.iu.edu/maddash-webui/index.cgi) - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure 
+- [*OSG Dashboards*](http://psmad.opensciencegrid.org/maddash-webui/index.cgi) - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure (NOTE: this instance was previously the prototype instance at AGLT2 and no longer uses the deprecated OSG central measurement archive).
 - [*WLCG Dashboards*](http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16) - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. 
+
+NOTE: As of May 2018 we have retired the OSG central measurement archive.  Instead all perfSONAR metrics are now available in the University of Chicago and Nebraska Elasticsearch instances.
 
 Network Analytics
 -----------------
@@ -37,19 +38,17 @@ University of Chicago has setup an [**analytics platform**](<https://twiki.cern.
 
 Support and Feedback
 --------------------
-If you suspect a network problem and wish to follow up on it, please open a ticket with the appropriate support unit: For `OSG` sites please open a ticket with [GOC](http://ticket.grid.iu.edu/submit); For `WLCG` sites please open a [GGUS](https://ggus.eu/) ticket to `WLCG Network Throughput` support unit. If you'd like to get help in setting up or debugging perfSONAR instance please open a ticket with [GOC](http://ticket.grid.iu.edu/submit) or via [GGUS](https://ggus.eu/) to WLCG perfSONAR support. For any other requests please contact [GOC](http://ticket.grid.iu.edu/submit).
+If you suspect a network problem and wish to follow up on it, please open a ticket with the appropriate support unit: For `OSG` sites please open a ticket with [GOC](http://ticket.opensciencegrid.org/submit); For `WLCG` sites please open a [GGUS](https://ggus.eu/) ticket to `WLCG Network Throughput` support unit. If you'd like to get help in setting up or debugging perfSONAR instance please open a ticket with [GOC](http://ticket.opensciencegrid.org/submit) or via [GGUS](https://ggus.eu/) to WLCG perfSONAR support. For any other requests please contact [GOC](http://ticket.opensciencegrid.org/submit).
 
 
 References
 ----------
 - ESNet network performance tuning and debugging <https://fasterdata.es.net/>
 - [perfSONAR](http://docs.perfsonar.net/) toolkit is part of the [perfSONAR](http://www.perfsonar.net/) project. 
-- **OSG/WLCG mesh configuration interface** is available at http://meshconfig.grid.iu.edu 
+- **OSG/WLCG mesh configuration interface** is available at http://psconfig.opensciencegrid.org 
 - Information on **ESmond** is available at <http://software.es.net/esmond/>
-- Information on querying the perfSONAR data from ESmond is at <http://software.es.net/esmond/perfsonar_client_rest.html>
-- Access to a JSON view of the **OSG network datastore** is available at <http://psds.grid.iu.edu/esmond/perfsonar/archive/?format=json>
-- **OSG dashboard instance** <http://psmad.grid.iu.edu/maddash-webui/index.cgi>
-- **OSG perfSONAR infrastructure monitoring** <https://psetf.grid.iu.edu/etf/check_mk/>
+- **OSG dashboard instance** <http://psmad.opensciencegrid.org/maddash-webui/index.cgi>
+- **OSG perfSONAR infrastructure monitoring** <https://psetf.opensciencegrid.org/etf/check_mk/>
 - **OSG Analytics platform** <http://atlas-kibana.mwt2.org:5601/app/kibana#/dashboard/Default?_g=()>
 - **WLCG dashboards** http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16
 - **PuNDIT** (an OSG Satellite project) focusing on analyzing perfSONAR data to alert on problems: <http://pundit.gatech.edu/>
