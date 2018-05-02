@@ -27,7 +27,7 @@ OSG operates an advance platform to collect, store, publish and analyse the netw
 - [perfSONAR infrastructure monitoring](perfsonar/psetf.md) - monitors state of perfSONAR network and reports on availability of core services
 - *OSG Distributed Network Datastore* - distributed datastore based on ElasticSearch holding all the network measurements and providing an API to expose them via JSON is available at two locations (University of Chicago and University of Nebraska). In addition, all network data is backed up on tape at Fermi National Accelerator Laboratory. The central OSG datastore that was hosted at OSG/GOC was retired in June 2018.
 - *OSG Network Stream* - access to network measurements in near realtime is provided by the GOC RabbitMQ and CERN ActiveMQ messaging brokers.
-- *OSG Mesh Configuration Interface (MCA)* - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure (https://meshconfig.opensciencegrid.org/). In case you'd like to start/manage particular mesh, please contact our support channels to get access.
+- [*OSG Mesh Configuration Interface (MCA)*](https://meshconfig.opensciencegrid.org/) - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure . In case you'd like to start/manage particular mesh, please contact our support channels to get access.
 - [*OSG Dashboards*](http://psmad.opensciencegrid.org/maddash-webui/index.cgi) - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure 
 - [*WLCG Dashboards*](http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16) - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. 
 
@@ -37,7 +37,7 @@ University of Chicago has setup an [**analytics platform**](<https://twiki.cern.
 
 Support and Feedback
 --------------------
-If you suspect a network problem and wish to follow up on it, please open a ticket with the appropriate support unit: For `OSG` sites please open a ticket with [GOC](http://support.opensciencegrid.org); For `WLCG` sites please open a [GGUS](https://ggus.eu/) ticket to `WLCG Network Throughput` support unit. If you'd like to get help in setting up or debugging perfSONAR instance please open a ticket with [GOC](http://support.opensciencegrid.org) or via [GGUS](https://ggus.eu/) to WLCG perfSONAR support. For any other requests please open a ticket at [GGUS] and mention OSG networking (https://ggus.eu/).
+If you suspect a network problem and wish to follow up on it, please open a ticket with the appropriate support unit: For `OSG` sites please open a ticket with [GOC](http://support.opensciencegrid.org); For `WLCG` sites please open a [GGUS](https://ggus.eu/) ticket to `WLCG Network Throughput` support unit. If you'd like to get help in setting up or debugging perfSONAR instance please open a ticket with [GOC](http://support.opensciencegrid.org) or via [GGUS](https://ggus.eu/) to WLCG perfSONAR support. For any other requests please open a ticket at [GGUS](https://ggus.eu/) and mention OSG networking.
 
 
 References
