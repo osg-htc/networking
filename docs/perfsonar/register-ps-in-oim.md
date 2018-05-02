@@ -10,7 +10,7 @@
 	These instructions were revised on October 1, 2013.** If you registered your perfSONAR instances in OIM following instructions prior to this date please update them using the following instructions. The summary of the change: Instead of registering one resource per "Site" and then having two services (latency and bandwidth) for that resource, the new instructions are to register each site/service combination as one resource. For example a Tier-2 with two sites (A,B) will now need to register 4 resources: **latency\_A**, **latency\_B**, **bandwidth\_A** and **bandwidth\_B**. 
 
 
-This section describes how to register your perfSONAR-PS instances in OIM. For general information about registering items in OIM see <https://twiki.opensciencegrid.org/bin/view/Operations/OIMRegistrationInstructions>
+This section describes how to register your perfSONAR-PS instances in OIM. For general information about registering items in OIM see <https://twiki.grid.iu.edu/bin/view/Operations/OIMRegistrationInstructions>
 
 Each OSG site should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR instances.
 
@@ -18,8 +18,8 @@ The example below uses AGLT2 (primarily an ATLAS Tier-2 center) which has two ph
 
 To begin registration, make sure you have your X509 certificate loaded in your browser and go to
 
--   <https://oim.opensciencegrid.org> (for registered users)
--   <http://oim.opensciencegrid.org> (for guest)
+-   <https://oim.grid.iu.edu> (for registered users)
+-   <http://oim.grid.iu.edu> (for guest)
 
 <!-- -->
 

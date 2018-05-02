@@ -29,12 +29,12 @@ Many sites would prefer **not** to have to deploy two servers for cost, space an
 - Instead of configuring just one auto-URL in the `/etc/perfsonar/meshconfig-agent.conf`, please add both, so you'll end up having something like this:
 ```
 <mesh>
-    configuration_url http://psconfig.opensciencegrid.org/pub/auto/<hostname_nic1>
+    configuration_url http://meshconfig.opensciencegrid.org/pub/auto/<hostname_nic1>
     validate_certificate 0
     required 1
 </mesh>
 <mesh>
-    configuration_url http://psconfig.opensciencegrid.org/pub/auto/<hostname_nic2>
+    configuration_url http://meshconfig.opensciencegrid.org/pub/auto/<hostname_nic2>
     validate_certificate 0
     required 1
 </mesh>
