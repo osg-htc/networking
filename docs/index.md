@@ -28,7 +28,7 @@ OSG operates an advance platform to collect, store, publish and analyse the netw
 - [*OSG Distributed Network Datastore*](http://atlas-kibana.mwt2.org:5601/app/kibana#/dashboard/Default?_g=()) - distributed datastore based on ElasticSearch holding all the network measurements and providing an API to expose them via JSON is available at two locations (University of Chicago and University of Nebraska). In addition, all network data is backed up on tape at Fermi National Accelerator Laboratory. The central OSG datastore that was hosted at OSG/GOC was retired in June 2018.
 - *OSG Network Stream* - access to network measurements in near realtime is provided by the OSG RabbitMQ and CERN ActiveMQ messaging brokers.
 - [*OSG Mesh Configuration Interface (MCA)*](https://meshconfig.opensciencegrid.org/) - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure . In case you'd like to start/manage particular mesh, please contact our support channels to get access.
-- [*OSG Dashboards*](http://psmad.opensciencegrid.org/maddash-webui/index.cgi) - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure 
+- [*OSG Dashboards*](http://psmad.opensciencegrid.org/maddash-webui/index.cgi) - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure (NOTE: this instance was previously the prototype instance at AGLT2 and no longer uses the deprecated OSG central measurement archive).
 - [*WLCG Dashboards*](http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16) - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. 
 
 Network Analytics
