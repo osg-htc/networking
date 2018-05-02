@@ -168,7 +168,7 @@
             <div class="section">
               
                 <h1 id="osg-networking-area">OSG Networking Area<a class="headerlink" href="#osg-networking-area" title="Permanent link">&para;</a></h1>
-<p><em>Welcome to OSG Networking !</em> This is an entry point for those interested in Networking in OSG/WLCG or for those OSG/WLCG users experiencing network problems. It provides an overview of the networking goals, plans and various activities and subtopics underway regarding networking in the <em>Open Science Grid (OSG)</em> and <em>World-wide LHC Computing Grid (WLCG)</em>, operated as a joint project. This area started in June 2012 with initial focus on the network monitoring as monitoring is critical to provide needed visibility into existing networks and site connectivity. OSG is working to provide needed networking information and tools for users, sites and experiments/VOs.</p>
+<p><em>Welcome to OSG Networking !</em> This is an entry point for those interested in Networking in OSG/WLCG or for those OSG/WLCG users experiencing network problems. It provides an overview of the networking goals, plans and various activities and subtopics underway regarding networking in the <em>Open Science Grid (OSG)</em> and <em>World-wide LCG Computing Grid (WLCG)</em>, operated as a joint project. This area started in June 2012 with initial focus on the network monitoring as monitoring is critical to provide needed visibility into existing networks and site connectivity. OSG is working to provide needed networking information and tools for users, sites and experiments/VOs.</p>
 <p>This documentation is divided into several sub-sections, each covering a specific area of activities. </p>
 <h2 id="network-monitoring-in-wlcg-and-osg-perfsonar">Network Monitoring in WLCG and OSG (perfSONAR)<a class="headerlink" href="#network-monitoring-in-wlcg-and-osg-perfsonar" title="Permanent link">&para;</a></h2>
 <p>WLCG and OSG jointly operate a network of <code>perfSONAR</code> agents deployed world-wide, which provides an open platform that can be used to baseline network performance and debug any potential issues. The following subsections provide details on the motivation, deployment and operations of the perfSONARs in WLCG/OSG: </p>
@@ -184,22 +184,24 @@
 <p>OSG operates an advance platform to collect, store, publish and analyse the network monitoring data it gathers from perfSONAR and other locations. All measurements are collected and available via streaming or through APIs. The following services are available:</p>
 <ul>
 <li><a href="perfsonar/psetf/">perfSONAR infrastructure monitoring</a> - monitors state of perfSONAR network and reports on availability of core services</li>
+<li><em>OSG Distributed Network Datastore</em> - distributed datastore based on ElasticSearch holding all the network measurements and providing an API to expose them via JSON is available at two locations (University of Chicago and University of Nebraska). In addition, all network data is backed up on tape at Fermi National Accelerator Laboratory. The central OSG datastore that was hosted at OSG/GOC was retired in June 2018.</li>
 <li><em>OSG Network Stream</em> - access to network measurements in near realtime is provided by the GOC RabbitMQ and CERN ActiveMQ messaging brokers.</li>
-<li><em>OSG Mesh Configuration Interface (MCA)</em> - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure (see <a href="http://docs.perfsonar.net/mca.html">MCA</a> for details). In case you'd like to start/manage particular mesh, please contact our support channels to get access.</li>
-<li><a href="http://psmad.opensciencegrid.org/maddash-webui/index.cgi"><em>OSG Dashboards</em></a> - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure (NOTE: this instance was previously the prototype instance at AGLT2 and no longer uses the deprecated OSG central measurement archive).</li>
+<li><em>OSG Mesh Configuration Interface (MCA)</em> - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure (https://meshconfig.opensciencegrid.org/). In case you'd like to start/manage particular mesh, please contact our support channels to get access.</li>
+<li><a href="http://psmad.opensciencegrid.org/maddash-webui/index.cgi"><em>OSG Dashboards</em></a> - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure </li>
 <li><a href="http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16"><em>WLCG Dashboards</em></a> - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. </li>
 </ul>
-<p>NOTE: As of May 2018 we have retired the OSG central measurement archive.  Instead all perfSONAR metrics are now available in the University of Chicago and Nebraska Elasticsearch instances.</p>
 <h2 id="network-analytics">Network Analytics<a class="headerlink" href="#network-analytics" title="Permanent link">&para;</a></h2>
 <p>University of Chicago has setup an <a href="https://twiki.cern.ch/twiki/bin/view/AtlasComputing/ATLASAnalytics"><strong>analytics platform</strong></a> using <code>ElasticSearch</code> and <code>Kibana4</code> as well as <code>Jupyter</code> that can be used to access and analyse all the existing network measurements.</p>
 <h2 id="support-and-feedback">Support and Feedback<a class="headerlink" href="#support-and-feedback" title="Permanent link">&para;</a></h2>
-<p>If you suspect a network problem and wish to follow up on it, please open a ticket with the appropriate support unit: For <code>OSG</code> sites please open a ticket with <a href="http://ticket.opensciencegrid.org/submit">GOC</a>; For <code>WLCG</code> sites please open a <a href="https://ggus.eu/">GGUS</a> ticket to <code>WLCG Network Throughput</code> support unit. If you'd like to get help in setting up or debugging perfSONAR instance please open a ticket with <a href="http://ticket.opensciencegrid.org/submit">GOC</a> or via <a href="https://ggus.eu/">GGUS</a> to WLCG perfSONAR support. For any other requests please contact <a href="http://ticket.opensciencegrid.org/submit">GOC</a>.</p>
+<p>If you suspect a network problem and wish to follow up on it, please open a ticket with the appropriate support unit: For <code>OSG</code> sites please open a ticket with <a href="http://support.opensciencegrid.org">GOC</a>; For <code>WLCG</code> sites please open a <a href="https://ggus.eu/">GGUS</a> ticket to <code>WLCG Network Throughput</code> support unit. If you'd like to get help in setting up or debugging perfSONAR instance please open a ticket with <a href="http://support.opensciencegrid.org">GOC</a> or via <a href="https://ggus.eu/">GGUS</a> to WLCG perfSONAR support. For any other requests please open a ticket at [GGUS] and mention OSG networking (https://ggus.eu/).</p>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <ul>
 <li>ESNet network performance tuning and debugging <a href="https://fasterdata.es.net/">https://fasterdata.es.net/</a></li>
 <li><a href="http://docs.perfsonar.net/">perfSONAR</a> toolkit is part of the <a href="http://www.perfsonar.net/">perfSONAR</a> project. </li>
-<li><strong>OSG/WLCG mesh configuration interface</strong> is available at http://psconfig.opensciencegrid.org </li>
+<li><strong>OSG/WLCG mesh configuration interface</strong> is available at http://meshconfig.opensciencegrid.org </li>
 <li>Information on <strong>ESmond</strong> is available at <a href="http://software.es.net/esmond/">http://software.es.net/esmond/</a></li>
+<li>Information on querying the perfSONAR data from ESmond is at <a href="http://software.es.net/esmond/perfsonar_client_rest.html">http://software.es.net/esmond/perfsonar_client_rest.html</a></li>
+<li>Access to a JSON view of the <strong>OSG network datastore</strong> is available at <a href="http://psds.opensciencegrid.org/esmond/perfsonar/archive/?format=json">http://psds.opensciencegrid.org/esmond/perfsonar/archive/?format=json</a></li>
 <li><strong>OSG dashboard instance</strong> <a href="http://psmad.opensciencegrid.org/maddash-webui/index.cgi">http://psmad.opensciencegrid.org/maddash-webui/index.cgi</a></li>
 <li><strong>OSG perfSONAR infrastructure monitoring</strong> <a href="https://psetf.opensciencegrid.org/etf/check_mk/">https://psetf.opensciencegrid.org/etf/check_mk/</a></li>
 <li><strong>OSG Analytics platform</strong> <a href="http://atlas-kibana.mwt2.org:5601/app/kibana#/dashboard/Default?_g=()">http://atlas-kibana.mwt2.org:5601/app/kibana#/dashboard/Default?_g=()</a></li>
@@ -258,5 +260,5 @@
 
 <!--
 MkDocs version : 0.17.1
-Build Date UTC : 2018-04-30 16:15:53
+Build Date UTC : 2018-05-02 09:21:51
 -->
