@@ -38,7 +38,7 @@ This page contains information on opening ticket and pointers to relevant tools 
 
 **OSG**: If you have questions or unusual problems you think are OSG related, feel free to contact the OSG GOC. You can also open network related tickets and OSG can help to 'triage' your request and get it to the right people: 
 
--   <https://opensciencegrid.github.io/production/>
+-   <https://opensciencegrid.org/production/>
 
 **WLCG**: WLCG has a dedicated support unit, which will assist in debugging the problem and triaging the issue. More details can be found at:
 
