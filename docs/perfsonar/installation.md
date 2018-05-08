@@ -100,7 +100,7 @@ You might not be able to access the page if you are not properly registered in G
 <!-- -->
 
 -   GOCDB screen shot for creating a Service Endpoint: 
-<img src="https://opensciencegrid.github.io/networking/img/Screen_shot_2013-02-19_at_15.26.52.png" width="1024">
+<img src="https://opensciencegrid.org/networking/img/Screen_shot_2013-02-19_at_15.26.52.png" width="1024">
 
 ### Register perfSONAR in OIM
 
@@ -121,29 +121,29 @@ To begin registration, make sure you have your X509 certificate loaded in your b
 
 -   The web page should be similar to this one with your site details. See notes on this screen capture: 
 
-<img src="https://opensciencegrid.github.io/networking/img/OIM_perfSONAR_reg_1.png" width="1024">
+<img src="https://opensciencegrid.org/networking/img/OIM_perfSONAR_reg_1.png" width="1024">
 
 -   You need to create a name for the new resource. This example is the latency instance at the AGLT2 UM site: 
 
-<img src="https://opensciencegrid.github.io/networking/img/OSG-ps-register-latency.png" width="1024">
+<img src="https://opensciencegrid.org/networking/img/OSG-ps-register-latency.png" width="1024">
 
 -   Please select the right service for the instance you are registering (either latency or bandwidth): 
 
-<img src="https://opensciencegrid.github.io/networking/img/OSG-ps-register-latency-service.png" width="1024">
+<img src="https://opensciencegrid.org/networking/img/OSG-ps-register-latency-service.png" width="1024">
 
 -   More details about registering the site. You need to include relevant contact details. These instructions will apply to all perfSONAR-PS instances you register: 
 
-<img src="https://opensciencegrid.github.io/networking/img/OIM_perfSONAR_reg_4b.png" width="1024">
+<img src="https://opensciencegrid.org/networking/img/OIM_perfSONAR_reg_4b.png" width="1024">
 
 -   You need to agree to the OSG AUPs before submitting. These instructions will apply to each set of perfSONAR-PS instances you register: 
 
-<img src="https://opensciencegrid.github.io/networking/img/OIM_perfSONAR_reg_4c.png" width="1024">
+<img src="https://opensciencegrid.org/networking/img/OIM_perfSONAR_reg_4c.png" width="1024">
 
 -   If you have another site/service to enter you should add another resource and create a new name (similar to above). For this example we also need to register **perfSONAR\_UM\_bandwidth** which is the perfSONAR bandwidth instance for the University of Michigan AGLT2 site. Since AGLT2 also has a site at Michigan State University we will also need to create two more resources/services: **perfSONAR\_MSU\_latency** and **perfSONAR\_MSU\_bandwidth**. <br />
 
 -   This is similar what your "topology" should look like after **updating** to the new way of registering perfSONAR instances. Shown are both old and new entries. If you haven't registered before you won't see the old entries of course. 
 
-<img src="https://opensciencegrid.github.io/networking/img/OSG-ps-register-topology.png" width="800">
+<img src="https://opensciencegrid.org/networking/img/OSG-ps-register-topology.png" width="800">
 
 After you have submitted each resource you should get an email confirming the requested registration with some details. **For sites that already have been running and registered in OIM there won't be much that you need to do.** In such a case you can choose to attend the next Monday meeting if you have questions or concerns. Details will be in the email that is sent. Also you should note that tickets will be created to track your new perfSONAR registrations. You don't have to take any action on them.
 
