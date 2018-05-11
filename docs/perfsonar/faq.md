@@ -48,7 +48,7 @@ This indicates that you're missing the recommended mesh configuration. Please fo
 
 * **perfSONAR services: ntp** is failing
 
-This indicates that NTP service is not running correctly on your toolkit instance, please note that NTP is critical service. Some things to check include your perfSONAR NTP configuration (see http://docs.perfsonar.net/manage_ntp.html )  If NTP is configured it is possible you could have a firewall issue:  port 123 UDP must be open.   There is debugging information available on Google (e.g., https://support.ntp.org/bin/view/Support/TroubleshootingNTP )
+This indicates that NTP service is not running correctly on your toolkit instance, **please note that NTP is critical service**. Some things to check include your perfSONAR NTP configuration (see http://docs.perfsonar.net/manage_ntp.html )  If NTP is correctly configured, it is possible you could have a firewall issue:  **port 123 UDP must be open**.   There is NTP debugging information available on Google (e.g., https://support.ntp.org/bin/view/Support/TroubleshootingNTP ).  If you still have problems, please open a support ticket (see below).
 
 * **perfSONAR services: regular testing/pscheduler** is failing
 
