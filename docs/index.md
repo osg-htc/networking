@@ -22,7 +22,7 @@ Users with network issues should check the [troubleshooting link](network-troubl
 Network Services 
 ----------------
 
-OSG operates an advance platform to collect, store, publish and analyse the network monitoring data it gathers from perfSONAR and other locations. All measurements are collected and available via streaming or through APIs. The following services are available:
+OSG operates an advanced platform to collect, store, publish and analyse the network monitoring data it gathers from perfSONAR and other locations. All measurements are collected and available via streaming or through APIs. The following services are available:
 
 - [perfSONAR infrastructure monitoring](perfsonar/psetf.md) - monitors state of perfSONAR network and reports on availability of core services
 - [*OSG Distributed Network Datastore*](http://atlas-kibana.mwt2.org:5601/app/kibana#/dashboard/Default?_g=()) - distributed datastore based on ElasticSearch holding all the network measurements and providing an API to expose them via JSON is available at two locations (University of Chicago and University of Nebraska). In addition, all network data is backed up on tape at Fermi National Accelerator Laboratory. The central OSG datastore that was hosted at OSG/GOC was retired in June 2018.
