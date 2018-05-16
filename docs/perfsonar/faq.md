@@ -33,7 +33,7 @@ Please check if you have added the administrative information as detailed [here]
 
 * **perfSONAR services: bwctl/owamp/pscheduler** metrics are failing
 
-This means that we're unable to connect to controller ports of the respective services, please ensure you have correct firewall settings (especially white listed subnets allowed) as described in the [Installation Guide](installation.md) . This can also indicate failures of service daemons, please check <http://www.perfsonar.net/about/faq> for additional details.
+This means that we're unable to connect to controller ports of the respective services, please ensure you have correct firewall settings (especially white listed subnets allowed) as described in the [Installation Guide](installation.md) . This can also indicate failures of service daemons, please check <http://docs.perfsonar.net/FAQ.html> for additional details.
 
 * **perfSONAR services: esmond** metric is failing
 
