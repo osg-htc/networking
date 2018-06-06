@@ -34,7 +34,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
  
 ```
        <mesh> 
-         configuration_url http://meshconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
+         configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
          validate_certificate 0 
          required 1 
        </mesh> 	
