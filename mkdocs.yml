@@ -2,7 +2,8 @@ site_name: OSG Networking Area
 site_url: https://opensciencegrid.github.io/networking/
 repo_url: https://github.com/opensciencegrid/networking/
 theme: 
-  name: readthedocs
+  name: material
+  custom_dir: osgthedocs
 
 extra_css:
   - css/extra.css
