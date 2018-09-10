@@ -8,10 +8,10 @@ For any questions or help with WLCG perfSONAR setup, please contact [GGUS](https
 
 Prior to installing please consult the [release notes](https://www.perfsonar.net/) for the latest available release. In case you have already an instance running and wish to re-install/update it then please follow our recommendations:
 
-* We recommend reinstalling using CentOS7 to all sites already running a registered instance or planning new installation. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.
+* We recommend *reinstalling* using CentOS7 to all sites already running a registered instance or planning new installation. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.
 * perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use CentOS7 as this is the most common and best understood deployment.
 * Please backup `/etc/perfsonar/meshconfig-agent.conf`, which contains the current configuration.
-* Local measurement archive backup is not needed as OSG/WLCG stores all measurements centrally. In case you'd like to perform the backup  anyway please follow the [migration guide](http://docs.perfsonar.net/install_migrate_centos7.html).
+* *Local measurement archive backup is not needed* as OSG/WLCG stores all measurements centrally. In case you'd like to perform the backup  anyway please follow the [migration guide](http://docs.perfsonar.net/install_migrate_centos7.html).
 * In case you plan to deploy a single bare metal node with multiple NICs, please consult [Multiple NIC Guidance](deployment-models.md)
 
 The following options are available to install perfSONAR toolkit:
@@ -29,16 +29,25 @@ The following *additional* steps are needed to configure the toolkit to be used 
 
 * Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](#register-perfsonar-in-oim). For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
-* You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file `/etc/perfsonar/meshconfig-agent.conf`. Otherwise please follow the steps below: 
-    * Add a mesh section with configuration_url pointing to `http://psconfig.opensciencegrid.org/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
- 
-```
-       <mesh> 
-         configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
-         validate_certificate 0 
-         required 1 
-       </mesh> 	
-```
+* You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below for perfSONAR Toolkit 4.1+: 
+    * On the command line run `psconfig remote add http://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
+	```
+	=== pScheduler Agent ===
+	[
+	   {
+	      "url" : "http://psconfig.opensciencegrid.org/pub/auto/perfsonar02-iep-grid.saske.sk"
+	   }
+	]
+	```
+    * If you're upgrading please don't forget the remove any old entries using `psconfig remote delete <URL>`
+    * For version prior to 4.1, the configuration is stored in a file `/etc/perfsonar/meshconfig-agent.conf`. Please add/replace a mesh section with configuration_url pointing to `http://psconfig.opensciencegrid.org/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
+	```
+	       <mesh> 
+		 configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
+		 validate_certificate 0 
+		 required 1 
+	       </mesh> 	
+	```
 
 * If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. 
 
