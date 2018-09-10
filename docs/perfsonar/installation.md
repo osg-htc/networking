@@ -41,13 +41,13 @@ The following *additional* steps are needed to configure the toolkit to be used 
 	```
     * Please remove any old/stale URLs using `psconfig remote delete <URL>`
     * For any version prior to 4.1, the configuration requires changing a file `/etc/perfsonar/meshconfig-agent.conf`. Please add/replace a mesh section with configuration_url pointing to `http://psconfig.opensciencegrid.org/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
-	```
-	       <mesh> 
-		 configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
-		 validate_certificate 0 
-		 required 1 
-	       </mesh> 	
-	```
+```
+       <mesh> 
+	 configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
+	 validate_certificate 0 
+	 required 1 
+       </mesh> 	
+```
 
 * If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. 
 
