@@ -35,7 +35,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
 	=== pScheduler Agent ===
 	[
 	   {
-	      "url" : "http://psconfig.opensciencegrid.org/pub/auto/perfsonar02-iep-grid.saske.sk"
+	      "url" : "http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
 	   }
 	]
 	```
