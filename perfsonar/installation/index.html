@@ -607,10 +607,10 @@
 <h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
 <p>Prior to installing please consult the <a href="https://www.perfsonar.net/">release notes</a> for the latest available release. In case you have already an instance running and wish to re-install/update it then please follow our recommendations:</p>
 <ul>
-<li>We recommend reinstalling using CentOS7 to all sites already running a registered instance or planning new installation. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.</li>
+<li>We recommend <em>reinstalling</em> using CentOS7 to all sites already running a registered instance or planning new installation. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.</li>
 <li>perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use CentOS7 as this is the most common and best understood deployment.</li>
 <li>Please backup <code>/etc/perfsonar/meshconfig-agent.conf</code>, which contains the current configuration.</li>
-<li>Local measurement archive backup is not needed as OSG/WLCG stores all measurements centrally. In case you'd like to perform the backup  anyway please follow the <a href="http://docs.perfsonar.net/install_migrate_centos7.html">migration guide</a>.</li>
+<li><em>Local measurement archive backup is not needed</em> as OSG/WLCG stores all measurements centrally. In case you'd like to perform the backup  anyway please follow the <a href="http://docs.perfsonar.net/install_migrate_centos7.html">migration guide</a>.</li>
 <li>In case you plan to deploy a single bare metal node with multiple NICs, please consult <a href="../deployment-models/">Multiple NIC Guidance</a></li>
 </ul>
 <p>The following options are available to install perfSONAR toolkit:</p>
@@ -644,21 +644,28 @@
 <ul>
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in <a href="#register-perfsonar-in-oim">OIM</a>. For non-OSG sites, follow the details in <a href="#register-perfsonar-service-in-gocdb">GOCDB</a></li>
 <li>Please ensure you have added or updated your <a href="http://docs.perfsonar.net/manage_admin_info.html">administrative information</a></li>
-<li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. If this is a re-installation you can just revert from backup the file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Otherwise please follow the steps below: <ul>
-<li>Add a mesh section with configuration_url pointing to <code>http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. Below is an example set of lines for <code>meshconfig-agent.conf</code>:</li>
+<li>
+<p>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below for perfSONAR Toolkit 4.1+: </p>
+<ul>
+<li>On the command line run <code>psconfig remote add http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.
+<code>=== pScheduler Agent ===
+[
+   {
+      "url" : "http://psconfig.opensciencegrid.org/pub/auto/perfsonar02-iep-grid.saske.sk"
+   }
+]</code></li>
+<li>If you're upgrading please don't forget the remove any old entries using <code>psconfig remote delete &lt;URL&gt;</code></li>
+<li>For version prior to 4.1, the configuration is stored in a file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Please add/replace a mesh section with configuration_url pointing to <code>http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. Below is an example set of lines for <code>meshconfig-agent.conf</code>:
+<code>&lt;mesh&gt; 
+     configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
+     validate_certificate 0 
+     required 1 
+       &lt;/mesh&gt;</code></li>
 </ul>
 </li>
-</ul>
-<div class="codehilite"><pre><span></span>       <span class="nt">&lt;mesh&gt;</span> 
-         configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
-         validate_certificate 0 
-         required 1 
-       <span class="nt">&lt;/mesh&gt;</span>  
-</pre></div>
-
-
-<ul>
-<li>If this is a <strong>new instance</strong> or you have changed the node's FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. </li>
+<li>
+<p>If this is a <strong>new instance</strong> or you have changed the node's FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. </p>
+</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
