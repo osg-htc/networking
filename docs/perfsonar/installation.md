@@ -40,7 +40,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
 	]
 	```
     * Please remove any old/stale URLs using `psconfig remote delete <URL>`
-    * For any version prior to 4.1, the configuration requires changing a file `/etc/perfsonar/meshconfig-agent.conf`. Please add/replace a mesh section with configuration_url pointing to `http://psconfig.opensciencegrid.org/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
+    * **For toolkit versions prior to 4.1**, the configuration requires changing a file `/etc/perfsonar/meshconfig-agent.conf`. Please add/replace a mesh section with configuration_url pointing to `http://psconfig.opensciencegrid.org/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
 ```
        <mesh> 
 	 configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
