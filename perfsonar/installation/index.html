@@ -644,8 +644,8 @@
 <ul>
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in <a href="#register-perfsonar-in-oim">OIM</a>. For non-OSG sites, follow the details in <a href="#register-perfsonar-service-in-gocdb">GOCDB</a></li>
 <li>Please ensure you have added or updated your <a href="http://docs.perfsonar.net/manage_admin_info.html">administrative information</a></li>
-<li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below for perfSONAR Toolkit <strong>4.1+</strong>: <ul>
-<li>On the command line run <code>psconfig remote add http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.
+<li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: <ul>
+<li><strong>For toolkit versions 4.1 and higher</strong>, please run from the command line <code>psconfig remote add http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.
 <code>=== pScheduler Agent ===
 [
    {
@@ -653,7 +653,7 @@
    }
 ]</code></li>
 <li>Please remove any old/stale URLs using <code>psconfig remote delete &lt;URL&gt;</code></li>
-<li><strong>For toolkit versions prior to 4.1</strong>, the configuration requires changing a file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Please add/replace a mesh section with configuration_url pointing to <code>http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. Below is an example set of lines for <code>meshconfig-agent.conf</code>:</li>
+<li><strong>For toolkit versions prior to 4.1</strong>, the configuration change requires editing a file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Please add/replace a mesh section with configuration_url pointing to <code>http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. Below is an example set of lines for <code>meshconfig-agent.conf</code>:</li>
 </ul>
 </li>
 </ul>
