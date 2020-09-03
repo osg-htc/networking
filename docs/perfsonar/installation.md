@@ -30,20 +30,20 @@ The following *additional* steps are needed to configure the toolkit to be used 
 * Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](#register-perfsonar-in-oim). For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: 
-    * **For toolkit versions 4.1 and higher**, please run from the command line `psconfig remote add http://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
+    * **For toolkit versions 4.1 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
 	```
 	=== pScheduler Agent ===
 	[
 	   {
-	      "url" : "http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
+	      "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
 	   }
 	]
 	```
     * Please remove any old/stale URLs using `psconfig remote delete <URL>`
-    * **For toolkit versions prior to 4.1**, the configuration change requires editing a file `/etc/perfsonar/meshconfig-agent.conf`. Please add/replace a mesh section with configuration_url pointing to `http://psconfig.opensciencegrid.org/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
+    * **For toolkit versions prior to 4.1**, the configuration change requires editing a file `/etc/perfsonar/meshconfig-agent.conf`. Please add/replace a mesh section with configuration_url pointing to `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. Below is an example set of lines for `meshconfig-agent.conf`:
 ```
        <mesh> 
-	 configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
+	 configuration_url https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
 	 validate_certificate 0 
 	 required 1 
        </mesh> 	
@@ -52,7 +52,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
 * If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. 
 
 !!! note
-    Until your host is added (on http://psconfig.opensciencegrid.org ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
+    Until your host is added (on https://psconfig.opensciencegrid.org ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
 	
 * We **recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
 * Adding *communities* is optional, but if you do, we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the public lookup service. As noted in the documentation you can select from already registered communities as appropriate.
