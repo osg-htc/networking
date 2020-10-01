@@ -26,17 +26,9 @@ Many sites would prefer **not** to have to deploy two servers for cost, space an
 
 - Please setup source routing as described in the [official documentation](http://docs.perfsonar.net/manage_dual_xface.html).
 - You'll need to register two hostnames in [OIM](installation.md)/[GOCDB](installation.md) (and have two reverse DNS entries) as you would normally for two separate nodes.
-- Instead of configuring just one auto-URL in the `/etc/perfsonar/meshconfig-agent.conf`, please add both, so you'll end up having something like this:
+- Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:
 ```
-<mesh>
-    configuration_url http://meshconfig.opensciencegrid.org/pub/auto/<hostname_nic1>
-    validate_certificate 0
-    required 1
-</mesh>
-<mesh>
-    configuration_url http://meshconfig.opensciencegrid.org/pub/auto/<hostname_nic2>
-    validate_certificate 0
-    required 1
-</mesh>
+psconfig remote add "https://psconfig.opensciencegrid.org/pub/auto/<FQDN_latency>"
+psconfig remote add "https://psconfig.opensciencegrid.org/pub/auto/<FQDN_throughput>"
 ...
 ```
