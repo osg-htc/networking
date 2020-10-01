@@ -1,5 +1,13 @@
 language: python
+install:
 install: pip install -r ci/pip-requirements.txt
 script:
 - ./ci/verify
 - ./ci/deploy
+deploy:
+ provider: pages
+ skip_cleanup: true
+ github_token: 480938468717571b6ba0cbaad45f800e1802613f # Set in travis-ci.org dashboard
+ local_dir: site
+ on:
+   branch: master
