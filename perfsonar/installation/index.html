@@ -601,10 +601,10 @@
                 
                   <h1>Installation and Maintenance</h1>
                 
-                <h2 id="perfsonar-installation-guide">perfSONAR Installation Guide<a class="headerlink" href="#perfsonar-installation-guide" title="Permanent link">&para;</a></h2>
+                <h2 id="perfsonar-installation-guide">perfSONAR Installation Guide</h2>
 <p>This page documents installing/upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult our <a href="../../perfsonar-in-osg/">overview</a> and possible <a href="../deployment-models/">deployment options</a> before installing. For troubleshooting an existing installation please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting Guide</a>, <a href="http://docs.perfsonar.net/FAQ.html">FAQ</a> as well as WLCG/OSG specific <a href="../faq/">FAQ</a>.</p>
 <p>For any questions or help with WLCG perfSONAR setup, please contact <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">GGUS</a> WLCG perfSONAR support unit or OSG <a href="http://support.opensciencegrid.org">GOC</a>. We strongly recommend anyone maintaining/using perfSONAR to join <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">perfsonar-user</a> and <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">perfsonar-announce</a> mailing lists.</p>
-<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
+<h3 id="installation">Installation</h3>
 <p>Prior to installing please consult the <a href="https://www.perfsonar.net/">release notes</a> for the latest available release. In case you have already an instance running and wish to re-install/update it then please follow our recommendations:</p>
 <ul>
 <li>We recommend <em>reinstalling</em> using CentOS7 to all sites already running a registered instance or planning new installation. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.</li>
@@ -644,33 +644,26 @@
 <ul>
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in <a href="#register-perfsonar-in-oim">OIM</a>. For non-OSG sites, follow the details in <a href="#register-perfsonar-service-in-gocdb">GOCDB</a></li>
 <li>Please ensure you have added or updated your <a href="http://docs.perfsonar.net/manage_admin_info.html">administrative information</a></li>
-<li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: <ul>
-<li><strong>For toolkit versions 4.1 and higher</strong>, please run from the command line <code>psconfig remote add http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.
+<li>
+<p>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: </p>
+<ul>
+<li><strong>For toolkit versions 4.1 and higher</strong>, please run from the command line <code>psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.
 <code>=== pScheduler Agent ===
 [
    {
-      "url" : "http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
+      "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
    }
 ]</code></li>
 <li>Please remove any old/stale URLs using <code>psconfig remote delete &lt;URL&gt;</code></li>
-<li><strong>For toolkit versions prior to 4.1</strong>, the configuration change requires editing a file <code>/etc/perfsonar/meshconfig-agent.conf</code>. Please add/replace a mesh section with configuration_url pointing to <code>http://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. Below is an example set of lines for <code>meshconfig-agent.conf</code>:</li>
 </ul>
 </li>
-</ul>
-<div class="codehilite"><pre><span></span>       <span class="nt">&lt;mesh&gt;</span> 
-     configuration_url http://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org
-     validate_certificate 0 
-     required 1 
-       <span class="nt">&lt;/mesh&gt;</span>  
-</pre></div>
-
-
-<ul>
-<li>If this is a <strong>new instance</strong> or you have changed the node's FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. </li>
+<li>
+<p>If this is a <strong>new instance</strong> or you have changed the node's FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. </p>
+</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Until your host is added (on http://psconfig.opensciencegrid.org ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).</p>
+<p>Until your host is added (on https://psconfig.opensciencegrid.org ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).</p>
 </div>
 <ul>
 <li>We <strong>recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</li>
@@ -679,11 +672,11 @@
 <li>Once installation is finished, please <strong>reboot</strong> the node.</li>
 </ul>
 <p>For any further questions, please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting Guide</a>, <a href="http://docs.perfsonar.net/FAQ.html">FAQ</a> as well as WLCG/OSG specific <a href="../faq/">FAQ</a> or contact directly WLCG or OSG perfSONAR support units.</p>
-<h3 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h3>
+<h3 id="maintenance">Maintenance</h3>
 <p>Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released. perfSONAR team has dropped support for web100 kernel, which means that stock kernels from centOS7 as well as any updates can be deployed as soon as they're released.</p>
 <p>In case you'd like to manually update the node please follow the official <a href="http://docs.perfsonar.net/manage_update.html">guide</a>.</p>
 <p>Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but there are some community driven projects that could be helpful, such as <a href="http://github.com/HEP-Puppet/perfsonar">HEP-Puppet</a>. As perfSONAR manages most of its configuration automatically via packages and there is very little initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary interventions after auto-updates. </p>
-<h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
+<h3 id="security-considerations">Security Considerations</h3>
 <p>The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see <a href="http://docs.perfsonar.net/manage_security.html">Manage Security</a> for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -694,9 +687,9 @@
 <p class="admonition-title">Warning</p>
 <p>In case you have <strong>central/campus firewall</strong>, please check the required port openings in the <a href="http://docs.perfsonar.net/manage_security.html">perfSONAR security documentation</a>.  </p>
 </div>
-<h3 id="enabling-snmp-plugins">Enabling SNMP plugins<a class="headerlink" href="#enabling-snmp-plugins" title="Permanent link">&para;</a></h3>
+<h3 id="enabling-snmp-plugins">Enabling SNMP plugins</h3>
 <p>Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a <a href="http://www.perfsonar.net/release-notes/version-4-0-2/">beta feature</a> that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.</p>
-<h3 id="register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB<a class="headerlink" href="#register-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h3>
+<h3 id="register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB</h3>
 <p>This section describes how to register the perfSONAR service in GOCDB.</p>
 <p>In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service Endpoint</p>
 <ul>
@@ -723,7 +716,7 @@
 <li>GOCDB screen shot for creating a Service Endpoint: 
 <img src="https://opensciencegrid.org/networking/img/Screen_shot_2013-02-19_at_15.26.52.png" width="1024"></li>
 </ul>
-<h3 id="register-perfsonar-in-oim">Register perfSONAR in OIM<a class="headerlink" href="#register-perfsonar-in-oim" title="Permanent link">&para;</a></h3>
+<h3 id="register-perfsonar-in-oim">Register perfSONAR in OIM</h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>These instructions no longer apply (after June 2018) as OIM is migrated to github static topology text file. For instructions how to add new resources please open a ticket with OSG at http://support.opensciencegrid.org</p>
