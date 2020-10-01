@@ -51,7 +51,6 @@ References
 - **OSG perfSONAR infrastructure monitoring** <https://psetf.opensciencegrid.org/etf/check_mk/>
 - **OSG Analytics platform** <http://atlas-kibana.mwt2.org/s/networking/app/kibana>
 - **WLCG dashboards** http://monit-grafana-open.cern.ch/dashboard/db/home?orgId=16
-- **PuNDIT** (an OSG Satellite project) focusing on analyzing perfSONAR data to alert on problems: <http://pundit.gatech.edu/>
-- **MadAlert** which analyzes **MaDDash** meshes to identify network problems: <http://madalert.aglt2.org/madalert/>
+- **SAND** (an OSG Satellite project) focusing on analyzing perfSONAR and related network metrics: <https://sand-ci.org>
 
 
