@@ -30,12 +30,13 @@ The following *additional* steps are needed to configure the toolkit to be used 
 * Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](#register-perfsonar-in-oim). For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: 
-    * **For toolkit versions 4.1 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
+    * **For toolkit versions 4.1 and higher**, please run from the command line `psconfig remote add --configure-archives  https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
 	```
 	=== pScheduler Agent ===
 	[
 	   {
 	      "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
+	      "configure-archives" : true
 	   }
 	]
 	```
