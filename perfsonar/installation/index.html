@@ -647,11 +647,12 @@
 <li>
 <p>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: </p>
 <ul>
-<li><strong>For toolkit versions 4.1 and higher</strong>, please run from the command line <code>psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.
+<li><strong>For toolkit versions 4.1 and higher</strong>, please run from the command line <code>psconfig remote add --configure-archives  https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.
 <code>=== pScheduler Agent ===
 [
    {
       "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
+      "configure-archives" : true
    }
 ]</code></li>
 <li>Please remove any old/stale URLs using <code>psconfig remote delete &lt;URL&gt;</code></li>
