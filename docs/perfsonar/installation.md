@@ -104,11 +104,10 @@ You might not be able to access the page if you are not properly registered in G
 -   GOCDB screen shot for creating a Service Endpoint: 
 <img src="https://opensciencegrid.org/networking/img/Screen_shot_2013-02-19_at_15.26.52.png" width="1024">
 
-### Register perfSONAR in OIM
+### Register perfSONAR in OSG Topology
 
-!!! warning
-	These instructions no longer apply (after June 2018) as OIM is migrated to github static topology text file. For instructions how to add new resources please open a ticket with OSG at http://support.opensciencegrid.org
+Each *OSG site* should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR instances.
 
-Each OSG site should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR instances.
+To add hosts to OSG Topology, please follow the instructions at https://opensciencegrid.org/docs/common/registration/
 
 If you have problems or questions please consult our [FAQ](faq.md) or alternatively open a ticket with GOC. 
