@@ -1,6 +1,6 @@
 site_name: OSG Networking Area
-site_url: https://opensciencegrid.github.io/networking/
-repo_url: https://github.com/opensciencegrid/networking/
+site_url: https://osg-htc/networking/
+repo_url: https://github.com/osg-htc/networking/
 theme: 
   name: material
   custom_dir: osgthedocs

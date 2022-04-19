@@ -7,7 +7,7 @@ difficult to verify everything is working correctly.
 
 A sample initial dashboard is shown below:
 
-<img src="https://opensciencegrid.org/networking/img/etf.png" width="1024">
+<img src="/networking/img/etf.png" width="1024">
 
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into four categories:
 
@@ -17,7 +17,7 @@ You can use quicksearch in the left pane to search for hostnames, domains or tes
 4. *Freshness tests* (`perfSONAR freshness`) is a high level test that checks what tests are available in the local measurement archive and compares this with the tests configured. There can be many different reasons why certain tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with measurement archive or scheduling, therefore this test is informative and never reaches critical state. A special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results are stored centrally as compared to local measurement archive. It mainly reflects on the efficiency of the central OSG collector and doesn't provide any information on the on the local services.
 
 This is sample snapshost showing all metrics for particular perfSONAR instance (latency node in this case):
-<img src="https://opensciencegrid.org/networking/img/etf_page.png" width="1024">
+<img src="/networking/img/etf_page.png" width="1024">
 
 For any issues/questions concerning the monitoring pages and tests, please consult the [FAQ](faq.md)
 

@@ -102,7 +102,7 @@ You might not be able to access the page if you are not properly registered in G
 <!-- -->
 
 -   GOCDB screen shot for creating a Service Endpoint: 
-<img src="https://opensciencegrid.org/networking/img/Screen_shot_2013-02-19_at_15.26.52.png" width="1024">
+<img src="/networking/img/Screen_shot_2013-02-19_at_15.26.52.png" width="1024">
 
 ### Register perfSONAR in OSG Topology
 

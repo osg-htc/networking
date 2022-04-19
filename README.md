@@ -2,7 +2,7 @@
 
 This repository contains the internal documents for the OSG Networking Area.
 
-- [Github hosted](http://opensciencegrid.github.io/networking)
+- [Github hosted](http://osg-htc.org/networking)
 
 ## Other OSG documentation on Github
 
