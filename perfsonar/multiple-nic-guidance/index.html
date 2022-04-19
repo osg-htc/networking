@@ -9,14 +9,14 @@
       
       
       
-        <link rel="canonical" href="https://osg-htc/networking/perfsonar/faq/">
+        <link rel="canonical" href="https://osg-htc/networking/perfsonar/multiple-nic-guidance/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.0">
     
     
       
-        <title>Frequently Asked Questions - OSG Networking Area</title>
+        <title>Multiple nic guidance - OSG Networking Area</title>
       
     
     
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#frequently-asked-questions" class="md-skip">
+        <a href="#multiple-nic-network-interface-card-guidance" class="md-skip">
           Skip to content
         </a>
       
@@ -93,7 +93,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Frequently Asked Questions
+              Multiple nic guidance
             
           </span>
         </div>
@@ -212,14 +212,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
       
       <label class="md-nav__link" for="__nav_2">
         Network Monitoring (perfSONAR)
@@ -271,72 +269,11 @@
             
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Frequently Asked Questions
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
         Frequently Asked Questions
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#frequently-asked-questions" class="md-nav__link">
-    Frequently Asked Questions
-  </a>
-  
-    <nav class="md-nav" aria-label="Frequently Asked Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#network-troubleshooting" class="md-nav__link">
-    Network Troubleshooting
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#service-registration" class="md-nav__link">
-    Service Registration
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#infrastructure-monitoring-check_mk-metrics" class="md-nav__link">
-    Infrastructure Monitoring (check_mk metrics)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -490,36 +427,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#frequently-asked-questions" class="md-nav__link">
-    Frequently Asked Questions
+  <a href="#multiple-nic-network-interface-card-guidance" class="md-nav__link">
+    Multiple NIC (Network Interface Card) Guidance
   </a>
-  
-    <nav class="md-nav" aria-label="Frequently Asked Questions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#network-troubleshooting" class="md-nav__link">
-    Network Troubleshooting
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#service-registration" class="md-nav__link">
-    Service Registration
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#infrastructure-monitoring-check_mk-metrics" class="md-nav__link">
-    Infrastructure Monitoring (check_mk metrics)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -535,84 +445,20 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/osg-htc/networking/edit/master/docs/perfsonar/faq.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/osg-htc/networking/edit/master/docs/perfsonar/multiple-nic-guidance.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>Frequently Asked Questions</h1>
+                  <h1>Multiple nic guidance</h1>
                 
-                <h3 id="frequently-asked-questions">Frequently Asked Questions</h3>
-<p>Here we will provide details on troubleshooting perfSONAR installations for OSG and WLCG as well as some additional configuration options and a FAQ.</p>
-<p>A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and isolate network problems can be found at https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/</p>
-<p>We are maintaining a <a href="../../network-troubleshooting/">Network Troubleshooting</a> page to guide users in identifying and following up on network problems.</p>
-<h4 id="network-troubleshooting">Network Troubleshooting</h4>
-<ul>
-<li>I suspect there is a network performance issue impacting my site</li>
-</ul>
-<p>For OSG sites, please open a ticket with GOC. Otherwise please open a GGUS ticket (or assign an existing) one to WLCG Network Throughput support unit.</p>
-<h4 id="service-registration">Service Registration</h4>
-<p><strong>I got an email after registering with lots of information in it...what do I do?</strong> </p>
-<p>This is part of the process. If you are a new site you will need to attend the next OSG operations meeting. If you are an existing site and have just registered perfSONAR instances you don't have to do anything but feel free to attend the next operations meeting if you have questions or concerns.</p>
-<p><strong>Once I registered, new tickets were opened concerning perfSONAR...What do I do?</strong> </p>
-<p>This is standard operating procedure and the tickets are to ensure that OSG operations properly gets your new perfSONAR instances registered. You don't have to do anything and the tickets will be closed by OSG operations staff.</p>
-<h4 id="infrastructure-monitoring-check_mk-metrics">Infrastructure Monitoring (check_mk metrics)</h4>
-<ul>
-<li><strong>perfSONAR services: versions</strong> metric is failing.</li>
-</ul>
-<p>This metrics checks if your sonar is at the most recent version. Please check if you have automatic yum updates enabled, this is strongly recommended due to security issues we have seen in the past. In case you're still running an older version (3.3-3.5), please update and reconfigure as soon as possible following <a href="../installation/">Installation Guide</a> </p>
-<ul>
-<li><strong>perfSONAR configuration: contacts or location</strong> metrics are failing </li>
-</ul>
-<p>Please check if you have added the administrative information as detailed <a href="http://docs.perfsonar.net/install_config_first_time.html#updating-your-administrative-information">here</a></p>
-<ul>
-<li><strong>perfSONAR services: bwctl/owamp/pscheduler</strong> metrics are failing</li>
-</ul>
-<p>This means that we're unable to connect to controller ports of the respective services, please ensure you have correct firewall settings (especially white listed subnets allowed) as described in the <a href="../installation/">Installation Guide</a> . This can also indicate failures of service daemons, please check <a href="http://docs.perfsonar.net/FAQ.html">http://docs.perfsonar.net/FAQ.html</a> for additional details.</p>
-<ul>
-<li><strong>perfSONAR services: esmond</strong> metric is failing</li>
-</ul>
-<p>This means that your measurement archive is not accessible or failing, there can be many possible causes (disk full, httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS ticket to WLCG perfSONAR support. </p>
-<ul>
-<li>
-<p><strong>perfSONAR json summary</strong> is failing</p>
-<ul>
-<li>This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS </li>
-</ul>
-</li>
-<li>
-<p><strong>perfSONAR configuration: meshes</strong> metric is failing</p>
-</li>
-</ul>
-<p>This indicates that you're missing the recommended mesh configuration. Please follow mesh configuration as detailed in the <a href="../installation/">installation guide</a>. Also, please REMOVE any old mesh configuration, this metric will also fail in case you have both the new mesh config and the old mesh URLs </p>
-<ul>
-<li><strong>perfSONAR services: ntp</strong> is failing</li>
-</ul>
-<p>This indicates that NTP service is not running correctly on your toolkit instance, <strong>please note that NTP is critical service</strong>. Some things to check include your <a href="http://docs.perfsonar.net/manage_ntp.html">perfSONAR NTP configuration</a>.  If NTP is correctly configured, it is possible you could have a firewall issue:  <strong>port 123 UDP must be open</strong>.   There is NTP debugging information available on Google (e.g., <a href="https://support.ntp.org/bin/view/Support/TroubleshootingNTP">https://support.ntp.org/bin/view/Support/TroubleshootingNTP</a>).  If you still have problems, please open a support ticket (see below).</p>
-<ul>
-<li><strong>perfSONAR services: regular testing/pscheduler</strong> is failing</li>
-</ul>
-<p>This indicates that pscheduler is not working correctly. As this is the core daemon please contact WLCG perfSONAR support unit for help.</p>
-<ul>
-<li>There are <strong>many tests failing</strong> for given sonar, where should I start</li>
-</ul>
-<p>Please update and reconfigure your sonar following <a href="../installation/">Installation Guide</a>. Please ensure firewall doesn't block access from the whitelisted subnets that are required for the infrastructure monitoring to work. </p>
-<ul>
-<li><strong>Where can I get support on managing WLCG perfSONAR</strong> ?</li>
-</ul>
-<p>You can open ticket in GGUS to WLCG perfSONAR support unit or contact directly wlcg-perfsonar-support (at cern.ch) </p>
-<ul>
-<li><strong>perfSONAR esmond freshness Latency/Bandwidth Direct</strong> is failing or gives warning</li>
-</ul>
-<p>This metric checks freshness of the local measurement archive, in particular it checks if it contains fresh results for all the configured tests. This metric is needed to determine if we're able to consistently get results from perfSONAR boxes in WLCG. Currently it's a non-critical test, you can ignore it. </p>
-<ul>
-<li><strong>perfSONAR services ndt/npad</strong> is failing</li>
-</ul>
-<p>Both metrics check if you have disabled NDT and NPAD. As both NDT and NPAD have been dropped starting with 4.0, this metrics should stay green in most of the cases. </p>
-<ul>
-<li><strong>perfSONAR hardware check</strong> is failing</li>
-</ul>
-<p>Please consult the minimum and recommended <a href="../deployment-models/">hardware requirements</a>. </p>
+                <h3 id="multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance</h3>
+<p>The OSG and WLCG recommendation is to deploy two flavors of perfSONAR measurement nodes: 1) a latency instance which continuously measures packet delay and lost and 2) a bandwidth instance measuring
+the achievable bandwidth.  That implies sites must purchase, deploy and maintain two systems.  <strong>Why can't we just run both latency and bandwidth services on a single instance?</strong>
+The problem is that running both latency and bandwidth services on a single node / single NIC may cause interence between the various measurements and introduce "false-positive" indications of
+network problems.    </p>
+<p>Many sites would prefer <strong>not</strong> to have to deploy two servers for cost, space and power reasons.  Fortunately the perfSONAR developers have provided a way to install both latency and bandwidth 
+measurements services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing and memory.  See <a href="http://docs.perfsonar.net/manage_dual_xface.html">manage-dual-xface</a> for details on configuring this.</p>
                 
               
               
@@ -628,39 +474,6 @@
       
         
 <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        <a href="../installation/" class="md-footer__link md-footer__link--prev" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Installation and Maintenance
-            </div>
-          </div>
-        </a>
-      
-      
-        <a href="../../network-troubleshooting/" class="md-footer__link md-footer__link--next" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Network Troubleshooting
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

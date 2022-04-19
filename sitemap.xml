@@ -1,53 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/</loc>
-     <lastmod>2020-10-15</lastmod>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
+     <loc>https://osg-htc/networking/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/perfsonar-in-osg/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/perfsonar-in-osg/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/perfsonar/deployment-models/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/perfsonar/deployment-models/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/perfsonar/installation/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/perfsonar/installation/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/perfsonar/faq/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/perfsonar/faq/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/network-troubleshooting/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/network-troubleshooting/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/network-troubleshooting/osg-debugging-document/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/network-troubleshooting/osg-debugging-document/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/perfsonar/psetf/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/perfsonar/psetf/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/osg-network-services/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/osg-network-services/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
-    </url>
-    <url>
-     <loc>https://opensciencegrid.github.io/networking/osg-network-analytics/</loc>
-     <lastmod>2020-10-15</lastmod>
+    </url><url>
+     <loc>https://osg-htc/networking/osg-network-analytics/</loc>
+     <lastmod>2022-04-19</lastmod>
      <changefreq>daily</changefreq>
     </url>
 </urlset>
