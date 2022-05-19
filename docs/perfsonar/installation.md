@@ -108,6 +108,6 @@ You might not be able to access the page if you are not properly registered in G
 
 Each *OSG site* should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR instances.
 
-To add hosts to OSG Topology, please follow the instructions at https://opensciencegrid.org/docs/common/registration/
+To add hosts to OSG Topology, please follow the instructions at https://osg-htc.org/docs/common/registration/
 
 If you have problems or questions please consult our [FAQ](faq.md) or alternatively open a ticket with GOC. 
