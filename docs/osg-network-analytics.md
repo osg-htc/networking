@@ -1,2 +1,2 @@
 - **OSG Analytics platform** <http://atlas-kibana.mwt2.org/s/networking/app/kibana#/dashboard/Default?_g=()>
-- **WLCG dashboards** <https://monit-grafana-open.cern.ch/d/000000523/home?orgId=16)https://monit-grafana-open.cern.ch/d/000000523/home?orgId=16>
+- **WLCG dashboards** <https://monit-grafana-open.cern.ch/d/000000523/home?orgId=16>
