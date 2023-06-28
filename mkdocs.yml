@@ -8,7 +8,7 @@ theme:
 extra_css:
   - css/extra.css
 
-pages:
+nav:
   - OSG Networking Area: 'index.md'
   - Network Monitoring (perfSONAR):
     - 'Motivation': 'perfsonar-in-osg.md'
