@@ -7,7 +7,7 @@ difficult to verify everything is working correctly.
 
 A sample initial dashboard is shown below:
 
-<img src="/networking/docs/img/etf.png" width="1024">
+<img src="/networking/img/etf.png" width="1024">
 
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into four categories:
 
