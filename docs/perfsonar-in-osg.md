@@ -45,7 +45,8 @@ Highlights include:
 
 -   Use of Opensearch for the measurement archive, replacing ESmond
 -   Support for new OSes, include EL8 and EL9.
--   Significant number of bug fixes and new features
+-   No longer supports ISO install option.
+-   Significant number of bug fixes and new features.
 
 For a more complete list of changes, see the full release notes at <https://www.perfsonar.net/docs_releasenotes.html>
 
