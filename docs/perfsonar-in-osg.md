@@ -37,17 +37,15 @@ For anyone maintaining/using perfSONAR we suggest to join either/both of the fol
 -   **User's Mailing List** The perfSONAR project maintains a mailing list for communication on matters of installation, configuration, bug reports, or general performance discussions: <https://lists.internet2.edu/sympa/subscribe/perfsonar-user>
 -   **Announcement Mailing List** The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <https://lists.internet2.edu/sympa/subscribe/perfsonar-announce>
 
-#### Changes for perfSONAR 4.0
+#### Changes for perfSONAR 5.0
 
-The final release of perfSONAR 4.0 was put into the perfSONAR repository on April 17, 2017. All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days of that date. This release incorporates possibly the largest single change in perfSONAR’s 15-year history, and the developers spent considerable time making sure it was right.
+The first release of [perfSONAR 5.0.0](https://www.perfsonar.net/releasenotes-2023-04-17-5-0-0.html) was available on April 17, 2023, followed by a version supporting EL8/EL9 on June 21, 2023 ([version 5.0.3](https://www.perfsonar.net/releasenotes-2023-06-16-5-0-3.html)). All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days after the releases.   Version 5 marks a transition for the OSG/WLCG perfSONAR deployment, enabling us to migrate to a new network data pipeline where perfSONAR hosts directly send their measurement data to our central Elasticsearch instance via an HTTP-Archiver and Logstash. 
 
 Highlights include:
 
--   New scheduling software called pScheduler that provides increased visibility, extensibility and control in the measurement process.
--   CentOS 7 support
--   Debian perfsonar-toolkit bundle support
--   Updated graphs
--   Support for email alerting in MaDDash
+-   Use of Opensearch for the measurement archive, replacing ESmond
+-   Support for new OSes, include EL8 and EL9.
+-   Significant number of bug fixes and new features
 
-For a more complete list of changes, see the full release notes at: <http://www.perfsonar.net/release-notes/version-4-0/>
+For a more complete list of changes, see the full release notes at <https://www.perfsonar.net/docs_releasenotes.html>
 
