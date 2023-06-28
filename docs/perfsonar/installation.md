@@ -4,33 +4,35 @@ This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. I
 
 For any questions or help with WLCG perfSONAR setup, please contact [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG [GOC](http://support.opensciencegrid.org). We strongly recommend anyone maintaining/using perfSONAR to join [perfsonar-user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
-### Installation
+### Installation or Upgrade
 
-Prior to installing please consult the [release notes](https://www.perfsonar.net/) for the latest available release. In case you have already an instance running and wish to re-install/update it then please follow our recommendations:
+Prior to installing please consult the [release notes](https://www.perfsonar.net/docs_releasenotes.html)) for the latest available release. In case you have already an instance running and wish to re-install/update it then please follow our recommendations:
 
-* We recommend *reinstalling* using CentOS7 to all sites already running a registered instance or planning new installation. The primary reason for this recommendation is that the next point release of perfSONAR (4.1) will no longer support RHEL6/CentOS6/Scientific Linux 6.
-* perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use CentOS7 as this is the most common and best understood deployment.
-* Please backup `/etc/perfsonar/meshconfig-agent.conf`, which contains the current configuration.
-* *Local measurement archive backup is not needed* as OSG/WLCG stores all measurements centrally. In case you'd like to perform the backup  anyway please follow the [migration guide](http://docs.perfsonar.net/install_migrate_centos7.html).
+* Upgrades: We recommend *reinstalling* using an EL9 (RHEL,Rocky,Alma) OS for all sites already running a registered instance or planning new installation. The primary reason for this recommendation is to provide a long-term supported OS and to benefit from a 5.x kernel.
+* perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use EL9 to have a common, well understood deployment.
+* *Local measurement archive backup is not needed* as OSG/WLCG stores all measurements centrally. 
 * In case you plan to deploy a single bare metal node with multiple NICs, please consult [Multiple NIC Guidance](deployment-models.md)
 
-The following options are available to install perfSONAR toolkit:
+First, install your chosen EL9 operating system on your host after saving you local configuration if you are "updating".
+
+The following options are then recommended to install perfSONAR for OSG/WLCG:
 
 | Installation method              | Link                                                                                    |
 |----------------------------------|-----------------------------------------------------------------------------------------|
-| Meta-package/bundle installation | [Bundle installation guide](http://docs.perfsonar.net/install_centos.html)              |
-| Full ISO image installation      | [Toolkit full install guide](http://docs.perfsonar.net/install_centos_fullinstall.html) |
-| Net ISO image installation       | [Toolkit NET install guide](http://docs.perfsonar.net/install_centos_netinstall.html)   |
+| Toolkit bundle installation | [Toolkit Installation Quick Start](https://docs.perfsonar.net/install_quick_start.html)      |
+| Testpoint bundle installation | Follow quick start above but do 'dnf install perfsonar-testpoint' instead of toolkit       |
+
+You can see more details about EL supported installs at <https://docs.perfsonar.net/install_el.html>
 
 !!! note
-    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4.0. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances. 
+    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4+. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances. 
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:
 
 * Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in [OIM](#register-perfsonar-in-oim). For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: 
-    * **For toolkit versions 4.1 and higher**, please run from the command line `psconfig remote add --configure-archives  https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
+    * **For toolkit versions 5.0 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
 	```
 	=== pScheduler Agent ===
 	[
@@ -47,7 +49,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
 !!! note
     Until your host is added (on https://psconfig.opensciencegrid.org ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
 	
-* We **recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
+* We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
 * Adding *communities* is optional, but if you do, we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the public lookup service. As noted in the documentation you can select from already registered communities as appropriate.
 * Please check that both **local and campus firewall** has the necessary [port openings](#security-considerations). Local iptables are configured automatically, but there are ways how to tune the existing set, please see the official [firewall](http://docs.perfsonar.net/manage_security.html#adding-your-own-firewall-rules) guide for details.
 * Once installation is finished, please **reboot** the node.
@@ -56,7 +58,7 @@ For any further questions, please consult official [Troubleshooting Guide](http:
 
 ### Maintenance
 
-Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released. perfSONAR team has dropped support for web100 kernel, which means that stock kernels from centOS7 as well as any updates can be deployed as soon as they're released.
+Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released.
 
 In case you'd like to manually update the node please follow the official [guide](http://docs.perfsonar.net/manage_update.html).
 
@@ -64,10 +66,10 @@ Using automated configuration tools (such as Chef, Puppet, etc) for managing per
 
 ### Security Considerations
 
-The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see [Manage Security](http://docs.perfsonar.net/manage_security.html) for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.
+The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see [Manage Security](http://docs.perfsonar.net/manage_security.html) for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.   An overview of perfSONAR security is available at <https://www.perfsonar.net/deployment_security.html>
 
 !!! warning 
-	As of perfSONAR 4.0+ ALL perfSONAR instances need to have port 443 accessible to all the other perfSONAR instances. Allowing access to port 443 is needed because it's now used as a controller port for scheduling tests (via pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available. The old test scheduler (BWCTL) will be retired in perfSONAR 4.1 release (planned Q1 2018) at which point access to port 443 will be the only way how to run the tests. Starting from perfSONAR 4.0, HTTPS/443 is now by default configured on all perfSONAR instances, i.e. local iptables as well as httpd configuration comes out of the box and requires no extra steps, therefore opening is only needed if you have central/campus firewall.
+	As of perfSONAR 4.0+ ALL perfSONAR instances need to have port 443 accessible to all the other perfSONAR instances. Allowing access to port 443 is **required** because it's now used as a controller port for scheduling tests (via pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available. Starting from perfSONAR 4.0, HTTPS/443 is now by default configured on all perfSONAR instances, i.e. local iptables as well as httpd configuration comes out of the box and requires no extra steps, therefore opening is only needed if you have central/campus firewall.
 
 For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues. 
 
