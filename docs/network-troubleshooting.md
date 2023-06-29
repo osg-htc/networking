@@ -13,7 +13,7 @@
 
 ESnet maintains a very useful page on network troubleshooting at <https://fasterdata.es.net/performance-testing/troubleshooting/>
 
-We have a (older) draft version of the OSG [network debugging document](network-troubleshooting/osg-debugging-document) that describes things in much more detail. If you have comments, questions or suggestions, please contact Shawn McKee.
+We have a (older) draft version of the OSG [network debugging document](network-troubleshooting/osg-debugging-document.md) that describes things in much more detail. If you have comments, questions or suggestions, please contact Shawn McKee.
 
 If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at <https://learn.nsrc.org/perfsonar>
 

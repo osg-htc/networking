@@ -1,5 +1,5 @@
 site_name: OSG Networking Area
-site_url: https://osg-htc/networking/
+site_url: https://osg-htc.org/networking/
 repo_url: https://github.com/osg-htc/networking/
 theme: 
   name: material
@@ -8,7 +8,7 @@ theme:
 extra_css:
   - css/extra.css
 
-pages:
+nav:
   - OSG Networking Area: 'index.md'
   - Network Monitoring (perfSONAR):
     - 'Motivation': 'perfsonar-in-osg.md'
@@ -20,8 +20,8 @@ pages:
     - 'OSG Network Debugging Document': 'network-troubleshooting/osg-debugging-document.md'
   - Network Services: 
     - 'Infrastructure Monitoring': 'perfsonar/psetf.md'
-    - 'Network Datastore and Streaming' : 'osg-network-services.md'
-    - 'Network Analytics' : 'osg-network-analytics.md'
+    - 'Network Datastore and Streaming': 'osg-network-services.md'
+    - 'Network Analytics': 'osg-network-analytics.md'
 
 markdown_extensions:
   - admonition

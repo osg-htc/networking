@@ -9,16 +9,27 @@ The primary motivation for perfSONAR deployment is to test isolation, i.e. only 
     * Full-node VM is strongly preffered, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended. 
     * VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
     * Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production 
-* **Container** - this is currently planned to be fully supported from version 4.1 (Q1 2018), but the main focus is on perfSONAR test point, which does not replace full toolkit installation as it doesn't include a local measurement archive and is therefore not recommeneded for WLCG/OSG use cases:
-    * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a test-point which can send results to a local measurement archive running on the perfSONAR toolkit node. 
+* **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
+    * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a test-point which can send results to a local measurement archive running on the perfSONAR toolkit node.
+
+### perfSONAR Toolkit vs Testpoint
+
+The perfSONAR team has documented the types of installations supported at <https://docs.perfsonar.net/install_options.html>.   With the release of version 5, OSG/WLCG sites have a new option: instead of installing the full Toolkit sites can choose to install the Testpoint bundle.
+* Pros
+     * Simpler deployment when a local web interface is not needed and a central measurement archive is available.
+     * Less resource intensive for both memory and I/O capacity.
+* Cons       
+     * Measurements are not stored locally
+     * No web interface to use for configuration or adding local tests
+     * Unable to show results in MaDDash
    
 ### perfSONAR Hardware Requirements
 
-There are two different nodes participating in the network testing, latency node and bandwidth node, while both are running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported) as well as enough memory and CPU to support high bandwidth testing. Our recommendation is to match bandwidth node NIC speed with the one installed on the storage nodes as this would provide us with the best match when there are issues to investigate. In case you'd like to deploy high speed (100G) bandwidth node, please consult [ESNet tuning guide](https://fasterdata.es.net/host-tuning/100g-tuning/) and [100G tuning presentation](https://www.es.net/assets/Uploads/100G-Tuning-TechEx2016.tierney.pdf). Latency node on the other hand runs low bandwidth, but high frequency tests, sending a continuous stream of packets to measure delay and corresponding packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to continuously store its results into local measurement archive. The minimum hardware requirements to run perfSONAR toolkit are documented [here](http://docs.perfsonar.net/install_hardware_details.html). For WLCG/OSG deployment and taking into account the amount of testing that we perform, we recommend at least the following for perfSONAR 4.0+:
+There are two different nodes participating in the network testing, latency node and bandwidth node, while both are running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported) as well as enough memory and CPU to support high bandwidth testing. Our recommendation is to match bandwidth node NIC speed with the one installed on the storage nodes as this would provide us with the best match when there are issues to investigate. In case you'd like to deploy high speed (100G) bandwidth node, please consult [ESNet tuning guide](https://fasterdata.es.net/host-tuning/100g-tuning/) and [100G tuning presentation](https://www.es.net/assets/Uploads/100G-Tuning-TechEx2016.tierney.pdf). Latency node on the other hand runs low bandwidth, but high frequency tests, sending a continuous stream of packets to measure delay and corresponding packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to continuously store its results into local measurement archive. The minimum hardware requirements to run perfSONAR toolkit are documented [here](http://docs.perfsonar.net/install_hardware_details.html). For WLCG/OSG deployment and taking into account the amount of testing that we perform, we recommend at least the following for perfSONAR 5.0+:
 
-- 10G NIC for bandwidth node (or matching capacity of the storage nodes), 1G NIC for latency node (for higher NIC capacities, 40/100G, please check [ESNet tuning guide](https://fasterdata.es.net/host-tuning/100g-tuning/))
-- 4-core x86_64 CPU (2.7 Ghz+) with at least 8GB of RAM (if both latency and bandwidth are on a single node then 16GB)
-- SSD disk (128GB should be sufficient)
+- NIC for bandwidth node matching the capacity of the site storage nodes(10/25/40/100G), 1G NIC for latency node (for higher NIC capacities, 40/100G, please check [ESNet tuning guide](https://fasterdata.es.net/host-tuning/100g-tuning/))
+- High clock speede CPU (3.0 Ghz+), fwere cores OK, with at least 32GB+ of RAM (8GB+ if using a Testpoint install)
+- NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.
 
 ### Multiple NIC (Network Interface Card) Guidance
 
