@@ -9,7 +9,7 @@
       
       
       
-        <link rel="canonical" href="https://osg-htc/networking/perfsonar-in-osg/">
+        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar-in-osg/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.0">
@@ -279,8 +279,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#changes-for-perfsonar-40" class="md-nav__link">
-    Changes for perfSONAR 4.0
+  <a href="#changes-for-perfsonar-50" class="md-nav__link">
+    Changes for perfSONAR 5.0
   </a>
   
 </li>
@@ -498,8 +498,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#changes-for-perfsonar-40" class="md-nav__link">
-    Changes for perfSONAR 4.0
+  <a href="#changes-for-perfsonar-50" class="md-nav__link">
+    Changes for perfSONAR 5.0
   </a>
   
 </li>
@@ -558,17 +558,16 @@ This is to ensure that we are measuring as much of the network path involved wit
 <li><strong>User's Mailing List</strong> The perfSONAR project maintains a mailing list for communication on matters of installation, configuration, bug reports, or general performance discussions: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">https://lists.internet2.edu/sympa/subscribe/perfsonar-user</a></li>
 <li><strong>Announcement Mailing List</strong> The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">https://lists.internet2.edu/sympa/subscribe/perfsonar-announce</a></li>
 </ul>
-<h4 id="changes-for-perfsonar-40">Changes for perfSONAR 4.0</h4>
-<p>The final release of perfSONAR 4.0 was put into the perfSONAR repository on April 17, 2017. All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days of that date. This release incorporates possibly the largest single change in perfSONAR’s 15-year history, and the developers spent considerable time making sure it was right.</p>
+<h4 id="changes-for-perfsonar-50">Changes for perfSONAR 5.0</h4>
+<p>The first release of <a href="https://www.perfsonar.net/releasenotes-2023-04-17-5-0-0.html">perfSONAR 5.0.0</a> was available on April 17, 2023, followed by a version supporting EL8/EL9 on June 21, 2023 (<a href="https://www.perfsonar.net/releasenotes-2023-06-16-5-0-3.html">version 5.0.3</a>). All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days after the releases.   Version 5 marks a transition for the OSG/WLCG perfSONAR deployment, enabling us to migrate to a new network data pipeline where perfSONAR hosts directly send their measurement data to our central Elasticsearch instance via an HTTP-Archiver and Logstash. </p>
 <p>Highlights include:</p>
 <ul>
-<li>New scheduling software called pScheduler that provides increased visibility, extensibility and control in the measurement process.</li>
-<li>CentOS 7 support</li>
-<li>Debian perfsonar-toolkit bundle support</li>
-<li>Updated graphs</li>
-<li>Support for email alerting in MaDDash</li>
+<li>Use of Opensearch for the measurement archive, replacing ESmond</li>
+<li>Support for new OSes, include EL8 and EL9.</li>
+<li>No longer supports ISO install option.</li>
+<li>Significant number of bug fixes and new features.</li>
 </ul>
-<p>For a more complete list of changes, see the full release notes at: <a href="http://www.perfsonar.net/release-notes/version-4-0/">http://www.perfsonar.net/release-notes/version-4-0/</a></p>
+<p>For a more complete list of changes, see the full release notes at <a href="https://www.perfsonar.net/docs_releasenotes.html">https://www.perfsonar.net/docs_releasenotes.html</a></p>
                 
               
               
