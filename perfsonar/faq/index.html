@@ -308,6 +308,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#installing-a-certificate" class="md-nav__link">
+    Installing a certificate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#network-troubleshooting" class="md-nav__link">
     Network Troubleshooting
   </a>
@@ -498,6 +505,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#installing-a-certificate" class="md-nav__link">
+    Installing a certificate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#network-troubleshooting" class="md-nav__link">
     Network Troubleshooting
   </a>
@@ -546,6 +560,26 @@
 <p>Here we will provide details on troubleshooting perfSONAR installations for OSG and WLCG as well as some additional configuration options and a FAQ.</p>
 <p>A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and isolate network problems can be found at https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/</p>
 <p>We are maintaining a <a href="../../network-troubleshooting/">Network Troubleshooting</a> page to guide users in identifying and following up on network problems.</p>
+<h4 id="installing-a-certificate">Installing a certificate</h4>
+<p><strong>What is the recommended way to install a certificate on my perfSONAR host?</strong></p>
+<p>We recommend using Lets Encrypt (see https://letsencrypt.org).    There is a tutorial that users may find helpful at  <a href="https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&amp;text=Befor">Secure Apache with Lets Encrypt</a>.   </p>
+<details>
+    <summary>A quick set of steps is shown here:</summary>
+    <p>0. install certbot with yum, dnf, or snap  yum install certbot python3-certbot-apache
+    1. certbot needs port. So, in general I keep it closed.  systemctl stop firewalld  systemctl stop httpd
+    2. test with dry-run  certbot certonly --standalone --preferred-challenges http --dry-run
+    3. get the cerificte  certbot certonly --standalone --preferred-challenges http
+    4. restart httpd  systemctl start firewalld  systemctl start httpd 
+    5. certificate is installed under  /etc/letsencrypt/
+    6. Tell http where your certificate is.  The file /etc/httpd/conf.d/ssl.conf
+        1. Set SSLCertificateFile to /etc/letsencrypt/live/FQDN/cert.pem
+        2. Set SSLCertificateKeyFile /etc/letsencrypt/live/FQDN/privkey.pem
+        3. Set SSLCertificateChainFile /etc/letsencrypt/live/FQDN/fullchain.pem  
+    7. renew your certficate certbot renew --dry-run certbot renew 
+    8. Make a donation :)</p>
+</details>
+
+<p>Thanks to Raul Lopes for these details!</p>
 <h4 id="network-troubleshooting">Network Troubleshooting</h4>
 <ul>
 <li>I suspect there is a network performance issue impacting my site</li>
