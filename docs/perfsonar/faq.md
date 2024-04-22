@@ -6,6 +6,30 @@ A good overview of existing tools provided by perfSONAR toolkit and examples how
 
 We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) page to guide users in identifying and following up on network problems.
 
+#### Installing a certificate
+
+**What is the recommended way to install a certificate on my perfSONAR host?**
+
+We recommend using Lets Encrypt (see https://letsencrypt.org).    There is a tutorial that users may find helpful at  [Secure Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).   
+
+<details>
+    <summary>A quick set of steps is shown here:</summary>
+    <p>0. install certbot with yum, dnf, or snap  yum install certbot python3-certbot-apache
+    1. certbot needs port. So, in general I keep it closed.  systemctl stop firewalld  systemctl stop httpd
+    2. test with dry-run  certbot certonly --standalone --preferred-challenges http --dry-run
+    3. get the cerificte  certbot certonly --standalone --preferred-challenges http
+    4. restart httpd  systemctl start firewalld  systemctl start httpd 
+    5. certificate is installed under  /etc/letsencrypt/
+    6. Tell http where your certificate is.  The file /etc/httpd/conf.d/ssl.conf
+        1. Set SSLCertificateFile to /etc/letsencrypt/live/FQDN/cert.pem
+        2. Set SSLCertificateKeyFile /etc/letsencrypt/live/FQDN/privkey.pem
+        3. Set SSLCertificateChainFile /etc/letsencrypt/live/FQDN/fullchain.pem  
+    7. renew your certficate certbot renew --dry-run certbot renew 
+    8. Make a donation :)</p>
+</details>
+
+Thanks to Raul Lopes for these details!
+
 #### Network Troubleshooting
 
 * I suspect there is a network performance issue impacting my site
