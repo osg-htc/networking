@@ -565,18 +565,18 @@
 <p>We recommend using Lets Encrypt (see https://letsencrypt.org).    There is a tutorial that users may find helpful at  <a href="https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&amp;text=Befor">Secure Apache with Lets Encrypt</a>.   </p>
 <details>
     <summary>A quick set of steps is shown here:</summary>
-    <p>0. install certbot with yum, dnf, or snap  yum install certbot python3-certbot-apache
-    1. certbot needs port. So, in general I keep it closed.  systemctl stop firewalld  systemctl stop httpd
-    2. test with dry-run  certbot certonly --standalone --preferred-challenges http --dry-run
-    3. get the cerificte  certbot certonly --standalone --preferred-challenges http
-    4. restart httpd  systemctl start firewalld  systemctl start httpd 
-    5. certificate is installed under  /etc/letsencrypt/
-    6. Tell http where your certificate is.  The file /etc/httpd/conf.d/ssl.conf
-        1. Set SSLCertificateFile to /etc/letsencrypt/live/FQDN/cert.pem
-        2. Set SSLCertificateKeyFile /etc/letsencrypt/live/FQDN/privkey.pem
-        3. Set SSLCertificateChainFile /etc/letsencrypt/live/FQDN/fullchain.pem  
-    7. renew your certficate certbot renew --dry-run certbot renew 
-    8. Make a donation :)</p>
+    <p>0. Install certbot with yum, dnf, or snap:  **yum install certbot python3-certbot-apache**</p>
+    <p>1. Certbot needs port 80/443 so stop anything blocking it or using it:  **systemctl stop firewalld  systemctl stop httpd**</p>
+    <p>2. Test with dry-run:  **certbot certonly --standalone --preferred-challenges http --dry-run**</p>
+    <p>3. Get the certificate:  **certbot certonly --standalone --preferred-challenges http**</p>
+    <p>4. Restart httpd:  **systemctl start firewalld  systemctl start httpd**</p>
+    <p>5. Note certificate is installed under  /etc/letsencrypt/</p>    
+    <p>6. Tell http where your certificate is:  Edit /etc/httpd/conf.d/ssl.conf</p>
+        <p>1. Set **SSLCertificateFile** to /etc/letsencrypt/live/FQDN/cert.pem</p>
+        <p>2. Set **SSLCertificateKeyFile** to /etc/letsencrypt/live/FQDN/privkey.pem</p>
+        <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>  
+    <p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
+    <p>8. Make a donation :)</p>
 </details>
 
 <p>Thanks to Raul Lopes for these details!</p>
