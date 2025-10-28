@@ -1,4 +1,7 @@
-## perfSONAR Installation Guide 
+## perfSONAR Installation Guide
+
+!!! note
+    This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.
 
 This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult our [overview](../perfsonar-in-osg.md) and possible [deployment options](deployment-models.md) before installing. For troubleshooting an existing installation please consult official [Troubleshooting Guide](http://docs.perfsonar.net/troubleshooting_overview.html), [FAQ](http://docs.perfsonar.net/FAQ.html) as well as WLCG/OSG specific [FAQ](faq.md).
 
@@ -10,7 +13,7 @@ Prior to installing please consult the [release notes](https://www.perfsonar.net
 
 * Upgrades: We recommend *reinstalling* using an EL9 (RHEL,Rocky,Alma) OS for all sites already running a registered instance or planning new installation. The primary reason for this recommendation is to provide a long-term supported OS and to benefit from a 5.x kernel.
 * perfSONAR team provides support for Debian9 and Ubuntu as well, but we recommend to use EL9 to have a common, well understood deployment.
-* *Local measurement archive backup is not needed* as OSG/WLCG stores all measurements centrally. 
+* *Local measurement archive backup is not needed* as OSG/WLCG stores all measurements centrally.
 * In case you plan to deploy a single bare metal node with multiple NICs, please consult [Multiple NIC Guidance](deployment-models.md)
 
 First, install your chosen EL9 operating system on your host after saving you local configuration if you are "updating".
@@ -25,30 +28,32 @@ The following options are then recommended to install perfSONAR for OSG/WLCG:
 You can see more details about EL supported installs at <https://docs.perfsonar.net/install_el.html>
 
 !!! note
-    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4+. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances. 
+    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4+. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances.
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:
 
 * Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in OSG Topology below. For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
-* You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below: 
-    * **For toolkit versions 5.0 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
-	```
-	=== pScheduler Agent ===
-	[
-	   {
-	      "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
-	      "configure-archives" : true
-	   }
-	]
-	```
-    * Please remove any old/stale URLs using `psconfig remote delete <URL>`
+* You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
+  * **For toolkit versions 5.0 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
 
-* If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication. 
+ ```json
+ === pScheduler Agent ===
+ [
+    {
+       "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
+       "configure-archives" : true
+    }
+ ]
+ ```
+
+* Please remove any old/stale URLs using `psconfig remote delete <URL>`
+
+* If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication.
 
 !!! note
-    Until your host is added (on https://psconfig.opensciencegrid.org ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
-	
+    Until your host is added (on <https://psconfig.opensciencegrid.org> ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
+
 * We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
 * Adding *communities* is optional, but if you do, we recommend putting in WLCG as well as your VO: `ATLAS`, `CMS`, etc. This just helps others from the community lookup your instances in the public lookup service. As noted in the documentation you can select from already registered communities as appropriate.
 * Please check that both **local and campus firewall** has the necessary [port openings](#security-considerations). Local iptables are configured automatically, but there are ways how to tune the existing set, please see the official [firewall](http://docs.perfsonar.net/manage_security.html#adding-your-own-firewall-rules) guide for details.
@@ -62,20 +67,20 @@ Provided that you have enabled auto-updates, the only thing that remains is to f
 
 In case you'd like to manually update the node please follow the official [guide](http://docs.perfsonar.net/manage_update.html).
 
-Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but there are some community driven projects that could be helpful, such as [HEP-Puppet](http://github.com/HEP-Puppet/perfsonar). As perfSONAR manages most of its configuration automatically via packages and there is very little initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary interventions after auto-updates. 
+Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but there are some community driven projects that could be helpful, such as [HEP-Puppet](http://github.com/HEP-Puppet/perfsonar). As perfSONAR manages most of its configuration automatically via packages and there is very little initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary interventions after auto-updates.
 
 ### Security Considerations
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see [Manage Security](http://docs.perfsonar.net/manage_security.html) for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.   An overview of perfSONAR security is available at <https://www.perfsonar.net/deployment_security.html>
 
-!!! warning 
-	As of perfSONAR 4.0+ ALL perfSONAR instances need to have port 443 accessible to all the other perfSONAR instances. Allowing access to port 443 is **required** because it's now used as a controller port for scheduling tests (via pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available. Starting from perfSONAR 4.0, HTTPS/443 is now by default configured on all perfSONAR instances, i.e. local iptables as well as httpd configuration comes out of the box and requires no extra steps, therefore opening is only needed if you have central/campus firewall.
+!!! warning
+    As of perfSONAR 4.0+ ALL perfSONAR instances need to have port 443 accessible to all the other perfSONAR instances. Allowing access to port 443 is **required** because it's now used as a controller port for scheduling tests (via pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available. Starting from perfSONAR 4.0, HTTPS/443 is now by default configured on all perfSONAR instances, i.e. local iptables as well as httpd configuration comes out of the box and requires no extra steps, therefore opening is only needed if you have central/campus firewall.
 
-For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues. 
+For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues.
 
 !!! warning
-	In case you have **central/campus firewall**, please check the required port openings in the [perfSONAR security documentation](http://docs.perfsonar.net/manage_security.html).  
-	
+    In case you have **central/campus firewall**, please check the required port openings in the [perfSONAR security documentation](http://docs.perfsonar.net/manage_security.html).  
+
 ### Enabling SNMP plugins
 
 Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a [beta feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.
@@ -86,30 +91,30 @@ This section describes how to register the perfSONAR service in GOCDB.
 
 In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service Endpoint
 
--   <https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint>
+* <https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint>
 
 You might not be able to access the page if you are not properly registered in GOC, so a snapshot can be found below. In filling the information please follow those simple guidelines:
 
--   There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).
--   For each form (i.e. for each service type) fill at least the important informations:
-    -   Hosting Site (drop-down menu, mandatory)
-    -   Service Type (drop-down menu, mandatory)
-    -   Host Name (free text, mandatory)
-    -   Host IP (free text, optional)
-    -   Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
-    -   Check "N" when asked "Is it a beta service"
-    -   Check "Y" when asked "Is this service in production"
-    -   Check "Y" when asked "Is this service monitored"
+* There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).
+* For each form (i.e. for each service type) fill at least the important informations:
+* Hosting Site (drop-down menu, mandatory)
+* Service Type (drop-down menu, mandatory)
+* Host Name (free text, mandatory)
+* Host IP (free text, optional)
+* Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
+* Check "N" when asked "Is it a beta service"
+* Check "Y" when asked "Is this service in production"
+* Check "Y" when asked "Is this service monitored"
 
 <!-- -->
 
--   GOCDB screen shot for creating a Service Endpoint: 
+* GOCDB screen shot for creating a Service Endpoint:
 <img src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" alt="GOCDB screen shot for creating a Service Endpoint" width="1024">
 
 ### Register perfSONAR in OSG Topology
 
 Each *OSG site* should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR instances.
 
-To add hosts to OSG Topology, please follow the instructions at https://osg-htc.org/docs/common/registration/
+To add hosts to OSG Topology, please follow the instructions at <https://osg-htc.org/docs/common/registration/>
 
-If you have problems or questions please consult our [FAQ](faq.md) or alternatively open a ticket with GOC. 
+If you have problems or questions please consult our [FAQ](faq.md) or alternatively open a ticket with GOC.
