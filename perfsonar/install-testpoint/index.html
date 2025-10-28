@@ -9,14 +9,14 @@
       
       
       
-        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/psetf/">
+        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/install-testpoint/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.0">
     
     
       
-        <title>Infrastructure Monitoring - OSG Networking Area</title>
+        <title>Install testpoint - OSG Networking Area</title>
       
     
     
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#infrastructure-monitoring" class="md-skip">
+        <a href="#1-prerequisites" class="md-skip">
           Skip to content
         </a>
       
@@ -93,7 +93,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Infrastructure Monitoring
+              Install testpoint
             
           </span>
         </div>
@@ -344,14 +344,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
       
       <label class="md-nav__link" for="__nav_4">
         Network Services
@@ -367,45 +365,11 @@
             
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Infrastructure Monitoring
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../psetf/" class="md-nav__link">
         Infrastructure Monitoring
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#infrastructure-monitoring" class="md-nav__link">
-    Infrastructure Monitoring
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -463,8 +427,138 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#infrastructure-monitoring" class="md-nav__link">
-    Infrastructure Monitoring
+  <a href="#1-prerequisites" class="md-nav__link">
+    1. Prerequisites
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ensure-the-host-is-up-to-date" class="md-nav__link">
+    Ensure the host is up to date:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-required-packages" class="md-nav__link">
+    Install required packages:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-deploy-the-perfsonar-testpoint-container" class="md-nav__link">
+    2. Deploy the perfSONAR Testpoint Container
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Deploy the perfSONAR Testpoint Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-repository" class="md-nav__link">
+    Clone the repository:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prepare-configuration-storage" class="md-nav__link">
+    Prepare configuration storage:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edit-the-compose-file-as-needed" class="md-nav__link">
+    Edit the compose file as needed:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pull-and-launch-the-container" class="md-nav__link">
+    Pull and Launch the Container:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-configure-policy-based-routing-for-multi-homed-nics" class="md-nav__link">
+    3. Configure Policy-Based Routing for Multi-Homed NICs
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Configure Policy-Based Routing for Multi-Homed NICs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-add-custom-routing-tables" class="md-nav__link">
+    a) Add custom routing tables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-add-routes-and-rules-replace-ips-as-appropriate" class="md-nav__link">
+    b) Add routes and rules (replace IPs as appropriate):
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-make-persistent" class="md-nav__link">
+    c) Make persistent
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-example-nftables-firewall-rules" class="md-nav__link">
+    4. Example NFTables Firewall Rules
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-optional-perfsonar-testpoint-container-networking" class="md-nav__link">
+    5. Optional: perfSONAR Testpoint Container Networking
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-confirm-operation" class="md-nav__link">
+    6. Confirm Operation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-optional-configure-perfsonar-remotes" class="md-nav__link">
+    7. (Optional) Configure perfSONAR Remotes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-references-further-reading" class="md-nav__link">
+    8. References &amp; Further Reading
   </a>
   
 </li>
@@ -481,30 +575,155 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/osg-htc/networking/edit/master/docs/perfsonar/psetf.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/osg-htc/networking/edit/master/docs/perfsonar/install-testpoint.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>Infrastructure Monitoring</h1>
+                  <h1>Install testpoint</h1>
                 
-                <h3 id="infrastructure-monitoring">Infrastructure Monitoring</h3>
-<p>WLCG/OSG is operating more than 200 perfSONAR agents world-wide. A typical perfSONAR deployment has many services that need to function correctly for the the system to work.  As we scale-up to many perfSONAR deployments across many sites it can be
-difficult to verify everything is working correctly.</p>
-<p><a href="https://psetf.opensciencegrid.org/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py">perfSONAR monitoring instance</a> actively monitors the state of the infrastructure for both remote perfSONAR installation as well as central services. The instance is based on <a href="http://etf.cern.ch/docs/latest/">ETF</a>, which is an open source measurement middleware for functional/availability testing of the resources. In order to access the page you'll need to have x509 grid certificate loaded in the browser.</p>
-<p>A sample initial dashboard is shown below:</p>
-<p><img src="../../img/etf.png" alt="Initial perfSONAR dashboard" width="1024"></p>
-<p>You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into four categories:</p>
-<ol>
-<li><em>Configuration tests</em> (<code>perfSONAR configuration:</code>) tests if the contact, organisation and meshes were set following our <a href="../installation/">installation guide</a>.</li>
-<li><em>Service tests</em> (<code>perfSONAR services:</code>) check if different perfSONAR toolkit services are up and running correctly as well as if ports are reachable from OSG subnets.</li>
-<li><em>Hardware test</em> (<code>perfSONAR hardware</code>) checks if the node conforms to the minimal hardware requirements (see <a href="../deployment-models/">Requirements</a> for details)</li>
-<li><em>Freshness tests</em> (<code>perfSONAR freshness</code>) is a high level test that checks what tests are available in the local measurement archive and compares this with the tests configured. There can be many different reasons why certain tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with measurement archive or scheduling, therefore this test is informative and never reaches critical state. A special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results are stored centrally as compared to local measurement archive. It mainly reflects on the efficiency of the central OSG collector and doesn't provide any information on the on the local services.</li>
-</ol>
-<p>This is sample snapshost showing all metrics for particular perfSONAR instance (latency node in this case):
-<img src="../../img/etf_page.png" alt="Sample Snapshot of all metrics for a perfSONAR instance" width="1024"></p>
-<p>For any issues/questions concerning the monitoring pages and tests, please consult the <a href="../faq/">FAQ</a></p>
-<p>Central services are also monitored with the same tool and their status can be seen by following Business Intelligence/All Aggregations on the left pane. It shows the aggregated status of both production and pre-production services including mesh configuration interface, central datastore and infrastructure monitoring.</p>
+                <h2 id="1-prerequisites"><strong>1. Prerequisites</strong></h2>
+<h3 id="ensure-the-host-is-up-to-date"><strong>Ensure the host is up to date:</strong></h3>
+<p>sudo dnf update -y</p>
+<h3 id="install-required-packages"><strong>Install required packages:</strong></h3>
+<p>sudo dnf install -y git podman docker-compose nftables iproute</p>
+<ul>
+<li><em>Note</em>: podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.</li>
+</ul>
+<hr />
+<h2 id="2-deploy-the-perfsonar-testpoint-container"><strong>2. Deploy the perfSONAR Testpoint Container</strong></h2>
+<h3 id="clone-the-repository"><strong>Clone the repository:</strong></h3>
+<p>git clone https://github.com/perfsonar/perfsonar-testpoint-docker.git<br />
+cd perfsonar-testpoint-docker</p>
+<h3 id="prepare-configuration-storage"><strong>Prepare configuration storage:</strong></h3>
+<p>sudo mkdir -p /opt/testpoint/<br />
+sudo cp -r compose/psconfig /opt/testpoint/</p>
+<h3 id="edit-the-compose-file-as-needed"><strong>Edit the compose file as needed:</strong></h3>
+<p>Edit docker-compose.systemd.yml if you need to customize e.g., resource limits or volumes.</p>
+<hr />
+<h3 id="pull-and-launch-the-container"><strong>Pull and Launch the Container:</strong></h3>
+<p>sudo podman-compose -f docker-compose.systemd.yml pull<br />
+sudo podman-compose -f docker-compose.systemd.yml up -d</p>
+<p><em>Or, if using Docker:</em></p>
+<p>sudo docker compose -f docker-compose.systemd.yml pull<br />
+sudo docker compose -f docker-compose.systemd.yml up -d</p>
+<hr />
+<h2 id="3-configure-policy-based-routing-for-multi-homed-nics"><strong>3. Configure Policy-Based Routing for Multi-Homed NICs</strong></h2>
+<p>Suppose:</p>
+<ul>
+<li>eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1  </li>
+<li>eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1</li>
+</ul>
+<h3 id="a-add-custom-routing-tables"><strong>a) Add custom routing tables</strong></h3>
+<p>Edit /etc/iproute2/rt_tables and add:</p>
+<p>200  eth0table<br />
+201  eth1table</p>
+<h3 id="b-add-routes-and-rules-replace-ips-as-appropriate"><strong>b) Add routes and rules (replace IPs as appropriate):</strong></h3>
+<p># Add rules for eth0 (latency)<br />
+sudo ip rule add from 192.168.10.10/32 table eth0table</p>
+<p>sudo ip route add 192.168.10.0/24 dev eth0 scope link table eth0table<br />
+sudo ip route add default via 192.168.10.1 dev eth0 table eth0table</p>
+<p># Add rules for eth1 (throughput)<br />
+sudo ip rule add from 10.20.30.10/32 table eth1table</p>
+<p>sudo ip route add 10.20.30.0/24 dev eth1 scope link table eth1table<br />
+sudo ip route add default via 10.20.30.1 dev eth1 table eth1table</p>
+<h3 id="c-make-persistent"><strong>c) Make persistent</strong></h3>
+<p>For persistent configuration, add these rules and routes to a script (e.g., /usr/local/sbin/perfsonar-policy-routing.sh) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.</p>
+<p>Example systemd unit:</p>
+<p># /etc/systemd/system/perfsonar-policy-routing.service<br />
+<strong>[Unit]</strong><br />
+Description\=PerfSONAR Policy Routing<br />
+After\=network.target</p>
+<p><strong>[Service]</strong><br />
+Type\=oneshot<br />
+ExecStart\=/usr/local/sbin/perfsonar-policy-routing.sh</p>
+<p><strong>[Install]</strong><br />
+WantedBy\=multi-user.target</p>
+<p>Enable it:</p>
+<p>sudo systemctl enable --now perfsonar-policy-routing</p>
+<hr />
+<h2 id="4-example-nftables-firewall-rules"><strong>4. Example NFTables Firewall Rules</strong></h2>
+<p>Below is a sample NFTables rule set that</p>
+<ul>
+<li>Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)  </li>
+<li>Restricts SSH access to trusted subnets/hosts  </li>
+<li>Accepts ICMP/ICMPv6 and related/permitted connections</li>
+</ul>
+<p>/etc/nftables.conf:</p>
+<p>flush ruleset</p>
+<p>table inet perfsonar {<br />
+    set allowed_protocols {<br />
+        type inet_proto<br />
+        elements \= { icmp, icmpv6 }<br />
+    }<br />
+    set allowed_interfaces {<br />
+        type ifname<br />
+        elements \= { "lo" }<br />
+    }<br />
+    set allowed_tcp_dports {<br />
+        type inet_service<br />
+        elements \= { 22, 443, 861, 862, 9090, 123, 5201, 5001, 5000, 5101 }<br />
+    }<br />
+    set allowed_udp_ports {<br />
+        type inet_service<br />
+        elements \= { 123, 5201, 5001, 5000, 5101 }<br />
+    }<br />
+    chain allow {<br />
+        ct state established,related accept<br />
+        ct state invalid drop<br />
+        meta l4proto @allowed_protocols accept<br />
+        iifname @allowed_interfaces accept<br />
+        tcp dport @allowed_tcp_dports ct state new accept<br />
+        udp dport @allowed_udp_ports ct state new accept<br />
+        # traceroute and test ranges<br />
+        udp dport 33434-33634 ct state new accept<br />
+        udp dport 18760-19960 ct state new accept<br />
+        udp dport 8760-9960 ct state new accept<br />
+        tcp dport 5890-5900 ct state new accept<br />
+        # SSH controls (add your trusted IPs/subnets)<br />
+        tcp dport 22 ip saddr 192.168.10.0/24 accept<br />
+        tcp dport 22 ip saddr 10.20.30.0/24 accept<br />
+    }<br />
+    chain input {<br />
+        type filter hook input priority 0; policy drop;<br />
+        jump allow<br />
+        reject with icmpx admin-prohibited<br />
+    }<br />
+}</p>
+<p>Apply and persist:</p>
+<p>sudo nft -f /etc/nftables.conf<br />
+sudo systemctl enable --now nftables</p>
+<hr />
+<h2 id="5-optional-perfsonar-testpoint-container-networking"><strong>5. Optional: perfSONAR Testpoint Container Networking</strong></h2>
+<p>If you want the container to use a specific NIC, adjust the docker-compose.systemd.yml to use --network host, or configure the container’s network accordingly. By default, host mode is recommended for testpoint deployments to avoid NAT and ensure direct packet timing.</p>
+<hr />
+<h2 id="6-confirm-operation"><strong>6. Confirm Operation</strong></h2>
+<p>Check containers:<br />
+sudo podman ps<br />
+# or<br />
+sudo docker ps</p>
+<ul>
+<li></li>
+</ul>
+<p>Check logs:<br />
+sudo podman logs perfsonar-testpoint</p>
+<ul>
+<li></li>
+<li>Test connectivity between testpoints.</li>
+</ul>
+<hr />
+<h2 id="7-optional-configure-perfsonar-remotes"><strong>7. (Optional) Configure perfSONAR Remotes</strong></h2>
+<p>To register your testpoint with a central config:</p>
+<p>sudo podman exec -it perfsonar-testpoint psconfig remote list<br />
+sudo podman exec -it perfsonar-testpoint psconfig remote --configure-archives add http://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch</p>
+<hr />
+<h2 id="8-references-further-reading"><strong>8. References &amp; Further Reading</strong></h2>
+<ul>
+<li><a href="https://github.com/perfsonar/perfsonar-testpoint-docker/">perfSONAR testpoint Docker GitHub</a>  </li>
+<li><a href="https://docs.perfsonar.net/">perfSONAR Documentation</a>  </li>
+<li><a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_configuring-policy-based-routing_configuring-and-managing-networking">Red Hat Policy Routing</a>  </li>
+<li><a href="https://wiki.nftables.org/">NFTables Wiki</a></li>
+</ul>
                 
               
               
@@ -520,39 +739,6 @@ difficult to verify everything is working correctly.</p>
       
         
 <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        <a href="../../network-troubleshooting/osg-debugging-document/" class="md-footer__link md-footer__link--prev" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              OSG Network Debugging Document
-            </div>
-          </div>
-        </a>
-      
-      
-        <a href="../../osg-network-services/" class="md-footer__link md-footer__link--next" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Network Datastore and Streaming
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
