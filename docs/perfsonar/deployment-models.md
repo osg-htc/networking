@@ -10,7 +10,7 @@ The primary motivation for perfSONAR deployment is to test isolation, i.e. only 
   * VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
   * Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production
 * **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
-  * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a test-point which can send results to a local measurement archive running on the perfSONAR toolkit node.
+  * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
 
 ### perfSONAR Toolkit vs Testpoint
 
@@ -24,7 +24,7 @@ The perfSONAR team has documented the types of installations supported at <https
   * No web interface to use for configuration or adding local tests
   * Unable to show results in MaDDash
 
-While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced resource constraints, less components and easier management.   
+While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced resource constraints, less components and easier management.
 
 ### perfSONAR Hardware Requirements
 
