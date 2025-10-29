@@ -42,6 +42,16 @@
     <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  
+  
+
+
+  <script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-69012-29","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),"undefined"!=typeof location$&&location$.subscribe(function(e){ga("send","pageview",e.pathname)})})</script>
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
+
 
     
     
@@ -627,14 +637,14 @@
 
   <h1>Installation and Maintenance</h1>
 
-<h2 id="perfsonar-installation-guide">perfSONAR Installation Guide</h2>
+<h2 id="perfsonar-installation-guide">perfSONAR Installation Guide<a class="headerlink" href="#perfsonar-installation-guide" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.</p>
 </div>
 <p>This page documents installing/upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult our <a href="../../perfsonar-in-osg/">overview</a> and possible <a href="../deployment-models/">deployment options</a> before installing. For troubleshooting an existing installation please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting Guide</a>, <a href="http://docs.perfsonar.net/FAQ.html">FAQ</a> as well as WLCG/OSG specific <a href="../faq/">FAQ</a>.</p>
 <p>For any questions or help with WLCG perfSONAR setup, please contact <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">GGUS</a> WLCG perfSONAR support unit or OSG <a href="http://support.opensciencegrid.org">GOC</a>. We strongly recommend anyone maintaining/using perfSONAR to join <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">perfsonar-user</a> and <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">perfsonar-announce</a> mailing lists.</p>
-<h3 id="installation-or-upgrade">Installation or Upgrade</h3>
+<h3 id="installation-or-upgrade">Installation or Upgrade<a class="headerlink" href="#installation-or-upgrade" title="Permanent link">&para;</a></h3>
 <p>Prior to installing please consult the <a href="https://www.perfsonar.net/docs_releasenotes.html">release notes</a>) for the latest available release. In case you have already an instance running and wish to re-install/update it then please follow our recommendations:</p>
 <ul>
 <li>Upgrades: We recommend <em>reinstalling</em> using an EL9 (RHEL,Rocky,Alma) OS for all sites already running a registered instance or planning new installation. The primary reason for this recommendation is to provide a long-term supported OS and to benefit from a 5.x kernel.</li>
@@ -674,14 +684,14 @@
 <li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:</li>
 <li><strong>For toolkit versions 5.0 and higher</strong>, please run from the command line <code>psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.</li>
 </ul>
-<p><code>json
- === pScheduler Agent ===
- [
-    {
-       "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
-       "configure-archives" : true
-    }
- ]</code></p>
+<div class="highlight"><pre><span></span><code><span class="err">===</span><span class="w"> </span><span class="err">pScheduler</span><span class="w"> </span><span class="err">Age</span><span class="kc">nt</span><span class="w"> </span><span class="err">===</span><span class="w"></span>
+<span class="p">[</span><span class="w"></span>
+<span class="w">   </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;configure-archives&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
+</code></pre></div>
 <ul>
 <li>
 <p>Please remove any old/stale URLs using <code>psconfig remote delete &lt;URL&gt;</code></p>
@@ -701,11 +711,11 @@
 <li>Once installation is finished, please <strong>reboot</strong> the node.</li>
 </ul>
 <p>For any further questions, please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting Guide</a>, <a href="http://docs.perfsonar.net/FAQ.html">FAQ</a> as well as WLCG/OSG specific <a href="../faq/">FAQ</a> or contact directly WLCG or OSG perfSONAR support units.</p>
-<h3 id="maintenance">Maintenance</h3>
+<h3 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h3>
 <p>Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues and either patch the node as soon as possible or reboot once the patched kernel is released.</p>
 <p>In case you'd like to manually update the node please follow the official <a href="http://docs.perfsonar.net/manage_update.html">guide</a>.</p>
 <p>Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but there are some community driven projects that could be helpful, such as <a href="http://github.com/HEP-Puppet/perfsonar">HEP-Puppet</a>. As perfSONAR manages most of its configuration automatically via packages and there is very little initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary interventions after auto-updates.</p>
-<h3 id="security-considerations">Security Considerations</h3>
+<h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
 <p>The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see <a href="http://docs.perfsonar.net/manage_security.html">Manage Security</a> for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.   An overview of perfSONAR security is available at <a href="https://www.perfsonar.net/deployment_security.html">https://www.perfsonar.net/deployment_security.html</a></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -716,9 +726,9 @@
 <p class="admonition-title">Warning</p>
 <p>In case you have <strong>central/campus firewall</strong>, please check the required port openings in the <a href="http://docs.perfsonar.net/manage_security.html">perfSONAR security documentation</a>.  </p>
 </div>
-<h3 id="enabling-snmp-plugins">Enabling SNMP plugins</h3>
+<h3 id="enabling-snmp-plugins">Enabling SNMP plugins<a class="headerlink" href="#enabling-snmp-plugins" title="Permanent link">&para;</a></h3>
 <p>Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a <a href="http://www.perfsonar.net/release-notes/version-4-0-2/">beta feature</a> that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.</p>
-<h3 id="register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB</h3>
+<h3 id="register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB<a class="headerlink" href="#register-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h3>
 <p>This section describes how to register the perfSONAR service in GOCDB.</p>
 <p>In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service Endpoint</p>
 <ul>
@@ -743,7 +753,7 @@
 <li>GOCDB screen shot for creating a Service Endpoint:
 <img src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" alt="GOCDB screen shot for creating a Service Endpoint" width="1024"></li>
 </ul>
-<h3 id="register-perfsonar-in-osg-topology">Register perfSONAR in OSG Topology</h3>
+<h3 id="register-perfsonar-in-osg-topology">Register perfSONAR in OSG Topology<a class="headerlink" href="#register-perfsonar-in-osg-topology" title="Permanent link">&para;</a></h3>
 <p>Each <em>OSG site</em> should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR instances.</p>
 <p>To add hosts to OSG Topology, please follow the instructions at <a href="https://osg-htc.org/docs/common/registration/">https://osg-htc.org/docs/common/registration/</a></p>
 <p>If you have problems or questions please consult our <a href="../faq/">FAQ</a> or alternatively open a ticket with GOC.</p>

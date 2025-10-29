@@ -42,6 +42,16 @@
     <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  
+  
+
+
+  <script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-69012-29","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),"undefined"!=typeof location$&&location$.subscribe(function(e){ga("send","pageview",e.pathname)})})</script>
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
+
 
     
     
@@ -622,43 +632,43 @@
 
   <h1>Install testpoint</h1>
 
-<h2 id="1-prerequisites"><strong>1. Prerequisites</strong></h2>
-<h3 id="ensure-the-host-is-up-to-date"><strong>Ensure the host is up to date:</strong></h3>
+<h2 id="1-prerequisites"><strong>1. Prerequisites</strong><a class="headerlink" href="#1-prerequisites" title="Permanent link">&para;</a></h2>
+<h3 id="ensure-the-host-is-up-to-date"><strong>Ensure the host is up to date:</strong><a class="headerlink" href="#ensure-the-host-is-up-to-date" title="Permanent link">&para;</a></h3>
 <p>sudo dnf update -y</p>
-<h3 id="install-required-packages"><strong>Install required packages:</strong></h3>
+<h3 id="install-required-packages"><strong>Install required packages:</strong><a class="headerlink" href="#install-required-packages" title="Permanent link">&para;</a></h3>
 <p>sudo dnf install -y git podman docker-compose nftables iproute</p>
 <ul>
 <li><em>Note</em>: podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.</li>
 </ul>
 <hr />
-<h2 id="2-deploy-the-perfsonar-testpoint-container"><strong>2. Deploy the perfSONAR Testpoint Container</strong></h2>
-<h3 id="clone-the-repository"><strong>Clone the repository:</strong></h3>
+<h2 id="2-deploy-the-perfsonar-testpoint-container"><strong>2. Deploy the perfSONAR Testpoint Container</strong><a class="headerlink" href="#2-deploy-the-perfsonar-testpoint-container" title="Permanent link">&para;</a></h2>
+<h3 id="clone-the-repository"><strong>Clone the repository:</strong><a class="headerlink" href="#clone-the-repository" title="Permanent link">&para;</a></h3>
 <p>git clone https://github.com/perfsonar/perfsonar-testpoint-docker.git<br />
 cd perfsonar-testpoint-docker</p>
-<h3 id="prepare-configuration-storage"><strong>Prepare configuration storage:</strong></h3>
+<h3 id="prepare-configuration-storage"><strong>Prepare configuration storage:</strong><a class="headerlink" href="#prepare-configuration-storage" title="Permanent link">&para;</a></h3>
 <p>sudo mkdir -p /opt/testpoint/<br />
 sudo cp -r compose/psconfig /opt/testpoint/</p>
-<h3 id="edit-the-compose-file-as-needed"><strong>Edit the compose file as needed:</strong></h3>
+<h3 id="edit-the-compose-file-as-needed"><strong>Edit the compose file as needed:</strong><a class="headerlink" href="#edit-the-compose-file-as-needed" title="Permanent link">&para;</a></h3>
 <p>Edit docker-compose.systemd.yml if you need to customize e.g., resource limits or volumes.</p>
 <hr />
-<h3 id="pull-and-launch-the-container"><strong>Pull and Launch the Container:</strong></h3>
+<h3 id="pull-and-launch-the-container"><strong>Pull and Launch the Container:</strong><a class="headerlink" href="#pull-and-launch-the-container" title="Permanent link">&para;</a></h3>
 <p>sudo podman-compose -f docker-compose.systemd.yml pull<br />
 sudo podman-compose -f docker-compose.systemd.yml up -d</p>
 <p><em>Or, if using Docker:</em></p>
 <p>sudo docker compose -f docker-compose.systemd.yml pull<br />
 sudo docker compose -f docker-compose.systemd.yml up -d</p>
 <hr />
-<h2 id="3-configure-policy-based-routing-for-multi-homed-nics"><strong>3. Configure Policy-Based Routing for Multi-Homed NICs</strong></h2>
+<h2 id="3-configure-policy-based-routing-for-multi-homed-nics"><strong>3. Configure Policy-Based Routing for Multi-Homed NICs</strong><a class="headerlink" href="#3-configure-policy-based-routing-for-multi-homed-nics" title="Permanent link">&para;</a></h2>
 <p>Suppose:</p>
 <ul>
 <li>eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1  </li>
 <li>eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1</li>
 </ul>
-<h3 id="a-add-custom-routing-tables"><strong>a) Add custom routing tables</strong></h3>
+<h3 id="a-add-custom-routing-tables"><strong>a) Add custom routing tables</strong><a class="headerlink" href="#a-add-custom-routing-tables" title="Permanent link">&para;</a></h3>
 <p>Edit /etc/iproute2/rt_tables and add:</p>
 <p>200  eth0table<br />
 201  eth1table</p>
-<h3 id="b-add-routes-and-rules-replace-ips-as-appropriate"><strong>b) Add routes and rules (replace IPs as appropriate):</strong></h3>
+<h3 id="b-add-routes-and-rules-replace-ips-as-appropriate"><strong>b) Add routes and rules (replace IPs as appropriate):</strong><a class="headerlink" href="#b-add-routes-and-rules-replace-ips-as-appropriate" title="Permanent link">&para;</a></h3>
 <p># Add rules for eth0 (latency)<br />
 sudo ip rule add from 192.168.10.10/32 table eth0table</p>
 <p>sudo ip route add 192.168.10.0/24 dev eth0 scope link table eth0table<br />
@@ -667,7 +677,7 @@ sudo ip route add default via 192.168.10.1 dev eth0 table eth0table</p>
 sudo ip rule add from 10.20.30.10/32 table eth1table</p>
 <p>sudo ip route add 10.20.30.0/24 dev eth1 scope link table eth1table<br />
 sudo ip route add default via 10.20.30.1 dev eth1 table eth1table</p>
-<h3 id="c-make-persistent"><strong>c) Make persistent</strong></h3>
+<h3 id="c-make-persistent"><strong>c) Make persistent</strong><a class="headerlink" href="#c-make-persistent" title="Permanent link">&para;</a></h3>
 <p>For persistent configuration, add these rules and routes to a script (e.g., /usr/local/sbin/perfsonar-policy-routing.sh) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.</p>
 <p>Example systemd unit:</p>
 <p># /etc/systemd/system/perfsonar-policy-routing.service<br />
@@ -682,7 +692,7 @@ WantedBy\=multi-user.target</p>
 <p>Enable it:</p>
 <p>sudo systemctl enable --now perfsonar-policy-routing</p>
 <hr />
-<h2 id="4-example-nftables-firewall-rules"><strong>4. Example NFTables Firewall Rules</strong></h2>
+<h2 id="4-example-nftables-firewall-rules"><strong>4. Example NFTables Firewall Rules</strong><a class="headerlink" href="#4-example-nftables-firewall-rules" title="Permanent link">&para;</a></h2>
 <p>Below is a sample NFTables rule set that</p>
 <ul>
 <li>Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)  </li>
@@ -734,10 +744,10 @@ WantedBy\=multi-user.target</p>
 <p>sudo nft -f /etc/nftables.conf<br />
 sudo systemctl enable --now nftables</p>
 <hr />
-<h2 id="5-optional-perfsonar-testpoint-container-networking"><strong>5. Optional: perfSONAR Testpoint Container Networking</strong></h2>
+<h2 id="5-optional-perfsonar-testpoint-container-networking"><strong>5. Optional: perfSONAR Testpoint Container Networking</strong><a class="headerlink" href="#5-optional-perfsonar-testpoint-container-networking" title="Permanent link">&para;</a></h2>
 <p>If you want the container to use a specific NIC, adjust the docker-compose.systemd.yml to use --network host, or configure the container’s network accordingly. By default, host mode is recommended for testpoint deployments to avoid NAT and ensure direct packet timing.</p>
 <hr />
-<h2 id="6-confirm-operation"><strong>6. Confirm Operation</strong></h2>
+<h2 id="6-confirm-operation"><strong>6. Confirm Operation</strong><a class="headerlink" href="#6-confirm-operation" title="Permanent link">&para;</a></h2>
 <p>Check containers:<br />
 sudo podman ps<br />
 # or<br />
@@ -752,12 +762,12 @@ sudo podman logs perfsonar-testpoint</p>
 <li>Test connectivity between testpoints.</li>
 </ul>
 <hr />
-<h2 id="7-optional-configure-perfsonar-remotes"><strong>7. (Optional) Configure perfSONAR Remotes</strong></h2>
+<h2 id="7-optional-configure-perfsonar-remotes"><strong>7. (Optional) Configure perfSONAR Remotes</strong><a class="headerlink" href="#7-optional-configure-perfsonar-remotes" title="Permanent link">&para;</a></h2>
 <p>To register your testpoint with a central config:</p>
 <p>sudo podman exec -it perfsonar-testpoint psconfig remote list<br />
 sudo podman exec -it perfsonar-testpoint psconfig remote --configure-archives add http://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch</p>
 <hr />
-<h2 id="8-references-further-reading"><strong>8. References &amp; Further Reading</strong></h2>
+<h2 id="8-references-further-reading"><strong>8. References &amp; Further Reading</strong><a class="headerlink" href="#8-references-further-reading" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://github.com/perfsonar/perfsonar-testpoint-docker/">perfSONAR testpoint Docker GitHub</a>  </li>
 <li><a href="https://docs.perfsonar.net/">perfSONAR Documentation</a>  </li>

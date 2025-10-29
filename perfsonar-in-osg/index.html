@@ -42,6 +42,16 @@
     <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  
+  
+
+
+  <script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-69012-29","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),"undefined"!=typeof location$&&location$.subscribe(function(e){ga("send","pageview",e.pathname)})})</script>
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
+
 
     
     
@@ -571,10 +581,10 @@
 
   <h1>Motivation</h1>
 
-<h3 id="overview-of-perfsonar">Overview of perfSONAR</h3>
+<h3 id="overview-of-perfsonar">Overview of perfSONAR<a class="headerlink" href="#overview-of-perfsonar" title="Permanent link">&para;</a></h3>
 <p>For those not familiar with <code>perfSONAR</code>, this page provides a quick overview of what it is and why we recommend its deployment at OSG and WLCG sites.</p>
 <p>OSG is working to support the scientific networking needs of it's constituents and collaborators. To do this, we are recommending all sites deploy perfSONAR so we can measure, monitor and diagnose the OSG (and WLCG) networks.</p>
-<h3 id="motivation">Motivation</h3>
+<h3 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h3>
 <p>Distributed scientific computing relies upon networks to interconnect resources and make them usable for scientific workflows. This dependency upon the network means that issues in our networks can significantly impact the behavior of all the various cyber-infrastructure components that rely upon it. Compounding the problem is that networks, by their nature, are distributed and typically involve many different "owners" and administrators. When a problem arises somewhere along a network path, it can be very difficult to identify and localize.</p>
 <p>This was the context for the formation of the <a href="https://www.perfsonar.net/about/mission-statement">perfSONAR collaboration</a>. This collaboration is focused on developing and deploying the <code>perfSONAR</code> software suite in support of network monitoring across the global set of research and education (R&amp;E) networks. The <strong>Open Science Grid</strong> (<strong>OSG</strong>) has chosen to base the core of its network monitoring framework on <code>perfSONAR</code> because of both the capabilities of the toolkit for measuring our networks and its global acceptance as the defacto network monitoring infrastructure of first choice.</p>
 <p>The <a href="https://www.perfsonar.net/about/what-is-perfsonar/">https://www.perfsonar.net/about/what-is-perfsonar/</a> provides a succinct summary: <em>perfSONAR is a network measurement toolkit designed to provide federated coverage of paths,
@@ -601,7 +611,7 @@ It is possible to install both versions on a single host with at least two NICs 
 <li><strong>User's Mailing List</strong> The perfSONAR project maintains a mailing list for communication on matters of installation, configuration, bug reports, or general performance discussions: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">https://lists.internet2.edu/sympa/subscribe/perfsonar-user</a></li>
 <li><strong>Announcement Mailing List</strong> The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">https://lists.internet2.edu/sympa/subscribe/perfsonar-announce</a></li>
 </ul>
-<h4 id="changes-for-perfsonar-50">Changes for perfSONAR 5.0</h4>
+<h4 id="changes-for-perfsonar-50">Changes for perfSONAR 5.0<a class="headerlink" href="#changes-for-perfsonar-50" title="Permanent link">&para;</a></h4>
 <p>The first release of <a href="https://www.perfsonar.net/releasenotes-2023-04-17-5-0-0.html">perfSONAR 5.0.0</a> was available on April 17, 2023, followed by a version supporting EL8/EL9 on June 21, 2023 (<a href="https://www.perfsonar.net/releasenotes-2023-06-16-5-0-3.html">version 5.0.3</a>). All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days after the releases.   Version 5 marks a transition for the OSG/WLCG perfSONAR deployment, enabling us to migrate to a new network data pipeline where perfSONAR hosts directly send their measurement data to our central Elasticsearch instance via an HTTP-Archiver and Logstash.</p>
 <p>Highlights include:</p>
 <ul>

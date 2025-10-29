@@ -42,6 +42,16 @@
     <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  
+  
+
+
+  <script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-69012-29","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),"undefined"!=typeof location$&&location$.subscribe(function(e){ga("send","pageview",e.pathname)})})</script>
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
+
 
     
     
@@ -492,7 +502,7 @@
 
   <h1>Multiple nic guidance</h1>
 
-<h3 id="multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance</h3>
+<h3 id="multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance<a class="headerlink" href="#multiple-nic-network-interface-card-guidance" title="Permanent link">&para;</a></h3>
 <p>The OSG and WLCG recommendation is to deploy two flavors of perfSONAR measurement nodes: 1) a latency instance which continuously measures packet delay and lost and 2) a bandwidth instance measuring
 the achievable bandwidth.  That implies sites must purchase, deploy and maintain two systems.  <strong>Why can't we just run both latency and bandwidth services on a single instance?</strong>
 The problem is that running both latency and bandwidth services on a single node / single NIC may cause interence between the various measurements and introduce "false-positive" indications of
