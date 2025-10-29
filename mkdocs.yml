@@ -1,6 +1,10 @@
 site_name: OSG Networking Area
 site_url: https://osg-htc.org/networking/
 repo_url: https://github.com/osg-htc/networking/
+extra:
+  analytics:
+    provider: google
+    property: UA-69012-29
 theme: 
   name: material
   custom_dir: osgthedocs
@@ -26,4 +30,16 @@ nav:
 markdown_extensions:
   - admonition
   - codehilite
+      guess_lang: False
+  - meta
+  - toc:
+      permalink: True
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - attr_list
 
+plugins:
+  - search

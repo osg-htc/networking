@@ -1,13 +1,13 @@
-name: Valdate static MkDocs pages
+name: Validate static MkDocs pages
 on: pull_request
 
 jobs:
   validate-mkdocs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build MkDocs pages
-        uses: docker://squidfunk/mkdocs-material:7.1.0
+        uses: docker://squidfunk/mkdocs-material:8.2.8
         timeout-minutes: 1
         with:
           args: >-
@@ -16,16 +16,18 @@ jobs:
             --strict
 
       - id: format-github-repo
-        run: echo "::set-output name=repo-name::${GITHUB_REPOSITORY#*\/}"
+        run: echo "repo-name=${GITHUB_REPOSITORY#*\/}" >> $GITHUB_OUTPUT
 
       - name: Test links
         timeout-minutes: 10
         uses: docker://klakegg/html-proofer:3.16.0
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           args: >-
             --allow-hash-href
             --check-html
-            --http-status-ignore 302,401
+            --http-status-ignore 302
             --file-ignore ./site/404.html
-            --url-ignore "https://psetf.opensciencegrid.org/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py/,/https://github.com/osg-htc/networking/edit/master/docs/perfsonar/psetf.md/,/http://etf.cern.ch/docs/latest/,/https://github.com/osg-htc/networking/edit/master/docs/perfsonar/installation.md/,/https://psetf.opensciencegrid.org/etf/check_mk/,https://fonts.gstatic.com,/github.com\/opensciencegrid\/${{ steps.format-github-repo.outputs.repo-name }}\/edit/,/opensciencegrid.org\/${{ steps.format-github-repo.outputs.repo-name }}/"
+            --url-ignore "https://fonts.gstatic.com,/hypernews.cern.ch/,/github.com\/osg-htc\/${{ steps.format-github-repo.outputs.repo-name }}\/edit/,/osg-htc.org\/${{ steps.format-github-repo.outputs.repo-name }}/,/\/${{ steps.format-github-repo.outputs.repo-name }}/"
             ./site
