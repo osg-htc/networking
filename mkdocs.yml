@@ -30,7 +30,6 @@ nav:
 markdown_extensions:
   - admonition
   - codehilite
-      guess_lang: False
   - meta
   - toc:
       permalink: True
