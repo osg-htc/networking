@@ -35,7 +35,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
 * Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in OSG Topology below. For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
-  * **For toolkit versions 5.0 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
+    * **For toolkit versions 5.0 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
 
  ```json
  === pScheduler Agent ===
@@ -46,7 +46,6 @@ The following *additional* steps are needed to configure the toolkit to be used 
     }
  ]
  ```
-
 * Please remove any old/stale URLs using `psconfig remote delete <URL>`
 
 * If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication.
@@ -97,11 +96,11 @@ You might not be able to access the page if you are not properly registered in G
 
 * There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).
 * For each form (i.e. for each service type) fill at least the important informations:
-* Hosting Site (drop-down menu, mandatory)
-* Service Type (drop-down menu, mandatory)
-* Host Name (free text, mandatory)
-* Host IP (free text, optional)
-* Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
+    * Hosting Site (drop-down menu, mandatory)
+    * Service Type (drop-down menu, mandatory)
+    * Host Name (free text, mandatory)
+    * Host IP (free text, optional)
+    * Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
 * Check "N" when asked "Is it a beta service"
 * Check "Y" when asked "Is this service in production"
 * Check "Y" when asked "Is this service monitored"

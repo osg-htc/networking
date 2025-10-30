@@ -2,8 +2,10 @@
 
 _Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan_
 
-_February 4_
-_# th_ _2013_
+_February 4th 2013_
+
+!!! note
+    This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
 
 # Abstract
 
