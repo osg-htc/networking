@@ -586,26 +586,36 @@
 <h3 id="perfsonar-deployment-options">perfSONAR Deployment Options<a class="headerlink" href="#perfsonar-deployment-options" title="Permanent link">&para;</a></h3>
 <p>The primary motivation for perfSONAR deployment is to test isolation, i.e. only one end-to-end test should run on a host at a time. This ensures that the test results are not impacted by the other tests. Otherwise it is much more difficult to interpret test results, which may vary due to host effects rather then network effects. Taking this into account it means that perfSONAR measurement tools are much more accurate running on a dedicated hardware and while it may be useful to run them on other hosts such as Data Transfer Nodes the current recommendation is to have specific measurement machine. In addition, as bandwidth testing could impact latency testing, we recommend to deploy two different nodes, each focused on specific set of tests. The following deployment options are currently available:</p>
 <ul>
-<li><strong>Bare metal</strong> - preffered option in one of two possible configurations:</li>
+<li><strong>Bare metal</strong> - preffered option in one of two possible configurations:<ul>
 <li>Two bare metal servers, one for latency node, one for bandwidth node</li>
 <li>One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to <a href="#multiple-nic-network-interface-card-guidance">dual NIC</a> section for more details on this.</li>
-<li><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:</li>
+</ul>
+</li>
+<li><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:<ul>
 <li>Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.</li>
 <li>VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)</li>
 <li>Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production</li>
-<li><strong>Container</strong> - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <a href="https://docs.perfsonar.net/install_docker.html">https://docs.perfsonar.net/install_docker.html</a> but is not typically used in the same way as a full toolkit installation.</li>
+</ul>
+</li>
+<li><strong>Container</strong> - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <a href="https://docs.perfsonar.net/install_docker.html">https://docs.perfsonar.net/install_docker.html</a> but is not typically used in the same way as a full toolkit installation.<ul>
 <li>Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.</li>
+</ul>
+</li>
 </ul>
 <h3 id="perfsonar-toolkit-vs-testpoint">perfSONAR Toolkit vs Testpoint<a class="headerlink" href="#perfsonar-toolkit-vs-testpoint" title="Permanent link">&para;</a></h3>
 <p>The perfSONAR team has documented the types of installations supported at <a href="https://docs.perfsonar.net/install_options.html">https://docs.perfsonar.net/install_options.html</a>.   With the release of version 5, OSG/WLCG sites have a new option: instead of installing the full Toolkit sites can choose to install the Testpoint bundle.</p>
 <ul>
-<li>Pros</li>
+<li>Pros<ul>
 <li>Simpler deployment when a local web interface is not needed and a central measurement archive is available.</li>
 <li>Less resource intensive for both memory and I/O capacity.</li>
-<li>Cons</li>
+</ul>
+</li>
+<li>Cons<ul>
 <li>Measurements are not stored locally</li>
 <li>No web interface to use for configuration or adding local tests</li>
 <li>Unable to show results in MaDDash</li>
+</ul>
+</li>
 </ul>
 <p>While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced resource constraints, less components and easier management.</p>
 <h3 id="perfsonar-hardware-requirements">perfSONAR Hardware Requirements<a class="headerlink" href="#perfsonar-hardware-requirements" title="Permanent link">&para;</a></h3>

@@ -681,10 +681,12 @@
 <ul>
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in OSG Topology below. For non-OSG sites, follow the details in <a href="#register-perfsonar-service-in-gocdb">GOCDB</a></li>
 <li>Please ensure you have added or updated your <a href="http://docs.perfsonar.net/manage_admin_info.html">administrative information</a></li>
-<li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:</li>
+<li>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:<ul>
 <li><strong>For toolkit versions 5.0 and higher</strong>, please run from the command line <code>psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code>. Replace <code>&lt;FQDN&gt;</code> with the fully qualified domain name of your host, e.g., <code>psum01.aglt2.org</code>. To verify the configuration is correct, you can run <code>psconfig remote list</code>, which should show the URL configured, e.g.</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="err">===</span><span class="w"> </span><span class="err">pScheduler</span><span class="w"> </span><span class="err">Age</span><span class="kc">nt</span><span class="w"> </span><span class="err">===</span><span class="w"></span>
+</li>
+</ul>
+<p><div class="highlight"><pre><span></span><code><span class="err">===</span><span class="w"> </span><span class="err">pScheduler</span><span class="w"> </span><span class="err">Age</span><span class="kc">nt</span><span class="w"> </span><span class="err">===</span><span class="w"></span>
 <span class="p">[</span><span class="w"></span>
 <span class="w">   </span><span class="p">{</span><span class="w"></span>
 <span class="w">      </span><span class="nt">&quot;url&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org&quot;</span><span class="w"></span>
@@ -692,13 +694,9 @@
 <span class="w">   </span><span class="p">}</span><span class="w"></span>
 <span class="p">]</span><span class="w"></span>
 </code></pre></div>
+* Please remove any old/stale URLs using <code>psconfig remote delete &lt;URL&gt;</code></p>
 <ul>
-<li>
-<p>Please remove any old/stale URLs using <code>psconfig remote delete &lt;URL&gt;</code></p>
-</li>
-<li>
-<p>If this is a <strong>new instance</strong> or you have changed the node's FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication.</p>
-</li>
+<li>If this is a <strong>new instance</strong> or you have changed the node's FQDN, you will need to notify <code>wlcg-perfsonar-support 'at' cern.ch</code> to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see <a href="http://docs.perfsonar.net/manage_regular_tests.html">Configuring regular tests</a> for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication.</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -737,12 +735,14 @@
 <p>You might not be able to access the page if you are not properly registered in GOC, so a snapshot can be found below. In filling the information please follow those simple guidelines:</p>
 <ul>
 <li>There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).</li>
-<li>For each form (i.e. for each service type) fill at least the important informations:</li>
+<li>For each form (i.e. for each service type) fill at least the important informations:<ul>
 <li>Hosting Site (drop-down menu, mandatory)</li>
 <li>Service Type (drop-down menu, mandatory)</li>
 <li>Host Name (free text, mandatory)</li>
 <li>Host IP (free text, optional)</li>
 <li>Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.</li>
+</ul>
+</li>
 <li>Check "N" when asked "Is it a beta service"</li>
 <li>Check "Y" when asked "Is this service in production"</li>
 <li>Check "Y" when asked "Is this service monitored"</li>
