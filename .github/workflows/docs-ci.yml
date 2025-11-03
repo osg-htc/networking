@@ -1,0 +1,53 @@
+name: Docs CI
+
+on:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'docs/**'
+      - '.github/**'
+      - 'mkdocs.yml'
+  push:
+    branches: [ reorg/personas-use-cases ]
+    paths:
+      - 'docs/**'
+      - '.github/**'
+      - 'mkdocs.yml'
+
+jobs:
+  lint:
+    name: Lint (Super-Linter)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Super-Linter (limited scope for this PR)
+        uses: github/super-linter@v4
+        env:
+          # Only lint selected paths to avoid failing on large legacy docs set.
+          # This regex matches files under .github/, docs/personas/, docs/tools/, docs/templates/, docs/features/, and mkdocs.yml
+          FILTER_REGEX_INCLUDE: '(^\.github/|^docs/personas/|^docs/tools/|^docs/templates/|^docs/features/|^mkdocs.yml|^\.github/PR_BODY.md)'
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_MARKDOWN: true
+          VALIDATE_SHELL: true
+          VALIDATE_YAML: true
+          VALIDATE_JSON: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docs:
+    name: Build docs + Link checks
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs mkdocs-material requests beautifulsoup4
+      - name: Build MkDocs site
+        run: mkdocs build --clean --strict
+      - name: Run docs link-check (dry-run)
+        run: python docs/tools/find_and_remove_broken_links.py --check-externals --dry-run || true
