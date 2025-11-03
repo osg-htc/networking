@@ -11,12 +11,33 @@ Quick overview
 - Config file: `/etc/perfSONAR-multi-nic-config.conf`
 - Log file: `/var/log/perfSONAR-multi-nic-config.log`
 
+Requirements
+------------
+- Must be run as root. The script now enforces running as root early in
+  execution and will exit if run as a non-privileged user. Run it with sudo
+  or from a root shell.
+- NetworkManager (`nmcli`) is required. The script checks for the presence of
+  `nmcli` and will abort if it is not installed. Install NetworkManager via
+  your distribution's package manager before running.
+
 Safety first
 ------------
 This script will REMOVE ALL existing NetworkManager connections when run.
 Always test in a VM or console-attached host and use `--dry-run` to preview
 changes. The script creates a timestamped backup of existing connections before
 modifying anything.
+
+Compatibility and fallbacks
+---------------------------
+- The script prefers to configure routing and policy rules via NetworkManager
+  (`nmcli`). However, `nmcli` support for advanced `routes` entries and
+  `routing-rules` varies across versions and distributions. If `nmcli` cannot
+  apply a given route or routing-rule, the script will attempt a compatibility
+  fallback using the `ip route` and `ip rule` commands directly.
+
+- Because the script now requires root, it no longer invokes `sudo` internally
+  (the caller should run it with root privileges). This makes behavior
+  deterministic in automation and avoids interactive sudo prompts.
 
 How to run (dry-run / debug)
 ---------------------------
