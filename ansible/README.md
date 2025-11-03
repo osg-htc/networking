@@ -37,7 +37,7 @@ ansible-playbook -i ansible/inventory.example ansible/site.yml \
 ```
 
 ## Notes
-- nftables: This deploys a minimal ruleset to `/etc/nftables.conf` and enables the nftables service. If you already use another firewall (firewalld/iptables), test carefully and avoid conflicts.
+- nftables: This deploys a minimal ruleset to `/etc/nftables.conf` and enables the nftables service. **WARNING**: The default policy is DROP, which will block all traffic except SSH (port 22), loopback, and established connections. Test carefully before applying to remote systems to avoid being locked out. If you already use another firewall (firewalld/iptables), test carefully and avoid conflicts.
 - SELinux: The role sets the SELinux mode only when `enable_selinux=true`. On systems without SELinux, the role is skipped.
 - Debian/Ubuntu: Not tested here. Tasks are guarded where practical; contributions welcome.
 
