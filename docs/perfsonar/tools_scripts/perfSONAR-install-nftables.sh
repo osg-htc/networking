@@ -36,8 +36,6 @@ BACKUP_DIR="/var/backups/perfsonar-install-$(date +%s)"
 
 # Colors
 GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-RED='\033[0;31m'
 NC='\033[0m'
 
 usage() {
@@ -146,6 +144,7 @@ backup_file() {
 
 write_nft_rules() {
     local ports_csv=$1
+    log "write_nft_rules called with ports: $ports_csv"
     local tmpfile
     tmpfile=$(mktemp)
     # Write a richer perfSONAR nftables ruleset inspired by the example provided.
@@ -516,7 +515,7 @@ fi
 # Capture existing ruleset for rollback (if nft present and not dry-run)
 if [ "$DRY_RUN" = false ] && command -v nft >/dev/null 2>&1; then
     # Save current active ruleset to backup for potential restore
-    run_cmd sh -c 'nft list ruleset > "$1"' -- "$BACKUP_DIR/existing_ruleset.nft" || log "Failed to capture existing nft ruleset"
+    run_cmd sh -c "nft list ruleset > \"\$1\"" -- "$BACKUP_DIR/existing_ruleset.nft" || log "Failed to capture existing nft ruleset"
 fi
 
 install_packages
