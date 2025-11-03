@@ -1,18 +1,48 @@
 ---
-title: Triage checklist for network issues
-description: Short checklist to quickly gather the information needed to troubleshoot network and perfSONAR problems.
+title: "Triage checklist (minimal)"
+description: "Short checklist to quickly gather the information needed to troubleshoot network and perfSONAR problems."
 persona: troubleshoot
-owners: [networking-team@osg-htc.org]
+owners: ["networking-team@osg-htc.org"]
 status: draft
 tags: [troubleshoot, checklist]
 ---
 
 ## Quick triage checklist
 
-1. Gather host information: hostname, distro, kernel, NICs.
-1. Check basic connectivity: ping, traceroute to remote testpoints.
-1. Verify perfSONAR services: systemctl status perfsonar-* and web UI.
-1. Check firewall/ports (nftables/iptables) and required ports for perfSONAR.
-1. Collect logs and measurement samples for sharing with support.
+1. Gather host information
 
-Use relevant playbooks in `playbooks/` for specific scenarios.
+```bash
+hostnamectl
+cat /etc/os-release
+uname -a
+ip -c a
+```
+
+2. Check basic connectivity
+
+```bash
+ping -c 4 <remote-ip-or-host>
+traceroute -n <remote-ip-or-host>
+```
+
+3. Verify perfSONAR services and containers
+
+```bash
+systemctl status perfsonar-*
+ps aux | grep perfsonar
+sudo podman ps || sudo docker ps
+```
+
+4. Check firewall and ports
+
+```bash
+sudo nft list ruleset
+sudo ss -ltnp
+```
+
+5. Collect logs and measurements
+
+- Container logs: `sudo podman logs perfsonar-testpoint`
+- perfSONAR checks: `pscheduler tasks --host localhost`
+
+Use the scenario playbooks in `playbooks/` for step-by-step remediation instructions.
