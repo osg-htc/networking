@@ -26,9 +26,9 @@ OSG operates an advanced platform to collect, store, publish and analyse the net
 
 - [perfSONAR infrastructure monitoring](perfsonar/psetf.md) - monitors state of perfSONAR network and reports on availability of core services
 - [*OSG Distributed Network Datastore*](https://atlas-kibana.mwt2.org/s/networking/app/kibana#/dashboards?notFound=dashboard&_g=()) - distributed datastore based on ElasticSearch holding all the network measurements and providing an API to expose them via JSON is available at two locations (University of Chicago and University of Nebraska). 
-- [*OSG pSConfig Web Admin (PWA)*](https://psconfig.opensciencegrid.org/) - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure . In case you'd like to start/manage particular mesh, please contact our support channels to get access.
-- *OSG Dashboards* [BROKEN-LINK: http://psmad.opensciencegrid.org/maddash-webui/index.cgi] - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure (NOTE: this instance is being deprecated and we plan to introduce dashboards that will replace MaDDash over the coming 2023-2024 year).
-- [*WLCG Dashboards*](https://monit-grafana-open.cern.ch/d/000000523/home?orgId=16)) - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. 
+- *OSG pSConfig Web Admin (PWA)* - centralized configuration of the tests performed by the OSG/WLCG perfSONAR infrastructure . In case you'd like to start/manage particular mesh, please contact our support channels to get access.
+- *OSG Dashboards* [http://maddash.aglt2.org](https://maddash.aglt2.org) - set of dashboards showing an overview of the network state as seen by the perfSONAR infrastructure (NOTE: this instance is being deprecated and we plan to introduce dashboards that will replace MaDDash over the coming 2023-2024 year).
+- [*WLCG Dashboards*](https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network?var-bin=1h&orgId=16)) - set of dashboards showing WLCG and OSG network performance by combining multiple sources of data including perfSONAR, FTS, ESNet/LHCOPN traffic, etc. 
 
 Network Analytics
 -----------------
@@ -44,10 +44,9 @@ References
 - ESNet network performance tuning and debugging <https://fasterdata.es.net/>
 - [perfSONAR](http://docs.perfsonar.net/) toolkit is part of the [perfSONAR](https://www.perfsonar.net/) project. 
 - **OSG/WLCG mesh configuration interface** is available at <https://psconfig.opensciencegrid.org>
-- **OSG dashboard instance** <https://psmad.opensciencegrid.org/maddash-webui/index.cgi> (NOTE: deprecated)
-- **OSG perfSONAR infrastructure monitoring** <https://psetf.opensciencegrid.org/etf/check_mk/>
+- **OSG dashboard instance** <https://maddash.aglt2.org> (NOTE: deprecated replacement)
+- **OSG perfSONAR infrastructure monitoring** <https://psetf.aglt2.org/etf/check_mk/>
 - **OSG Analytics platform** <https://atlas-kibana.mwt2.org/s/networking/app/kibana>
-- **WLCG dashboards** <https://monit-grafana-open.cern.ch/d/000000523/home?orgId=16>
-- **SAND** (an previous OSG Satellite project) focusing on analyzing perfSONAR and related network metrics: <https://sand-ci.org>
+- **WLCG dashboards** <https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network?var-bin=1h&orgId=16>
 
 
