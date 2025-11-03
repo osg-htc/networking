@@ -15,7 +15,7 @@ ESnet maintains a very useful page on network troubleshooting at <https://faster
 
 We have a (older) draft version of the OSG [network debugging document](network-troubleshooting/osg-debugging-document.md) that describes things in much more detail. If you have comments, questions or suggestions, please contact Shawn McKee.
 
-If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at <https://learn.nsrc.org/perfsonar>
+If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at https server learn.nsrc.org/perfsonar. 
 
 Information on Contacting Network Support
 -----------------------------------------
