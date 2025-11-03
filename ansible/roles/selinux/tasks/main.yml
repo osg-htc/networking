@@ -1,0 +1,12 @@
+---
+- name: Gather SELinux facts
+  setup:
+    filter: ansible_selinux
+  tags: ['selinux']
+
+- name: Ensure SELinux state as requested
+  ansible.posix.selinux:
+    policy: targeted
+    state: "{{ selinux_state }}"
+  when: ansible_facts.selinux is defined and ansible_facts.selinux.status != 'disabled'
+  tags: ['selinux']

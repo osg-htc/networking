@@ -1,0 +1,9 @@
+---
+- name: Reload nftables
+  command: nft -f /etc/nftables.conf
+  notify: Restart nftables
+
+- name: Restart nftables
+  service:
+    name: nftables
+    state: restarted

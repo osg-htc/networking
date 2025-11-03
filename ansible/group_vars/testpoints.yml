@@ -1,0 +1,16 @@
+# Defaults for the testpoints group — override as needed
+enable_fail2ban: false
+enable_selinux: false
+enable_nftables: false
+
+selinux_state: enforcing
+
+# Services may vary by version; override if needed
+testpoint_services:
+  - pscheduler-scheduler
+  - pscheduler-runner
+
+# Baseline sysctl tuning (override to suit your NIC/OS)
+testpoint_sysctls:
+  - { name: 'net.core.rmem_max', value: '67108864' }
+  - { name: 'net.core.wmem_max', value: '67108864' }
