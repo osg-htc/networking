@@ -15,7 +15,7 @@ ESnet maintains a very useful page on network troubleshooting at <https://faster
 
 We have a (older) draft version of the OSG [network debugging document](network-troubleshooting/osg-debugging-document.md) that describes things in much more detail. If you have comments, questions or suggestions, please contact Shawn McKee.
 
-If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at <https://learn.nsrc.org/perfsonar>
+If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at https server learn.nsrc.org/perfsonar. 
 
 Information on Contacting Network Support
 -----------------------------------------
@@ -26,7 +26,7 @@ Below are the links you can use to report problems to OSG or the major Research 
 
 **INTERNET2**: If you are located at a University in the United States you are likely connected to Internet2. You can find the details on opening a ticket with Internet2 at:
 
--   <http://noc.net.internet2.edu/i2network/support.html>
+-   <https://noc.net.internet2.edu/internet2/help/index.html>
 
 This is typically a good choice for support beyond your campus.
 
@@ -38,7 +38,7 @@ This page contains information on opening ticket and pointers to relevant tools 
 
 **OSG**: If you have questions or unusual problems you think are OSG related, feel free to contact the OSG GOC. You can also open network related tickets and OSG can help to 'triage' your request and get it to the right people: 
 
--   <https://osg-htc.org/production/>
+-   <https://support.opensciencegrid.org/support/home>
 
 **WLCG**: WLCG has a dedicated support unit, which will assist in debugging the problem and triaging the issue. More details can be found at:
 
