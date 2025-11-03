@@ -1,4 +1,3 @@
----
 title: Quick Deploy — perfSONAR Testpoint (Quick Deploy)
 description: Quick, minimal steps to deploy a perfSONAR testpoint for WLCG/OSG monitoring.
 persona: quick-deploy
@@ -6,12 +5,20 @@ owners: [networking-team@osg-htc.org]
 status: draft
 tags: [quickstart, perfSONAR, testpoint]
 ---
+title: "Quick Deploy — perfSONAR Testpoint"
+description: "Concise, verified quickstart to deploy a perfSONAR testpoint for OSG/WLCG monitoring."
+persona: quick-deploy
+owners: ["networking-team@osg-htc.org"]
+status: draft
+tags: [quickstart, perfSONAR, testpoint]
+---
 
 # Quick Deploy — perfSONAR Testpoint
 
-This page provides a concise, tested minimal path to deploy a perfSONAR testpoint suitable for WLCG/OSG monitoring. Use the Quickstart for a fast, verified deployment. For optional features (fail2ban, selinux, nftables, automation) see the linked pages.
+This landing page links to minimal, tested instructions and automation to get a perfSONAR testpoint running quickly.
 
-- Quickstart: `quickstart-perfsonar-testpoint.md`
-- Optional features and automated setup: `automated-setup/README.md`
+- Quickstart (minimal): `quickstart-perfsonar-testpoint-v2.md`
+- Automated setups and optional features: `automated-setup/README.md`
 
-Follow the quickstart if you need a working testpoint in a single admin session.
+If you need a working testpoint in a single admin session, follow the quickstart; if you plan repeated deploys, use the automation examples.
+
