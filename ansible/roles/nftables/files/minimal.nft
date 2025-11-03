@@ -1,0 +1,17 @@
+table inet filter {
+  chains {
+    input {
+      type filter hook input priority 0;
+      policy drop;
+      ct state established,related accept
+      iif lo accept
+      tcp dport { 22 } accept
+      # perfSONAR typical ports (uncomment and adapt as needed):
+      # udp dport { 861, 876, 883, 33434-33534 } accept  # owamp, twamp, traceroute range
+      # tcp dport { 5201 } accept                         # iperf3 throughput tests
+      counter drop
+    }
+    forward { type filter hook forward priority 0; policy drop; }
+    output  { type filter hook output  priority 0; policy accept; }
+  }
+}

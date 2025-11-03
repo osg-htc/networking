@@ -1,0 +1,21 @@
+- hosts: testpoints
+  become: true
+  vars:
+    enable_fail2ban: false
+    enable_selinux: false
+    enable_nftables: false
+
+    # Defaults can be overridden in group_vars/ or via -e
+    selinux_state: enforcing
+    testpoint_services:
+      - pscheduler-scheduler
+      - pscheduler-runner
+    testpoint_sysctls:
+      - { name: 'net.core.rmem_max', value: '67108864' }
+      - { name: 'net.core.wmem_max', value: '67108864' }
+
+  roles:
+    - role: testpoint
+    - { role: fail2ban, when: enable_fail2ban }
+    - { role: selinux,  when: enable_selinux }
+    - { role: nftables, when: enable_nftables }
