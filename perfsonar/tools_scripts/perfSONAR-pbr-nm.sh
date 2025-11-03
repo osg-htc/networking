@@ -150,14 +150,14 @@ rollback() {
     fi
 
     # Restore using rsync (safer than shell-globbed cp)
-    run_cmd sudo rsync -a -- "$BACKUP_DIR"/ /etc/NetworkManager/system-connections/ || log "Rollback: copy failed"
-    run_cmd sudo chmod -R 0600 /etc/NetworkManager/system-connections/* || true
-    run_cmd sudo chown -R root:root /etc/NetworkManager/system-connections/* || true
+    run_cmd rsync -a -- "$BACKUP_DIR"/ /etc/NetworkManager/system-connections/ || log "Rollback: copy failed"
+    run_cmd chmod -R 0600 /etc/NetworkManager/system-connections/* || true
+    run_cmd chown -R root:root /etc/NetworkManager/system-connections/* || true
     # Reload NetworkManager connections; if reload fails attempt restart and
     # log if both operations fail. Use explicit if/then to avoid shellcheck
     # warning about conditional chaining.
-    if ! run_cmd sudo nmcli connection reload; then
-        if ! run_cmd sudo systemctl restart NetworkManager; then
+    if ! run_cmd nmcli connection reload; then
+        if ! run_cmd systemctl restart NetworkManager; then
             log "Rollback: failed to reload/restart NetworkManager"
         fi
     fi
@@ -322,7 +322,7 @@ generate_config_from_system() {
     # script from failing silently on hosts without physical NICs.
     if (( ${#NIC_NAMES[@]} == 0 )); then
         log "No suitable NICs detected; writing example config instead."
-        cat <<'EXAMPLE' | sudo tee "$CONFIG_FILE" > /dev/null
+    cat <<'EXAMPLE' | tee "$CONFIG_FILE" > /dev/null
 # Example /etc/perfSONAR-multi-nic-config.conf
 # (no interfaces detected automatically)
 NIC_NAMES=("eth0" "eth1")
@@ -336,8 +336,8 @@ NIC_IPV6_GWS=("-" "-")
 # Specify the NIC that will hold the default route for this host
 DEFAULT_ROUTE_NIC="eth1"
 EXAMPLE
-        sudo chmod 0644 "$CONFIG_FILE" || true
-        sudo chown root:root "$CONFIG_FILE" || true
+    chmod 0644 "$CONFIG_FILE" || true
+    chown root:root "$CONFIG_FILE" || true
         echo "Generated example configuration at $CONFIG_FILE." >&2
         echo "Edit it to match your interfaces and rerun this script. Exiting." >&2
         exit 0
@@ -460,10 +460,10 @@ EXAMPLE
             log "----- End generated config preview -----"
         fi
     else
-        run_cmd sudo mv "$TMPFILE" "$CONFIG_FILE" || handle_error "Failed to write generated config to $CONFIG_FILE"
+        run_cmd mv "$TMPFILE" "$CONFIG_FILE" || handle_error "Failed to write generated config to $CONFIG_FILE"
     fi
-    run_cmd sudo chmod 0644 "$CONFIG_FILE" || true
-    run_cmd sudo chown root:root "$CONFIG_FILE" || true
+    run_cmd chmod 0644 "$CONFIG_FILE" || true
+    run_cmd chown root:root "$CONFIG_FILE" || true
     echo "Generated configuration at $CONFIG_FILE (auto-detected). Edit if needed and rerun the script." >&2
     exit 0
 }
@@ -717,11 +717,11 @@ validate_ip() {
 backup_existing_configs() {
     BACKUP_DIR="/etc/NetworkManager/system-connections-backup-$(date +%Y%m%d%H%M%S)"
     log "Backing up existing configurations to $BACKUP_DIR..."
-    run_cmd sudo mkdir -p "$BACKUP_DIR"
+    run_cmd mkdir -p "$BACKUP_DIR"
     # Use rsync to copy contents safely (avoids shell globbing issues with /*)
-    run_cmd sudo rsync -a -- /etc/NetworkManager/system-connections/ "$BACKUP_DIR" || log "No existing connections to backup or copy failed"
+    run_cmd rsync -a -- /etc/NetworkManager/system-connections/ "$BACKUP_DIR" || log "No existing connections to backup or copy failed"
     log "Removing original configuration files from /etc/NetworkManager/system-connections/"
-    run_cmd sudo rm -rf /etc/NetworkManager/system-connections/*
+    run_cmd rm -rf /etc/NetworkManager/system-connections/*
 }
 
 # -------- Routing table management --------
@@ -753,7 +753,7 @@ add_routing_table() {
                 log "Removing existing routing table entry for $table_name from $f"
                 # Use sed -i to remove matching lines in-place (safer and avoids complex shell -c quoting)
                 # Match the table-name at end-of-line and delete the line.
-                run_cmd sudo sed -i -E "/^[[:space:]]*[0-9]+[[:space:]]+${table_name}[[:space:]]*$/d" "$f" || log "Failed to clean $f"
+                run_cmd sed -i -E "/^[[:space:]]*[0-9]+[[:space:]]+${table_name}[[:space:]]*$/d" "$f" || log "Failed to clean $f"
             fi
         done
 
@@ -765,17 +765,17 @@ add_routing_table() {
         fi
 
         log "Creating drop-in $dropin_file"
-        run_cmd sudo mkdir -p "$dropin_dir"
+        run_cmd mkdir -p "$dropin_dir"
     # Create the drop-in file (atomic creation) and set perms using printf via sh -c
     # shellcheck disable=SC2016
     # Intentionally single-quoted: $1/$2/$3 should be expanded by the
     # invoked shell (sh -c) using the provided positional args.
-    run_cmd sudo sh -c 'printf "%s\t%s\n" "$1" "$2" > "$3"' -- "$table_num" "$table_name" "$dropin_file"
-        run_cmd sudo chmod 0644 "$dropin_file"
-        run_cmd sudo chown root:root "$dropin_file"
+    run_cmd sh -c 'printf "%s\t%s\n" "$1" "$2" > "$3"' -- "$table_num" "$table_name" "$dropin_file"
+        run_cmd chmod 0644 "$dropin_file"
+        run_cmd chown root:root "$dropin_file"
         # Restore SELinux context if possible
         if command -v restorecon >/dev/null 2>&1; then
-            run_cmd sudo restorecon -v "$dropin_file" || true
+            run_cmd restorecon -v "$dropin_file" || true
         fi
         log "Added routing table ${table_name} as number ${table_num} via drop-in"
         return 0
@@ -786,14 +786,47 @@ add_routing_table() {
     # the desired mapping.
     if grep -wq "${table_name}" /etc/iproute2/rt_tables 2>/dev/null; then
         log "Removing existing entry for ${table_name} from /etc/iproute2/rt_tables"
-        run_cmd sudo sed -i -E "/^[[:space:]]*[0-9]+[[:space:]]+${table_name}[[:space:]]*$/d" /etc/iproute2/rt_tables || log "Failed to clean /etc/iproute2/rt_tables"
+    run_cmd sed -i -E "/^[[:space:]]*[0-9]+[[:space:]]+${table_name}[[:space:]]*$/d" /etc/iproute2/rt_tables || log "Failed to clean /etc/iproute2/rt_tables"
     fi
 
     # shellcheck disable=SC2016
     # Intentionally single-quoted: $1/$2 should be expanded by the invoked
     # shell (sh -c) using the provided positional args when appending.
-    run_cmd sudo sh -c 'printf "%s\t%s\n" "$1" "$2" >> /etc/iproute2/rt_tables' -- "$table_num" "$table_name" || handle_error "Failed to add routing table ${table_name}"
+    run_cmd sh -c 'printf "%s\t%s\n" "$1" "$2" >> /etc/iproute2/rt_tables' -- "$table_num" "$table_name" || handle_error "Failed to add routing table ${table_name}"
     log "Added routing table ${table_name} as number ${table_num} to /etc/iproute2/rt_tables"
+}
+
+##
+# Resolve or create a NetworkManager connection for a given device name.
+# Many systems have connection "names" that do not equal the device name
+# (for example "Wired connection 1"). This helper finds the connection
+# associated with a device or creates a new dedicated connection named
+# "perfsonar-<dev>" if none exists. It prints the connection name to stdout.
+get_conn_for_device() {
+    local dev=$1
+    local conn=""
+
+    # Try to read the active connection associated with the device.
+    if command -v nmcli >/dev/null 2>&1; then
+        # nmcli device show prints a GENERAL.CONNECTION field when a
+        # connection is active. Use -t to make parsing predictable.
+        conn=$(nmcli -t -f GENERAL.CONNECTION device show "$dev" 2>/dev/null | awk -F: '{print $2}' || true)
+    fi
+
+    # Fallback: find any connection that references this device
+    if [ -z "$conn" ] || [ "$conn" = "--" ]; then
+        conn=$(nmcli -t -f NAME,DEVICE connection show 2>/dev/null | awk -F: -v d="$dev" '$2==d{print $1; exit}' || true)
+    fi
+
+    # If still empty, create a new connection named perfsonar-<dev>
+    if [ -z "$conn" ]; then
+        conn="perfsonar-$dev"
+        log "No existing NM connection for device $dev; creating connection $conn"
+        # Create a minimal ethernet connection bound to the interface
+        run_cmd nmcli connection add type ethernet ifname "$dev" con-name "$conn" autoconnect yes || handle_error "Failed to create connection $conn for device $dev"
+    fi
+
+    printf '%s' "$conn"
 }
 
 # -------- Per-NIC NetworkManager configuration --------
@@ -822,6 +855,10 @@ configure_nic() {
     validate_ip "$ipv4_addr"
     validate_ip "$ipv6_addr"
 
+    # Resolve or create NetworkManager connection associated with this device
+    local conn
+    conn=$(get_conn_for_device "$nic")
+
     # Ensure routing table exists for non-default NICs
     if [[ "$nic" != "$DEFAULT_ROUTE_NIC" ]]; then
         log "\n${GREEN}Configuring NIC $nic ($ipv4_addr$ipv4_prefix) with table $rt_table_name ($table_id)${NC}"
@@ -831,64 +868,91 @@ configure_nic() {
     fi
 
     # Ensure the NIC's NetworkManager connection exists and is set to autoconnect
-    run_cmd nmcli con mod "$nic" connection.autoconnect yes || handle_error "Failed to enable autoconnect for $nic"
+    run_cmd nmcli con mod "$conn" connection.autoconnect yes || handle_error "Failed to enable autoconnect for $nic (conn: $conn)"
 
     # Use manual IPv4 addressing
-    run_cmd nmcli con mod "$nic" ipv4.method manual || handle_error "Failed to set IPv4 method for $nic"
+    run_cmd nmcli con mod "$conn" ipv4.method manual || handle_error "Failed to set IPv4 method for $nic (conn: $conn)"
 
-    # Configure static IPv4 address + gateway
+    # Configure static IPv4 address + gateway (use canonical nmcli keys)
     log "  - Setting IPv4 address and gateway"
-    run_cmd nmcli con mod "$nic" ip4 "$ipv4_addr$ipv4_prefix" gw4 "$ipv4_gw" || handle_error "Failed to set IPv4 address for $nic"
+    run_cmd nmcli con mod "$conn" ipv4.addresses "$ipv4_addr$ipv4_prefix" ipv4.gateway "$ipv4_gw" || handle_error "Failed to set IPv4 address for $nic (conn: $conn)"
 
     # Configure static IPv6 if present
     if [[ "$ipv6_addr" != "-" ]]; then
-        run_cmd nmcli con mod "$nic" ipv6.method manual || handle_error "Failed to set IPv6 method for $nic"
+        run_cmd nmcli con mod "$conn" ipv6.method manual || handle_error "Failed to set IPv6 method for $nic (conn: $conn)"
         log "  - Setting IPv6 address and gateway"
-        run_cmd nmcli con mod "$nic" ip6 "$ipv6_addr$ipv6_prefix" gw6 "$ipv6_gw" || handle_error "Failed to set IPv6 address for $nic"
+        run_cmd nmcli con mod "$conn" ipv6.addresses "$ipv6_addr$ipv6_prefix" ipv6.gateway "$ipv6_gw" || handle_error "Failed to set IPv6 address for $nic (conn: $conn)"
     fi
 
     # Default route logic controlled by DEFAULT_ROUTE_NIC
     if [[ "$nic" == "$DEFAULT_ROUTE_NIC" ]]; then
         echo "  - ${nic} is the default route NIC" | tee -a "$LOG_FILE"
-        run_cmd nmcli con mod "$nic" +ipv4.routes "0.0.0.0/0 $ipv4_gw" || handle_error "Failed to set default IPv4 route for $nic"
+        if ! run_cmd nmcli con mod "$conn" +ipv4.routes "0.0.0.0/0 $ipv4_gw"; then
+            log "nmcli failed to set default IPv4 route for $conn; falling back to ip route"
+            run_cmd ip route replace default via "$ipv4_gw" dev "$nic" || handle_error "Failed to set fallback IPv4 default route for $nic"
+        fi
         if [[ "$ipv6_addr" != "-" ]]; then
-            run_cmd nmcli con mod "$nic" +ipv6.routes "::/0 $ipv6_gw" || handle_error "Failed to set default IPv6 route for $nic"
+            if ! run_cmd nmcli con mod "$conn" +ipv6.routes "::/0 $ipv6_gw"; then
+                log "nmcli failed to set default IPv6 route for $conn; falling back to ip -6 route"
+                run_cmd ip -6 route replace default via "$ipv6_gw" dev "$nic" || handle_error "Failed to set fallback IPv6 default route for $nic"
+            fi
         fi
     else
         echo "  - Non-default NIC: static IPv4 route with source-based routing rules on table $table_id for $nic" | tee -a "$LOG_FILE"
-        run_cmd nmcli con mod "$nic" +ipv4.routes "0.0.0.0/0 $ipv4_gw table=$table_id" || handle_error "Failed to set IPv4 route for $nic"
+        if ! run_cmd nmcli con mod "$conn" +ipv4.routes "0.0.0.0/0 $ipv4_gw table=$table_id"; then
+            log "nmcli failed to set IPv4 route for $conn; falling back to ip route"
+            run_cmd ip route replace default via "$ipv4_gw" dev "$nic" table "$table_id" || handle_error "Failed to set fallback IPv4 route for $nic"
+        fi
 
         if [[ "$ipv4_addroute" != "-" ]]; then
             echo "  - ${nic} adding static route to table $table_id for $ipv4_addroute" | tee -a "$LOG_FILE"
-            run_cmd nmcli con mod "$nic" +ipv4.routes "$ipv4_addroute table=$table_id" || handle_error "Failed to add static route for $nic"
+            if ! run_cmd nmcli con mod "$conn" +ipv4.routes "$ipv4_addroute table=$table_id"; then
+                log "nmcli failed to add custom IPv4 route for $conn; falling back to ip route"
+                run_cmd ip route add $ipv4_addroute table "$table_id" || log "Fallback: failed to add custom IPv4 route for $nic (may need manual intervention)"
+            fi
         fi
 
         if [[ "$ipv6_addr" != "-" ]]; then
             echo "  - Non-default NIC: static IPv6 route with source-based routing rules on table $table_id for $nic" | tee -a "$LOG_FILE"
-            run_cmd nmcli con mod "$nic" +ipv6.routes "::/0 $ipv6_gw table=$table_id" || handle_error "Failed to set IPv6 route for $nic"
+            if ! run_cmd nmcli con mod "$conn" +ipv6.routes "::/0 $ipv6_gw table=$table_id"; then
+                log "nmcli failed to set IPv6 route for $conn; falling back to ip -6 route"
+                run_cmd ip -6 route replace default via "$ipv6_gw" dev "$nic" table "$table_id" || handle_error "Failed to set fallback IPv6 route for $nic"
+            fi
         fi
 
         # Add policy routing rules for this NIC
         echo "  - Applying IPv4 routing rules for $nic and table $table_id..." | tee -a "$LOG_FILE"
-        run_cmd nmcli con mod "$nic" ipv4.routing-rules "priority $priority iif $nic table $table_id" || handle_error "Failed to apply IPv4 routing rules for $nic"
-        run_cmd nmcli con mod "$nic" +ipv4.routing-rules "priority $priority from $ipv4_addr table $table_id" || handle_error "Failed to apply IPv4 routing rules for $nic"
+        if ! run_cmd nmcli con mod "$conn" ipv4.routing-rules "priority $priority iif $nic table $table_id"; then
+            log "nmcli cannot set ipv4.routing-rules; adding ip rule fallback"
+            run_cmd ip rule add iif "$nic" table "$table_id" priority "$priority" || log "ip rule add iif failed or already present"
+        fi
+        if ! run_cmd nmcli con mod "$conn" +ipv4.routing-rules "priority $priority from $ipv4_addr table $table_id"; then
+            log "nmcli cannot set ipv4.from rule; adding ip rule fallback"
+            run_cmd ip rule add from "$ipv4_addr/32" table "$table_id" priority "$priority" || log "ip rule add from failed or already present"
+        fi
 
         if [[ "$ipv6_addr" != "-" ]]; then
             echo "  - Applying IPv6 routing rules for $nic and table $table_id..." | tee -a "$LOG_FILE"
-            run_cmd nmcli con mod "$nic" ipv6.routing-rules "priority $priority iif $nic table $table_id" || handle_error "Failed to apply IPv6 routing rules for $nic"
-            run_cmd nmcli con mod "$nic" +ipv6.routing-rules "priority $priority from $ipv6_addr table $table_id" || handle_error "Failed to apply IPv6 routing rules for $nic"
+            if ! run_cmd nmcli con mod "$conn" ipv6.routing-rules "priority $priority iif $nic table $table_id"; then
+                log "nmcli cannot set ipv6.routing-rules; adding ip -6 rule fallback"
+                run_cmd ip -6 rule add iif "$nic" table "$table_id" priority "$priority" || log "ip -6 rule add iif failed or already present"
+            fi
+            if ! run_cmd nmcli con mod "$conn" +ipv6.routing-rules "priority $priority from $ipv6_addr table $table_id"; then
+                log "nmcli cannot set ipv6.from rule; adding ip -6 rule fallback"
+                run_cmd ip -6 rule add from "$ipv6_addr/128" table "$table_id" priority "$priority" || log "ip -6 rule add from failed or already present"
+            fi
         fi
 
         # Prevent this connection from installing default routes
         echo "  - Marking as private: prevent default gateway" | tee -a "$LOG_FILE"
-        run_cmd nmcli con mod "$nic" ipv4.never-default yes || handle_error "Failed to mark $nic as private"
+        run_cmd nmcli con mod "$conn" ipv4.never-default yes || handle_error "Failed to mark $nic as private (conn: $conn)"
         if [[ "$ipv6_addr" != "-" ]]; then
-            run_cmd nmcli con mod "$nic" ipv6.never-default yes || handle_error "Failed to mark $nic as private"
+            run_cmd nmcli con mod "$conn" ipv6.never-default yes || handle_error "Failed to mark $nic as private (conn: $conn)"
         fi
     fi
 
     # Bring up the connection and reapply device config
-    run_cmd nmcli conn up "$nic" || handle_error "Failed to bring up $nic"
+    run_cmd nmcli conn up "$conn" || handle_error "Failed to bring up $nic (conn: $conn)"
     sleep 1
     run_cmd nmcli device reapply "$nic" || handle_error "Failed to reapply device config for $nic"
 }
@@ -948,6 +1012,19 @@ done
 # Run shellcheck now that CLI flags are known (user can disable via --no-shellcheck)
 run_shellcheck
 
+# Ensure required tools and privileges
+# Enforce running as root to avoid unexpected sudo prompts and to make
+# behavior deterministic. Also verify `nmcli` is present since the script
+# relies heavily on NetworkManager.
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root. Please run with sudo or as root." >&2
+    exit 1
+fi
+
+if ! command -v nmcli >/dev/null 2>&1; then
+    handle_error "nmcli (NetworkManager CLI) is required but not installed. Install NetworkManager and retry."
+fi
+
 # Configuration file handling: ensure config exists, auto-generate if missing,
 # then source the configuration and validate it.
 # Honor explicit request to auto-generate config even if a config exists.
@@ -999,15 +1076,15 @@ backup_existing_configs
 
 # Flush existing routes (use sudo with tee via bash -c to avoid redirection issues)
 log "Flushing all existing routes..."
-run_cmd sudo bash -c 'echo 1 > /proc/sys/net/ipv4/route/flush' || handle_error "Failed to flush IPv4 routes"
-run_cmd sudo bash -c 'echo 1 > /proc/sys/net/ipv6/route/flush' || handle_error "Failed to flush IPv6 routes"
-run_cmd sudo ip rule flush || handle_error "Failed to flush IP rules"
+run_cmd bash -c 'echo 1 > /proc/sys/net/ipv4/route/flush' || handle_error "Failed to flush IPv4 routes"
+run_cmd bash -c 'echo 1 > /proc/sys/net/ipv6/route/flush' || handle_error "Failed to flush IPv6 routes"
+run_cmd ip rule flush || handle_error "Failed to flush IP rules"
 
 # Remove previous NetworkManager configurations
 log "Removing ALL existing network configurations..."
 # Execute removal via run_cmd and log failure explicitly; using an if/then
 # prevents shellcheck complaining that the '||' may be misinterpreted.
-if ! run_cmd sudo rm -rf /etc/NetworkManager/system-connections/*; then
+if ! run_cmd rm -rf /etc/NetworkManager/system-connections/*; then
     log "No existing configurations removed or rm failed"
 fi
 
