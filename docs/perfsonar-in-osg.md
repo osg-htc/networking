@@ -1,4 +1,4 @@
-### Overview of perfSONAR
+# Overview of perfSONAR
 
 For those not familiar with `perfSONAR`, this page provides a quick overview of what it is and why we recommend its deployment at OSG and WLCG sites.
 
