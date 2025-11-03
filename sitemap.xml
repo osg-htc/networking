@@ -91,6 +91,26 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://osg-htc.org/networking/personas/backups/quick-deploy_landing_original/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/backups/research_landing_original/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/backups/troubleshoot_landing_original/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/quick-deploy/intro/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/landing/</loc>
          <lastmod>2025-11-03</lastmod>
          <changefreq>daily</changefreq>
@@ -111,7 +131,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://osg-htc.org/networking/personas/research/intro/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://osg-htc.org/networking/personas/research/landing/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/troubleshoot/intro/</loc>
          <lastmod>2025-11-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
