@@ -1,15 +1,13 @@
-<span class="twiki-macro LINKCSS"></span>
+# Network and Network Troubleshooting Documentation
 
-<span class="twiki-macro SPACEOUT">Network  and Network Troubleshooting Documentation</span>
-============================================================================================
+<span class="twiki-macro STARTINCLUDE"></span>
 
+This page will eventually include pointers to various network troubleshooting resources. In general, when users suspect a network problem the procedure is:
 
-<span class="twiki-macro STARTINCLUDE"></span> This page will eventually include pointers to various network troubleshooting resources. In general, when users suspect a network problem the procedure is:
-
--   **Document the problem**: Basically you need to describe the problem you encountered. Provide any relevant details like the exact command you used, any errors or warning you got and any problems you observed. This can help you better understand the problem and will allow you to easily "hand-off" troubleshooting to an expert
--   **Gather relevant data:** Run tests (see Guide below) and capture the results.
--   **Contact your local network support** (this is sometimes where users don't know where to go). Google or your campus web-pages should be able to help you find the right contact.
--   **Escalate**, if the problem persists (See below)
+- **Document the problem**: Basically you need to describe the problem you encountered. Provide any relevant details like the exact command you used, any errors or warning you got and any problems you observed. This can help you better understand the problem and will allow you to easily "hand-off" troubleshooting to an expert
+- **Gather relevant data:** Run tests (see Guide below) and capture the results.
+- **Contact your local network support** (this is sometimes where users don't know where to go). Google or your campus web-pages should be able to help you find the right contact.
+- **Escalate**, if the problem persists (See below)
 
 ESnet maintains a very useful page on network troubleshooting at <https://fasterdata.es.net/performance-testing/troubleshooting/>
 

@@ -1,4 +1,4 @@
-### perfSONAR Deployment Options
+# perfSONAR Deployment Options
 
 The primary motivation for perfSONAR deployment is to test isolation, i.e. only one end-to-end test should run on a host at a time. This ensures that the test results are not impacted by the other tests. Otherwise it is much more difficult to interpret test results, which may vary due to host effects rather then network effects. Taking this into account it means that perfSONAR measurement tools are much more accurate running on a dedicated hardware and while it may be useful to run them on other hosts such as Data Transfer Nodes the current recommendation is to have specific measurement machine. In addition, as bandwidth testing could impact latency testing, we recommend to deploy two different nodes, each focused on specific set of tests. The following deployment options are currently available:
 

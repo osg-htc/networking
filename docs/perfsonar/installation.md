@@ -1,4 +1,4 @@
-## perfSONAR Installation Guide
+# perfSONAR Installation Guide
 
 !!! note
     This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.
