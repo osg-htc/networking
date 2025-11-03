@@ -26,6 +26,24 @@ nav:
     - 'Infrastructure Monitoring': 'perfsonar/psetf.md'
     - 'Network Datastore and Streaming': 'osg-network-services.md'
     - 'Network Analytics': 'osg-network-analytics.md'
+  - Personas:
+    - Quick Deploy:
+      - 'Landing': 'personas/quick-deploy/landing.md'
+      - 'Quickstart: perfSONAR Testpoint': 'personas/quick-deploy/quickstart-perfsonar-testpoint.md'
+      - 'Automated setup': 'personas/quick-deploy/automated-setup/README.md'
+    - Troubleshooter:
+      - 'Landing': 'personas/troubleshoot/landing.md'
+      - 'Triage checklist': 'personas/troubleshoot/triage-checklist.md'
+    - Researcher:
+      - 'Landing': 'personas/research/landing.md'
+      - 'Architecture': 'personas/research/architecture.md'
+  - Features:
+    - 'fail2ban': 'features/fail2ban.md'
+    - 'SELinux': 'features/selinux.md'
+    - 'nftables': 'features/nftables.md'
+  - Tools & Scripts:
+    - 'Scripts and tools': 'perfsonar/tools_scripts/README.md'
+    - 'Link-check tools': 'tools/README.md'
 
 markdown_extensions:
   - admonition
