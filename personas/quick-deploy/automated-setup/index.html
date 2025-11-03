@@ -6,23 +6,25 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
+        <meta name="description" content="Examples for automating setup using Ansible and container-based examples.">
       
       
-        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/psetf/">
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+        <link rel="canonical" href="https://osg-htc.org/networking/personas/quick-deploy/automated-setup/">
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.8">
     
     
       
-        <title>Infrastructure Monitoring - OSG Networking Area</title>
+        <title>Automated setup — perfSONAR Testpoint - OSG Networking Area</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.644de097.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.644de097.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.e6a45f82.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.e6a45f82.min.css">
         
       
     
@@ -37,9 +39,9 @@
       
     
     
-      <link rel="stylesheet" href="../../css/extra.css">
+      <link rel="stylesheet" href="../../../css/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -72,11 +74,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#infrastructure-monitoring" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -87,7 +84,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href="../../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -106,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Infrastructure Monitoring
+              Automated setup — perfSONAR Testpoint
             
           </span>
         </div>
@@ -185,7 +182,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href="../../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -216,7 +213,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         OSG Networking Area
       </a>
     </li>
@@ -257,7 +254,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../perfsonar-in-osg/" class="md-nav__link">
+      <a href="../../../perfsonar-in-osg/" class="md-nav__link">
         Motivation
       </a>
     </li>
@@ -271,7 +268,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment-models/" class="md-nav__link">
+      <a href="../../../perfsonar/deployment-models/" class="md-nav__link">
         Deployment
       </a>
     </li>
@@ -285,7 +282,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../installation/" class="md-nav__link">
+      <a href="../../../perfsonar/installation/" class="md-nav__link">
         Installation and Maintenance
       </a>
     </li>
@@ -299,7 +296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/" class="md-nav__link">
+      <a href="../../../perfsonar/faq/" class="md-nav__link">
         Frequently Asked Questions
       </a>
     </li>
@@ -347,7 +344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../network-troubleshooting/" class="md-nav__link">
+      <a href="../../../network-troubleshooting/" class="md-nav__link">
         Network Troubleshooting
       </a>
     </li>
@@ -361,8 +358,84 @@
   
   
     <li class="md-nav__item">
-      <a href="../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
+      <a href="../../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
         OSG Network Debugging Document
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Network Services
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Network Services" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Network Services
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../perfsonar/psetf/" class="md-nav__link">
+        Infrastructure Monitoring
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../osg-network-services/" class="md-nav__link">
+        Network Datastore and Streaming
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../osg-network-analytics/" class="md-nav__link">
+        Network Analytics
       </a>
     </li>
   
@@ -388,120 +461,7 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_4">
-          Network Services
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Network Services" data-md-level="1">
-        <label class="md-nav__title" for="__nav_4">
-          <span class="md-nav__icon md-icon"></span>
-          Network Services
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Infrastructure Monitoring
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        Infrastructure Monitoring
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#infrastructure-monitoring" class="md-nav__link">
-    Infrastructure Monitoring
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../osg-network-services/" class="md-nav__link">
-        Network Datastore and Streaming
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../osg-network-analytics/" class="md-nav__link">
-        Network Analytics
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
       
       
       
@@ -522,12 +482,14 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" checked>
       
       
       
@@ -550,7 +512,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/quick-deploy/landing/" class="md-nav__link">
+      <a href="../landing/" class="md-nav__link">
         Landing
       </a>
     </li>
@@ -564,7 +526,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/quick-deploy/quickstart-perfsonar-testpoint/" class="md-nav__link">
+      <a href="../quickstart-perfsonar-testpoint/" class="md-nav__link">
         Quickstart: perfSONAR Testpoint
       </a>
     </li>
@@ -576,11 +538,19 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../../personas/quick-deploy/automated-setup/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Automated setup
       </a>
+      
     </li>
   
 
@@ -625,7 +595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/troubleshoot/landing/" class="md-nav__link">
+      <a href="../../troubleshoot/landing/" class="md-nav__link">
         Landing
       </a>
     </li>
@@ -639,7 +609,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/troubleshoot/triage-checklist/" class="md-nav__link">
+      <a href="../../troubleshoot/triage-checklist/" class="md-nav__link">
         Triage checklist
       </a>
     </li>
@@ -686,7 +656,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/research/landing/" class="md-nav__link">
+      <a href="../../research/landing/" class="md-nav__link">
         Landing
       </a>
     </li>
@@ -700,7 +670,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/research/architecture/" class="md-nav__link">
+      <a href="../../research/architecture/" class="md-nav__link">
         Architecture
       </a>
     </li>
@@ -755,7 +725,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../features/fail2ban/" class="md-nav__link">
+      <a href="../../../features/fail2ban/" class="md-nav__link">
         fail2ban
       </a>
     </li>
@@ -769,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../features/selinux/" class="md-nav__link">
+      <a href="../../../features/selinux/" class="md-nav__link">
         SELinux
       </a>
     </li>
@@ -783,7 +753,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../features/nftables/" class="md-nav__link">
+      <a href="../../../features/nftables/" class="md-nav__link">
         nftables
       </a>
     </li>
@@ -831,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools_scripts/" class="md-nav__link">
+      <a href="../../../perfsonar/tools_scripts/" class="md-nav__link">
         Scripts and tools
       </a>
     </li>
@@ -845,7 +815,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/" class="md-nav__link">
+      <a href="../../../tools/" class="md-nav__link">
         Link-check tools
       </a>
     </li>
@@ -866,67 +836,25 @@
               </div>
             
             
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#infrastructure-monitoring" class="md-nav__link">
-    Infrastructure Monitoring
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
           
           <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
               
                 
-<a href="https://github.com/osg-htc/networking/edit/master/docs/perfsonar/psetf.md" title="Edit this page" class="md-content__button md-icon">
+<a href="https://github.com/osg-htc/networking/edit/master/docs/personas/quick-deploy/automated-setup/README.md" title="Edit this page" class="md-content__button md-icon">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
 </a>
 
 
 
-  <h1>Infrastructure Monitoring</h1>
+  <h1>Automated setup</h1>
 
-<h3 id="infrastructure-monitoring">Infrastructure Monitoring<a class="headerlink" href="#infrastructure-monitoring" title="Permanent link">&para;</a></h3>
-<p>WLCG/OSG is operating more than 200 perfSONAR agents world-wide. A typical perfSONAR deployment has many services that need to function correctly for the the system to work.  As we scale-up to many perfSONAR deployments across many sites it can be
-difficult to verify everything is working correctly.</p>
-<p>perfSONAR monitoring instance [BROKEN-LINK: https://psetf.opensciencegrid.org/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py] actively monitors the state of the infrastructure for both remote perfSONAR installation as well as central services. The instance is based on ETF [BROKEN-LINK: http://etf.cern.ch/docs/latest/], which is an open source measurement middleware for functional/availability testing of the resources. In order to access the page you'll need to have x509 grid certificate loaded in the browser.</p>
-<p>A sample initial dashboard is shown below:</p>
-<p><img src="../../img/etf.png" alt="Initial perfSONAR dashboard" width="1024"></p>
-<p>You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided into four categories:</p>
-<ol>
-<li><em>Configuration tests</em> (<code>perfSONAR configuration:</code>) tests if the contact, organisation and meshes were set following our <a href="../installation/">installation guide</a>.</li>
-<li><em>Service tests</em> (<code>perfSONAR services:</code>) check if different perfSONAR toolkit services are up and running correctly as well as if ports are reachable from OSG subnets.</li>
-<li><em>Hardware test</em> (<code>perfSONAR hardware</code>) checks if the node conforms to the minimal hardware requirements (see <a href="../deployment-models/">Requirements</a> for details)</li>
-<li><em>Freshness tests</em> (<code>perfSONAR freshness</code>) is a high level test that checks what tests are available in the local measurement archive and compares this with the tests configured. There can be many different reasons why certain tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with measurement archive or scheduling, therefore this test is informative and never reaches critical state. A special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results are stored centrally as compared to local measurement archive. It mainly reflects on the efficiency of the central OSG collector and doesn't provide any information on the on the local services.</li>
-</ol>
-<p>This is sample snapshost showing all metrics for particular perfSONAR instance (latency node in this case):
-<img src="../../img/etf_page.png" alt="Sample Snapshot of all metrics for a perfSONAR instance" width="1024"></p>
-<p>For any issues/questions concerning the monitoring pages and tests, please consult the <a href="../faq/">FAQ</a></p>
-<p>Central services are also monitored with the same tool and their status can be seen by following Business Intelligence/All Aggregations on the left pane. It shows the aggregated status of both production and pre-production services including mesh configuration interface, central datastore and infrastructure monitoring.</p>
+<p>This directory contains examples and pointers for automated deployment:</p>
+<ul>
+<li><code>ansible/</code> — playbooks and roles (example skeleton)</li>
+<li><code>docker/</code> — example container-based testpoint deployments (optional)</li>
+</ul>
+<p>Use these examples as a starting point and adapt to site policies.</p>
 
               
             </article>
@@ -940,7 +868,7 @@ difficult to verify everything is working correctly.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../../network-troubleshooting/osg-debugging-document/" class="md-footer__link md-footer__link--prev" aria-label="Previous: OSG Network Debugging Document" rel="prev">
+        <a href="../quickstart-perfsonar-testpoint/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quickstart: perfSONAR Testpoint" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -949,20 +877,20 @@ difficult to verify everything is working correctly.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              OSG Network Debugging Document
+              Quickstart: perfSONAR Testpoint
             </div>
           </div>
         </a>
       
       
         
-        <a href="../../osg-network-services/" class="md-footer__link md-footer__link--next" aria-label="Next: Network Datastore and Streaming" rel="next">
+        <a href="../../troubleshoot/landing/" class="md-footer__link md-footer__link--next" aria-label="Next: Landing" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Network Datastore and Streaming
+              Landing
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -992,10 +920,10 @@ difficult to verify everything is working correctly.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.5e67fbfe.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.5e67fbfe.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c44cc438.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.c44cc438.min.js"></script>
       
     
   </body>

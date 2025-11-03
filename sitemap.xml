@@ -31,6 +31,21 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://osg-htc.org/networking/features/fail2ban/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/features/nftables/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/features/selinux/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://osg-htc.org/networking/network-troubleshooting/osg-debugging-document/</loc>
          <lastmod>2025-11-03</lastmod>
          <changefreq>daily</changefreq>
@@ -72,6 +87,41 @@
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/quick-deploy/landing/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/quick-deploy/quickstart-perfsonar-testpoint/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/quick-deploy/automated-setup/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/research/architecture/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/research/landing/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/troubleshoot/landing/</loc>
+         <lastmod>2025-11-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/troubleshoot/triage-checklist/</loc>
          <lastmod>2025-11-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
