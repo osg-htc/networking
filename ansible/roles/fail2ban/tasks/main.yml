@@ -1,0 +1,21 @@
+---
+- name: Install fail2ban
+  package:
+    name: fail2ban
+    state: present
+  tags: ['fail2ban', 'packages']
+
+- name: Enable and start fail2ban
+  service:
+    name: fail2ban
+    state: started
+    enabled: true
+  tags: ['fail2ban', 'services']
+
+- name: Deploy perfSONAR-friendly jail config (sshd)
+  template:
+    src: jail.local.j2
+    dest: /etc/fail2ban/jail.d/perfsonar.local
+    mode: '0644'
+  notify: Restart fail2ban
+  tags: ['fail2ban', 'config']

@@ -1,0 +1,31 @@
+---
+- name: Ensure perfSONAR repositories are available (RHEL-family)
+  package:
+    name: perfsonar-release
+    state: present
+  when: ansible_facts.os_family == 'RedHat'
+  tags: ['perfsonar', 'packages']
+
+- name: Install perfSONAR testpoint packages
+  package:
+    name: perfsonar-testpoint
+    state: present
+  tags: ['perfsonar', 'packages']
+
+- name: Enable and start perfSONAR services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ testpoint_services }}"
+  tags: ['perfsonar', 'services']
+
+- name: Apply baseline sysctl tuning
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_set: yes
+    state: present
+    reload: yes
+  loop: "{{ testpoint_sysctls }}"
+  tags: ['perfsonar', 'sysctl']

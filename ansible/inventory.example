@@ -1,0 +1,2 @@
+[testpoints]
+ps-testpoint-01.example.org ansible_user=ec2-user

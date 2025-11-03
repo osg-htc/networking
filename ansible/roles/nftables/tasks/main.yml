@@ -1,0 +1,22 @@
+---
+- name: Install nftables
+  package:
+    name: nftables
+    state: present
+  tags: ['nftables', 'packages']
+
+- name: Deploy minimal nftables rules
+  copy:
+    src: minimal.nft
+    dest: /etc/nftables.conf
+    mode: '0644'
+    backup: true
+  notify: Reload nftables
+  tags: ['nftables', 'config']
+
+- name: Enable and start nftables
+  service:
+    name: nftables
+    state: started
+    enabled: true
+  tags: ['nftables', 'services']
