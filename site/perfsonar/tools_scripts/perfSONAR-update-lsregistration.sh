@@ -29,6 +29,7 @@ ENGINE="auto"   # auto|docker|podman
 CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"
 DRY_RUN=false
 NO_RESTART=false
+LOCAL_MODE=false   # when true, operate on local filesystem instead of container
 
 # Values to set (all optional)
 SITE_NAME=""
@@ -54,6 +55,8 @@ Usage: perfSONAR-update-lsregistration.sh [OPTIONS]
 Options:
   --container NAME           Container name (default: perfsonar-testpoint)
   --engine [auto|docker|podman]  Container engine selector (default: auto)
+  --local                    Edit a local file instead of a container (see --conf)
+  --conf PATH                Path to lsregistrationdaemon.conf (default: /etc/perfsonar/lsregistrationdaemon.conf)
   --dry-run                  Show diff but do not copy back or restart
   --no-restart               Do not restart lsregistrationdaemon inside container
 
@@ -81,6 +84,11 @@ Examples:
     --city Berkeley --region CA --country US --zip 94720 \
     --latitude 37.5 --longitude -121.7469 \
     --admin-name "pS Admin" --admin-email admin@example.org
+
+  # Operate on host file (non-container use)
+  sudo ./perfSONAR-update-lsregistration.sh --local \
+    --conf /etc/perfsonar/lsregistrationdaemon.conf \
+    --site-name "Acme Co." --domain example.org
 EOF
 }
 
@@ -145,6 +153,8 @@ while [[ $# -gt 0 ]]; do
     --help|-h) usage; exit 0;;
     --container) CONTAINER="$2"; shift 2;;
     --engine) ENGINE="$2"; shift 2;;
+    --local) LOCAL_MODE=true; shift;;
+    --conf) CONF_PATH="$2"; shift 2;;
     --dry-run) DRY_RUN=true; shift;;
     --no-restart) NO_RESTART=true; shift;;
     --site-name) SITE_NAME="$2"; shift 2;;
@@ -167,17 +177,23 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Basic validation
-if [[ -n "$ADMIN_NAME" && -z "$ADMIN_EMAIL" ]] || [[ -n "$ADMIN_EMAIL" && -z "$ADMIN_NAME" ]]; then
+if [[ ( -n "$ADMIN_NAME" && -z "$ADMIN_EMAIL" ) || ( -n "$ADMIN_EMAIL" && -z "$ADMIN_NAME" ) ]]; then
   echo "--admin-name and --admin-email must be set together" >&2
   exit 1
-}
+fi
 
-ENG=$(pick_engine)
-need_cmd "$ENG"
-
-if ! container_exists "$ENG" "$CONTAINER"; then
-  echo "Container '$CONTAINER' not found with $ENG" >&2
-  exit 1
+if [[ "$LOCAL_MODE" == true ]]; then
+  if [[ ! -f "$CONF_PATH" ]]; then
+    echo "Local conf not found: $CONF_PATH" >&2
+    exit 2
+  fi
+else
+  ENG=$(pick_engine)
+  need_cmd "$ENG"
+  if ! container_exists "$ENG" "$CONTAINER"; then
+    echo "Container '$CONTAINER' not found with $ENG" >&2
+    exit 1
+  fi
 fi
 
 workdir=$(mktemp -d)
@@ -185,8 +201,13 @@ trap 'rm -rf "$workdir"' EXIT
 local_conf="$workdir/lsregistrationdaemon.conf"
 orig_conf="$workdir/lsregistrationdaemon.conf.orig"
 
-log "Copying $CONF_PATH from container $CONTAINER"
-copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$local_conf"
+if [[ "$LOCAL_MODE" == true ]]; then
+  log "Copying local $CONF_PATH"
+  cp -a "$CONF_PATH" "$local_conf"
+else
+  log "Copying $CONF_PATH from container $CONTAINER"
+  copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$local_conf"
+fi
 cp -a "$local_conf" "$orig_conf"
 
 # Helpers to mutate the file
@@ -263,21 +284,32 @@ if command -v diff >/dev/null 2>&1; then
 fi
 
 if [[ "$DRY_RUN" == true ]]; then
-  log "Dry-run: not copying updated file back into container."
+  log "Dry-run: not copying updated file back."
   exit 0
 fi
 
-log "Copying updated file back to container"
-copy_to_container "$ENG" "$CONTAINER" "$local_conf" "$CONF_PATH"
-
-if [[ "$NO_RESTART" == true ]]; then
-  log "Skipping service restart as requested."
-  exit 0
-fi
-
-log "Restarting lsregistrationdaemon (best-effort)"
-if ! exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'; then
-  log "Warning: failed to restart lsregistrationdaemon"
+if [[ "$LOCAL_MODE" == true ]]; then
+  log "Writing updated file to $CONF_PATH"
+  cp -a "$local_conf" "$CONF_PATH"
+  if [[ "$NO_RESTART" == true ]]; then
+    log "Skipping service restart as requested."
+    exit 0
+  fi
+  log "Restarting lsregistrationdaemon on host (best-effort)"
+  if ! bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'; then
+    log "Warning: failed to restart lsregistrationdaemon on host"
+  fi
+else
+  log "Copying updated file back to container"
+  copy_to_container "$ENG" "$CONTAINER" "$local_conf" "$CONF_PATH"
+  if [[ "$NO_RESTART" == true ]]; then
+    log "Skipping service restart as requested."
+    exit 0
+  fi
+  log "Restarting lsregistrationdaemon (best-effort)"
+  if ! exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'; then
+    log "Warning: failed to restart lsregistrationdaemon"
+  fi
 fi
 
 log "Done."
