@@ -1,50 +1,49 @@
 #!/usr/bin/env bash
-# Generate a perfSONAR-update-lsregistration.sh invocation from an existing
-# lsregistrationdaemon.conf configuration file.
+# Build a self-contained restore script to re-apply lsregistrationdaemon.conf
+# settings after an upgrade or rebuild.
 #
-# This helper parses key fields from an lsregistrationdaemon.conf and prints a
-# ready-to-run command line with the equivalent flags. It does not modify any
-# files.
+# This tool parses an existing lsregistrationdaemon.conf and writes a
+# temporary script that invokes perfSONAR-update-lsregistration.sh with the
+# equivalent flags to restore configuration either inside the container or on
+# the host (local mode).
 #
-# Default conf path: /etc/perfsonar/lsregistrationdaemon.conf
-#
-# Example:
-#   ./perfSONAR-build-lsregistration-invoke.sh \
-#     --conf /etc/perfsonar/lsregistrationdaemon.conf \
-#     --script ./perfSONAR-update-lsregistration.sh \
-#     --container perfsonar-testpoint
-#
-# Output:
-#   sudo ./perfSONAR-update-lsregistration.sh --container perfsonar-testpoint \
-#     --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-#     --city Berkeley --region CA --country US --zip 94720 \
-#     --latitude 37.5 --longitude -121.7469 \
-#     --ls-instance https://ls.example.org/lookup/records \
-#     --ls-lease-duration 7200 --check-interval 3600 --allow-internal 0 \
-#     --admin-name "pS Admin" --admin-email admin@example.org
+# Defaults:
+#   - Source conf: /etc/perfsonar/lsregistrationdaemon.conf
+#   - Output: /tmp/perfSONAR-restore-lsregistration-YYYYmmddTHHMMSSZ.sh
+#   - Restore target: container 'perfsonar-testpoint' (override with --local
+#     to restore directly on host, or --container to choose a different name)
 #
 set -euo pipefail
 IFS=$'\n\t'
 
-CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"
-SCRIPT_PATH="./perfSONAR-update-lsregistration.sh"
+CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"   # source to read
+SCRIPT_PATH="./perfSONAR-update-lsregistration.sh"     # updater to call in generated script
 INCLUDE_SUDO=true
-CONTAINER_NAME=""
-ENGINE=""
-FLAGS_ONLY=false
+ENGINE=""                 # optional engine to include in generated script
+CONTAINER_NAME="perfsonar-testpoint"
+LOCAL_MODE=false            # if true, generated script uses --local --conf
+TARGET_CONF="/etc/perfsonar/lsregistrationdaemon.conf" # where to write in restore
+OUT_PATH=""               # output file path; auto if empty
 
 usage() {
   cat <<'EOF'
 Usage: perfSONAR-build-lsregistration-invoke.sh [OPTIONS]
 
+Build a restore script that re-applies lsregistration settings using
+perfSONAR-update-lsregistration.sh.
+
 Options:
-  --conf PATH           Path to lsregistrationdaemon.conf (default: /etc/perfsonar/lsregistrationdaemon.conf)
-  --script PATH         Path to perfSONAR-update-lsregistration.sh (default: ./perfSONAR-update-lsregistration.sh)
-  --container NAME      Include --container NAME in the generated command
-  --engine auto|docker|podman  Include --engine in the generated command
-  --no-sudo             Do not prefix the command with 'sudo'
-  --flags-only          Print only the flags (omit the script path and sudo)
-  -h, --help            Show this help
+  --conf PATH             Source lsregistrationdaemon.conf to parse
+                          (default: /etc/perfsonar/lsregistrationdaemon.conf)
+  --script PATH           Path to perfSONAR-update-lsregistration.sh used by
+                          the generated script (default: ./perfSONAR-update-lsregistration.sh)
+  --local                 Generate script to restore on host (non-container)
+  --target-conf PATH      Target conf path for local restore (default: /etc/perfsonar/lsregistrationdaemon.conf)
+  --container NAME        Generate script to restore in container NAME (default: perfsonar-testpoint)
+  --engine auto|docker|podman  Include engine flag in generated script
+  --out PATH              Output script path (default: /tmp/perfSONAR-restore-lsregistration-<timestamp>.sh)
+  --no-sudo               Do not prefix restore command with 'sudo'
+  -h, --help              Show this help
 
 Notes:
   - Only uncommented keys are considered; last occurrence wins.
@@ -116,18 +115,14 @@ read_admin() {
   ' "$CONF_PATH"
 }
 
-# quote-safe print of a command array
-print_cmd() {
-  local -a arr=("$@")
-  local out=""
-  for el in "${arr[@]}"; do
-    # shell-escape like printf %q (portable in bash)
+quote_join() {
+  # Print a space-joined, shell-escaped version of all args
+  local out="" q
+  for el in "$@"; do
     printf -v q '%q' "$el"
     out+="$q "
   done
-  # trim trailing space
-  out=${out%% } 
-  printf '%s\n' "$out"
+  printf '%s\n' "${out%% }"
 }
 
 # Parse CLI
@@ -136,10 +131,12 @@ while [[ $# -gt 0 ]]; do
     --help|-h) usage; exit 0;;
     --conf) CONF_PATH="$2"; shift 2;;
     --script) SCRIPT_PATH="$2"; shift 2;;
-    --container) CONTAINER_NAME="$2"; shift 2;;
+    --local) LOCAL_MODE=true; shift;;
+    --target-conf) TARGET_CONF="$2"; shift 2;;
+    --container) CONTAINER_NAME="$2"; LOCAL_MODE=false; shift 2;;
     --engine) ENGINE="$2"; shift 2;;
+    --out) OUT_PATH="$2"; shift 2;;
     --no-sudo) INCLUDE_SUDO=false; shift;;
-    --flags-only) FLAGS_ONLY=true; shift;;
     *) err "Unknown option: $1"; usage; exit 1;;
   esac
 done
@@ -174,10 +171,14 @@ if admin_line=$(read_admin); then
   fi
 fi
 
-# Build arguments
+# Build argument array for the updater
 args=()
-if [[ -n "$CONTAINER_NAME" ]]; then args+=(--container "$CONTAINER_NAME"); fi
-if [[ -n "$ENGINE" ]]; then args+=(--engine "$ENGINE"); fi
+if [[ "$LOCAL_MODE" == true ]]; then
+  args+=(--local --conf "$TARGET_CONF")
+else
+  args+=(--container "$CONTAINER_NAME")
+  if [[ -n "$ENGINE" ]]; then args+=(--engine "$ENGINE"); fi
+fi
 if [[ -n "$SITE_NAME" ]]; then args+=(--site-name "$SITE_NAME"); fi
 if [[ -n "$DOMAIN" ]]; then args+=(--domain "$DOMAIN"); fi
 for p in "${PROJECTS[@]:-}"; do args+=(--project "$p"); done
@@ -195,13 +196,32 @@ if [[ -n "$ADMIN_NAME" && -n "$ADMIN_EMAIL" ]]; then
   args+=(--admin-name "$ADMIN_NAME" --admin-email "$ADMIN_EMAIL")
 fi
 
-if [[ "$FLAGS_ONLY" == true ]]; then
-  print_cmd "${args[@]}"
-  exit 0
+# Determine output path
+if [[ -z "$OUT_PATH" ]]; then
+  ts=$(date -u +%Y%m%dT%H%M%SZ)
+  OUT_PATH="/tmp/perfSONAR-restore-lsregistration-${ts}.sh"
 fi
 
-cmd_arr=()
-if [[ "$INCLUDE_SUDO" == true ]]; then cmd_arr+=(sudo); fi
-cmd_arr+=("$SCRIPT_PATH")
-cmd_arr+=("${args[@]}")
-print_cmd "${cmd_arr[@]}"
+# Compose the command line as a single escaped string for embedding
+cmd_line=""
+tmp_arr=()
+if [[ "$INCLUDE_SUDO" == true ]]; then tmp_arr+=(sudo); fi
+tmp_arr+=("$SCRIPT_PATH")
+tmp_arr+=("${args[@]}")
+cmd_line=$(quote_join "${tmp_arr[@]}")
+
+# Write the restore script
+cat >"$OUT_PATH" <<EOF
+#!/usr/bin/env bash
+# Restore lsregistration configuration
+# Source: $(printf '%q' "$CONF_PATH")
+# Generated: $(date -u +%F' '%T'Z')
+set -euo pipefail
+echo "Applying perfSONAR lsregistration settings..."
+$cmd_line
+echo "Done."
+EOF
+
+chmod +x "$OUT_PATH"
+echo "Restore script written to: $OUT_PATH"
+exit 0
