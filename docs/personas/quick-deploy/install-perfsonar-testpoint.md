@@ -54,39 +54,51 @@ Document interface mappings; you will need them for the policy-based routing con
 
 ## Step 2 – Configure Policy-Based Routing (PBR)
 
-The repository ships `docs/perfsonar/pbr-nm-config-perfSONAR.sh`, which automates NetworkManager configuration and routing rules. Copy it into place and prepare its configuration file.
+The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that automates NetworkManager configuration and routing rules and can auto-generate its config file.
 
 1. **Stage the script:**
 
    ```bash
-   install -m 0755 docs/perfsonar/pbr-nm-config-perfSONAR.sh /usr/local/sbin/perfsonar-pbr-nm.sh
+   install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh /usr/local/sbin/perfSONAR-pbr-nm.sh
    ```
 
-2. **Create `/etc/perfSONAR-multi-nic-config.conf`:** tailor the arrays to your site. A template example is shown below—replace addresses, gateways, and NIC names with real values.
+2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.
 
-   ```bash
-   cat <<'EOF' >/etc/perfSONAR-multi-nic-config.conf
-   NIC_NAMES=(eno1 eno2)
-   NIC_IPV4_ADDRS=(198.51.100.10 203.0.113.10)
-   NIC_IPV4_PREFIXES=("/24" "/24")
-   NIC_IPV4_GWS=(198.51.100.1 203.0.113.1)
-   NIC_IPV4_NODEFAULT=(0 1)
-   NIC_IPV4_ADDROUTE=("-" "203.0.113.0/24 203.0.113.1")
-   NIC_IPV6_ADDRS=("2001:db8:1::10" "-")
-   NIC_IPV6_PREFIXES=("/64" "-")
-   NIC_IPV6_GWS=("2001:db8:1::1" "-")
-   DEFAULT_ROUTE_NIC="eno1"
-   CONFIGURE_DEFAULT_ROUTE=true
-   EOF
-   ```
+    - Preview (no changes):
+
+       ```bash
+       /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-debug
+       ```
+
+    - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
+
+       ```bash
+       /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-auto
+       ```
+
+    Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
 
 3. **Execute the script:**
 
-   ```bash
-   perfsonar-pbr-nm.sh
-   ```
+    - Rehearsal (no changes, extra logging recommended on first run):
 
-   When prompted, type `yes` to confirm you understand all existing NetworkManager connections will be removed. The script backs up prior connections, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
+       ```bash
+       perfsonar-pbr-nm.sh --dry-run --debug
+       ```
+
+    - Apply changes non-interactively (auto-confirm):
+
+       ```bash
+       perfsonar-pbr-nm.sh --yes
+       ```
+
+    - Or run interactively and answer the confirmation prompt when ready:
+
+       ```bash
+       perfsonar-pbr-nm.sh
+       ```
+
+    The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
 
 4. **Verify the routing policy:**
 
