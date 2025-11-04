@@ -5,7 +5,7 @@ registration configuration in `lsregistrationdaemon.conf`.
 
 - `perfSONAR-update-lsregistration.sh` — updates configuration either inside the
   perfSONAR testpoint container or directly on the host (local mode).
-- `perfSONAR-build-lsregistration-invoke.sh` — reads an existing
+- `perfSONAR-extract-lsregistration.sh` — reads an existing
   `lsregistrationdaemon.conf` and generates a self-contained restore script that
   invokes the updater with all equivalent flags. This is useful after an upgrade
   or rebuild to re-apply your previous configuration in one step.
@@ -42,7 +42,7 @@ sudo ./perfSONAR-update-lsregistration.sh --local \
 
 ## Generate a restore script from an existing conf
 
-Script: `perfSONAR-build-lsregistration-invoke.sh`
+Script: `perfSONAR-extract-lsregistration.sh`
 
 - Reads values from an existing `lsregistrationdaemon.conf` (by default
   `/etc/perfsonar/lsregistrationdaemon.conf`).
@@ -63,12 +63,12 @@ Examples:
 
 ```bash
 # Build a container restore script (default container name)
-./perfSONAR-build-lsregistration-invoke.sh \
+./perfSONAR-extract-lsregistration.sh \
   --conf /etc/perfsonar/lsregistrationdaemon.conf \
   --script ./perfSONAR-update-lsregistration.sh
 
 # Build a local restore script that targets the host file directly
-./perfSONAR-build-lsregistration-invoke.sh --local \
+./perfSONAR-extract-lsregistration.sh --local \
   --target-conf /etc/perfsonar/lsregistrationdaemon.conf \
   --out /tmp/perfSONAR-restore-local.sh
 ```

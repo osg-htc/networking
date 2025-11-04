@@ -27,7 +27,7 @@ OUT_PATH=""               # output file path; auto if empty
 
 usage() {
   cat <<'EOF'
-Usage: perfSONAR-build-lsregistration-invoke.sh [OPTIONS]
+Usage: perfSONAR-extract-lsregistration.sh [OPTIONS]
 
 Build a restore script that re-applies lsregistration settings using
 perfSONAR-update-lsregistration.sh.
