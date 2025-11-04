@@ -1223,9 +1223,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-3-deploy-nftables-selinux-and-fail2ban" class="md-nav__link">
+  <a href="#step-3-configure-nftables-selinux-and-fail2ban" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 3 – Deploy nftables, SELinux, and Fail2Ban
+      Step 3 – Configure nftables, SELinux, and Fail2Ban
     </span>
   </a>
   
@@ -1333,37 +1333,49 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <p>Document interface mappings; you will need them for the policy-based routing configuration.</p>
 <hr />
 <h2 id="step-2-configure-policy-based-routing-pbr">Step 2 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-2-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
-<p>The repository ships <code>docs/perfsonar/pbr-nm-config-perfSONAR.sh</code>, which automates NetworkManager configuration and routing rules. Copy it into place and prepare its configuration file.</p>
+<p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file.</p>
 <ol>
 <li><strong>Stage the script:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/pbr-nm-config-perfSONAR.sh<span class="w"> </span>/usr/local/sbin/perfsonar-pbr-nm.sh
+<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>/usr/local/sbin/perfSONAR-pbr-nm.sh
 </code></pre></div>
 <ol>
-<li><strong>Create <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> tailor the arrays to your site. A template example is shown below—replace addresses, gateways, and NIC names with real values.</li>
-</ol>
-<div class="highlight"><pre><span></span><code>cat<span class="w"> </span><span class="s">&lt;&lt;&#39;EOF&#39; &gt;/etc/perfSONAR-multi-nic-config.conf</span>
-<span class="s">NIC_NAMES=(eno1 eno2)</span>
-<span class="s">NIC_IPV4_ADDRS=(198.51.100.10 203.0.113.10)</span>
-<span class="s">NIC_IPV4_PREFIXES=(&quot;/24&quot; &quot;/24&quot;)</span>
-<span class="s">NIC_IPV4_GWS=(198.51.100.1 203.0.113.1)</span>
-<span class="s">NIC_IPV4_NODEFAULT=(0 1)</span>
-<span class="s">NIC_IPV4_ADDROUTE=(&quot;-&quot; &quot;203.0.113.0/24 203.0.113.1&quot;)</span>
-<span class="s">NIC_IPV6_ADDRS=(&quot;2001:db8:1::10&quot; &quot;-&quot;)</span>
-<span class="s">NIC_IPV6_PREFIXES=(&quot;/64&quot; &quot;-&quot;)</span>
-<span class="s">NIC_IPV6_GWS=(&quot;2001:db8:1::1&quot; &quot;-&quot;)</span>
-<span class="s">DEFAULT_ROUTE_NIC=&quot;eno1&quot;</span>
-<span class="s">CONFIGURE_DEFAULT_ROUTE=true</span>
-<span class="s">EOF</span>
+<li>
+<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.</p>
+<ul>
+<li>Preview (no changes):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-debug
 </code></pre></div>
-<ol>
-<li><strong>Execute the script:</strong></li>
-</ol>
+<ul>
+<li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+</code></pre></div>
+<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+</li>
+<li>
+<p><strong>Execute the script:</strong></p>
+<ul>
+<li>Rehearsal (no changes, extra logging recommended on first run):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
+</code></pre></div>
+<ul>
+<li>Apply changes non-interactively (auto-confirm):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh<span class="w"> </span>--yes
+</code></pre></div>
+<ul>
+<li>Or run interactively and answer the confirmation prompt when ready:</li>
+</ul>
 <div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh
 </code></pre></div>
-<p>When prompted, type <code>yes</code> to confirm you understand all existing NetworkManager connections will be removed. The script backs up prior connections, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
-<ol>
-<li><strong>Verify the routing policy:</strong></li>
+<p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
+</li>
+<li>
+<p><strong>Verify the routing policy:</strong></p>
+</li>
 </ol>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>connection<span class="w"> </span>show
 ip<span class="w"> </span>rule<span class="w"> </span>show
@@ -1371,13 +1383,15 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 </code></pre></div>
 <p>Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default route.</p>
 <hr />
-<h2 id="step-3-deploy-nftables-selinux-and-fail2ban">Step 3 – Deploy nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-3-deploy-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
-<p>Use <code>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh</code> to install a hardened firewall profile with optional SELinux and Fail2Ban support.</p>
-<ol>
-<li><strong>Install dependencies:</strong></li>
-</ol>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nftables<span class="w"> </span>policycoreutils-python-utils<span class="w"> </span>fail2ban
-</code></pre></div>
+<h2 id="step-3-configure-nftables-selinux-and-fail2ban">Step 3 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-3-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
+<p>Use <code>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables profile with optional SELinux and Fail2Ban support.</p>
+<p>Prerequisites (not installed by the script):</p>
+<ul>
+<li><code>nftables</code> must already be installed and available (<code>nft</code> binary) for firewall configuration.</li>
+<li><code>fail2ban</code> must be installed if you want the optional jail configuration.</li>
+<li>SELinux tools (e.g., <code>getenforce</code>, <code>policycoreutils</code>) must be present to attempt SELinux configuration.</li>
+</ul>
+<p>If any prerequisite is missing, the script skips that component and continues.</p>
 <ol>
 <li><strong>Stage the installer:</strong></li>
 </ol>
@@ -1390,9 +1404,49 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 </code></pre></div>
 <ul>
 <li>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).</li>
-<li>Add <code>--dry-run</code> for a rehearsal that only prints the planned actions.</li>
+<li>
+<p>Add <code>--dry-run</code> for a rehearsal that only prints the planned actions.</p>
+<p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-config.conf</code>, optionally adjusts SELinux, and enables Fail2Ban jails—only if those components are already installed.</p>
+<p>Notes:
+- SSH allow-list is built from your NIC address/prefix arrays in <code>/etc/perfSONAR-multi-nic-config.conf</code>:
+   - CIDR values in <code>NIC_IPV4_PREFIXES</code>/<code>NIC_IPV6_PREFIXES</code> paired with corresponding addresses are treated as subnets.
+   - Address entries without a prefix are treated as single hosts.
+   - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
+- The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.
+- Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</p>
+</li>
 </ul>
-<p>The script creates nftables sets for perfSONAR services, derives SSH access lists from <code>/etc/perfSONAR-multi-nic-config.conf</code>, configures SELinux when requested, and enables Fail2Ban jails tuned for measurement hosts. Logs are written to <code>/var/log/perfSONAR-install-nftables.log</code>, and backups land under <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</p>
+<p>Tip: preview the fully rendered nftables rules (no changes are made):</p>
+<div class="highlight"><pre><span></span><code>perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
+</code></pre></div>
+<p>Optional: manually add extra management hosts/subnets</p>
+<p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
+<div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
+   type ipv4_addr
+   flags interval
+   elements = { 192.0.2.0/24, 198.51.100.0/25 }
+}
+
+set ssh_access_ip4_hosts {
+   type ipv4_addr
+   elements = { 203.0.113.10, 203.0.113.11 }
+}
+
+set ssh_access_ip6_subnets {
+   type ipv6_addr
+   flags interval
+   elements = { 2001:db8:1::/64 }
+}
+
+set ssh_access_ip6_hosts {
+   type ipv6_addr
+   elements = { 2001:db8::10 }
+}
+</code></pre></div>
+<p>Then validate and reload (root shell):</p>
+<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
+systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
+</code></pre></div>
 <ol>
 <li><strong>Confirm firewall state and security services:</strong></li>
 </ol>

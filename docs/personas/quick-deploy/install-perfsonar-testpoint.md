@@ -1,3 +1,12 @@
+---
+title: Install: perfSONAR Testpoint
+description: Instructions and verification to deploy a perfSONAR testpoint for WLCG/OSG.
+persona: quick-deploy
+owners: [networking-team@osg-htc.org]
+status: draft
+tags: [install, perfSONAR, container]
+---
+
 # Installing a perfSONAR Testpoint for WLCG/OSG
 
 This quick-deploy playbook walks WLCG/OSG site administrators through the end-to-end installation, configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). Each phase references tooling that already lives in this repository so you can automate as much as possible while still capturing the site-specific information required by OSG/WLCG operations.
@@ -112,23 +121,25 @@ The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-
 
 ---
 
-## Step 3 – Deploy nftables, SELinux, and Fail2Ban
+## Step 3 – Configure nftables, SELinux, and Fail2Ban
 
-Use `docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh` to install a hardened firewall profile with optional SELinux and Fail2Ban support.
+Use `docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support.
 
-1. **Install dependencies:**
+Prerequisites (not installed by the script):
 
-   ```bash
-   dnf install -y nftables policycoreutils-python-utils fail2ban
-   ```
+- `nftables` must already be installed and available (`nft` binary) for firewall configuration.
+- `fail2ban` must be installed if you want the optional jail configuration.
+- SELinux tools (e.g., `getenforce`, `policycoreutils`) must be present to attempt SELinux configuration.
 
-2. **Stage the installer:**
+If any prerequisite is missing, the script skips that component and continues.
+
+1. **Stage the installer:**
 
    ```bash
    install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh /usr/local/sbin/perfsonar-install-nftables.sh
    ```
 
-3. **Run with desired options:**
+2. **Run with desired options:**
 
    ```bash
    perfsonar-install-nftables.sh --selinux --fail2ban --yes
@@ -137,9 +148,58 @@ Use `docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh` to install a ha
    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
    - Add `--dry-run` for a rehearsal that only prints the planned actions.
 
-   The script creates nftables sets for perfSONAR services, derives SSH access lists from `/etc/perfSONAR-multi-nic-config.conf`, configures SELinux when requested, and enables Fail2Ban jails tuned for measurement hosts. Logs are written to `/var/log/perfSONAR-install-nftables.log`, and backups land under `/var/backups/perfsonar-install-<timestamp>`.
+    The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf`, optionally adjusts SELinux, and enables Fail2Ban jails—only if those components are already installed.
 
-4. **Confirm firewall state and security services:**
+    Notes:
+    - SSH allow-list is built from your NIC address/prefix arrays in `/etc/perfSONAR-multi-nic-config.conf`:
+       - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
+       - Address entries without a prefix are treated as single hosts.
+       - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
+    - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
+    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+
+   Tip: preview the fully rendered nftables rules (no changes are made):
+
+   ```bash
+   perfsonar-install-nftables.sh --print-rules
+   ```
+
+   Optional: manually add extra management hosts/subnets
+
+   If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
+
+   ```nft
+   set ssh_access_ip4_subnets {
+      type ipv4_addr
+      flags interval
+      elements = { 192.0.2.0/24, 198.51.100.0/25 }
+   }
+
+   set ssh_access_ip4_hosts {
+      type ipv4_addr
+      elements = { 203.0.113.10, 203.0.113.11 }
+   }
+
+   set ssh_access_ip6_subnets {
+      type ipv6_addr
+      flags interval
+      elements = { 2001:db8:1::/64 }
+   }
+
+   set ssh_access_ip6_hosts {
+      type ipv6_addr
+      elements = { 2001:db8::10 }
+   }
+   ```
+
+   Then validate and reload (root shell):
+
+   ```bash
+   nft -c -f /etc/nftables.d/perfsonar.nft
+   systemctl reload nftables || systemctl restart nftables
+   ```
+
+3. **Confirm firewall state and security services:**
 
    ```bash
    nft list ruleset

@@ -2,8 +2,9 @@
 # perfSONAR nftables installer and helper
 # --------------------------------------
 # Purpose:
-#   Install and configure nftables for a perfSONAR testpoint host. Optionally
-#   deploy a minimal fail2ban configuration and enable SELinux (with warnings).
+#   Configure nftables for a perfSONAR testpoint host (no package installation).
+#   Optionally configure a minimal fail2ban jail and enable SELinux (with
+#   warnings) — only if these components are already installed on the system.
 #
 # Contract (inputs / outputs):
 #   - Input: CLI flags control behavior (see --help). Ports may be passed as a
@@ -16,6 +17,8 @@
 # Safety:
 #   - This script must be run as root. Use --dry-run to preview actions.
 #   - It makes backups before overwriting nftables rules or fail2ban files.
+#   - It does NOT install any packages. Ensure nftables/fail2ban/SELinux tools
+#     are already installed; otherwise related configuration steps are skipped.
 #
 # Author: Generated based on existing perfSONAR helper scripts
 # Version: 0.1.0 - 2025-11-03
@@ -33,6 +36,7 @@ PERF_PORTS="443"
 NFT_RULE_FILE="/etc/nftables.d/perfsonar.nft"
 CONFIG_FILE="/etc/perfSONAR-multi-nic-config.conf"
 BACKUP_DIR="/var/backups/perfsonar-install-$(date +%s)"
+PRINT_RULES=false
 
 # Colors
 GREEN='\033[0;32m'
@@ -44,21 +48,24 @@ Usage: perfSONAR-install-nftables.sh [OPTIONS]
 
 Options:
   --help               Show this help
-  --dry-run            Print actions without making changes
+    --dry-run            Print actions without making changes
   --yes                Skip confirmation prompts
-  --fail2ban           Install and enable a minimal fail2ban config
-  --selinux            Attempt to enable SELinux (may require reboot)
+    --fail2ban           Configure and enable a minimal fail2ban jail (if installed)
+    --selinux            Attempt to enable SELinux (if installed; may require reboot)
   --ports=CSV          Comma-separated list of TCP ports to allow (default: 22,80,443)
   --debug              Print commands (set -x) for troubleshooting
   --backup-dir=DIR     Where to store backups (default: auto under /var/backups)
+    --print-rules        Render the nftables rules to stdout and exit (no writes)
 
 Example:
   sudo ./perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
 
 Notes:
-  - Run in a VM or console first. Use --dry-run to preview changes.
-  - SELinux enablement is a potentially disruptive operation; read the
-    script comments and test before enabling on production hosts.
+    - Run in a VM or console first. Use --dry-run to preview changes.
+    - SELinux enablement is a potentially disruptive operation; read the
+        script comments and test before enabling on production hosts.
+    - This script does not install packages; ensure nftables/fail2ban/SELinux
+        are present before using related flags.
 EOF
 }
 
@@ -90,47 +97,31 @@ require_root() {
     fi
 }
 
-detect_pkg_manager() {
-    if command -v dnf >/dev/null 2>&1; then
-        echo dnf
-    elif command -v yum >/dev/null 2>&1; then
-        echo yum
-    elif command -v apt-get >/dev/null 2>&1; then
-        echo apt
-    elif command -v zypper >/dev/null 2>&1; then
-        echo zypper
+check_prereqs() {
+    # No installation is performed. Only check and log presence of tools.
+    if command -v nft >/dev/null 2>&1; then
+        log "nftables detected; configuration steps will be applied."
     else
-        echo unknown
+        log "nftables not detected; nftables configuration will be skipped."
     fi
-}
 
-install_packages() {
-    local pkg_mgr
-    pkg_mgr=$(detect_pkg_manager)
-    case "$pkg_mgr" in
-        dnf|yum)
-            run_cmd "$pkg_mgr" -y install nftables
-            if [ "$INSTALL_FAIL2BAN" = true ]; then
-                run_cmd "$pkg_mgr" -y install fail2ban
-            fi
-            ;;
-        apt)
-            run_cmd apt-get update
-            run_cmd apt-get -y install nftables
-            if [ "$INSTALL_FAIL2BAN" = true ]; then
-                run_cmd apt-get -y install fail2ban
-            fi
-            ;;
-        zypper)
-            run_cmd zypper --non-interactive install nftables
-            if [ "$INSTALL_FAIL2BAN" = true ]; then
-                run_cmd zypper --non-interactive install fail2ban
-            fi
-            ;;
-        *)
-            log "Unsupported package manager: $pkg_mgr. Install nftables and fail2ban manually."
-            ;;
-    esac
+    if [ "$INSTALL_FAIL2BAN" = true ]; then
+        if command -v fail2ban-client >/dev/null 2>&1 || systemctl list-unit-files --type=service 2>/dev/null | grep -q '^fail2ban\.service'; then
+            log "fail2ban detected; jail configuration will be applied."
+        else
+            log "fail2ban not detected; skipping fail2ban configuration."
+            INSTALL_FAIL2BAN=false
+        fi
+    fi
+
+    if [ "$ENABLE_SELINUX" = true ]; then
+        if command -v getenforce >/dev/null 2>&1; then
+            log "SELinux tools detected; SELinux configuration will be attempted."
+        else
+            log "SELinux tools not detected; skipping SELinux configuration."
+            ENABLE_SELINUX=false
+        fi
+    fi
 }
 
 backup_file() {
@@ -145,10 +136,47 @@ backup_file() {
 write_nft_rules() {
     local ports_csv=$1
     log "write_nft_rules called with ports: $ports_csv"
+    if ! command -v nft >/dev/null 2>&1; then
+        log "nft command not found; skipping nftables rules write (component not installed)."
+        return 0
+    fi
+    # Split SUBNETS/HOSTS into IPv4/IPv6 lists for embedding directly into set definitions
+    local -a ip4_subnets=() ip6_subnets=() ip4_hosts=() ip6_hosts=()
+    for s in "${SUBNETS[@]:-}"; do
+        [ -z "$s" ] && continue
+        if [[ "$s" == *":"* ]]; then
+            ip6_subnets+=("$s")
+        else
+            ip4_subnets+=("$s")
+        fi
+    done
+    for h in "${HOSTS[@]:-}"; do
+        [ -z "$h" ] && continue
+        if [[ "$h" == *":"* ]]; then
+            ip6_hosts+=("$h")
+        else
+            ip4_hosts+=("$h")
+        fi
+    done
+
+    # Helper to join array with comma+space
+    _join_by() { local IFS=", "; shift; echo "$*"; }
+
+    local ip4_subnets_join ip6_subnets_join ip4_hosts_join ip6_hosts_join
+    ip4_subnets_join=$(_join_by , "${ip4_subnets[@]}")
+    ip6_subnets_join=$(_join_by , "${ip6_subnets[@]}")
+    ip4_hosts_join=$(_join_by , "${ip4_hosts[@]}")
+    ip6_hosts_join=$(_join_by , "${ip6_hosts[@]}")
+
+    # Small validation/logging of resolved SSH elements for operator visibility
+    log "SSH IPv4 subnets: ${ip4_subnets_join:-<none>}"
+    log "SSH IPv6 subnets: ${ip6_subnets_join:-<none>}"
+    log "SSH IPv4 hosts:   ${ip4_hosts_join:-<none>}"
+    log "SSH IPv6 hosts:   ${ip6_hosts_join:-<none>}"
+
     local tmpfile
     tmpfile=$(mktemp)
-    # Write a richer perfSONAR nftables ruleset inspired by the example provided.
-    cat > "$tmpfile" <<'EOF'
+    cat > "$tmpfile" <<EOF
 #!/usr/sbin/nft -f
 flush ruleset
 
@@ -174,27 +202,27 @@ table inet nftables_svc {
         elements = { 123, 5201, 5001, 5000, 5101 }
     }
 
-    # ssh access sets: elements filled below by the installer
+    # ssh access sets populated from site config
     set ssh_access_ip4_subnets {
         type ipv4_addr
         flags interval
-        elements = { }
+        elements = { ${ip4_subnets_join} }
     }
 
     set ssh_access_ip6_subnets {
         type ipv6_addr
         flags interval
-        elements = { }
+        elements = { ${ip6_subnets_join} }
     }
 
     set ssh_access_ip4_hosts {
         type ipv4_addr
-        elements = { }
+        elements = { ${ip4_hosts_join} }
     }
 
     set ssh_access_ip6_hosts {
         type ipv6_addr
-        elements = { }
+        elements = { ${ip6_hosts_join} }
     }
 
     chain allow {
@@ -215,7 +243,7 @@ table inet nftables_svc {
         udp dport 18760-19960 ct state { new, untracked } accept
         udp dport 33434-33634 ct state { new, untracked } accept
 
-        # ssh rules (will be limited to configured subnets/hosts)
+        # ssh rules limited to configured subnets/hosts
         tcp dport 22 ip saddr @ssh_access_ip4_subnets ct state { new, untracked } accept
         tcp dport 22 ip6 saddr @ssh_access_ip6_subnets ct state { new, untracked } accept
         tcp dport 22 ip saddr @ssh_access_ip4_hosts ct state { new, untracked } accept
@@ -225,50 +253,8 @@ table inet nftables_svc {
     chain INPUT {
         type filter hook input priority filter + 20
         policy accept
-
         jump allow
         reject with icmpx admin-prohibited
-    }
-
-}
-EOF
-
-    # Now append elements for the ssh access sets derived from SUBNETS/HOSTS
-    # We build a small temporary file with the 'add element' commands and then
-    # concat it into the main nft file so we don't need to regenerate the whole
-    # structure stringly.
-    local tmp_add
-    tmp_add=$(mktemp)
-
-    # Populate ssh_access_ip4_subnets and ssh_access_ip6_subnets
-    for s in "${SUBNETS[@]:-}"; do
-        [ -z "$s" ] && continue
-        if [[ "$s" == *":"* ]]; then
-            printf 'add element inet nftables_svc ssh_access_ip6_subnets { %s }\n' "$s" >> "$tmp_add"
-        else
-            printf 'add element inet nftables_svc ssh_access_ip4_subnets { %s }\n' "$s" >> "$tmp_add"
-        fi
-    done
-
-    # Populate hosts
-    for h in "${HOSTS[@]:-}"; do
-        [ -z "$h" ] && continue
-        if [[ "$h" == *":"* ]]; then
-            printf 'add element inet nftables_svc ssh_access_ip6_hosts { %s }\n' "$h" >> "$tmp_add"
-        else
-            printf 'add element inet nftables_svc ssh_access_ip4_hosts { %s }\n' "$h" >> "$tmp_add"
-        fi
-    done
-
-    # If any values were added, append them to the rules file
-    if [ -s "$tmp_add" ]; then
-        cat "$tmp_add" >> "$tmpfile"
-    fi
-    rm -f "$tmp_add"
-
-    cat >> "$tmpfile" <<'EOF'
-
-        # allow ssh rate-limited at service level (use fail2ban for stronger policies)
     }
 
     chain forward {
@@ -281,7 +267,21 @@ EOF
 }
 EOF
 
-    # Backup existing nft file and atomically move in place
+    # Validate syntax before installing/printing the generated rules
+    if ! nft -c -f "$tmpfile" >/dev/null 2>&1; then
+        log "Validation failed for generated nftables rules. Not writing $NFT_RULE_FILE."
+        rm -f "$tmpfile"
+        return 1
+    fi
+
+    # If print-only was requested, emit the rules and exit without writing
+    if [ "$PRINT_RULES" = true ]; then
+        cat "$tmpfile"
+        rm -f "$tmpfile"
+        log "Printed generated nftables rules (no changes written)."
+        return 0
+    fi
+
     backup_file "$NFT_RULE_FILE"
     run_cmd mkdir -p "$(dirname "$NFT_RULE_FILE")"
     run_cmd cp -a -- "$tmpfile" "$NFT_RULE_FILE"
@@ -292,6 +292,10 @@ EOF
 
 enable_nft_service() {
     # Ensure nftables service is enabled and reload rules
+    if ! command -v nft >/dev/null 2>&1; then
+        log "nft command not found; skipping nftables service enable/reload."
+        return 0
+    fi
     if command -v systemctl >/dev/null 2>&1; then
         run_cmd systemctl enable --now nftables || run_cmd systemctl restart nftables || true
         # Try to reload nftables rules if supported
@@ -306,6 +310,10 @@ enable_nft_service() {
 write_fail2ban() {
     local jail_dir="/etc/fail2ban/jail.d"
     local jail_file="$jail_dir/perfsonar.local"
+    if ! command -v fail2ban-client >/dev/null 2>&1 && ! systemctl list-unit-files --type=service 2>/dev/null | grep -q '^fail2ban\.service'; then
+        log "fail2ban not detected; skipping fail2ban jail configuration."
+        return 0
+    fi
     mkdir -p "$jail_dir"
     backup_file "$jail_file"
     local tmp
@@ -480,6 +488,8 @@ while [[ ${#} -gt 0 ]]; do
             PERF_PORTS="${1#*=}"; shift ;;
         --backup-dir=*)
             BACKUP_DIR="${1#*=}"; shift ;;
+        --print-rules)
+            PRINT_RULES=true; shift ;;
         *)
             # ignore unknown for now
             shift ;;
@@ -493,17 +503,28 @@ log "DRY_RUN=$DRY_RUN INSTALL_FAIL2BAN=$INSTALL_FAIL2BAN ENABLE_SELINUX=$ENABLE_
 
 # show planned actions
 printf '%b\n' "${GREEN}Planned actions:${NC}"
-echo "- Install nftables (if missing)"
+if [ "$PRINT_RULES" = true ]; then
+    echo "- Preview (print) generated nftables rules (no changes)"
+else
+    echo "- Configure nftables rules (if nftables is installed)"
+fi
 if [ "$INSTALL_FAIL2BAN" = true ]; then
-    echo "- Install and enable fail2ban"
+    echo "- Configure and enable fail2ban (if installed)"
 fi
 if [ "$ENABLE_SELINUX" = true ]; then
-    echo "- Attempt to enable SELinux (may require reboot)"
+    echo "- Attempt to enable SELinux (if installed; may require reboot)"
 fi
-echo "- Write nftables rules to $NFT_RULE_FILE (backup created under $BACKUP_DIR)"
+if [ "$PRINT_RULES" = true ]; then
+    echo "- No files will be written; this is a print-only preview"
+else
+    echo "- Write nftables rules to $NFT_RULE_FILE (backup created under $BACKUP_DIR)"
+fi
 echo
 
-confirm_or_exit
+# Only prompt for confirmation if we intend to make changes
+if [ "$PRINT_RULES" != true ]; then
+    confirm_or_exit
+fi
 
 # create backup dir even in dry-run for informational parity
 if [ "$DRY_RUN" = false ]; then
@@ -518,12 +539,18 @@ if [ "$DRY_RUN" = false ] && command -v nft >/dev/null 2>&1; then
     run_cmd sh -c "nft list ruleset > \"\$1\"" -- "$BACKUP_DIR/existing_ruleset.nft" || log "Failed to capture existing nft ruleset"
 fi
 
-install_packages
+check_prereqs
 
 # Derive perfSONAR subnets/hosts from perfSONAR multi-nic config if present
 derive_subnets_and_hosts_from_config
 
 write_nft_rules "$PERF_PORTS"
+
+# If we were only asked to print the rules, stop here
+if [ "$PRINT_RULES" = true ]; then
+    log "Exiting after printing rules as requested."
+    exit 0
+fi
 
 enable_nft_service
 
@@ -535,20 +562,25 @@ if [ "$ENABLE_SELINUX" = true ]; then
     enable_selinux
 fi
 
-# Verify that only our perfSONAR ruleset is active; rollback if verification fails
-if ! verify_only_perfsonar_ruleset; then
-    log "Verification of active nftables ruleset failed. Attempting rollback."
-    if [ -f "$BACKUP_DIR/existing_ruleset.nft" ]; then
-        log "Restoring previous ruleset from $BACKUP_DIR/existing_ruleset.nft"
-        if [ "$DRY_RUN" = false ]; then
-            run_cmd nft -f "$BACKUP_DIR/existing_ruleset.nft" || log "Failed to restore previous nft ruleset"
+# Verify that only our perfSONAR ruleset is active; rollback if verification fails.
+# Skip verification entirely if nftables is not installed.
+if command -v nft >/dev/null 2>&1; then
+    if ! verify_only_perfsonar_ruleset; then
+        log "Verification of active nftables ruleset failed. Attempting rollback."
+        if [ -f "$BACKUP_DIR/existing_ruleset.nft" ]; then
+            log "Restoring previous ruleset from $BACKUP_DIR/existing_ruleset.nft"
+            if [ "$DRY_RUN" = false ]; then
+                run_cmd nft -f "$BACKUP_DIR/existing_ruleset.nft" || log "Failed to restore previous nft ruleset"
+            else
+                log "Dry-run: would restore previous nft ruleset from $BACKUP_DIR/existing_ruleset.nft"
+            fi
         else
-            log "Dry-run: would restore previous nft ruleset from $BACKUP_DIR/existing_ruleset.nft"
+            log "No existing ruleset backup available to restore"
         fi
-    else
-        log "No existing ruleset backup available to restore"
+        exit 1
     fi
-    exit 1
+else
+    log "nft not detected; skipping ruleset verification"
 fi
 
 log "perfSONAR nftables installation completed. Review $LOG_FILE and $BACKUP_DIR for artifacts."
