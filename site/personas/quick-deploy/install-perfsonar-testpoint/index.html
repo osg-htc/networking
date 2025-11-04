@@ -1451,14 +1451,14 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 <h2 id="step-5-register-and-configure-with-wlcgosg">Step 5 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-5-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>PerfSONAR toolkit configuration:</strong></li>
-<li>Browse to <a href="https://&lt;SERVER_FQDN&gt;/toolkit">https://<SERVER_FQDN>/toolkit</a> and complete the local toolkit setup wizard.</li>
+<li>Browse to <code>https://&lt;SERVER_FQDN&gt;/toolkit</code> and complete the local toolkit setup wizard.</li>
 <li>
 <p>Populate site contact email, usage policy URL, and location (latitude/longitude). Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping.</p>
 </li>
 <li>
 <p><strong>OSG/WLCG registration workflow:</strong></p>
 </li>
-<li>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</li>
+<li>Register the host in OSG topology (<code>https://topology.opensciencegrid.org/host</code>).</li>
 <li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</li>
 <li>
 <p>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>

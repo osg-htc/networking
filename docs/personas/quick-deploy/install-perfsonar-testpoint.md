@@ -398,11 +398,11 @@ Key paths to persist on the host:
 ## Step 5 – Register and Configure with WLCG/OSG
 
 1. **PerfSONAR toolkit configuration:**
-   - Browse to [https://<SERVER_FQDN>/toolkit](https://<SERVER_FQDN>/toolkit) and complete the local toolkit setup wizard.
+   - Browse to `https://<SERVER_FQDN>/toolkit` and complete the local toolkit setup wizard.
    - Populate site contact email, usage policy URL, and location (latitude/longitude). Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping.
 
 2. **OSG/WLCG registration workflow:**
-   - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+   - Register the host in OSG topology (`https://topology.opensciencegrid.org/host`).
    - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
    - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
