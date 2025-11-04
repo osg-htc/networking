@@ -29,7 +29,7 @@ nav:
   - Personas:
     - Quick Deploy:
       - 'Landing': 'personas/quick-deploy/landing.md'
-      - 'Quickstart: perfSONAR Testpoint': 'personas/quick-deploy/quickstart-perfsonar-testpoint.md'
+      - 'Quickstart: perfSONAR Testpoint': 'personas/quick-deploy/install-perfsonar-testpoint.md'
       - 'Automated setup': 'personas/quick-deploy/automated-setup/README.md'
     - Troubleshooter:
       - 'Landing': 'personas/troubleshoot/landing.md'
@@ -43,6 +43,7 @@ nav:
     - 'nftables': 'features/nftables.md'
   - Tools & Scripts:
     - 'Scripts and tools': 'perfsonar/tools_scripts/README.md'
+    - 'Compose bundle (docker-compose.yml)': 'perfsonar/tools_scripts/docker-compose.yml'
     - 'Link-check tools': 'tools/README.md'
 
 markdown_extensions:

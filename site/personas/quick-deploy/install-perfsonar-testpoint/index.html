@@ -11,6 +11,10 @@
         <link rel="canonical" href="https://osg-htc.org/networking/personas/quick-deploy/install-perfsonar-testpoint/">
       
       
+        <link rel="prev" href="../landing/">
+      
+      
+        <link rel="next" href="../automated-setup/">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
@@ -18,7 +22,7 @@
     
     
       
-        <title>Installing a perfSONAR Testpoint for WLCG/OSG - OSG Networking Area</title>
+        <title>Quickstart: perfSONAR Testpoint - OSG Networking Area</title>
       
     
     
@@ -108,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installing a perfSONAR Testpoint for WLCG/OSG
+              Quickstart: perfSONAR Testpoint
             
           </span>
         </div>
@@ -589,18 +593,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
@@ -616,7 +622,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Personas
@@ -627,18 +633,20 @@
                 
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" checked>
         
           
           <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
@@ -654,7 +662,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5_1">
             <span class="md-nav__icon md-icon"></span>
             Quick Deploy
@@ -695,10 +703,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../quickstart-perfsonar-testpoint/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Quickstart: perfSONAR Testpoint
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -709,6 +739,113 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites-and-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites and Planning
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-install-and-harden-el9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1 – Install and Harden EL9
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-configure-policy-based-routing-pbr" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2 – Configure Policy-Based Routing (PBR)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-configure-nftables-selinux-and-fail2ban" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3 – Configure nftables, SELinux, and Fail2Ban
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-deploy-the-containerized-perfsonar-testpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4 – Deploy the Containerized perfSONAR Testpoint
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-register-and-configure-with-wlcgosg" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5 – Register and Configure with WLCG/OSG
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-post-install-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6 – Post-Install Validation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ongoing-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ongoing Maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ongoing Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic image updates and safe restarts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1146,6 +1283,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../perfsonar/tools_scripts/docker-compose.yml" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Compose bundle (docker-compose.yml)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../tools/" class="md-nav__link">
         
   
@@ -1265,6 +1425,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Ongoing Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic image updates and safe restarts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1311,7 +1486,7 @@
 <ol>
 <li>
 <p><strong>Set the hostname and time sync:</strong>
-    !!! note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+    Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
    <div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
 timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
@@ -1334,49 +1509,69 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <hr />
 <h2 id="step-2-configure-policy-based-routing-pbr">Step 2 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-2-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file.</p>
-<ol>
-<li><strong>Stage the script:</strong></li>
-</ol>
-<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>/usr/local/sbin/perfSONAR-pbr-nm.sh
+<p>Script location in the repository:</p>
+<ul>
+<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
+<li>
+<p><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh">Raw file (direct download)</a></p>
+</li>
+<li>
+<p><strong>Stage the script:</strong></p>
+<ul>
+<li>
+<p>From a local clone of this repository:</p>
+<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>/usr/local/sbin/perfsonar-pbr-nm.sh
 </code></pre></div>
-<ol>
+</li>
+<li>
+<p>Or download directly from the repository URL:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>-o<span class="w"> </span>/usr/local/sbin/perfsonar-pbr-nm.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/sbin/perfsonar-pbr-nm.sh
+</code></pre></div>
+</li>
+</ul>
+</li>
 <li>
 <p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.</p>
 <ul>
-<li>Preview (no changes):</li>
-</ul>
+<li>
+<p>Preview (no changes):</p>
 <div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-debug
 </code></pre></div>
-<ul>
-<li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
-</ul>
+</li>
+<li>
+<p>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</p>
 <div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
+</li>
+</ul>
 <p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
 </li>
 <li>
 <p><strong>Execute the script:</strong></p>
 <ul>
-<li>Rehearsal (no changes, extra logging recommended on first run):</li>
-</ul>
+<li>
+<p>Rehearsal (no changes, extra logging recommended on first run):</p>
 <div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
 </code></pre></div>
-<ul>
-<li>Apply changes non-interactively (auto-confirm):</li>
-</ul>
+</li>
+<li>
+<p>Apply changes non-interactively (auto-confirm):</p>
 <div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
-<ul>
-<li>Or run interactively and answer the confirmation prompt when ready:</li>
-</ul>
+</li>
+<li>
+<p>Or run interactively and answer the confirmation prompt when ready:</p>
 <div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh
 </code></pre></div>
+</li>
+</ul>
 <p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
 </li>
 <li>
 <p><strong>Verify the routing policy:</strong></p>
 </li>
-</ol>
+</ul>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>connection<span class="w"> </span>show
 ip<span class="w"> </span>rule<span class="w"> </span>show
 ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </span>table<span class="w"> </span>&lt;table-id&gt;
@@ -1385,6 +1580,11 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 <hr />
 <h2 id="step-3-configure-nftables-selinux-and-fail2ban">Step 3 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-3-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
 <p>Use <code>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables profile with optional SELinux and Fail2Ban support.</p>
+<p>Script location in the repository:</p>
+<ul>
+<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
+<li><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh">Raw file (direct download)</a></li>
+</ul>
 <p>Prerequisites (not installed by the script):</p>
 <ul>
 <li><code>nftables</code> must already be installed and available (<code>nft</code> binary) for firewall configuration.</li>
@@ -1393,12 +1593,23 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 </ul>
 <p>If any prerequisite is missing, the script skips that component and continues.</p>
 <ol>
-<li><strong>Stage the installer:</strong></li>
-</ol>
+<li>
+<p><strong>Stage the installer:</strong></p>
+<ul>
+<li>From a local clone of this repository:</li>
+</ul>
 <div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>/usr/local/sbin/perfsonar-install-nftables.sh
 </code></pre></div>
-<ol>
-<li><strong>Run with desired options:</strong></li>
+<ul>
+<li>Or download directly from the repository URL:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>/usr/local/sbin/perfsonar-install-nftables.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/sbin/perfsonar-install-nftables.sh
+</code></pre></div>
+</li>
+<li>
+<p><strong>Run with desired options:</strong></p>
+</li>
 </ol>
 <div class="highlight"><pre><span></span><code>perfsonar-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
@@ -1457,51 +1668,150 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 <p>Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.</p>
 <hr />
 <h2 id="step-4-deploy-the-containerized-perfsonar-testpoint">Step 4 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-4-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
-<p>WLCG/OSG supports the container-based perfSONAR testpoint using Podman and Podman Compose. This section also layers an alternate Docker Compose binary that allows automatic certificate management via Let’s Encrypt.</p>
-<ol>
-<li><strong>Install Podman tooling:</strong></li>
-</ol>
+<p>We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on the host are reflected inside the containers.</p>
+<p>Key paths to persist on the host:</p>
+<ul>
+<li><code>/opt/testpoint/psconfig</code> → container <code>/etc/perfsonar/psconfig</code></li>
+<li><code>/etc/apache2</code> → container <code>/etc/apache2</code> (Apache configs)</li>
+<li><code>/var/www/html</code> → container <code>/var/www/html</code> (webroot for Toolkit and ACME challenges)</li>
+<li>
+<p><code>/etc/letsencrypt</code> → container <code>/etc/letsencrypt</code> (certs/keys, if using Let’s Encrypt)</p>
+</li>
+<li>
+<p>Install container tooling (Podman and optional Docker-style compose):</p>
+</li>
+</ul>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>podman<span class="w"> </span>podman-compose<span class="w"> </span>python3-pip
 pip3<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>docker-compose
 </code></pre></div>
-<p>The <code>docker-compose</code> Python package supplies the alternative binary (<code>/usr/local/bin/docker-compose</code>) required for Let’s Encrypt automation used by the perfSONAR systemd stack.</p>
+<p>Tip: you can use either <code>podman-compose</code> or <code>docker-compose</code> in the steps below. Substitute the command that matches your preference.</p>
 <ol>
-<li><strong>Enable cgroups v2 and lingering user sessions (if not default):</strong></li>
+<li>Prepare directories on the host:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>grubby<span class="w"> </span>--update-kernel<span class="o">=</span>ALL<span class="w"> </span>--args<span class="o">=</span><span class="s2">&quot;systemd.unified_cgroup_hierarchy=1&quot;</span>
-loginctl<span class="w"> </span>enable-linger<span class="w"> </span>perfsonar
-</code></pre></div>
-<p>Reboot if you updated the kernel arguments.</p>
-<ol>
-<li><strong>Clone the deployment bundle:</strong></li>
-</ol>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/perfsonar-testpoint-container.git<span class="w"> </span>/opt/perfsonar-testpoint
-<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-testpoint
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/testpoint/psconfig
+mkdir<span class="w"> </span>-p<span class="w"> </span>/var/www/html
+mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/apache2
+mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/letsencrypt
 </code></pre></div>
 <ol>
-<li><strong>Customize environment variables:</strong> edit <code>.env</code> (or <code>pscheduler.env</code>, <code>esmond.env</code>, etc.) to set</li>
-<li><code>LETSENCRYPT_EMAIL</code></li>
-<li><code>SERVER_FQDN</code></li>
-<li><code>SITE_NAME</code></li>
+<li>Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):</li>
+</ol>
+<p>Create a minimal compose file at <code>/opt/testpoint/docker-compose.yml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">testpoint</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">perfsonar-testpoint</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/perfsonar/testpoint:5.2.4-systemd</span>
+<span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
+<span class="w">    </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">tmpfs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
+<span class="w">      </span><span class="c1"># Don&#39;t bind Apache/webroot yet; we&#39;ll copy defaults out first</span>
+<span class="w">      </span><span class="c1"># Persist perfSONAR psconfig later after seeding (see step 5)</span>
+<span class="w">    </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
+</code></pre></div>
+<p>Bring it up with your preferred tool:</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/testpoint<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or: (cd /opt/testpoint; docker-compose up -d)</span>
+</code></pre></div>
+<ol>
+<li>Copy baseline content out of the running container to the host:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use docker cp or podman cp (either works)</span>
+docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/apache2<span class="w"> </span>/etc/apache2
+docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/var/www/html<span class="w"> </span>/var/www/html
+docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/perfsonar/psconfig<span class="w"> </span>/opt/testpoint/psconfig
+</code></pre></div>
+<p>If SELinux is enforcing, we’ll relabel these paths when we mount (using <code>:z</code>/<code>:Z</code> below), so you don’t need manual <code>chcon</code>.</p>
+<ol>
 <li>
-<p>data volumes under <code>/var/lib/perfsonar</code></p>
-</li>
-<li>
-<p><strong>Deploy via Podman Compose:</strong></p>
+<p>Replace the compose file with bind-mounts that map host paths directly, and (optionally) add a <code>certbot</code> sidecar for Let’s Encrypt.</p>
+<p>You can download a ready-to-use compose file from this repository:</p>
+<ul>
+<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/docker-compose.yml">Browse</a></li>
+<li>Download directly:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml<span class="w"> </span>-o<span class="w"> </span>/opt/testpoint/docker-compose.yml
+</code></pre></div>
+<p>Or create/edit <code>/opt/testpoint/docker-compose.yml</code> with the following content:</p>
+<p>Note: The provided compose file ships with <code>io.containers.autoupdate=registry</code> labels pre-set for Podman auto-update.</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>podman-compose<span class="w"> </span>up<span class="w"> </span>-d
-podman<span class="w"> </span>ps
+<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">testpoint</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">perfsonar-testpoint</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/perfsonar/testpoint:5.2.4-systemd</span>
+<span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
+<span class="w">    </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">    </span><span class="nt">tmpfs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
+<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z</span>
+<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /var/www/html:/var/www/html:z</span>
+<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /etc/apache2:/etc/apache2:z</span>
+<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /etc/letsencrypt:/etc/letsencrypt:z</span>
+<span class="w">    </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
+<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
+
+<span class="w">  </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
+<span class="w">  </span><span class="nt">certbot</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">certbot/certbot</span>
+<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">certbot</span>
+<span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">       </span><span class="l l-Scalar l-Scalar-Plain">entrypoint</span><span class="p p-Indicator">:</span><span class="w"> </span>
+<span class="w">      </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;trap</span><span class="nv"> </span><span class="s">exit</span><span class="nv"> </span><span class="s">TERM;</span><span class="nv"> </span><span class="s">while</span><span class="nv"> </span><span class="s">:;</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">certbot</span><span class="nv"> </span><span class="s">renew;</span><span class="nv"> </span><span class="s">sleep</span><span class="nv"> </span><span class="s">12h</span><span class="nv"> </span><span class="s">&amp;</span><span class="nv"> </span><span class="s">wait</span><span class="nv"> </span><span class="s">$${!};</span><span class="nv"> </span><span class="s">done;&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testpoint</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/www/html:/var/www/html:z</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/letsencrypt:/etc/letsencrypt:z</span>
 </code></pre></div>
-<p>Verify that <code>pscheduler</code>, <code>esmond</code>, and <code>maat</code> containers are running. Podman generates systemd unit files under <code>~/.config/systemd/user/</code> that keep the stack running across reboots.</p>
 <ol>
-<li><strong>Optional – generate systemd units with docker-compose:</strong></li>
+<li>Restart with the new compose:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>docker-compose<span class="w"> </span>--profile<span class="w"> </span>systemd<span class="w"> </span>config<span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/perfsonar-testpoint.service
-systemctl<span class="w"> </span>daemon-reload
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
+<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/testpoint<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>down<span class="o">)</span>
+<span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/testpoint<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose down &amp;&amp; docker-compose up -d</span>
 </code></pre></div>
-<p>Use this when you require root-managed units instead of user lingering.</p>
+<ol>
+<li>Optional – obtain your first Let’s Encrypt certificate:</li>
+</ol>
+<p>The <code>certbot</code> sidecar above continuously renews existing certs. For the initial issuance, run a one-shot command and then reload Apache inside the testpoint container:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Issue (HTTP-01 webroot challenge). Replace values accordingly.</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span>-v<span class="w"> </span>/var/www/html:/var/www/html<span class="w"> </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>certbot/certbot<span class="w"> </span>certonly<span class="w"> </span>--webroot<span class="w"> </span>-w<span class="w"> </span>/var/www/html<span class="w"> </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--email<span class="w"> </span>&lt;LETSENCRYPT_EMAIL&gt;<span class="w"> </span>--agree-tos<span class="w"> </span>--no-eff-email
+
+<span class="c1"># Gracefully reload Apache within the testpoint container (or restart the service)</span>
+docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>bash<span class="w"> </span>-lc<span class="w"> </span><span class="s1">&#39;systemctl reload httpd || apachectl -k graceful || true&#39;</span>
+</code></pre></div>
+<p>Notes:
+   - Ensure port 80 on the host is reachable from the internet while issuing certificates.
+   - All shared paths use SELinux-aware <code>:z</code>/<code>:Z</code> to permit container access on enforcing hosts.</p>
+<ol>
+<li>Verify:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsS<span class="w"> </span>http://localhost/toolkit/<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">5</span>
+docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or podman ps</span>
+</code></pre></div>
 <hr />
 <h2 id="step-5-register-and-configure-with-wlcgosg">Step 5 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-5-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1588,6 +1898,75 @@ toolkit-system-health
 <li>Apply <code>dnf update</code> monthly and reboot during the next maintenance window.</li>
 <li>Monitor psconfig feeds for changes in mesh participation.</li>
 <li>Track certificate expiry (<code>certbot renew --dry-run</code>) if you rely on Let’s Encrypt.</li>
+</ul>
+<h3 id="automatic-image-updates-and-safe-restarts">Automatic image updates and safe restarts<a class="headerlink" href="#automatic-image-updates-and-safe-restarts" title="Permanent link">&para;</a></h3>
+<p>Keep containers current and only restart them when their image actually changes.</p>
+<ul>
+<li>Option A (Podman-native): auto-update via labels and a systemd timer</li>
+<li>
+<p>Add an auto-update label to services in your compose file (both <code>testpoint</code> and <code>certbot</code> if used):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">testpoint</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># ...</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+<span class="w">   </span><span class="nt">certbot</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># ...</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+</code></pre></div>
+<p>This instructs Podman to check the registry for newer images and restart only if an update is pulled.</p>
+</li>
+<li>
+<p>Enable the Podman auto-update timer (runs daily by default):</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>podman-auto-update.timer
+</code></pre></div>
+</li>
+<li>
+<p>Run ad-hoc when desired and preview:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>auto-update<span class="w"> </span>--dry-run
+podman<span class="w"> </span>auto-update
+</code></pre></div>
+</li>
+<li>
+<p>Inspect recent runs:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>podman-auto-update
+journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<span class="w"> </span>--since<span class="w"> </span><span class="s2">&quot;1 day ago&quot;</span>
+</code></pre></div>
+</li>
+<li>
+<p>Option B (Docker-style): Watchtower</p>
+</li>
+<li>
+<p>Run Watchtower to monitor and update running containers; it restarts a container only when a newer image is pulled:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>watchtower<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>containrrr/watchtower<span class="w"> </span><span class="se">\</span>
+<span class="w">   </span>--cleanup<span class="w"> </span>--rolling-restart<span class="w"> </span>--interval<span class="w"> </span><span class="m">3600</span>
+</code></pre></div>
+<ul>
+<li><code>--cleanup</code> removes old images after a successful update.</li>
+<li><code>--rolling-restart</code> updates one container at a time.</li>
+<li>
+<p>To limit updates to labeled services only, use <code>--label-enable</code> and label your services:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">   </span><span class="nt">testpoint</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># ...</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">com.centurylinklabs.watchtower.enable=true</span>
+<span class="w">   </span><span class="nt">certbot</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># ...</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">com.centurylinklabs.watchtower.enable=true</span>
+</code></pre></div>
+</li>
+</ul>
+</li>
+</ul>
+<p>Notes:</p>
+<ul>
+<li>Pin to a stable tag line (e.g., <code>ghcr.io/perfsonar/testpoint:5.2.4-systemd</code> or <code>5.2-systemd</code>) that matches your change window policy.</li>
+<li>If SELinux is enforcing, ensure bind-mounted paths retain the <code>:z</code>/<code>:Z</code> options in your compose so updates don’t introduce AVC denials.</li>
 </ul>
 <p>Document any deviations from this procedure so the next deployment at your site can reuse improvements with minimal effort.</p>
 

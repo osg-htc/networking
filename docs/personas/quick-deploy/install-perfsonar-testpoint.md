@@ -27,7 +27,7 @@ Before you begin, gather the following information:
    ```
 
 3. **Set the hostname and time sync:**
-    !!! note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+    Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
    ```bash
    hostnamectl set-hostname <testpoint-hostname>
    systemctl enable --now chronyd
@@ -56,47 +56,61 @@ Document interface mappings; you will need them for the policy-based routing con
 
 The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that automates NetworkManager configuration and routing rules and can auto-generate its config file.
 
+Script location in the repository:
+
+- [Directory (browse)](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts)
+- [Raw file (direct download)](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh)
+
 1. **Stage the script:**
 
-   ```bash
-   install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh /usr/local/sbin/perfSONAR-pbr-nm.sh
-   ```
+      - From a local clone of this repository:
+
+         ```bash
+         install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh /usr/local/sbin/perfsonar-pbr-nm.sh
+         ```
+
+      - Or download directly from the repository URL:
+
+         ```bash
+         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o /usr/local/sbin/perfsonar-pbr-nm.sh
+         chmod 0755 /usr/local/sbin/perfsonar-pbr-nm.sh
+         ```
 
 2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.
 
-    - Preview (no changes):
+      - Preview (no changes):
 
-       ```bash
-       /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-debug
-       ```
+         ```bash
+         /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-debug
+         ```
 
-    - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
+      - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
-       ```bash
-       /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-auto
-       ```
+         ```bash
+         /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-auto
+         ```
 
     Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
 
 3. **Execute the script:**
 
-    - Rehearsal (no changes, extra logging recommended on first run):
+      - Rehearsal (no changes, extra logging recommended on first run):
 
-       ```bash
-       perfsonar-pbr-nm.sh --dry-run --debug
-       ```
+         ```bash
+         perfsonar-pbr-nm.sh --dry-run --debug
+         ```
 
-    - Apply changes non-interactively (auto-confirm):
+      - Apply changes non-interactively (auto-confirm):
 
-       ```bash
-       perfsonar-pbr-nm.sh --yes
-       ```
+         ```bash
+         perfsonar-pbr-nm.sh --yes
+         ```
 
-    - Or run interactively and answer the confirmation prompt when ready:
+      - Or run interactively and answer the confirmation prompt when ready:
 
-       ```bash
-       perfsonar-pbr-nm.sh
-       ```
+         ```bash
+         perfsonar-pbr-nm.sh
+         ```
 
     The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
 
@@ -116,6 +130,11 @@ The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-
 
 Use `docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support.
 
+Script location in the repository:
+
+- [Directory (browse)](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts)
+- [Raw file (direct download)](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh)
+
 Prerequisites (not installed by the script):
 
 - `nftables` must already be installed and available (`nft` binary) for firewall configuration.
@@ -126,9 +145,18 @@ If any prerequisite is missing, the script skips that component and continues.
 
 1. **Stage the installer:**
 
-   ```bash
-   install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh /usr/local/sbin/perfsonar-install-nftables.sh
-   ```
+    - From a local clone of this repository:
+
+       ```bash
+       install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh /usr/local/sbin/perfsonar-install-nftables.sh
+       ```
+
+    - Or download directly from the repository URL:
+
+       ```bash
+       curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o /usr/local/sbin/perfsonar-install-nftables.sh
+       chmod 0755 /usr/local/sbin/perfsonar-install-nftables.sh
+       ```
 
 2. **Run with desired options:**
 
@@ -204,57 +232,166 @@ If any prerequisite is missing, the script skips that component and continues.
 
 ## Step 4 – Deploy the Containerized perfSONAR Testpoint
 
-WLCG/OSG supports the container-based perfSONAR testpoint using Podman and Podman Compose. This section also layers an alternate Docker Compose binary that allows automatic certificate management via Let’s Encrypt.
+We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on the host are reflected inside the containers.
 
-1. **Install Podman tooling:**
+Key paths to persist on the host:
+
+- `/opt/testpoint/psconfig` → container `/etc/perfsonar/psconfig`
+- `/etc/apache2` → container `/etc/apache2` (Apache configs)
+- `/var/www/html` → container `/var/www/html` (webroot for Toolkit and ACME challenges)
+- `/etc/letsencrypt` → container `/etc/letsencrypt` (certs/keys, if using Let’s Encrypt)
+
+1. Install container tooling (Podman and optional Docker-style compose):
 
    ```bash
    dnf install -y podman podman-compose python3-pip
    pip3 install --upgrade docker-compose
    ```
 
-   The `docker-compose` Python package supplies the alternative binary (`/usr/local/bin/docker-compose`) required for Let’s Encrypt automation used by the perfSONAR systemd stack.
+   Tip: you can use either `podman-compose` or `docker-compose` in the steps below. Substitute the command that matches your preference.
 
-2. **Enable cgroups v2 and lingering user sessions (if not default):**
-
-   ```bash
-   grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=1"
-   loginctl enable-linger perfsonar
-   ```
-
-   Reboot if you updated the kernel arguments.
-
-3. **Clone the deployment bundle:**
+2. Prepare directories on the host:
 
    ```bash
-   git clone https://github.com/perfsonar/perfsonar-testpoint-container.git /opt/perfsonar-testpoint
-   cd /opt/perfsonar-testpoint
+   mkdir -p /opt/testpoint/psconfig
+   mkdir -p /var/www/html
+   mkdir -p /etc/apache2
+   mkdir -p /etc/letsencrypt
    ```
 
-4. **Customize environment variables:** edit `.env` (or `pscheduler.env`, `esmond.env`, etc.) to set
-   - `LETSENCRYPT_EMAIL`
-   - `SERVER_FQDN`
-   - `SITE_NAME`
-   - data volumes under `/var/lib/perfsonar`
+3. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
 
-5. **Deploy via Podman Compose:**
+   Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
+
+   ```yaml
+   version: "3.9"
+   services:
+     testpoint:
+       container_name: perfsonar-testpoint
+       image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+       network_mode: "host"
+       cgroup: host
+       environment:
+         - TZ=UTC
+       restart: unless-stopped
+       tmpfs:
+         - /run
+         - /run/lock
+         - /tmp
+       volumes:
+         - /sys/fs/cgroup:/sys/fs/cgroup:rw
+         # Don't bind Apache/webroot yet; we'll copy defaults out first
+         # Persist perfSONAR psconfig later after seeding (see step 5)
+       tty: true
+       pids_limit: 8192
+       cap_add:
+         - CAP_NET_RAW
+   ```
+
+   Bring it up with your preferred tool:
 
    ```bash
-   podman-compose up -d
-   podman ps
+   (cd /opt/testpoint; podman-compose up -d)  # or: (cd /opt/testpoint; docker-compose up -d)
    ```
 
-   Verify that `pscheduler`, `esmond`, and `maat` containers are running. Podman generates systemd unit files under `~/.config/systemd/user/` that keep the stack running across reboots.
-
-6. **Optional – generate systemd units with docker-compose:**
+4. Copy baseline content out of the running container to the host:
 
    ```bash
-   docker-compose --profile systemd config > /etc/systemd/system/perfsonar-testpoint.service
-   systemctl daemon-reload
-   systemctl enable --now perfsonar-testpoint.service
+   # Use docker cp or podman cp (either works)
+   docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
+   docker cp perfsonar-testpoint:/var/www/html /var/www/html
+   docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/testpoint/psconfig
    ```
 
-   Use this when you require root-managed units instead of user lingering.
+   If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you don’t need manual `chcon`.
+
+5. Replace the compose file with bind-mounts that map host paths directly, and (optionally) add a `certbot` sidecar for Let’s Encrypt.
+
+    You can download a ready-to-use compose file from this repository:
+
+    - [Browse](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/docker-compose.yml)
+    - Download directly:
+
+       ```bash
+       curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml -o /opt/testpoint/docker-compose.yml
+       ```
+
+    Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
+
+    Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
+
+   ```yaml
+    version: "3.9"
+   services:
+     testpoint:
+       container_name: perfsonar-testpoint
+       image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+       network_mode: "host"
+       cgroup: host
+       environment:
+         - TZ=UTC
+       restart: unless-stopped
+       tmpfs:
+         - /run
+         - /run/lock
+         - /tmp
+       volumes:
+         - /sys/fs/cgroup:/sys/fs/cgroup:rw
+             - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
+             - /var/www/html:/var/www/html:z
+             - /etc/apache2:/etc/apache2:z
+             - /etc/letsencrypt:/etc/letsencrypt:z
+       tty: true
+       pids_limit: 8192
+       cap_add:
+         - CAP_NET_RAW
+
+     # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
+     certbot:
+       image: certbot/certbot
+       container_name: certbot
+       network_mode: "host"
+       restart: unless-stopped
+          entrypoint: 
+         ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+       depends_on:
+         - testpoint
+       volumes:
+         - /var/www/html:/var/www/html:z
+         - /etc/letsencrypt:/etc/letsencrypt:z
+   ```
+
+6. Restart with the new compose:
+
+   ```bash
+   (cd /opt/testpoint; podman-compose down)
+   (cd /opt/testpoint; podman-compose up -d)  # or docker-compose down && docker-compose up -d
+   ```
+
+7. Optional – obtain your first Let’s Encrypt certificate:
+
+   The `certbot` sidecar above continuously renews existing certs. For the initial issuance, run a one-shot command and then reload Apache inside the testpoint container:
+
+   ```bash
+   # Issue (HTTP-01 webroot challenge). Replace values accordingly.
+   docker run --rm --net=host -v /var/www/html:/var/www/html -v /etc/letsencrypt:/etc/letsencrypt \
+     certbot/certbot certonly --webroot -w /var/www/html -d <SERVER_FQDN> \
+     --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email
+
+   # Gracefully reload Apache within the testpoint container (or restart the service)
+   docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachectl -k graceful || true'
+   ```
+
+   Notes:
+   - Ensure port 80 on the host is reachable from the internet while issuing certificates.
+   - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
+
+8. Verify:
+
+   ```bash
+   curl -fsS http://localhost/toolkit/ | head -n 5
+   docker ps  # or podman ps
+   ```
 
 ---
 
@@ -346,5 +483,77 @@ Perform these checks before handing the host over to operations:
 - Apply `dnf update` monthly and reboot during the next maintenance window.
 - Monitor psconfig feeds for changes in mesh participation.
 - Track certificate expiry (`certbot renew --dry-run`) if you rely on Let’s Encrypt.
+
+### Automatic image updates and safe restarts
+
+Keep containers current and only restart them when their image actually changes.
+
+- Option A (Podman-native): auto-update via labels and a systemd timer
+   1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used):
+
+       ```yaml
+       services:
+          testpoint:
+             # ...
+             labels:
+                - io.containers.autoupdate=registry
+          certbot:
+             # ...
+             labels:
+                - io.containers.autoupdate=registry
+       ```
+
+       This instructs Podman to check the registry for newer images and restart only if an update is pulled.
+
+   2. Enable the Podman auto-update timer (runs daily by default):
+
+       ```bash
+       systemctl enable --now podman-auto-update.timer
+       ```
+
+   3. Run ad-hoc when desired and preview:
+
+       ```bash
+       podman auto-update --dry-run
+       podman auto-update
+       ```
+
+   4. Inspect recent runs:
+
+       ```bash
+       systemctl list-timers | grep podman-auto-update
+       journalctl -u podman-auto-update --since "1 day ago"
+       ```
+
+- Option B (Docker-style): Watchtower
+   1. Run Watchtower to monitor and update running containers; it restarts a container only when a newer image is pulled:
+
+       ```bash
+       docker run -d --name watchtower \
+          -v /var/run/docker.sock:/var/run/docker.sock \
+          containrrr/watchtower \
+          --cleanup --rolling-restart --interval 3600
+       ```
+
+       - `--cleanup` removes old images after a successful update.
+       - `--rolling-restart` updates one container at a time.
+       - To limit updates to labeled services only, use `--label-enable` and label your services:
+
+          ```yaml
+          services:
+             testpoint:
+                # ...
+                labels:
+                   - com.centurylinklabs.watchtower.enable=true
+             certbot:
+                # ...
+                labels:
+                   - com.centurylinklabs.watchtower.enable=true
+          ```
+
+Notes:
+
+- Pin to a stable tag line (e.g., `ghcr.io/perfsonar/testpoint:5.2.4-systemd` or `5.2-systemd`) that matches your change window policy.
+- If SELinux is enforcing, ensure bind-mounted paths retain the `:z`/`:Z` options in your compose so updates don’t introduce AVC denials.
 
 Document any deviations from this procedure so the next deployment at your site can reuse improvements with minimal effort.
