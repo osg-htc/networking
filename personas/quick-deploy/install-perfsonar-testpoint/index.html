@@ -967,37 +967,49 @@ ip -br addr
 <p>Document interface mappings; you will need them for the policy-based routing configuration.</p>
 <hr />
 <h2 id="step-2-configure-policy-based-routing-pbr">Step 2 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-2-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
-<p>The repository ships <code>docs/perfsonar/pbr-nm-config-perfSONAR.sh</code>, which automates NetworkManager configuration and routing rules. Copy it into place and prepare its configuration file.</p>
+<p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file.</p>
 <ol>
 <li><strong>Stage the script:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>install -m <span class="m">0755</span> docs/perfsonar/pbr-nm-config-perfSONAR.sh /usr/local/sbin/perfsonar-pbr-nm.sh
+<div class="highlight"><pre><span></span><code>install -m <span class="m">0755</span> docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh /usr/local/sbin/perfSONAR-pbr-nm.sh
 </code></pre></div>
 <ol>
-<li><strong>Create <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> tailor the arrays to your site. A template example is shown below—replace addresses, gateways, and NIC names with real values.</li>
-</ol>
-<div class="highlight"><pre><span></span><code>cat <span class="s">&lt;&lt;&#39;EOF&#39; &gt;/etc/perfSONAR-multi-nic-config.conf</span>
-<span class="s">NIC_NAMES=(eno1 eno2)</span>
-<span class="s">NIC_IPV4_ADDRS=(198.51.100.10 203.0.113.10)</span>
-<span class="s">NIC_IPV4_PREFIXES=(&quot;/24&quot; &quot;/24&quot;)</span>
-<span class="s">NIC_IPV4_GWS=(198.51.100.1 203.0.113.1)</span>
-<span class="s">NIC_IPV4_NODEFAULT=(0 1)</span>
-<span class="s">NIC_IPV4_ADDROUTE=(&quot;-&quot; &quot;203.0.113.0/24 203.0.113.1&quot;)</span>
-<span class="s">NIC_IPV6_ADDRS=(&quot;2001:db8:1::10&quot; &quot;-&quot;)</span>
-<span class="s">NIC_IPV6_PREFIXES=(&quot;/64&quot; &quot;-&quot;)</span>
-<span class="s">NIC_IPV6_GWS=(&quot;2001:db8:1::1&quot; &quot;-&quot;)</span>
-<span class="s">DEFAULT_ROUTE_NIC=&quot;eno1&quot;</span>
-<span class="s">CONFIGURE_DEFAULT_ROUTE=true</span>
-<span class="s">EOF</span>
+<li>
+<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.</p>
+<ul>
+<li>Preview (no changes):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-debug
 </code></pre></div>
-<ol>
-<li><strong>Execute the script:</strong></li>
-</ol>
+<ul>
+<li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-auto
+</code></pre></div>
+<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+</li>
+<li>
+<p><strong>Execute the script:</strong></p>
+<ul>
+<li>Rehearsal (no changes, extra logging recommended on first run):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh --dry-run --debug
+</code></pre></div>
+<ul>
+<li>Apply changes non-interactively (auto-confirm):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh --yes
+</code></pre></div>
+<ul>
+<li>Or run interactively and answer the confirmation prompt when ready:</li>
+</ul>
 <div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh
 </code></pre></div>
-<p>When prompted, type <code>yes</code> to confirm you understand all existing NetworkManager connections will be removed. The script backs up prior connections, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
-<ol>
-<li><strong>Verify the routing policy:</strong></li>
+<p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
+</li>
+<li>
+<p><strong>Verify the routing policy:</strong></p>
+</li>
 </ol>
 <div class="highlight"><pre><span></span><code>nmcli connection show
 ip rule show
