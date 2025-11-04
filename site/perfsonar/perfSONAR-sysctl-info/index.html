@@ -8,25 +8,21 @@
       
       
       
-        <link rel="canonical" href="https://osg-htc.org/networking/network-troubleshooting/">
+        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/perfSONAR-sysctl-info/">
       
       
-        <link rel="prev" href="../perfsonar/faq/">
       
       
-        <link rel="next" href="osg-debugging-document/">
-      
-      
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
     
     
       
-        <title>Network Troubleshooting - OSG Networking Area</title>
+        <title>Key sysctl settings for perfSONAR - OSG Networking Area</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.84d31ad4.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
       
       
 
@@ -45,9 +41,9 @@
       
     
     
-      <link rel="stylesheet" href="../css/extra.css">
+      <link rel="stylesheet" href="../../css/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -76,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#network-and-network-troubleshooting-documentation" class="md-skip">
+        <a href="#key-sysctl-settings-for-perfsonar" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +88,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href="../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -112,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Network Troubleshooting
+              Key sysctl settings for perfSONAR
             
           </span>
         </div>
@@ -202,7 +198,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href="../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -232,7 +228,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -292,7 +288,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../perfsonar-in-osg/" class="md-nav__link">
+      <a href="../../perfsonar-in-osg/" class="md-nav__link">
         
   
   
@@ -315,7 +311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../perfsonar/deployment-models/" class="md-nav__link">
+      <a href="../deployment-models/" class="md-nav__link">
         
   
   
@@ -338,7 +334,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../perfsonar/installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -361,7 +357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../perfsonar/faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   
@@ -388,20 +384,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -417,7 +411,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Network Troubleshooting
@@ -428,32 +422,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Network Troubleshooting
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../network-troubleshooting/" class="md-nav__link">
         
   
   
@@ -464,35 +436,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#information-on-contacting-network-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      Information on Contacting Network Support
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -505,7 +448,7 @@
   
   
     <li class="md-nav__item">
-      <a href="osg-debugging-document/" class="md-nav__link">
+      <a href="../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
         
   
   
@@ -573,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../perfsonar/psetf/" class="md-nav__link">
+      <a href="../psetf/" class="md-nav__link">
         
   
   
@@ -596,7 +539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../osg-network-services/" class="md-nav__link">
+      <a href="../../osg-network-services/" class="md-nav__link">
         
   
   
@@ -619,7 +562,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../osg-network-analytics/" class="md-nav__link">
+      <a href="../../osg-network-analytics/" class="md-nav__link">
         
   
   
@@ -725,7 +668,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../personas/quick-deploy/landing/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/landing/" class="md-nav__link">
         
   
   
@@ -755,7 +698,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../personas/quick-deploy/quickstart-perfsonar-testpoint/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/quickstart-perfsonar-testpoint/" class="md-nav__link">
         
   
   
@@ -778,7 +721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../personas/quick-deploy/automated-setup/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/automated-setup/" class="md-nav__link">
         
   
   
@@ -854,7 +797,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../personas/troubleshoot/landing/" class="md-nav__link">
+      <a href="../../personas/troubleshoot/landing/" class="md-nav__link">
         
   
   
@@ -877,7 +820,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../personas/troubleshoot/triage-checklist/" class="md-nav__link">
+      <a href="../../personas/troubleshoot/triage-checklist/" class="md-nav__link">
         
   
   
@@ -953,7 +896,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../personas/research/landing/" class="md-nav__link">
+      <a href="../../personas/research/landing/" class="md-nav__link">
         
   
   
@@ -983,7 +926,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../personas/research/architecture/" class="md-nav__link">
+      <a href="../../personas/research/architecture/" class="md-nav__link">
         
   
   
@@ -1066,7 +1009,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../features/fail2ban/" class="md-nav__link">
+      <a href="../../features/fail2ban/" class="md-nav__link">
         
   
   
@@ -1089,7 +1032,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../features/selinux/" class="md-nav__link">
+      <a href="../../features/selinux/" class="md-nav__link">
         
   
   
@@ -1112,7 +1055,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../features/nftables/" class="md-nav__link">
+      <a href="../../features/nftables/" class="md-nav__link">
         
   
   
@@ -1180,7 +1123,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../perfsonar/tools_scripts/" class="md-nav__link">
+      <a href="../tools_scripts/" class="md-nav__link">
         
   
   
@@ -1203,7 +1146,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools/" class="md-nav__link">
+      <a href="../../tools/" class="md-nav__link">
         
   
   
@@ -1253,9 +1196,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#information-on-contacting-network-support" class="md-nav__link">
+  <a href="#tcp-buffer-sizing" class="md-nav__link">
     <span class="md-ellipsis">
-      Information on Contacting Network Support
+      TCP buffer sizing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#queue-management-and-packet-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Queue management and packet processing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multipath-and-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multipath and routing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tcp-optimizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      TCP optimizations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-apply-the-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to apply the settings
     </span>
   </a>
   
@@ -1280,39 +1259,48 @@
   
 
 
-<h1 id="network-and-network-troubleshooting-documentation">Network and Network Troubleshooting Documentation<a class="headerlink" href="#network-and-network-troubleshooting-documentation" title="Permanent link">&para;</a></h1>
-<p><span class="twiki-macro STARTINCLUDE"></span></p>
-<p>This page will eventually include pointers to various network troubleshooting resources. In general, when users suspect a network problem the procedure is:</p>
+<h1 id="key-sysctl-settings-for-perfsonar">Key sysctl settings for perfSONAR<a class="headerlink" href="#key-sysctl-settings-for-perfsonar" title="Permanent link">&para;</a></h1>
+<p>For optimal performance, the perfSONAR Toolkit applies system tuning settings by default upon installation by using the <code>perfsonar-toolkit-sysctl</code> package. These settings are based on the ESnet "fasterdata" knowledge base for high-performance test and measurement hosts and are sufficient for most use cases. However, you can manually verify or adjust the settings in <code>/etc/sysctl.conf</code> for specific needs. </p>
+<h2 id="tcp-buffer-sizing">TCP buffer sizing<a class="headerlink" href="#tcp-buffer-sizing" title="Permanent link">&para;</a></h2>
+<p>These settings increase the maximum TCP buffer sizes to support high throughput, especially on high-speed (e.g., 10 Gbps and faster) networks over long distances. </p>
 <ul>
-<li><strong>Document the problem</strong>: Basically you need to describe the problem you encountered. Provide any relevant details like the exact command you used, any errors or warning you got and any problems you observed. This can help you better understand the problem and will allow you to easily "hand-off" troubleshooting to an expert</li>
-<li><strong>Gather relevant data:</strong> Run tests (see Guide below) and capture the results.</li>
-<li><strong>Contact your local network support</strong> (this is sometimes where users don't know where to go). Google or your campus web-pages should be able to help you find the right contact.</li>
-<li><strong>Escalate</strong>, if the problem persists (See below)</li>
+<li><code>net.core.rmem_max</code>: The maximum receive socket buffer size in bytes.  </li>
+<li><code>net.core.wmem_max</code>: The maximum send socket buffer size in bytes.  </li>
+<li><code>net.ipv4.tcp_rmem</code>: The minimum, default, and maximum receive buffer sizes for TCP.  </li>
+<li><code>net.ipv4.tcp_wmem</code>: The minimum, default, and maximum send buffer sizes for TCP. </li>
 </ul>
-<p>ESnet maintains a very useful page on network troubleshooting at <a href="https://fasterdata.es.net/performance-testing/troubleshooting/">https://fasterdata.es.net/performance-testing/troubleshooting/</a></p>
-<p>We have a (older) draft version of the OSG <a href="osg-debugging-document/">network debugging document</a> that describes things in much more detail. If you have comments, questions or suggestions, please contact Shawn McKee.</p>
-<p>If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at https server learn.nsrc.org/perfsonar. </p>
-<h2 id="information-on-contacting-network-support">Information on Contacting Network Support<a class="headerlink" href="#information-on-contacting-network-support" title="Permanent link">&para;</a></h2>
-<p>There are numerous regional and campus network operations centers that have their own ticketing systems for reporting problems. I encourage you to identify how to contact your local campus network support personnel. Suggestion: try using Google with "YourUniversity network trouble ticket" as the search terms (of course substitute your university name for <em>YourUniversity</em>).</p>
-<p>Below are the links you can use to report problems to OSG or the major Research and Education networks. If you can't determine who your local contact should be or they are unable to help you resolve the issue, you should open a ticket with one of these entities:</p>
-<p><strong>INTERNET2</strong>: If you are located at a University in the United States you are likely connected to Internet2. You can find the details on opening a ticket with Internet2 at:</p>
+<p>Example settings for a 10G or 40G host with up to 100ms round-trip time (RTT):</p>
+<p>net.core.rmem_max \= 67108864<br />
+net.core.wmem_max \= 67108864<br />
+net.ipv4.tcp_rmem \= 4096 87380 33554432<br />
+net.ipv4.tcp_wmem \= 4096 65536 33554432</p>
+<p>For 100G or higher speeds, you may need to increase these values even further. </p>
+<h2 id="queue-management-and-packet-processing">Queue management and packet processing<a class="headerlink" href="#queue-management-and-packet-processing" title="Permanent link">&para;</a></h2>
+<p>These settings help prevent packet loss and improve network efficiency. </p>
 <ul>
-<li><a href="https://noc.net.internet2.edu/internet2/help/index.html">https://noc.net.internet2.edu/internet2/help/index.html</a></li>
+<li><code>net.core.netdev_max_backlog</code>: Increases the maximum length of the input packet queue for the network device. A higher value can prevent dropped packets during bursts of traffic.  </li>
+<li><code>net.core.default_qdisc</code>: Sets the default queuing discipline. Fair Queuing (fq) or Fair Queuing with CoDel (fq_codel) is recommended for its "fairness" in distributing bandwidth and kernel-level packet pacing. </li>
 </ul>
-<p>This is typically a good choice for support beyond your campus.</p>
-<p><strong>ESNET</strong>: If your problem involves a national laboratory in the United States, a university connected to ESnet or a trans-Atlantic network problem, then you may want to contact ESnet:</p>
+<h2 id="multipath-and-routing">Multipath and routing<a class="headerlink" href="#multipath-and-routing" title="Permanent link">&para;</a></h2>
+<p>If you are running perfSONAR on a host with multiple network interfaces on the same subnet, specific <code>sysctl</code> settings are needed to prevent Address Resolution Protocol (ARP) conflicts. </p>
+<p>net.ipv4.conf.all.arp_ignore=1<br />
+net.ipv4.conf.all.arp_announce=2<br />
+net.ipv4.conf.default.arp_filter=1<br />
+net.ipv4.conf.all.arp_filter=1</p>
+<h2 id="tcp-optimizations">TCP optimizations<a class="headerlink" href="#tcp-optimizations" title="Permanent link">&para;</a></h2>
+<p>For specific use cases, you might adjust other TCP settings: </p>
 <ul>
-<li><a href="http://es.net/about/contact-us/">http://es.net/about/contact-us/</a></li>
+<li><code>net.ipv4.tcp_timestamps</code>: While often suggested for improving CPU utilization, be aware of the implications. The <code>fasterdata</code> guide suggests disabling it for older kernels, but modern kernels handle timestamps more efficiently. </li>
 </ul>
-<p>This page contains information on opening ticket and pointers to relevant tools and documentation. ESnet serves the Department of Energy national labs.</p>
-<p><strong>OSG</strong>: If you have questions or unusual problems you think are OSG related, feel free to contact the OSG GOC. You can also open network related tickets and OSG can help to 'triage' your request and get it to the right people: </p>
-<ul>
-<li><a href="https://support.opensciencegrid.org/support/home">https://support.opensciencegrid.org/support/home</a></li>
-</ul>
-<p><strong>WLCG</strong>: WLCG has a dedicated support unit, which will assist in debugging the problem and triaging the issue. More details can be found at:</p>
-<ul>
-<li><a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics#Network_Throughput_Support_Unit">https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics#Network_Throughput_Support_Unit</a></li>
-</ul>
+<h2 id="how-to-apply-the-settings">How to apply the settings<a class="headerlink" href="#how-to-apply-the-settings" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Edit the configuration file: Add the desired settings to <code>/etc/sysctl.conf</code> or a new file in <code>/etc/sysctl.d/</code> (e.g., <code>/etc/sysctl.d/99-perfsonar.conf</code>).  </li>
+<li>Load the settings: Run <code>sysctl -p</code> to load the changes from the configuration file.  </li>
+<li>Verify the settings: Use <code>sysctl [parameter]</code> to confirm the new values are in effect. </li>
+</ol>
+<p>Automatic tuning with the perfSONAR Toolkit </p>
+<p>For installations using the perfSONAR Toolkit, the included <code>perfsonar-toolkit-sysctl</code> package handles most tuning automatically. If you change an interface speed, you can re-run the tuning script to apply appropriate settings: </p>
+<p>/usr/lib/perfsonar/scripts/configure_sysctl</p>
 
 
 
@@ -1363,10 +1351,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
       
     
   </body>

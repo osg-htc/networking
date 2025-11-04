@@ -20,11 +20,11 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
     
     
       
-        <title>Triage checklist for network issues - OSG Networking Area</title>
+        <title>Triage checklist (minimal) - OSG Networking Area</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Triage checklist for network issues
+              Triage checklist (minimal)
             
           </span>
         </div>
@@ -816,13 +816,6 @@
     
   </span>
   
-    
-  
-  
-    <span class="md-status md-status--draft"></span>
-  
-
-  
 
       </a>
     </li>
@@ -1296,13 +1289,42 @@
 
 <h2 id="quick-triage-checklist">Quick triage checklist<a class="headerlink" href="#quick-triage-checklist" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Gather host information: hostname, distro, kernel, NICs.</li>
-<li>Check basic connectivity: ping, traceroute to remote testpoints.</li>
-<li>Verify perfSONAR services: systemctl status perfsonar-* and web UI.</li>
-<li>Check firewall/ports (nftables/iptables) and required ports for perfSONAR.</li>
-<li>Collect logs and measurement samples for sharing with support.</li>
+<li>Gather host information</li>
 </ol>
-<p>Use relevant playbooks in <code>playbooks/</code> for specific scenarios.</p>
+<div class="highlight"><pre><span></span><code>hostnamectl
+cat<span class="w"> </span>/etc/os-release
+uname<span class="w"> </span>-a
+ip<span class="w"> </span>-c<span class="w"> </span>a
+</code></pre></div>
+<ol>
+<li>Check basic connectivity</li>
+</ol>
+<div class="highlight"><pre><span></span><code>ping<span class="w"> </span>-c<span class="w"> </span><span class="m">4</span><span class="w"> </span>&lt;remote-ip-or-host&gt;
+traceroute<span class="w"> </span>-n<span class="w"> </span>&lt;remote-ip-or-host&gt;
+</code></pre></div>
+<ol>
+<li>Verify perfSONAR services and containers</li>
+</ol>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-*
+ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+sudo<span class="w"> </span>podman<span class="w"> </span>ps<span class="w"> </span><span class="o">||</span><span class="w"> </span>sudo<span class="w"> </span>docker<span class="w"> </span>ps
+</code></pre></div>
+<ol>
+<li>Check firewall and ports</li>
+</ol>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>nft<span class="w"> </span>list<span class="w"> </span>ruleset
+sudo<span class="w"> </span>ss<span class="w"> </span>-ltnp
+</code></pre></div>
+<ol>
+<li>
+<p>Collect logs and measurements</p>
+</li>
+<li>
+<p>Container logs: <code>sudo podman logs perfsonar-testpoint</code></p>
+</li>
+<li>perfSONAR checks: <code>pscheduler tasks --host localhost</code></li>
+</ol>
+<p>Use the scenario playbooks in <code>playbooks/</code> for step-by-step remediation instructions.</p>
 
 
 
