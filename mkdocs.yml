@@ -44,6 +44,7 @@ nav:
   - Tools & Scripts:
     - 'Scripts and tools': 'perfsonar/tools_scripts/README.md'
     - 'Compose bundle (docker-compose.yml)': 'perfsonar/tools_scripts/docker-compose.yml'
+    - 'LS registration updater (script)': 'perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh'
     - 'Link-check tools': 'tools/README.md'
 
 markdown_extensions:

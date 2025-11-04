@@ -406,16 +406,41 @@ Key paths to persist on the host:
    - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
    - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
-3. **PSConfig enrollment:**
+3. **pSConfig enrollment:**
    - For each active NIC, register with the psconfig service so measurements cover all paths. Example:
 
      ```bash
-     /usr/bin/psconfig pscheduler add --url https://psconfig.opensciencegrid.org/pub/<feed>.json
+     /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
      ```
 
    - Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
 
 4. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
+
+!!! tip "How to update Lookup Service registration inside the container"
+
+      Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint` container and restart the daemon only if needed.
+
+      - Script (browse): [perfSONAR-update-lsregistration.sh](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
+      - Raw (download): [raw link](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
+
+      Install and run examples (root shell):
+
+      ```bash
+      curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+         -o /usr/local/sbin/perfSONAR-update-lsregistration.sh
+      chmod 0755 /usr/local/sbin/perfSONAR-update-lsregistration.sh
+
+      # Preview changes only
+      perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
+
+      # Apply common updates and restart the daemon inside the container
+      perfSONAR-update-lsregistration.sh \
+         --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+         --city Berkeley --region CA --country US --zip 94720 \
+         --latitude 37.5 --longitude -121.7469 \
+         --admin-name "pS Admin" --admin-email admin@example.org
+      ```
 
 ---
 
