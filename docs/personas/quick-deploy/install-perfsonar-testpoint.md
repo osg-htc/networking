@@ -1,12 +1,3 @@
----
-title: Install: perfSONAR Testpoint
-description: Instructions and verification to deploy a perfSONAR testpoint for WLCG/OSG.
-persona: quick-deploy
-owners: [networking-team@osg-htc.org]
-status: draft
-tags: [install, perfSONAR, container]
----
-
 # Installing a perfSONAR Testpoint for WLCG/OSG
 
 This quick-deploy playbook walks WLCG/OSG site administrators through the end-to-end installation, configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). Each phase references tooling that already lives in this repository so you can automate as much as possible while still capturing the site-specific information required by OSG/WLCG operations.
