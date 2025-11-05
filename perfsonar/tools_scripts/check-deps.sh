@@ -88,14 +88,20 @@ if [ ${#suggest_dnf[@]} -gt 0 ]; then
   # dedupe
   mapfile -t uniq_dnf < <(printf '%s\n' "${suggest_dnf[@]}" | awk '!seen[$0]++')
   echo "Install on Fedora/RHEL/CentOS (dnf):"
-  printf '  sudo dnf install -y %s\n' "${uniq_dnf[*]}"
+  # Join packages with spaces explicitly to avoid IFS (set to "\n\t") introducing newlines
+  dnf_pkgs=$(printf '%s ' "${uniq_dnf[@]}")
+  dnf_pkgs=${dnf_pkgs% }  # trim trailing space
+  printf '  sudo dnf install -y %s\n' "$dnf_pkgs"
   echo
 fi
 
 if [ ${#suggest_apt[@]} -gt 0 ]; then
   mapfile -t uniq_apt < <(printf '%s\n' "${suggest_apt[@]}" | awk '!seen[$0]++')
   echo "Install on Debian/Ubuntu (apt):"
-  printf '  sudo apt-get update && sudo apt-get install -y %s\n' "${uniq_apt[*]}"
+  # Join packages with spaces explicitly to avoid IFS newline joining
+  apt_pkgs=$(printf '%s ' "${uniq_apt[@]}")
+  apt_pkgs=${apt_pkgs% }
+  printf '  sudo apt-get update && sudo apt-get install -y %s\n' "$apt_pkgs"
   echo
 fi
 
