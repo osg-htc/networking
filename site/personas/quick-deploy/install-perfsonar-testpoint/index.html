@@ -807,6 +807,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Step 5 – Register and Configure with WLCG/OSG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Lookup Service registration inside the container
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1329,6 +1344,52 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../perfsonar/tools_scripts/perfSONAR-extract-lsregistration.sh" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LS registration extractor (script)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../perfsonar/tools_scripts/README-lsregistration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    LS registration helpers (README)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../tools/" class="md-nav__link">
         
   
@@ -1429,6 +1490,21 @@
       Step 5 – Register and Configure with WLCG/OSG
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Step 5 – Register and Configure with WLCG/OSG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Lookup Service registration inside the container
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1548,29 +1624,31 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 </li>
 <li>
 <p>Or download directly from the repository URL:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>-o<span class="w"> </span>/usr/local/sbin/perfsonar-pbr-nm.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/sbin/perfsonar-pbr-nm.sh
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>-o<span class="w"> </span>./perfSONAR-pbr-nm.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfSONAR-pbr-nm.sh
 </code></pre></div>
 </li>
 </ul>
 </li>
 <li>
-<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.</p>
+<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
 <ul>
 <li>
 <p>Preview (no changes):</p>
-<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-debug
 </code></pre></div>
 </li>
 <li>
 <p>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</p>
-<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
 </li>
 </ul>
-<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
 </li>
 </ul>
+<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+<p>!!! warning "Gateways required for addresses"
+      Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
 <p>!!! note "Gateway prompts"</p>
 <div class="codehilite"><pre><span></span><code><span class="w">  </span><span class="nx">During</span><span class="w"> </span><span class="nx">generation</span><span class="p">,</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">script</span><span class="w"> </span><span class="nx">attempts</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">detect</span><span class="w"> </span><span class="nx">gateways</span><span class="w"> </span><span class="nx">per</span><span class="o">-</span><span class="nx">NIC</span><span class="p">.</span><span class="w"> </span><span class="nx">If</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">NIC</span><span class="w"> </span><span class="nx">has</span><span class="w"> </span><span class="nx">an</span><span class="w"> </span><span class="nx">IP</span><span class="w"> </span><span class="nx">address</span><span class="w"> </span><span class="nx">but</span><span class="w"> </span><span class="nx">no</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="nx">could</span><span class="w"> </span><span class="nx">be</span><span class="w"> </span><span class="nx">determined</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="nx">will</span><span class="w"> </span><span class="nx">prompt</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">interactively</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">enter</span><span class="w"> </span><span class="nx">an</span><span class="w"> </span><span class="nx">IPv4</span><span class="w"> </span><span class="k">and</span><span class="o">/</span><span class="k">or</span><span class="w"> </span><span class="nx">IPv6</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="p">(</span><span class="k">or</span><span class="w"> </span><span class="err">`</span><span class="o">-</span><span class="err">`</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">skip</span><span class="p">).</span><span class="w"> </span><span class="nx">Prompts</span><span class="w"> </span><span class="nx">are</span><span class="w"> </span><span class="nx">skipped</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">non</span><span class="o">-</span><span class="nx">interactive</span><span class="w"> </span><span class="nx">sessions</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="nx">when</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">use</span><span class="w"> </span><span class="err">`</span><span class="o">--</span><span class="nx">yes</span><span class="err">`</span><span class="p">.</span>
 </code></pre></div>
@@ -1581,17 +1659,17 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <ul>
 <li>
 <p>Rehearsal (no changes, extra logging recommended on first run):</p>
-<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
 </code></pre></div>
 </li>
 <li>
 <p>Apply changes non-interactively (auto-confirm):</p>
-<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh<span class="w"> </span>--yes
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
 </li>
 <li>
 <p>Or run interactively and answer the confirmation prompt when ready:</p>
-<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh
 </code></pre></div>
 </li>
 </ul>
@@ -1644,7 +1722,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p><strong>Run with desired options:</strong></p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>perfsonar-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
+<div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
 <ul>
 <li>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).</li>
@@ -1661,7 +1739,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </li>
 </ul>
 <p>Tip: preview the fully rendered nftables rules (no changes are made):</p>
-<div class="highlight"><pre><span></span><code>perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
+<div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
 <p>Optional: manually add extra management hosts/subnets</p>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
@@ -1876,8 +1954,7 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 <p><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.</p>
 </li>
 </ol>
-<div class="admonition tip">
-<p class="admonition-title">How to update Lookup Service registration inside the container</p>
+<h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running <code>perfsonar-testpoint</code> container and restart the daemon only if needed.</p>
 <ul>
 <li>Script (browse): <a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh">perfSONAR-update-lsregistration.sh</a></li>
@@ -1885,20 +1962,19 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 </ul>
 <p>Install and run examples (root shell):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">   </span>-o<span class="w"> </span>/usr/local/sbin/perfSONAR-update-lsregistration.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/sbin/perfSONAR-update-lsregistration.sh
+<span class="w">   </span>-o<span class="w"> </span>./perfSONAR-update-lsregistration.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfSONAR-update-lsregistration.sh
 
 <span class="c1"># Preview changes only</span>
-perfSONAR-update-lsregistration.sh<span class="w"> </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
+./perfSONAR-update-lsregistration.sh<span class="w"> </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
 
 <span class="c1"># Apply common updates and restart the daemon inside the container</span>
-perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+./perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 </code></pre></div>
-</div>
 <hr />
 <h2 id="step-6-post-install-validation">Step 6 – Post-Install Validation<a class="headerlink" href="#step-6-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
