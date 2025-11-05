@@ -1652,7 +1652,9 @@ git<span class="w"> </span>clone<span class="w"> </span>https://github.com/osg-h
 <hr />
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</li>
+<li>
+<p><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</p>
+</li>
 <li>
 <p><strong>Apply baseline updates (and verify dependencies):</strong></p>
 <p>Use the repository's helper to check for required tools and print
@@ -1673,6 +1675,8 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 ./check-deps.sh
 </code></pre></div>
 </details>
+<details class="info">
+<summary>Apply updates and install baseline packages</summary>
 <p>On EL9, apply updates and install common baseline packages, then add any
 packages suggested by the checker (copy/paste the printed dnf line):</p>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
@@ -1680,26 +1684,36 @@ dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </s
 <span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
 <span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
 </code></pre></div>
+</details>
 </li>
 <li>
-<p><strong>Set the hostname and time sync:</strong>
-    Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</p>
+<p><strong>Set the hostname and time sync:</strong></p>
+<p>Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</p>
+<details class="info">
+<summary>System configuration commands</summary>
 <div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
 timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
 </code></pre></div>
+</details>
 </li>
 <li>
 <p><strong>Disable unused services:</strong></p>
+<details class="info">
+<summary>Service cleanup commands</summary>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
 dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
 </code></pre></div>
+</details>
 </li>
 <li>
 <p><strong>Record NIC names:</strong></p>
+<details class="info">
+<summary>Commands to list network interfaces</summary>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>device<span class="w"> </span>status
 ip<span class="w"> </span>-br<span class="w"> </span>addr
 </code></pre></div>
+</details>
 <p>Document interface mappings; you will need them for the policy-based routing configuration.</p>
 </li>
 </ol>
@@ -1933,21 +1947,29 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li>
 <p>Add <code>--dry-run</code> for a rehearsal that only prints the planned actions.</p>
 <p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-config.conf</code>, optionally adjusts SELinux, and enables Fail2Ban jails—only if those components are already installed.</p>
-<p>Notes:
-- SSH allow-list is built from your NIC address/prefix arrays in <code>/etc/perfSONAR-multi-nic-config.conf</code>:
-   - CIDR values in <code>NIC_IPV4_PREFIXES</code>/<code>NIC_IPV6_PREFIXES</code> paired with corresponding addresses are treated as subnets.
-   - Address entries without a prefix are treated as single hosts.
-   - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
-- The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.
-- Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</p>
+<details class="info">
+<summary>How SSH allow-lists and validation work</summary>
+<p><strong>SSH allow-list derivation:</strong></p>
+<ul>
+<li>CIDR values in <code>NIC_IPV4_PREFIXES</code>/<code>NIC_IPV6_PREFIXES</code> paired with corresponding addresses are treated as subnets.</li>
+<li>Address entries without a prefix are treated as single hosts.</li>
+<li>The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.</li>
+</ul>
+<p><strong>Validation and output:</strong></p>
+<ul>
+<li>The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.</li>
+<li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
+</ul>
+</details>
 <details class="tip">
-<summary>Tip</summary>
+<summary>Preview nftables rules before applying</summary>
 </details>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
-<p><code>bash
-   ~/perfsonar-install-nftables.sh --print-rules</code>   Optional: manually add extra management hosts/subnets</p>
-</li>
-</ul>
+<div class="highlight"><pre><span></span><code>~/perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
+</code></pre></div>
+<details class="tip">
+<summary>Manually add extra management hosts/subnets</summary>
+</details>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
 <div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
    type ipv4_addr
@@ -1975,13 +1997,16 @@ set ssh_access_ip6_hosts {
 <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
 systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
 </code></pre></div>
-<ol>
-<li><strong>Confirm firewall state and security services:</strong></li>
-</ol>
-<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
+</li>
+<li>
+<p><strong>Confirm firewall state and security services:</strong></p>
+</li>
+</ul>
+<p>??? info "Verification commands"
+       <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
 sestatus
 systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
-</code></pre></div>
+</code></pre></div></p>
 <p>Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.</p>
 <hr />
 <h2 id="step-4-deploy-the-containerized-perfsonar-testpoint">Step 4 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-4-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
@@ -2133,32 +2158,35 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 <h2 id="step-5-register-and-configure-with-wlcgosg">Step 5 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-5-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>PerfSONAR toolkit configuration:</strong></li>
-<li>Browse to <a href="https://&lt;SERVER_FQDN&gt;/toolkit">https://<SERVER_FQDN>/toolkit</a> and complete the local toolkit setup wizard.</li>
-<li>
-<p>Populate site contact email, usage policy URL, and location (latitude/longitude). Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping.</p>
-</li>
-<li>
-<p><strong>OSG/WLCG registration workflow:</strong></p>
-</li>
-<li>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</li>
-<li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</li>
-<li>
-<p>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>
-</li>
-<li>
-<p><strong>pSConfig enrollment:</strong></p>
-</li>
-<li>
-<p>For each active NIC, register with the psconfig service so measurements cover all paths. Example:</p>
-<div class="highlight"><pre><span></span><code>/usr/bin/psconfig<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span>--url<span class="w"> </span>https://psconfig.opensciencegrid.org/pub/auto/&lt;NIC-FQDN&gt;
+</ol>
+<p>Browse to <code>https://&lt;SERVER_FQDN&gt;/toolkit</code> and complete the local toolkit setup wizard.</p>
+<p>??? info "Configuration details to populate"
+       - Site contact email
+       - Usage policy URL
+       - Location (latitude/longitude)
+       - Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping</p>
+<ol>
+<li><strong>OSG/WLCG registration workflow:</strong></li>
+</ol>
+<p>??? info "Registration steps and portals"
+       - Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.
+       - Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.
+       - In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>
+<ol>
+<li><strong>pSConfig enrollment:</strong></li>
+</ol>
+<p>For each active NIC, register with the psconfig service so measurements cover all paths.</p>
+<p>??? info "Registration command and verification"
+       Example registration:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
+<span class="n n-Quoted">   /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/&lt;NIC-FQDN&gt;</span>
+<span class="n n-Quoted">   </span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">`</span>
+
+<span class="w">   </span><span class="n">Confirm</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">resulting</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n n-Quoted">`/etc/perfsonar/psconfig/pscheduler.d/`</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">correct</span><span class="w"> </span><span class="n">interface</span><span class="w"> </span><span class="n">addresses</span><span class="w"> </span><span class="p">(</span><span class="n n-Quoted">`ifaddr`</span><span class="w"> </span><span class="n">tags</span><span class="p">).</span>
 </code></pre></div>
-</li>
-<li>
-<p>Confirm the resulting files in <code>/etc/perfsonar/psconfig/pscheduler.d/</code> map to the correct interface addresses (<code>ifaddr</code> tags).</p>
-</li>
-<li>
-<p><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.</p>
-</li>
+
+<ol>
+<li><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.</li>
 </ol>
 <h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running <code>perfsonar-testpoint</code> container and restart the daemon only if needed.</p>
@@ -2187,23 +2215,30 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <ol>
 <li><strong>System services:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
+<p>??? info "Verify Podman and compose services"
+       <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
 systemctl<span class="w"> </span>--user<span class="w"> </span>status<span class="w"> </span>podman-compose@perfsonar-testpoint.service
+</code></pre></div></p>
+<div class="codehilite"><pre><span></span><code>   Ensure both are active/green.
 </code></pre></div>
-<p>Ensure both are active/green.</p>
+
 <ol>
 <li><strong>Container health:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
+<p>??? info "Check container status and logs"
+       <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
 podman<span class="w"> </span>logs<span class="w"> </span>pscheduler-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail
-</code></pre></div>
+</code></pre></div></p>
 <ol>
 <li><strong>Network path validation:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
+<p>??? info "Test network connectivity and routing"
+       <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
 tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
+</code></pre></div></p>
+<div class="codehilite"><pre><span></span><code>   Confirm traffic uses the intended policy-based routes (check `ip route get &lt;dest&gt;`).
 </code></pre></div>
-<p>Confirm traffic uses the intended policy-based routes (check <code>ip route get &lt;dest&gt;</code>).</p>
+
 <ol>
 <li>
 <p><strong>Toolkit diagnostics:</strong> visit the Toolkit UI → <em>Dashboard</em> → <em>Host Status</em> to confirm pScheduler, MaDDash, and owamp/bwctl services report healthy.</p>
@@ -2239,8 +2274,9 @@ toolkit-system-health
 </ul>
 <h3 id="automatic-image-updates-and-safe-restarts">Automatic image updates and safe restarts<a class="headerlink" href="#automatic-image-updates-and-safe-restarts" title="Permanent link">&para;</a></h3>
 <p>Keep containers current and only restart them when their image actually changes.</p>
-<ul>
-<li>Option A (Podman-native): auto-update via labels and a systemd timer</li>
+<details class="info">
+<summary>Auto-update via labels and a systemd timer</summary>
+<ol>
 <li>
 <p>Add an auto-update label to services in your compose file (both <code>testpoint</code> and <code>certbot</code> if used):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
@@ -2272,41 +2308,8 @@ podman<span class="w"> </span>auto-update
 journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<span class="w"> </span>--since<span class="w"> </span><span class="s2">&quot;1 day ago&quot;</span>
 </code></pre></div>
 </li>
-<li>
-<p>Option B (Docker-style): Watchtower</p>
-</li>
-<li>
-<p>Run Watchtower to monitor and update running containers; it restarts a container only when a newer image is pulled:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>watchtower<span class="w"> </span><span class="se">\</span>
-<span class="w">   </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
-<span class="w">   </span>containrrr/watchtower<span class="w"> </span><span class="se">\</span>
-<span class="w">   </span>--cleanup<span class="w"> </span>--rolling-restart<span class="w"> </span>--interval<span class="w"> </span><span class="m">3600</span>
-</code></pre></div>
-<ul>
-<li><code>--cleanup</code> removes old images after a successful update.</li>
-<li><code>--rolling-restart</code> updates one container at a time.</li>
-<li>
-<p>To limit updates to labeled services only, use <code>--label-enable</code> and label your services:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
-<span class="w">   </span><span class="nt">testpoint</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># ...</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">com.centurylinklabs.watchtower.enable=true</span>
-<span class="w">   </span><span class="nt">certbot</span><span class="p">:</span>
-<span class="w">      </span><span class="c1"># ...</span>
-<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">         </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">com.centurylinklabs.watchtower.enable=true</span>
-</code></pre></div>
-</li>
-</ul>
-</li>
-</ul>
-<p>Notes:</p>
-<ul>
-<li>Pin to a stable tag line (e.g., <code>ghcr.io/perfsonar/testpoint:5.2.4-systemd</code> or <code>5.2-systemd</code>) that matches your change window policy.</li>
-<li>If SELinux is enforcing, ensure bind-mounted paths retain the <code>:z</code>/<code>:Z</code> options in your compose so updates don’t introduce AVC denials.</li>
-</ul>
-<p>Document any deviations from this procedure so the next deployment at your site can reuse improvements with minimal effort.</p>
+</ol>
+</details>
 
 
 
