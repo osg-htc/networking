@@ -53,7 +53,7 @@ DEBUG=false          # when true: run commands under bash -x for verbose output
 
 # CLI-controlled behavior defaults
 RUN_SHELLCHECK=false
-GENERATE_CONFIG_AUTO=true
+GENERATE_CONFIG_AUTO=false
 GENERATE_CONFIG_DEBUG=false
 
 # -----------------------------------------------------
@@ -369,6 +369,20 @@ EXAMPLE
     # will be moved into /etc with sudo.
     local TMPFILE
     TMPFILE="/tmp/perfsonar-gen-config-$$.conf"
+    # Determine NICs for which we could not determine gateways. These are
+    # important because the main script requires gateways when an IP is set.
+    local -a MISSING_IPV4_GW=()
+    local -a MISSING_IPV6_GW=()
+    for i in "${!NIC_NAMES[@]}"; do
+        # shellcheck disable=SC2154
+        if [ "${NIC_IPV4_ADDRS[$i]:-}" != "-" ] && [ "${NIC_IPV4_GWS[$i]:-}" = "-" ]; then
+            MISSING_IPV4_GW+=("${NIC_NAMES[$i]}")
+        fi
+        if [ "${NIC_IPV6_ADDRS[$i]:-}" != "-" ] && [ "${NIC_IPV6_GWS[$i]:-}" = "-" ]; then
+            MISSING_IPV6_GW+=("${NIC_NAMES[$i]}")
+        fi
+    done
+
     {
         echo "# Auto-generated /etc/perfSONAR-multi-nic-config.conf"
         echo "# Generated: $(date)"
@@ -449,6 +463,24 @@ EXAMPLE
 
         echo "# Specify the NIC that will hold the default route for this host"
         printf 'DEFAULT_ROUTE_NIC="%s"\n' "$DEFAULT_ROUTE_NIC_DETECTED" >> "$TMPFILE"
+
+        # If we couldn't identify gateways for some NICs, provide a clear
+        # warning in the generated file so users notice and edit the file
+        # before attempting to apply it. The main validation step will also
+        # fail if gateways are missing, but surfacing the issue here avoids
+        # surprising behaviour when auto-generating configs.
+        if (( ${#MISSING_IPV4_GW[@]} > 0 )) || (( ${#MISSING_IPV6_GW[@]} > 0 )); then
+            printf "\n# WARNING: The auto-detection step could not identify gateways for some NICs.\n" >> "$TMPFILE"
+            if (( ${#MISSING_IPV4_GW[@]} > 0 )); then
+                printf "# Missing IPv4 gateways for NICs: %s\n" "$(printf '%s ' "${MISSING_IPV4_GW[@]}")" >> "$TMPFILE"
+                printf "# Please edit NIC_IPV4_GWS=(...) and provide the correct IPv4 gateway addresses (use '-' for none).\n" >> "$TMPFILE"
+            fi
+            if (( ${#MISSING_IPV6_GW[@]} > 0 )); then
+                printf "# Missing IPv6 gateways for NICs: %s\n" "$(printf '%s ' "${MISSING_IPV6_GW[@]}")" >> "$TMPFILE"
+                printf "# Please edit NIC_IPV6_GWS=(...) and provide the correct IPv6 gateway addresses (use '-' for none).\n" >> "$TMPFILE"
+            fi
+            printf "# NOTE: The script will validate that any NIC with an IP address also has a corresponding gateway and will fail if gateways are missing.\n" >> "$TMPFILE"
+        fi
     }
 
     # Move into place (or print preview when in dry-run/debug).
@@ -464,7 +496,22 @@ EXAMPLE
     fi
     run_cmd chmod 0644 "$CONFIG_FILE" || true
     run_cmd chown root:root "$CONFIG_FILE" || true
-    echo "Generated configuration at $CONFIG_FILE (auto-detected). Edit if needed and rerun the script." >&2
+
+    # If missing gateways were detected warn loudly to stderr so operators
+    # reading console output understand the generated file likely needs
+    # manual edits before running the main configuration steps.
+    if (( ${#MISSING_IPV4_GW[@]} > 0 )) || (( ${#MISSING_IPV6_GW[@]} > 0 )); then
+        log "WARNING: Could not identify gateways for some NICs during auto-detection."
+        if (( ${#MISSING_IPV4_GW[@]} > 0 )); then
+            log "  - Missing IPv4 gateways for: $(printf '%s ' "${MISSING_IPV4_GW[@]}")"
+        fi
+        if (( ${#MISSING_IPV6_GW[@]} > 0 )); then
+            log "  - Missing IPv6 gateways for: $(printf '%s ' "${MISSING_IPV6_GW[@]}")"
+        fi
+        echo "Generated configuration at $CONFIG_FILE (auto-detected). IMPORTANT: edit $CONFIG_FILE to fill in missing gateway entries before running the script to apply changes." >&2
+    else
+        echo "Generated configuration at $CONFIG_FILE (auto-detected). Edit if needed and rerun the script." >&2
+    fi
     exit 0
 }
 
@@ -1065,7 +1112,9 @@ fi
 _n_names=${#NIC_NAMES[@]}
 _n_v4=${#NIC_IPV4_ADDRS[@]}
 _n_p4=${#NIC_IPV4_PREFIXES[@]}
-if (( _n_names != _n_v4 || _n_names != _n_p4 )); then
+# Ensure all array lengths match NIC_NAMES. Use an explicit equality
+# check so static analyzers do not misinterpret the intent.
+if ! (( _n_names == _n_v4 && _n_names == _n_p4 )); then
     handle_error "Configuration arrays have inconsistent lengths."
 fi
 
