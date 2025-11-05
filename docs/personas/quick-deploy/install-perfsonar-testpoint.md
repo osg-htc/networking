@@ -151,6 +151,84 @@ Script location in the repository:
 
 The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
 
+### DNS: forward and reverse entries (required)
+
+All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.
+
+- For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.
+- For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
+- For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
+
+Automating verification from the generated config
+
+The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays. Example Bash verification script (run as root or a user that can read the config):
+
+```bash
+# quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf
+set -euo pipefail
+CONFIG=/etc/perfSONAR-multi-nic-config.conf
+[ -f "$CONFIG" ] || { echo "Config not found: $CONFIG" >&2; exit 2; }
+source "$CONFIG"
+
+check_ip() {
+   local ip=$1
+   local family=$2   # 4 or 6
+   # strip CIDR if present
+   ip=${ip%%/*}
+   [ "$ip" = "-" ] && return 0
+
+   # PTR lookup (reverse)
+   ptr=$(dig +short -x "$ip" | head -n1)
+   if [ -z "$ptr" ]; then
+      echo "MISSING PTR for $ip"
+      return 1
+   fi
+   # remove trailing dot from PTR
+   ptr=${ptr%.}
+
+   # Forward lookup for the hostname returned by PTR
+   if [ "$family" = "4" ]; then
+      fwd=$(dig +short A "$ptr" | tr '\n' ' ')
+   else
+      fwd=$(dig +short AAAA "$ptr" | tr '\n' ' ')
+   fi
+
+   if ! echo "$fwd" | grep -qw "$ip"; then
+      echo "INCONSISTENT: PTR $ptr does not resolve back to $ip (resolved: $fwd)"
+      return 1
+   fi
+   echo "OK: $ip ⇄ $ptr"
+   return 0
+}
+
+errors=0
+for ip in "${NIC_IPV4_ADDRS[@]:-}"; do
+   if [ "$ip" != "-" ]; then
+      check_ip "$ip" 4 || errors=$((errors+1))
+   fi
+done
+for ip in "${NIC_IPV6_ADDRS[@]:-}"; do
+   if [ "$ip" != "-" ]; then
+      check_ip "$ip" 6 || errors=$((errors+1))
+   fi
+done
+
+if (( errors > 0 )); then
+   echo "DNS verification failed ($errors problem(s)). Fix DNS (forward/reverse) before running tests." >&2
+   exit 1
+fi
+echo "DNS forward/reverse checks passed for configured addresses."
+```
+
+Notes and automation tips:
+
+- The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it to use `host` if preferred.
+- Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
+- For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages `dns.resolver` for async checks.
+- If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
+
+If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.
+
 1. **Verify the routing policy:**
 
    ```bash
