@@ -40,17 +40,23 @@ Compatibility and fallbacks
   deterministic in automation and avoids interactive sudo prompts.
 
 How to run (dry-run / debug)
----------------------------
+----------------------------
 Preview what the script would do without changing the system:
 
 ```bash
 sudo bash perfSONAR-pbr-nm.sh --dry-run --debug
 ```
 
-Generate an example or auto-detected config (preview):
+Generate an example or auto-detected config (preview, dry-run only):
 
 ```bash
 sudo bash perfSONAR-pbr-nm.sh --generate-config-debug
+
+Write the auto-detected config to /etc (does not apply changes):
+
+```bash
+sudo bash perfSONAR-pbr-nm.sh --generate-config-auto
+```
 ```
 
 Run for real (be careful):
@@ -59,6 +65,15 @@ Run for real (be careful):
 sudo bash perfSONAR-pbr-nm.sh
 # or non-interactive
 sudo bash perfSONAR-pbr-nm.sh --yes
+
+Gateway requirement and generator warnings
+-----------------------------------------
+- Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.
+- The auto-generator will warn if it cannot detect a gateway for a NIC that has an address. The generated config will include a WARNING block listing affected NICs. Edit `NIC_IPV4_GWS` and/or `NIC_IPV6_GWS` accordingly before running the script to apply changes.
+
+Backups and safety
+------------------
+- Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
 ```
 
 Tests

@@ -76,7 +76,7 @@ Script location in the repository:
          chmod 0755 /usr/local/sbin/perfsonar-pbr-nm.sh
          ```
 
-2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.
+2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
 
       - Preview (no changes):
 
@@ -90,7 +90,10 @@ Script location in the repository:
          /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-auto
          ```
 
-    Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
+   Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
+
+   !!! warning "Gateways required for addresses"
+      Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
 
 3. **Execute the script:**
 
@@ -417,30 +420,30 @@ Key paths to persist on the host:
 
 4. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
 
-!!! tip "How to update Lookup Service registration inside the container"
+### Update Lookup Service registration inside the container
 
-      Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint` container and restart the daemon only if needed.
+Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint` container and restart the daemon only if needed.
 
-      - Script (browse): [perfSONAR-update-lsregistration.sh](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
-      - Raw (download): [raw link](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
+- Script (browse): [perfSONAR-update-lsregistration.sh](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
+- Raw (download): [raw link](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
 
-      Install and run examples (root shell):
+Install and run examples (root shell):
 
-      ```bash
-      curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-         -o /usr/local/sbin/perfSONAR-update-lsregistration.sh
-      chmod 0755 /usr/local/sbin/perfSONAR-update-lsregistration.sh
+```bash
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+   -o /usr/local/sbin/perfSONAR-update-lsregistration.sh
+chmod 0755 /usr/local/sbin/perfSONAR-update-lsregistration.sh
 
-      # Preview changes only
-      perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
+# Preview changes only
+perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
 
-      # Apply common updates and restart the daemon inside the container
-      perfSONAR-update-lsregistration.sh \
-         --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-         --city Berkeley --region CA --country US --zip 94720 \
-         --latitude 37.5 --longitude -121.7469 \
-         --admin-name "pS Admin" --admin-email admin@example.org
-      ```
+# Apply common updates and restart the daemon inside the container
+perfSONAR-update-lsregistration.sh \
+   --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+   --city Berkeley --region CA --country US --zip 94720 \
+   --latitude 37.5 --longitude -121.7469 \
+   --admin-name "pS Admin" --admin-email admin@example.org
+```
 
 ---
 

@@ -1111,14 +1111,30 @@ modifying anything.</p>
 <p>Preview what the script would do without changing the system:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
 </code></pre></div>
-<p>Generate an example or auto-detected config (preview):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+<p>Generate an example or auto-detected config (preview, dry-run only):</p>
+<p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+
+Write<span class="w"> </span>the<span class="w"> </span>auto-detected<span class="w"> </span>config<span class="w"> </span>to<span class="w"> </span>/etc<span class="w"> </span><span class="o">(</span>does<span class="w"> </span>not<span class="w"> </span>apply<span class="w"> </span>changes<span class="o">)</span>:
+
+<span class="sb">```</span>bash
+sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
-<p>Run for real (be careful):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh
-<span class="c1"># or non-interactive</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
-</code></pre></div>
+<div class="highlight"><pre><span></span><code>Run for real (be careful):
+
+```bash
+sudo bash perfSONAR-pbr-nm.sh
+# or non-interactive
+sudo bash perfSONAR-pbr-nm.sh --yes
+
+Gateway requirement and generator warnings
+-----------------------------------------
+- Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.
+- The auto-generator will warn if it cannot detect a gateway for a NIC that has an address. The generated config will include a WARNING block listing affected NICs. Edit `NIC_IPV4_GWS` and/or `NIC_IPV6_GWS` accordingly before running the script to apply changes.
+
+Backups and safety
+------------------
+- Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
+</code></pre></div></p>
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>A small set of unit-style tests is provided under <code>tests/</code>. These are designed
 to exercise pure validation and sanitization helpers without modifying system
