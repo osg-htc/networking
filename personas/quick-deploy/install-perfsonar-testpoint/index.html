@@ -762,6 +762,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Prerequisites and Planning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone the Repository
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1461,6 +1476,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Prerequisites and Planning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone the Repository
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1601,6 +1631,21 @@
 <li><strong>Operational contacts:</strong> site admin email, OSG facility name, latitude/longitude, usage policy link.</li>
 <li><strong>Repository artifacts:</strong> the scripts referenced below are in <code>docs/perfsonar/</code> in this repository.</li>
 </ul>
+<h3 id="clone-the-repository">Clone the Repository<a class="headerlink" href="#clone-the-repository" title="Permanent link">&para;</a></h3>
+<p>This guide references multiple scripts from the osg-htc/networking repository. Clone the repository to your testpoint host for easy access to all tools.</p>
+<p><strong>Recommended locations:</strong></p>
+<ul>
+<li><strong>Networking repo:</strong> <code>/opt/networking</code> (configuration scripts and documentation)</li>
+<li><strong>perfSONAR testpoint compose bundle:</strong> <code>/opt/testpoint</code> (if using containerized testpoint)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Clone the networking repository to /opt</span>
+<span class="nb">cd</span><span class="w"> </span>/opt
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/osg-htc/networking.git
+
+<span class="c1"># Optional: if deploying the perfSONAR testpoint container, clone it separately</span>
+<span class="c1"># git clone https://github.com/perfsonar/testpoint.git /opt/testpoint</span>
+</code></pre></div>
+<p>After cloning, all script examples in this guide that reference <code>docs/perfsonar/tools_scripts/</code> assume you're running commands from <code>/opt/networking</code>.</p>
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
@@ -1616,7 +1661,7 @@ baseline packages.</p>
 <ul>
 <li>
 <p>From a local clone of this repository (recommended):</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># run from the repo root</span>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
 ./docs/perfsonar/tools_scripts/check-deps.sh
 </code></pre></div>
 </li>
@@ -1672,7 +1717,9 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <ul>
 <li>
 <p>From a local clone of this repository:</p>
-<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>./perfsonar-pbr-nm.sh
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
+install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>~/perfsonar-pbr-nm.sh
+<span class="nb">cd</span><span class="w"> </span>~
 </code></pre></div>
 </li>
 </ul>
@@ -1688,12 +1735,12 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <ul>
 <li>
 <p>Preview (no changes):</p>
-<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-debug
 </code></pre></div>
 </li>
 <li>
 <p>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</p>
-<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
 </li>
 </ul>
@@ -1712,17 +1759,17 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <ul>
 <li>
 <p>Rehearsal (no changes, extra logging recommended on first run):</p>
-<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
 </code></pre></div>
 </li>
 <li>
 <p>Apply changes non-interactively (auto-confirm):</p>
-<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh<span class="w"> </span>--yes
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
 </li>
 <li>
 <p>Or run interactively and answer the confirmation prompt when ready:</p>
-<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh
 </code></pre></div>
 </li>
 </ul>
@@ -1862,14 +1909,16 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 <ul>
 <li>
 <p>From a local clone of this repository:</p>
-<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>./perfsonar-install-nftables.sh
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
+install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>~/perfsonar-install-nftables.sh
+<span class="nb">cd</span><span class="w"> </span>~
 </code></pre></div>
 </li>
 </ul>
 <details class="tip">
 <summary>Alternative: Download directly from the repository URL</summary>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>./perfsonar-install-nftables.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfsonar-install-nftables.sh
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>~/perfsonar-install-nftables.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>~/perfsonar-install-nftables.sh
 </code></pre></div>
 </details>
 </li>
@@ -1877,7 +1926,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p><strong>Run with desired options:</strong></p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
+<div class="highlight"><pre><span></span><code>~/perfsonar-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
 <ul>
 <li>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).</li>
@@ -1895,11 +1944,10 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <summary>Tip</summary>
 </details>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
-<div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
-</code></pre></div>
+<p><code>bash
+   ~/perfsonar-install-nftables.sh --print-rules</code>   Optional: manually add extra management hosts/subnets</p>
 </li>
 </ul>
-<p>Optional: manually add extra management hosts/subnets</p>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
 <div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
    type ipv4_addr
@@ -2120,14 +2168,14 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 </ul>
 <p>Install and run examples (root shell):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">   </span>-o<span class="w"> </span>./perfSONAR-update-lsregistration.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfSONAR-update-lsregistration.sh
+<span class="w">   </span>-o<span class="w"> </span>~/perfSONAR-update-lsregistration.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>~/perfSONAR-update-lsregistration.sh
 
 <span class="c1"># Preview changes only</span>
-./perfSONAR-update-lsregistration.sh<span class="w"> </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
+~/perfSONAR-update-lsregistration.sh<span class="w"> </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
 
 <span class="c1"># Apply common updates and restart the daemon inside the container</span>
-./perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+~/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">   </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
