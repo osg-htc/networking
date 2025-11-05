@@ -17,8 +17,9 @@ declare -A CMD_TO_PKG_DNF=(
   [nft]=nftables
   [fail2ban-client]=fail2ban
   [podman]=podman
-  [docker]=docker
-  [docker-compose]=docker-compose
+  [podman-compose]=podman-compose
+  [restorecon]=policycoreutils
+  [getenforce]=policycoreutils
 )
 declare -A CMD_TO_PKG_APT=(
   [ip]=iproute2
@@ -29,12 +30,13 @@ declare -A CMD_TO_PKG_APT=(
   [nft]=nftables
   [fail2ban-client]=fail2ban
   [podman]=podman
-  [docker]=docker.io
-  [docker-compose]=docker-compose
+  [podman-compose]=podman-compose
+  [restorecon]=policycoreutils
+  [getenforce]=policycoreutils
 )
 
 ESSENTIAL=(bash ip nmcli rsync curl openssl)
-OPTIONAL=(nft fail2ban-client podman docker docker-compose podman-compose restorecon getenforce)
+OPTIONAL=(nft fail2ban-client podman podman-compose restorecon getenforce)
 
 missing=()
 missing_optional=()
@@ -46,15 +48,8 @@ for cmd in "${ESSENTIAL[@]}"; do
 done
 
 for cmd in "${OPTIONAL[@]}"; do
-  if [ "$cmd" = "docker-compose" ]; then
-    # Accept either docker-compose or podman-compose as sufficient
-    if ! command -v docker-compose >/dev/null 2>&1 && ! command -v podman-compose >/dev/null 2>&1; then
-      missing_optional+=("docker-compose")
-    fi
-  else
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-      missing_optional+=("$cmd")
-    fi
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    missing_optional+=("$cmd")
   fi
 done
 
@@ -100,8 +95,7 @@ fi
 if [ ${#suggest_apt[@]} -gt 0 ]; then
   mapfile -t uniq_apt < <(printf '%s\n' "${suggest_apt[@]}" | awk '!seen[$0]++')
   echo "Install on Debian/Ubuntu (apt):"
-  echo "  sudo apt-get update"
-  printf '  sudo apt-get install -y %s\n' "${uniq_apt[*]}"
+  printf '  sudo apt-get update && sudo apt-get install -y %s\n' "${uniq_apt[*]}"
   echo
 fi
 
