@@ -40,6 +40,7 @@ After cloning, all script examples in this guide that reference `docs/perfsonar/
 ## Step 1 – Install and Harden EL9
 
 1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
+
 2. **Apply baseline updates (and verify dependencies):**
 
     Use the repository's helper to check for required tools and print
@@ -60,38 +61,43 @@ After cloning, all script examples in this guide that reference `docs/perfsonar/
         ./check-deps.sh
         ```
 
-    On EL9, apply updates and install common baseline packages, then add any
-    packages suggested by the checker (copy/paste the printed dnf line):
+    ??? info "Apply updates and install baseline packages"
+        On EL9, apply updates and install common baseline packages, then add any
+        packages suggested by the checker (copy/paste the printed dnf line):
 
-    ```bash
-    dnf update -y
-    dnf install -y epel-release chrony vim git
-    # (Optional) install any additional packages suggested by check-deps.sh
-    # e.g., dnf install -y NetworkManager rsync curl openssl nftables
-    ```
+        ```bash
+        dnf update -y
+        dnf install -y epel-release chrony vim git
+        # (Optional) install any additional packages suggested by check-deps.sh
+        # e.g., dnf install -y NetworkManager rsync curl openssl nftables
+        ```
 
 3. **Set the hostname and time sync:**
+    
     Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
 
-    ```bash
-    hostnamectl set-hostname <testpoint-hostname>
-    systemctl enable --now chronyd
-    timedatectl set-timezone <Region/City>
-    ```
+    ??? info "System configuration commands"
+        ```bash
+        hostnamectl set-hostname <testpoint-hostname>
+        systemctl enable --now chronyd
+        timedatectl set-timezone <Region/City>
+        ```
 
 4. **Disable unused services:**
 
-    ```bash
-    systemctl disable --now firewalld NetworkManager-wait-online
-    dnf remove -y rsyslog
-    ```
+    ??? info "Service cleanup commands"
+        ```bash
+        systemctl disable --now firewalld NetworkManager-wait-online
+        dnf remove -y rsyslog
+        ```
 
 5. **Record NIC names:**
 
-    ```bash
-    nmcli device status
-    ip -br addr
-    ```
+    ??? info "Commands to list network interfaces"
+        ```bash
+        nmcli device status
+        ip -br addr
+        ```
 
     Document interface mappings; you will need them for the policy-based routing configuration.
 
@@ -331,62 +337,67 @@ If any prerequisite is missing, the script skips that component and continues.
 
     The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf`, optionally adjusts SELinux, and enables Fail2Ban jails—only if those components are already installed.
 
-    Notes:
-    - SSH allow-list is built from your NIC address/prefix arrays in `/etc/perfSONAR-multi-nic-config.conf`:
-       - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
-       - Address entries without a prefix are treated as single hosts.
-       - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
-    - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
-    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+    ??? info "How SSH allow-lists and validation work"
+        **SSH allow-list derivation:**
+        
+        - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
+        - Address entries without a prefix are treated as single hosts.
+        - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
+        
+        **Validation and output:**
+        
+        - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
+        - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-    ??? tip
-   
+    ??? tip "Preview nftables rules before applying"
        You can preview the fully rendered nftables rules (no changes are made):
 
        ```bash
        ~/perfsonar-install-nftables.sh --print-rules
-       ```   Optional: manually add extra management hosts/subnets
+       ```
 
-   If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
+    ??? tip "Manually add extra management hosts/subnets"
+       If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
 
-   ```nft
-   set ssh_access_ip4_subnets {
-      type ipv4_addr
-      flags interval
-      elements = { 192.0.2.0/24, 198.51.100.0/25 }
-   }
+       ```nft
+       set ssh_access_ip4_subnets {
+          type ipv4_addr
+          flags interval
+          elements = { 192.0.2.0/24, 198.51.100.0/25 }
+       }
 
-   set ssh_access_ip4_hosts {
-      type ipv4_addr
-      elements = { 203.0.113.10, 203.0.113.11 }
-   }
+       set ssh_access_ip4_hosts {
+          type ipv4_addr
+          elements = { 203.0.113.10, 203.0.113.11 }
+       }
 
-   set ssh_access_ip6_subnets {
-      type ipv6_addr
-      flags interval
-      elements = { 2001:db8:1::/64 }
-   }
+       set ssh_access_ip6_subnets {
+          type ipv6_addr
+          flags interval
+          elements = { 2001:db8:1::/64 }
+       }
 
-   set ssh_access_ip6_hosts {
-      type ipv6_addr
-      elements = { 2001:db8::10 }
-   }
-   ```
+       set ssh_access_ip6_hosts {
+          type ipv6_addr
+          elements = { 2001:db8::10 }
+       }
+       ```
 
-   Then validate and reload (root shell):
+       Then validate and reload (root shell):
 
-   ```bash
-   nft -c -f /etc/nftables.d/perfsonar.nft
-   systemctl reload nftables || systemctl restart nftables
-   ```
+       ```bash
+       nft -c -f /etc/nftables.d/perfsonar.nft
+       systemctl reload nftables || systemctl restart nftables
+       ```
 
 3. **Confirm firewall state and security services:**
 
-   ```bash
-   nft list ruleset
-   sestatus
-   systemctl status fail2ban
-   ```
+   ??? info "Verification commands"
+       ```bash
+       nft list ruleset
+       sestatus
+       systemctl status fail2ban
+       ```
 
    Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
@@ -560,22 +571,34 @@ Key paths to persist on the host:
 ## Step 5 – Register and Configure with WLCG/OSG
 
 1. **PerfSONAR toolkit configuration:**
-   - Browse to [https://<SERVER_FQDN>/toolkit](https://<SERVER_FQDN>/toolkit) and complete the local toolkit setup wizard.
-   - Populate site contact email, usage policy URL, and location (latitude/longitude). Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping.
+   
+   Browse to `https://<SERVER_FQDN>/toolkit` and complete the local toolkit setup wizard.
+   
+   ??? info "Configuration details to populate"
+       - Site contact email
+       - Usage policy URL
+       - Location (latitude/longitude)
+       - Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping
 
 2. **OSG/WLCG registration workflow:**
-   - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
-   - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
-   - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+   
+   ??? info "Registration steps and portals"
+       - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+       - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+       - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
 3. **pSConfig enrollment:**
-   - For each active NIC, register with the psconfig service so measurements cover all paths. Example:
+   
+   For each active NIC, register with the psconfig service so measurements cover all paths.
 
-     ```bash
-     /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
-     ```
+   ??? info "Registration command and verification"
+       Example registration:
 
-   - Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
+       ```bash
+       /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
+       ```
+
+       Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
 
 4. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
 
@@ -612,28 +635,31 @@ Perform these checks before handing the host over to operations:
 
 1. **System services:**
 
-   ```bash
-   systemctl status podman
-   systemctl --user status podman-compose@perfsonar-testpoint.service
-   ```
+   ??? info "Verify Podman and compose services"
+       ```bash
+       systemctl status podman
+       systemctl --user status podman-compose@perfsonar-testpoint.service
+       ```
 
-   Ensure both are active/green.
+       Ensure both are active/green.
 
 2. **Container health:**
 
-   ```bash
-   podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-   podman logs pscheduler-agent | tail
-   ```
+   ??? info "Check container status and logs"
+       ```bash
+       podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+       podman logs pscheduler-agent | tail
+       ```
 
 3. **Network path validation:**
 
-   ```bash
-   pscheduler task throughput --dest <remote-testpoint>
-   tracepath -n <remote-testpoint>
-   ```
+   ??? info "Test network connectivity and routing"
+       ```bash
+       pscheduler task throughput --dest <remote-testpoint>
+       tracepath -n <remote-testpoint>
+       ```
 
-   Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
+       Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
 4. **Toolkit diagnostics:** visit the Toolkit UI → *Dashboard* → *Host Status* to confirm pScheduler, MaDDash, and owamp/bwctl services report healthy.
 
@@ -675,72 +701,41 @@ Perform these checks before handing the host over to operations:
 
 Keep containers current and only restart them when their image actually changes.
 
-- Option A (Podman-native): auto-update via labels and a systemd timer
-   1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used):
+??? info "Auto-update via labels and a systemd timer"
+    1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used):
 
-       ```yaml
-       services:
-          testpoint:
-             # ...
-             labels:
-                - io.containers.autoupdate=registry
-          certbot:
-             # ...
-             labels:
-                - io.containers.autoupdate=registry
-       ```
+        ```yaml
+        services:
+           testpoint:
+              # ...
+              labels:
+                 - io.containers.autoupdate=registry
+           certbot:
+              # ...
+              labels:
+                 - io.containers.autoupdate=registry
+        ```
 
-       This instructs Podman to check the registry for newer images and restart only if an update is pulled.
+        This instructs Podman to check the registry for newer images and restart only if an update is pulled.
 
-   2. Enable the Podman auto-update timer (runs daily by default):
+    2. Enable the Podman auto-update timer (runs daily by default):
 
-       ```bash
-       systemctl enable --now podman-auto-update.timer
-       ```
+        ```bash
+        systemctl enable --now podman-auto-update.timer
+        ```
 
-   3. Run ad-hoc when desired and preview:
+    3. Run ad-hoc when desired and preview:
 
-       ```bash
-       podman auto-update --dry-run
-       podman auto-update
-       ```
+        ```bash
+        podman auto-update --dry-run
+        podman auto-update
+        ```
 
-   4. Inspect recent runs:
+    4. Inspect recent runs:
 
-       ```bash
-       systemctl list-timers | grep podman-auto-update
-       journalctl -u podman-auto-update --since "1 day ago"
-       ```
+        ```bash
+        systemctl list-timers | grep podman-auto-update
+        journalctl -u podman-auto-update --since "1 day ago"
+        ```
 
-- Option B (Docker-style): Watchtower
-   1. Run Watchtower to monitor and update running containers; it restarts a container only when a newer image is pulled:
 
-       ```bash
-       docker run -d --name watchtower \
-          -v /var/run/docker.sock:/var/run/docker.sock \
-          containrrr/watchtower \
-          --cleanup --rolling-restart --interval 3600
-       ```
-
-       - `--cleanup` removes old images after a successful update.
-       - `--rolling-restart` updates one container at a time.
-       - To limit updates to labeled services only, use `--label-enable` and label your services:
-
-          ```yaml
-          services:
-             testpoint:
-                # ...
-                labels:
-                   - com.centurylinklabs.watchtower.enable=true
-             certbot:
-                # ...
-                labels:
-                   - com.centurylinklabs.watchtower.enable=true
-          ```
-
-Notes:
-
-- Pin to a stable tag line (e.g., `ghcr.io/perfsonar/testpoint:5.2.4-systemd` or `5.2-systemd`) that matches your change window policy.
-- If SELinux is enforcing, ensure bind-mounted paths retain the `:z`/`:Z` options in your compose so updates don’t introduce AVC denials.
-
-Document any deviations from this procedure so the next deployment at your site can reuse improvements with minimal effort.
