@@ -1140,22 +1140,43 @@
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</li>
-<li><strong>Apply baseline updates:</strong></li>
+<li><strong>Apply baseline updates (and verify dependencies):</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>dnf update -y <span class="o">&amp;&amp;</span> dnf install -y epel-release chrony vim git
+<p>Use the repository's helper to check for required tools and print
+   copy/paste install commands. Then apply OS updates and any remaining
+   baseline packages.</p>
+<ul>
+<li>
+<p>From a local clone of this repository (recommended):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># run from the repo root</span>
+./docs/perfsonar/tools_scripts/check-deps.sh
+</code></pre></div>
+</li>
+<li>
+<p>Or download and run the script directly:</p>
+<div class="highlight"><pre><span></span><code>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o /usr/local/sbin/check-deps.sh
+chmod <span class="m">0755</span> /usr/local/sbin/check-deps.sh
+check-deps.sh
+</code></pre></div>
+</li>
+</ul>
+<p>On EL9, apply updates and install common baseline packages, then add any
+   packages suggested by the checker (copy/paste the printed dnf line):</p>
+<div class="highlight"><pre><span></span><code>dnf update -y
+dnf install -y epel-release chrony vim git
+<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
+<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
 </code></pre></div>
 <ol>
-<li>
-<p><strong>Set the hostname and time sync:</strong>
-   Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
-   <div class="highlight"><pre><span></span><code>hostnamectl set-hostname &lt;testpoint-hostname&gt;
+<li><strong>Set the hostname and time sync:</strong>
+   Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</li>
+</ol>
+<div class="highlight"><pre><span></span><code>hostnamectl set-hostname &lt;testpoint-hostname&gt;
 systemctl <span class="nb">enable</span> --now chronyd
 timedatectl set-timezone &lt;Region/City&gt;
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Disable unused services:</strong></p>
-</li>
+</code></pre></div>
+<ol>
+<li><strong>Disable unused services:</strong></li>
 </ol>
 <div class="highlight"><pre><span></span><code>systemctl disable --now firewalld NetworkManager-wait-online
 dnf remove -y rsyslog
