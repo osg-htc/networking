@@ -20,6 +20,7 @@ declare -A CMD_TO_PKG_DNF=(
   [podman-compose]=podman-compose
   [restorecon]=policycoreutils
   [getenforce]=policycoreutils
+  [dig]=bind-utils
 )
 declare -A CMD_TO_PKG_APT=(
   [ip]=iproute2
@@ -33,10 +34,11 @@ declare -A CMD_TO_PKG_APT=(
   [podman-compose]=podman-compose
   [restorecon]=policycoreutils
   [getenforce]=policycoreutils
+  [dig]=dnsutils
 )
 
 ESSENTIAL=(bash ip nmcli rsync curl openssl)
-OPTIONAL=(nft fail2ban-client podman podman-compose restorecon getenforce)
+OPTIONAL=(nft fail2ban-client podman podman-compose restorecon getenforce dig)
 
 missing=()
 missing_optional=()

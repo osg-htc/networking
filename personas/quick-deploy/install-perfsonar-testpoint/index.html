@@ -780,6 +780,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Step 2 – Configure Policy-Based Routing (PBR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dns-forward-and-reverse-entries-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      DNS: forward and reverse entries (required)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1464,6 +1479,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Step 2 – Configure Policy-Based Routing (PBR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dns-forward-and-reverse-entries-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      DNS: forward and reverse entries (required)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1701,6 +1731,78 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 </div>
 <p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use <code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.</p>
 <p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
+<h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
+<p>All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.</p>
+<ul>
+<li>For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.</li>
+<li>For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.</li>
+<li>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).</li>
+</ul>
+<p>Automating verification from the generated config</p>
+<p>The <code>perfSONAR-multi-nic-config.conf</code> contains the arrays <code>NIC_IPV4_ADDRS</code> and <code>NIC_IPV6_ADDRS</code> (with <code>-</code> for unused entries). You can automate a forward/reverse consistency check using <code>dig</code> or <code>host</code> by sourcing the config and iterating the arrays. Example Bash verification script (run as root or a user that can read the config):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf</span>
+<span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
+<span class="nv">CONFIG</span><span class="o">=</span>/etc/perfSONAR-multi-nic-config.conf
+<span class="o">[</span><span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONFIG</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Config not found: </span><span class="nv">$CONFIG</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span><span class="p">;</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">2</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+<span class="nb">source</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONFIG</span><span class="s2">&quot;</span>
+
+check_ip<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">   </span><span class="nb">local</span><span class="w"> </span><span class="nv">ip</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">   </span><span class="nb">local</span><span class="w"> </span><span class="nv">family</span><span class="o">=</span><span class="nv">$2</span><span class="w">   </span><span class="c1"># 4 or 6</span>
+<span class="w">   </span><span class="c1"># strip CIDR if present</span>
+<span class="w">   </span><span class="nv">ip</span><span class="o">=</span><span class="si">${</span><span class="nv">ip</span><span class="p">%%/*</span><span class="si">}</span>
+<span class="w">   </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;-&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="m">0</span>
+
+<span class="w">   </span><span class="c1"># PTR lookup (reverse)</span>
+<span class="w">   </span><span class="nv">ptr</span><span class="o">=</span><span class="k">$(</span>dig<span class="w"> </span>+short<span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n1<span class="k">)</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ptr</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;MISSING PTR for </span><span class="nv">$ip</span><span class="s2">&quot;</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="m">1</span>
+<span class="w">   </span><span class="k">fi</span>
+<span class="w">   </span><span class="c1"># remove trailing dot from PTR</span>
+<span class="w">   </span><span class="nv">ptr</span><span class="o">=</span><span class="si">${</span><span class="nv">ptr</span><span class="p">%.</span><span class="si">}</span>
+
+<span class="w">   </span><span class="c1"># Forward lookup for the hostname returned by PTR</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$family</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nv">fwd</span><span class="o">=</span><span class="k">$(</span>dig<span class="w"> </span>+short<span class="w"> </span>A<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ptr</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="k">)</span>
+<span class="w">   </span><span class="k">else</span>
+<span class="w">      </span><span class="nv">fwd</span><span class="o">=</span><span class="k">$(</span>dig<span class="w"> </span>+short<span class="w"> </span>AAAA<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ptr</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="k">)</span>
+<span class="w">   </span><span class="k">fi</span>
+
+<span class="w">   </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$fwd</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-qw<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;INCONSISTENT: PTR </span><span class="nv">$ptr</span><span class="s2"> does not resolve back to </span><span class="nv">$ip</span><span class="s2"> (resolved: </span><span class="nv">$fwd</span><span class="s2">)&quot;</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="m">1</span>
+<span class="w">   </span><span class="k">fi</span>
+<span class="w">   </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK: </span><span class="nv">$ip</span><span class="s2"> ⇄ </span><span class="nv">$ptr</span><span class="s2">&quot;</span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="m">0</span>
+<span class="o">}</span>
+
+<span class="nv">errors</span><span class="o">=</span><span class="m">0</span>
+<span class="k">for</span><span class="w"> </span>ip<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">NIC_IPV4_ADDRS</span><span class="p">[@]</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;-&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span>check_ip<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nv">errors</span><span class="o">=</span><span class="k">$((</span><span class="nv">errors</span><span class="o">+</span><span class="m">1</span><span class="k">))</span>
+<span class="w">   </span><span class="k">fi</span>
+<span class="k">done</span>
+<span class="k">for</span><span class="w"> </span>ip<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">NIC_IPV6_ADDRS</span><span class="p">[@]</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;-&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">      </span>check_ip<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="m">6</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nv">errors</span><span class="o">=</span><span class="k">$((</span><span class="nv">errors</span><span class="o">+</span><span class="m">1</span><span class="k">))</span>
+<span class="w">   </span><span class="k">fi</span>
+<span class="k">done</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">((</span><span class="w"> </span>errors<span class="w"> </span>&gt;<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">))</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">   </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;DNS verification failed (</span><span class="nv">$errors</span><span class="s2"> problem(s)). Fix DNS (forward/reverse) before running tests.&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+<span class="w">   </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;DNS forward/reverse checks passed for configured addresses.&quot;</span>
+</code></pre></div>
+<p>Notes and automation tips:</p>
+<ul>
+<li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it to use <code>host</code> if preferred.</li>
+<li>Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.</li>
+<li>For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages <code>dns.resolver</code> for async checks.</li>
+<li>If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.</li>
+</ul>
+<p>If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.</p>
 <ol>
 <li><strong>Verify the routing policy:</strong></li>
 </ol>
