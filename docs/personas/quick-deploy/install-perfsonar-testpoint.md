@@ -33,8 +33,7 @@ Before you begin, gather the following information:
         ./docs/perfsonar/tools_scripts/check-deps.sh
         ```
 
-    - Or download and run the script directly:
-
+    ??? tip "Alternative: Download and run directly"
         ```bash
         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
         chmod 0755 ./check-deps.sh
@@ -95,8 +94,7 @@ Script location in the repository:
         install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ./perfsonar-pbr-nm.sh
         ```
 
-    - Or download directly from the repository URL:
-
+    ??? tip "Alternative: Download directly from the repository URL"
         ```bash
         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
         chmod 0755 ./perfSONAR-pbr-nm.sh
@@ -159,103 +157,101 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
 - For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
 
-Automating verification from the generated config
+??? example "Example: Bash script to automate DNS verification"
+    The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays.
 
-The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays. Example Bash verification script (run as root or a user that can read the config):
+    ```bash
+    # quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf
+    set -euo pipefail
+    CONFIG=/etc/perfSONAR-multi-nic-config.conf
+    [ -f "$CONFIG" ] || { echo "Config not found: $CONFIG" >&2; exit 2; }
+    source "$CONFIG"
 
-```bash
-# quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf
-set -euo pipefail
-CONFIG=/etc/perfSONAR-multi-nic-config.conf
-[ -f "$CONFIG" ] || { echo "Config not found: $CONFIG" >&2; exit 2; }
-source "$CONFIG"
+    check_ip() {
+       local ip=$1
+       local family=$2   # 4 or 6
+       # strip CIDR if present
+       ip=${ip%%/*}
+       [ "$ip" = "-" ] && return 0
 
-check_ip() {
-   local ip=$1
-   local family=$2   # 4 or 6
-   # strip CIDR if present
-   ip=${ip%%/*}
-   [ "$ip" = "-" ] && return 0
+       # PTR lookup (reverse)
+       ptr=$(dig +short -x "$ip" | head -n1)
+       if [ -z "$ptr" ]; then
+          echo "MISSING PTR for $ip"
+          return 1
+       fi
+       # remove trailing dot from PTR
+       ptr=${ptr%.}
 
-   # PTR lookup (reverse)
-   ptr=$(dig +short -x "$ip" | head -n1)
-   if [ -z "$ptr" ]; then
-      echo "MISSING PTR for $ip"
-      return 1
-   fi
-   # remove trailing dot from PTR
-   ptr=${ptr%.}
+       # Forward lookup for the hostname returned by PTR
+       if [ "$family" = "4" ]; then
+          fwd=$(dig +short A "$ptr" | tr '\n' ' ')
+       else
+          fwd=$(dig +short AAAA "$ptr" | tr '\n' ' ')
+       fi
 
-   # Forward lookup for the hostname returned by PTR
-   if [ "$family" = "4" ]; then
-      fwd=$(dig +short A "$ptr" | tr '\n' ' ')
-   else
-      fwd=$(dig +short AAAA "$ptr" | tr '\n' ' ')
-   fi
+       if ! echo "$fwd" | grep -qw "$ip"; then
+          echo "INCONSISTENT: PTR $ptr does not resolve back to $ip (resolved: $fwd)"
+          return 1
+       fi
+       echo "OK: $ip ⇄ $ptr"
+       return 0
+    }
 
-   if ! echo "$fwd" | grep -qw "$ip"; then
-      echo "INCONSISTENT: PTR $ptr does not resolve back to $ip (resolved: $fwd)"
-      return 1
-   fi
-   echo "OK: $ip ⇄ $ptr"
-   return 0
-}
+    errors=0
+    for ip in "${NIC_IPV4_ADDRS[@]:-}"; do
+       if [ "$ip" != "-" ]; then
+          check_ip "$ip" 4 || errors=$((errors+1))
+       fi
+    done
+    for ip in "${NIC_IPV6_ADDRS[@]:-}"; do
+       if [ "$ip" != "-" ]; then
+          check_ip "$ip" 6 || errors=$((errors+1))
+       fi
+    done
 
-errors=0
-for ip in "${NIC_IPV4_ADDRS[@]:-}"; do
-   if [ "$ip" != "-" ]; then
-      check_ip "$ip" 4 || errors=$((errors+1))
-   fi
-done
-for ip in "${NIC_IPV6_ADDRS[@]:-}"; do
-   if [ "$ip" != "-" ]; then
-      check_ip "$ip" 6 || errors=$((errors+1))
-   fi
-done
+    if (( errors > 0 )); then
+       echo "DNS verification failed ($errors problem(s)). Fix DNS (forward/reverse) before running tests." >&2
+       exit 1
+    fi
+    echo "DNS forward/reverse checks passed for configured addresses."
+    ```
 
-if (( errors > 0 )); then
-   echo "DNS verification failed ($errors problem(s)). Fix DNS (forward/reverse) before running tests." >&2
-   exit 1
-fi
-echo "DNS forward/reverse checks passed for configured addresses."
-```
+    **Notes and automation tips:**
 
-Notes and automation tips:
-
-- The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it to use `host` if preferred.
-- Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
-- For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages `dns.resolver` for async checks.
-- If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
+    - The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it to use `host` if preferred.
+    - Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
+    - For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages `dns.resolver` for async checks.
+    - If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
 
 If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.
 
-### Download and run the checker
+??? example "Download and run the DNS checker"
+    You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects `/etc/perfSONAR-multi-nic-config.conf` to exist and be readable.
 
-You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects `/etc/perfSONAR-multi-nic-config.conf` to exist and be readable. Example copy/paste steps:
+    ```bash
+    # Download (curl)
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh -o ./check-perfsonar-dns.sh
+    # Or download with wget
+    # wget -O ./check-perfsonar-dns.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh
 
-```bash
-# Download (curl)
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh -o ./check-perfsonar-dns.sh
-# Or download with wget
-# wget -O ./check-perfsonar-dns.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh
+    chmod 0755 ./check-perfsonar-dns.sh
 
-chmod 0755 ./check-perfsonar-dns.sh
+    # Install DNS tools if missing (EL9)
+    sudo dnf install -y bind-utils
 
-# Install DNS tools if missing (EL9)
-sudo dnf install -y bind-utils
+    # Debian/Ubuntu alternative
+    # sudo apt-get update && sudo apt-get install -y dnsutils
 
-# Debian/Ubuntu alternative
-# sudo apt-get update && sudo apt-get install -y dnsutils
+    # Run the check (needs to read /etc/perfSONAR-multi-nic-config.conf)
+    sudo ./check-perfsonar-dns.sh
+    ```
 
-# Run the check (needs to read /etc/perfSONAR-multi-nic-config.conf)
-sudo ./check-perfsonar-dns.sh
-```
+    **Notes:**
 
-Notes:
-
-- If you downloaded the script to a different path, either move it to the host and run it there, or copy `/etc/perfSONAR-multi-nic-config.conf` to the machine where you run the check (recommended only for temporary verification; treat the config as sensitive).
-- The script uses `dig` (preferred) or `host` as a fallback; ensure one of those is installed.
-- Run this check after you generate or edit `/etc/perfSONAR-multi-nic-config.conf` and before you register or start active measurements.
+    - If you downloaded the script to a different path, either move it to the host and run it there, or copy `/etc/perfSONAR-multi-nic-config.conf` to the machine where you run the check (recommended only for temporary verification; treat the config as sensitive).
+    - The script uses `dig` (preferred) or `host` as a fallback; ensure one of those is installed.
+    - Run this check after you generate or edit `/etc/perfSONAR-multi-nic-config.conf` and before you register or start active measurements.
 
 1. **Verify the routing policy:**
 
@@ -288,17 +284,16 @@ If any prerequisite is missing, the script skips that component and continues.
 
 1. **Stage the installer:**
 
-      - From a local clone of this repository:
+    - From a local clone of this repository:
 
         ```bash
-         install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh ./perfsonar-install-nftables.sh
+        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh ./perfsonar-install-nftables.sh
         ```
 
-      - Or download directly from the repository URL:
-
+    ??? tip "Alternative: Download directly from the repository URL"
         ```bash
-         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ./perfsonar-install-nftables.sh
-         chmod 0755 ./perfsonar-install-nftables.sh
+        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ./perfsonar-install-nftables.sh
+        chmod 0755 ./perfsonar-install-nftables.sh
         ```
 
 2. **Run with desired options:**
