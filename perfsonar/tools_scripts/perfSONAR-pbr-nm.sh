@@ -274,10 +274,39 @@ generate_config_from_system() {
             ipv6_prefix="-"
         fi
 
-        # detect gateways associated with this device (if any)
-        local gw4 gw6
-        gw4=$(ip route show default 2>/dev/null | awk -v d="$dev" '$0 ~ "dev "d {for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
-        gw6=$(ip -6 route show default 2>/dev/null | awk -v d="$dev" '$0 ~ "dev "d {for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
+        # Detect gateways associated with this device (if any).
+        # Prefer configured values from NetworkManager connection settings,
+        # then fall back to current kernel default routes scoped to this dev.
+        local gw4 gw6 connname gtmp
+        gw4=""; gw6=""
+        if command -v nmcli >/dev/null 2>&1; then
+            connname=$(nmcli -t -f GENERAL.CONNECTION device show "$dev" 2>/dev/null | awk -F: '{print $2}') || true
+            if [ -n "$connname" ] && [ "$connname" != "--" ]; then
+                gtmp=$(nmcli -t -g ipv4.gateway connection show "$connname" 2>/dev/null | tr -d '\r') || true
+                if [ -n "$gtmp" ] && [ "$gtmp" != "--" ]; then
+                    gw4="$gtmp"
+                fi
+                gtmp=$(nmcli -t -g ipv6.gateway connection show "$connname" 2>/dev/null | tr -d '\r') || true
+                if [ -n "$gtmp" ] && [ "$gtmp" != "--" ]; then
+                    gw6="$gtmp"
+                fi
+            fi
+        fi
+
+        # If not found in NM connection settings, look at kernel default routes per dev
+        if [ -z "$gw4" ] || ! is_ipv4 "${gw4:-}"; then
+            gtmp=$(ip route show default dev "$dev" 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
+            if [ -n "$gtmp" ] && is_ipv4 "$gtmp"; then
+                gw4="$gtmp"
+            fi
+        fi
+        if [ -z "$gw6" ] || ! is_ipv6 "${gw6:-}"; then
+            gtmp=$(ip -6 route show default dev "$dev" 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
+            if [ -n "$gtmp" ] && is_ipv6 "$gtmp"; then
+                gw6="$gtmp"
+            fi
+        fi
+
         [ -z "$gw4" ] && gw4="-"
         [ -z "$gw6" ] && gw6="-"
 
