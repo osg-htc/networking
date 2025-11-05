@@ -11,9 +11,9 @@ jobs:
   validate-mkdocs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build MkDocs pages
-        uses: docker://squidfunk/mkdocs-material:8.2.8
+        uses: docker://squidfunk/mkdocs-material:9.6.23
         timeout-minutes: 1
         with:
           args: >-
@@ -37,9 +37,9 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build MkDocs site (strict)
-        uses: docker://squidfunk/mkdocs-material:8.2.8
+        uses: docker://squidfunk/mkdocs-material:9.6.23
         with:
           args: >-
             build
