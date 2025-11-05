@@ -870,6 +870,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#gateway-requirement-inference-and-generator-warnings" class="md-nav__link">
+    Gateway requirement, inference, and generator warnings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backups-and-safety" class="md-nav__link">
+    Backups and safety
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tests" class="md-nav__link">
     Tests
   </a>
@@ -1044,6 +1058,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#gateway-requirement-inference-and-generator-warnings" class="md-nav__link">
+    Gateway requirement, inference, and generator warnings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backups-and-safety" class="md-nav__link">
+    Backups and safety
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tests" class="md-nav__link">
     Tests
   </a>
@@ -1176,17 +1204,56 @@ modifying anything.</p>
 <div class="highlight"><pre><span></span><code>sudo bash perfSONAR-pbr-nm.sh
 <span class="c1"># or non-interactive</span>
 sudo bash perfSONAR-pbr-nm.sh --yes
-
-Gateway requirement and generator warnings
------------------------------------------
-- Any NIC with an IPv4 address must have a corresponding IPv4 gateway<span class="p">;</span> likewise <span class="k">for</span> IPv6.
-- The auto-generator will warn <span class="k">if</span> it cannot detect a gateway <span class="k">for</span> a NIC that has an address. The generated config will include a WARNING block listing affected NICs. Edit <span class="sb">`</span>NIC_IPV4_GWS<span class="sb">`</span> and/or <span class="sb">`</span>NIC_IPV6_GWS<span class="sb">`</span> accordingly before running the script to apply changes.
-
-Backups and safety
-------------------
-
-- Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers <span class="sb">`</span>rsync<span class="sb">`</span> when available and falls back to <span class="sb">`</span>cp -a<span class="sb">`</span>. If the backup fails, the script aborts without removing existing configurations.
 </code></pre></div>
+<h2 id="gateway-requirement-inference-and-generator-warnings">Gateway requirement, inference, and generator warnings<a class="headerlink" href="#gateway-requirement-inference-and-generator-warnings" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.</li>
+<li>Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.</li>
+<li>IPv4: subnets are checked in bash; one unambiguous match is required.</li>
+<li>IPv6: requires <code>python3</code> (<code>ipaddress</code> module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.</li>
+<li>If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.</li>
+<li>This inference runs in two places:
+  1) During auto-generation (<code>--generate-config-auto</code> or <code>--generate-config-debug</code>) so the written config can be immediately useful.
+  2) During normal execution after loading the config but before validation, so missing gateways may be filled automatically.</li>
+</ul>
+<p>Example: generated config with inferred gateways</p>
+<div class="highlight"><pre><span></span><code><span class="nv">NIC_NAMES</span><span class="o">=(</span>
+  <span class="s2">&quot;eth0&quot;</span>
+  <span class="s2">&quot;eth1&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV4_ADDRS</span><span class="o">=(</span>
+  <span class="s2">&quot;192.0.2.10&quot;</span>
+  <span class="s2">&quot;192.0.2.20&quot;</span>
+<span class="o">)</span>
+<span class="nv">NIC_IPV4_PREFIXES</span><span class="o">=(</span>
+  <span class="s2">&quot;/24&quot;</span>
+  <span class="s2">&quot;/24&quot;</span>
+<span class="o">)</span>
+<span class="nv">NIC_IPV4_GWS</span><span class="o">=(</span>
+  <span class="s2">&quot;192.0.2.1&quot;</span>  <span class="c1"># guessed from eth0</span>
+  <span class="s2">&quot;192.0.2.1&quot;</span>  <span class="c1"># guessed (reused gateway)</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV6_ADDRS</span><span class="o">=(</span>
+  <span class="s2">&quot;2001:db8::10&quot;</span>
+  <span class="s2">&quot;2001:db8::20&quot;</span>
+<span class="o">)</span>
+<span class="nv">NIC_IPV6_PREFIXES</span><span class="o">=(</span>
+  <span class="s2">&quot;/64&quot;</span>
+  <span class="s2">&quot;/64&quot;</span>
+<span class="o">)</span>
+<span class="nv">NIC_IPV6_GWS</span><span class="o">=(</span>
+  <span class="s2">&quot;2001:db8::1&quot;</span>  <span class="c1"># guessed from eth0</span>
+  <span class="s2">&quot;2001:db8::1&quot;</span>  <span class="c1"># guessed (reused gateway)</span>
+<span class="o">)</span>
+</code></pre></div>
+<p>When gateways are inferred, a NOTE section is added near the bottom of the generated file listing each guess. The script will also print a NOTICE to the console/log. Review and edit the guessed values if needed before applying changes.</p>
+<p>If gateways remain missing after inference, the generator writes a WARNING block listing the affected NICs and the script will refuse to proceed until you set the gateways.</p>
+<h2 id="backups-and-safety">Backups and safety<a class="headerlink" href="#backups-and-safety" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers <code>rsync</code> when available and falls back to <code>cp -a</code>. If the backup fails, the script aborts without removing existing configurations.</li>
+</ul>
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>A small set of unit-style tests is provided under <code>tests/</code>. These are designed
 to exercise pure validation and sanitization helpers without modifying system

@@ -1197,12 +1197,12 @@ chmod <span class="m">0755</span> ./perfSONAR-pbr-nm.sh
 <ul>
 <li>
 <p>Preview (no changes):</p>
-<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-debug
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh --generate-config-debug
 </code></pre></div>
 </li>
 <li>
 <p>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</p>
-<div class="highlight"><pre><span></span><code>/usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-auto
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh --generate-config-auto
 </code></pre></div>
 </li>
 </ul>
@@ -1217,17 +1217,17 @@ chmod <span class="m">0755</span> ./perfSONAR-pbr-nm.sh
 <ul>
 <li>
 <p>Rehearsal (no changes, extra logging recommended on first run):</p>
-<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh --dry-run --debug
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh --dry-run --debug
 </code></pre></div>
 </li>
 <li>
 <p>Apply changes non-interactively (auto-confirm):</p>
-<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh --yes
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh --yes
 </code></pre></div>
 </li>
 <li>
 <p>Or run interactively and answer the confirmation prompt when ready:</p>
-<div class="highlight"><pre><span></span><code>perfsonar-pbr-nm.sh
+<div class="highlight"><pre><span></span><code>./perfsonar-pbr-nm.sh
 </code></pre></div>
 </li>
 </ul>
@@ -1276,7 +1276,7 @@ chmod <span class="m">0755</span> /usr/local/sbin/perfsonar-install-nftables.sh
 <p><strong>Run with desired options:</strong></p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>perfsonar-install-nftables.sh --selinux --fail2ban --yes
+<div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh --selinux --fail2ban --yes
 </code></pre></div>
 <ul>
 <li>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).</li>
@@ -1293,7 +1293,7 @@ chmod <span class="m">0755</span> /usr/local/sbin/perfsonar-install-nftables.sh
 </li>
 </ul>
 <p>Tip: preview the fully rendered nftables rules (no changes are made):</p>
-<div class="highlight"><pre><span></span><code>perfsonar-install-nftables.sh --print-rules
+<div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh --print-rules
 </code></pre></div>
 <p>Optional: manually add extra management hosts/subnets</p>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
@@ -1516,14 +1516,14 @@ docker ps  <span class="c1"># or podman ps</span>
 </ul>
 <p>Install and run examples (root shell):</p>
 <div class="highlight"><pre><span></span><code>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh <span class="se">\</span>
-   -o /usr/local/sbin/perfSONAR-update-lsregistration.sh
-chmod <span class="m">0755</span> /usr/local/sbin/perfSONAR-update-lsregistration.sh
+   -o ./perfSONAR-update-lsregistration.sh
+chmod <span class="m">0755</span> ./perfSONAR-update-lsregistration.sh
 
 <span class="c1"># Preview changes only</span>
-perfSONAR-update-lsregistration.sh --dry-run --site-name <span class="s2">&quot;Acme Co.&quot;</span> --project WLCG --admin-email admin@example.org --admin-name <span class="s2">&quot;pS Admin&quot;</span>
+./perfSONAR-update-lsregistration.sh --dry-run --site-name <span class="s2">&quot;Acme Co.&quot;</span> --project WLCG --admin-email admin@example.org --admin-name <span class="s2">&quot;pS Admin&quot;</span>
 
 <span class="c1"># Apply common updates and restart the daemon inside the container</span>
-perfSONAR-update-lsregistration.sh <span class="se">\</span>
+./perfSONAR-update-lsregistration.sh <span class="se">\</span>
    --site-name <span class="s2">&quot;Acme Co.&quot;</span> --domain example.org --project WLCG --project OSG <span class="se">\</span>
    --city Berkeley --region CA --country US --zip <span class="m">94720</span> <span class="se">\</span>
    --latitude <span class="m">37</span>.5 --longitude -121.7469 <span class="se">\</span>
