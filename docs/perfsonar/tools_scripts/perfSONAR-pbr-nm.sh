@@ -372,6 +372,61 @@ generate_config_from_system() {
         NIC_IPV6_GWS+=("$gw6")
     done
 
+    # If any NIC has an address but a missing gateway ('-'), and we're in an
+    # interactive session (and not auto-confirm), prompt the user to supply a
+    # gateway before writing the configuration file. This ensures the generated
+    # config is complete when possible.
+    local needs_prompt=false
+    for i in "${!NIC_NAMES[@]}"; do
+        if { [ "${NIC_IPV4_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV4_GWS[$i]}" ] || [ "${NIC_IPV4_GWS[$i]}" = "-" ]; }; } \
+           || { [ "${NIC_IPV6_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV6_GWS[$i]}" ] || [ "${NIC_IPV6_GWS[$i]}" = "-" ]; }; }; then
+            needs_prompt=true
+            break
+        fi
+    done
+
+    if [ "$needs_prompt" = true ] && is_interactive && [ "${AUTO_YES:-false}" != true ]; then
+        for i in "${!NIC_NAMES[@]}"; do
+            dev=${NIC_NAMES[$i]}
+            ipv4_addr=${NIC_IPV4_ADDRS[$i]}
+            ipv4_pref=${NIC_IPV4_PREFIXES[$i]}
+            gw4=${NIC_IPV4_GWS[$i]}
+            ipv6_addr=${NIC_IPV6_ADDRS[$i]}
+            ipv6_pref=${NIC_IPV6_PREFIXES[$i]}
+            gw6=${NIC_IPV6_GWS[$i]}
+
+            if [ "$ipv4_addr" != "-" ] && { [ -z "$gw4" ] || [ "$gw4" = "-" ]; }; then
+                echo "No IPv4 gateway detected for $dev ($ipv4_addr$ipv4_pref). Enter IPv4 gateway for $dev or '-' to skip:" >&2
+                read -r ans4
+                if [ -n "$ans4" ] && [ "$ans4" != "-" ]; then
+                    if is_ipv4 "$ans4"; then
+                        NIC_IPV4_GWS[$i]="$ans4"
+                    else
+                        echo "Input '$ans4' is not a valid IPv4 address; leaving '-'" >&2
+                        NIC_IPV4_GWS[$i]="-"
+                    fi
+                else
+                    NIC_IPV4_GWS[$i]="-"
+                fi
+            fi
+
+            if [ "$ipv6_addr" != "-" ] && { [ -z "$gw6" ] || [ "$gw6" = "-" ]; }; then
+                echo "No IPv6 gateway detected for $dev ($ipv6_addr$ipv6_pref). Enter IPv6 gateway for $dev or '-' to skip:" >&2
+                read -r ans6
+                if [ -n "$ans6" ] && [ "$ans6" != "-" ]; then
+                    if is_ipv6 "$ans6"; then
+                        NIC_IPV6_GWS[$i]="$ans6"
+                    else
+                        echo "Input '$ans6' is not a valid IPv6 address; leaving '-'" >&2
+                        NIC_IPV6_GWS[$i]="-"
+                    fi
+                else
+                    NIC_IPV6_GWS[$i]="-"
+                fi
+            fi
+        done
+    fi
+
     # If generator debug mode was requested, force DRY_RUN and verbose output
     # so the generated file is previewed and not written into /etc.
     if [ "${GENERATE_CONFIG_DEBUG:-false}" = "true" ]; then
