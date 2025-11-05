@@ -1907,14 +1907,14 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
    - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
 - The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.
 - Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-</div>
-<p>preview the fully rendered nftables rules (no changes are made):</p>
-</li>
-</ul>
+<details class="tip">
+<summary>Tip</summary>
+</details>
+<p>You can preview the fully rendered nftables rules (no changes are made):</p>
 <div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
+</li>
+</ul>
 <p>Optional: manually add extra management hosts/subnets</p>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
 <div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
