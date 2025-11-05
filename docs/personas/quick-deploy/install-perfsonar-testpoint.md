@@ -349,55 +349,55 @@ If any prerequisite is missing, the script skips that component and continues.
         - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
         - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-    ??? tip "Preview nftables rules before applying"
-       You can preview the fully rendered nftables rules (no changes are made):
+   ??? tip "Preview nftables rules before applying"
+      You can preview the fully rendered nftables rules (no changes are made):
 
-       ```bash
-       ~/perfsonar-install-nftables.sh --print-rules
-       ```
+      ```bash
+      ~/perfsonar-install-nftables.sh --print-rules
+      ```
 
     ??? tip "Manually add extra management hosts/subnets"
-       If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
+        If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
 
-       ```nft
-       set ssh_access_ip4_subnets {
-          type ipv4_addr
-          flags interval
-          elements = { 192.0.2.0/24, 198.51.100.0/25 }
-       }
+        ```nft
+        set ssh_access_ip4_subnets {
+           type ipv4_addr
+           flags interval
+           elements = { 192.0.2.0/24, 198.51.100.0/25 }
+        }
 
-       set ssh_access_ip4_hosts {
-          type ipv4_addr
-          elements = { 203.0.113.10, 203.0.113.11 }
-       }
+        set ssh_access_ip4_hosts {
+           type ipv4_addr
+           elements = { 203.0.113.10, 203.0.113.11 }
+        }
 
-       set ssh_access_ip6_subnets {
-          type ipv6_addr
-          flags interval
-          elements = { 2001:db8:1::/64 }
-       }
+        set ssh_access_ip6_subnets {
+           type ipv6_addr
+           flags interval
+           elements = { 2001:db8:1::/64 }
+        }
 
-       set ssh_access_ip6_hosts {
-          type ipv6_addr
-          elements = { 2001:db8::10 }
-       }
-       ```
+        set ssh_access_ip6_hosts {
+           type ipv6_addr
+           elements = { 2001:db8::10 }
+        }
+        ```
 
-       Then validate and reload (root shell):
+        Then validate and reload (root shell):
 
-       ```bash
-       nft -c -f /etc/nftables.d/perfsonar.nft
-       systemctl reload nftables || systemctl restart nftables
-       ```
+        ```bash
+        nft -c -f /etc/nftables.d/perfsonar.nft
+        systemctl reload nftables || systemctl restart nftables
+        ```
 
 3. **Confirm firewall state and security services:**
 
    ??? info "Verification commands"
-       ```bash
-       nft list ruleset
-       sestatus
-       systemctl status fail2ban
-       ```
+      ```bash
+      nft list ruleset
+      sestatus
+      systemctl status fail2ban
+      ```
 
    Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
@@ -575,30 +575,30 @@ Key paths to persist on the host:
    Browse to `https://<SERVER_FQDN>/toolkit` and complete the local toolkit setup wizard.
    
    ??? info "Configuration details to populate"
-       - Site contact email
-       - Usage policy URL
-       - Location (latitude/longitude)
-       - Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping
+      - Site contact email
+      - Usage policy URL
+      - Location (latitude/longitude)
+      - Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping
 
 2. **OSG/WLCG registration workflow:**
    
    ??? info "Registration steps and portals"
-       - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
-       - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
-       - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+      - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+      - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+      - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
 3. **pSConfig enrollment:**
    
    For each active NIC, register with the psconfig service so measurements cover all paths.
 
    ??? info "Registration command and verification"
-       Example registration:
+      Example registration:
 
-       ```bash
-       /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
-       ```
+      ```bash
+      /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
+      ```
 
-       Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
+      Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
 
 4. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
 
@@ -636,30 +636,30 @@ Perform these checks before handing the host over to operations:
 1. **System services:**
 
    ??? info "Verify Podman and compose services"
-       ```bash
-       systemctl status podman
-       systemctl --user status podman-compose@perfsonar-testpoint.service
-       ```
+      ```bash
+      systemctl status podman
+      systemctl --user status podman-compose@perfsonar-testpoint.service
+      ```
 
-       Ensure both are active/green.
+      Ensure both are active/green.
 
 2. **Container health:**
 
    ??? info "Check container status and logs"
-       ```bash
-       podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-       podman logs pscheduler-agent | tail
-       ```
+      ```bash
+      podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+      podman logs pscheduler-agent | tail
+      ```
 
 3. **Network path validation:**
 
    ??? info "Test network connectivity and routing"
-       ```bash
-       pscheduler task throughput --dest <remote-testpoint>
-       tracepath -n <remote-testpoint>
-       ```
+      ```bash
+      pscheduler task throughput --dest <remote-testpoint>
+      tracepath -n <remote-testpoint>
+      ```
 
-       Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
+      Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
 4. **Toolkit diagnostics:** visit the Toolkit UI → *Dashboard* → *Host Status* to confirm pScheduler, MaDDash, and owamp/bwctl services report healthy.
 
