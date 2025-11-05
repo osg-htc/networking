@@ -1307,6 +1307,8 @@ while [[ ${#} -gt 0 ]]; do
         --generate-config-debug)
             # Run the auto-generator in debug/dry-run mode and print internals
             GENERATE_CONFIG_DEBUG=true
+            # Also request generation so main path calls the generator.
+            GENERATE_CONFIG_AUTO=true
             shift
             ;;
         --shellcheck)
