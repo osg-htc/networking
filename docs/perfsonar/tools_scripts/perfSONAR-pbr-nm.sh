@@ -576,6 +576,167 @@ validate_prefix() {
     return 1
 }
 
+# -------- Address helpers for gateway inference --------
+# ipv4_to_int: convert dotted-quad IPv4 to a 32-bit integer
+ipv4_to_int() {
+    local ip=$1 a b c d
+    IFS=. read -r a b c d <<<"$ip"
+    printf '%u' $(( (a<<24) + (b<<16) + (c<<8) + d ))
+}
+
+# ipv4_mask_int: compute a 32-bit mask integer from a /prefix string (e.g., /24)
+ipv4_mask_int() {
+    local pfx=$1 n
+    n=${pfx#/}
+    # Handle edge cases
+    if (( n <= 0 )); then printf '%u' 0; return; fi
+    if (( n >= 32 )); then printf '%u' 4294967295; return; fi
+    # Create mask with top n bits set
+    printf '%u' $(( 0xFFFFFFFF & (0xFFFFFFFF << (32 - n)) ))
+}
+
+# ipv4_same_subnet: return 0 (true) if gw is within ip/prefix, else 1
+ipv4_same_subnet() {
+    local ip=$1 pfx=$2 gw=$3
+    # Basic validation
+    is_ipv4 "$ip" || return 1
+    [[ "$pfx" =~ ^/([0-9]{1,2})$ ]] || return 1
+    is_ipv4 "$gw" || return 1
+    local ipi gwi maski
+    ipi=$(ipv4_to_int "$ip")
+    gwi=$(ipv4_to_int "$gw")
+    maski=$(ipv4_mask_int "$pfx")
+    # shellcheck disable=SC2046
+    if [ $(( ipi & maski )) -eq $(( gwi & maski )) ]; then
+        return 0
+    fi
+    return 1
+}
+
+# is_link_local_v6: true if IPv6 is link-local (fe80::/10)
+is_link_local_v6() {
+    local ip=$1
+    case "$ip" in
+        fe80:*) return 0 ;;
+        *) ;; 
+    esac
+    # Try python for robust check when available
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$ip" <<'PY'
+import sys, ipaddress
+ip = sys.argv[1]
+try:
+    a = ipaddress.ip_address(ip)
+    sys.exit(0 if a.is_link_local else 1)
+except Exception:
+    sys.exit(1)
+PY
+        return $?
+    fi
+    return 1
+}
+
+# v6_in_prefix: return 0 if gw is within ipv6/prefix, else 1. Requires python3.
+v6_in_prefix() {
+    local ip=$1 pfx=$2 gw=$3
+    if ! command -v python3 >/dev/null 2>&1; then
+        return 1
+    fi
+    python3 - "$ip" "$pfx" "$gw" <<'PY'
+import sys, ipaddress
+ip, pfx, gw = sys.argv[1:]
+try:
+    net = ipaddress.ip_network(ip + pfx, strict=False)
+    gw_ip = ipaddress.ip_address(gw)
+    sys.exit(0 if gw_ip in net else 1)
+except Exception:
+    sys.exit(1)
+PY
+}
+
+# guess_missing_gateways: infer and fill missing gateways by reusing a suitable
+# gateway from another NIC on the same subnet. Logs a warning when a guess is made.
+guess_missing_gateways() {
+    local n=${#NIC_NAMES[@]}
+    local -a guessed_v4=()
+    local -a guessed_v6=()
+
+    # Build candidate lists of known gateways
+    local -a cand_gw4=() cand_gw4_owner=()
+    local -a cand_gw6=() cand_gw6_owner=()
+    for ((j=0; j<n; j++)); do
+        local gw4=${NIC_IPV4_GWS[$j]:-"-"}
+        local gw6=${NIC_IPV6_GWS[$j]:-"-"}
+        if [ "$gw4" != "-" ] && is_ipv4 "$gw4"; then
+            cand_gw4+=("$gw4"); cand_gw4_owner+=("${NIC_NAMES[$j]}")
+        fi
+        if [ "$gw6" != "-" ] && is_ipv6 "$gw6" && ! is_link_local_v6 "$gw6"; then
+            cand_gw6+=("$gw6"); cand_gw6_owner+=("${NIC_NAMES[$j]}")
+        fi
+    done
+
+    # Try to fill missing IPv4 gateways
+    for ((i=0; i<n; i++)); do
+        local nic=${NIC_NAMES[$i]:-}
+        local ip4=${NIC_IPV4_ADDRS[$i]:-"-"}
+        local p4=${NIC_IPV4_PREFIXES[$i]:-"-"}
+        local gw4=${NIC_IPV4_GWS[$i]:-"-"}
+        if [ "$ip4" != "-" ] && [ "$p4" != "-" ] && [ "$gw4" = "-" ]; then
+            local matches=() owners=()
+            for ((k=0; k<${#cand_gw4[@]}; k++)); do
+                if ipv4_same_subnet "$ip4" "$p4" "${cand_gw4[$k]}"; then
+                    matches+=("${cand_gw4[$k]}")
+                    owners+=("${cand_gw4_owner[$k]}")
+                fi
+            done
+            if (( ${#matches[@]} == 1 )); then
+                NIC_IPV4_GWS[$i]="${matches[0]}"
+                guessed_v4+=("$nic:${matches[0]} (from ${owners[0]})")
+                log "GUESS: Inferred IPv4 gateway ${matches[0]} for $nic based on subnet match with ${owners[0]}"
+            elif (( ${#matches[@]} > 1 )); then
+                log "WARNING: Multiple candidate IPv4 gateways for $nic (${matches[*]}). Not guessing."
+            fi
+        fi
+    done
+
+    # Try to fill missing IPv6 gateways (global only)
+    for ((i=0; i<n; i++)); do
+        local nic=${NIC_NAMES[$i]:-}
+        local ip6=${NIC_IPV6_ADDRS[$i]:-"-"}
+        local p6=${NIC_IPV6_PREFIXES[$i]:-"-"}
+        local gw6=${NIC_IPV6_GWS[$i]:-"-"}
+        if [ "$ip6" != "-" ] && [ "$p6" != "-" ] && [ "$gw6" = "-" ]; then
+            # Skip if target address appears link-local; guessing across links is unsafe
+            if is_link_local_v6 "$ip6"; then
+                continue
+            fi
+            local matches=() owners=()
+            for ((k=0; k<${#cand_gw6[@]}; k++)); do
+                # Ensure candidate is in same prefix as ip6
+                if v6_in_prefix "$ip6" "$p6" "${cand_gw6[$k]}"; then
+                    matches+=("${cand_gw6[$k]}")
+                    owners+=("${cand_gw6_owner[$k]}")
+                fi
+            done
+            if (( ${#matches[@]} == 1 )); then
+                NIC_IPV6_GWS[$i]="${matches[0]}"
+                guessed_v6+=("$nic:${matches[0]} (from ${owners[0]})")
+                log "GUESS: Inferred IPv6 gateway ${matches[0]} for $nic based on subnet match with ${owners[0]}"
+            elif (( ${#matches[@]} > 1 )); then
+                log "WARNING: Multiple candidate IPv6 gateways for $nic (${matches[*]}). Not guessing."
+            fi
+        fi
+    done
+
+    # If we made guesses, summarize to stderr to alert the operator
+    if (( ${#guessed_v4[@]} > 0 )) || (( ${#guessed_v6[@]} > 0 )); then
+        echo "NOTICE: One or more gateways were inferred automatically:" >&2
+        for g in "${guessed_v4[@]}"; do echo "  - IPv4 $g" >&2; done
+        for g in "${guessed_v6[@]}"; do echo "  - IPv6 $g" >&2; done
+        echo "Review $CONFIG_FILE and adjust NIC_*_GWS as needed before applying in production." >&2
+    fi
+}
+
 # validate_config: sanity-check the arrays loaded from the config file.
 # Behavior:
 #  - Ensures array lengths match NIC_NAMES
@@ -1111,6 +1272,8 @@ source "$CONFIG_FILE"
 
 # Sanitize config after sourcing and then validate its contents
 sanitize_config
+# Attempt to infer and fill missing gateways conservatively before validation
+guess_missing_gateways
 validate_config
 
 # -------- Warning Prompt --------
