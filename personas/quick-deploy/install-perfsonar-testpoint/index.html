@@ -792,15 +792,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#download-and-run-the-checker" class="md-nav__link">
-    <span class="md-ellipsis">
-      Download and run the checker
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1500,15 +1491,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#download-and-run-the-checker" class="md-nav__link">
-    <span class="md-ellipsis">
-      Download and run the checker
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1638,14 +1620,14 @@ baseline packages.</p>
 ./docs/perfsonar/tools_scripts/check-deps.sh
 </code></pre></div>
 </li>
-<li>
-<p>Or download and run the script directly:</p>
+</ul>
+<details class="tip">
+<summary>Alternative: Download and run directly</summary>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span>-o<span class="w"> </span>./check-deps.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
 ./check-deps.sh
 </code></pre></div>
-</li>
-</ul>
+</details>
 <p>On EL9, apply updates and install common baseline packages, then add any
 packages suggested by the checker (copy/paste the printed dnf line):</p>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
@@ -1693,13 +1675,13 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>./perfsonar-pbr-nm.sh
 </code></pre></div>
 </li>
-<li>
-<p>Or download directly from the repository URL:</p>
+</ul>
+<details class="tip">
+<summary>Alternative: Download directly from the repository URL</summary>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>-o<span class="w"> </span>./perfSONAR-pbr-nm.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfSONAR-pbr-nm.sh
 </code></pre></div>
-</li>
-</ul>
+</details>
 </li>
 <li>
 <p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
@@ -1758,8 +1740,9 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li>For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.</li>
 <li>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).</li>
 </ul>
-<p>Automating verification from the generated config</p>
-<p>The <code>perfSONAR-multi-nic-config.conf</code> contains the arrays <code>NIC_IPV4_ADDRS</code> and <code>NIC_IPV6_ADDRS</code> (with <code>-</code> for unused entries). You can automate a forward/reverse consistency check using <code>dig</code> or <code>host</code> by sourcing the config and iterating the arrays. Example Bash verification script (run as root or a user that can read the config):</p>
+<details class="example">
+<summary>Example: Bash script to automate DNS verification</summary>
+<p>The <code>perfSONAR-multi-nic-config.conf</code> contains the arrays <code>NIC_IPV4_ADDRS</code> and <code>NIC_IPV6_ADDRS</code> (with <code>-</code> for unused entries). You can automate a forward/reverse consistency check using <code>dig</code> or <code>host</code> by sourcing the config and iterating the arrays.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf</span>
 <span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
 <span class="nv">CONFIG</span><span class="o">=</span>/etc/perfSONAR-multi-nic-config.conf
@@ -1815,16 +1798,18 @@ check_ip<span class="o">()</span><span class="w"> </span><span class="o">{</span
 <span class="k">fi</span>
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;DNS forward/reverse checks passed for configured addresses.&quot;</span>
 </code></pre></div>
-<p>Notes and automation tips:</p>
+<p><strong>Notes and automation tips:</strong></p>
 <ul>
 <li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it to use <code>host</code> if preferred.</li>
 <li>Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.</li>
 <li>For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages <code>dns.resolver</code> for async checks.</li>
 <li>If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.</li>
 </ul>
+</details>
 <p>If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.</p>
-<h3 id="download-and-run-the-checker">Download and run the checker<a class="headerlink" href="#download-and-run-the-checker" title="Permanent link">&para;</a></h3>
-<p>You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects <code>/etc/perfSONAR-multi-nic-config.conf</code> to exist and be readable. Example copy/paste steps:</p>
+<details class="example">
+<summary>Download and run the DNS checker</summary>
+<p>You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects <code>/etc/perfSONAR-multi-nic-config.conf</code> to exist and be readable.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download (curl)</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh<span class="w"> </span>-o<span class="w"> </span>./check-perfsonar-dns.sh
 <span class="c1"># Or download with wget</span>
@@ -1841,17 +1826,16 @@ sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> <
 <span class="c1"># Run the check (needs to read /etc/perfSONAR-multi-nic-config.conf)</span>
 sudo<span class="w"> </span>./check-perfsonar-dns.sh
 </code></pre></div>
-<p>Notes:</p>
+<p><strong>Notes:</strong></p>
 <ul>
 <li>If you downloaded the script to a different path, either move it to the host and run it there, or copy <code>/etc/perfSONAR-multi-nic-config.conf</code> to the machine where you run the check (recommended only for temporary verification; treat the config as sensitive).</li>
 <li>The script uses <code>dig</code> (preferred) or <code>host</code> as a fallback; ensure one of those is installed.</li>
-<li>
-<p>Run this check after you generate or edit <code>/etc/perfSONAR-multi-nic-config.conf</code> and before you register or start active measurements.</p>
-</li>
-<li>
-<p><strong>Verify the routing policy:</strong></p>
-</li>
+<li>Run this check after you generate or edit <code>/etc/perfSONAR-multi-nic-config.conf</code> and before you register or start active measurements.</li>
 </ul>
+</details>
+<ol>
+<li><strong>Verify the routing policy:</strong></li>
+</ol>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>connection<span class="w"> </span>show
 ip<span class="w"> </span>rule<span class="w"> </span>show
 ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </span>table<span class="w"> </span>&lt;table-id&gt;
@@ -1878,16 +1862,16 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 <ul>
 <li>
 <p>From a local clone of this repository:</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>./perfsonar-install-nftables.sh
-</code></pre></div>
-</li>
-<li>
-<p>Or download directly from the repository URL:</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>./perfsonar-install-nftables.sh
-<span class="w"> </span>chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfsonar-install-nftables.sh
+<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>./perfsonar-install-nftables.sh
 </code></pre></div>
 </li>
 </ul>
+<details class="tip">
+<summary>Alternative: Download directly from the repository URL</summary>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>./perfsonar-install-nftables.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfsonar-install-nftables.sh
+</code></pre></div>
+</details>
 </li>
 <li>
 <p><strong>Run with desired options:</strong></p>
