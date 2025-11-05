@@ -53,7 +53,7 @@ for cmd in "${OPTIONAL[@]}"; do
   fi
 done
 
-echo "Dependency check for perfSONAR tools"
+echo "Dependency check for perfSONAR install scripts requirements"
 echo
 if [ ${#missing[@]} -eq 0 ]; then
   # Print essentials on one line regardless of IFS settings
@@ -87,6 +87,18 @@ for m in "${missing[@]}" "${missing_optional[@]}"; do
   if [ -n "$pkg2" ]; then suggest_apt+=("$pkg2"); fi
 done
 
+# Also build optional-only install suggestions (useful when essentials are
+# already satisfied and the admin only wants the optional feature packages).
+suggest_dnf_optional=()
+suggest_apt_optional=()
+for m in "${missing_optional[@]}"; do
+  [ -z "$m" ] && continue
+  pkg=${CMD_TO_PKG_DNF[$m]:-}
+  if [ -n "$pkg" ]; then suggest_dnf_optional+=("$pkg"); fi
+  pkg2=${CMD_TO_PKG_APT[$m]:-}
+  if [ -n "$pkg2" ]; then suggest_apt_optional+=("$pkg2"); fi
+done
+
 if [ ${#suggest_dnf[@]} -gt 0 ]; then
   # dedupe
   mapfile -t uniq_dnf < <(printf '%s\n' "${suggest_dnf[@]}" | awk '!seen[$0]++')
@@ -105,6 +117,27 @@ if [ ${#suggest_apt[@]} -gt 0 ]; then
   apt_pkgs=$(printf '%s ' "${uniq_apt[@]}")
   apt_pkgs=${apt_pkgs% }
   printf '  sudo apt-get update && sudo apt-get install -y %s\n' "$apt_pkgs"
+  echo
+fi
+
+# If optional packages are missing, print an explicit one-line example that
+# installs only those optional packages (no essentials). This is handy when
+# essentials are already present and the admin wants to add optional features.
+if [ ${#suggest_dnf_optional[@]} -gt 0 ]; then
+  mapfile -t uniq_dnf_opt < <(printf '%s\n' "${suggest_dnf_optional[@]}" | awk '!seen[$0]++')
+  dnf_opt_pkgs=$(printf '%s ' "${uniq_dnf_opt[@]}")
+  dnf_opt_pkgs=${dnf_opt_pkgs% }
+  echo "Optional-only install example for Fedora/RHEL/CentOS (dnf):"
+  printf '  sudo dnf install -y %s\n' "$dnf_opt_pkgs"
+  echo
+fi
+
+if [ ${#suggest_apt_optional[@]} -gt 0 ]; then
+  mapfile -t uniq_apt_opt < <(printf '%s\n' "${suggest_apt_optional[@]}" | awk '!seen[$0]++')
+  apt_opt_pkgs=$(printf '%s ' "${uniq_apt_opt[@]}")
+  apt_opt_pkgs=${apt_opt_pkgs% }
+  echo "Optional-only install example for Debian/Ubuntu (apt):"
+  printf '  sudo apt-get update && sudo apt-get install -y %s\n' "$apt_opt_pkgs"
   echo
 fi
 
