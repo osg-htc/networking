@@ -47,7 +47,8 @@ jobs:
             --strict
       - name: Install html-proofer
         run: |
-          sudo gem install html-proofer:~>4.4.3
+          # Use proper version flag syntax; avoid colon which is parsed as a URI scheme
+          sudo gem install html-proofer -v "~> 4.4.3" --no-document
       - name: Run html-proofer against built site
         continue-on-error: true
         run: |
