@@ -123,16 +123,64 @@ sudo bash perfSONAR-pbr-nm.sh
 # or non-interactive
 sudo bash perfSONAR-pbr-nm.sh --yes
 
-Gateway requirement and generator warnings
------------------------------------------
+```
+
+Gateway requirement, inference, and generator warnings
+-----------------------------------------------------
+
 - Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.
-- The auto-generator will warn if it cannot detect a gateway for a NIC that has an address. The generated config will include a WARNING block listing affected NICs. Edit `NIC_IPV4_GWS` and/or `NIC_IPV6_GWS` accordingly before running the script to apply changes.
+- Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.
+  - IPv4: subnets are checked in bash; one unambiguous match is required.
+  - IPv6: requires `python3` (`ipaddress` module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.
+  - If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.
+- This inference runs in two places:
+  1) During auto-generation (`--generate-config-auto` or `--generate-config-debug`) so the written config can be immediately useful.
+  2) During normal execution after loading the config but before validation, so missing gateways may be filled automatically.
+
+Example: generated config with inferred gateways
+
+```bash
+NIC_NAMES=(
+  "eth0"
+  "eth1"
+)
+
+NIC_IPV4_ADDRS=(
+  "192.0.2.10"
+  "192.0.2.20"
+)
+NIC_IPV4_PREFIXES=(
+  "/24"
+  "/24"
+)
+NIC_IPV4_GWS=(
+  "192.0.2.1"  # guessed from eth0
+  "192.0.2.1"  # guessed (reused gateway)
+)
+
+NIC_IPV6_ADDRS=(
+  "2001:db8::10"
+  "2001:db8::20"
+)
+NIC_IPV6_PREFIXES=(
+  "/64"
+  "/64"
+)
+NIC_IPV6_GWS=(
+  "2001:db8::1"  # guessed from eth0
+  "2001:db8::1"  # guessed (reused gateway)
+)
+```
+
+When gateways are inferred, a NOTE section is added near the bottom of the generated file listing each guess. The script will also print a NOTICE to the console/log. Review and edit the guessed values if needed before applying changes.
+
+If gateways remain missing after inference, the generator writes a WARNING block listing the affected NICs and the script will refuse to proceed until you set the gateways.
 
 Backups and safety
 ------------------
 
 - Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
-```
+
 
 Tests
 -----
