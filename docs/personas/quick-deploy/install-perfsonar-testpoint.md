@@ -35,11 +35,11 @@ Before you begin, gather the following information:
 
    - Or download and run the script directly:
 
-      ```bash
-      curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o /usr/local/sbin/check-deps.sh
-      chmod 0755 /usr/local/sbin/check-deps.sh
-      check-deps.sh
-      ```
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
+   chmod 0755 ./check-deps.sh
+   ./check-deps.sh
+   ```
 
    On EL9, apply updates and install common baseline packages, then add any
    packages suggested by the checker (copy/paste the printed dnf line):
@@ -89,18 +89,18 @@ Script location in the repository:
 
 1. **Stage the script:**
 
-      - From a local clone of this repository:
+    - From a local clone of this repository:
 
-         ```bash
-         install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh /usr/local/sbin/perfsonar-pbr-nm.sh
-         ```
+       ```bash
+       install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ./perfsonar-pbr-nm.sh
+       ```
 
-      - Or download directly from the repository URL:
+         - Or download directly from the repository URL:
 
-         ```bash
-         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
-         chmod 0755 ./perfSONAR-pbr-nm.sh
-         ```
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
+            chmod 0755 ./perfSONAR-pbr-nm.sh
+            ```
 
 2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
 
@@ -182,18 +182,18 @@ If any prerequisite is missing, the script skips that component and continues.
 
 1. **Stage the installer:**
 
-    - From a local clone of this repository:
+      - From a local clone of this repository:
 
-       ```bash
-       install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh /usr/local/sbin/perfsonar-install-nftables.sh
-       ```
+         ```bash
+         install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh ./perfsonar-install-nftables.sh
+         ```
 
-    - Or download directly from the repository URL:
+      - Or download directly from the repository URL:
 
-       ```bash
-       curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o /usr/local/sbin/perfsonar-install-nftables.sh
-       chmod 0755 /usr/local/sbin/perfsonar-install-nftables.sh
-       ```
+         ```bash
+         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ./perfsonar-install-nftables.sh
+         chmod 0755 ./perfsonar-install-nftables.sh
+         ```
 
 2. **Run with desired options:**
 

@@ -72,7 +72,7 @@ sudo ip route add default via 10.20.30.1 dev eth1 table eth1table
 
 ### **c) Make persistent**
 
-For persistent configuration, add these rules and routes to a script (e.g., /usr/local/sbin/perfsonar-policy-routing.sh) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.
+For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.
 
 Example systemd unit:
 
@@ -83,7 +83,7 @@ After\=network.target
 
 **\[Service\]**  
 Type\=oneshot  
-ExecStart\=/usr/local/sbin/perfsonar-policy-routing.sh
+ExecStart\=/path/to/your/working/dir/perfsonar-policy-routing.sh
 
 **\[Install\]**  
 WantedBy\=multi-user.target

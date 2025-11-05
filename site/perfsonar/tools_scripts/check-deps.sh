@@ -17,8 +17,9 @@ declare -A CMD_TO_PKG_DNF=(
   [nft]=nftables
   [fail2ban-client]=fail2ban
   [podman]=podman
-  [docker]=docker
-  [docker-compose]=docker-compose
+  [podman-compose]=podman-compose
+  [restorecon]=policycoreutils
+  [getenforce]=policycoreutils
 )
 declare -A CMD_TO_PKG_APT=(
   [ip]=iproute2
@@ -29,12 +30,13 @@ declare -A CMD_TO_PKG_APT=(
   [nft]=nftables
   [fail2ban-client]=fail2ban
   [podman]=podman
-  [docker]=docker.io
-  [docker-compose]=docker-compose
+  [podman-compose]=podman-compose
+  [restorecon]=policycoreutils
+  [getenforce]=policycoreutils
 )
 
 ESSENTIAL=(bash ip nmcli rsync curl openssl)
-OPTIONAL=(nft fail2ban-client podman docker docker-compose podman-compose restorecon getenforce)
+OPTIONAL=(nft fail2ban-client podman podman-compose restorecon getenforce)
 
 missing=()
 missing_optional=()
@@ -46,22 +48,18 @@ for cmd in "${ESSENTIAL[@]}"; do
 done
 
 for cmd in "${OPTIONAL[@]}"; do
-  if [ "$cmd" = "docker-compose" ]; then
-    # Accept either docker-compose or podman-compose as sufficient
-    if ! command -v docker-compose >/dev/null 2>&1 && ! command -v podman-compose >/dev/null 2>&1; then
-      missing_optional+=("docker-compose")
-    fi
-  else
-    if ! command -v "$cmd" >/dev/null 2>&1; then
-      missing_optional+=("$cmd")
-    fi
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    missing_optional+=("$cmd")
   fi
 done
 
 echo "Dependency check for perfSONAR tools"
 echo
 if [ ${#missing[@]} -eq 0 ]; then
-  echo "All essential commands present: ${ESSENTIAL[*]}"
+  # Print essentials on one line regardless of IFS settings
+  essentials_joined=$(printf '%s ' "${ESSENTIAL[@]}")
+  essentials_joined=${essentials_joined% }
+  echo "All essential commands present: ${essentials_joined}"
 else
   echo "Missing essential commands:"
   for m in "${missing[@]}"; do
@@ -93,15 +91,20 @@ if [ ${#suggest_dnf[@]} -gt 0 ]; then
   # dedupe
   mapfile -t uniq_dnf < <(printf '%s\n' "${suggest_dnf[@]}" | awk '!seen[$0]++')
   echo "Install on Fedora/RHEL/CentOS (dnf):"
-  printf '  sudo dnf install -y %s\n' "${uniq_dnf[*]}"
+  # Join packages with spaces explicitly to avoid IFS (set to "\n\t") introducing newlines
+  dnf_pkgs=$(printf '%s ' "${uniq_dnf[@]}")
+  dnf_pkgs=${dnf_pkgs% }  # trim trailing space
+  printf '  sudo dnf install -y %s\n' "$dnf_pkgs"
   echo
 fi
 
 if [ ${#suggest_apt[@]} -gt 0 ]; then
   mapfile -t uniq_apt < <(printf '%s\n' "${suggest_apt[@]}" | awk '!seen[$0]++')
   echo "Install on Debian/Ubuntu (apt):"
-  echo "  sudo apt-get update"
-  printf '  sudo apt-get install -y %s\n' "${uniq_apt[*]}"
+  # Join packages with spaces explicitly to avoid IFS newline joining
+  apt_pkgs=$(printf '%s ' "${uniq_apt[@]}")
+  apt_pkgs=${apt_pkgs% }
+  printf '  sudo apt-get update && sudo apt-get install -y %s\n' "$apt_pkgs"
   echo
 fi
 

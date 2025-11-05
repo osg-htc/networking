@@ -56,6 +56,10 @@ RUN_SHELLCHECK=false
 GENERATE_CONFIG_AUTO=true
 GENERATE_CONFIG_DEBUG=false
 
+# Backup status flag: set true only after a successful backup. Used to
+# prevent destructive removals when we couldn't capture a backup safely.
+BACKUP_OK=false
+
 # -----------------------------------------------------
 
 # ----------------- Function definitions follow -----------------
@@ -124,6 +128,79 @@ is_interactive() {
     [ -t 0 ] && [ -t 1 ]
 }
 
+# Return 0 if the provided gateway IP belongs to the network defined by
+# address+prefix. Supports IPv4 and IPv6 using Python's ipaddress module
+# when available. Falls back to a permissive 'false' when python3 is missing.
+in_same_subnet() {
+    local gw=$1 addr=$2 prefix=$3
+    [ -z "$gw" ] && return 1
+    [ "$addr" = "-" ] && return 1
+    [ "$prefix" = "-" ] && return 1
+    # prefix is like "/24" or "/64"; ensure no duplicate slash
+    local cidr
+    cidr="${addr}${prefix}"
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$gw" "$cidr" <<'PY'
+import sys, ipaddress
+gw = sys.argv[1]
+cidr = sys.argv[2]
+try:
+    net = ipaddress.ip_network(cidr, strict=False)
+    gip = ipaddress.ip_address(gw)
+    sys.exit(0 if gip in net else 1)
+except Exception:
+    sys.exit(1)
+PY
+        return $?
+    fi
+    # Without python3, do a conservative fallback: return non-zero (not in subnet)
+    return 1
+}
+
+# Persist the current in-memory config arrays back to $CONFIG_FILE
+# Writes a temporary file and atomically moves it into place.
+save_config_to_file() {
+    local target=${1:-"$CONFIG_FILE"}
+    local TMPFILE
+    TMPFILE="/tmp/perfsonar-save-config-$$.conf"
+
+    {
+        echo "# perfSONAR multi-NIC configuration"
+        echo "# Saved: $(date)"
+        echo ""
+
+        _print_arr() {
+            local name="$1"; shift
+            printf '%s=(\n' "$name" >> "$TMPFILE"
+            for v in "$@"; do
+                printf '  "%s"\n' "$v" >> "$TMPFILE"
+            done
+            printf ')\n\n' >> "$TMPFILE"
+        }
+
+        _print_arr NIC_NAMES "${NIC_NAMES[@]}"
+        _print_arr NIC_IPV4_ADDRS "${NIC_IPV4_ADDRS[@]}"
+        _print_arr NIC_IPV4_PREFIXES "${NIC_IPV4_PREFIXES[@]}"
+        _print_arr NIC_IPV4_GWS "${NIC_IPV4_GWS[@]}"
+        _print_arr NIC_IPV4_ADDROUTE "${NIC_IPV4_ADDROUTE[@]}"
+        _print_arr NIC_IPV6_ADDRS "${NIC_IPV6_ADDRS[@]}"
+        _print_arr NIC_IPV6_PREFIXES "${NIC_IPV6_PREFIXES[@]}"
+        _print_arr NIC_IPV6_GWS "${NIC_IPV6_GWS[@]}"
+
+        printf 'DEFAULT_ROUTE_NIC="%s"\n' "${DEFAULT_ROUTE_NIC:-}" >> "$TMPFILE"
+    }
+
+    if [ "$DRY_RUN" = true ]; then
+        log "DRY-RUN: would write updated config to $target"
+        [ -f "$TMPFILE" ] && rm -f "$TMPFILE"
+        return 0
+    fi
+
+    run_cmd mv "$TMPFILE" "$target" || handle_error "Failed to persist updated configuration to $target"
+    run_cmd chmod 0644 "$target" || true
+    run_cmd chown root:root "$target" || true
+}
+
 # -------- Error handling and rollback helpers --------
 # handle_error: centralized failure path. Logs error, attempts rollback,
 # and exits with a non-zero status. Use this where a hard failure should
@@ -154,8 +231,26 @@ rollback() {
         return 0
     fi
 
-    # Restore using rsync (safer than shell-globbed cp)
-    run_cmd rsync -a -- "$BACKUP_DIR"/ /etc/NetworkManager/system-connections/ || log "Rollback: copy failed"
+    # Ensure destination exists and restore from backup using rsync when
+    # available; fall back to cp -a if rsync is not present or fails.
+    run_cmd mkdir -p /etc/NetworkManager/system-connections
+    local restore_ok=false
+    if command -v rsync >/dev/null 2>&1; then
+        if run_cmd rsync -a -- "$BACKUP_DIR"/ /etc/NetworkManager/system-connections/; then
+            restore_ok=true
+        else
+            log "Rollback: rsync restore failed; will try cp -a as fallback"
+        fi
+    fi
+    if [ "$restore_ok" = false ]; then
+        if run_cmd cp -a -- "$BACKUP_DIR"/. /etc/NetworkManager/system-connections/; then
+            restore_ok=true
+        else
+            log "Rollback: cp -a restore failed"
+        fi
+    fi
+
+    # Permissions for NetworkManager connection files
     run_cmd chmod -R 0600 /etc/NetworkManager/system-connections/* || true
     run_cmd chown -R root:root /etc/NetworkManager/system-connections/* || true
     # Reload NetworkManager connections; if reload fails attempt restart and
@@ -274,10 +369,39 @@ generate_config_from_system() {
             ipv6_prefix="-"
         fi
 
-        # detect gateways associated with this device (if any)
-        local gw4 gw6
-        gw4=$(ip route show default 2>/dev/null | awk -v d="$dev" '$0 ~ "dev "d {for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
-        gw6=$(ip -6 route show default 2>/dev/null | awk -v d="$dev" '$0 ~ "dev "d {for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
+        # Detect gateways associated with this device (if any).
+        # Prefer configured values from NetworkManager connection settings,
+        # then fall back to current kernel default routes scoped to this dev.
+        local gw4 gw6 connname gtmp
+        gw4=""; gw6=""
+        if command -v nmcli >/dev/null 2>&1; then
+            connname=$(nmcli -t -f GENERAL.CONNECTION device show "$dev" 2>/dev/null | awk -F: '{print $2}') || true
+            if [ -n "$connname" ] && [ "$connname" != "--" ]; then
+                gtmp=$(nmcli -t -g ipv4.gateway connection show "$connname" 2>/dev/null | tr -d '\r') || true
+                if [ -n "$gtmp" ] && [ "$gtmp" != "--" ]; then
+                    gw4="$gtmp"; log "Guessed IPv4 gateway for $dev from NM connection $connname: $gw4"
+                fi
+                gtmp=$(nmcli -t -g ipv6.gateway connection show "$connname" 2>/dev/null | tr -d '\r') || true
+                if [ -n "$gtmp" ] && [ "$gtmp" != "--" ]; then
+                    gw6="$gtmp"; log "Guessed IPv6 gateway for $dev from NM connection $connname: $gw6"
+                fi
+            fi
+        fi
+
+        # If not found in NM connection settings, look at kernel default routes per dev
+        if [ -z "$gw4" ] || ! is_ipv4 "${gw4:-}"; then
+            gtmp=$(ip route show default dev "$dev" 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
+            if [ -n "$gtmp" ] && is_ipv4 "$gtmp"; then
+                gw4="$gtmp"; log "Guessed IPv4 gateway for $dev from kernel default route: $gw4"
+            fi
+        fi
+        if [ -z "$gw6" ] || ! is_ipv6 "${gw6:-}"; then
+            gtmp=$(ip -6 route show default dev "$dev" 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
+            if [ -n "$gtmp" ] && is_ipv6 "$gtmp"; then
+                gw6="$gtmp"; log "Guessed IPv6 gateway for $dev from kernel default route: $gw6"
+            fi
+        fi
+
         [ -z "$gw4" ] && gw4="-"
         [ -z "$gw6" ] && gw6="-"
 
@@ -299,8 +423,55 @@ generate_config_from_system() {
         NIC_IPV6_GWS+=("$gw6")
     done
 
-    # If interactive and not auto-confirm, prompt for any missing gateways we could not detect
-    if is_interactive && [ "${AUTO_YES:-false}" != true ]; then
+    # Attempt to reuse any known gateways for NICs missing a gateway when
+    # those gateways belong to the NIC's subnet. This helps complete configs
+    # on systems where only one NIC currently has the default route set.
+    {
+        # Build candidate lists
+        declare -a CAND_GW4=() CAND_GW6=()
+        for g in "${NIC_IPV4_GWS[@]}"; do [ "$g" != "-" ] && is_ipv4 "$g" && CAND_GW4+=("$g"); done
+        for g in "${NIC_IPV6_GWS[@]}"; do [ "$g" != "-" ] && is_ipv6 "$g" && CAND_GW6+=("$g"); done
+        # De-duplicate
+        if ((${#CAND_GW4[@]})); then mapfile -t CAND_GW4 < <(printf '%s\n' "${CAND_GW4[@]}" | awk '!seen[$0]++'); fi
+        if ((${#CAND_GW6[@]})); then mapfile -t CAND_GW6 < <(printf '%s\n' "${CAND_GW6[@]}" | awk '!seen[$0]++'); fi
+
+        # Fill missing per NIC if suitable
+        for i in "${!NIC_NAMES[@]}"; do
+            if [ "${NIC_IPV4_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV4_GWS[$i]}" ] || [ "${NIC_IPV4_GWS[$i]}" = "-" ]; }; then
+                for g in "${CAND_GW4[@]:-}"; do
+                    if in_same_subnet "$g" "${NIC_IPV4_ADDRS[$i]}" "${NIC_IPV4_PREFIXES[$i]}"; then
+                        NIC_IPV4_GWS[$i]="$g"
+                        log "Reused IPv4 gateway $g for ${NIC_NAMES[$i]} based on subnet match"
+                        break
+                    fi
+                done
+            fi
+            if [ "${NIC_IPV6_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV6_GWS[$i]}" ] || [ "${NIC_IPV6_GWS[$i]}" = "-" ]; }; then
+                for g in "${CAND_GW6[@]:-}"; do
+                    if in_same_subnet "$g" "${NIC_IPV6_ADDRS[$i]}" "${NIC_IPV6_PREFIXES[$i]}"; then
+                        NIC_IPV6_GWS[$i]="$g"
+                        log "Reused IPv6 gateway $g for ${NIC_NAMES[$i]} based on subnet match"
+                        break
+                    fi
+                done
+            fi
+        done
+    }
+
+    # If any NIC has an address but a missing gateway ('-'), and we're in an
+    # interactive session (and not auto-confirm), prompt the user to supply a
+    # gateway before writing the configuration file. This ensures the generated
+    # config is complete when possible.
+    local needs_prompt=false
+    for i in "${!NIC_NAMES[@]}"; do
+        if { [ "${NIC_IPV4_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV4_GWS[$i]}" ] || [ "${NIC_IPV4_GWS[$i]}" = "-" ]; }; } \
+           || { [ "${NIC_IPV6_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV6_GWS[$i]}" ] || [ "${NIC_IPV6_GWS[$i]}" = "-" ]; }; }; then
+            needs_prompt=true
+            break
+        fi
+    done
+
+    if [ "$needs_prompt" = true ] && is_interactive && [ "${AUTO_YES:-false}" != true ]; then
         for i in "${!NIC_NAMES[@]}"; do
             dev=${NIC_NAMES[$i]}
             ipv4_addr=${NIC_IPV4_ADDRS[$i]}
@@ -775,7 +946,8 @@ prompt_missing_gateways_from_config() {
     done
 
     if [ "$updated" = true ]; then
-        log "Gateways provided interactively were applied for this run. Consider updating $CONFIG_FILE to persist them."
+        log "Gateways provided interactively; persisting updates to $CONFIG_FILE."
+        save_config_to_file "$CONFIG_FILE"
     fi
 }
 
@@ -808,15 +980,57 @@ validate_ip() {
 
 # -------- Backup existing NetworkManager configurations --------
 # backup_existing_configs: create a timestamped backup of /etc/NetworkManager/system-connections
-# Uses rsync for safer copying (avoids globbing pitfalls) and records BACKUP_DIR for rollback.
+# Prefer rsync when available, else fall back to cp -a. Only mark BACKUP_OK
+# true (and proceed to destructive actions later) if the backup succeeded or
+# there was nothing to back up.
 backup_existing_configs() {
     BACKUP_DIR="/etc/NetworkManager/system-connections-backup-$(date +%Y%m%d%H%M%S)"
+    BACKUP_OK=false
     log "Backing up existing configurations to $BACKUP_DIR..."
     run_cmd mkdir -p "$BACKUP_DIR"
-    # Use rsync to copy contents safely (avoids shell globbing issues with /*)
-    run_cmd rsync -a -- /etc/NetworkManager/system-connections/ "$BACKUP_DIR" || log "No existing connections to backup or copy failed"
-    log "Removing original configuration files from /etc/NetworkManager/system-connections/"
-    run_cmd rm -rf /etc/NetworkManager/system-connections/*
+
+    # Detect if there are any existing connection files; if none, we can
+    # safely continue even if copy commands fail or are unavailable.
+    local has_existing
+    if [ -d /etc/NetworkManager/system-connections ]; then
+        if [ -n "$(ls -A /etc/NetworkManager/system-connections 2>/dev/null || true)" ]; then
+            has_existing=true
+        else
+            has_existing=false
+        fi
+    else
+        has_existing=false
+    fi
+
+    local copy_ok=false
+    if [ "$has_existing" = true ]; then
+        if command -v rsync >/dev/null 2>&1; then
+            if run_cmd rsync -a -- /etc/NetworkManager/system-connections/ "$BACKUP_DIR"/; then
+                copy_ok=true
+            else
+                log "Backup via rsync failed; will try cp -a as fallback"
+            fi
+        fi
+        if [ "$copy_ok" = false ]; then
+            # Fallback to cp -a; copy directory contents using trailing dot
+            if run_cmd cp -a -- /etc/NetworkManager/system-connections/. "$BACKUP_DIR"/; then
+                copy_ok=true
+            else
+                log "Backup via cp -a also failed"
+            fi
+        fi
+    else
+        # Nothing to back up; treat as success
+        copy_ok=true
+    fi
+
+    if [ "$copy_ok" = true ]; then
+        BACKUP_OK=true
+        log "Backup completed${has_existing:+ (existing files found)}. Saved to $BACKUP_DIR"
+    else
+        BACKUP_OK=false
+        log "Backup did not complete successfully; will not proceed with destructive removals"
+    fi
 }
 
 # -------- Routing table management --------
@@ -878,7 +1092,17 @@ add_routing_table() {
 
     # Fallback: ensure there are no existing entries for this table name in
     # the legacy /etc/iproute2/rt_tables, remove them if present, then append
-    # the desired mapping.
+    # the desired mapping. Create the directory/file if missing to avoid
+    # runtime failures on minimal installs.
+    run_cmd mkdir -p /etc/iproute2
+    if [ ! -f /etc/iproute2/rt_tables ]; then
+        run_cmd touch /etc/iproute2/rt_tables
+        run_cmd chmod 0644 /etc/iproute2/rt_tables || true
+        run_cmd chown root:root /etc/iproute2/rt_tables || true
+        if command -v restorecon >/dev/null 2>&1; then
+            run_cmd restorecon -v /etc/iproute2/rt_tables || true
+        fi
+    fi
     if grep -wq "${table_name}" /etc/iproute2/rt_tables 2>/dev/null; then
         log "Removing existing entry for ${table_name} from /etc/iproute2/rt_tables"
     run_cmd sed -i -E "/^[[:space:]]*[0-9]+[[:space:]]+${table_name}[[:space:]]*$/d" /etc/iproute2/rt_tables || log "Failed to clean /etc/iproute2/rt_tables"
@@ -1177,6 +1401,9 @@ run_cmd bash -c 'echo 1 > /proc/sys/net/ipv6/route/flush' || handle_error "Faile
 run_cmd ip rule flush || handle_error "Failed to flush IP rules"
 
 # Remove previous NetworkManager configurations
+if [ "$BACKUP_OK" != true ]; then
+    handle_error "Backup did not succeed; refusing to remove existing NetworkManager configurations."
+fi
 log "Removing ALL existing network configurations..."
 # Execute removal via run_cmd and log failure explicitly; using an if/then
 # prevents shellcheck complaining that the '||' may be misinterpreted.
