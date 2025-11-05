@@ -119,6 +119,11 @@ run_cmd() {
     fi
 }
 
+# Simple helper: return 0 if running interactively on a TTY
+is_interactive() {
+    [ -t 0 ] && [ -t 1 ]
+}
+
 # -------- Error handling and rollback helpers --------
 # handle_error: centralized failure path. Logs error, attempts rollback,
 # and exits with a non-zero status. Use this where a hard failure should
@@ -293,6 +298,49 @@ generate_config_from_system() {
         NIC_IPV6_PREFIXES+=("$ipv6_prefix")
         NIC_IPV6_GWS+=("$gw6")
     done
+
+    # If interactive and not auto-confirm, prompt for any missing gateways we could not detect
+    if is_interactive && [ "${AUTO_YES:-false}" != true ]; then
+        for i in "${!NIC_NAMES[@]}"; do
+            dev=${NIC_NAMES[$i]}
+            ipv4_addr=${NIC_IPV4_ADDRS[$i]}
+            ipv4_pref=${NIC_IPV4_PREFIXES[$i]}
+            gw4=${NIC_IPV4_GWS[$i]}
+            ipv6_addr=${NIC_IPV6_ADDRS[$i]}
+            ipv6_pref=${NIC_IPV6_PREFIXES[$i]}
+            gw6=${NIC_IPV6_GWS[$i]}
+
+            if [ "$ipv4_addr" != "-" ] && { [ -z "$gw4" ] || [ "$gw4" = "-" ]; }; then
+                echo "No IPv4 gateway detected for $dev ($ipv4_addr$ipv4_pref). Enter IPv4 gateway for $dev or '-' to skip:" >&2
+                read -r ans4
+                if [ -n "$ans4" ] && [ "$ans4" != "-" ]; then
+                    if is_ipv4 "$ans4"; then
+                        NIC_IPV4_GWS[$i]="$ans4"
+                    else
+                        echo "Input '$ans4' is not a valid IPv4 address; leaving '-'" >&2
+                        NIC_IPV4_GWS[$i]="-"
+                    fi
+                else
+                    NIC_IPV4_GWS[$i]="-"
+                fi
+            fi
+
+            if [ "$ipv6_addr" != "-" ] && { [ -z "$gw6" ] || [ "$gw6" = "-" ]; }; then
+                echo "No IPv6 gateway detected for $dev ($ipv6_addr$ipv6_pref). Enter IPv6 gateway for $dev or '-' to skip:" >&2
+                read -r ans6
+                if [ -n "$ans6" ] && [ "$ans6" != "-" ]; then
+                    if is_ipv6 "$ans6"; then
+                        NIC_IPV6_GWS[$i]="$ans6"
+                    else
+                        echo "Input '$ans6' is not a valid IPv6 address; leaving '-'" >&2
+                        NIC_IPV6_GWS[$i]="-"
+                    fi
+                else
+                    NIC_IPV6_GWS[$i]="-"
+                fi
+            fi
+        done
+    fi
 
     # If generator debug mode was requested, force DRY_RUN and verbose output
     # so the generated file is previewed and not written into /etc.
@@ -731,6 +779,53 @@ sanitize_config() {
     fi
 }
 
+# Prompt for any missing gateways in the loaded config (post-load), updating in-memory arrays.
+# Skips prompting when running non-interactively or when AUTO_YES=true.
+prompt_missing_gateways_from_config() {
+    if ! is_interactive || [ "${AUTO_YES:-false}" = true ]; then
+        return 0
+    fi
+    local updated=false
+    local n=${#NIC_NAMES[@]}
+    for ((i=0; i<n; i++)); do
+        local dev=${NIC_NAMES[$i]:-}
+        local ipv4=${NIC_IPV4_ADDRS[$i]:-"-"}
+        local p4=${NIC_IPV4_PREFIXES[$i]:-"-"}
+        local gw4=${NIC_IPV4_GWS[$i]:-"-"}
+        local ipv6=${NIC_IPV6_ADDRS[$i]:-"-"}
+        local p6=${NIC_IPV6_PREFIXES[$i]:-"-"}
+        local gw6=${NIC_IPV6_GWS[$i]:-"-"}
+
+        if [ "$ipv4" != "-" ] && { [ -z "$gw4" ] || [ "$gw4" = "-" ]; }; then
+            echo "Gateway missing for $dev IPv4 ($ipv4$p4). Enter IPv4 gateway or '-' to skip:" >&2
+            read -r ans4
+            if [ -n "$ans4" ] && [ "$ans4" != "-" ]; then
+                if is_ipv4 "$ans4"; then
+                    NIC_IPV4_GWS[$i]="$ans4"; updated=true
+                else
+                    echo "Input '$ans4' is not a valid IPv4 address; keeping '-'" >&2
+                fi
+            fi
+        fi
+
+        if [ "$ipv6" != "-" ] && { [ -z "$gw6" ] || [ "$gw6" = "-" ]; }; then
+            echo "Gateway missing for $dev IPv6 ($ipv6$p6). Enter IPv6 gateway or '-' to skip:" >&2
+            read -r ans6
+            if [ -n "$ans6" ] && [ "$ans6" != "-" ]; then
+                if is_ipv6 "$ans6"; then
+                    NIC_IPV6_GWS[$i]="$ans6"; updated=true
+                else
+                    echo "Input '$ans6' is not a valid IPv6 address; keeping '-'" >&2
+                fi
+            fi
+        fi
+    done
+
+    if [ "$updated" = true ]; then
+        log "Gateways provided interactively were applied for this run. Consider updating $CONFIG_FILE to persist them."
+    fi
+}
+
 # NOTE: CLI parsing, shellcheck, and config loading are performed in the
 # main execution section at the end of this file to guarantee every helper
 # function is defined before any function is invoked. This ordering avoids
@@ -1111,6 +1206,7 @@ source "$CONFIG_FILE"
 
 # Sanitize config after sourcing and then validate its contents
 sanitize_config
+prompt_missing_gateways_from_config
 validate_config
 
 # -------- Warning Prompt --------

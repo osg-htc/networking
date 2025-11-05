@@ -95,6 +95,10 @@ Script location in the repository:
    !!! warning "Gateways required for addresses"
       Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
 
+   !!! note "Gateway prompts"
+
+      During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
+
 3. **Execute the script:**
 
       - Rehearsal (no changes, extra logging recommended on first run):
@@ -115,9 +119,13 @@ Script location in the repository:
          ./perfsonar-pbr-nm.sh
          ```
 
-    The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
+!!! note "Missing gateways at apply time"
 
-4. **Verify the routing policy:**
+   If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
+
+The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
+
+1. **Verify the routing policy:**
 
    ```bash
    nmcli connection show
