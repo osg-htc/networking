@@ -27,7 +27,7 @@ Before you begin, gather the following information:
    ```
 
 3. **Set the hostname and time sync:**
-    Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+   Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
    ```bash
    hostnamectl set-hostname <testpoint-hostname>
    systemctl enable --now chronyd
