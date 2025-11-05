@@ -1626,11 +1626,11 @@
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</li>
-<li><strong>Apply baseline updates (and verify dependencies):</strong></li>
-</ol>
+<li>
+<p><strong>Apply baseline updates (and verify dependencies):</strong></p>
 <p>Use the repository's helper to check for required tools and print
-   copy/paste install commands. Then apply OS updates and any remaining
-   baseline packages.</p>
+copy/paste install commands. Then apply OS updates and any remaining
+baseline packages.</p>
 <ul>
 <li>
 <p>From a local clone of this repository (recommended):</p>
@@ -1640,40 +1640,42 @@
 </li>
 <li>
 <p>Or download and run the script directly:</p>
-</li>
-</ul>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span>-o<span class="w"> </span>./check-deps.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
 ./check-deps.sh
 </code></pre></div>
+</li>
+</ul>
 <p>On EL9, apply updates and install common baseline packages, then add any
-   packages suggested by the checker (copy/paste the printed dnf line):</p>
+packages suggested by the checker (copy/paste the printed dnf line):</p>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
 dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
 <span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
 <span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
 </code></pre></div>
-<ol>
-<li><strong>Set the hostname and time sync:</strong>
-   Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</li>
-</ol>
+</li>
+<li>
+<p><strong>Set the hostname and time sync:</strong>
+    Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</p>
 <div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
 timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
 </code></pre></div>
-<ol>
-<li><strong>Disable unused services:</strong></li>
-</ol>
+</li>
+<li>
+<p><strong>Disable unused services:</strong></p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
 dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
 </code></pre></div>
-<ol>
-<li><strong>Record NIC names:</strong></li>
-</ol>
+</li>
+<li>
+<p><strong>Record NIC names:</strong></p>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>device<span class="w"> </span>status
 ip<span class="w"> </span>-br<span class="w"> </span>addr
 </code></pre></div>
 <p>Document interface mappings; you will need them for the policy-based routing configuration.</p>
+</li>
+</ol>
 <hr />
 <h2 id="step-2-configure-policy-based-routing-pbr">Step 2 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-2-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file.</p>
@@ -1686,18 +1688,18 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <li>
 <p><strong>Stage the script:</strong></p>
 <ul>
-<li>From a local clone of this repository:</li>
-</ul>
+<li>
+<p>From a local clone of this repository:</p>
 <div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>./perfsonar-pbr-nm.sh
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Or</span><span class="w"> </span><span class="n">download</span><span class="w"> </span><span class="n">directly</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">repository</span><span class="w"> </span><span class="n">URL</span><span class="p">:</span>
-
-<span class="w">    </span><span class="err">```</span><span class="n">bash</span>
-<span class="w">    </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">./</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span>
-<span class="w">    </span><span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">./</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span>
-<span class="w">    </span><span class="err">```</span>
+</li>
+<li>
+<p>Or download directly from the repository URL:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>-o<span class="w"> </span>./perfSONAR-pbr-nm.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfSONAR-pbr-nm.sh
 </code></pre></div>
-
+</li>
+</ul>
 </li>
 <li>
 <p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
@@ -1907,7 +1909,10 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 - Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</p>
 </li>
 </ul>
-<p>Tip: preview the fully rendered nftables rules (no changes are made):</p>
+<p>!!! tip </p>
+<div class="codehilite"><pre><span></span><code>   preview the fully rendered nftables rules (no changes are made):
+</code></pre></div>
+
 <div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
 <p>Optional: manually add extra management hosts/subnets</p>
