@@ -320,13 +320,13 @@ If any prerequisite is missing, the script skips that component and continues.
     - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
     - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-    !!! tip 
+    ??? tip 
    
-       preview the fully rendered nftables rules (no changes are made):
+       You can preview the fully rendered nftables rules (no changes are made):
 
-   ```bash
-   ./perfsonar-install-nftables.sh --print-rules
-   ```
+       ```bash
+       ./perfsonar-install-nftables.sh --print-rules
+       ```
 
    Optional: manually add extra management hosts/subnets
 
