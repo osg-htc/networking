@@ -1211,6 +1211,10 @@ chmod <span class="m">0755</span> ./perfSONAR-pbr-nm.sh
 <p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
 <p>!!! warning "Gateways required for addresses"
       Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
+<p>!!! note "Gateway prompts"</p>
+<div class="codehilite"><pre><span></span><code>  <span class="nv">During</span> <span class="nv">generation</span>, <span class="nv">the</span> <span class="nv">script</span> <span class="nv">attempts</span> <span class="nv">to</span> <span class="nv">detect</span> <span class="nv">gateways</span> <span class="nv">per</span><span class="o">-</span><span class="nv">NIC</span>. <span class="k">If</span> <span class="nv">a</span> <span class="nv">NIC</span> <span class="nv">has</span> <span class="nv">an</span> <span class="nv">IP</span> <span class="nv">address</span> <span class="nv">but</span> <span class="nv">no</span> <span class="nv">gateway</span> <span class="nv">could</span> <span class="nv">be</span> <span class="nv">determined</span>, <span class="nv">it</span> <span class="nv">will</span> <span class="nv">prompt</span> <span class="nv">you</span> <span class="nv">interactively</span> <span class="nv">to</span> <span class="nv">enter</span> <span class="nv">an</span> <span class="nv">IPv4</span> <span class="nv">and</span><span class="o">/</span><span class="nv">or</span> <span class="nv">IPv6</span> <span class="nv">gateway</span> <span class="ss">(</span><span class="nv">or</span> `<span class="o">-</span>` <span class="nv">to</span> <span class="nv">skip</span><span class="ss">)</span>. <span class="nv">Prompts</span> <span class="nv">are</span> <span class="nv">skipped</span> <span class="nv">in</span> <span class="nv">non</span><span class="o">-</span><span class="nv">interactive</span> <span class="nv">sessions</span> <span class="nv">or</span> <span class="nv">when</span> <span class="nv">you</span> <span class="nv">use</span> `<span class="o">--</span><span class="nv">yes</span>`.
+</code></pre></div>
+
 <ol>
 <li>
 <p><strong>Execute the script:</strong></p>
@@ -1231,11 +1235,15 @@ chmod <span class="m">0755</span> ./perfSONAR-pbr-nm.sh
 </code></pre></div>
 </li>
 </ul>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Missing gateways at apply time</p>
+</div>
+<p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use <code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.</p>
 <p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
-</li>
-<li>
-<p><strong>Verify the routing policy:</strong></p>
-</li>
+<ol>
+<li><strong>Verify the routing policy:</strong></li>
 </ol>
 <div class="highlight"><pre><span></span><code>nmcli connection show
 ip rule show
