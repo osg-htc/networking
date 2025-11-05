@@ -1578,22 +1578,43 @@
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</li>
-<li><strong>Apply baseline updates:</strong></li>
+<li><strong>Apply baseline updates (and verify dependencies):</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
+<p>Use the repository's helper to check for required tools and print
+   copy/paste install commands. Then apply OS updates and any remaining
+   baseline packages.</p>
+<ul>
+<li>
+<p>From a local clone of this repository (recommended):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># run from the repo root</span>
+./docs/perfsonar/tools_scripts/check-deps.sh
+</code></pre></div>
+</li>
+<li>
+<p>Or download and run the script directly:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span>-o<span class="w"> </span>/usr/local/sbin/check-deps.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/sbin/check-deps.sh
+check-deps.sh
+</code></pre></div>
+</li>
+</ul>
+<p>On EL9, apply updates and install common baseline packages, then add any
+   packages suggested by the checker (copy/paste the printed dnf line):</p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
+dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
+<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
+<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
 </code></pre></div>
 <ol>
-<li>
-<p><strong>Set the hostname and time sync:</strong>
-   Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
-   <div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
+<li><strong>Set the hostname and time sync:</strong>
+   Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</li>
+</ol>
+<div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
 timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
-</code></pre></div></p>
-</li>
-<li>
-<p><strong>Disable unused services:</strong></p>
-</li>
+</code></pre></div>
+<ol>
+<li><strong>Disable unused services:</strong></li>
 </ol>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
 dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
