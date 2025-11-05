@@ -13,6 +13,26 @@ Before you begin, gather the following information:
 - **Operational contacts:** site admin email, OSG facility name, latitude/longitude, usage policy link.
 - **Repository artifacts:** the scripts referenced below are in `docs/perfsonar/` in this repository.
 
+### Clone the Repository
+
+This guide references multiple scripts from the osg-htc/networking repository. Clone the repository to your testpoint host for easy access to all tools.
+
+**Recommended locations:**
+
+- **Networking repo:** `/opt/networking` (configuration scripts and documentation)
+- **perfSONAR testpoint compose bundle:** `/opt/testpoint` (if using containerized testpoint)
+
+```bash
+# Clone the networking repository to /opt
+cd /opt
+git clone https://github.com/osg-htc/networking.git
+
+# Optional: if deploying the perfSONAR testpoint container, clone it separately
+# git clone https://github.com/perfsonar/testpoint.git /opt/testpoint
+```
+
+After cloning, all script examples in this guide that reference `docs/perfsonar/tools_scripts/` assume you're running commands from `/opt/networking`.
+
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
 ---
@@ -29,7 +49,7 @@ Before you begin, gather the following information:
     - From a local clone of this repository (recommended):
 
         ```bash
-        # run from the repo root
+        cd /opt/networking
         ./docs/perfsonar/tools_scripts/check-deps.sh
         ```
 
@@ -91,7 +111,9 @@ Script location in the repository:
     - From a local clone of this repository:
 
         ```bash
-        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ./perfsonar-pbr-nm.sh
+        cd /opt/networking
+        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ~/perfsonar-pbr-nm.sh
+        cd ~
         ```
 
     ??? tip "Alternative: Download directly from the repository URL"
@@ -105,13 +127,13 @@ Script location in the repository:
     - Preview (no changes):
 
         ```bash
-        ./perfsonar-pbr-nm.sh --generate-config-debug
+        ~/perfsonar-pbr-nm.sh --generate-config-debug
         ```
 
     - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
         ```bash
-        ./perfsonar-pbr-nm.sh --generate-config-auto
+        ~/perfsonar-pbr-nm.sh --generate-config-auto
         ```
 
     Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
@@ -128,19 +150,19 @@ Script location in the repository:
     - Rehearsal (no changes, extra logging recommended on first run):
 
         ```bash
-        ./perfsonar-pbr-nm.sh --dry-run --debug
+        ~/perfsonar-pbr-nm.sh --dry-run --debug
         ```
 
     - Apply changes non-interactively (auto-confirm):
 
         ```bash
-        ./perfsonar-pbr-nm.sh --yes
+        ~/perfsonar-pbr-nm.sh --yes
         ```
 
     - Or run interactively and answer the confirmation prompt when ready:
 
         ```bash
-        ./perfsonar-pbr-nm.sh
+        ~/perfsonar-pbr-nm.sh
         ```
 
     !!! note "Missing gateways at apply time"
@@ -287,19 +309,21 @@ If any prerequisite is missing, the script skips that component and continues.
     - From a local clone of this repository:
 
         ```bash
-        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh ./perfsonar-install-nftables.sh
+        cd /opt/networking
+        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh ~/perfsonar-install-nftables.sh
+        cd ~
         ```
 
     ??? tip "Alternative: Download directly from the repository URL"
         ```bash
-        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ./perfsonar-install-nftables.sh
-        chmod 0755 ./perfsonar-install-nftables.sh
+        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ~/perfsonar-install-nftables.sh
+        chmod 0755 ~/perfsonar-install-nftables.sh
         ```
 
 2. **Run with desired options:**
 
    ```bash
-   ./perfsonar-install-nftables.sh --selinux --fail2ban --yes
+   ~/perfsonar-install-nftables.sh --selinux --fail2ban --yes
    ```
 
    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
@@ -315,15 +339,13 @@ If any prerequisite is missing, the script skips that component and continues.
     - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
     - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-    ??? tip 
+    ??? tip
    
        You can preview the fully rendered nftables rules (no changes are made):
 
        ```bash
-       ./perfsonar-install-nftables.sh --print-rules
-       ```
-
-   Optional: manually add extra management hosts/subnets
+       ~/perfsonar-install-nftables.sh --print-rules
+       ```   Optional: manually add extra management hosts/subnets
 
    If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
 
@@ -568,14 +590,14 @@ Install and run examples (root shell):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-   -o ./perfSONAR-update-lsregistration.sh
-chmod 0755 ./perfSONAR-update-lsregistration.sh
+   -o ~/perfSONAR-update-lsregistration.sh
+chmod 0755 ~/perfSONAR-update-lsregistration.sh
 
 # Preview changes only
-./perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
+~/perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
 
 # Apply common updates and restart the daemon inside the container
-./perfSONAR-update-lsregistration.sh \
+~/perfSONAR-update-lsregistration.sh \
    --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
    --city Berkeley --region CA --country US --zip 94720 \
    --latitude 37.5 --longitude -121.7469 \
