@@ -56,7 +56,10 @@ done
 echo "Dependency check for perfSONAR tools"
 echo
 if [ ${#missing[@]} -eq 0 ]; then
-  echo "All essential commands present: ${ESSENTIAL[*]}"
+  # Print essentials on one line regardless of IFS settings
+  essentials_joined=$(printf '%s ' "${ESSENTIAL[@]}")
+  essentials_joined=${essentials_joined% }
+  echo "All essential commands present: ${essentials_joined}"
 else
   echo "Missing essential commands:"
   for m in "${missing[@]}"; do
