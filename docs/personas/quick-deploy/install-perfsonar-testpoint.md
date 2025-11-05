@@ -229,6 +229,34 @@ Notes and automation tips:
 
 If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.
 
+### Download and run the checker
+
+You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects `/etc/perfSONAR-multi-nic-config.conf` to exist and be readable. Example copy/paste steps:
+
+```bash
+# Download (curl)
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh -o ./check-perfsonar-dns.sh
+# Or download with wget
+# wget -O ./check-perfsonar-dns.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh
+
+chmod 0755 ./check-perfsonar-dns.sh
+
+# Install DNS tools if missing (EL9)
+sudo dnf install -y bind-utils
+
+# Debian/Ubuntu alternative
+# sudo apt-get update && sudo apt-get install -y dnsutils
+
+# Run the check (needs to read /etc/perfSONAR-multi-nic-config.conf)
+sudo ./check-perfsonar-dns.sh
+```
+
+Notes:
+
+- If you downloaded the script to a different path, either move it to the host and run it there, or copy `/etc/perfSONAR-multi-nic-config.conf` to the machine where you run the check (recommended only for temporary verification; treat the config as sensitive).
+- The script uses `dig` (preferred) or `host` as a fallback; ensure one of those is installed.
+- Run this check after you generate or edit `/etc/perfSONAR-multi-nic-config.conf` and before you register or start active measurements.
+
 1. **Verify the routing policy:**
 
    ```bash
