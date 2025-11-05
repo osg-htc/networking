@@ -1715,16 +1715,16 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </code></pre></div>
 </li>
 </ul>
-</li>
-</ul>
 <p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
-<p>!!! warning "Gateways required for addresses"
-      Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
-<p>!!! note "Gateway prompts"</p>
-<div class="codehilite"><pre><span></span><code><span class="w">  </span><span class="nx">During</span><span class="w"> </span><span class="nx">generation</span><span class="p">,</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">script</span><span class="w"> </span><span class="nx">attempts</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">detect</span><span class="w"> </span><span class="nx">gateways</span><span class="w"> </span><span class="nx">per</span><span class="o">-</span><span class="nx">NIC</span><span class="p">.</span><span class="w"> </span><span class="nx">If</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">NIC</span><span class="w"> </span><span class="nx">has</span><span class="w"> </span><span class="nx">an</span><span class="w"> </span><span class="nx">IP</span><span class="w"> </span><span class="nx">address</span><span class="w"> </span><span class="nx">but</span><span class="w"> </span><span class="nx">no</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="nx">could</span><span class="w"> </span><span class="nx">be</span><span class="w"> </span><span class="nx">determined</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="nx">will</span><span class="w"> </span><span class="nx">prompt</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">interactively</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">enter</span><span class="w"> </span><span class="nx">an</span><span class="w"> </span><span class="nx">IPv4</span><span class="w"> </span><span class="k">and</span><span class="o">/</span><span class="k">or</span><span class="w"> </span><span class="nx">IPv6</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="p">(</span><span class="k">or</span><span class="w"> </span><span class="err">`</span><span class="o">-</span><span class="err">`</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">skip</span><span class="p">).</span><span class="w"> </span><span class="nx">Prompts</span><span class="w"> </span><span class="nx">are</span><span class="w"> </span><span class="nx">skipped</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">non</span><span class="o">-</span><span class="nx">interactive</span><span class="w"> </span><span class="nx">sessions</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="nx">when</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">use</span><span class="w"> </span><span class="err">`</span><span class="o">--</span><span class="nx">yes</span><span class="err">`</span><span class="p">.</span>
-</code></pre></div>
-
-<ol>
+<div class="admonition warning">
+<p class="admonition-title">Gateways required for addresses</p>
+<p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Gateway prompts</p>
+<p>During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive sessions or when you use <code>--yes</code>.</p>
+</div>
+</li>
 <li>
 <p><strong>Execute the script:</strong></p>
 <ul>
@@ -1744,12 +1744,12 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </code></pre></div>
 </li>
 </ul>
-</li>
-</ol>
 <div class="admonition note">
 <p class="admonition-title">Missing gateways at apply time</p>
-</div>
 <p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use <code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.</p>
+</div>
+</li>
+</ul>
 <p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
 <h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
 <p>All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.</p>
@@ -1878,13 +1878,13 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 <ul>
 <li>
 <p>From a local clone of this repository:</p>
-<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>./perfsonar-install-nftables.sh
+<div class="highlight"><pre><span></span><code><span class="w"> </span>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>./perfsonar-install-nftables.sh
 </code></pre></div>
 </li>
 <li>
 <p>Or download directly from the repository URL:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>./perfsonar-install-nftables.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfsonar-install-nftables.sh
+<div class="highlight"><pre><span></span><code><span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>./perfsonar-install-nftables.sh
+<span class="w"> </span>chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfsonar-install-nftables.sh
 </code></pre></div>
 </li>
 </ul>
@@ -1907,12 +1907,12 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
    - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
 - The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.
 - Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+</div>
+<p>preview the fully rendered nftables rules (no changes are made):</p>
 </li>
 </ul>
-<p>!!! tip </p>
-<div class="codehilite"><pre><span></span><code>   preview the fully rendered nftables rules (no changes are made):
-</code></pre></div>
-
 <div class="highlight"><pre><span></span><code>./perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
 <p>Optional: manually add extra management hosts/subnets</p>
