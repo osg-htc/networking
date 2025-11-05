@@ -20,6 +20,61 @@ Requirements
   `nmcli` and will abort if it is not installed. Install NetworkManager via
   your distribution's package manager before running.
 
+Dependencies and package install hints
+-------------------------------------
+
+The scripts in this directory call a number of external commands. Install
+these packages (or their distro equivalents) before using the tools below.
+
+Essential packages
+
+- bash (Bash 4.3+)
+- coreutils (cp/mv/rm/mkdir/chmod/chown)
+- iproute2 (provides `ip` and `ip route`)
+- NetworkManager (provides `nmcli`)
+- rsync (recommended for safe backups; scripts fall back to `cp`)
+- curl
+- openssl
+
+Optional / feature packages
+
+- nftables (provides `nft`) — required for `perfSONAR-install-nftables.sh`
+- fail2ban (provides `fail2ban-client`) — optional; only used if present
+- SELinux user tools (provides `getenforce`, `setenforce`, `restorecon`) —
+  used by SELinux-related operations
+- A container engine: `podman` or `docker` — required for the lsregistration
+  updater/extractor when operating against the running testpoint container
+- podman-compose or docker-compose — useful for running the testpoint
+  compose bundle locally
+  
+Note: the `check-deps.sh` helper accepts `podman-compose` as an alternative
+provider to `docker-compose` and will report the dependency as satisfied if
+either binary is present.
+
+Example install commands
+
+Note: package names vary slightly across distributions. Adapt as needed.
+
+Fedora / RHEL / CentOS (dnf):
+
+```bash
+sudo dnf install -y bash coreutils iproute NetworkManager rsync curl openssl nftables podman podman-compose docker-compose fail2ban policycoreutils
+```
+
+Debian / Ubuntu (apt):
+
+```bash
+sudo apt-get update
+sudo apt-get install -y bash coreutils iproute2 network-manager rsync curl openssl nftables podman podman-compose docker.io docker-compose fail2ban policycoreutils
+```
+
+If you intend to use the lsregistration container helpers, ensure either
+`podman` or `docker` is installed and that the service can list and access
+containers (e.g., `podman ps` or `docker ps` works as root).
+
+If `rsync` is not available the scripts will attempt a `cp -a` fallback, but
+installing `rsync` provides safer, more robust backups.
+
 Safety first
 ------------
 This script will REMOVE ALL existing NetworkManager connections when run.
@@ -29,6 +84,7 @@ modifying anything.
 
 Compatibility and fallbacks
 ---------------------------
+
 - The script prefers to configure routing and policy rules via NetworkManager
   (`nmcli`). However, `nmcli` support for advanced `routes` entries and
   `routing-rules` varies across versions and distributions. If `nmcli` cannot
@@ -41,6 +97,7 @@ Compatibility and fallbacks
 
 How to run (dry-run / debug)
 ----------------------------
+
 Preview what the script would do without changing the system:
 
 ```bash
@@ -51,12 +108,12 @@ Generate an example or auto-detected config (preview, dry-run only):
 
 ```bash
 sudo bash perfSONAR-pbr-nm.sh --generate-config-debug
+```
 
 Write the auto-detected config to /etc (does not apply changes):
 
 ```bash
 sudo bash perfSONAR-pbr-nm.sh --generate-config-auto
-```
 ```
 
 Run for real (be careful):
@@ -73,11 +130,13 @@ Gateway requirement and generator warnings
 
 Backups and safety
 ------------------
+
 - Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
 ```
 
 Tests
 -----
+
 A small set of unit-style tests is provided under `tests/`. These are designed
 to exercise pure validation and sanitization helpers without modifying system
 configuration. They source the script (functions only) and run checks in a
@@ -92,6 +151,7 @@ cd docs/perfsonar
 
 Notes
 -----
+
 - The script requires Bash (uses `local -n` namerefs). Run tests on a system
   with Bash 4.3+.
 - For more extensive validation, run `shellcheck -x perfSONAR-pbr-nm.sh` and
@@ -99,4 +159,5 @@ Notes
 
 Contact
 -------
-Shawn McKee (script author) - smckee@umich.edu
+
+Shawn McKee (script author) — [smckee@umich.edu](mailto:smckee@umich.edu)
