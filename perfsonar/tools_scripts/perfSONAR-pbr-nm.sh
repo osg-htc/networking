@@ -56,6 +56,10 @@ RUN_SHELLCHECK=false
 GENERATE_CONFIG_AUTO=true
 GENERATE_CONFIG_DEBUG=false
 
+# Backup status flag: set true only after a successful backup. Used to
+# prevent destructive removals when we couldn't capture a backup safely.
+BACKUP_OK=false
+
 # -----------------------------------------------------
 
 # ----------------- Function definitions follow -----------------
@@ -227,8 +231,26 @@ rollback() {
         return 0
     fi
 
-    # Restore using rsync (safer than shell-globbed cp)
-    run_cmd rsync -a -- "$BACKUP_DIR"/ /etc/NetworkManager/system-connections/ || log "Rollback: copy failed"
+    # Ensure destination exists and restore from backup using rsync when
+    # available; fall back to cp -a if rsync is not present or fails.
+    run_cmd mkdir -p /etc/NetworkManager/system-connections
+    local restore_ok=false
+    if command -v rsync >/dev/null 2>&1; then
+        if run_cmd rsync -a -- "$BACKUP_DIR"/ /etc/NetworkManager/system-connections/; then
+            restore_ok=true
+        else
+            log "Rollback: rsync restore failed; will try cp -a as fallback"
+        fi
+    fi
+    if [ "$restore_ok" = false ]; then
+        if run_cmd cp -a -- "$BACKUP_DIR"/. /etc/NetworkManager/system-connections/; then
+            restore_ok=true
+        else
+            log "Rollback: cp -a restore failed"
+        fi
+    fi
+
+    # Permissions for NetworkManager connection files
     run_cmd chmod -R 0600 /etc/NetworkManager/system-connections/* || true
     run_cmd chown -R root:root /etc/NetworkManager/system-connections/* || true
     # Reload NetworkManager connections; if reload fails attempt restart and
@@ -958,15 +980,57 @@ validate_ip() {
 
 # -------- Backup existing NetworkManager configurations --------
 # backup_existing_configs: create a timestamped backup of /etc/NetworkManager/system-connections
-# Uses rsync for safer copying (avoids globbing pitfalls) and records BACKUP_DIR for rollback.
+# Prefer rsync when available, else fall back to cp -a. Only mark BACKUP_OK
+# true (and proceed to destructive actions later) if the backup succeeded or
+# there was nothing to back up.
 backup_existing_configs() {
     BACKUP_DIR="/etc/NetworkManager/system-connections-backup-$(date +%Y%m%d%H%M%S)"
+    BACKUP_OK=false
     log "Backing up existing configurations to $BACKUP_DIR..."
     run_cmd mkdir -p "$BACKUP_DIR"
-    # Use rsync to copy contents safely (avoids shell globbing issues with /*)
-    run_cmd rsync -a -- /etc/NetworkManager/system-connections/ "$BACKUP_DIR" || log "No existing connections to backup or copy failed"
-    log "Removing original configuration files from /etc/NetworkManager/system-connections/"
-    run_cmd rm -rf /etc/NetworkManager/system-connections/*
+
+    # Detect if there are any existing connection files; if none, we can
+    # safely continue even if copy commands fail or are unavailable.
+    local has_existing
+    if [ -d /etc/NetworkManager/system-connections ]; then
+        if [ -n "$(ls -A /etc/NetworkManager/system-connections 2>/dev/null || true)" ]; then
+            has_existing=true
+        else
+            has_existing=false
+        fi
+    else
+        has_existing=false
+    fi
+
+    local copy_ok=false
+    if [ "$has_existing" = true ]; then
+        if command -v rsync >/dev/null 2>&1; then
+            if run_cmd rsync -a -- /etc/NetworkManager/system-connections/ "$BACKUP_DIR"/; then
+                copy_ok=true
+            else
+                log "Backup via rsync failed; will try cp -a as fallback"
+            fi
+        fi
+        if [ "$copy_ok" = false ]; then
+            # Fallback to cp -a; copy directory contents using trailing dot
+            if run_cmd cp -a -- /etc/NetworkManager/system-connections/. "$BACKUP_DIR"/; then
+                copy_ok=true
+            else
+                log "Backup via cp -a also failed"
+            fi
+        fi
+    else
+        # Nothing to back up; treat as success
+        copy_ok=true
+    fi
+
+    if [ "$copy_ok" = true ]; then
+        BACKUP_OK=true
+        log "Backup completed${has_existing:+ (existing files found)}. Saved to $BACKUP_DIR"
+    else
+        BACKUP_OK=false
+        log "Backup did not complete successfully; will not proceed with destructive removals"
+    fi
 }
 
 # -------- Routing table management --------
@@ -1028,7 +1092,17 @@ add_routing_table() {
 
     # Fallback: ensure there are no existing entries for this table name in
     # the legacy /etc/iproute2/rt_tables, remove them if present, then append
-    # the desired mapping.
+    # the desired mapping. Create the directory/file if missing to avoid
+    # runtime failures on minimal installs.
+    run_cmd mkdir -p /etc/iproute2
+    if [ ! -f /etc/iproute2/rt_tables ]; then
+        run_cmd touch /etc/iproute2/rt_tables
+        run_cmd chmod 0644 /etc/iproute2/rt_tables || true
+        run_cmd chown root:root /etc/iproute2/rt_tables || true
+        if command -v restorecon >/dev/null 2>&1; then
+            run_cmd restorecon -v /etc/iproute2/rt_tables || true
+        fi
+    fi
     if grep -wq "${table_name}" /etc/iproute2/rt_tables 2>/dev/null; then
         log "Removing existing entry for ${table_name} from /etc/iproute2/rt_tables"
     run_cmd sed -i -E "/^[[:space:]]*[0-9]+[[:space:]]+${table_name}[[:space:]]*$/d" /etc/iproute2/rt_tables || log "Failed to clean /etc/iproute2/rt_tables"
@@ -1327,6 +1401,9 @@ run_cmd bash -c 'echo 1 > /proc/sys/net/ipv6/route/flush' || handle_error "Faile
 run_cmd ip rule flush || handle_error "Failed to flush IP rules"
 
 # Remove previous NetworkManager configurations
+if [ "$BACKUP_OK" != true ]; then
+    handle_error "Backup did not succeed; refusing to remove existing NetworkManager configurations."
+fi
 log "Removing ALL existing network configurations..."
 # Execute removal via run_cmd and log failure explicitly; using an if/then
 # prevents shellcheck complaining that the '||' may be misinterpreted.

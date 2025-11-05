@@ -1154,12 +1154,12 @@
 </li>
 <li>
 <p>Or download and run the script directly:</p>
-<div class="highlight"><pre><span></span><code>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o /usr/local/sbin/check-deps.sh
-chmod <span class="m">0755</span> /usr/local/sbin/check-deps.sh
-check-deps.sh
-</code></pre></div>
 </li>
 </ul>
+<div class="highlight"><pre><span></span><code>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
+chmod <span class="m">0755</span> ./check-deps.sh
+./check-deps.sh
+</code></pre></div>
 <p>On EL9, apply updates and install common baseline packages, then add any
    packages suggested by the checker (copy/paste the printed dnf line):</p>
 <div class="highlight"><pre><span></span><code>dnf update -y
@@ -1200,18 +1200,18 @@ ip -br addr
 <li>
 <p><strong>Stage the script:</strong></p>
 <ul>
-<li>
-<p>From a local clone of this repository:</p>
-<div class="highlight"><pre><span></span><code>install -m <span class="m">0755</span> docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh /usr/local/sbin/perfsonar-pbr-nm.sh
-</code></pre></div>
-</li>
-<li>
-<p>Or download directly from the repository URL:</p>
-<div class="highlight"><pre><span></span><code>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
-chmod <span class="m">0755</span> ./perfSONAR-pbr-nm.sh
-</code></pre></div>
-</li>
+<li>From a local clone of this repository:</li>
 </ul>
+<div class="highlight"><pre><span></span><code>install -m <span class="m">0755</span> docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ./perfsonar-pbr-nm.sh
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Or</span><span class="w"> </span><span class="n">download</span><span class="w"> </span><span class="n">directly</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">repository</span><span class="w"> </span><span class="n">URL</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">    </span><span class="err">```</span><span class="n">bash</span><span class="w"></span>
+<span class="w">    </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">./</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span><span class="w"></span>
+<span class="w">    </span><span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">./</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span><span class="w"></span>
+<span class="w">    </span><span class="err">```</span><span class="w"></span>
+</code></pre></div>
+
 </li>
 <li>
 <p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
@@ -1290,16 +1290,18 @@ ip route show table &lt;table-id&gt;
 <li>
 <p><strong>Stage the installer:</strong></p>
 <ul>
-<li>From a local clone of this repository:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>install -m <span class="m">0755</span> docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh /usr/local/sbin/perfsonar-install-nftables.sh
+<li>
+<p>From a local clone of this repository:</p>
+<div class="highlight"><pre><span></span><code>install -m <span class="m">0755</span> docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh ./perfsonar-install-nftables.sh
 </code></pre></div>
-<ul>
-<li>Or download directly from the repository URL:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o /usr/local/sbin/perfsonar-install-nftables.sh
-chmod <span class="m">0755</span> /usr/local/sbin/perfsonar-install-nftables.sh
+</li>
+<li>
+<p>Or download directly from the repository URL:</p>
+<div class="highlight"><pre><span></span><code>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ./perfsonar-install-nftables.sh
+chmod <span class="m">0755</span> ./perfsonar-install-nftables.sh
 </code></pre></div>
+</li>
+</ul>
 </li>
 <li>
 <p><strong>Run with desired options:</strong></p>

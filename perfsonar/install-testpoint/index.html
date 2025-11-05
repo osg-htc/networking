@@ -1103,7 +1103,7 @@ sudo ip rule add from 10.20.30.10/32 table eth1table</p>
 <p>sudo ip route add 10.20.30.0/24 dev eth1 scope link table eth1table<br />
 sudo ip route add default via 10.20.30.1 dev eth1 table eth1table</p>
 <h3 id="c-make-persistent"><strong>c) Make persistent</strong><a class="headerlink" href="#c-make-persistent" title="Permanent link">&para;</a></h3>
-<p>For persistent configuration, add these rules and routes to a script (e.g., /usr/local/sbin/perfsonar-policy-routing.sh) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.</p>
+<p>For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.</p>
 <p>Example systemd unit:</p>
 <p># /etc/systemd/system/perfsonar-policy-routing.service<br />
 <strong>[Unit]</strong><br />
@@ -1111,7 +1111,7 @@ Description\=PerfSONAR Policy Routing<br />
 After\=network.target</p>
 <p><strong>[Service]</strong><br />
 Type\=oneshot<br />
-ExecStart\=/usr/local/sbin/perfsonar-policy-routing.sh</p>
+ExecStart\=/path/to/your/working/dir/perfsonar-policy-routing.sh</p>
 <p><strong>[Install]</strong><br />
 WantedBy\=multi-user.target</p>
 <p>Enable it:</p>
