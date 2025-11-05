@@ -53,7 +53,7 @@ DEBUG=false          # when true: run commands under bash -x for verbose output
 
 # CLI-controlled behavior defaults
 RUN_SHELLCHECK=false
-GENERATE_CONFIG_AUTO=true
+GENERATE_CONFIG_AUTO=false
 GENERATE_CONFIG_DEBUG=false
 
 # Backup status flag: set true only after a successful backup. Used to
