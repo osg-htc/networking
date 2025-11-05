@@ -842,6 +842,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dependencies-and-package-install-hints" class="md-nav__link">
+    Dependencies and package install hints
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#safety-first" class="md-nav__link">
     Safety first
   </a>
@@ -1009,6 +1016,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dependencies-and-package-install-hints" class="md-nav__link">
+    Dependencies and package install hints
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#safety-first" class="md-nav__link">
     Safety first
   </a>
@@ -1087,6 +1101,44 @@ static IPv4/IPv6 addressing and per-NIC source-based routing via NetworkManager
   <code>nmcli</code> and will abort if it is not installed. Install NetworkManager via
   your distribution's package manager before running.</li>
 </ul>
+<h2 id="dependencies-and-package-install-hints">Dependencies and package install hints<a class="headerlink" href="#dependencies-and-package-install-hints" title="Permanent link">&para;</a></h2>
+<p>The scripts in this directory call a number of external commands. Install
+these packages (or their distro equivalents) before using the tools below.</p>
+<p>Essential packages</p>
+<ul>
+<li>bash (Bash 4.3+)</li>
+<li>coreutils (cp/mv/rm/mkdir/chmod/chown)</li>
+<li>iproute2 (provides <code>ip</code> and <code>ip route</code>)</li>
+<li>NetworkManager (provides <code>nmcli</code>)</li>
+<li>rsync (recommended for safe backups; scripts fall back to <code>cp</code>)</li>
+<li>curl</li>
+<li>openssl</li>
+</ul>
+<p>Optional / feature packages</p>
+<ul>
+<li>nftables (provides <code>nft</code>) — required for <code>perfSONAR-install-nftables.sh</code></li>
+<li>fail2ban (provides <code>fail2ban-client</code>) — optional; only used if present</li>
+<li>SELinux user tools (provides <code>getenforce</code>, <code>setenforce</code>, <code>restorecon</code>) —
+  used by SELinux-related operations</li>
+<li>A container engine: <code>podman</code> or <code>docker</code> — required for the lsregistration
+  updater/extractor when operating against the running testpoint container</li>
+<li>podman-compose or docker-compose — useful for running the testpoint
+  compose bundle locally</li>
+</ul>
+<p>Example install commands</p>
+<p>Note: package names vary slightly across distributions. Adapt as needed.</p>
+<p>Fedora / RHEL / CentOS (dnf):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bash<span class="w"> </span>coreutils<span class="w"> </span>iproute<span class="w"> </span>NetworkManager<span class="w"> </span>rsync<span class="w"> </span>curl<span class="w"> </span>openssl<span class="w"> </span>nftables<span class="w"> </span>podman<span class="w"> </span>docker-compose<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils
+</code></pre></div>
+<p>Debian / Ubuntu (apt):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bash<span class="w"> </span>coreutils<span class="w"> </span>iproute2<span class="w"> </span>network-manager<span class="w"> </span>rsync<span class="w"> </span>curl<span class="w"> </span>openssl<span class="w"> </span>nftables<span class="w"> </span>podman<span class="w"> </span>docker.io<span class="w"> </span>docker-compose<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils
+</code></pre></div>
+<p>If you intend to use the lsregistration container helpers, ensure either
+<code>podman</code> or <code>docker</code> is installed and that the service can list and access
+containers (e.g., <code>podman ps</code> or <code>docker ps</code> works as root).</p>
+<p>If <code>rsync</code> is not available the scripts will attempt a <code>cp -a</code> fallback, but
+installing <code>rsync</code> provides safer, more robust backups.</p>
 <h2 id="safety-first">Safety first<a class="headerlink" href="#safety-first" title="Permanent link">&para;</a></h2>
 <p>This script will REMOVE ALL existing NetworkManager connections when run.
 Always test in a VM or console-attached host and use <code>--dry-run</code> to preview
@@ -1112,29 +1164,25 @@ modifying anything.</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
 </code></pre></div>
 <p>Generate an example or auto-detected config (preview, dry-run only):</p>
-<p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
-
-Write<span class="w"> </span>the<span class="w"> </span>auto-detected<span class="w"> </span>config<span class="w"> </span>to<span class="w"> </span>/etc<span class="w"> </span><span class="o">(</span>does<span class="w"> </span>not<span class="w"> </span>apply<span class="w"> </span>changes<span class="o">)</span>:
-
-<span class="sb">```</span>bash
-sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Run for real (be careful):
+<p>Write the auto-detected config to /etc (does not apply changes):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+</code></pre></div>
+<p>Run for real (be careful):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh
+<span class="c1"># or non-interactive</span>
+sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 
-```bash
-sudo bash perfSONAR-pbr-nm.sh
-# or non-interactive
-sudo bash perfSONAR-pbr-nm.sh --yes
-
-Gateway requirement and generator warnings
+Gateway<span class="w"> </span>requirement<span class="w"> </span>and<span class="w"> </span>generator<span class="w"> </span>warnings
 -----------------------------------------
-- Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.
-- The auto-generator will warn if it cannot detect a gateway for a NIC that has an address. The generated config will include a WARNING block listing affected NICs. Edit `NIC_IPV4_GWS` and/or `NIC_IPV6_GWS` accordingly before running the script to apply changes.
+-<span class="w"> </span>Any<span class="w"> </span>NIC<span class="w"> </span>with<span class="w"> </span>an<span class="w"> </span>IPv4<span class="w"> </span>address<span class="w"> </span>must<span class="w"> </span>have<span class="w"> </span>a<span class="w"> </span>corresponding<span class="w"> </span>IPv4<span class="w"> </span>gateway<span class="p">;</span><span class="w"> </span>likewise<span class="w"> </span><span class="k">for</span><span class="w"> </span>IPv6.
+-<span class="w"> </span>The<span class="w"> </span>auto-generator<span class="w"> </span>will<span class="w"> </span>warn<span class="w"> </span><span class="k">if</span><span class="w"> </span>it<span class="w"> </span>cannot<span class="w"> </span>detect<span class="w"> </span>a<span class="w"> </span>gateway<span class="w"> </span><span class="k">for</span><span class="w"> </span>a<span class="w"> </span>NIC<span class="w"> </span>that<span class="w"> </span>has<span class="w"> </span>an<span class="w"> </span>address.<span class="w"> </span>The<span class="w"> </span>generated<span class="w"> </span>config<span class="w"> </span>will<span class="w"> </span>include<span class="w"> </span>a<span class="w"> </span>WARNING<span class="w"> </span>block<span class="w"> </span>listing<span class="w"> </span>affected<span class="w"> </span>NICs.<span class="w"> </span>Edit<span class="w"> </span><span class="sb">`</span>NIC_IPV4_GWS<span class="sb">`</span><span class="w"> </span>and/or<span class="w"> </span><span class="sb">`</span>NIC_IPV6_GWS<span class="sb">`</span><span class="w"> </span>accordingly<span class="w"> </span>before<span class="w"> </span>running<span class="w"> </span>the<span class="w"> </span>script<span class="w"> </span>to<span class="w"> </span>apply<span class="w"> </span>changes.
 
-Backups and safety
+Backups<span class="w"> </span>and<span class="w"> </span>safety
 ------------------
-- Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
-</code></pre></div></p>
+-<span class="w"> </span>Before<span class="w"> </span>applying<span class="w"> </span>changes,<span class="w"> </span>the<span class="w"> </span>script<span class="w"> </span>creates<span class="w"> </span>a<span class="w"> </span>timestamped<span class="w"> </span>backup<span class="w"> </span>of<span class="w"> </span>existing<span class="w"> </span>NetworkManager<span class="w"> </span>connections.<span class="w"> </span>It<span class="w"> </span>prefers<span class="w"> </span><span class="sb">`</span>rsync<span class="sb">`</span><span class="w"> </span>when<span class="w"> </span>available<span class="w"> </span>and<span class="w"> </span>falls<span class="w"> </span>back<span class="w"> </span>to<span class="w"> </span><span class="sb">`</span>cp<span class="w"> </span>-a<span class="sb">`</span>.<span class="w"> </span>If<span class="w"> </span>the<span class="w"> </span>backup<span class="w"> </span>fails,<span class="w"> </span>the<span class="w"> </span>script<span class="w"> </span>aborts<span class="w"> </span>without<span class="w"> </span>removing<span class="w"> </span>existing<span class="w"> </span>configurations.
+</code></pre></div>
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>A small set of unit-style tests is provided under <code>tests/</code>. These are designed
 to exercise pure validation and sanitization helpers without modifying system
