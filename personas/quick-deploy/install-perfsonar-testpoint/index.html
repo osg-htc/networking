@@ -792,6 +792,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#download-and-run-the-checker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download and run the checker
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1491,6 +1500,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#download-and-run-the-checker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download and run the checker
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1803,9 +1821,35 @@ check_ip<span class="o">()</span><span class="w"> </span><span class="o">{</span
 <li>If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.</li>
 </ul>
 <p>If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.</p>
-<ol>
-<li><strong>Verify the routing policy:</strong></li>
-</ol>
+<h3 id="download-and-run-the-checker">Download and run the checker<a class="headerlink" href="#download-and-run-the-checker" title="Permanent link">&para;</a></h3>
+<p>You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects <code>/etc/perfSONAR-multi-nic-config.conf</code> to exist and be readable. Example copy/paste steps:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download (curl)</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh<span class="w"> </span>-o<span class="w"> </span>./check-perfsonar-dns.sh
+<span class="c1"># Or download with wget</span>
+<span class="c1"># wget -O ./check-perfsonar-dns.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh</span>
+
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-perfsonar-dns.sh
+
+<span class="c1"># Install DNS tools if missing (EL9)</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bind-utils
+
+<span class="c1"># Debian/Ubuntu alternative</span>
+<span class="c1"># sudo apt-get update &amp;&amp; sudo apt-get install -y dnsutils</span>
+
+<span class="c1"># Run the check (needs to read /etc/perfSONAR-multi-nic-config.conf)</span>
+sudo<span class="w"> </span>./check-perfsonar-dns.sh
+</code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>If you downloaded the script to a different path, either move it to the host and run it there, or copy <code>/etc/perfSONAR-multi-nic-config.conf</code> to the machine where you run the check (recommended only for temporary verification; treat the config as sensitive).</li>
+<li>The script uses <code>dig</code> (preferred) or <code>host</code> as a fallback; ensure one of those is installed.</li>
+<li>
+<p>Run this check after you generate or edit <code>/etc/perfSONAR-multi-nic-config.conf</code> and before you register or start active measurements.</p>
+</li>
+<li>
+<p><strong>Verify the routing policy:</strong></p>
+</li>
+</ul>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>connection<span class="w"> </span>show
 ip<span class="w"> </span>rule<span class="w"> </span>show
 ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </span>table<span class="w"> </span>&lt;table-id&gt;
