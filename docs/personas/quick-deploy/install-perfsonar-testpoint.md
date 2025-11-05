@@ -20,14 +20,40 @@ Before you begin, gather the following information:
 ## Step 1 – Install and Harden EL9
 
 1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
-2. **Apply baseline updates:**
+2. **Apply baseline updates (and verify dependencies):**
+
+   Use the repository's helper to check for required tools and print
+   copy/paste install commands. Then apply OS updates and any remaining
+   baseline packages.
+
+   - From a local clone of this repository (recommended):
+
+      ```bash
+      # run from the repo root
+      ./docs/perfsonar/tools_scripts/check-deps.sh
+      ```
+
+   - Or download and run the script directly:
+
+      ```bash
+      curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o /usr/local/sbin/check-deps.sh
+      chmod 0755 /usr/local/sbin/check-deps.sh
+      check-deps.sh
+      ```
+
+   On EL9, apply updates and install common baseline packages, then add any
+   packages suggested by the checker (copy/paste the printed dnf line):
 
    ```bash
-   dnf update -y && dnf install -y epel-release chrony vim git
+   dnf update -y
+   dnf install -y epel-release chrony vim git
+   # (Optional) install any additional packages suggested by check-deps.sh
+   # e.g., dnf install -y NetworkManager rsync curl openssl nftables
    ```
 
 3. **Set the hostname and time sync:**
    Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+
    ```bash
    hostnamectl set-hostname <testpoint-hostname>
    systemctl enable --now chronyd
