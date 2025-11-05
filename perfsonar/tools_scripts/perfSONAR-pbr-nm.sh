@@ -124,6 +124,35 @@ is_interactive() {
     [ -t 0 ] && [ -t 1 ]
 }
 
+# Return 0 if the provided gateway IP belongs to the network defined by
+# address+prefix. Supports IPv4 and IPv6 using Python's ipaddress module
+# when available. Falls back to a permissive 'false' when python3 is missing.
+in_same_subnet() {
+    local gw=$1 addr=$2 prefix=$3
+    [ -z "$gw" ] && return 1
+    [ "$addr" = "-" ] && return 1
+    [ "$prefix" = "-" ] && return 1
+    # prefix is like "/24" or "/64"; ensure no duplicate slash
+    local cidr
+    cidr="${addr}${prefix}"
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$gw" "$cidr" <<'PY'
+import sys, ipaddress
+gw = sys.argv[1]
+cidr = sys.argv[2]
+try:
+    net = ipaddress.ip_network(cidr, strict=False)
+    gip = ipaddress.ip_address(gw)
+    sys.exit(0 if gip in net else 1)
+except Exception:
+    sys.exit(1)
+PY
+        return $?
+    fi
+    # Without python3, do a conservative fallback: return non-zero (not in subnet)
+    return 1
+}
+
 # Persist the current in-memory config arrays back to $CONFIG_FILE
 # Writes a temporary file and atomically moves it into place.
 save_config_to_file() {
@@ -328,11 +357,11 @@ generate_config_from_system() {
             if [ -n "$connname" ] && [ "$connname" != "--" ]; then
                 gtmp=$(nmcli -t -g ipv4.gateway connection show "$connname" 2>/dev/null | tr -d '\r') || true
                 if [ -n "$gtmp" ] && [ "$gtmp" != "--" ]; then
-                    gw4="$gtmp"
+                    gw4="$gtmp"; log "Guessed IPv4 gateway for $dev from NM connection $connname: $gw4"
                 fi
                 gtmp=$(nmcli -t -g ipv6.gateway connection show "$connname" 2>/dev/null | tr -d '\r') || true
                 if [ -n "$gtmp" ] && [ "$gtmp" != "--" ]; then
-                    gw6="$gtmp"
+                    gw6="$gtmp"; log "Guessed IPv6 gateway for $dev from NM connection $connname: $gw6"
                 fi
             fi
         fi
@@ -341,13 +370,13 @@ generate_config_from_system() {
         if [ -z "$gw4" ] || ! is_ipv4 "${gw4:-}"; then
             gtmp=$(ip route show default dev "$dev" 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
             if [ -n "$gtmp" ] && is_ipv4 "$gtmp"; then
-                gw4="$gtmp"
+                gw4="$gtmp"; log "Guessed IPv4 gateway for $dev from kernel default route: $gw4"
             fi
         fi
         if [ -z "$gw6" ] || ! is_ipv6 "${gw6:-}"; then
             gtmp=$(ip -6 route show default dev "$dev" 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="via") {print $(i+1); exit}}') || true
             if [ -n "$gtmp" ] && is_ipv6 "$gtmp"; then
-                gw6="$gtmp"
+                gw6="$gtmp"; log "Guessed IPv6 gateway for $dev from kernel default route: $gw6"
             fi
         fi
 
@@ -371,6 +400,41 @@ generate_config_from_system() {
         NIC_IPV6_PREFIXES+=("$ipv6_prefix")
         NIC_IPV6_GWS+=("$gw6")
     done
+
+    # Attempt to reuse any known gateways for NICs missing a gateway when
+    # those gateways belong to the NIC's subnet. This helps complete configs
+    # on systems where only one NIC currently has the default route set.
+    {
+        # Build candidate lists
+        declare -a CAND_GW4=() CAND_GW6=()
+        for g in "${NIC_IPV4_GWS[@]}"; do [ "$g" != "-" ] && is_ipv4 "$g" && CAND_GW4+=("$g"); done
+        for g in "${NIC_IPV6_GWS[@]}"; do [ "$g" != "-" ] && is_ipv6 "$g" && CAND_GW6+=("$g"); done
+        # De-duplicate
+        if ((${#CAND_GW4[@]})); then mapfile -t CAND_GW4 < <(printf '%s\n' "${CAND_GW4[@]}" | awk '!seen[$0]++'); fi
+        if ((${#CAND_GW6[@]})); then mapfile -t CAND_GW6 < <(printf '%s\n' "${CAND_GW6[@]}" | awk '!seen[$0]++'); fi
+
+        # Fill missing per NIC if suitable
+        for i in "${!NIC_NAMES[@]}"; do
+            if [ "${NIC_IPV4_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV4_GWS[$i]}" ] || [ "${NIC_IPV4_GWS[$i]}" = "-" ]; }; then
+                for g in "${CAND_GW4[@]:-}"; do
+                    if in_same_subnet "$g" "${NIC_IPV4_ADDRS[$i]}" "${NIC_IPV4_PREFIXES[$i]}"; then
+                        NIC_IPV4_GWS[$i]="$g"
+                        log "Reused IPv4 gateway $g for ${NIC_NAMES[$i]} based on subnet match"
+                        break
+                    fi
+                done
+            fi
+            if [ "${NIC_IPV6_ADDRS[$i]}" != "-" ] && { [ -z "${NIC_IPV6_GWS[$i]}" ] || [ "${NIC_IPV6_GWS[$i]}" = "-" ]; }; then
+                for g in "${CAND_GW6[@]:-}"; do
+                    if in_same_subnet "$g" "${NIC_IPV6_ADDRS[$i]}" "${NIC_IPV6_PREFIXES[$i]}"; then
+                        NIC_IPV6_GWS[$i]="$g"
+                        log "Reused IPv6 gateway $g for ${NIC_NAMES[$i]} based on subnet match"
+                        break
+                    fi
+                done
+            fi
+        done
+    }
 
     # If any NIC has an address but a missing gateway ('-'), and we're in an
     # interactive session (and not auto-confirm), prompt the user to supply a
