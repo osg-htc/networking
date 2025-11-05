@@ -22,59 +22,59 @@ Before you begin, gather the following information:
 1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
 2. **Apply baseline updates (and verify dependencies):**
 
-   Use the repository's helper to check for required tools and print
-   copy/paste install commands. Then apply OS updates and any remaining
-   baseline packages.
+    Use the repository's helper to check for required tools and print
+    copy/paste install commands. Then apply OS updates and any remaining
+    baseline packages.
 
-   - From a local clone of this repository (recommended):
+    - From a local clone of this repository (recommended):
 
-      ```bash
-      # run from the repo root
-      ./docs/perfsonar/tools_scripts/check-deps.sh
-      ```
+        ```bash
+        # run from the repo root
+        ./docs/perfsonar/tools_scripts/check-deps.sh
+        ```
 
-   - Or download and run the script directly:
+    - Or download and run the script directly:
 
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
-   chmod 0755 ./check-deps.sh
-   ./check-deps.sh
-   ```
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
+        chmod 0755 ./check-deps.sh
+        ./check-deps.sh
+        ```
 
-   On EL9, apply updates and install common baseline packages, then add any
-   packages suggested by the checker (copy/paste the printed dnf line):
+    On EL9, apply updates and install common baseline packages, then add any
+    packages suggested by the checker (copy/paste the printed dnf line):
 
-   ```bash
-   dnf update -y
-   dnf install -y epel-release chrony vim git
-   # (Optional) install any additional packages suggested by check-deps.sh
-   # e.g., dnf install -y NetworkManager rsync curl openssl nftables
-   ```
+    ```bash
+    dnf update -y
+    dnf install -y epel-release chrony vim git
+    # (Optional) install any additional packages suggested by check-deps.sh
+    # e.g., dnf install -y NetworkManager rsync curl openssl nftables
+    ```
 
 3. **Set the hostname and time sync:**
-   Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+    Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
 
-   ```bash
-   hostnamectl set-hostname <testpoint-hostname>
-   systemctl enable --now chronyd
-   timedatectl set-timezone <Region/City>
-   ```
+    ```bash
+    hostnamectl set-hostname <testpoint-hostname>
+    systemctl enable --now chronyd
+    timedatectl set-timezone <Region/City>
+    ```
 
 4. **Disable unused services:**
 
-   ```bash
-   systemctl disable --now firewalld NetworkManager-wait-online
-   dnf remove -y rsyslog
-   ```
+    ```bash
+    systemctl disable --now firewalld NetworkManager-wait-online
+    dnf remove -y rsyslog
+    ```
 
 5. **Record NIC names:**
 
-   ```bash
-   nmcli device status
-   ip -br addr
-   ```
+    ```bash
+    nmcli device status
+    ip -br addr
+    ```
 
-Document interface mappings; you will need them for the policy-based routing configuration.
+    Document interface mappings; you will need them for the policy-based routing configuration.
 
 ---
 
@@ -91,16 +91,16 @@ Script location in the repository:
 
     - From a local clone of this repository:
 
-       ```bash
-       install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ./perfsonar-pbr-nm.sh
-       ```
+        ```bash
+        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ./perfsonar-pbr-nm.sh
+        ```
 
-         - Or download directly from the repository URL:
+    - Or download directly from the repository URL:
 
-            ```bash
-            curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
-            chmod 0755 ./perfSONAR-pbr-nm.sh
-            ```
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
+        chmod 0755 ./perfSONAR-pbr-nm.sh
+        ```
 
 2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
 
@@ -320,7 +320,9 @@ If any prerequisite is missing, the script skips that component and continues.
     - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
     - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-   Tip: preview the fully rendered nftables rules (no changes are made):
+   !!! tip 
+   
+       preview the fully rendered nftables rules (no changes are made):
 
    ```bash
    ./perfsonar-install-nftables.sh --print-rules
