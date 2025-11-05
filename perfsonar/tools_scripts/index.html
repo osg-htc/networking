@@ -842,6 +842,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dependencies-and-package-install-hints" class="md-nav__link">
+    Dependencies and package install hints
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#safety-first" class="md-nav__link">
     Safety first
   </a>
@@ -1009,6 +1016,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dependencies-and-package-install-hints" class="md-nav__link">
+    Dependencies and package install hints
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#safety-first" class="md-nav__link">
     Safety first
   </a>
@@ -1087,6 +1101,47 @@ static IPv4/IPv6 addressing and per-NIC source-based routing via NetworkManager
   <code>nmcli</code> and will abort if it is not installed. Install NetworkManager via
   your distribution's package manager before running.</li>
 </ul>
+<h2 id="dependencies-and-package-install-hints">Dependencies and package install hints<a class="headerlink" href="#dependencies-and-package-install-hints" title="Permanent link">&para;</a></h2>
+<p>The scripts in this directory call a number of external commands. Install
+these packages (or their distro equivalents) before using the tools below.</p>
+<p>Essential packages</p>
+<ul>
+<li>bash (Bash 4.3+)</li>
+<li>coreutils (cp/mv/rm/mkdir/chmod/chown)</li>
+<li>iproute2 (provides <code>ip</code> and <code>ip route</code>)</li>
+<li>NetworkManager (provides <code>nmcli</code>)</li>
+<li>rsync (recommended for safe backups; scripts fall back to <code>cp</code>)</li>
+<li>curl</li>
+<li>openssl</li>
+</ul>
+<p>Optional / feature packages</p>
+<ul>
+<li>nftables (provides <code>nft</code>) — required for <code>perfSONAR-install-nftables.sh</code></li>
+<li>fail2ban (provides <code>fail2ban-client</code>) — optional; only used if present</li>
+<li>SELinux user tools (provides <code>getenforce</code>, <code>setenforce</code>, <code>restorecon</code>) —
+  used by SELinux-related operations</li>
+<li>A container engine: <code>podman</code> or <code>docker</code> — required for the lsregistration
+  updater/extractor when operating against the running testpoint container</li>
+<li>podman-compose or docker-compose — useful for running the testpoint
+  compose bundle locally</li>
+</ul>
+<p>Note: the <code>check-deps.sh</code> helper accepts <code>podman-compose</code> as an alternative
+provider to <code>docker-compose</code> and will report the dependency as satisfied if
+either binary is present.</p>
+<p>Example install commands</p>
+<p>Note: package names vary slightly across distributions. Adapt as needed.</p>
+<p>Fedora / RHEL / CentOS (dnf):</p>
+<div class="highlight"><pre><span></span><code>sudo dnf install -y bash coreutils iproute NetworkManager rsync curl openssl nftables podman podman-compose docker-compose fail2ban policycoreutils
+</code></pre></div>
+<p>Debian / Ubuntu (apt):</p>
+<div class="highlight"><pre><span></span><code>sudo apt-get update
+sudo apt-get install -y bash coreutils iproute2 network-manager rsync curl openssl nftables podman podman-compose docker.io docker-compose fail2ban policycoreutils
+</code></pre></div>
+<p>If you intend to use the lsregistration container helpers, ensure either
+<code>podman</code> or <code>docker</code> is installed and that the service can list and access
+containers (e.g., <code>podman ps</code> or <code>docker ps</code> works as root).</p>
+<p>If <code>rsync</code> is not available the scripts will attempt a <code>cp -a</code> fallback, but
+installing <code>rsync</code> provides safer, more robust backups.</p>
 <h2 id="safety-first">Safety first<a class="headerlink" href="#safety-first" title="Permanent link">&para;</a></h2>
 <p>This script will REMOVE ALL existing NetworkManager connections when run.
 Always test in a VM or console-attached host and use <code>--dry-run</code> to preview
@@ -1112,29 +1167,26 @@ modifying anything.</p>
 <div class="highlight"><pre><span></span><code>sudo bash perfSONAR-pbr-nm.sh --dry-run --debug
 </code></pre></div>
 <p>Generate an example or auto-detected config (preview, dry-run only):</p>
-<p><div class="highlight"><pre><span></span><code>sudo bash perfSONAR-pbr-nm.sh --generate-config-debug
-
-Write the auto-detected config to /etc <span class="o">(</span>does not apply changes<span class="o">)</span>:
-
-<span class="sb">```</span>bash
-sudo bash perfSONAR-pbr-nm.sh --generate-config-auto
+<div class="highlight"><pre><span></span><code>sudo bash perfSONAR-pbr-nm.sh --generate-config-debug
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Run for real (be careful):
-
-```bash
-sudo bash perfSONAR-pbr-nm.sh
-# or non-interactive
+<p>Write the auto-detected config to /etc (does not apply changes):</p>
+<div class="highlight"><pre><span></span><code>sudo bash perfSONAR-pbr-nm.sh --generate-config-auto
+</code></pre></div>
+<p>Run for real (be careful):</p>
+<div class="highlight"><pre><span></span><code>sudo bash perfSONAR-pbr-nm.sh
+<span class="c1"># or non-interactive</span>
 sudo bash perfSONAR-pbr-nm.sh --yes
 
 Gateway requirement and generator warnings
 -----------------------------------------
-- Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.
-- The auto-generator will warn if it cannot detect a gateway for a NIC that has an address. The generated config will include a WARNING block listing affected NICs. Edit `NIC_IPV4_GWS` and/or `NIC_IPV6_GWS` accordingly before running the script to apply changes.
+- Any NIC with an IPv4 address must have a corresponding IPv4 gateway<span class="p">;</span> likewise <span class="k">for</span> IPv6.
+- The auto-generator will warn <span class="k">if</span> it cannot detect a gateway <span class="k">for</span> a NIC that has an address. The generated config will include a WARNING block listing affected NICs. Edit <span class="sb">`</span>NIC_IPV4_GWS<span class="sb">`</span> and/or <span class="sb">`</span>NIC_IPV6_GWS<span class="sb">`</span> accordingly before running the script to apply changes.
 
 Backups and safety
 ------------------
-- Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
-</code></pre></div></p>
+
+- Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers <span class="sb">`</span>rsync<span class="sb">`</span> when available and falls back to <span class="sb">`</span>cp -a<span class="sb">`</span>. If the backup fails, the script aborts without removing existing configurations.
+</code></pre></div>
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
 <p>A small set of unit-style tests is provided under <code>tests/</code>. These are designed
 to exercise pure validation and sanitization helpers without modifying system
@@ -1152,7 +1204,7 @@ non-destructive way.</p>
   address any issues reported.</li>
 </ul>
 <h2 id="contact">Contact<a class="headerlink" href="#contact" title="Permanent link">&para;</a></h2>
-<p>Shawn McKee (script author) - smckee@umich.edu</p>
+<p>Shawn McKee (script author) — <a href="mailto:smckee@umich.edu">smckee@umich.edu</a></p>
 
               
             </article>
