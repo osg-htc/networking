@@ -72,8 +72,8 @@ Script location in the repository:
       - Or download directly from the repository URL:
 
          ```bash
-         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o /usr/local/sbin/perfsonar-pbr-nm.sh
-         chmod 0755 /usr/local/sbin/perfsonar-pbr-nm.sh
+         curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
+         chmod 0755 ./perfSONAR-pbr-nm.sh
          ```
 
 2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
