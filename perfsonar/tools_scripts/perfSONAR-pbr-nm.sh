@@ -124,6 +124,50 @@ is_interactive() {
     [ -t 0 ] && [ -t 1 ]
 }
 
+# Persist the current in-memory config arrays back to $CONFIG_FILE
+# Writes a temporary file and atomically moves it into place.
+save_config_to_file() {
+    local target=${1:-"$CONFIG_FILE"}
+    local TMPFILE
+    TMPFILE="/tmp/perfsonar-save-config-$$.conf"
+
+    {
+        echo "# perfSONAR multi-NIC configuration"
+        echo "# Saved: $(date)"
+        echo ""
+
+        _print_arr() {
+            local name="$1"; shift
+            printf '%s=(\n' "$name" >> "$TMPFILE"
+            for v in "$@"; do
+                printf '  "%s"\n' "$v" >> "$TMPFILE"
+            done
+            printf ')\n\n' >> "$TMPFILE"
+        }
+
+        _print_arr NIC_NAMES "${NIC_NAMES[@]}"
+        _print_arr NIC_IPV4_ADDRS "${NIC_IPV4_ADDRS[@]}"
+        _print_arr NIC_IPV4_PREFIXES "${NIC_IPV4_PREFIXES[@]}"
+        _print_arr NIC_IPV4_GWS "${NIC_IPV4_GWS[@]}"
+        _print_arr NIC_IPV4_ADDROUTE "${NIC_IPV4_ADDROUTE[@]}"
+        _print_arr NIC_IPV6_ADDRS "${NIC_IPV6_ADDRS[@]}"
+        _print_arr NIC_IPV6_PREFIXES "${NIC_IPV6_PREFIXES[@]}"
+        _print_arr NIC_IPV6_GWS "${NIC_IPV6_GWS[@]}"
+
+        printf 'DEFAULT_ROUTE_NIC="%s"\n' "${DEFAULT_ROUTE_NIC:-}" >> "$TMPFILE"
+    }
+
+    if [ "$DRY_RUN" = true ]; then
+        log "DRY-RUN: would write updated config to $target"
+        [ -f "$TMPFILE" ] && rm -f "$TMPFILE"
+        return 0
+    fi
+
+    run_cmd mv "$TMPFILE" "$target" || handle_error "Failed to persist updated configuration to $target"
+    run_cmd chmod 0644 "$target" || true
+    run_cmd chown root:root "$target" || true
+}
+
 # -------- Error handling and rollback helpers --------
 # handle_error: centralized failure path. Logs error, attempts rollback,
 # and exits with a non-zero status. Use this where a hard failure should
@@ -327,49 +371,6 @@ generate_config_from_system() {
         NIC_IPV6_PREFIXES+=("$ipv6_prefix")
         NIC_IPV6_GWS+=("$gw6")
     done
-
-    # If interactive and not auto-confirm, prompt for any missing gateways we could not detect
-    if is_interactive && [ "${AUTO_YES:-false}" != true ]; then
-        for i in "${!NIC_NAMES[@]}"; do
-            dev=${NIC_NAMES[$i]}
-            ipv4_addr=${NIC_IPV4_ADDRS[$i]}
-            ipv4_pref=${NIC_IPV4_PREFIXES[$i]}
-            gw4=${NIC_IPV4_GWS[$i]}
-            ipv6_addr=${NIC_IPV6_ADDRS[$i]}
-            ipv6_pref=${NIC_IPV6_PREFIXES[$i]}
-            gw6=${NIC_IPV6_GWS[$i]}
-
-            if [ "$ipv4_addr" != "-" ] && { [ -z "$gw4" ] || [ "$gw4" = "-" ]; }; then
-                echo "No IPv4 gateway detected for $dev ($ipv4_addr$ipv4_pref). Enter IPv4 gateway for $dev or '-' to skip:" >&2
-                read -r ans4
-                if [ -n "$ans4" ] && [ "$ans4" != "-" ]; then
-                    if is_ipv4 "$ans4"; then
-                        NIC_IPV4_GWS[$i]="$ans4"
-                    else
-                        echo "Input '$ans4' is not a valid IPv4 address; leaving '-'" >&2
-                        NIC_IPV4_GWS[$i]="-"
-                    fi
-                else
-                    NIC_IPV4_GWS[$i]="-"
-                fi
-            fi
-
-            if [ "$ipv6_addr" != "-" ] && { [ -z "$gw6" ] || [ "$gw6" = "-" ]; }; then
-                echo "No IPv6 gateway detected for $dev ($ipv6_addr$ipv6_pref). Enter IPv6 gateway for $dev or '-' to skip:" >&2
-                read -r ans6
-                if [ -n "$ans6" ] && [ "$ans6" != "-" ]; then
-                    if is_ipv6 "$ans6"; then
-                        NIC_IPV6_GWS[$i]="$ans6"
-                    else
-                        echo "Input '$ans6' is not a valid IPv6 address; leaving '-'" >&2
-                        NIC_IPV6_GWS[$i]="-"
-                    fi
-                else
-                    NIC_IPV6_GWS[$i]="-"
-                fi
-            fi
-        done
-    fi
 
     # If generator debug mode was requested, force DRY_RUN and verbose output
     # so the generated file is previewed and not written into /etc.
@@ -804,7 +805,8 @@ prompt_missing_gateways_from_config() {
     done
 
     if [ "$updated" = true ]; then
-        log "Gateways provided interactively were applied for this run. Consider updating $CONFIG_FILE to persist them."
+        log "Gateways provided interactively; persisting updates to $CONFIG_FILE."
+        save_config_to_file "$CONFIG_FILE"
     fi
 }
 
