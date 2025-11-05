@@ -1,5 +1,11 @@
 name: Validate static MkDocs pages
-on: pull_request
+on:
+  pull_request:
+  push:
+    branches: [ master ]
+  schedule:
+    - cron: '27 6 * * *'
+  workflow_dispatch:
 
 jobs:
   validate-mkdocs:
@@ -23,3 +29,32 @@ jobs:
       # URLs). If you want link checking re-enabled, either add targeted
       # url-ignore patterns or reintroduce a guarded step that only runs on
       # specific branches.
+
+  link-check:
+    # Reintroduced link checks in a separate job that does not run on PRs
+    # to avoid blocking contributions. It runs on push to master, on a
+    # daily schedule, and when manually dispatched.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build MkDocs site (strict)
+        uses: docker://squidfunk/mkdocs-material:8.2.8
+        with:
+          args: >-
+            build
+            --verbose
+            --strict
+      - name: Install html-proofer
+        run: |
+          sudo gem install html-proofer:~>4.4.3
+      - name: Run html-proofer against built site
+        run: |
+          # Ignore known problematic/placeholder URLs to reduce false positives
+          # - topology.opensciencegrid.org/host/... (may be transient or legacy)
+          # - https://<SERVER_FQDN>/toolkit (placeholder in docs)
+          URL_IGNORE="/topology\.opensciencegrid\.org\/host\//,/https?:\\/\\/<SERVER_FQDN>\\/toolkit/"
+          htmlproofer ./site \
+            --assume-extension \
+            --check-external-hash \
+            --url-ignore "$URL_IGNORE"
