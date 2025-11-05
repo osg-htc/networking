@@ -602,6 +602,19 @@
     Step 5 – Register and Configure with WLCG/OSG
   </a>
   
+    <nav class="md-nav" aria-label="Step 5 – Register and Configure with WLCG/OSG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
+    Update Lookup Service registration inside the container
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1049,6 +1062,19 @@
     Step 5 – Register and Configure with WLCG/OSG
   </a>
   
+    <nav class="md-nav" aria-label="Step 5 – Register and Configure with WLCG/OSG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
+    Update Lookup Service registration inside the container
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1167,7 +1193,7 @@ chmod <span class="m">0755</span> /usr/local/sbin/perfsonar-pbr-nm.sh
 </ul>
 </li>
 <li>
-<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit.</p>
+<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
 <ul>
 <li>
 <p>Preview (no changes):</p>
@@ -1180,8 +1206,12 @@ chmod <span class="m">0755</span> /usr/local/sbin/perfsonar-pbr-nm.sh
 </code></pre></div>
 </li>
 </ul>
-<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
 </li>
+</ul>
+<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+<p>!!! warning "Gateways required for addresses"
+      Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
+<ol>
 <li>
 <p><strong>Execute the script:</strong></p>
 <ul>
@@ -1206,7 +1236,7 @@ chmod <span class="m">0755</span> /usr/local/sbin/perfsonar-pbr-nm.sh
 <li>
 <p><strong>Verify the routing policy:</strong></p>
 </li>
-</ul>
+</ol>
 <div class="highlight"><pre><span></span><code>nmcli connection show
 ip rule show
 ip route show table &lt;table-id&gt;
@@ -1478,8 +1508,7 @@ docker ps  <span class="c1"># or podman ps</span>
 <p><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.</p>
 </li>
 </ol>
-<div class="admonition tip">
-<p class="admonition-title">How to update Lookup Service registration inside the container</p>
+<h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running <code>perfsonar-testpoint</code> container and restart the daemon only if needed.</p>
 <ul>
 <li>Script (browse): <a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh">perfSONAR-update-lsregistration.sh</a></li>
@@ -1500,7 +1529,6 @@ perfSONAR-update-lsregistration.sh <span class="se">\</span>
    --latitude <span class="m">37</span>.5 --longitude -121.7469 <span class="se">\</span>
    --admin-name <span class="s2">&quot;pS Admin&quot;</span> --admin-email admin@example.org
 </code></pre></div>
-</div>
 <hr />
 <h2 id="step-6-post-install-validation">Step 6 – Post-Install Validation<a class="headerlink" href="#step-6-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
