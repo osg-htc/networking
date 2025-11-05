@@ -81,13 +81,13 @@ Script location in the repository:
       - Preview (no changes):
 
          ```bash
-         /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-debug
+         ./perfsonar-pbr-nm.sh --generate-config-debug
          ```
 
       - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
          ```bash
-         /usr/local/sbin/perfsonar-pbr-nm.sh --generate-config-auto
+         ./perfsonar-pbr-nm.sh --generate-config-auto
          ```
 
    Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
@@ -100,19 +100,19 @@ Script location in the repository:
       - Rehearsal (no changes, extra logging recommended on first run):
 
          ```bash
-         perfsonar-pbr-nm.sh --dry-run --debug
+         ./perfsonar-pbr-nm.sh --dry-run --debug
          ```
 
       - Apply changes non-interactively (auto-confirm):
 
          ```bash
-         perfsonar-pbr-nm.sh --yes
+         ./perfsonar-pbr-nm.sh --yes
          ```
 
       - Or run interactively and answer the confirmation prompt when ready:
 
          ```bash
-         perfsonar-pbr-nm.sh
+         ./perfsonar-pbr-nm.sh
          ```
 
     The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
@@ -164,7 +164,7 @@ If any prerequisite is missing, the script skips that component and continues.
 2. **Run with desired options:**
 
    ```bash
-   perfsonar-install-nftables.sh --selinux --fail2ban --yes
+   ./perfsonar-install-nftables.sh --selinux --fail2ban --yes
    ```
 
    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
@@ -183,7 +183,7 @@ If any prerequisite is missing, the script skips that component and continues.
    Tip: preview the fully rendered nftables rules (no changes are made):
 
    ```bash
-   perfsonar-install-nftables.sh --print-rules
+   ./perfsonar-install-nftables.sh --print-rules
    ```
 
    Optional: manually add extra management hosts/subnets
@@ -431,14 +431,14 @@ Install and run examples (root shell):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-   -o /usr/local/sbin/perfSONAR-update-lsregistration.sh
-chmod 0755 /usr/local/sbin/perfSONAR-update-lsregistration.sh
+   -o ./perfSONAR-update-lsregistration.sh
+chmod 0755 ./perfSONAR-update-lsregistration.sh
 
 # Preview changes only
-perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
+./perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
 
 # Apply common updates and restart the daemon inside the container
-perfSONAR-update-lsregistration.sh \
+./perfSONAR-update-lsregistration.sh \
    --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
    --city Berkeley --region CA --country US --zip 94720 \
    --latitude 37.5 --longitude -121.7469 \
