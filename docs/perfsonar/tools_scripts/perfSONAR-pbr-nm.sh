@@ -364,24 +364,75 @@ EXAMPLE
     DEFAULT_ROUTE_NIC="$DEFAULT_ROUTE_NIC_DETECTED"
     export DEFAULT_ROUTE_NIC
 
+    # Before writing, attempt to conservatively infer missing gateways from
+    # other NICs on the same subnet so the generated configuration is more
+    # immediately usable. We capture original values to annotate any guesses.
+    local -a ORIG_IPV4_GWS=("${NIC_IPV4_GWS[@]}")
+    local -a ORIG_IPV6_GWS=("${NIC_IPV6_GWS[@]}")
+    guess_missing_gateways
+
+    # Track guessed entries for annotation in the generated file and in
+    # the console/log summaries. A guess is when original gw was '-' and
+    # the post-inference gw is a valid IP.
+    local -a GUESSED_V4_IDX=()
+    local -a GUESSED_V6_IDX=()
+    local -a GUESSED_V4_NOTE=()
+    local -a GUESSED_V6_NOTE=()
+    for i in "${!NIC_NAMES[@]}"; do
+        if [ "${ORIG_IPV4_GWS[$i]:-"-"}" = "-" ] && is_ipv4 "${NIC_IPV4_GWS[$i]:-"-"}"; then
+            GUESSED_V4_IDX+=("$i")
+            # Try to identify a unique owner NIC that already used this gw
+            local gw4_now=${NIC_IPV4_GWS[$i]}
+            local owner4=""
+            local owners4_count=0
+            for k in "${!NIC_NAMES[@]}"; do
+                if [ "$k" != "$i" ] && [ "${ORIG_IPV4_GWS[$k]:-"-"}" != "-" ] && [ "${ORIG_IPV4_GWS[$k]}" = "$gw4_now" ]; then
+                    owner4=${NIC_NAMES[$k]}
+                    owners4_count=$((owners4_count+1))
+                fi
+            done
+            if (( owners4_count == 1 )); then
+                GUESSED_V4_NOTE[$i]="from ${owner4}"
+            else
+                GUESSED_V4_NOTE[$i]="(reused gateway)"
+            fi
+        fi
+        if [ "${ORIG_IPV6_GWS[$i]:-"-"}" = "-" ] && is_ipv6 "${NIC_IPV6_GWS[$i]:-"-"}" && ! is_link_local_v6 "${NIC_IPV6_GWS[$i]}"; then
+            GUESSED_V6_IDX+=("$i")
+            local gw6_now=${NIC_IPV6_GWS[$i]}
+            local owner6=""
+            local owners6_count=0
+            for k in "${!NIC_NAMES[@]}"; do
+                if [ "$k" != "$i" ] && [ "${ORIG_IPV6_GWS[$k]:-"-"}" != "-" ] && [ "${ORIG_IPV6_GWS[$k]}" = "$gw6_now" ]; then
+                    owner6=${NIC_NAMES[$k]}
+                    owners6_count=$((owners6_count+1))
+                fi
+            done
+            if (( owners6_count == 1 )); then
+                GUESSED_V6_NOTE[$i]="from ${owner6}"
+            else
+                GUESSED_V6_NOTE[$i]="(reused gateway)"
+            fi
+        fi
+    done
+
+    # Re-evaluate missing gateways after inference
+    local -a MISSING_IPV4_GW=()
+    local -a MISSING_IPV6_GW=()
+    for i in "${!NIC_NAMES[@]}"; do
+        if [ "${NIC_IPV4_ADDRS[$i]:-"-"}" != "-" ] && [ "${NIC_IPV4_GWS[$i]:-"-"}" = "-" ]; then
+            MISSING_IPV4_GW+=("${NIC_NAMES[$i]}")
+        fi
+        if [ "${NIC_IPV6_ADDRS[$i]:-"-"}" != "-" ] && [ "${NIC_IPV6_GWS[$i]:-"-"}" = "-" ]; then
+            MISSING_IPV6_GW+=("${NIC_NAMES[$i]}")
+        fi
+    done
+
     # Write the detected config to a temp file then (atomically) move it into
     # place under $CONFIG_FILE. When not in DRY_RUN/debug mode the tmp file
     # will be moved into /etc with sudo.
     local TMPFILE
     TMPFILE="/tmp/perfsonar-gen-config-$$.conf"
-    # Determine NICs for which we could not determine gateways. These are
-    # important because the main script requires gateways when an IP is set.
-    local -a MISSING_IPV4_GW=()
-    local -a MISSING_IPV6_GW=()
-    for i in "${!NIC_NAMES[@]}"; do
-        # shellcheck disable=SC2154
-        if [ "${NIC_IPV4_ADDRS[$i]:-}" != "-" ] && [ "${NIC_IPV4_GWS[$i]:-}" = "-" ]; then
-            MISSING_IPV4_GW+=("${NIC_NAMES[$i]}")
-        fi
-        if [ "${NIC_IPV6_ADDRS[$i]:-}" != "-" ] && [ "${NIC_IPV6_GWS[$i]:-}" = "-" ]; then
-            MISSING_IPV6_GW+=("${NIC_NAMES[$i]}")
-        fi
-    done
 
     {
         echo "# Auto-generated /etc/perfSONAR-multi-nic-config.conf"
@@ -426,10 +477,15 @@ EXAMPLE
         done
         printf ")\n\n" >> "$TMPFILE"
 
-        echo "# IPv4 gateways for each NIC (use '-' for none)"
+        echo "# IPv4 gateways for each NIC (use '-' for none)" >> "$TMPFILE"
         echo "NIC_IPV4_GWS=(" >> "$TMPFILE"
-        for v in "${NIC_IPV4_GWS[@]}"; do
-            printf '  "%s"\n' "$v" >> "$TMPFILE"
+        for i in "${!NIC_IPV4_GWS[@]}"; do
+            v=${NIC_IPV4_GWS[$i]}
+            if [ -n "${GUESSED_V4_NOTE[$i]:-}" ]; then
+                printf '  "%s"  # guessed %s\n' "$v" "${GUESSED_V4_NOTE[$i]}" >> "$TMPFILE"
+            else
+                printf '  "%s"\n' "$v" >> "$TMPFILE"
+            fi
         done
         printf ")\n\n" >> "$TMPFILE"
 
@@ -454,10 +510,15 @@ EXAMPLE
         done
         printf ")\n\n" >> "$TMPFILE"
 
-        echo "# IPv6 gateways for each NIC (use '-' for none)"
+        echo "# IPv6 gateways for each NIC (use '-' for none)" >> "$TMPFILE"
         echo "NIC_IPV6_GWS=(" >> "$TMPFILE"
-        for v in "${NIC_IPV6_GWS[@]}"; do
-            printf '  "%s"\n' "$v" >> "$TMPFILE"
+        for i in "${!NIC_IPV6_GWS[@]}"; do
+            v=${NIC_IPV6_GWS[$i]}
+            if [ -n "${GUESSED_V6_NOTE[$i]:-}" ]; then
+                printf '  "%s"  # guessed %s\n' "$v" "${GUESSED_V6_NOTE[$i]}" >> "$TMPFILE"
+            else
+                printf '  "%s"\n' "$v" >> "$TMPFILE"
+            fi
         done
         printf ")\n\n" >> "$TMPFILE"
 
@@ -469,6 +530,20 @@ EXAMPLE
         # before attempting to apply it. The main validation step will also
         # fail if gateways are missing, but surfacing the issue here avoids
         # surprising behaviour when auto-generating configs.
+        if (( ${#GUESSED_V4_IDX[@]} > 0 )) || (( ${#GUESSED_V6_IDX[@]} > 0 )); then
+            printf "\n# NOTE: The following gateways were auto-inferred during detection. Review carefully.\n" >> "$TMPFILE"
+            if (( ${#GUESSED_V4_IDX[@]} > 0 )); then
+                for i in "${GUESSED_V4_IDX[@]}"; do
+                    printf '#  - IPv4 %s -> %s %s\n' "${NIC_NAMES[$i]}" "${NIC_IPV4_GWS[$i]}" "${GUESSED_V4_NOTE[$i]}" >> "$TMPFILE"
+                done
+            fi
+            if (( ${#GUESSED_V6_IDX[@]} > 0 )); then
+                for i in "${GUESSED_V6_IDX[@]}"; do
+                    printf '#  - IPv6 %s -> %s %s\n' "${NIC_NAMES[$i]}" "${NIC_IPV6_GWS[$i]}" "${GUESSED_V6_NOTE[$i]}" >> "$TMPFILE"
+                done
+            fi
+        fi
+
         if (( ${#MISSING_IPV4_GW[@]} > 0 )) || (( ${#MISSING_IPV6_GW[@]} > 0 )); then
             printf "\n# WARNING: The auto-detection step could not identify gateways for some NICs.\n" >> "$TMPFILE"
             if (( ${#MISSING_IPV4_GW[@]} > 0 )); then
@@ -500,6 +575,17 @@ EXAMPLE
     # If missing gateways were detected warn loudly to stderr so operators
     # reading console output understand the generated file likely needs
     # manual edits before running the main configuration steps.
+    if (( ${#GUESSED_V4_IDX[@]} > 0 )) || (( ${#GUESSED_V6_IDX[@]} > 0 )); then
+        log "NOTICE: One or more gateways were inferred during auto-generation:"
+        for i in "${GUESSED_V4_IDX[@]:-}"; do
+            log "  - IPv4 ${NIC_NAMES[$i]} -> ${NIC_IPV4_GWS[$i]} ${GUESSED_V4_NOTE[$i]}"
+        done
+        for i in "${GUESSED_V6_IDX[@]:-}"; do
+            log "  - IPv6 ${NIC_NAMES[$i]} -> ${NIC_IPV6_GWS[$i]} ${GUESSED_V6_NOTE[$i]}"
+        done
+        echo "Auto-generated $CONFIG_FILE includes inferred gateways (see comments). Review before applying." >&2
+    fi
+
     if (( ${#MISSING_IPV4_GW[@]} > 0 )) || (( ${#MISSING_IPV6_GW[@]} > 0 )); then
         log "WARNING: Could not identify gateways for some NICs during auto-detection."
         if (( ${#MISSING_IPV4_GW[@]} > 0 )); then
