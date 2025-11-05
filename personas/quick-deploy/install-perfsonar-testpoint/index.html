@@ -1961,49 +1961,54 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
 </ul>
 </details>
-<details class="tip">
-<summary>Preview nftables rules before applying</summary>
-</details>
-<p>You can preview the fully rendered nftables rules (no changes are made):</p>
-<div class="highlight"><pre><span></span><code>~/perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
-</code></pre></div>
-<details class="tip">
-<summary>Manually add extra management hosts/subnets</summary>
-</details>
-<p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
-<div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
-   type ipv4_addr
-   flags interval
-   elements = { 192.0.2.0/24, 198.51.100.0/25 }
-}
-
-set ssh_access_ip4_hosts {
-   type ipv4_addr
-   elements = { 203.0.113.10, 203.0.113.11 }
-}
-
-set ssh_access_ip6_subnets {
-   type ipv6_addr
-   flags interval
-   elements = { 2001:db8:1::/64 }
-}
-
-set ssh_access_ip6_hosts {
-   type ipv6_addr
-   elements = { 2001:db8::10 }
-}
-</code></pre></div>
-<p>Then validate and reload (root shell):</p>
-<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
-systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
-</code></pre></div>
-</li>
-<li>
-<p><strong>Confirm firewall state and security services:</strong></p>
 </li>
 </ul>
+<p>??? tip "Preview nftables rules before applying"
+      You can preview the fully rendered nftables rules (no changes are made):</p>
+<div class="codehilite"><pre><span></span><code><span class="w">  </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">  </span><span class="o">~/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">nftables</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">rules</span>
+<span class="w">  </span><span class="err">```</span>
+
+<span class="err">???</span><span class="w"> </span><span class="n">tip</span><span class="w"> </span><span class="s2">&quot;Manually add extra management hosts/subnets&quot;</span>
+<span class="w">    </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="n">additional</span><span class="w"> </span><span class="n">SSH</span><span class="w"> </span><span class="n">sources</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">represented</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">NIC</span><span class="o">-</span><span class="n">derived</span><span class="w"> </span><span class="n">prefixes</span><span class="p">,</span><span class="w"> </span><span class="n">edit</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nftables</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">.</span><span class="n">nft</span><span class="err">`</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="n">entries</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">appropriate</span><span class="w"> </span><span class="n">sets</span><span class="p">:</span>
+
+<span class="w">    </span><span class="err">```</span><span class="n">nft</span>
+<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip4_subnets</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">type</span><span class="w"> </span><span class="n">ipv4_addr</span>
+<span class="w">       </span><span class="n">flags</span><span class="w"> </span><span class="n">interval</span>
+<span class="w">       </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mf">192.0</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mf">198.51</span><span class="o">.</span><span class="mf">100.0</span><span class="o">/</span><span class="mi">25</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip4_hosts</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">type</span><span class="w"> </span><span class="n">ipv4_addr</span>
+<span class="w">       </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mf">203.0</span><span class="o">.</span><span class="mf">113.10</span><span class="p">,</span><span class="w"> </span><span class="mf">203.0</span><span class="o">.</span><span class="mf">113.11</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip6_subnets</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">type</span><span class="w"> </span><span class="n">ipv6_addr</span>
+<span class="w">       </span><span class="n">flags</span><span class="w"> </span><span class="n">interval</span>
+<span class="w">       </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">2001</span><span class="p">:</span><span class="n">db8</span><span class="p">:</span><span class="mi">1</span><span class="p">::</span><span class="o">/</span><span class="mi">64</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip6_hosts</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="n">type</span><span class="w"> </span><span class="n">ipv6_addr</span>
+<span class="w">       </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">2001</span><span class="p">:</span><span class="n">db8</span><span class="p">::</span><span class="mi">10</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="err">```</span>
+
+<span class="w">    </span><span class="n">Then</span><span class="w"> </span><span class="n">validate</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="w"> </span><span class="n">shell</span><span class="p">):</span>
+
+<span class="w">    </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">    </span><span class="n">nft</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nftables</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">.</span><span class="n">nft</span>
+<span class="w">    </span><span class="n">systemctl</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">nftables</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">systemctl</span><span class="w"> </span><span class="n">restart</span><span class="w"> </span><span class="n">nftables</span>
+<span class="w">    </span><span class="err">```</span>
+</code></pre></div>
+
+<ol>
+<li><strong>Confirm firewall state and security services:</strong></li>
+</ol>
 <p>??? info "Verification commands"
-       <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
+      <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
 sestatus
 systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 </code></pre></div></p>
@@ -2161,28 +2166,28 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 </ol>
 <p>Browse to <code>https://&lt;SERVER_FQDN&gt;/toolkit</code> and complete the local toolkit setup wizard.</p>
 <p>??? info "Configuration details to populate"
-       - Site contact email
-       - Usage policy URL
-       - Location (latitude/longitude)
-       - Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping</p>
+      - Site contact email
+      - Usage policy URL
+      - Location (latitude/longitude)
+      - Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping</p>
 <ol>
 <li><strong>OSG/WLCG registration workflow:</strong></li>
 </ol>
 <p>??? info "Registration steps and portals"
-       - Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.
-       - Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.
-       - In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>
+      - Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.
+      - Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.
+      - In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>
 <ol>
 <li><strong>pSConfig enrollment:</strong></li>
 </ol>
 <p>For each active NIC, register with the psconfig service so measurements cover all paths.</p>
 <p>??? info "Registration command and verification"
-       Example registration:</p>
-<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
-<span class="n n-Quoted">   /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/&lt;NIC-FQDN&gt;</span>
-<span class="n n-Quoted">   </span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">`</span>
+      Example registration:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">  </span><span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
+<span class="n n-Quoted">  /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/&lt;NIC-FQDN&gt;</span>
+<span class="n n-Quoted">  </span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">`</span>
 
-<span class="w">   </span><span class="n">Confirm</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">resulting</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n n-Quoted">`/etc/perfsonar/psconfig/pscheduler.d/`</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">correct</span><span class="w"> </span><span class="n">interface</span><span class="w"> </span><span class="n">addresses</span><span class="w"> </span><span class="p">(</span><span class="n n-Quoted">`ifaddr`</span><span class="w"> </span><span class="n">tags</span><span class="p">).</span>
+<span class="w">  </span><span class="n">Confirm</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">resulting</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n n-Quoted">`/etc/perfsonar/psconfig/pscheduler.d/`</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">correct</span><span class="w"> </span><span class="n">interface</span><span class="w"> </span><span class="n">addresses</span><span class="w"> </span><span class="p">(</span><span class="n n-Quoted">`ifaddr`</span><span class="w"> </span><span class="n">tags</span><span class="p">).</span>
 </code></pre></div>
 
 <ol>
@@ -2216,27 +2221,27 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li><strong>System services:</strong></li>
 </ol>
 <p>??? info "Verify Podman and compose services"
-       <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
+      <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
 systemctl<span class="w"> </span>--user<span class="w"> </span>status<span class="w"> </span>podman-compose@perfsonar-testpoint.service
 </code></pre></div></p>
-<div class="codehilite"><pre><span></span><code>   Ensure both are active/green.
+<div class="codehilite"><pre><span></span><code>  Ensure both are active/green.
 </code></pre></div>
 
 <ol>
 <li><strong>Container health:</strong></li>
 </ol>
 <p>??? info "Check container status and logs"
-       <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
+      <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
 podman<span class="w"> </span>logs<span class="w"> </span>pscheduler-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail
 </code></pre></div></p>
 <ol>
 <li><strong>Network path validation:</strong></li>
 </ol>
 <p>??? info "Test network connectivity and routing"
-       <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
+      <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
 tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
 </code></pre></div></p>
-<div class="codehilite"><pre><span></span><code>   Confirm traffic uses the intended policy-based routes (check `ip route get &lt;dest&gt;`).
+<div class="codehilite"><pre><span></span><code>  Confirm traffic uses the intended policy-based routes (check `ip route get &lt;dest&gt;`).
 </code></pre></div>
 
 <ol>
