@@ -46,20 +46,20 @@ Before you begin, gather the following information:
         ./docs/perfsonar/tools_scripts/check-deps.sh
         ```
 
-    ??? tip "Alternative: Download and run directly"
-        ```bash
-        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
-        chmod 0755 ./check-deps.sh
-        ./check-deps.sh
-        ```
+??? tip "Alternative: Download and run directly"
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
+    chmod 0755 ./check-deps.sh
+    ./check-deps.sh
+    ```
 
-    ??? info "Apply updates and install baseline packages"
-        On EL9, apply updates and install common baseline packages, then add any
-        packages suggested by the checker (copy/paste the printed dnf line):
+??? info "Apply updates and install baseline packages"
+    On EL9, apply updates and install common baseline packages, then add any
+    packages suggested by the checker (copy/paste the printed dnf line):
 
-        ```bash
-        dnf update -y
-        dnf install -y epel-release chrony vim git
+    ```bash
+    dnf update -y
+    dnf install -y epel-release chrony vim git
         # (Optional) install any additional packages suggested by check-deps.sh
         # e.g., dnf install -y NetworkManager rsync curl openssl nftables
         ```
@@ -68,20 +68,20 @@ Before you begin, gather the following information:
     
     Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
 
-    ??? info "System configuration commands"
-        ```bash
-        hostnamectl set-hostname <testpoint-hostname>
-        systemctl enable --now chronyd
-        timedatectl set-timezone <Region/City>
-        ```
+??? info "System configuration commands"
+    ```bash
+    hostnamectl set-hostname <testpoint-hostname>
+    systemctl enable --now chronyd
+    timedatectl set-timezone <Region/City>
+    ```
 
-4. **Disable unused services:**
+    4. **Disable unused services:**
 
-    ??? info "Service cleanup commands"
-        ```bash
-        systemctl disable --now firewalld NetworkManager-wait-online
-        dnf remove -y rsyslog
-        ```
+        ??? info "Service cleanup commands"
+            ```bash
+            systemctl disable --now firewalld NetworkManager-wait-online
+            dnf remove -y rsyslog
+            ```
 
 5. **Record NIC names:**
 
@@ -91,9 +91,9 @@ Before you begin, gather the following information:
         ip -br addr
         ```
 
-    Document interface mappings; you will need them for the policy-based routing configuration.
+        Document interface mappings; you will need them for the policy-based routing configuration.
 
----
+        ---
 
 ## Step 2 – Clone the Repository
 
@@ -138,60 +138,60 @@ Script location in the repository:
         cd ~
         ```
 
-    ??? tip "Alternative: Download directly from the repository URL"
-        ```bash
-        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
-        chmod 0755 ./perfSONAR-pbr-nm.sh
-        ```
+??? tip "Alternative: Download directly from the repository URL"
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
+    chmod 0755 ./perfSONAR-pbr-nm.sh
+    ```
 
-2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
+    2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
 
     - Preview (no changes):
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --generate-config-debug
-        ```
+    ```bash
+    ~/perfsonar-pbr-nm.sh --generate-config-debug
+    ```
 
     - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --generate-config-auto
-        ```
+    ```bash
+    ~/perfsonar-pbr-nm.sh --generate-config-auto
+    ```
 
     Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
 
     !!! warning "Gateways required for addresses"
-        Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
+    Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
 
     !!! note "Gateway prompts"
 
-        During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
+    During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
 
-3. **Execute the script:**
+    3. **Execute the script:**
 
     - Rehearsal (no changes, extra logging recommended on first run):
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --dry-run --debug
-        ```
+    ```bash
+    ~/perfsonar-pbr-nm.sh --dry-run --debug
+    ```
 
     - Apply changes non-interactively (auto-confirm):
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --yes
-        ```
+    ```bash
+    ~/perfsonar-pbr-nm.sh --yes
+    ```
 
     - Or run interactively and answer the confirmation prompt when ready:
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh
-        ```
+    ```bash
+    ~/perfsonar-pbr-nm.sh
+    ```
 
     !!! note "Missing gateways at apply time"
 
-        If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
+    If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
 
-The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
+    The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
 
 ### DNS: forward and reverse entries (required)
 
@@ -201,10 +201,10 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
 - For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
 
-??? example "Example: Bash script to automate DNS verification"
-    The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays.
+    ??? example "Example: Bash script to automate DNS verification"
+        The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays.
 
-    ```bash
+        ```bash
     # quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf
     set -euo pipefail
     CONFIG=/etc/perfSONAR-multi-nic-config.conf
@@ -336,89 +336,89 @@ If any prerequisite is missing, the script skips that component and continues.
         cd ~
         ```
 
-    ??? tip "Alternative: Download directly from the repository URL"
-        ```bash
-        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ~/perfsonar-install-nftables.sh
-        chmod 0755 ~/perfsonar-install-nftables.sh
-        ```
+??? tip "Alternative: Download directly from the repository URL"
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ~/perfsonar-install-nftables.sh
+    chmod 0755 ~/perfsonar-install-nftables.sh
+    ```
 
-2. **Run with desired options:**
+    2. **Run with desired options:**
 
-   ```bash
-   ~/perfsonar-install-nftables.sh --selinux --fail2ban --yes
-   ```
+    ```bash
+    ~/perfsonar-install-nftables.sh --selinux --fail2ban --yes
+    ```
 
-   - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
-   - Add `--dry-run` for a rehearsal that only prints the planned actions.
+    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
+    - Add `--dry-run` for a rehearsal that only prints the planned actions.
 
     The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf`, optionally adjusts SELinux, and enables Fail2Ban jails—only if those components are already installed.
 
-    ??? info "How SSH allow-lists and validation work"
-        **SSH allow-list derivation:**
-        
-        - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
-        - Address entries without a prefix are treated as single hosts.
-        - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
-        
-        **Validation and output:**
-        
-        - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
-      - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+??? info "How SSH allow-lists and validation work"
+    **SSH allow-list derivation:**
 
-??? tip "Preview nftables rules before applying"
-    You can preview the fully rendered nftables rules (no changes are made):
+    - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
+    - Address entries without a prefix are treated as single hosts.
+    - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
 
-    ```bash
-    ~/perfsonar-install-nftables.sh --print-rules
-    ```
+    **Validation and output:**
+
+    - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
+    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+
+        ??? tip "Preview nftables rules before applying"
+            You can preview the fully rendered nftables rules (no changes are made):
+
+            ```bash
+            ~/perfsonar-install-nftables.sh --print-rules
+            ```
 
 ??? tip "Manually add extra management hosts/subnets"
     If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
 
     ```nft
     set ssh_access_ip4_subnets {
-       type ipv4_addr
-       flags interval
-       elements = { 192.0.2.0/24, 198.51.100.0/25 }
+    type ipv4_addr
+    flags interval
+    elements = { 192.0.2.0/24, 198.51.100.0/25 }
     }
 
     set ssh_access_ip4_hosts {
-       type ipv4_addr
-       elements = { 203.0.113.10, 203.0.113.11 }
+    type ipv4_addr
+    elements = { 203.0.113.10, 203.0.113.11 }
     }
 
     set ssh_access_ip6_subnets {
-       type ipv6_addr
-       flags interval
-       elements = { 2001:db8:1::/64 }
+    type ipv6_addr
+    flags interval
+    elements = { 2001:db8:1::/64 }
     }
 
     set ssh_access_ip6_hosts {
-       type ipv6_addr
-       elements = { 2001:db8::10 }
+    type ipv6_addr
+    elements = { 2001:db8::10 }
     }
     ```
 
-   Then validate and reload (root shell):
+    Then validate and reload (root shell):
 
-   ```bash
-   nft -c -f /etc/nftables.d/perfsonar.nft
-   systemctl reload nftables || systemctl restart nftables
-   ```
+    ```bash
+    nft -c -f /etc/nftables.d/perfsonar.nft
+    systemctl reload nftables || systemctl restart nftables
+    ```
 
-3. **Confirm firewall state and security services:**
+    3. **Confirm firewall state and security services:**
 
-    ??? info "Verification commands"
+        ??? info "Verification commands"
 
-        ```bash
-        nft list ruleset
-        sestatus
-        systemctl status fail2ban
-        ```
+            ```bash
+            nft list ruleset
+            sestatus
+            systemctl status fail2ban
+            ```
 
-    Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
+            Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
----
+            ---
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
 
@@ -451,26 +451,26 @@ Key paths to persist on the host:
 
 3. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
 
-      ??? example "Create minimal compose and start the container"
-            Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
+    ??? example "Create minimal compose and start the container"
+        Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
 
-            ```yaml
-            version: "3.9"
-            services:
-               testpoint:
-                  container_name: perfsonar-testpoint
-                  image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-                  network_mode: "host"
-                  cgroup: host
-                  environment:
-                     - TZ=UTC
-                  restart: unless-stopped
-                  tmpfs:
-                     - /run
-                     - /run/lock
-                     - /tmp
-                  volumes:
-                     - /sys/fs/cgroup:/sys/fs/cgroup:rw
+        ```yaml
+        version: "3.9"
+        services:
+        testpoint:
+        container_name: perfsonar-testpoint
+        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+        network_mode: "host"
+        cgroup: host
+        environment:
+        - TZ=UTC
+        restart: unless-stopped
+        tmpfs:
+        - /run
+        - /run/lock
+        - /tmp
+        volumes:
+        - /sys/fs/cgroup:/sys/fs/cgroup:rw
                      # Don't bind Apache/webroot yet; we'll copy defaults out first
                      # Persist perfSONAR psconfig later after seeding (see step 5)
                   tty: true
@@ -507,36 +507,36 @@ Key paths to persist on the host:
        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml -o /opt/testpoint/docker-compose.yml
        ```
 
-      ??? example "Complete docker-compose.yml with bind-mounts and certbot"
-            Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
+??? example "Complete docker-compose.yml with bind-mounts and certbot"
+    Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
 
-            Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
+    Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
 
-            ```yaml
-            version: "3.9"
-            services:
-               testpoint:
-                  container_name: perfsonar-testpoint
-                  image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-                  network_mode: "host"
-                  cgroup: host
-                  environment:
-                     - TZ=UTC
-                  restart: unless-stopped
-                  tmpfs:
-                     - /run
-                     - /run/lock
-                     - /tmp
-                  volumes:
-                     - /sys/fs/cgroup:/sys/fs/cgroup:rw
-                     - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
-                     - /var/www/html:/var/www/html:z
-                     - /etc/apache2:/etc/apache2:z
-                     - /etc/letsencrypt:/etc/letsencrypt:z
-                  tty: true
-                  pids_limit: 8192
-                  cap_add:
-                     - CAP_NET_RAW
+    ```yaml
+    version: "3.9"
+    services:
+    testpoint:
+    container_name: perfsonar-testpoint
+    image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+    network_mode: "host"
+    cgroup: host
+    environment:
+    - TZ=UTC
+    restart: unless-stopped
+    tmpfs:
+    - /run
+    - /run/lock
+    - /tmp
+    volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
+    - /var/www/html:/var/www/html:z
+    - /etc/apache2:/etc/apache2:z
+    - /etc/letsencrypt:/etc/letsencrypt:z
+    tty: true
+    pids_limit: 8192
+    cap_add:
+    - CAP_NET_RAW
 
                # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
                certbot:
@@ -574,18 +574,18 @@ Key paths to persist on the host:
    docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachectl -k graceful || true'
    ```
 
-   ??? info "Notes"
-      - Ensure port 80 on the host is reachable from the internet while issuing certificates.
-      - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
+??? info "Notes"
+    - Ensure port 80 on the host is reachable from the internet while issuing certificates.
+    - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
 
-8. Verify:
+    8. Verify:
 
-   ```bash
-   curl -fsS http://localhost/toolkit/ | head -n 5
-   docker ps  # or podman ps
-   ```
+    ```bash
+    curl -fsS http://localhost/toolkit/ | head -n 5
+    docker ps  # or podman ps
+    ```
 
----
+    ---
 
 ## Step 6 – Register and Configure with WLCG/OSG
 
@@ -593,33 +593,33 @@ Key paths to persist on the host:
    
    Browse to `https://<SERVER_FQDN>/toolkit` and complete the local toolkit setup wizard.
    
-   ??? info "Configuration details to populate"
-      - Site contact email
-      - Usage policy URL
-      - Location (latitude/longitude)
-      - Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping
+??? info "Configuration details to populate"
+    - Site contact email
+    - Usage policy URL
+    - Location (latitude/longitude)
+    - Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping
 
-2. **OSG/WLCG registration workflow:**
-   
-   ??? info "Registration steps and portals"
-      - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
-      - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
-      - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+    2. **OSG/WLCG registration workflow:**
+
+        ??? info "Registration steps and portals"
+            - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+            - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+            - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
 3. **pSConfig enrollment:**
    
    For each active NIC, register with the psconfig service so measurements cover all paths.
 
-   ??? info "Registration command and verification"
-      Example registration:
+??? info "Registration command and verification"
+    Example registration:
 
-      ```bash
-      /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
-      ```
+    ```bash
+    /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
+    ```
 
-      Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
+    Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
 
-4. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
+    4. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
 
 ### Update Lookup Service registration inside the container
 
@@ -654,65 +654,65 @@ Perform these checks before handing the host over to operations:
 
 1. **System services:**
 
-   ??? info "Verify Podman and compose services"
-      ```bash
-      systemctl status podman
-      systemctl --user status podman-compose@perfsonar-testpoint.service
-      ```
+    ??? info "Verify Podman and compose services"
+        ```bash
+        systemctl status podman
+        systemctl --user status podman-compose@perfsonar-testpoint.service
+        ```
 
-      Ensure both are active/green.
+        Ensure both are active/green.
 
 2. **Container health:**
 
-   ??? info "Check container status and logs"
-      ```bash
-      podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-      podman logs pscheduler-agent | tail
-      ```
+    ??? info "Check container status and logs"
+        ```bash
+        podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+        podman logs pscheduler-agent | tail
+        ```
 
 3. **Network path validation:**
 
-   ??? info "Test network connectivity and routing"
-      ```bash
-      pscheduler task throughput --dest <remote-testpoint>
-      tracepath -n <remote-testpoint>
-      ```
+    ??? info "Test network connectivity and routing"
+        ```bash
+        pscheduler task throughput --dest <remote-testpoint>
+        tracepath -n <remote-testpoint>
+        ```
 
-      Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
+        Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
 4. **Toolkit diagnostics:** visit the Toolkit UI → *Dashboard* → *Host Status* to confirm pScheduler, MaDDash, and owamp/bwctl services report healthy.
 
 5. **Security posture:**
 
-   ??? info "Check firewall, fail2ban, and SELinux"
-      ```bash
-      nft list ruleset | grep perfsonar
-      fail2ban-client status
-      ausearch --message AVC --just-one
-      ```
+    ??? info "Check firewall, fail2ban, and SELinux"
+        ```bash
+        nft list ruleset | grep perfsonar
+        fail2ban-client status
+        ausearch --message AVC --just-one
+        ```
 
-      Investigate any SELinux denials or repeated Fail2Ban bans.
+        Investigate any SELinux denials or repeated Fail2Ban bans.
 
 6. **LetsEncrypt certificate check:**
 
-   ??? info "Verify certificate validity"
-      ```bash
-      openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
-      ```
+    ??? info "Verify certificate validity"
+        ```bash
+        openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
+        ```
 
-      Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
+        Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
 
 7. **Reporting:**
 
-   ??? info "Run perfSONAR diagnostic reports"
-      Run the perfSONAR toolkit daily report and send outputs to operations:
+    ??? info "Run perfSONAR diagnostic reports"
+        Run the perfSONAR toolkit daily report and send outputs to operations:
 
-      ```bash
-      pscheduler troubleshoot
-      toolkit-system-health
-      ```
+        ```bash
+        pscheduler troubleshoot
+        toolkit-system-health
+        ```
 
----
+        ---
 
 ## Ongoing Maintenance
 
@@ -728,9 +728,9 @@ Keep containers current and only restart them when their image actually changes.
 ??? info "Auto-update via labels and a systemd timer"
     1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used):
 
-        ```yaml
-        services:
-           testpoint:
+    ```yaml
+    services:
+    testpoint:
               # ...
               labels:
                  - io.containers.autoupdate=registry
