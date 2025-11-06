@@ -114,11 +114,13 @@ This guide references multiple scripts from the osg-htc/networking repository. C
 # Clone the networking repository to /opt
 cd /opt
 git clone https://github.com/osg-htc/networking.git
+```
 
-# Optional: if deploying the perfSONAR testpoint container, clone it separately
-# git clone https://github.com/perfsonar/testpoint.git /opt/perfsonar-tp
+Optional: if deploying the perfSONAR testpoint container, clone it separately:
 
 ```bash
+git clone https://github.com/perfsonar/testpoint.git /opt/perfsonar-tp
+```
 
 After cloning, all script examples in this guide that reference `docs/perfsonar/tools_scripts/` assume you're running commands from `/opt/networking`.
 
@@ -446,149 +448,144 @@ Key paths to persist on the host:
 - `/var/www/html` → container `/var/www/html` (webroot for Toolkit and ACME challenges)
 - `/etc/letsencrypt` → container `/etc/letsencrypt` (certs/keys, if using Let’s Encrypt)
 
-1. Install container tooling (Podman and optional Docker-style compose):
+### Install container tooling (Podman and optional Docker-style compose)
 
-   ```bash
-   dnf install -y podman podman-compose python3-pip
-   pip3 install --upgrade docker-compose
-   ```
+```bash
+dnf install -y podman podman-compose python3-pip
+pip3 install --upgrade docker-compose
+```
 
-   Tip: you can use either `podman-compose` or `docker-compose` in the steps below. Substitute the command that matches your preference.
+Tip: you can use either `podman-compose` or `docker-compose` in the steps below. Substitute the command that matches your preference.
 
-1. Prepare directories on the host:
+### Prepare directories on the host
 
 ```bash
 mkdir -p /opt/perfsonar-tp/psconfig
 mkdir -p /var/www/html
 mkdir -p /etc/apache2
 mkdir -p /etc/letsencrypt
+```
+
+### Seed defaults from the testpoint container
+
+First, create a minimal compose file and start the container without host bind-mounts so we can copy baseline content out.
+
+```yaml
+version: "3.9"
+services:
+    testpoint:
+        container_name: perfsonar-testpoint
+        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+        network_mode: "host"
+        cgroup: host
+        environment:
+            - TZ=UTC
+        restart: unless-stopped
+        tmpfs:
+            - /run
+            - /run/lock
+            - /tmp
+        volumes:
+            - /sys/fs/cgroup:/sys/fs/cgroup:rw
+        tty: true
+        pids_limit: 8192
+        cap_add:
+            - CAP_NET_RAW
+```
+
+Bring it up with your preferred tool:
 
 ```bash
+(cd /opt/perfsonar-tp; podman-compose up -d)  # or: (cd /opt/perfsonar-tp; docker-compose up -d)
+```
 
-1. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
+### Copy baseline content out of the running container
 
-    ??? example "Create minimal compose and start the container"
-                Create a minimal compose file at `/opt/perfsonar-tp/docker-compose.yml`:
-
-                ```yaml
-                version: "3.9"
-                services:
-                    testpoint:
-                        container_name: perfsonar-testpoint
-                        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-                        network_mode: "host"
-                        cgroup: host
-                        environment:
-                            - TZ=UTC
-                        restart: unless-stopped
-                        tmpfs:
-                            - /run
-                            - /run/lock
-                            - /tmp
-                        volumes:
-                            - /sys/fs/cgroup:/sys/fs/cgroup:rw
-                        tty: true
-                        pids_limit: 8192
-                        cap_add:
-                            - CAP_NET_RAW
-                ```
-
-                Bring it up with your preferred tool:
-
-                ```bash
-                (cd /opt/perfsonar-tp; podman-compose up -d)  # or: (cd /opt/perfsonar-tp; docker-compose up -d)
-                ```
-
-1. Copy baseline content out of the running container to the host:
-
-   ```bash
-   # Use docker cp or podman cp (either works)
-   docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
-   docker cp perfsonar-testpoint:/var/www/html /var/www/html
+```bash
+# Use docker cp or podman cp (either works)
+docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
+docker cp perfsonar-testpoint:/var/www/html /var/www/html
 docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
-   ```
+```
 
-   If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you don’t need manual `chcon`.
+If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you don’t need manual `chcon`.
 
-1. Replace the compose file with bind-mounts that map host paths directly, and (optionally) add a `certbot` sidecar for Let’s Encrypt.
+### Replace the compose file with bind-mounts and optional certbot
 
-    You can download a ready-to-use compose file from this repository:
+You can download a ready-to-use compose file from this repository, or create it manually.
 
-    - [Browse](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/docker-compose.yml)
-    - Download directly:
+- [Browse](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/docker-compose.yml)
+- Download directly:
 
-    ```bash
-        curl -fsSL \
-            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
-            -o /opt/perfsonar-tp/docker-compose.yml
-    ```
+```bash
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
+    -o /opt/perfsonar-tp/docker-compose.yml
+```
 
-    ??? example "Complete docker-compose.yml with bind-mounts and certbot"
-                Or create/edit `/opt/perfsonar-tp/docker-compose.yml` with the following content:
+Or create/edit `/opt/perfsonar-tp/docker-compose.yml` with the following content (includes an optional `certbot` sidecar):
 
-                Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
+```yaml
+version: "3.9"
+services:
+    testpoint:
+        container_name: perfsonar-testpoint
+        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+        network_mode: "host"
+        cgroup: host
+        environment:
+            - TZ=UTC
+        restart: unless-stopped
+        tmpfs:
+            - /run
+            - /run/lock
+            - /tmp
+        volumes:
+            - /sys/fs/cgroup:/sys/fs/cgroup:rw
+            - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
+            - /var/www/html:/var/www/html:z
+            - /etc/apache2:/etc/apache2:z
+            - /etc/letsencrypt:/etc/letsencrypt:z
+        tty: true
+        pids_limit: 8192
+        cap_add:
+            - CAP_NET_RAW
 
-                ```yaml
-                version: "3.9"
-                services:
-                    testpoint:
-                        container_name: perfsonar-testpoint
-                        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-                        network_mode: "host"
-                        cgroup: host
-                        environment:
-                            - TZ=UTC
-                        restart: unless-stopped
-                        tmpfs:
-                            - /run
-                            - /run/lock
-                            - /tmp
-                        volumes:
-                            - /sys/fs/cgroup:/sys/fs/cgroup:rw
-                            - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
-                            - /var/www/html:/var/www/html:z
-                            - /etc/apache2:/etc/apache2:z
-                            - /etc/letsencrypt:/etc/letsencrypt:z
-                        tty: true
-                        pids_limit: 8192
-                        cap_add:
-                            - CAP_NET_RAW
+    # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
+    certbot:
+        image: certbot/certbot
+        container_name: certbot
+        network_mode: "host"
+        restart: unless-stopped
+        entrypoint:
+            ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+        depends_on:
+            - testpoint
+        volumes:
+            - /var/www/html:/var/www/html:z
+            - /etc/letsencrypt:/etc/letsencrypt:z
+```
 
-                    # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
-                    certbot:
-                        image: certbot/certbot
-                        container_name: certbot
-                        network_mode: "host"
-                        restart: unless-stopped
-                        entrypoint:
-                            ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
-                        depends_on:
-                            - testpoint
-                        volumes:
-                            - /var/www/html:/var/www/html:z
-                            - /etc/letsencrypt:/etc/letsencrypt:z
-                ```
+### Restart with the new compose
 
-1. Restart with the new compose:
+```bash
+(cd /opt/perfsonar-tp; podman-compose down)
+(cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose down && docker-compose up -d
+```
 
-   ```bash
-    (cd /opt/perfsonar-tp; podman-compose down)
-    (cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose down && docker-compose up -d
-   ```
+### Optional – obtain your first Let’s Encrypt certificate
 
-1. Optional – obtain your first Let’s Encrypt certificate:
+The `certbot` sidecar above continuously renews existing certs. For the initial issuance, run a one-shot command and then reload Apache inside the testpoint container:
 
-   The `certbot` sidecar above continuously renews existing certs. For the initial issuance, run a one-shot command and then reload Apache inside the testpoint container:
+```bash
+# Issue (HTTP-01 webroot challenge). Replace values accordingly.
+docker run --rm --net=host -v /var/www/html:/var/www/html -v /etc/letsencrypt:/etc/letsencrypt \
+    certbot/certbot certonly --webroot -w /var/www/html -d <SERVER_FQDN> \
+    --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email
 
-   ```bash
-   # Issue (HTTP-01 webroot challenge). Replace values accordingly.
-   docker run --rm --net=host -v /var/www/html:/var/www/html -v /etc/letsencrypt:/etc/letsencrypt \
-     certbot/certbot certonly --webroot -w /var/www/html -d <SERVER_FQDN> \
-     --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email
-
-   # Gracefully reload Apache within the testpoint container (or restart the service)
-   docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachectl -k graceful || true'
-   ```
+# Gracefully reload Apache within the testpoint container (or restart the service)
+docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachectl -k graceful || true'
+```
 
 ??? info "Notes"
     - Ensure port 80 on the host is reachable from the internet while issuing certificates.
@@ -637,7 +634,7 @@ Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside 
 
 Install and run examples (root shell):
 
-```bash
+```
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
    -o ~/perfSONAR-update-lsregistration.sh
 chmod 0755 ~/perfSONAR-update-lsregistration.sh
