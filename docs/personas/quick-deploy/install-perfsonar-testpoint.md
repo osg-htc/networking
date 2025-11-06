@@ -557,9 +557,9 @@ Key paths to persist on the host:
    docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachectl -k graceful || true'
    ```
 
-   Notes:
-   - Ensure port 80 on the host is reachable from the internet while issuing certificates.
-   - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
+   ??? info "Notes"
+      - Ensure port 80 on the host is reachable from the internet while issuing certificates.
+      - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
 
 8. Verify:
 
