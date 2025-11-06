@@ -1413,21 +1413,20 @@
 <ul>
 <li>
 <p><strong>Bare metal</strong> - preffered option in one of two possible configurations:</p>
-<div class="highlight"><pre><span></span><code>* Two bare metal servers, one for latency node, one for bandwidth node
-* One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to [dual NIC](#multiple-nic-network-interface-card-guidance) section for more details on this.
-</code></pre></div>
+<p><code>* Two bare metal servers, one for latency node, one for bandwidth node
+* One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to [dual NIC](#multiple-nic-network-interface-card-guidance) section for more details on this.</code></p>
 </li>
 <li>
 <p><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:</p>
-<div class="highlight"><pre><span></span><code>* Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
+<p><code>* Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
 * VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
-* Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production
-</code></pre></div>
+* Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production</code></p>
 </li>
 <li>
 <p><strong>Container</strong> - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <a href="https://docs.perfsonar.net/install_docker.html">https://docs.perfsonar.net/install_docker.html</a> but is not typically used in the same way as a full toolkit installation.</p>
-<div class="highlight"><pre><span></span><code>* Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
-</code></pre></div>
+<p>```
+* Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.</p>
+<p>```</p>
 </li>
 </ul>
 <h3 id="perfsonar-toolkit-vs-testpoint">perfSONAR Toolkit vs Testpoint<a class="headerlink" href="#perfsonar-toolkit-vs-testpoint" title="Permanent link">&para;</a></h3>
@@ -1435,16 +1434,16 @@
 <ul>
 <li>
 <p>Pros</p>
-<div class="highlight"><pre><span></span><code>* Simpler deployment when a local web interface is not needed and a central measurement archive is available.
-* Less resource intensive for both memory and I/O capacity.
-</code></pre></div>
+<p><code>* Simpler deployment when a local web interface is not needed and a central measurement archive is available.
+* Less resource intensive for both memory and I/O capacity.</code></p>
 </li>
 <li>
 <p>Cons</p>
-<div class="highlight"><pre><span></span><code>* Measurements are not stored locally
+<p>```
+* Measurements are not stored locally
 * No web interface to use for configuration or adding local tests
-* Unable to show results in MaDDash
-</code></pre></div>
+* Unable to show results in MaDDash</p>
+<p>```</p>
 </li>
 </ul>
 <p>While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced resource constraints, less components and easier management.</p>

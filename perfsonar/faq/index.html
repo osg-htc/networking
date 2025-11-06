@@ -1428,23 +1428,24 @@
 <p>We are maintaining a <a href="../../network-troubleshooting/">Network Troubleshooting</a> page to guide users in identifying and following up on network problems.</p>
 <h4 id="installing-a-certificate">Installing a certificate<a class="headerlink" href="#installing-a-certificate" title="Permanent link">&para;</a></h4>
 <p><strong>What is the recommended way to install a certificate on my perfSONAR host?</strong></p>
-<p>We recommend using Lets Encrypt (see https://letsencrypt.org).    There is a tutorial that users may find helpful at  <a href="https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&amp;text=Befor">Secure Apache with Lets Encrypt</a>.   </p>
+<p>We recommend using Lets Encrypt (see https://letsencrypt.org).    There is a tutorial that users may find helpful at  <a href="https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&amp;text=Befor">Secure Apache with Lets Encrypt</a>.</p>
 <details>
 
-    <div class="highlight"><pre><span></span><code>&lt;summary&gt;A quick set of steps is shown here:&lt;/summary&gt;
-&lt;p&gt;0. Install certbot with yum, dnf, or snap:  **yum install certbot python3-certbot-apache**&lt;/p&gt;
-&lt;p&gt;1. Certbot needs port 80/443 so stop anything blocking it or using it:  **systemctl stop firewalld  systemctl stop httpd**&lt;/p&gt;
-&lt;p&gt;2. Test with dry-run:  **certbot certonly --standalone --preferred-challenges http --dry-run**&lt;/p&gt;
-&lt;p&gt;3. Get the certificate:  **certbot certonly --standalone --preferred-challenges http**&lt;/p&gt;
-&lt;p&gt;4. Restart httpd:  **systemctl start firewalld  systemctl start httpd**&lt;/p&gt;
-&lt;p&gt;5. Note certificate is installed under  /etc/letsencrypt/&lt;/p&gt;    
-&lt;p&gt;6. Tell http where your certificate is:  Edit /etc/httpd/conf.d/ssl.conf&lt;/p&gt;
-    &lt;p&gt;1. Set **SSLCertificateFile** to /etc/letsencrypt/live/FQDN/cert.pem&lt;/p&gt;
-    &lt;p&gt;2. Set **SSLCertificateKeyFile** to /etc/letsencrypt/live/FQDN/privkey.pem&lt;/p&gt;
-    &lt;p&gt;3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem&lt;/p&gt;  
-&lt;p&gt;7. Renew your certficate: **certbot renew --dry-run certbot renew**&lt;/p&gt;
-&lt;p&gt;8. Make a donation :)&lt;/p&gt;
-</code></pre></div>
+    ```
+<summary>A quick set of steps is shown here:</summary>
+<p>0. Install certbot with yum, dnf, or snap:  **yum install certbot python3-certbot-apache**</p>
+<p>1. Certbot needs port 80/443 so stop anything blocking it or using it:  **systemctl stop firewalld  systemctl stop httpd**</p>
+<p>2. Test with dry-run:  **certbot certonly --standalone --preferred-challenges http --dry-run**</p>
+<p>3. Get the certificate:  **certbot certonly --standalone --preferred-challenges http**</p>
+<p>4. Restart httpd:  **systemctl start firewalld  systemctl start httpd**</p>
+<p>5. Note certificate is installed under  /etc/letsencrypt/</p>
+<p>6. Tell http where your certificate is:  Edit /etc/httpd/conf.d/ssl.conf</p>
+    <p>1. Set **SSLCertificateFile** to /etc/letsencrypt/live/FQDN/cert.pem</p>
+    <p>2. Set **SSLCertificateKeyFile** to /etc/letsencrypt/live/FQDN/privkey.pem</p>
+    <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>
+<p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
+<p>8. Make a donation :)</p>
+    ```
 
 </details>
 
@@ -1455,17 +1456,17 @@
 </ul>
 <p>For OSG sites, please open a ticket with GOC. Otherwise please open a GGUS ticket (or assign an existing) one to WLCG Network Throughput support unit.</p>
 <h4 id="service-registration">Service Registration<a class="headerlink" href="#service-registration" title="Permanent link">&para;</a></h4>
-<p><strong>I got an email after registering with lots of information in it...what do I do?</strong> </p>
+<p><strong>I got an email after registering with lots of information in it...what do I do?</strong></p>
 <p>This is part of the process. If you are a new site you will need to attend the next OSG operations meeting. If you are an existing site and have just registered perfSONAR instances you don't have to do anything but feel free to attend the next operations meeting if you have questions or concerns.</p>
-<p><strong>Once I registered, new tickets were opened concerning perfSONAR...What do I do?</strong> </p>
+<p><strong>Once I registered, new tickets were opened concerning perfSONAR...What do I do?</strong></p>
 <p>This is standard operating procedure and the tickets are to ensure that OSG operations properly gets your new perfSONAR instances registered. You don't have to do anything and the tickets will be closed by OSG operations staff.</p>
 <h4 id="infrastructure-monitoring-check_mk-metrics">Infrastructure Monitoring (check_mk metrics)<a class="headerlink" href="#infrastructure-monitoring-check_mk-metrics" title="Permanent link">&para;</a></h4>
 <ul>
 <li><strong>perfSONAR services: versions</strong> metric is failing.</li>
 </ul>
-<p>This metrics checks if your sonar is at the most recent version. Please check if you have automatic yum updates enabled, this is strongly recommended due to security issues we have seen in the past. In case you're still running an older version (3.3-3.5), please update and reconfigure as soon as possible following <a href="../installation/">Installation Guide</a> </p>
+<p>This metrics checks if your sonar is at the most recent version. Please check if you have automatic yum updates enabled, this is strongly recommended due to security issues we have seen in the past. In case you're still running an older version (3.3-3.5), please update and reconfigure as soon as possible following <a href="../installation/">Installation Guide</a></p>
 <ul>
-<li><strong>perfSONAR configuration: contacts or location</strong> metrics are failing </li>
+<li><strong>perfSONAR configuration: contacts or location</strong> metrics are failing</li>
 </ul>
 <p>Please check if you have added the administrative information as detailed <a href="http://docs.perfsonar.net/install_config_first_time.html#updating-your-administrative-information">here</a></p>
 <ul>
@@ -1475,18 +1476,19 @@
 <ul>
 <li><strong>perfSONAR services: esmond</strong> metric is failing</li>
 </ul>
-<p>This means that your measurement archive is not accessible or failing, there can be many possible causes (disk full, httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS ticket to WLCG perfSONAR support. </p>
+<p>This means that your measurement archive is not accessible or failing, there can be many possible causes (disk full, httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS ticket to WLCG perfSONAR support.</p>
 <ul>
 <li>
 <p><strong>perfSONAR json summary</strong> is failing</p>
-<div class="highlight"><pre><span></span><code>-   This means the toolkit&#39;s homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS 
-</code></pre></div>
+<p>```
+-   This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS</p>
+<p>```</p>
 </li>
 <li>
 <p><strong>perfSONAR configuration: meshes</strong> metric is failing</p>
 </li>
 </ul>
-<p>This indicates that you're missing the recommended mesh configuration. Please follow mesh configuration as detailed in the <a href="../installation/">installation guide</a>. Also, please REMOVE any old mesh configuration, this metric will also fail in case you have both the new mesh config and the old mesh URLs </p>
+<p>This indicates that you're missing the recommended mesh configuration. Please follow mesh configuration as detailed in the <a href="../installation/">installation guide</a>. Also, please REMOVE any old mesh configuration, this metric will also fail in case you have both the new mesh config and the old mesh URLs</p>
 <ul>
 <li><strong>perfSONAR services: ntp</strong> is failing</li>
 </ul>
@@ -1498,23 +1500,23 @@
 <ul>
 <li>There are <strong>many tests failing</strong> for given sonar, where should I start</li>
 </ul>
-<p>Please update and reconfigure your sonar following <a href="../installation/">Installation Guide</a>. Please ensure firewall doesn't block access from the whitelisted subnets that are required for the infrastructure monitoring to work. </p>
+<p>Please update and reconfigure your sonar following <a href="../installation/">Installation Guide</a>. Please ensure firewall doesn't block access from the whitelisted subnets that are required for the infrastructure monitoring to work.</p>
 <ul>
 <li><strong>Where can I get support on managing WLCG perfSONAR</strong> ?</li>
 </ul>
-<p>You can open ticket in GGUS to WLCG perfSONAR support unit or contact directly wlcg-perfsonar-support (at cern.ch) </p>
+<p>You can open ticket in GGUS to WLCG perfSONAR support unit or contact directly wlcg-perfsonar-support (at cern.ch)</p>
 <ul>
 <li><strong>perfSONAR esmond freshness Latency/Bandwidth Direct</strong> is failing or gives warning</li>
 </ul>
-<p>This metric checks freshness of the local measurement archive, in particular it checks if it contains fresh results for all the configured tests. This metric is needed to determine if we're able to consistently get results from perfSONAR boxes in WLCG. Currently it's a non-critical test, you can ignore it. </p>
+<p>This metric checks freshness of the local measurement archive, in particular it checks if it contains fresh results for all the configured tests. This metric is needed to determine if we're able to consistently get results from perfSONAR boxes in WLCG. Currently it's a non-critical test, you can ignore it.</p>
 <ul>
 <li><strong>perfSONAR services ndt/npad</strong> is failing</li>
 </ul>
-<p>Both metrics check if you have disabled NDT and NPAD. As both NDT and NPAD have been dropped starting with 4.0, this metrics should stay green in most of the cases. </p>
+<p>Both metrics check if you have disabled NDT and NPAD. As both NDT and NPAD have been dropped starting with 4.0, this metrics should stay green in most of the cases.</p>
 <ul>
 <li><strong>perfSONAR hardware check</strong> is failing</li>
 </ul>
-<p>Please consult the minimum and recommended <a href="../deployment-models/">hardware requirements</a>. </p>
+<p>Please consult the minimum and recommended <a href="../deployment-models/">hardware requirements</a>.</p>
 
 
 
