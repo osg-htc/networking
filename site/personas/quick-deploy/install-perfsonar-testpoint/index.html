@@ -1460,7 +1460,9 @@ baseline packages.</p>
 </ul>
 <details class="tip">
 <summary>Alternative: Download and run directly</summary>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span>-o<span class="w"> </span>./check-deps.sh
+<div class="highlight"><pre><span></span><code><span class="w">        </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>-o<span class="w"> </span>./check-deps.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
 ./check-deps.sh
 </code></pre></div>
@@ -1549,7 +1551,9 @@ cd ~</code></p>
 <details class="tip">
 <summary>Alternative: Download directly from the repository URL</summary>
 <p><code>bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh \
+            -o ./perfSONAR-pbr-nm.sh
 chmod 0755 ./perfSONAR-pbr-nm.sh</code></p>
 </details>
 </li>
@@ -1677,7 +1681,11 @@ echo "DNS forward/reverse checks passed for configured addresses."
 <p>You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects <code>/etc/perfSONAR-multi-nic-config.conf</code> to exist and be readable.</p>
 <p>```bash</p>
 <h1 id="download-curl">Download (curl)<a class="headerlink" href="#download-curl" title="Permanent link">&para;</a></h1>
-<p>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh -o ./check-perfsonar-dns.sh</p>
+<div class="codehilite"><pre><span></span><code><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
+<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
+<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">./</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
+</code></pre></div>
+
 <h1 id="or-download-with-wget">Or download with wget<a class="headerlink" href="#or-download-with-wget" title="Permanent link">&para;</a></h1>
 <h1 id="wget-o-check-perfsonar-dnssh-httpsrawgithubusercontentcomosg-htcnetworkingmasterdocsperfsonartools_scriptscheck-perfsonar-dnssh">wget -O ./check-perfsonar-dns.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh<a class="headerlink" href="#wget-o-check-perfsonar-dnssh-httpsrawgithubusercontentcomosg-htcnetworkingmasterdocsperfsonartools_scriptscheck-perfsonar-dnssh" title="Permanent link">&para;</a></h1>
 <p>chmod 0755 ./check-perfsonar-dns.sh</p>
@@ -1733,7 +1741,9 @@ cd ~</code></p>
 <details class="tip">
 <summary>Alternative: Download directly from the repository URL</summary>
 <p><code>bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ~/perfsonar-install-nftables.sh
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh \
+            -o ~/perfsonar-install-nftables.sh
 chmod 0755 ~/perfsonar-install-nftables.sh</code></p>
 </details>
 <ol>
@@ -1896,7 +1906,9 @@ docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
 <li>Download directly:</li>
 </ul>
 <p><code>bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml -o /opt/perfsonar-tp/docker-compose.yml</code></p>
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
+        -o /opt/perfsonar-tp/docker-compose.yml</code></p>
 <details class="example">
 <summary>Complete docker-compose.yml with bind-mounts and certbot</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">Or</span><span class="w"> </span><span class="n">create</span><span class="o">/</span><span class="n">edit</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">.</span><span class="n">yml</span><span class="err">`</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">following</span><span class="w"> </span><span class="n">content</span><span class="p">:</span>
