@@ -538,9 +538,9 @@ Key paths to persist on the host:
                             - /etc/apache2:/etc/apache2:z
                             - /etc/letsencrypt:/etc/letsencrypt:z
                         tty: true
-                pids_limit: 8192
-                cap_add:
-                    - CAP_NET_RAW
+                        pids_limit: 8192
+                        cap_add:
+                            - CAP_NET_RAW
 
                     # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
                     certbot:
