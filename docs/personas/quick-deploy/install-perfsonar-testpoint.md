@@ -77,16 +77,18 @@ This guide references multiple scripts from the osg-htc/networking repository. C
 - **perfSONAR testpoint compose bundle:** `/opt/perfsonar-tp` (if using containerized testpoint)
 
 ```bash
-# Clone the networking repository to /opt
+# Clone the networking repository to /opt (public repo)
 cd /opt
+git clone https://github.com/osg-htc/networking.git /opt/networking
 ```
 
-Optional: if deploying the perfSONAR testpoint container, clone it separately:
+Create the application directory for the testpoint bundle (no private clone required):
 
 ```bash
-git clone https://github.com/perfsonar/testpoint.git /opt/perfsonar-tp
+mkdir -p /opt/perfsonar-tp
 ```
-We will then check out just the tools_script directory from this repo, to give us access to the appropriate scripts and tools.
+
+We will then check out just the tools_scripts directory from this repo, to give us access to the appropriate scripts and tools.
 
 Create only the perfSONAR tools directory from this repository using a sparse checkout, and place it under `/opt/perfsonar-tp/tools_scripts`:
 
