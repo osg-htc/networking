@@ -1,4 +1,4 @@
-# Installing a perfSONAR Testpoint for WLCG/OSG
+﻿# Installing a perfSONAR Testpoint for WLCG/OSG
 
 This quick-deploy playbook walks WLCG/OSG site administrators through the end-to-end installation, configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). Each phase references tooling that already lives in this repository so you can automate as much as possible while still capturing the site-specific information required by OSG/WLCG operations.
 
@@ -49,7 +49,9 @@ Before you begin, gather the following information:
     ??? tip "Alternative: Download and run directly"
 
         ```bash
-        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
+                curl -fsSL \
+                    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
+                    -o ./check-deps.sh
         chmod 0755 ./check-deps.sh
         ./check-deps.sh
         ```
@@ -106,7 +108,7 @@ This guide references multiple scripts from the osg-htc/networking repository. C
 **Recommended locations:**
 
 - **Networking repo:** `/opt/networking` (configuration scripts and documentation)
-- **perfSONAR testpoint compose bundle:** `/opt/testpoint` (if using containerized testpoint)
+- **perfSONAR testpoint compose bundle:** `/opt/perfsonar-tp` (if using containerized testpoint)
 
 ```bash
 # Clone the networking repository to /opt
@@ -114,8 +116,9 @@ cd /opt
 git clone https://github.com/osg-htc/networking.git
 
 # Optional: if deploying the perfSONAR testpoint container, clone it separately
-# git clone https://github.com/perfsonar/testpoint.git /opt/testpoint
-```
+# git clone https://github.com/perfsonar/testpoint.git /opt/perfsonar-tp
+
+```bash
 
 After cloning, all script examples in this guide that reference `docs/perfsonar/tools_scripts/` assume you're running commands from `/opt/networking`.
 
@@ -145,7 +148,9 @@ Script location in the repository:
     ??? tip "Alternative: Download directly from the repository URL"
 
         ```bash
-        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
+                curl -fsSL \
+                    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh \
+                    -o ./perfSONAR-pbr-nm.sh
         chmod 0755 ./perfSONAR-pbr-nm.sh
         ```
 
@@ -280,7 +285,9 @@ If any addresses fail these checks, correct the DNS zone (forward and/or reverse
 
     ```bash
     # Download (curl)
-    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh -o ./check-perfsonar-dns.sh
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
+            -o ./check-perfsonar-dns.sh
     # Or download with wget
     # wget -O ./check-perfsonar-dns.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh
 
@@ -344,7 +351,9 @@ If any prerequisite is missing, the script skips that component and continues.
     ??? tip "Alternative: Download directly from the repository URL"
 
         ```bash
-        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ~/perfsonar-install-nftables.sh
+                curl -fsSL \
+                    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh \
+                    -o ~/perfsonar-install-nftables.sh
         chmod 0755 ~/perfsonar-install-nftables.sh
         ```
 
@@ -432,7 +441,7 @@ We’ll run the official testpoint image from the GitHub Container Registry usin
 
 Key paths to persist on the host:
 
-- `/opt/testpoint/psconfig` → container `/etc/perfsonar/psconfig`
+- `/opt/perfsonar-tp/psconfig` → container `/etc/perfsonar/psconfig`
 - `/etc/apache2` → container `/etc/apache2` (Apache configs)
 - `/var/www/html` → container `/var/www/html` (webroot for Toolkit and ACME challenges)
 - `/etc/letsencrypt` → container `/etc/letsencrypt` (certs/keys, if using Let’s Encrypt)
@@ -448,17 +457,18 @@ Key paths to persist on the host:
 
 1. Prepare directories on the host:
 
-   ```bash
-   mkdir -p /opt/testpoint/psconfig
-   mkdir -p /var/www/html
-   mkdir -p /etc/apache2
-   mkdir -p /etc/letsencrypt
-   ```
+```bash
+mkdir -p /opt/perfsonar-tp/psconfig
+mkdir -p /var/www/html
+mkdir -p /etc/apache2
+mkdir -p /etc/letsencrypt
+
+```bash
 
 1. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
 
     ??? example "Create minimal compose and start the container"
-                Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
+                Create a minimal compose file at `/opt/perfsonar-tp/docker-compose.yml`:
 
                 ```yaml
                 version: "3.9"
@@ -486,7 +496,7 @@ Key paths to persist on the host:
                 Bring it up with your preferred tool:
 
                 ```bash
-                (cd /opt/testpoint; podman-compose up -d)  # or: (cd /opt/testpoint; docker-compose up -d)
+                (cd /opt/perfsonar-tp; podman-compose up -d)  # or: (cd /opt/perfsonar-tp; docker-compose up -d)
                 ```
 
 1. Copy baseline content out of the running container to the host:
@@ -495,7 +505,7 @@ Key paths to persist on the host:
    # Use docker cp or podman cp (either works)
    docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
    docker cp perfsonar-testpoint:/var/www/html /var/www/html
-   docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/testpoint/psconfig
+docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
    ```
 
    If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you don’t need manual `chcon`.
@@ -507,12 +517,14 @@ Key paths to persist on the host:
     - [Browse](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/docker-compose.yml)
     - Download directly:
 
-       ```bash
-       curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml -o /opt/testpoint/docker-compose.yml
-       ```
+    ```bash
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
+            -o /opt/perfsonar-tp/docker-compose.yml
+    ```
 
     ??? example "Complete docker-compose.yml with bind-mounts and certbot"
-                Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
+                Or create/edit `/opt/perfsonar-tp/docker-compose.yml` with the following content:
 
                 Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
 
@@ -533,7 +545,7 @@ Key paths to persist on the host:
                             - /tmp
                         volumes:
                             - /sys/fs/cgroup:/sys/fs/cgroup:rw
-                            - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
+                            - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
                             - /var/www/html:/var/www/html:z
                             - /etc/apache2:/etc/apache2:z
                             - /etc/letsencrypt:/etc/letsencrypt:z
@@ -560,8 +572,8 @@ Key paths to persist on the host:
 1. Restart with the new compose:
 
    ```bash
-   (cd /opt/testpoint; podman-compose down)
-   (cd /opt/testpoint; podman-compose up -d)  # or docker-compose down && docker-compose up -d
+    (cd /opt/perfsonar-tp; podman-compose down)
+    (cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose down && docker-compose up -d
    ```
 
 1. Optional – obtain your first Let’s Encrypt certificate:
@@ -639,7 +651,8 @@ chmod 0755 ~/perfSONAR-update-lsregistration.sh
    --city Berkeley --region CA --country US --zip 94720 \
    --latitude 37.5 --longitude -121.7469 \
    --admin-name "pS Admin" --admin-email admin@example.org
-```
+
+```bash
 
 ---
 

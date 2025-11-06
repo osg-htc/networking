@@ -1,4 +1,4 @@
-## **1\. Prerequisites**
+﻿## **1\. Prerequisites**
 
 ### **Ensure the host is up to date:**
 
@@ -21,8 +21,8 @@ cd perfsonar-testpoint-docker
 
 ### **Prepare configuration storage:**
 
-sudo mkdir \-p /opt/testpoint/
-sudo cp \-r compose/psconfig /opt/testpoint/
+sudo mkdir \-p /opt/perfsonar-tp/
+sudo cp \-r compose/psconfig /opt/perfsonar-tp/
 
 ### **Edit the compose file as needed:**
 
@@ -108,8 +108,7 @@ flush ruleset
 
 table inet perfsonar {
 
-    ```
-set allowed\_protocols {
+    `\n\nset allowed\_protocols {
     type inet\_proto
     elements \= { icmp, icmpv6 }
 }

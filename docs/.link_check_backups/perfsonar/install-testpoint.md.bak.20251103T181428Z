@@ -1,4 +1,4 @@
-## **1\. Prerequisites**
+﻿## **1\. Prerequisites**
 
 ### **Ensure the host is up to date:**
 
@@ -21,8 +21,8 @@ cd perfsonar-testpoint-docker
 
 ### **Prepare configuration storage:**
 
-sudo mkdir \-p /opt/testpoint/  
-sudo cp \-r compose/psconfig /opt/testpoint/
+sudo mkdir \-p /opt/perfsonar-tp/  
+sudo cp \-r compose/psconfig /opt/perfsonar-tp/
 
 ### **Edit the compose file as needed:**
 
@@ -72,7 +72,7 @@ sudo ip route add default via 10.20.30.1 dev eth1 table eth1table
 
 ### **c) Make persistent**
 
-For persistent configuration, add these rules and routes to a script (e.g., /usr/local/sbin/perfsonar-policy-routing.sh) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.
+For persistent configuration, add these rules and routes to a script (e.g., /usr/local/sbin/perfsonar-policy-routing.sh) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManagerâ€™s connection profile route-rules and routes fields for the relevant interfaces.
 
 Example systemd unit:
 
@@ -155,7 +155,7 @@ sudo systemctl enable \--now nftables
 
 ## **5\. Optional: perfSONAR Testpoint Container Networking**
 
-If you want the container to use a specific NIC, adjust the docker-compose.systemd.yml to use \--network host, or configure the container’s network accordingly. By default, host mode is recommended for testpoint deployments to avoid NAT and ensure direct packet timing.
+If you want the container to use a specific NIC, adjust the docker-compose.systemd.yml to use \--network host, or configure the containerâ€™s network accordingly. By default, host mode is recommended for testpoint deployments to avoid NAT and ensure direct packet timing.
 
 ---
 
@@ -191,4 +191,5 @@ sudo podman exec \-it perfsonar-testpoint psconfig remote \--configure-archives 
 * [perfSONAR Documentation](https://docs.perfsonar.net/)  
 * [Red Hat Policy Routing](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_configuring-policy-based-routing_configuring-and-managing-networking)  
 * [NFTables Wiki](https://wiki.nftables.org/)
+
 
