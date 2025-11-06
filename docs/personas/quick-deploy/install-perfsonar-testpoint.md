@@ -17,9 +17,9 @@ Before you begin, gather the following information:
 
 - **Existing perfSONAR configuration:** If you are replacing or upgrading an existing perfSONAR instance, capture its configuration and registration data before taking services offline. Useful items to collect include:
 
-   - `/etc/perfsonar/` configuration files, especially `lsregistrationdaemon.conf`
-   - any site-specific psconfig or testpoint config files stored in container volumes or host paths
-   - exported firewall, monitoring, and cron jobs that the current instance relies on
+    - `/etc/perfsonar/` configuration files, especially `lsregistrationdaemon.conf`
+    - any site-specific psconfig or testpoint config files stored in container volumes or host paths
+    - exported firewall, monitoring, and cron jobs that the current instance relies on
 
    The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and keep a copy in your change log.
 
@@ -446,7 +446,7 @@ Key paths to persist on the host:
 
    Tip: you can use either `podman-compose` or `docker-compose` in the steps below. Substitute the command that matches your preference.
 
-2. Prepare directories on the host:
+1. Prepare directories on the host:
 
    ```bash
    mkdir -p /opt/testpoint/psconfig
@@ -455,43 +455,41 @@ Key paths to persist on the host:
    mkdir -p /etc/letsencrypt
    ```
 
-3. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
+1. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
 
-    ??? example "Create minimal compose and start the container"
-        Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
+        ??? example "Create minimal compose and start the container"
+                Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
 
-        ```yaml
-        version: "3.9"
-        services:
-        testpoint:
-        container_name: perfsonar-testpoint
-        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-        network_mode: "host"
-        cgroup: host
-        environment:
-        - TZ=UTC
-        restart: unless-stopped
-        tmpfs:
-        - /run
-        - /run/lock
-        - /tmp
-        volumes:
-        - /sys/fs/cgroup:/sys/fs/cgroup:rw
-             # Don't bind Apache/webroot yet; we'll copy defaults out first
-             # Persist perfSONAR psconfig later after seeding (see step 5)
-          tty: true
-          pids_limit: 8192
-          cap_add:
-             - CAP_NET_RAW
-            ```
+                ```yaml
+                version: "3.9"
+                services:
+                    testpoint:
+                        container_name: perfsonar-testpoint
+                        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+                        network_mode: "host"
+                        cgroup: host
+                        environment:
+                            - TZ=UTC
+                        restart: unless-stopped
+                        tmpfs:
+                            - /run
+                            - /run/lock
+                            - /tmp
+                        volumes:
+                            - /sys/fs/cgroup:/sys/fs/cgroup:rw
+                        tty: true
+                        pids_limit: 8192
+                        cap_add:
+                            - CAP_NET_RAW
+                ```
 
-            Bring it up with your preferred tool:
+                Bring it up with your preferred tool:
 
-            ```bash
-            (cd /opt/testpoint; podman-compose up -d)  # or: (cd /opt/testpoint; docker-compose up -d)
-            ```
+                ```bash
+                (cd /opt/testpoint; podman-compose up -d)  # or: (cd /opt/testpoint; docker-compose up -d)
+                ```
 
-4. Copy baseline content out of the running container to the host:
+1. Copy baseline content out of the running container to the host:
 
    ```bash
    # Use docker cp or podman cp (either works)
@@ -502,7 +500,7 @@ Key paths to persist on the host:
 
    If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you don’t need manual `chcon`.
 
-5. Replace the compose file with bind-mounts that map host paths directly, and (optionally) add a `certbot` sidecar for Let’s Encrypt.
+1. Replace the compose file with bind-mounts that map host paths directly, and (optionally) add a `certbot` sidecar for Let’s Encrypt.
 
     You can download a ready-to-use compose file from this repository:
 
@@ -513,60 +511,60 @@ Key paths to persist on the host:
        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml -o /opt/testpoint/docker-compose.yml
        ```
 
-??? example "Complete docker-compose.yml with bind-mounts and certbot"
-    Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
+        ??? example "Complete docker-compose.yml with bind-mounts and certbot"
+                Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
 
-    Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
+                Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
 
-    ```yaml
-    version: "3.9"
-    services:
-    testpoint:
-    container_name: perfsonar-testpoint
-    image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-    network_mode: "host"
-    cgroup: host
-    environment:
-    - TZ=UTC
-    restart: unless-stopped
-    tmpfs:
-    - /run
-    - /run/lock
-    - /tmp
-    volumes:
-    - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
-    - /var/www/html:/var/www/html:z
-    - /etc/apache2:/etc/apache2:z
-    - /etc/letsencrypt:/etc/letsencrypt:z
-    tty: true
-    pids_limit: 8192
-    cap_add:
-    - CAP_NET_RAW
+                ```yaml
+                version: "3.9"
+                services:
+                    testpoint:
+                        container_name: perfsonar-testpoint
+                        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+                        network_mode: "host"
+                        cgroup: host
+                        environment:
+                            - TZ=UTC
+                        restart: unless-stopped
+                        tmpfs:
+                            - /run
+                            - /run/lock
+                            - /tmp
+                        volumes:
+                            - /sys/fs/cgroup:/sys/fs/cgroup:rw
+                            - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
+                            - /var/www/html:/var/www/html:z
+                            - /etc/apache2:/etc/apache2:z
+                            - /etc/letsencrypt:/etc/letsencrypt:z
+                        tty: true
+                pids_limit: 8192
+                cap_add:
+                    - CAP_NET_RAW
 
-           # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
-           certbot:
-              image: certbot/certbot
-              container_name: certbot
-              network_mode: "host"
-              restart: unless-stopped
-              entrypoint:
-                 ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
-              depends_on:
-                 - testpoint
-              volumes:
-                 - /var/www/html:/var/www/html:z
-                 - /etc/letsencrypt:/etc/letsencrypt:z
-            ```
+                    # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
+                    certbot:
+                        image: certbot/certbot
+                        container_name: certbot
+                        network_mode: "host"
+                        restart: unless-stopped
+                        entrypoint:
+                            ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+                        depends_on:
+                            - testpoint
+                        volumes:
+                            - /var/www/html:/var/www/html:z
+                            - /etc/letsencrypt:/etc/letsencrypt:z
+                ```
 
-6. Restart with the new compose:
+1. Restart with the new compose:
 
    ```bash
    (cd /opt/testpoint; podman-compose down)
    (cd /opt/testpoint; podman-compose up -d)  # or docker-compose down && docker-compose up -d
    ```
 
-7. Optional – obtain your first Let’s Encrypt certificate:
+1. Optional – obtain your first Let’s Encrypt certificate:
 
    The `certbot` sidecar above continuously renews existing certs. For the initial issuance, run a one-shot command and then reload Apache inside the testpoint container:
 
@@ -584,12 +582,12 @@ Key paths to persist on the host:
     - Ensure port 80 on the host is reachable from the internet while issuing certificates.
     - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
 
-    8. Verify:
+1. Verify:
 
-    ```bash
-    curl -fsS http://localhost/toolkit/ | head -n 5
-    docker ps  # or podman ps
-    ```
+   ```bash
+   curl -fsS http://localhost/toolkit/ | head -n 5
+   docker ps  # or podman ps
+   ```
 
     ---
 
@@ -601,26 +599,23 @@ Key paths to persist on the host:
 
 ??? info "Configuration details to populate"
 
-    ```
     - Site contact email
     - Usage policy URL
     - Location (latitude/longitude)
     - Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping
 
-    2. **OSG/WLCG registration workflow:**
+1. **OSG/WLCG registration workflow:**
 
     ??? info "Registration steps and portals"
         - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
         - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
         - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
-    ```
-
-3. **pSConfig enrollment:**
+1. **pSConfig enrollment:**
 
    For each active NIC, register with the psconfig service so measurements cover all paths.
 
-??? info "Registration command and verification"
+    ??? info "Registration command and verification"
     Example registration:
 
     ```bash
@@ -629,7 +624,7 @@ Key paths to persist on the host:
 
     Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
 
-    4. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
+    1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
 
 ### Update Lookup Service registration inside the container
 
@@ -743,16 +738,16 @@ Keep containers current and only restart them when their image actually changes.
 ??? info "Auto-update via labels and a systemd timer"
     1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used):
 
-    ```yaml
-    services:
-    testpoint:
-          # ...
-          labels:
-             - io.containers.autoupdate=registry
-       certbot:
-          # ...
-          labels:
-             - io.containers.autoupdate=registry
+        ```yaml
+        services:
+            testpoint:
+                # ...
+                labels:
+                    - io.containers.autoupdate=registry
+            certbot:
+                # ...
+                labels:
+                    - io.containers.autoupdate=registry
         ```
 
         This instructs Podman to check the registry for newer images and restart only if an update is pulled.
