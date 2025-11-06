@@ -2180,20 +2180,8 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <li>All shared paths use SELinux-aware <code>:z</code>/<code>:Z</code> to permit container access on enforcing hosts.</li>
 </ul>
 </details>
-<ol>
-<li>Verify:</li>
-</ol>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsS<span class="w"> </span>http://localhost/toolkit/<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">5</span>
-docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or podman ps</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>---
-</code></pre></div>
-
 <h2 id="step-6-register-and-configure-with-wlcgosg">Step 6 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-6-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>PerfSONAR toolkit configuration:</strong></li>
-</ol>
-<p>Browse to <code>https://&lt;SERVER_FQDN&gt;/toolkit</code> and complete the local toolkit setup wizard.</p>
+<p>We need to register your instance and ensure it is configurated with the required meta data for the lsregistration daemon (see below).</p>
 <details class="info">
 <summary>Configuration details to populate</summary>
 <ul>
