@@ -393,6 +393,7 @@ If any prerequisite is missing, the script skips that component and continues.
 3. **Confirm firewall state and security services:**
 
    ??? info "Verification commands"
+        
       ```bash
       nft list ruleset
       sestatus
