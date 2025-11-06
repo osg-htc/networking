@@ -1965,16 +1965,14 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p><strong>Validation and output:</strong></p>
 <ul>
 <li>The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.</li>
-<li>
-<p>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</p>
+<li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
+</ul>
 <details class="tip">
 <summary>Preview nftables rules before applying</summary>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
 <div class="highlight"><pre><span></span><code>~/perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
 </details>
-</li>
-</ul>
 </details>
 <details class="tip">
 <summary>Manually add extra management hosts/subnets</summary>
@@ -2006,19 +2004,20 @@ elements = { 2001:db8::10 }
 systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
 </code></pre></div>
 <ol>
-<li>
-<p><strong>Confirm firewall state and security services:</strong></p>
+<li><strong>Confirm firewall state and security services:</strong></li>
+</ol>
 <details class="info">
 <summary>Verification commands</summary>
 <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
 sestatus
 systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 </code></pre></div>
-<p>Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.</p>
-<hr />
+<div class="codehilite"><pre><span></span><code>Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
+
+---
+</code></pre></div>
+
 </details>
-</li>
-</ol>
 </details>
 <h2 id="step-5-deploy-the-containerized-perfsonar-testpoint">Step 5 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-5-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
 <p>We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on the host are reflected inside the containers.</p>
@@ -2049,39 +2048,41 @@ mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/letsencrypt
 <ol>
 <li>
 <p>Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):</p>
-<div class="codehilite"><pre><span></span><code><span class="err">???</span><span class="w"> </span><span class="n">example</span><span class="w"> </span><span class="s2">&quot;Create minimal compose and start the container&quot;</span>
-<span class="w">        </span><span class="n">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">minimal</span><span class="w"> </span><span class="n">compose</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">.</span><span class="n">yml</span><span class="err">`</span><span class="p">:</span>
+<details class="example">
+<summary>Create minimal compose and start the container</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">minimal</span><span class="w"> </span><span class="n">compose</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">.</span><span class="n">yml</span><span class="err">`</span><span class="p">:</span>
 
-<span class="w">        </span><span class="err">```</span><span class="n">yaml</span>
-<span class="w">        </span><span class="n">version</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.9&quot;</span>
-<span class="w">        </span><span class="n">services</span><span class="p">:</span>
-<span class="w">            </span><span class="n">testpoint</span><span class="p">:</span>
-<span class="w">                </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">perfsonar</span><span class="o">-</span><span class="n">testpoint</span>
-<span class="w">                </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">ghcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">testpoint</span><span class="p">:</span><span class="mf">5.2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">systemd</span>
-<span class="w">                </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
-<span class="w">                </span><span class="n">cgroup</span><span class="p">:</span><span class="w"> </span><span class="n">host</span>
-<span class="w">                </span><span class="n">environment</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="n">TZ</span><span class="o">=</span><span class="n">UTC</span>
-<span class="w">                </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
-<span class="w">                </span><span class="n">tmpfs</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span>
-<span class="w">                </span><span class="n">volumes</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">rw</span>
-<span class="w">                </span><span class="n">tty</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span>
-<span class="w">                </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
-<span class="w">                </span><span class="n">cap_add</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
-<span class="w">        </span><span class="err">```</span>
+<span class="w">    </span><span class="err">```</span><span class="n">yaml</span>
+<span class="w">    </span><span class="n">version</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.9&quot;</span>
+<span class="w">    </span><span class="n">services</span><span class="p">:</span>
+<span class="w">        </span><span class="n">testpoint</span><span class="p">:</span>
+<span class="w">            </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">perfsonar</span><span class="o">-</span><span class="n">testpoint</span>
+<span class="w">            </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">ghcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">testpoint</span><span class="p">:</span><span class="mf">5.2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">systemd</span>
+<span class="w">            </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
+<span class="w">            </span><span class="n">cgroup</span><span class="p">:</span><span class="w"> </span><span class="n">host</span>
+<span class="w">            </span><span class="n">environment</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="n">TZ</span><span class="o">=</span><span class="n">UTC</span>
+<span class="w">            </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
+<span class="w">            </span><span class="n">tmpfs</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span>
+<span class="w">            </span><span class="n">volumes</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">rw</span>
+<span class="w">            </span><span class="n">tty</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span>
+<span class="w">            </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
+<span class="w">            </span><span class="n">cap_add</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
+<span class="w">    </span><span class="err">```</span>
 
-<span class="w">        </span><span class="n">Bring</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">preferred</span><span class="w"> </span><span class="k">tool</span><span class="p">:</span>
+<span class="w">    </span><span class="n">Bring</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">preferred</span><span class="w"> </span><span class="k">tool</span><span class="p">:</span>
 
-<span class="w">        </span><span class="err">```</span><span class="n">bash</span>
-<span class="w">        </span><span class="p">(</span><span class="n">cd</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="p">;</span><span class="w"> </span><span class="n">podman</span><span class="o">-</span><span class="n">compose</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="p">)</span><span class="w">  </span><span class="c1"># or: (cd /opt/testpoint; docker-compose up -d)</span>
-<span class="w">        </span><span class="err">```</span>
+<span class="w">    </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">    </span><span class="p">(</span><span class="n">cd</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="p">;</span><span class="w"> </span><span class="n">podman</span><span class="o">-</span><span class="n">compose</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="p">)</span><span class="w">  </span><span class="c1"># or: (cd /opt/testpoint; docker-compose up -d)</span>
+<span class="w">    </span><span class="err">```</span>
 </code></pre></div>
 
+</details>
 </li>
 <li>
 <p>Copy baseline content out of the running container to the host:</p>
@@ -2103,53 +2104,55 @@ docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc
 </ul>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml<span class="w"> </span>-o<span class="w"> </span>/opt/testpoint/docker-compose.yml
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="err">???</span><span class="w"> </span><span class="n">example</span><span class="w"> </span><span class="s2">&quot;Complete docker-compose.yml with bind-mounts and certbot&quot;</span>
-<span class="w">        </span><span class="n">Or</span><span class="w"> </span><span class="n">create</span><span class="o">/</span><span class="n">edit</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">.</span><span class="n">yml</span><span class="err">`</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">following</span><span class="w"> </span><span class="n">content</span><span class="p">:</span>
+<details class="example">
+<summary>Complete docker-compose.yml with bind-mounts and certbot</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">Or</span><span class="w"> </span><span class="n">create</span><span class="o">/</span><span class="n">edit</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="o">.</span><span class="n">yml</span><span class="err">`</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">following</span><span class="w"> </span><span class="n">content</span><span class="p">:</span>
 
-<span class="w">        </span><span class="n">Note</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">provided</span><span class="w"> </span><span class="n">compose</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">ships</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="err">`</span><span class="n">io</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">autoupdate</span><span class="o">=</span><span class="n">registry</span><span class="err">`</span><span class="w"> </span><span class="n">labels</span><span class="w"> </span><span class="n">pre</span><span class="o">-</span><span class="n">set</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Podman</span><span class="w"> </span><span class="n">auto</span><span class="o">-</span><span class="n">update</span><span class="o">.</span>
+<span class="w">    </span><span class="n">Note</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">provided</span><span class="w"> </span><span class="n">compose</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">ships</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="err">`</span><span class="n">io</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">autoupdate</span><span class="o">=</span><span class="n">registry</span><span class="err">`</span><span class="w"> </span><span class="n">labels</span><span class="w"> </span><span class="n">pre</span><span class="o">-</span><span class="n">set</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Podman</span><span class="w"> </span><span class="n">auto</span><span class="o">-</span><span class="n">update</span><span class="o">.</span>
 
-<span class="w">        </span><span class="err">```</span><span class="n">yaml</span>
-<span class="w">        </span><span class="n">version</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.9&quot;</span>
-<span class="w">        </span><span class="n">services</span><span class="p">:</span>
-<span class="w">            </span><span class="n">testpoint</span><span class="p">:</span>
-<span class="w">                </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">perfsonar</span><span class="o">-</span><span class="n">testpoint</span>
-<span class="w">                </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">ghcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">testpoint</span><span class="p">:</span><span class="mf">5.2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">systemd</span>
-<span class="w">                </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
-<span class="w">                </span><span class="n">cgroup</span><span class="p">:</span><span class="w"> </span><span class="n">host</span>
-<span class="w">                </span><span class="n">environment</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="n">TZ</span><span class="o">=</span><span class="n">UTC</span>
-<span class="w">                </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
-<span class="w">                </span><span class="n">tmpfs</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span>
-<span class="w">                </span><span class="n">volumes</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">rw</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="o">/</span><span class="n">psconfig</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">psconfig</span><span class="p">:</span><span class="n">Z</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="n">z</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="n">z</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span>
-<span class="w">                </span><span class="n">tty</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span>
-<span class="w">                </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
-<span class="w">                </span><span class="n">cap_add</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
+<span class="w">    </span><span class="err">```</span><span class="n">yaml</span>
+<span class="w">    </span><span class="n">version</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.9&quot;</span>
+<span class="w">    </span><span class="n">services</span><span class="p">:</span>
+<span class="w">        </span><span class="n">testpoint</span><span class="p">:</span>
+<span class="w">            </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">perfsonar</span><span class="o">-</span><span class="n">testpoint</span>
+<span class="w">            </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">ghcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">testpoint</span><span class="p">:</span><span class="mf">5.2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">systemd</span>
+<span class="w">            </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
+<span class="w">            </span><span class="n">cgroup</span><span class="p">:</span><span class="w"> </span><span class="n">host</span>
+<span class="w">            </span><span class="n">environment</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="n">TZ</span><span class="o">=</span><span class="n">UTC</span>
+<span class="w">            </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
+<span class="w">            </span><span class="n">tmpfs</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span>
+<span class="w">            </span><span class="n">volumes</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">rw</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="o">/</span><span class="n">psconfig</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">psconfig</span><span class="p">:</span><span class="n">Z</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="n">z</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="n">z</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span>
+<span class="w">            </span><span class="n">tty</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span>
+<span class="w">            </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
+<span class="w">            </span><span class="n">cap_add</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
 
-<span class="w">            </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
-<span class="w">            </span><span class="n">certbot</span><span class="p">:</span>
-<span class="w">                </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">certbot</span><span class="o">/</span><span class="n">certbot</span>
-<span class="w">                </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">certbot</span>
-<span class="w">                </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
-<span class="w">                </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
-<span class="w">                </span><span class="n">entrypoint</span><span class="p">:</span>
-<span class="w">                    </span><span class="p">[</span><span class="s2">&quot;/bin/sh&quot;</span><span class="p">,</span><span class="s2">&quot;-c&quot;</span><span class="p">,</span><span class="s2">&quot;trap exit TERM; while :; do certbot renew; sleep 12h &amp; wait $${!}; done;&quot;</span><span class="p">]</span>
-<span class="w">                </span><span class="n">depends_on</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="n">testpoint</span>
-<span class="w">                </span><span class="n">volumes</span><span class="p">:</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="n">z</span>
-<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span>
-<span class="w">        </span><span class="err">```</span>
+<span class="w">        </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
+<span class="w">        </span><span class="n">certbot</span><span class="p">:</span>
+<span class="w">            </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">certbot</span><span class="o">/</span><span class="n">certbot</span>
+<span class="w">            </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">certbot</span>
+<span class="w">            </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
+<span class="w">            </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
+<span class="w">            </span><span class="n">entrypoint</span><span class="p">:</span>
+<span class="w">                </span><span class="p">[</span><span class="s2">&quot;/bin/sh&quot;</span><span class="p">,</span><span class="s2">&quot;-c&quot;</span><span class="p">,</span><span class="s2">&quot;trap exit TERM; while :; do certbot renew; sleep 12h &amp; wait $${!}; done;&quot;</span><span class="p">]</span>
+<span class="w">            </span><span class="n">depends_on</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="n">testpoint</span>
+<span class="w">            </span><span class="n">volumes</span><span class="p">:</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="n">z</span>
+<span class="w">                </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span>
+<span class="w">    </span><span class="err">```</span>
 </code></pre></div>
 
+</details>
 </li>
 <li>
 <p>Restart with the new compose:</p>
