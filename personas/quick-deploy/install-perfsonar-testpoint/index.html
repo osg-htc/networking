@@ -2164,9 +2164,9 @@ docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 <span class="c1"># Gracefully reload Apache within the testpoint container (or restart the service)</span>
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>bash<span class="w"> </span>-lc<span class="w"> </span><span class="s1">&#39;systemctl reload httpd || apachectl -k graceful || true&#39;</span>
 </code></pre></div>
-<p>Notes:
-   - Ensure port 80 on the host is reachable from the internet while issuing certificates.
-   - All shared paths use SELinux-aware <code>:z</code>/<code>:Z</code> to permit container access on enforcing hosts.</p>
+<p>??? info "Notes"
+      - Ensure port 80 on the host is reachable from the internet while issuing certificates.
+      - All shared paths use SELinux-aware <code>:z</code>/<code>:Z</code> to permit container access on enforcing hosts.</p>
 <ol>
 <li>Verify:</li>
 </ol>
