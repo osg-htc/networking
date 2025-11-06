@@ -582,20 +582,10 @@ Key paths to persist on the host:
     - Ensure port 80 on the host is reachable from the internet while issuing certificates.
     - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
 
-1. Verify:
-
-   ```bash
-   curl -fsS http://localhost/toolkit/ | head -n 5
-   docker ps  # or podman ps
-   ```
-
-    ---
 
 ## Step 6 – Register and Configure with WLCG/OSG
 
-1. **PerfSONAR toolkit configuration:**
-
-   Browse to `https://<SERVER_FQDN>/toolkit` and complete the local toolkit setup wizard.
+We need to register your instance and ensure it is configurated with the required meta data for the lsregistration daemon (see below).
 
 ??? info "Configuration details to populate"
 
