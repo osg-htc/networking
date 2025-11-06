@@ -2130,9 +2130,9 @@ docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc
 <span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="n">z</span>
 <span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span>
 <span class="w">                </span><span class="n">tty</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span>
-<span class="w">        </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
-<span class="w">        </span><span class="n">cap_add</span><span class="p">:</span>
-<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
+<span class="w">                </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
+<span class="w">                </span><span class="n">cap_add</span><span class="p">:</span>
+<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
 
 <span class="w">            </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
 <span class="w">            </span><span class="n">certbot</span><span class="p">:</span>
