@@ -1506,54 +1506,44 @@ cd /opt/networking
 ./docs/perfsonar/tools_scripts/check-deps.sh</code></p>
 </li>
 </ul>
-</li>
-</ol>
 <details class="tip">
 <summary>Alternative: Download and run directly</summary>
-<p>```bash</p>
-</details>
-<p>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
-chmod 0755 ./check-deps.sh
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span>-o<span class="w"> </span>./check-deps.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
 ./check-deps.sh
-    ```</p>
+</code></pre></div>
+</details>
 <details class="info">
 <summary>Apply updates and install baseline packages</summary>
 <p>On EL9, apply updates and install common baseline packages, then add any
 packages suggested by the checker (copy/paste the printed dnf line):</p>
-<p>```bash</p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
+dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
+<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
+<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
+</code></pre></div>
 </details>
-<p>dnf update -y
-dnf install -y epel-release chrony vim git
-    # (Optional) install any additional packages suggested by check-deps.sh
-    # e.g., dnf install -y NetworkManager rsync curl openssl nftables
-        ```</p>
-<ol>
+</li>
 <li>
 <p><strong>Set the hostname and time sync:</strong></p>
-<p>```
-Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</p>
-<p>```</p>
-</li>
-</ol>
+<p>Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that hosts the default route (See step 2 below).</p>
 <details class="info">
 <summary>System configuration commands</summary>
-<p>```bash</p>
-</details>
-<p>hostnamectl set-hostname <testpoint-hostname>
-systemctl enable --now chronyd
-timedatectl set-timezone <Region/City>
-    ```</p>
-<div class="codehilite"><pre><span></span><code><span class="mf">4.</span><span class="w"> </span><span class="o">**</span><span class="n">Disable</span><span class="w"> </span><span class="n">unused</span><span class="w"> </span><span class="n">services</span><span class="p">:</span><span class="o">**</span>
-
-<span class="w">    </span><span class="err">???</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="s">&quot;Service cleanup commands&quot;</span>
-
-<span class="w">        </span><span class="err">```</span><span class="n">bash</span>
+<div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
+timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
 </code></pre></div>
-
-<p>systemctl disable --now firewalld NetworkManager-wait-online
-dnf remove -y rsyslog
-            ```</p>
-<ol>
+</details>
+</li>
+<li>
+<p><strong>Disable unused services:</strong></p>
+<details class="info">
+<summary>Service cleanup commands</summary>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
+dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
+</code></pre></div>
+</details>
+</li>
 <li>
 <p><strong>Record NIC names:</strong></p>
 <details class="info">
@@ -1564,12 +1554,11 @@ dnf remove -y rsyslog
 ip -br addr
     ```</p>
 <div class="codehilite"><pre><span></span><code><span class="nv">Document</span><span class="w"> </span><span class="nv">interface</span><span class="w"> </span><span class="nv">mappings</span><span class="c1">; you will need them for the policy-based routing configuration.</span>
-
-<span class="o">---</span>
 </code></pre></div>
 
 </li>
 </ol>
+<hr />
 <h2 id="step-2-clone-the-repository">Step 2 – Clone the Repository<a class="headerlink" href="#step-2-clone-the-repository" title="Permanent link">&para;</a></h2>
 <p>This guide references multiple scripts from the osg-htc/networking repository. Clone the repository to your testpoint host for easy access to all tools.</p>
 <p><strong>Recommended locations:</strong></p>
@@ -1608,82 +1597,74 @@ install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ~/perfsonar-pbr
 cd ~</code></p>
 </li>
 </ul>
-</li>
-</ul>
 <details class="tip">
 <summary>Alternative: Download directly from the repository URL</summary>
-<p>```bash</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>-o<span class="w"> </span>./perfSONAR-pbr-nm.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./perfSONAR-pbr-nm.sh
+</code></pre></div>
 </details>
-<p>curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
-chmod 0755 ./perfSONAR-pbr-nm.sh
-    ```</p>
-<div class="codehilite"><pre><span></span><code><span class="mf">2.</span><span class="w"> </span><span class="o">**</span><span class="n">Auto</span><span class="o">-</span><span class="n">generate</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">nic</span><span class="o">-</span><span class="n">config</span><span class="mf">.</span><span class="n">conf</span><span class="err">`</span><span class="p">:</span><span class="o">**</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">script</span><span class="err">’</span><span class="n">s</span><span class="w"> </span><span class="n">generator</span><span class="w"> </span><span class="kr">to</span><span class="w"> </span><span class="n">detect</span><span class="w"> </span><span class="n">NICs</span><span class="p">,</span><span class="w"> </span><span class="n">addresses</span><span class="p">,</span><span class="w"> </span><span class="n">prefixes</span><span class="p">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">gateways</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">write</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">starting</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">review</span><span class="o">/</span><span class="n">edit</span><span class="mf">.</span><span class="w"> </span><span class="n">Auto</span><span class="o">-</span><span class="n">generation</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">opt</span><span class="o">-</span><span class="n">in</span><span class="p">;</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">does</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kr">run</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="kd">def</span><span class="n">ault</span><span class="mf">.</span>
-
-<span class="o">-</span><span class="w"> </span><span class="n">Preview</span><span class="w"> </span><span class="p">(</span><span class="n">no</span><span class="w"> </span><span class="n">changes</span><span class="p">):</span>
-
-<span class="err">```</span><span class="n">bash</span>
+</li>
+<li>
+<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong> use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
+<ul>
+<li>
+<p>Preview (no changes):</p>
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-debug
 </code></pre></div>
-
-<p>~/perfsonar-pbr-nm.sh --generate-config-debug
-    ```</p>
-<div class="codehilite"><pre><span></span><code>- Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
-
-```bash
+</li>
+<li>
+<p>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</p>
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
-
-<p>~/perfsonar-pbr-nm.sh --generate-config-auto
-    ```</p>
-<div class="codehilite"><pre><span></span><code><span class="k">Then</span><span class="w"> </span><span class="k">open</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">file</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">adjust</span><span class="w"> </span><span class="k">any</span><span class="w"> </span><span class="n">site</span><span class="o">-</span><span class="k">specific</span><span class="w"> </span><span class="k">values</span><span class="w"> </span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">g</span><span class="p">.,</span><span class="w"> </span><span class="n">confirm</span><span class="w"> </span><span class="n n-Quoted">`DEFAULT_ROUTE_NIC`</span><span class="p">,</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="k">any</span><span class="w"> </span><span class="n n-Quoted">`NIC_IPV4_ADDROUTE`</span><span class="w"> </span><span class="n">entries</span><span class="p">,</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">replace</span><span class="w"> </span><span class="n">“</span><span class="o">-</span><span class="n">”</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">unused</span><span class="w"> </span><span class="n">IP</span><span class="o">/</span><span class="n">gateway</span><span class="w"> </span><span class="k">fields</span><span class="p">).</span>
-
-<span class="o">!!!</span><span class="w"> </span><span class="n">warning</span><span class="w"> </span><span class="s2">&quot;Gateways required for addresses&quot;</span>
-<span class="k">Any</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IPv4</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">also</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IPv4</span><span class="w"> </span><span class="n">gateway</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="k">any</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IPv6</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IPv6</span><span class="w"> </span><span class="n">gateway</span><span class="p">.</span><span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">generator</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">detect</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">gateway</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">adds</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">WARNING</span><span class="w"> </span><span class="k">block</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">generated</span><span class="w"> </span><span class="k">file</span><span class="w"> </span><span class="n">listing</span><span class="w"> </span><span class="n">affected</span><span class="w"> </span><span class="n">NICs</span><span class="p">.</span><span class="w"> </span><span class="n">Edit</span><span class="w"> </span><span class="n n-Quoted">`NIC_IPV4_GWS`</span><span class="o">/</span><span class="n n-Quoted">`NIC_IPV6_GWS`</span><span class="w"> </span><span class="n">accordingly</span><span class="w"> </span><span class="k">before</span><span class="w"> </span><span class="n">applying</span><span class="w"> </span><span class="n">changes</span><span class="p">.</span>
-
-<span class="o">!!!</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="s2">&quot;Gateway prompts&quot;</span>
-
-<span class="n">During</span><span class="w"> </span><span class="n">generation</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">attempts</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">detect</span><span class="w"> </span><span class="n">gateways</span><span class="w"> </span><span class="n">per</span><span class="o">-</span><span class="n">NIC</span><span class="p">.</span><span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IP</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="k">no</span><span class="w"> </span><span class="n">gateway</span><span class="w"> </span><span class="n">could</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">determined</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">interactively</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">enter</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IPv4</span><span class="w"> </span><span class="k">and</span><span class="o">/</span><span class="k">or</span><span class="w"> </span><span class="n">IPv6</span><span class="w"> </span><span class="n">gateway</span><span class="w"> </span><span class="p">(</span><span class="k">or</span><span class="w"> </span><span class="n n-Quoted">`-`</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">skip</span><span class="p">).</span><span class="w"> </span><span class="n">Prompts</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">skipped</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">interactive</span><span class="w"> </span><span class="n">sessions</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n n-Quoted">`--yes`</span><span class="p">.</span>
-
-<span class="mf">3.</span><span class="w"> </span><span class="o">**</span><span class="k">Execute</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">script</span><span class="o">:**</span>
-
-<span class="o">-</span><span class="w"> </span><span class="n">Rehearsal</span><span class="w"> </span><span class="p">(</span><span class="k">no</span><span class="w"> </span><span class="n">changes</span><span class="p">,</span><span class="w"> </span><span class="n">extra</span><span class="w"> </span><span class="n">logging</span><span class="w"> </span><span class="n">recommended</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">first</span><span class="w"> </span><span class="n">run</span><span class="p">)</span><span class="o">:</span>
-
-<span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
+</li>
+</ul>
+<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gateways required for addresses</p>
+<p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Gateway prompts</p>
+<p>During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive sessions or when you use <code>--yes</code>.</p>
+</div>
+</li>
+<li>
+<p><strong>Execute the script:</strong></p>
+<ul>
+<li>
+<p>Rehearsal (no changes, extra logging recommended on first run):</p>
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
 </code></pre></div>
-
-<p>~/perfsonar-pbr-nm.sh --dry-run --debug
-    ```</p>
-<div class="codehilite"><pre><span></span><code>- Apply changes non-interactively (auto-confirm):
-
-```bash
+</li>
+<li>
+<p>Apply changes non-interactively (auto-confirm):</p>
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
-
-<p>~/perfsonar-pbr-nm.sh --yes
-    ```</p>
-<div class="codehilite"><pre><span></span><code>- Or run interactively and answer the confirmation prompt when ready:
-
-```bash
+</li>
+<li>
+<p>Or run interactively and answer the confirmation prompt when ready:</p>
+<div class="highlight"><pre><span></span><code>~/perfsonar-pbr-nm.sh
 </code></pre></div>
-
-<p>~/perfsonar-pbr-nm.sh
-    ```</p>
-<div class="codehilite"><pre><span></span><code><span class="o">!!!</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="s2">&quot;Missing gateways at apply time&quot;</span>
-
-<span class="n">If</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="n">still</span><span class="w"> </span><span class="n">contains</span><span class="w"> </span><span class="err">`</span><span class="o">-</span><span class="err">`</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">gateway</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IP</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">interactively</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">provide</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">gateway</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">applying</span><span class="w"> </span><span class="n">changes</span><span class="o">.</span><span class="w"> </span><span class="n">Use</span><span class="w"> </span><span class="err">`</span><span class="o">--</span><span class="n">yes</span><span class="err">`</span><span class="w"> </span><span class="p">(</span><span class="ow">or</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">interactively</span><span class="p">)</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">suppress</span><span class="w"> </span><span class="n">prompts</span><span class="p">;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">case</span><span class="p">,</span><span class="w"> </span><span class="n">missing</span><span class="w"> </span><span class="n">gateways</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">cause</span><span class="w"> </span><span class="n">validation</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">fail</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">correct</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="n">first</span><span class="o">.</span>
-
-<span class="n">The</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">creates</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">timestamped</span><span class="w"> </span><span class="n">backup</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">existing</span><span class="w"> </span><span class="n">NetworkManager</span><span class="w"> </span><span class="n">profiles</span><span class="p">,</span><span class="w"> </span><span class="n">seeds</span><span class="w"> </span><span class="n">routing</span><span class="w"> </span><span class="n">tables</span><span class="p">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">applies</span><span class="w"> </span><span class="n">routing</span><span class="w"> </span><span class="n">rules</span><span class="o">.</span><span class="w"> </span><span class="n">Review</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">nic</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">log</span><span class="err">`</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">retain</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">change</span><span class="w"> </span><span class="n">records</span><span class="o">.</span>
-</code></pre></div>
-
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Missing gateways at apply time</p>
+<p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use <code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.</p>
+</div>
+<p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
+</li>
+</ul>
 <h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
 <p>All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.</p>
 <ul>
 <li>For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.</li>
 <li>For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.</li>
-<li>
-<p>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).</p>
+<li>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).</li>
+</ul>
 <details class="example">
 <summary>Example: Bash script to automate DNS verification</summary>
 <p>The <code>perfSONAR-multi-nic-config.conf</code> contains the arrays <code>NIC_IPV4_ADDRS</code> and <code>NIC_IPV6_ADDRS</code> (with <code>-</code> for unused entries). You can automate a forward/reverse consistency check using <code>dig</code> or <code>host</code> by sourcing the config and iterating the arrays.</p>
 <p>```bash</p>
-</details>
 <h1 id="quick-dns-consistency-check-using-etcperfsonar-multi-nic-configconf">quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf<a class="headerlink" href="#quick-dns-consistency-check-using-etcperfsonar-multi-nic-configconf" title="Permanent link">&para;</a></h1>
 <p>set -euo pipefail
 CONFIG=/etc/perfSONAR-multi-nic-config.conf
@@ -1697,51 +1678,58 @@ source "$CONFIG"</p>
    [ "$ip" = "-" ] &amp;&amp; return 0</p>
 <p># PTR lookup (reverse)
    ptr=$(dig +short -x "$ip" | head -n1)
-   if [ -z "$ptr" ]; then
-  echo "MISSING PTR for $ip"
+   if [ -z "$ptr" ]; then</p>
+</details>
+<p>echo "MISSING PTR for $ip"
   return 1
-   fi
-   # remove trailing dot from PTR
-   ptr=${ptr%.}</p>
-<p># Forward lookup for the hostname returned by PTR
-   if [ "$family" = "4" ]; then
-  fwd=$(dig +short A "$ptr" | tr '\n' ' ')
-   else
+       fi
+       # remove trailing dot from PTR
+       ptr=${ptr%.}</p>
+<div class="codehilite"><pre><span></span><code><span class="w">   </span>#<span class="w"> </span><span class="nv">Forward</span><span class="w"> </span><span class="nv">lookup</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">hostname</span><span class="w"> </span><span class="nv">returned</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">PTR</span>
+<span class="w">   </span><span class="k">if</span><span class="w"> </span>[<span class="w"> </span><span class="s2">&quot;$family&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="w"> </span>]<span class="c1">; then</span>
+</code></pre></div>
+
+<p>fwd=$(dig +short A "$ptr" | tr '\n' ' ')
+       else
   fwd=$(dig +short AAAA "$ptr" | tr '\n' ' ')
-   fi</p>
-<p>if ! echo "$fwd" | grep -qw "$ip"; then
-  echo "INCONSISTENT: PTR $ptr does not resolve back to $ip (resolved: $fwd)"
+       fi</p>
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="w"> </span><span class="nv">echo</span><span class="w"> </span><span class="s2">&quot;$fwd&quot;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nv">grep</span><span class="w"> </span><span class="o">-</span><span class="nv">qw</span><span class="w"> </span><span class="s2">&quot;$ip&quot;</span><span class="c1">; then</span>
+</code></pre></div>
+
+<p>echo "INCONSISTENT: PTR $ptr does not resolve back to $ip (resolved: $fwd)"
   return 1
-   fi
-   echo "OK: $ip ⇄ $ptr"
-   return 0
-}</p>
-<p>errors=0
-for ip in "${NIC_IPV4_ADDRS[@]:-}"; do
-   if [ "$ip" != "-" ]; then
-  check_ip "$ip" 4 || errors=$((errors+1))
-   fi
-done
-for ip in "${NIC_IPV6_ADDRS[@]:-}"; do
-   if [ "$ip" != "-" ]; then
+       fi
+       echo "OK: $ip ⇄ $ptr"
+       return 0
+    }</p>
+<div class="codehilite"><pre><span></span><code><span class="s s-Atom">errors</span><span class="o">=</span><span class="mi">0</span>
+<span class="s s-Atom">for</span> <span class="s s-Atom">ip</span> <span class="s s-Atom">in</span> <span class="s2">&quot;${NIC_IPV4_ADDRS[@]:-}&quot;</span><span class="p">;</span> <span class="s s-Atom">do</span>
+   <span class="s s-Atom">if</span> <span class="p">[</span> <span class="s2">&quot;$ip&quot;</span> <span class="p">!</span><span class="o">=</span> <span class="s2">&quot;-&quot;</span> <span class="p">];</span> <span class="s s-Atom">then</span>
+</code></pre></div>
+
+<p>check_ip "$ip" 4 || errors=$((errors+1))
+       fi
+    done
+    for ip in "${NIC_IPV6_ADDRS[@]:-}"; do
+       if [ "$ip" != "-" ]; then
   check_ip "$ip" 6 || errors=$((errors+1))
-   fi
-done</p>
-<p>if (( errors &gt; 0 )); then
-   echo "DNS verification failed ($errors problem(s)). Fix DNS (forward/reverse) before running tests." &gt;&amp;2
-   exit 1
-fi
-echo "DNS forward/reverse checks passed for configured addresses."
-```</p>
-<p><strong>Notes and automation tips:</strong></p>
-<ul>
-<li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it to use <code>host</code> if preferred.</li>
-<li>Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.</li>
-<li>For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages <code>dns.resolver</code> for async checks.</li>
-<li>If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.</li>
-</ul>
-</li>
-</ul>
+       fi
+    done</p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="w"> </span><span class="k">errors</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">));</span><span class="w"> </span><span class="k">then</span>
+<span class="w">   </span><span class="n">echo</span><span class="w"> </span><span class="s2">&quot;DNS verification failed ($errors problem(s)). Fix DNS (forward/reverse) before running tests.&quot;</span><span class="w"> </span><span class="o">&gt;&amp;</span><span class="mi">2</span>
+<span class="w">   </span><span class="k">exit</span><span class="w"> </span><span class="mi">1</span>
+<span class="n">fi</span>
+<span class="n">echo</span><span class="w"> </span><span class="s2">&quot;DNS forward/reverse checks passed for configured addresses.&quot;</span>
+<span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span>
+
+<span class="n n-Quoted">**Notes and automation tips:**</span>
+
+<span class="n n-Quoted">- The script above uses `</span><span class="n">dig</span><span class="n n-Quoted">` (bind-utils package) which is commonly available; you can adapt it to use `</span><span class="k">host</span><span class="n n-Quoted">` if preferred.</span>
+<span class="n n-Quoted">- Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.</span>
+<span class="n n-Quoted">- For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages `</span><span class="n">dns</span><span class="p">.</span><span class="n">resolver</span><span class="n n-Quoted">` for async checks.</span>
+<span class="n n-Quoted">- If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.</span>
+</code></pre></div>
+
 <p>If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.</p>
 <details class="example">
 <summary>Download and run the DNS checker</summary>
