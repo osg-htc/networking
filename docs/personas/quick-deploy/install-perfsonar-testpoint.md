@@ -76,12 +76,6 @@ This guide references multiple scripts from the osg-htc/networking repository. C
 
 - **perfSONAR testpoint compose bundle:** `/opt/perfsonar-tp` (if using containerized testpoint)
 
-```bash
-# Clone the networking repository to /opt (public repo)
-cd /opt
-git clone https://github.com/osg-htc/networking.git /opt/networking
-```
-
 Create the application directory for the testpoint bundle (no private clone required):
 
 ```bash
