@@ -46,48 +46,45 @@ cd /opt/networking
 ./docs/perfsonar/tools_scripts/check-deps.sh
         ```
 
-??? tip "Alternative: Download and run directly"
+    ??? tip "Alternative: Download and run directly"
 
-    ```bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
-chmod 0755 ./check-deps.sh
-./check-deps.sh
-    ```
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh -o ./check-deps.sh
+        chmod 0755 ./check-deps.sh
+        ./check-deps.sh
+        ```
 
-??? info "Apply updates and install baseline packages"
-    On EL9, apply updates and install common baseline packages, then add any
-    packages suggested by the checker (copy/paste the printed dnf line):
+    ??? info "Apply updates and install baseline packages"
+        On EL9, apply updates and install common baseline packages, then add any
+        packages suggested by the checker (copy/paste the printed dnf line):
 
-    ```bash
-dnf update -y
-dnf install -y epel-release chrony vim git
-    # (Optional) install any additional packages suggested by check-deps.sh
-    # e.g., dnf install -y NetworkManager rsync curl openssl nftables
+        ```bash
+        dnf update -y
+        dnf install -y epel-release chrony vim git
+        # (Optional) install any additional packages suggested by check-deps.sh
+        # e.g., dnf install -y NetworkManager rsync curl openssl nftables
         ```
 
 3. **Set the hostname and time sync:**
 
-    ```
-Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+    Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that hosts the default route (See step 2 below).
 
-    ```
+    ??? info "System configuration commands"
 
-??? info "System configuration commands"
+        ```bash
+        hostnamectl set-hostname <testpoint-hostname>
+        systemctl enable --now chronyd
+        timedatectl set-timezone <Region/City>
+        ```
 
-    ```bash
-hostnamectl set-hostname <testpoint-hostname>
-systemctl enable --now chronyd
-timedatectl set-timezone <Region/City>
-    ```
+4. **Disable unused services:**
 
-    4. **Disable unused services:**
+    ??? info "Service cleanup commands"
 
-        ??? info "Service cleanup commands"
-
-            ```bash
-systemctl disable --now firewalld NetworkManager-wait-online
-dnf remove -y rsyslog
-            ```
+        ```bash
+        systemctl disable --now firewalld NetworkManager-wait-online
+        dnf remove -y rsyslog
+        ```
 
 5. **Record NIC names:**
 
@@ -100,7 +97,7 @@ ip -br addr
 
         Document interface mappings; you will need them for the policy-based routing configuration.
 
-        ---
+---
 
 ## Step 2 – Clone the Repository
 
@@ -145,59 +142,59 @@ install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ~/perfsonar-pbr
 cd ~
         ```
 
-??? tip "Alternative: Download directly from the repository URL"
+    ??? tip "Alternative: Download directly from the repository URL"
 
-    ```bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
-chmod 0755 ./perfSONAR-pbr-nm.sh
-    ```
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh -o ./perfSONAR-pbr-nm.sh
+        chmod 0755 ./perfSONAR-pbr-nm.sh
+        ```
 
-    2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
+2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
 
     - Preview (no changes):
 
-    ```bash
-~/perfsonar-pbr-nm.sh --generate-config-debug
-    ```
+        ```bash
+        ~/perfsonar-pbr-nm.sh --generate-config-debug
+        ```
 
     - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
-    ```bash
-~/perfsonar-pbr-nm.sh --generate-config-auto
-    ```
+        ```bash
+        ~/perfsonar-pbr-nm.sh --generate-config-auto
+        ```
 
     Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
 
     !!! warning "Gateways required for addresses"
-    Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
+        Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
 
     !!! note "Gateway prompts"
 
-    During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
+        During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
 
-    3. **Execute the script:**
+3. **Execute the script:**
 
     - Rehearsal (no changes, extra logging recommended on first run):
 
-    ```bash
-~/perfsonar-pbr-nm.sh --dry-run --debug
-    ```
+        ```bash
+        ~/perfsonar-pbr-nm.sh --dry-run --debug
+        ```
 
     - Apply changes non-interactively (auto-confirm):
 
-    ```bash
-~/perfsonar-pbr-nm.sh --yes
-    ```
+        ```bash
+        ~/perfsonar-pbr-nm.sh --yes
+        ```
 
     - Or run interactively and answer the confirmation prompt when ready:
 
-    ```bash
-~/perfsonar-pbr-nm.sh
-    ```
+        ```bash
+        ~/perfsonar-pbr-nm.sh
+        ```
 
     !!! note "Missing gateways at apply time"
 
-    If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
+        If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
 
     The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
 
@@ -209,10 +206,10 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
 - For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
 
-    ??? example "Example: Bash script to automate DNS verification"
-        The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays.
+??? example "Example: Bash script to automate DNS verification"
+    The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays.
 
-        ```bash
+    ```bash
     # quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf
     set -euo pipefail
     CONFIG=/etc/perfSONAR-multi-nic-config.conf
