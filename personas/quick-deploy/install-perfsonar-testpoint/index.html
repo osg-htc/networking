@@ -1968,61 +1968,20 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <details class="example">
 <summary>Example: Bash script to automate DNS verification</summary>
 <p>The <code>perfSONAR-multi-nic-config.conf</code> contains the arrays <code>NIC_IPV4_ADDRS</code> and <code>NIC_IPV6_ADDRS</code> (with <code>-</code> for unused entries). You can automate a forward/reverse consistency check using <code>dig</code> or <code>host</code> by sourcing the config and iterating the arrays.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf</span>
-<span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
-<span class="nv">CONFIG</span><span class="o">=</span>/etc/perfSONAR-multi-nic-config.conf
-<span class="o">[</span><span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONFIG</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Config not found: </span><span class="nv">$CONFIG</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span><span class="p">;</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">2</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
-<span class="nb">source</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONFIG</span><span class="s2">&quot;</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">    </span><span class="c1"># Preferred: run the shipped DNS checker from the local tools checkout</span>
+<span class="w">    </span><span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
 
-check_ip<span class="o">()</span><span class="w"> </span><span class="o">{</span>
-<span class="w">   </span><span class="nb">local</span><span class="w"> </span><span class="nv">ip</span><span class="o">=</span><span class="nv">$1</span>
-<span class="w">   </span><span class="nb">local</span><span class="w"> </span><span class="nv">family</span><span class="o">=</span><span class="nv">$2</span><span class="w">   </span><span class="c1"># 4 or 6</span>
-<span class="w">   </span><span class="c1"># strip CIDR if present</span>
-<span class="w">   </span><span class="nv">ip</span><span class="o">=</span><span class="si">${</span><span class="nv">ip</span><span class="p">%%/*</span><span class="si">}</span>
-<span class="w">   </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;-&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="m">0</span>
-
-<span class="w">   </span><span class="c1"># PTR lookup (reverse)</span>
-<span class="w">   </span><span class="nv">ptr</span><span class="o">=</span><span class="k">$(</span>dig<span class="w"> </span>+short<span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n1<span class="k">)</span>
-<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ptr</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;MISSING PTR for </span><span class="nv">$ip</span><span class="s2">&quot;</span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="m">1</span>
-<span class="w">   </span><span class="k">fi</span>
-<span class="w">   </span><span class="c1"># remove trailing dot from PTR</span>
-<span class="w">   </span><span class="nv">ptr</span><span class="o">=</span><span class="si">${</span><span class="nv">ptr</span><span class="p">%.</span><span class="si">}</span>
-
-<span class="w">   </span><span class="c1"># Forward lookup for the hostname returned by PTR</span>
-<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$family</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  </span><span class="nv">fwd</span><span class="o">=</span><span class="k">$(</span>dig<span class="w"> </span>+short<span class="w"> </span>A<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ptr</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="k">)</span>
-<span class="w">   </span><span class="k">else</span>
-<span class="w">  </span><span class="nv">fwd</span><span class="o">=</span><span class="k">$(</span>dig<span class="w"> </span>+short<span class="w"> </span>AAAA<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ptr</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="k">)</span>
-<span class="w">   </span><span class="k">fi</span>
-
-<span class="w">   </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$fwd</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-qw<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;INCONSISTENT: PTR </span><span class="nv">$ptr</span><span class="s2"> does not resolve back to </span><span class="nv">$ip</span><span class="s2"> (resolved: </span><span class="nv">$fwd</span><span class="s2">)&quot;</span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="m">1</span>
-<span class="w">   </span><span class="k">fi</span>
-<span class="w">   </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK: </span><span class="nv">$ip</span><span class="s2"> ⇄ </span><span class="nv">$ptr</span><span class="s2">&quot;</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="m">0</span>
-<span class="o">}</span>
-
-<span class="nv">errors</span><span class="o">=</span><span class="m">0</span>
-<span class="k">for</span><span class="w"> </span>ip<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">NIC_IPV4_ADDRS</span><span class="p">[@]</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;-&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  </span>check_ip<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nv">errors</span><span class="o">=</span><span class="k">$((</span><span class="nv">errors</span><span class="o">+</span><span class="m">1</span><span class="k">))</span>
-<span class="w">   </span><span class="k">fi</span>
-<span class="k">done</span>
-<span class="k">for</span><span class="w"> </span>ip<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">NIC_IPV6_ADDRS</span><span class="p">[@]</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;-&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">  </span>check_ip<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="m">6</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nv">errors</span><span class="o">=</span><span class="k">$((</span><span class="nv">errors</span><span class="o">+</span><span class="m">1</span><span class="k">))</span>
-<span class="w">   </span><span class="k">fi</span>
-<span class="k">done</span>
-
-<span class="k">if</span><span class="w"> </span><span class="o">((</span><span class="w"> </span>errors<span class="w"> </span>&gt;<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">))</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">   </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;DNS verification failed (</span><span class="nv">$errors</span><span class="s2"> problem(s)). Fix DNS (forward/reverse) before running tests.&quot;</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
-<span class="w">   </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
-<span class="k">fi</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;DNS forward/reverse checks passed for configured addresses.&quot;</span>
+<span class="w">    </span><span class="c1"># Or, download and run it directly (useful on any machine with network visibility</span>
+<span class="w">    </span><span class="c1"># to your DNS servers):</span>
+<span class="w">    </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
+<span class="w">        </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
+<span class="w">        </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">./</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
+<span class="w">    </span><span class="n">chmod</span><span class="w"> </span><span class="n">a</span><span class="o">+</span><span class="n">x</span><span class="w"> </span><span class="o">./</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
+<span class="w">    </span><span class="n">sudo</span><span class="w"> </span><span class="o">./</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
+<span class="w">    </span><span class="err">```</span>
 </code></pre></div>
+
 <p><strong>Notes and automation tips:</strong></p>
 <ul>
 <li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it to use <code>host</code> if preferred.</li>
