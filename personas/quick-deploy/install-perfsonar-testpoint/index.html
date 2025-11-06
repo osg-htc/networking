@@ -2004,11 +2004,14 @@ systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span cla
 <ol>
 <li><strong>Confirm firewall state and security services:</strong></li>
 </ol>
-<p>??? info "Verification commands"
-      <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
-sestatus
-systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
-</code></pre></div></p>
+<p>??? info "Verification commands"</p>
+<div class="codehilite"><pre><span></span><code>  ```bash
+  nft list ruleset
+  sestatus
+  systemctl status fail2ban
+  ```
+</code></pre></div>
+
 <p>Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.</p>
 <hr />
 <h2 id="step-4-deploy-the-containerized-perfsonar-testpoint">Step 4 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-4-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
