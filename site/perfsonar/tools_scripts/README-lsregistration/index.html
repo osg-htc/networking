@@ -1015,12 +1015,20 @@ registration configuration in <code>lsregistrationdaemon.conf</code>.</p>
 <li>Container mode (default): copies <code>/etc/perfsonar/lsregistrationdaemon.conf</code>
   into a temp area, applies requested changes, writes it back into the
   container, and restarts <code>lsregistrationdaemon</code> inside the container.</li>
-<li>Key flags: <code>--container NAME</code> (default: <code>perfsonar-testpoint</code>),
-    <code>--engine auto|docker|podman</code> (default: <code>auto</code>).</li>
-<li>Local mode: operates directly on the host filesystem without a container.</li>
-<li>Key flags: <code>--local</code>, <code>--conf PATH</code> (default:
-    <code>/etc/perfsonar/lsregistrationdaemon.conf</code>).</li>
-<li>Attempts a best-effort restart of <code>lsregistrationdaemon</code> on the host.</li>
+<li>
+<p>Key flags: <code>--container NAME</code> (default: <code>perfsonar-testpoint</code>),</p>
+<p><code>`--engine auto|docker|podman` (default: `auto`).</code></p>
+</li>
+<li>
+<p>Local mode: operates directly on the host filesystem without a container.</p>
+</li>
+<li>
+<p>Key flags: <code>--local</code>, <code>--conf PATH</code> (default:</p>
+<p><code>`/etc/perfsonar/lsregistrationdaemon.conf`).</code></p>
+</li>
+<li>
+<p>Attempts a best-effort restart of <code>lsregistrationdaemon</code> on the host.</p>
+</li>
 </ul>
 <p>Examples:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Update a few fields inside the container</span>
