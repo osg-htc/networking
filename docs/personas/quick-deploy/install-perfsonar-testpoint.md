@@ -13,25 +13,17 @@ Before you begin, gather the following information:
 - **Operational contacts:** site admin email, OSG facility name, latitude/longitude, usage policy link.
 - **Repository artifacts:** the scripts referenced below are in `docs/perfsonar/` in this repository.
 
-### Clone the Repository
+- **Repository artifacts:** the scripts referenced below are in `docs/perfsonar/` in this repository.
 
-This guide references multiple scripts from the osg-htc/networking repository. Clone the repository to your testpoint host for easy access to all tools.
+- **Existing perfSONAR configuration:** If you are replacing or upgrading an existing perfSONAR instance, capture its configuration and registration data before taking services offline. Useful items to collect include:
 
-**Recommended locations:**
+   - `/etc/perfsonar/` configuration files, especially `lsregistrationdaemon.conf`
+   - any site-specific psconfig or testpoint config files stored in container volumes or host paths
+   - exported firewall, monitoring, and cron jobs that the current instance relies on
 
-- **Networking repo:** `/opt/networking` (configuration scripts and documentation)
-- **perfSONAR testpoint compose bundle:** `/opt/testpoint` (if using containerized testpoint)
+   The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and keep a copy in your change log.
 
-```bash
-# Clone the networking repository to /opt
-cd /opt
-git clone https://github.com/osg-htc/networking.git
-
-# Optional: if deploying the perfSONAR testpoint container, clone it separately
-# git clone https://github.com/perfsonar/testpoint.git /opt/testpoint
-```
-
-After cloning, all script examples in this guide that reference `docs/perfsonar/tools_scripts/` assume you're running commands from `/opt/networking`.
+   Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so you can perform the clone once the host is provisioned.
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
@@ -103,7 +95,31 @@ After cloning, all script examples in this guide that reference `docs/perfsonar/
 
 ---
 
-## Step 2 – Configure Policy-Based Routing (PBR)
+## Step 2 – Clone the Repository
+
+This guide references multiple scripts from the osg-htc/networking repository. Clone the repository to your testpoint host for easy access to all tools.
+
+**Recommended locations:**
+
+- **Networking repo:** `/opt/networking` (configuration scripts and documentation)
+- **perfSONAR testpoint compose bundle:** `/opt/testpoint` (if using containerized testpoint)
+
+```bash
+# Clone the networking repository to /opt
+cd /opt
+git clone https://github.com/osg-htc/networking.git
+
+# Optional: if deploying the perfSONAR testpoint container, clone it separately
+# git clone https://github.com/perfsonar/testpoint.git /opt/testpoint
+```
+
+After cloning, all script examples in this guide that reference `docs/perfsonar/tools_scripts/` assume you're running commands from `/opt/networking`.
+
+> **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
+
+---
+
+## Step 3 – Configure Policy-Based Routing (PBR)
 
 The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that automates NetworkManager configuration and routing rules and can auto-generate its config file.
 
@@ -293,7 +309,7 @@ If any addresses fail these checks, correct the DNS zone (forward and/or reverse
 
 ---
 
-## Step 3 – Configure nftables, SELinux, and Fail2Ban
+## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
 Use `docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support.
 
@@ -404,7 +420,7 @@ If any prerequisite is missing, the script skips that component and continues.
 
 ---
 
-## Step 4 – Deploy the Containerized perfSONAR Testpoint
+## Step 5 – Deploy the Containerized perfSONAR Testpoint
 
 We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on the host are reflected inside the containers.
 
@@ -571,7 +587,7 @@ Key paths to persist on the host:
 
 ---
 
-## Step 5 – Register and Configure with WLCG/OSG
+## Step 6 – Register and Configure with WLCG/OSG
 
 1. **PerfSONAR toolkit configuration:**
    
@@ -632,7 +648,7 @@ chmod 0755 ~/perfSONAR-update-lsregistration.sh
 
 ---
 
-## Step 6 – Post-Install Validation
+## Step 7 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
 
