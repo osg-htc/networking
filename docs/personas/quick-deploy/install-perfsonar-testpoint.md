@@ -347,48 +347,48 @@ If any prerequisite is missing, the script skips that component and continues.
         **Validation and output:**
         
         - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
-        - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+      - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-   ??? tip "Preview nftables rules before applying"
-      You can preview the fully rendered nftables rules (no changes are made):
+??? tip "Preview nftables rules before applying"
+    You can preview the fully rendered nftables rules (no changes are made):
 
-      ```bash
-      ~/perfsonar-install-nftables.sh --print-rules
-      ```
+    ```bash
+    ~/perfsonar-install-nftables.sh --print-rules
+    ```
 
-    ??? tip "Manually add extra management hosts/subnets"
-        If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
+??? tip "Manually add extra management hosts/subnets"
+    If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
 
-        ```nft
-        set ssh_access_ip4_subnets {
-           type ipv4_addr
-           flags interval
-           elements = { 192.0.2.0/24, 198.51.100.0/25 }
-        }
+    ```nft
+    set ssh_access_ip4_subnets {
+       type ipv4_addr
+       flags interval
+       elements = { 192.0.2.0/24, 198.51.100.0/25 }
+    }
 
-        set ssh_access_ip4_hosts {
-           type ipv4_addr
-           elements = { 203.0.113.10, 203.0.113.11 }
-        }
+    set ssh_access_ip4_hosts {
+       type ipv4_addr
+       elements = { 203.0.113.10, 203.0.113.11 }
+    }
 
-        set ssh_access_ip6_subnets {
-           type ipv6_addr
-           flags interval
-           elements = { 2001:db8:1::/64 }
-        }
+    set ssh_access_ip6_subnets {
+       type ipv6_addr
+       flags interval
+       elements = { 2001:db8:1::/64 }
+    }
 
-        set ssh_access_ip6_hosts {
-           type ipv6_addr
-           elements = { 2001:db8::10 }
-        }
-        ```
+    set ssh_access_ip6_hosts {
+       type ipv6_addr
+       elements = { 2001:db8::10 }
+    }
+    ```
 
-        Then validate and reload (root shell):
+    Then validate and reload (root shell):
 
-        ```bash
-        nft -c -f /etc/nftables.d/perfsonar.nft
-        systemctl reload nftables || systemctl restart nftables
-        ```
+    ```bash
+    nft -c -f /etc/nftables.d/perfsonar.nft
+    systemctl reload nftables || systemctl restart nftables
+    ```
 
 3. **Confirm firewall state and security services:**
 

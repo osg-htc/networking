@@ -1512,18 +1512,21 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p><strong>Validation and output:</strong></p>
 <ul>
 <li>The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.</li>
-<li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
 </ul>
 </details>
+<ul>
+<li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
+</ul>
+</li>
+</ul>
 <details class="tip">
 <summary>Preview nftables rules before applying</summary>
-</details>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
 <div class="highlight"><pre><span></span><code>~/perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
+</details>
 <details class="tip">
 <summary>Manually add extra management hosts/subnets</summary>
-</details>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
 <div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
    type ipv4_addr
@@ -1551,13 +1554,12 @@ set ssh_access_ip6_hosts {
 <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
 systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
 </code></pre></div>
-</li>
-<li>
-<p><strong>Confirm firewall state and security services:</strong></p>
-</li>
-</ul>
+</details>
+<ol>
+<li><strong>Confirm firewall state and security services:</strong></li>
+</ol>
 <p>??? info "Verification commands"
-       <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
+      <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
 sestatus
 systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 </code></pre></div></p>
@@ -1590,37 +1592,46 @@ mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/apache2
 mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/letsencrypt
 </code></pre></div>
 <ol>
-<li>Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):</li>
-</ol>
-<p>Create a minimal compose file at <code>/opt/testpoint/docker-compose.yml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
-<span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">testpoint</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">perfsonar-testpoint</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/perfsonar/testpoint:5.2.4-systemd</span>
-<span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
-<span class="w">    </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
-<span class="w">    </span><span class="nt">tmpfs</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
-<span class="w">      </span><span class="c1"># Don&#39;t bind Apache/webroot yet; we&#39;ll copy defaults out first</span>
-<span class="w">      </span><span class="c1"># Persist perfSONAR psconfig later after seeding (see step 5)</span>
-<span class="w">    </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
-<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
+<li>
+<p>Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):</p>
+<p>??? example "Create minimal compose and start the container"
+        Create a minimal compose file at <code>/opt/testpoint/docker-compose.yml</code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="err">```</span><span class="n">yaml</span>
+<span class="w">    </span><span class="n">version</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.9&quot;</span>
+<span class="w">    </span><span class="n">services</span><span class="p">:</span>
+<span class="w">       </span><span class="n">testpoint</span><span class="p">:</span>
+<span class="w">          </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">perfsonar</span><span class="o">-</span><span class="n">testpoint</span>
+<span class="w">          </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">ghcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">testpoint</span><span class="p">:</span><span class="mf">5.2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">systemd</span>
+<span class="w">          </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
+<span class="w">          </span><span class="n">cgroup</span><span class="p">:</span><span class="w"> </span><span class="n">host</span>
+<span class="w">          </span><span class="n">environment</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="n">TZ</span><span class="o">=</span><span class="n">UTC</span>
+<span class="w">          </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
+<span class="w">          </span><span class="n">tmpfs</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span>
+<span class="w">          </span><span class="n">volumes</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">rw</span>
+<span class="w">             </span><span class="c1"># Don&#39;t bind Apache/webroot yet; we&#39;ll copy defaults out first</span>
+<span class="w">             </span><span class="c1"># Persist perfSONAR psconfig later after seeding (see step 5)</span>
+<span class="w">          </span><span class="n">tty</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span>
+<span class="w">          </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
+<span class="w">          </span><span class="n">cap_add</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
+<span class="w">    </span><span class="err">```</span>
+
+<span class="w">    </span><span class="n">Bring</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">preferred</span><span class="w"> </span><span class="k">tool</span><span class="p">:</span>
+
+<span class="w">    </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">    </span><span class="p">(</span><span class="n">cd</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="p">;</span><span class="w"> </span><span class="n">podman</span><span class="o">-</span><span class="n">compose</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="p">)</span><span class="w">  </span><span class="c1"># or: (cd /opt/testpoint; docker-compose up -d)</span>
+<span class="w">    </span><span class="err">```</span>
 </code></pre></div>
-<p>Bring it up with your preferred tool:</p>
-<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/testpoint<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or: (cd /opt/testpoint; docker-compose up -d)</span>
-</code></pre></div>
-<ol>
-<li>Copy baseline content out of the running container to the host:</li>
+
+</li>
+<li>
+<p>Copy baseline content out of the running container to the host:</p>
+</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># Use docker cp or podman cp (either works)</span>
 docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/apache2<span class="w"> </span>/etc/apache2
@@ -1638,51 +1649,56 @@ docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc
 </ul>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml<span class="w"> </span>-o<span class="w"> </span>/opt/testpoint/docker-compose.yml
 </code></pre></div>
-<p>Or create/edit <code>/opt/testpoint/docker-compose.yml</code> with the following content:</p>
-<p>Note: The provided compose file ships with <code>io.containers.autoupdate=registry</code> labels pre-set for Podman auto-update.</p>
-</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
-<span class="nt">services</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">testpoint</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">perfsonar-testpoint</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/perfsonar/testpoint:5.2.4-systemd</span>
-<span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
-<span class="w">    </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
-<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
-<span class="w">    </span><span class="nt">tmpfs</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
-<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z</span>
-<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /var/www/html:/var/www/html:z</span>
-<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /etc/apache2:/etc/apache2:z</span>
-<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">- /etc/letsencrypt:/etc/letsencrypt:z</span>
-<span class="w">    </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
-<span class="w">    </span><span class="nt">cap_add</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
+<p>??? example "Complete docker-compose.yml with bind-mounts and certbot"
+        Or create/edit <code>/opt/testpoint/docker-compose.yml</code> with the following content:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">Note</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">provided</span><span class="w"> </span><span class="n">compose</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">ships</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="err">`</span><span class="n">io</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">autoupdate</span><span class="o">=</span><span class="n">registry</span><span class="err">`</span><span class="w"> </span><span class="n">labels</span><span class="w"> </span><span class="n">pre</span><span class="o">-</span><span class="n">set</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Podman</span><span class="w"> </span><span class="n">auto</span><span class="o">-</span><span class="n">update</span><span class="o">.</span>
 
-<span class="w">  </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
-<span class="w">  </span><span class="nt">certbot</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">certbot/certbot</span>
-<span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">certbot</span>
-<span class="w">    </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
-<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
-<span class="w">       </span><span class="l l-Scalar l-Scalar-Plain">entrypoint</span><span class="p p-Indicator">:</span><span class="w"> </span>
-<span class="w">      </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;trap</span><span class="nv"> </span><span class="s">exit</span><span class="nv"> </span><span class="s">TERM;</span><span class="nv"> </span><span class="s">while</span><span class="nv"> </span><span class="s">:;</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">certbot</span><span class="nv"> </span><span class="s">renew;</span><span class="nv"> </span><span class="s">sleep</span><span class="nv"> </span><span class="s">12h</span><span class="nv"> </span><span class="s">&amp;</span><span class="nv"> </span><span class="s">wait</span><span class="nv"> </span><span class="s">$${!};</span><span class="nv"> </span><span class="s">done;&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testpoint</span>
-<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/www/html:/var/www/html:z</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/letsencrypt:/etc/letsencrypt:z</span>
+<span class="w">    </span><span class="err">```</span><span class="n">yaml</span>
+<span class="w">    </span><span class="n">version</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.9&quot;</span>
+<span class="w">    </span><span class="n">services</span><span class="p">:</span>
+<span class="w">       </span><span class="n">testpoint</span><span class="p">:</span>
+<span class="w">          </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">perfsonar</span><span class="o">-</span><span class="n">testpoint</span>
+<span class="w">          </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">ghcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">testpoint</span><span class="p">:</span><span class="mf">5.2</span><span class="o">.</span><span class="mi">4</span><span class="o">-</span><span class="n">systemd</span>
+<span class="w">          </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
+<span class="w">          </span><span class="n">cgroup</span><span class="p">:</span><span class="w"> </span><span class="n">host</span>
+<span class="w">          </span><span class="n">environment</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="n">TZ</span><span class="o">=</span><span class="n">UTC</span>
+<span class="w">          </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
+<span class="w">          </span><span class="n">tmpfs</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">lock</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span>
+<span class="w">          </span><span class="n">volumes</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">fs</span><span class="o">/</span><span class="n">cgroup</span><span class="p">:</span><span class="n">rw</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">testpoint</span><span class="o">/</span><span class="n">psconfig</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">psconfig</span><span class="p">:</span><span class="n">Z</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="n">z</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apache2</span><span class="p">:</span><span class="n">z</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span>
+<span class="w">          </span><span class="n">tty</span><span class="p">:</span><span class="w"> </span><span class="bp">true</span>
+<span class="w">          </span><span class="n">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="mi">8192</span>
+<span class="w">          </span><span class="n">cap_add</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="n">CAP_NET_RAW</span>
+
+<span class="w">       </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
+<span class="w">       </span><span class="n">certbot</span><span class="p">:</span>
+<span class="w">          </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">certbot</span><span class="o">/</span><span class="n">certbot</span>
+<span class="w">          </span><span class="n">container_name</span><span class="p">:</span><span class="w"> </span><span class="n">certbot</span>
+<span class="w">          </span><span class="n">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span>
+<span class="w">          </span><span class="n">restart</span><span class="p">:</span><span class="w"> </span><span class="n">unless</span><span class="o">-</span><span class="n">stopped</span>
+<span class="w">          </span><span class="n">entrypoint</span><span class="p">:</span><span class="w"> </span>
+<span class="w">             </span><span class="p">[</span><span class="s2">&quot;/bin/sh&quot;</span><span class="p">,</span><span class="s2">&quot;-c&quot;</span><span class="p">,</span><span class="s2">&quot;trap exit TERM; while :; do certbot renew; sleep 12h &amp; wait $${!}; done;&quot;</span><span class="p">]</span>
+<span class="w">          </span><span class="n">depends_on</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="n">testpoint</span>
+<span class="w">          </span><span class="n">volumes</span><span class="p">:</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="n">z</span>
+<span class="w">             </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="p">:</span><span class="n">z</span>
+<span class="w">    </span><span class="err">```</span>
 </code></pre></div>
-<ol>
-<li>Restart with the new compose:</li>
+
+</li>
+<li>
+<p>Restart with the new compose:</p>
+</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/testpoint<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>down<span class="o">)</span>
 <span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/testpoint<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose down &amp;&amp; docker-compose up -d</span>
@@ -1699,9 +1715,9 @@ docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 <span class="c1"># Gracefully reload Apache within the testpoint container (or restart the service)</span>
 docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>bash<span class="w"> </span>-lc<span class="w"> </span><span class="s1">&#39;systemctl reload httpd || apachectl -k graceful || true&#39;</span>
 </code></pre></div>
-<p>Notes:
-   - Ensure port 80 on the host is reachable from the internet while issuing certificates.
-   - All shared paths use SELinux-aware <code>:z</code>/<code>:Z</code> to permit container access on enforcing hosts.</p>
+<p>??? info "Notes"
+      - Ensure port 80 on the host is reachable from the internet while issuing certificates.
+      - All shared paths use SELinux-aware <code>:z</code>/<code>:Z</code> to permit container access on enforcing hosts.</p>
 <ol>
 <li>Verify:</li>
 </ol>
@@ -1715,28 +1731,28 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 </ol>
 <p>Browse to <code>https://&lt;SERVER_FQDN&gt;/toolkit</code> and complete the local toolkit setup wizard.</p>
 <p>??? info "Configuration details to populate"
-       - Site contact email
-       - Usage policy URL
-       - Location (latitude/longitude)
-       - Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping</p>
+      - Site contact email
+      - Usage policy URL
+      - Location (latitude/longitude)
+      - Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping</p>
 <ol>
 <li><strong>OSG/WLCG registration workflow:</strong></li>
 </ol>
 <p>??? info "Registration steps and portals"
-       - Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.
-       - Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.
-       - In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>
+      - Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.
+      - Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.
+      - In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>
 <ol>
 <li><strong>pSConfig enrollment:</strong></li>
 </ol>
 <p>For each active NIC, register with the psconfig service so measurements cover all paths.</p>
 <p>??? info "Registration command and verification"
-       Example registration:</p>
-<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
-<span class="n n-Quoted">   /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/&lt;NIC-FQDN&gt;</span>
-<span class="n n-Quoted">   </span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">`</span>
+      Example registration:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">  </span><span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
+<span class="n n-Quoted">  /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/&lt;NIC-FQDN&gt;</span>
+<span class="n n-Quoted">  </span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">`</span>
 
-<span class="w">   </span><span class="n">Confirm</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">resulting</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n n-Quoted">`/etc/perfsonar/psconfig/pscheduler.d/`</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">correct</span><span class="w"> </span><span class="n">interface</span><span class="w"> </span><span class="n">addresses</span><span class="w"> </span><span class="p">(</span><span class="n n-Quoted">`ifaddr`</span><span class="w"> </span><span class="n">tags</span><span class="p">).</span>
+<span class="w">  </span><span class="n">Confirm</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">resulting</span><span class="w"> </span><span class="n">files</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n n-Quoted">`/etc/perfsonar/psconfig/pscheduler.d/`</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">correct</span><span class="w"> </span><span class="n">interface</span><span class="w"> </span><span class="n">addresses</span><span class="w"> </span><span class="p">(</span><span class="n n-Quoted">`ifaddr`</span><span class="w"> </span><span class="n">tags</span><span class="p">).</span>
 </code></pre></div>
 
 <ol>
@@ -1770,27 +1786,27 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li><strong>System services:</strong></li>
 </ol>
 <p>??? info "Verify Podman and compose services"
-       <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
+      <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
 systemctl<span class="w"> </span>--user<span class="w"> </span>status<span class="w"> </span>podman-compose@perfsonar-testpoint.service
 </code></pre></div></p>
-<div class="codehilite"><pre><span></span><code>   Ensure both are active/green.
+<div class="codehilite"><pre><span></span><code>  Ensure both are active/green.
 </code></pre></div>
 
 <ol>
 <li><strong>Container health:</strong></li>
 </ol>
 <p>??? info "Check container status and logs"
-       <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
+      <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
 podman<span class="w"> </span>logs<span class="w"> </span>pscheduler-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail
 </code></pre></div></p>
 <ol>
 <li><strong>Network path validation:</strong></li>
 </ol>
 <p>??? info "Test network connectivity and routing"
-       <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
+      <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
 tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
 </code></pre></div></p>
-<div class="codehilite"><pre><span></span><code>   Confirm traffic uses the intended policy-based routes (check `ip route get &lt;dest&gt;`).
+<div class="codehilite"><pre><span></span><code>  Confirm traffic uses the intended policy-based routes (check `ip route get &lt;dest&gt;`).
 </code></pre></div>
 
 <ol>
@@ -1801,23 +1817,34 @@ tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&
 <p><strong>Security posture:</strong></p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+<p>??? info "Check firewall, fail2ban, and SELinux"
+      <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
 fail2ban-client<span class="w"> </span>status
 ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class="w"> </span>--just-one
+</code></pre></div></p>
+<div class="codehilite"><pre><span></span><code>  Investigate any SELinux denials or repeated Fail2Ban bans.
 </code></pre></div>
-<p>Investigate any SELinux denials or repeated Fail2Ban bans.</p>
+
 <ol>
 <li><strong>LetsEncrypt certificate check:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;SERVER_FQDN&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
+<p>??? info "Verify certificate validity"
+      <div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;SERVER_FQDN&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
+</code></pre></div></p>
+<div class="codehilite"><pre><span></span><code>  Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
 </code></pre></div>
-<p>Ensure the issuer is Let’s Encrypt and the validity period is acceptable.</p>
+
 <ol>
-<li><strong>Reporting:</strong> run the perfSONAR toolkit daily report and send outputs to operations:</li>
+<li><strong>Reporting:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>troubleshoot
-toolkit-system-health
+<p>??? info "Run perfSONAR diagnostic reports"
+      Run the perfSONAR toolkit daily report and send outputs to operations:</p>
+<div class="codehilite"><pre><span></span><code><span class="w">  </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">  </span><span class="n">pscheduler</span><span class="w"> </span><span class="n">troubleshoot</span>
+<span class="w">  </span><span class="n">toolkit</span><span class="o">-</span><span class="n">system</span><span class="o">-</span><span class="n">health</span>
+<span class="w">  </span><span class="err">```</span>
 </code></pre></div>
+
 <hr />
 <h2 id="ongoing-maintenance">Ongoing Maintenance<a class="headerlink" href="#ongoing-maintenance" title="Permanent link">&para;</a></h2>
 <ul>
