@@ -2,6 +2,7 @@ The original `docs/personas/quick-deploy/landing.md` as read before replacement.
 
 ````
 ```markdown
+
 title: Quick Deploy — perfSONAR Testpoint (Quick Deploy)
 description: Quick, minimal steps to deploy a perfSONAR testpoint for WLCG/OSG monitoring.
 persona: quick-deploy
@@ -17,5 +18,6 @@ This page provides a concise, tested minimal path to deploy a perfSONAR testpoin
 - Optional features and automated setup: `automated-setup/README.md`
 
 Follow the quickstart if you need a working testpoint in a single admin session.
+
 ```
 ````

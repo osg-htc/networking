@@ -20,14 +20,14 @@ Script: `perfSONAR-update-lsregistration.sh`
   - Key flags: `--container NAME` (default: `perfsonar-testpoint`),
 
     ```
-    `--engine auto|docker|podman` (default: `auto`).
+`--engine auto|docker|podman` (default: `auto`).
     ```
 
 - Local mode: operates directly on the host filesystem without a container.
   - Key flags: `--local`, `--conf PATH` (default:
 
     ```
-    `/etc/perfsonar/lsregistrationdaemon.conf`).
+`/etc/perfsonar/lsregistrationdaemon.conf`).
     ```
 
   - Attempts a best-effort restart of `lsregistrationdaemon` on the host.

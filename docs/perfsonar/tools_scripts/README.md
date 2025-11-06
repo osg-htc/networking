@@ -46,7 +46,7 @@ Optional / feature packages
   updater/extractor when operating against the running testpoint container
 - podman-compose or docker-compose — useful for running the testpoint
   compose bundle locally
-  
+
 Note: the `check-deps.sh` helper accepts `podman-compose` as an alternative
 provider to `docker-compose` and will report the dependency as satisfied if
 either binary is present.

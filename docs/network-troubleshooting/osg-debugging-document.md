@@ -7,7 +7,7 @@ _February 4th 2013_
 !!! note
 
     ```
-    This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
+This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
 
     ```
 

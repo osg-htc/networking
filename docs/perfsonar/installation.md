@@ -3,7 +3,7 @@
 !!! note
 
     ```
-    This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.
+This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.
 
     ```
 
@@ -34,7 +34,7 @@ You can see more details about EL supported installs at <https://docs.perfsonar.
 !!! note
 
     ```
-    In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4+. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances.
+In all cases, we **strongly recommend to keep auto-updates enabled** as this is the default settings starting from perfSONAR 4+. With `yum` auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances.
 
     ```
 
@@ -45,19 +45,20 @@ The following *additional* steps are needed to configure the toolkit to be used 
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
 
     ```
-    * **For toolkit versions 5.0 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
+* **For toolkit versions 5.0 and higher**, please run from the command line `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>`. Replace `<FQDN>` with the fully qualified domain name of your host, e.g., `psum01.aglt2.org`. To verify the configuration is correct, you can run `psconfig remote list`, which should show the URL configured, e.g.
 
     ```
 
  ```json
- === pScheduler Agent ===
- [
-    {
-       "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
-       "configure-archives" : true
-    }
- ]
+=== pScheduler Agent ===
+[
+   {
+      "url" : "https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org"
+      "configure-archives" : true
+   }
+]
  ```
+
 * Please remove any old/stale URLs using `psconfig remote delete <URL>`
 
 * If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication.
@@ -65,7 +66,7 @@ The following *additional* steps are needed to configure the toolkit to be used 
 !!! note
 
     ```
-    Until your host is added (on <https://psconfig.opensciencegrid.org> ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
+Until your host is added (on <https://psconfig.opensciencegrid.org> ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).
 
     ```
 
@@ -91,7 +92,7 @@ The perfSONAR toolkit is reviewed both internally and externally for security fl
 !!! warning
 
     ```
-    As of perfSONAR 4.0+ ALL perfSONAR instances need to have port 443 accessible to all the other perfSONAR instances. Allowing access to port 443 is **required** because it's now used as a controller port for scheduling tests (via pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available. Starting from perfSONAR 4.0, HTTPS/443 is now by default configured on all perfSONAR instances, i.e. local iptables as well as httpd configuration comes out of the box and requires no extra steps, therefore opening is only needed if you have central/campus firewall.
+As of perfSONAR 4.0+ ALL perfSONAR instances need to have port 443 accessible to all the other perfSONAR instances. Allowing access to port 443 is **required** because it's now used as a controller port for scheduling tests (via pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available. Starting from perfSONAR 4.0, HTTPS/443 is now by default configured on all perfSONAR instances, i.e. local iptables as well as httpd configuration comes out of the box and requires no extra steps, therefore opening is only needed if you have central/campus firewall.
 
     ```
 
@@ -100,7 +101,7 @@ For sites that are concerned about having port 443 open, there is a possiblity t
 !!! warning
 
     ```
-    In case you have **central/campus firewall**, please check the required port openings in the [perfSONAR security documentation](http://docs.perfsonar.net/manage_security.html).  
+In case you have **central/campus firewall**, please check the required port openings in the [perfSONAR security documentation](http://docs.perfsonar.net/manage_security.html).
 
     ```
 
@@ -122,11 +123,11 @@ You might not be able to access the page if you are not properly registered in G
 * For each form (i.e. for each service type) fill at least the important informations:
 
     ```
-    * Hosting Site (drop-down menu, mandatory)
-    * Service Type (drop-down menu, mandatory)
-    * Host Name (free text, mandatory)
-    * Host IP (free text, optional)
-    * Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
+* Hosting Site (drop-down menu, mandatory)
+* Service Type (drop-down menu, mandatory)
+* Host Name (free text, mandatory)
+* Host IP (free text, optional)
+* Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
     ```
 
 * Check "N" when asked "Is it a beta service"
