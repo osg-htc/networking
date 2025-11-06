@@ -1491,8 +1491,8 @@
 <p>git clone https://github.com/perfsonar/perfsonar-testpoint-docker.git
 cd perfsonar-testpoint-docker</p>
 <h3 id="prepare-configuration-storage"><strong>Prepare configuration storage:</strong><a class="headerlink" href="#prepare-configuration-storage" title="Permanent link">&para;</a></h3>
-<p>sudo mkdir -p /opt/testpoint/
-sudo cp -r compose/psconfig /opt/testpoint/</p>
+<p>sudo mkdir -p /opt/perfsonar-tp/
+sudo cp -r compose/psconfig /opt/perfsonar-tp/</p>
 <h3 id="edit-the-compose-file-as-needed"><strong>Edit the compose file as needed:</strong><a class="headerlink" href="#edit-the-compose-file-as-needed" title="Permanent link">&para;</a></h3>
 <p>Edit docker-compose.systemd.yml if you need to customize e.g., resource limits or volumes.</p>
 <hr />
@@ -1547,13 +1547,12 @@ WantedBy\=multi-user.target</p>
 <p>/etc/nftables.conf:</p>
 <p>flush ruleset</p>
 <p>table inet perfsonar {</p>
-<div class="codehilite"><pre><span></span><code>```
+<div class="codehilite"><pre><span></span><code><span class="err">`\</span><span class="nx">n</span><span class="err">\</span><span class="nx">nset</span><span class="w"> </span><span class="nx">allowed</span><span class="err">\</span><span class="nx">_protocols</span><span class="w"> </span><span class="p">{</span>
+<span class="k">type</span><span class="w"> </span><span class="nx">inet</span><span class="err">\</span><span class="nx">_proto</span>
+<span class="nx">elements</span><span class="w"> </span><span class="err">\</span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">icmp</span><span class="p">,</span><span class="w"> </span><span class="nx">icmpv6</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 
-<p>set allowed_protocols {
-    type inet_proto
-    elements \= { icmp, icmpv6 }
-}
+<p>}
 set allowed_interfaces {
     type ifname
     elements \= { "lo" }
