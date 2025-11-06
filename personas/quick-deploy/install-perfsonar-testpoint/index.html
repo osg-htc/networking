@@ -1753,13 +1753,14 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <ul>
 <li><strong>perfSONAR testpoint compose bundle:</strong> <code>/opt/perfsonar-tp</code> (if using containerized testpoint)</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># Clone the networking repository to /opt</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Clone the networking repository to /opt (public repo)</span>
 <span class="nb">cd</span><span class="w"> </span>/opt
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/osg-htc/networking.git<span class="w"> </span>/opt/networking
 </code></pre></div>
-<p>Optional: if deploying the perfSONAR testpoint container, clone it separately:</p>
-<p><div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/testpoint.git<span class="w"> </span>/opt/perfsonar-tp
+<p>Create the application directory for the testpoint bundle (no private clone required):</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp
 </code></pre></div>
-We will then check out just the tools_script directory from this repo, to give us access to the appropriate scripts and tools.</p>
+<p>We will then check out just the tools_scripts directory from this repo, to give us access to the appropriate scripts and tools.</p>
 <p>Create only the perfSONAR tools directory from this repository using a sparse checkout, and place it under <code>/opt/perfsonar-tp/tools_scripts</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Create destination directory</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/tools_scripts
