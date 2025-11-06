@@ -1364,6 +1364,11 @@ git<span class="w"> </span>sparse-checkout<span class="w"> </span><span class="n
 <span class="c1"># Copy the tools into /opt/perfsonar-tp/tools_scripts</span>
 rsync<span class="w"> </span>-a<span class="w"> </span>docs/perfsonar/tools_scripts/<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/
 
+<span class="c1"># Ensure key scripts are executable (some source files are not marked exec in Git)</span>
+chmod<span class="w"> </span>a+x<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
+
 <span class="c1"># Optional: list what was installed</span>
 ls<span class="w"> </span>-1<span class="w"> </span>/opt/perfsonar-tp/tools_scripts
 
@@ -1387,7 +1392,7 @@ copy/paste install commands. Then apply OS updates and any remaining
 baseline packages.</p>
 <ul>
 <li>
-<p>From the local tools checkout (recommended):</p>
+<p>You can run check-deps.sh from the local copy:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-deps.sh
 </code></pre></div>
 </li>
@@ -1399,16 +1404,6 @@ baseline packages.</p>
 <span class="w">            </span>-o<span class="w"> </span>./check-deps.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
 ./check-deps.sh
-</code></pre></div>
-</details>
-<details class="info">
-<summary>Apply updates and install baseline packages</summary>
-<p>On EL9, apply updates and install common baseline packages, then add any
-packages suggested by the checker (copy/paste the printed dnf line):</p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
-dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
-<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
-<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
 </code></pre></div>
 </details>
 </li>

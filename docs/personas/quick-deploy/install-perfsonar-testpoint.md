@@ -101,6 +101,11 @@ git sparse-checkout set docs/perfsonar/tools_scripts
 # Copy the tools into /opt/perfsonar-tp/tools_scripts
 rsync -a docs/perfsonar/tools_scripts/ /opt/perfsonar-tp/tools_scripts/
 
+# Ensure key scripts are executable (some source files are not marked exec in Git)
+chmod a+x \
+    /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh \
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
+
 # Optional: list what was installed
 ls -1 /opt/perfsonar-tp/tools_scripts
 
@@ -124,7 +129,7 @@ After preparing the host, assume scripts from this guide are available at `/opt/
     copy/paste install commands. Then apply OS updates and any remaining
     baseline packages.
 
-    - From the local tools checkout (recommended):
+    - You can run check-deps.sh from the local copy:
 
         ```bash
         /opt/perfsonar-tp/tools_scripts/check-deps.sh
@@ -138,17 +143,6 @@ After preparing the host, assume scripts from this guide are available at `/opt/
                     -o ./check-deps.sh
         chmod 0755 ./check-deps.sh
         ./check-deps.sh
-        ```
-
-    ??? info "Apply updates and install baseline packages"
-        On EL9, apply updates and install common baseline packages, then add any
-        packages suggested by the checker (copy/paste the printed dnf line):
-
-        ```bash
-        dnf update -y
-        dnf install -y epel-release chrony vim git
-        # (Optional) install any additional packages suggested by check-deps.sh
-        # e.g., dnf install -y NetworkManager rsync curl openssl nftables
         ```
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
