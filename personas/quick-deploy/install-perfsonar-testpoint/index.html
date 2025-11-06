@@ -1528,7 +1528,8 @@ dnf install -y epel-release chrony vim git
 <ol>
 <li>
 <p><strong>Set the hostname and time sync:</strong></p>
-<p>Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).</p>
+<div class="highlight"><pre><span></span><code>Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+</code></pre></div>
 </li>
 </ol>
 <details class="info">
@@ -2046,25 +2047,18 @@ docker<span class="w"> </span>ps<span class="w">  </span><span class="c1"># or p
 <p>Browse to <code>https://&lt;SERVER_FQDN&gt;/toolkit</code> and complete the local toolkit setup wizard.</p>
 <details class="info">
 <summary>Configuration details to populate</summary>
-<ul>
-<li>Site contact email</li>
-<li>Usage policy URL</li>
-<li>Location (latitude/longitude)</li>
-<li>
-<p>Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping</p>
-</li>
-<li>
-<p><strong>OSG/WLCG registration workflow:</strong></p>
-<details class="info">
-<summary>Registration steps and portals</summary>
-<ul>
-<li>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</li>
-<li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</li>
-<li>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</li>
-</ul>
-</details>
-</li>
-</ul>
+<div class="highlight"><pre><span></span><code>- Site contact email
+- Usage policy URL
+- Location (latitude/longitude)
+- Export the configuration via `/etc/perfsonar/psconfig/nodes/local.json` for record keeping
+
+2. **OSG/WLCG registration workflow:**
+
+    ??? info &quot;Registration steps and portals&quot;
+        - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+        - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+        - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+</code></pre></div>
 </details>
 <ol>
 <li><strong>pSConfig enrollment:</strong></li>
