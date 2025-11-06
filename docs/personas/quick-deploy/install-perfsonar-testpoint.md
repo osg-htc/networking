@@ -371,12 +371,12 @@ If any prerequisite is missing, the script skips that component and continues.
     - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
     - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-        ??? tip "Preview nftables rules before applying"
-            You can preview the fully rendered nftables rules (no changes are made):
+    ??? tip "Preview nftables rules before applying"
+        You can preview the fully rendered nftables rules (no changes are made):
 
-            ```bash
-            ~/perfsonar-install-nftables.sh --print-rules
-            ```
+        ```bash
+        ~/perfsonar-install-nftables.sh --print-rules
+        ```
 
 ??? tip "Manually add extra management hosts/subnets"
     If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
@@ -414,13 +414,13 @@ If any prerequisite is missing, the script skips that component and continues.
 
     1. **Confirm firewall state and security services:**
 
-        ??? info "Verification commands"
+    ??? info "Verification commands"
 
-            ```bash
-            nft list ruleset
-            sestatus
-            systemctl status fail2ban
-            ```
+        ```bash
+        nft list ruleset
+        sestatus
+        systemctl status fail2ban
+        ```
 
             Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
@@ -457,7 +457,7 @@ Key paths to persist on the host:
 
 1. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
 
-        ??? example "Create minimal compose and start the container"
+    ??? example "Create minimal compose and start the container"
                 Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
 
                 ```yaml
@@ -511,7 +511,7 @@ Key paths to persist on the host:
        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml -o /opt/testpoint/docker-compose.yml
        ```
 
-        ??? example "Complete docker-compose.yml with bind-mounts and certbot"
+    ??? example "Complete docker-compose.yml with bind-mounts and certbot"
                 Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
 
                 Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
