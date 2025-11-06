@@ -113,7 +113,7 @@ Notes:
 - The source path in this repo is `docs/perfsonar/tools_scripts` (plural). We install it to `/opt/perfsonar-tp/tools_scripts` to keep the same name.
 - You don’t need to keep a full clone of the networking repo on the host for these tools; the sparse checkout above fetches only the needed directory.
 
-After cloning, all script examples in this guide that reference `docs/perfsonar/tools_scripts/` assume you're running commands from `/opt/networking`.
+After preparing the host, assume scripts from this guide are available at `/opt/perfsonar-tp/tools_scripts` and run them from there unless a raw download is shown.
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
@@ -124,11 +124,10 @@ After cloning, all script examples in this guide that reference `docs/perfsonar/
     copy/paste install commands. Then apply OS updates and any remaining
     baseline packages.
 
-    - From a local clone of this repository (recommended):
+    - From the local tools checkout (recommended):
 
         ```bash
-        cd /opt/networking
-        ./docs/perfsonar/tools_scripts/check-deps.sh
+        /opt/perfsonar-tp/tools_scripts/check-deps.sh
         ```
 
     ??? tip "Alternative: Download and run directly"
@@ -154,7 +153,7 @@ After cloning, all script examples in this guide that reference `docs/perfsonar/
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
-The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that automates NetworkManager configuration and routing rules and can auto-generate its config file.
+The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that automates NetworkManager configuration and routing rules and can auto-generate its config file. After Step 2, the local path for this script is `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh`.
 
 Script location in the repository:
 
@@ -163,12 +162,10 @@ Script location in the repository:
 
 1. **Stage the script:**
 
-    - From a local clone of this repository:
+    - From the local tools checkout:
 
         ```bash
-        cd /opt/networking
-        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh ~/perfsonar-pbr-nm.sh
-        cd ~
+        install -m 0755 /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh ~/perfsonar-pbr-nm.sh
         ```
 
     ??? tip "Alternative: Download directly from the repository URL"
@@ -306,8 +303,14 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 
 If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.
 
-??? example "Download and run the DNS checker"
-    You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects `/etc/perfSONAR-multi-nic-config.conf` to exist and be readable.
+??? example "Run or download the DNS checker"
+    From the local tools checkout (preferred):
+
+    ```bash
+    sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    ```
+
+    Or download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects `/etc/perfSONAR-multi-nic-config.conf` to exist and be readable.
 
     ```bash
     # Download (curl)
@@ -349,7 +352,7 @@ If any addresses fail these checks, correct the DNS zone (forward and/or reverse
 
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
-Use `docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support.
+Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support.
 
 Script location in the repository:
 
@@ -366,12 +369,10 @@ If any prerequisite is missing, the script skips that component and continues.
 
 1. **Stage the installer:**
 
-    - From a local clone of this repository:
+    - From the local tools checkout:
 
         ```bash
-        cd /opt/networking
-        install -m 0755 docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh ~/perfsonar-install-nftables.sh
-        cd ~
+        install -m 0755 /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh ~/perfsonar-install-nftables.sh
         ```
 
     ??? tip "Alternative: Download directly from the repository URL"
@@ -658,9 +659,17 @@ Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside 
 
 Install and run examples (root shell):
 
+From the local tools checkout (preferred):
+
+```bash
+install -m 0755 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh ~/perfSONAR-update-lsregistration.sh
 ```
+
+Or download the script and run it:
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-   -o ~/perfSONAR-update-lsregistration.sh
+    -o ~/perfSONAR-update-lsregistration.sh
 chmod 0755 ~/perfSONAR-update-lsregistration.sh
 
 # Preview changes only
@@ -668,12 +677,11 @@ chmod 0755 ~/perfSONAR-update-lsregistration.sh
 
 # Apply common updates and restart the daemon inside the container
 ~/perfSONAR-update-lsregistration.sh \
-   --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-   --city Berkeley --region CA --country US --zip 94720 \
-   --latitude 37.5 --longitude -121.7469 \
-   --admin-name "pS Admin" --admin-email admin@example.org
-
-```bash
+    --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+    --city Berkeley --region CA --country US --zip 94720 \
+    --latitude 37.5 --longitude -121.7469 \
+    --admin-name "pS Admin" --admin-email admin@example.org
+```
 
 ---
 

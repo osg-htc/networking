@@ -692,6 +692,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#step-7-post-install-validation" class="md-nav__link">
+    Step 7 – Post-Install Validation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ongoing-maintenance" class="md-nav__link">
+    Ongoing Maintenance
+  </a>
+  
+    <nav class="md-nav" aria-label="Ongoing Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
+    Automatic image updates and safe restarts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1200,6 +1227,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#step-7-post-install-validation" class="md-nav__link">
+    Step 7 – Post-Install Validation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ongoing-maintenance" class="md-nav__link">
+    Ongoing Maintenance
+  </a>
+  
+    <nav class="md-nav" aria-label="Ongoing Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
+    Automatic image updates and safe restarts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1291,13 +1345,10 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <ul>
 <li><strong>perfSONAR testpoint compose bundle:</strong> <code>/opt/perfsonar-tp</code> (if using containerized testpoint)</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># Clone the networking repository to /opt</span>
-<span class="nb">cd</span><span class="w"> </span>/opt
+<p>First check out the perfSONAR testpoint:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/testpoint.git<span class="w"> </span>/opt/perfsonar-tp
 </code></pre></div>
-<p>Optional: if deploying the perfSONAR testpoint container, clone it separately:</p>
-<p><div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/testpoint.git<span class="w"> </span>/opt/perfsonar-tp
-</code></pre></div>
-We will then check out just the tools_script directory from this repo, to give us access to the appropriate scripts and tools.</p>
+<p>We will then check out just the tools_scripts directory from THIS repo, to give us access to the appropriate scripts and tools.</p>
 <p>Create only the perfSONAR tools directory from this repository using a sparse checkout, and place it under <code>/opt/perfsonar-tp/tools_scripts</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Create destination directory</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/tools_scripts
@@ -1323,7 +1374,7 @@ rm<span class="w"> </span>-rf<span class="w"> </span><span class="s2">&quot;</sp
 <p>Notes:
 - The source path in this repo is <code>docs/perfsonar/tools_scripts</code> (plural). We install it to <code>/opt/perfsonar-tp/tools_scripts</code> to keep the same name.
 - You don’t need to keep a full clone of the networking repo on the host for these tools; the sparse checkout above fetches only the needed directory.</p>
-<p>After cloning, all script examples in this guide that reference <code>docs/perfsonar/tools_scripts/</code> assume you're running commands from <code>/opt/networking</code>.</p>
+<p>After preparing the host, assume scripts from this guide are available at <code>/opt/perfsonar-tp/tools_scripts</code> and run them from there unless a raw download is shown.</p>
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
@@ -1336,9 +1387,8 @@ copy/paste install commands. Then apply OS updates and any remaining
 baseline packages.</p>
 <ul>
 <li>
-<p>From a local clone of this repository (recommended):</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
-./docs/perfsonar/tools_scripts/check-deps.sh
+<p>From the local tools checkout (recommended):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-deps.sh
 </code></pre></div>
 </li>
 </ul>
@@ -1364,7 +1414,7 @@ dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </s
 </li>
 </ol>
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
-<p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file.</p>
+<p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file. After Step 2, the local path for this script is <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code>.</p>
 <p>Script location in the repository:</p>
 <ul>
 <li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
@@ -1375,10 +1425,8 @@ dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </s
 <p><strong>Stage the script:</strong></p>
 <ul>
 <li>
-<p>From a local clone of this repository:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
-install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>~/perfsonar-pbr-nm.sh
-<span class="nb">cd</span><span class="w"> </span>~
+<p>From the local tools checkout:</p>
+<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>~/perfsonar-pbr-nm.sh
 </code></pre></div>
 </li>
 </ul>
@@ -1516,8 +1564,11 @@ check_ip<span class="o">()</span><span class="w"> </span><span class="o">{</span
 </details>
 <p>If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.</p>
 <details class="example">
-<summary>Download and run the DNS checker</summary>
-<p>You can download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects <code>/etc/perfSONAR-multi-nic-config.conf</code> to exist and be readable.</p>
+<summary>Run or download the DNS checker</summary>
+<p>From the local tools checkout (preferred):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+</code></pre></div>
+<p>Or download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects <code>/etc/perfSONAR-multi-nic-config.conf</code> to exist and be readable.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download (curl)</span>
 <span class="w">    </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">        </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh<span class="w"> </span><span class="se">\</span>
@@ -1553,7 +1604,7 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 <p>Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default route.</p>
 <hr />
 <h2 id="step-4-configure-nftables-selinux-and-fail2ban">Step 4 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-4-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
-<p>Use <code>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables profile with optional SELinux and Fail2Ban support.</p>
+<p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables profile with optional SELinux and Fail2Ban support.</p>
 <p>Script location in the repository:</p>
 <ul>
 <li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
@@ -1571,10 +1622,8 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 <p><strong>Stage the installer:</strong></p>
 <ul>
 <li>
-<p>From a local clone of this repository:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
-install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>~/perfsonar-install-nftables.sh
-<span class="nb">cd</span><span class="w"> </span>~
+<p>From the local tools checkout:</p>
+<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>~/perfsonar-install-nftables.sh
 </code></pre></div>
 </li>
 </ul>
@@ -1834,19 +1883,24 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <li>Raw (download): <a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh">raw link</a></li>
 </ul>
 <p>Install and run examples (root shell):</p>
-<p>```
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-   -o ~/perfSONAR-update-lsregistration.sh
-chmod 0755 ~/perfSONAR-update-lsregistration.sh</p>
-<h1 id="preview-changes-only">Preview changes only<a class="headerlink" href="#preview-changes-only" title="Permanent link">&para;</a></h1>
-<p>~/perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"</p>
-<h1 id="apply-common-updates-and-restart-the-daemon-inside-the-container">Apply common updates and restart the daemon inside the container<a class="headerlink" href="#apply-common-updates-and-restart-the-daemon-inside-the-container" title="Permanent link">&para;</a></h1>
-<p>~/perfSONAR-update-lsregistration.sh \
-   --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-   --city Berkeley --region CA --country US --zip 94720 \
-   --latitude 37.5 --longitude -121.7469 \
-   --admin-name "pS Admin" --admin-email admin@example.org</p>
-<p>```bash</p>
+<p>From the local tools checkout (preferred):</p>
+<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>~/perfSONAR-update-lsregistration.sh
+</code></pre></div>
+<p>Or download the script and run it:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>~/perfSONAR-update-lsregistration.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>~/perfSONAR-update-lsregistration.sh
+
+<span class="c1"># Preview changes only</span>
+~/perfSONAR-update-lsregistration.sh<span class="w"> </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
+
+<span class="c1"># Apply common updates and restart the daemon inside the container</span>
+~/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
+</code></pre></div>
 <hr />
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
@@ -1855,9 +1909,9 @@ chmod 0755 ~/perfSONAR-update-lsregistration.sh</p>
 <p><strong>System services:</strong></p>
 <details class="info">
 <summary>Verify Podman and compose services</summary>
-<p><code>bash
-systemctl status podman
-systemctl --user status podman-compose@perfsonar-testpoint.service</code></p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
+systemctl<span class="w"> </span>--user<span class="w"> </span>status<span class="w"> </span>podman-compose@perfsonar-testpoint.service
+</code></pre></div>
 <p>Ensure both are active/green.</p>
 </details>
 </li>
@@ -1865,18 +1919,18 @@ systemctl --user status podman-compose@perfsonar-testpoint.service</code></p>
 <p><strong>Container health:</strong></p>
 <details class="info">
 <summary>Check container status and logs</summary>
-<p><code>bash
-podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-podman logs pscheduler-agent | tail</code></p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
+podman<span class="w"> </span>logs<span class="w"> </span>pscheduler-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail
+</code></pre></div>
 </details>
 </li>
 <li>
 <p><strong>Network path validation:</strong></p>
 <details class="info">
 <summary>Test network connectivity and routing</summary>
-<p><code>bash
-pscheduler task throughput --dest &lt;remote-testpoint&gt;
-tracepath -n &lt;remote-testpoint&gt;</code></p>
+<div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
+tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
+</code></pre></div>
 <p>Confirm traffic uses the intended policy-based routes (check <code>ip route get &lt;dest&gt;</code>).</p>
 </details>
 </li>
@@ -1887,10 +1941,10 @@ tracepath -n &lt;remote-testpoint&gt;</code></p>
 <p><strong>Security posture:</strong></p>
 <details class="info">
 <summary>Check firewall, fail2ban, and SELinux</summary>
-<p><code>bash
-nft list ruleset | grep perfsonar
-fail2ban-client status
-ausearch --message AVC --just-one</code></p>
+<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+fail2ban-client<span class="w"> </span>status
+ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class="w"> </span>--just-one
+</code></pre></div>
 <p>Investigate any SELinux denials or repeated Fail2Ban bans.</p>
 </details>
 </li>
@@ -1898,8 +1952,8 @@ ausearch --message AVC --just-one</code></p>
 <p><strong>LetsEncrypt certificate check:</strong></p>
 <details class="info">
 <summary>Verify certificate validity</summary>
-<p><code>bash
-openssl s_client -connect &lt;SERVER_FQDN&gt;:443 -servername &lt;SERVER_FQDN&gt; | openssl x509 -noout -dates -issuer</code></p>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;SERVER_FQDN&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
+</code></pre></div>
 <p>Ensure the issuer is Let’s Encrypt and the validity period is acceptable.</p>
 </details>
 </li>
@@ -1908,9 +1962,9 @@ openssl s_client -connect &lt;SERVER_FQDN&gt;:443 -servername &lt;SERVER_FQDN&gt
 <details class="info">
 <summary>Run perfSONAR diagnostic reports</summary>
 <p>Run the perfSONAR toolkit daily report and send outputs to operations:</p>
-<p><code>bash
-pscheduler troubleshoot
-toolkit-system-health</code></p>
+<div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>troubleshoot
+toolkit-system-health
+</code></pre></div>
 <hr />
 </details>
 </li>
@@ -1929,34 +1983,34 @@ toolkit-system-health</code></p>
 <ol>
 <li>
 <p>Add an auto-update label to services in your compose file (both <code>testpoint</code> and <code>certbot</code> if used):</p>
-<p><code>yaml
-services:
-    testpoint:
-        # ...
-        labels:
-            - io.containers.autoupdate=registry
-    certbot:
-        # ...
-        labels:
-            - io.containers.autoupdate=registry</code></p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># ...</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+<span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># ...</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+</code></pre></div>
 <p>This instructs Podman to check the registry for newer images and restart only if an update is pulled.</p>
 </li>
 <li>
 <p>Enable the Podman auto-update timer (runs daily by default):</p>
-<p><code>bash
-systemctl enable --now podman-auto-update.timer</code></p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>podman-auto-update.timer
+</code></pre></div>
 </li>
 <li>
 <p>Run ad-hoc when desired and preview:</p>
-<p><code>bash
-podman auto-update --dry-run
-podman auto-update</code></p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>auto-update<span class="w"> </span>--dry-run
+podman<span class="w"> </span>auto-update
+</code></pre></div>
 </li>
 <li>
 <p>Inspect recent runs:</p>
-<p><code>bash
-systemctl list-timers | grep podman-auto-update
-journalctl -u podman-auto-update --since "1 day ago"</code></p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>podman-auto-update
+journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<span class="w"> </span>--since<span class="w"> </span><span class="s2">&quot;1 day ago&quot;</span>
+</code></pre></div>
 </li>
 </ol>
 </details>
