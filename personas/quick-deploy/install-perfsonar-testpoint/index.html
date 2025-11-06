@@ -1996,23 +1996,24 @@ set ssh_access_ip6_hosts {
    elements = { 2001:db8::10 }
 }
 </code></pre></div>
+</details>
 <p>Then validate and reload (root shell):</p>
 <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
 systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
 </code></pre></div>
-</details>
 <ol>
-<li><strong>Confirm firewall state and security services:</strong></li>
-</ol>
-<p>??? info "Verification commands"</p>
-<div class="codehilite"><pre><span></span><code>  ```bash
-  nft list ruleset
-  sestatus
-  systemctl status fail2ban
-  ```
+<li>
+<p><strong>Confirm firewall state and security services:</strong></p>
+<details class="info">
+<summary>Verification commands</summary>
+<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
+sestatus
+systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 </code></pre></div>
-
+</details>
 <p>Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.</p>
+</li>
+</ol>
 <hr />
 <h2 id="step-4-deploy-the-containerized-perfsonar-testpoint">Step 4 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-4-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
 <p>We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on the host are reflected inside the containers.</p>
