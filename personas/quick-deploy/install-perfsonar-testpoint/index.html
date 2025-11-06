@@ -1716,39 +1716,6 @@
 <p><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</p>
 </li>
 <li>
-<p><strong>Apply baseline updates (and verify dependencies):</strong></p>
-<p>Use the repository's helper to check for required tools and print
-copy/paste install commands. Then apply OS updates and any remaining
-baseline packages.</p>
-<ul>
-<li>
-<p>From a local clone of this repository (recommended):</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
-./docs/perfsonar/tools_scripts/check-deps.sh
-</code></pre></div>
-</li>
-</ul>
-<details class="tip">
-<summary>Alternative: Download and run directly</summary>
-<div class="highlight"><pre><span></span><code><span class="w">        </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">            </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">            </span>-o<span class="w"> </span>./check-deps.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
-./check-deps.sh
-</code></pre></div>
-</details>
-<details class="info">
-<summary>Apply updates and install baseline packages</summary>
-<p>On EL9, apply updates and install common baseline packages, then add any
-packages suggested by the checker (copy/paste the printed dnf line):</p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
-dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
-<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
-<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
-</code></pre></div>
-</details>
-</li>
-<li>
 <p><strong>Set the hostname and time sync:</strong></p>
 <p>Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that hosts the default route (See step 2 below).</p>
 <details class="info">
@@ -1784,21 +1751,80 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <p>This guide references multiple scripts from the osg-htc/networking repository. Clone the repository to your testpoint host for easy access to all tools.</p>
 <p><strong>Recommended locations:</strong></p>
 <ul>
-<li><strong>Networking repo:</strong> <code>/opt/networking</code> (configuration scripts and documentation)</li>
 <li><strong>perfSONAR testpoint compose bundle:</strong> <code>/opt/perfsonar-tp</code> (if using containerized testpoint)</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># Clone the networking repository to /opt</span>
 <span class="nb">cd</span><span class="w"> </span>/opt
-git<span class="w"> </span>clone<span class="w"> </span>https://github.com/osg-htc/networking.git
 </code></pre></div>
 <p>Optional: if deploying the perfSONAR testpoint container, clone it separately:</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/testpoint.git<span class="w"> </span>/opt/perfsonar-tp
+<p><div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/testpoint.git<span class="w"> </span>/opt/perfsonar-tp
 </code></pre></div>
+We will then check out just the tools_script directory from this repo, to give us access to the appropriate scripts and tools.</p>
+<p>Create only the perfSONAR tools directory from this repository using a sparse checkout, and place it under <code>/opt/perfsonar-tp/tools_scripts</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create destination directory</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/tools_scripts
+
+<span class="c1"># Use a temporary sparse checkout to fetch only docs/perfsonar/tools_scripts</span>
+<span class="nv">tmpdir</span><span class="o">=</span><span class="k">$(</span>mktemp<span class="w"> </span>-d<span class="k">)</span>
+git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>--filter<span class="o">=</span>blob:none<span class="w"> </span>--sparse<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://github.com/osg-htc/networking.git<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$tmpdir</span><span class="s2">/networking&quot;</span>
+
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$tmpdir</span><span class="s2">/networking&quot;</span>
+git<span class="w"> </span>sparse-checkout<span class="w"> </span><span class="nb">set</span><span class="w"> </span>docs/perfsonar/tools_scripts
+
+<span class="c1"># Copy the tools into /opt/perfsonar-tp/tools_scripts</span>
+rsync<span class="w"> </span>-a<span class="w"> </span>docs/perfsonar/tools_scripts/<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/
+
+<span class="c1"># Optional: list what was installed</span>
+ls<span class="w"> </span>-1<span class="w"> </span>/opt/perfsonar-tp/tools_scripts
+
+<span class="c1"># Cleanup</span>
+<span class="nb">cd</span><span class="w"> </span>/
+rm<span class="w"> </span>-rf<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$tmpdir</span><span class="s2">&quot;</span>
+</code></pre></div>
+<p>Notes:
+- The source path in this repo is <code>docs/perfsonar/tools_scripts</code> (plural). We install it to <code>/opt/perfsonar-tp/tools_scripts</code> to keep the same name.
+- You don’t need to keep a full clone of the networking repo on the host for these tools; the sparse checkout above fetches only the needed directory.</p>
 <p>After cloning, all script examples in this guide that reference <code>docs/perfsonar/tools_scripts/</code> assume you're running commands from <code>/opt/networking</code>.</p>
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
 <hr />
+<ol>
+<li>
+<p><strong>Apply baseline updates (and verify dependencies):</strong></p>
+<p>Use the repository's helper to check for required tools and print
+copy/paste install commands. Then apply OS updates and any remaining
+baseline packages.</p>
+<ul>
+<li>
+<p>From a local clone of this repository (recommended):</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/networking
+./docs/perfsonar/tools_scripts/check-deps.sh
+</code></pre></div>
+</li>
+</ul>
+<details class="tip">
+<summary>Alternative: Download and run directly</summary>
+<div class="highlight"><pre><span></span><code><span class="w">        </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>-o<span class="w"> </span>./check-deps.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
+./check-deps.sh
+</code></pre></div>
+</details>
+<details class="info">
+<summary>Apply updates and install baseline packages</summary>
+<p>On EL9, apply updates and install common baseline packages, then add any
+packages suggested by the checker (copy/paste the printed dnf line):</p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
+dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
+<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
+<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
+</code></pre></div>
+</details>
+</li>
+</ol>
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file.</p>
 <p>Script location in the repository:</p>
