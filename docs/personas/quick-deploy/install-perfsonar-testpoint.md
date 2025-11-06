@@ -341,14 +341,14 @@ If any prerequisite is missing, the script skips that component and continues.
         cd ~
         ```
 
-??? tip "Alternative: Download directly from the repository URL"
+    ??? tip "Alternative: Download directly from the repository URL"
 
-    ```bash
-    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ~/perfsonar-install-nftables.sh
-    chmod 0755 ~/perfsonar-install-nftables.sh
-    ```
+        ```bash
+        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh -o ~/perfsonar-install-nftables.sh
+        chmod 0755 ~/perfsonar-install-nftables.sh
+        ```
 
-    2. **Run with desired options:**
+    1. **Run with desired options:**
 
     ```bash
     ~/perfsonar-install-nftables.sh --selinux --fail2ban --yes
@@ -412,7 +412,7 @@ If any prerequisite is missing, the script skips that component and continues.
     systemctl reload nftables || systemctl restart nftables
     ```
 
-    3. **Confirm firewall state and security services:**
+    1. **Confirm firewall state and security services:**
 
         ??? info "Verification commands"
 
@@ -668,7 +668,7 @@ Perform these checks before handing the host over to operations:
 
         Ensure both are active/green.
 
-2. **Container health:**
+1. **Container health:**
 
     ??? info "Check container status and logs"
 
@@ -677,7 +677,7 @@ Perform these checks before handing the host over to operations:
         podman logs pscheduler-agent | tail
         ```
 
-3. **Network path validation:**
+1. **Network path validation:**
 
     ??? info "Test network connectivity and routing"
 
@@ -688,9 +688,9 @@ Perform these checks before handing the host over to operations:
 
         Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
-4. **Toolkit diagnostics:** visit the Toolkit UI → *Dashboard* → *Host Status* to confirm pScheduler, MaDDash, and owamp/bwctl services report healthy.
+1. **Toolkit diagnostics:** visit the Toolkit UI → *Dashboard* → *Host Status* to confirm pScheduler, MaDDash, and owamp/bwctl services report healthy.
 
-5. **Security posture:**
+1. **Security posture:**
 
     ??? info "Check firewall, fail2ban, and SELinux"
 
@@ -702,7 +702,7 @@ Perform these checks before handing the host over to operations:
 
         Investigate any SELinux denials or repeated Fail2Ban bans.
 
-6. **LetsEncrypt certificate check:**
+1. **LetsEncrypt certificate check:**
 
     ??? info "Verify certificate validity"
 
@@ -712,7 +712,7 @@ Perform these checks before handing the host over to operations:
 
         Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
 
-7. **Reporting:**
+1. **Reporting:**
 
     ??? info "Run perfSONAR diagnostic reports"
         Run the perfSONAR toolkit daily report and send outputs to operations:
@@ -752,20 +752,20 @@ Keep containers current and only restart them when their image actually changes.
 
         This instructs Podman to check the registry for newer images and restart only if an update is pulled.
 
-    2. Enable the Podman auto-update timer (runs daily by default):
+    1. Enable the Podman auto-update timer (runs daily by default):
 
         ```bash
         systemctl enable --now podman-auto-update.timer
         ```
 
-    3. Run ad-hoc when desired and preview:
+    1. Run ad-hoc when desired and preview:
 
         ```bash
         podman auto-update --dry-run
         podman auto-update
         ```
 
-    4. Inspect recent runs:
+    1. Inspect recent runs:
 
         ```bash
         systemctl list-timers | grep podman-auto-update

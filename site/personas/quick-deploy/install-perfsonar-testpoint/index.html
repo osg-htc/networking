@@ -1490,13 +1490,12 @@ install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</s
 </code></pre></div>
 </li>
 </ul>
-</li>
-</ol>
 <details class="tip">
 <summary>Alternative: Download directly from the repository URL</summary>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>-o<span class="w"> </span>~/perfsonar-install-nftables.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>~/perfsonar-install-nftables.sh
 </code></pre></div>
+</details>
 <ol>
 <li><strong>Run with desired options:</strong></li>
 </ol>
@@ -1507,7 +1506,8 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li>Add <code>--dry-run</code> for a rehearsal that only prints the planned actions.</li>
 </ul>
 <p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-config.conf</code>, optionally adjusts SELinux, and enables Fail2Ban jails—only if those components are already installed.</p>
-</details>
+</li>
+</ol>
 <details class="info">
 <summary>How SSH allow-lists and validation work</summary>
 <p><strong>SSH allow-list derivation:</strong></p>
