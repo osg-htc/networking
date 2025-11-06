@@ -3,145 +3,181 @@
     <url>
          <loc>https://osg-htc.org/networking/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/BROKEN_LINKS_REPORT/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/network-troubleshooting/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/osg-network-analytics/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/osg-network-services/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar-in-osg/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/features/fail2ban/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/features/nftables/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/features/selinux/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/network-troubleshooting/osg-debugging-document/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/deployment-models/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/faq/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/install-testpoint/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/installation/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/multiple-nic-guidance/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/perfSONAR-and-rp_filter-EL9/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/perfSONAR-sysctl-info/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/psetf/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/register-ps-in-gocdb/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/README-lsregistration/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/backups/quick-deploy_landing_original/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/backups/research_landing_original/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/backups/troubleshoot_landing_original/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/install-perfsonar-testpoint/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/intro/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/landing/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/automated-setup/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/research/architecture/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/research/intro/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/research/landing/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/troubleshoot/intro/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/troubleshoot/landing/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/troubleshoot/triage-checklist/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/tools/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/tools/PR_BROKEN_LINKS_DRAFT/</loc>
          <lastmod>2025-11-06</lastmod>
+         <changefreq>daily</changefreq>
     </url>
 </urlset>
