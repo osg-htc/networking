@@ -383,24 +383,24 @@ If any prerequisite is missing, the script skips that component and continues.
     }
     ```
 
-    Then validate and reload (root shell):
+   Then validate and reload (root shell):
 
-    ```bash
-    nft -c -f /etc/nftables.d/perfsonar.nft
-    systemctl reload nftables || systemctl restart nftables
-    ```
+   ```bash
+   nft -c -f /etc/nftables.d/perfsonar.nft
+   systemctl reload nftables || systemctl restart nftables
+   ```
 
 3. **Confirm firewall state and security services:**
 
-   ??? info "Verification commands"
-        
-      ```bash
-      nft list ruleset
-      sestatus
-      systemctl status fail2ban
-      ```
+    ??? info "Verification commands"
 
-   Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
+        ```bash
+        nft list ruleset
+        sestatus
+        systemctl status fail2ban
+        ```
+
+    Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
 ---
 
