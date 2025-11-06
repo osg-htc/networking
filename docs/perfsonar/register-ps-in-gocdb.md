@@ -17,6 +17,8 @@ You might not be able to access the page if you are not properly registered in G
 
 -   There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).
 -   For each form (i.e. for each service type) fill at least the important informations:
+
+    ```
     -   Hosting Site (drop-down menu, mandatory)
     -   Service Type (drop-down menu, mandatory)
     -   Host Name (free text, mandatory)
@@ -25,6 +27,8 @@ You might not be able to access the page if you are not properly registered in G
     -   Check "N" when asked "Is it a beta service"
     -   Check "Y" when asked "Is this service in production"
     -   Check "Y" when asked "Is this service monitored"
+
+    ```
 
 <!-- -->
 

@@ -66,7 +66,10 @@ Before you begin, gather the following information:
 
 3. **Set the hostname and time sync:**
     
+    ```
     Note when you have multiple NICs pick one to be the hostname.  That should also be the NIC that hosts the default route (See step 2 below).
+
+    ```
 
 ??? info "System configuration commands"
     ```bash
@@ -594,6 +597,8 @@ Key paths to persist on the host:
    Browse to `https://<SERVER_FQDN>/toolkit` and complete the local toolkit setup wizard.
    
 ??? info "Configuration details to populate"
+
+    ```
     - Site contact email
     - Usage policy URL
     - Location (latitude/longitude)
@@ -605,6 +610,8 @@ Key paths to persist on the host:
             - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
             - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
             - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+
+    ```
 
 3. **pSConfig enrollment:**
    

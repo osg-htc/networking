@@ -107,6 +107,8 @@ Below is a sample NFTables rule set that
 flush ruleset
 
 table inet perfsonar {  
+
+    ```
     set allowed\_protocols {  
         type inet\_proto  
         elements \= { icmp, icmpv6 }  
@@ -144,6 +146,8 @@ table inet perfsonar {
         jump allow  
         reject with icmpx admin-prohibited  
     }  
+    ```
+
 }
 
 Apply and persist:

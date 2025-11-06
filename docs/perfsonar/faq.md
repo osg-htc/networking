@@ -13,6 +13,8 @@ We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) pa
 We recommend using Lets Encrypt (see https://letsencrypt.org).    There is a tutorial that users may find helpful at  [Secure Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).   
 
 <details>
+
+    ```
     <summary>A quick set of steps is shown here:</summary>
     <p>0. Install certbot with yum, dnf, or snap:  **yum install certbot python3-certbot-apache**</p>
     <p>1. Certbot needs port 80/443 so stop anything blocking it or using it:  **systemctl stop firewalld  systemctl stop httpd**</p>
@@ -26,6 +28,8 @@ We recommend using Lets Encrypt (see https://letsencrypt.org).    There is a tut
         <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>  
     <p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
     <p>8. Make a donation :)</p>
+    ```
+
 </details>
 
 Thanks to Raul Lopes for these details!
@@ -64,8 +68,12 @@ This means that we're unable to connect to controller ports of the respective se
 This means that your measurement archive is not accessible or failing, there can be many possible causes (disk full, httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS ticket to WLCG perfSONAR support. 
 
 * **perfSONAR json summary** is failing
+
+    ```
     -   This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS 
     
+    ```
+
 * **perfSONAR configuration: meshes** metric is failing
 
 This indicates that you're missing the recommended mesh configuration. Please follow mesh configuration as detailed in the [installation guide](installation.md). Also, please REMOVE any old mesh configuration, this metric will also fail in case you have both the new mesh config and the old mesh URLs 
