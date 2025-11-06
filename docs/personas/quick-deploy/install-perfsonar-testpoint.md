@@ -231,62 +231,18 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 ??? example "Example: Bash script to automate DNS verification"
     The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays.
 
-    ```bash
-    # quick DNS consistency check using /etc/perfSONAR-multi-nic-config.conf
-    set -euo pipefail
-    CONFIG=/etc/perfSONAR-multi-nic-config.conf
-    [ -f "$CONFIG" ] || { echo "Config not found: $CONFIG" >&2; exit 2; }
-    source "$CONFIG"
+            ```bash
+            # Preferred: run the shipped DNS checker from the local tools checkout
+            sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
 
-    check_ip() {
-       local ip=$1
-       local family=$2   # 4 or 6
-       # strip CIDR if present
-       ip=${ip%%/*}
-       [ "$ip" = "-" ] && return 0
-
-       # PTR lookup (reverse)
-       ptr=$(dig +short -x "$ip" | head -n1)
-       if [ -z "$ptr" ]; then
-      echo "MISSING PTR for $ip"
-      return 1
-       fi
-       # remove trailing dot from PTR
-       ptr=${ptr%.}
-
-       # Forward lookup for the hostname returned by PTR
-       if [ "$family" = "4" ]; then
-      fwd=$(dig +short A "$ptr" | tr '\n' ' ')
-       else
-      fwd=$(dig +short AAAA "$ptr" | tr '\n' ' ')
-       fi
-
-       if ! echo "$fwd" | grep -qw "$ip"; then
-      echo "INCONSISTENT: PTR $ptr does not resolve back to $ip (resolved: $fwd)"
-      return 1
-       fi
-       echo "OK: $ip ⇄ $ptr"
-       return 0
-    }
-
-    errors=0
-    for ip in "${NIC_IPV4_ADDRS[@]:-}"; do
-       if [ "$ip" != "-" ]; then
-      check_ip "$ip" 4 || errors=$((errors+1))
-       fi
-    done
-    for ip in "${NIC_IPV6_ADDRS[@]:-}"; do
-       if [ "$ip" != "-" ]; then
-      check_ip "$ip" 6 || errors=$((errors+1))
-       fi
-    done
-
-    if (( errors > 0 )); then
-       echo "DNS verification failed ($errors problem(s)). Fix DNS (forward/reverse) before running tests." >&2
-       exit 1
-    fi
-    echo "DNS forward/reverse checks passed for configured addresses."
-    ```
+            # Or, download and run it directly (useful on any machine with network visibility
+            # to your DNS servers):
+            curl -fsSL \
+                https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
+                -o ./check-perfsonar-dns.sh
+            chmod a+x ./check-perfsonar-dns.sh
+            sudo ./check-perfsonar-dns.sh
+            ```
 
     **Notes and automation tips:**
 
