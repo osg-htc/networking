@@ -434,38 +434,39 @@ Key paths to persist on the host:
 
 3. Seed defaults from the testpoint container (first run without host bind-mounts for Apache/webroot so we can copy the initial content out):
 
-   Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
+      ??? example "Create minimal compose and start the container"
+            Create a minimal compose file at `/opt/testpoint/docker-compose.yml`:
 
-   ```yaml
-   version: "3.9"
-   services:
-     testpoint:
-       container_name: perfsonar-testpoint
-       image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-       network_mode: "host"
-       cgroup: host
-       environment:
-         - TZ=UTC
-       restart: unless-stopped
-       tmpfs:
-         - /run
-         - /run/lock
-         - /tmp
-       volumes:
-         - /sys/fs/cgroup:/sys/fs/cgroup:rw
-         # Don't bind Apache/webroot yet; we'll copy defaults out first
-         # Persist perfSONAR psconfig later after seeding (see step 5)
-       tty: true
-       pids_limit: 8192
-       cap_add:
-         - CAP_NET_RAW
-   ```
+            ```yaml
+            version: "3.9"
+            services:
+               testpoint:
+                  container_name: perfsonar-testpoint
+                  image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+                  network_mode: "host"
+                  cgroup: host
+                  environment:
+                     - TZ=UTC
+                  restart: unless-stopped
+                  tmpfs:
+                     - /run
+                     - /run/lock
+                     - /tmp
+                  volumes:
+                     - /sys/fs/cgroup:/sys/fs/cgroup:rw
+                     # Don't bind Apache/webroot yet; we'll copy defaults out first
+                     # Persist perfSONAR psconfig later after seeding (see step 5)
+                  tty: true
+                  pids_limit: 8192
+                  cap_add:
+                     - CAP_NET_RAW
+            ```
 
-   Bring it up with your preferred tool:
+            Bring it up with your preferred tool:
 
-   ```bash
-   (cd /opt/testpoint; podman-compose up -d)  # or: (cd /opt/testpoint; docker-compose up -d)
-   ```
+            ```bash
+            (cd /opt/testpoint; podman-compose up -d)  # or: (cd /opt/testpoint; docker-compose up -d)
+            ```
 
 4. Copy baseline content out of the running container to the host:
 
@@ -489,50 +490,51 @@ Key paths to persist on the host:
        curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml -o /opt/testpoint/docker-compose.yml
        ```
 
-    Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
+      ??? example "Complete docker-compose.yml with bind-mounts and certbot"
+            Or create/edit `/opt/testpoint/docker-compose.yml` with the following content:
 
-    Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
+            Note: The provided compose file ships with `io.containers.autoupdate=registry` labels pre-set for Podman auto-update.
 
-   ```yaml
-    version: "3.9"
-   services:
-     testpoint:
-       container_name: perfsonar-testpoint
-       image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-       network_mode: "host"
-       cgroup: host
-       environment:
-         - TZ=UTC
-       restart: unless-stopped
-       tmpfs:
-         - /run
-         - /run/lock
-         - /tmp
-       volumes:
-         - /sys/fs/cgroup:/sys/fs/cgroup:rw
-             - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
-             - /var/www/html:/var/www/html:z
-             - /etc/apache2:/etc/apache2:z
-             - /etc/letsencrypt:/etc/letsencrypt:z
-       tty: true
-       pids_limit: 8192
-       cap_add:
-         - CAP_NET_RAW
+            ```yaml
+            version: "3.9"
+            services:
+               testpoint:
+                  container_name: perfsonar-testpoint
+                  image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+                  network_mode: "host"
+                  cgroup: host
+                  environment:
+                     - TZ=UTC
+                  restart: unless-stopped
+                  tmpfs:
+                     - /run
+                     - /run/lock
+                     - /tmp
+                  volumes:
+                     - /sys/fs/cgroup:/sys/fs/cgroup:rw
+                     - /opt/testpoint/psconfig:/etc/perfsonar/psconfig:Z
+                     - /var/www/html:/var/www/html:z
+                     - /etc/apache2:/etc/apache2:z
+                     - /etc/letsencrypt:/etc/letsencrypt:z
+                  tty: true
+                  pids_limit: 8192
+                  cap_add:
+                     - CAP_NET_RAW
 
-     # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
-     certbot:
-       image: certbot/certbot
-       container_name: certbot
-       network_mode: "host"
-       restart: unless-stopped
-          entrypoint: 
-         ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
-       depends_on:
-         - testpoint
-       volumes:
-         - /var/www/html:/var/www/html:z
-         - /etc/letsencrypt:/etc/letsencrypt:z
-   ```
+               # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
+               certbot:
+                  image: certbot/certbot
+                  container_name: certbot
+                  network_mode: "host"
+                  restart: unless-stopped
+                  entrypoint: 
+                     ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+                  depends_on:
+                     - testpoint
+                  volumes:
+                     - /var/www/html:/var/www/html:z
+                     - /etc/letsencrypt:/etc/letsencrypt:z
+            ```
 
 6. Restart with the new compose:
 
@@ -665,28 +667,33 @@ Perform these checks before handing the host over to operations:
 
 5. **Security posture:**
 
-   ```bash
-   nft list ruleset | grep perfsonar
-   fail2ban-client status
-   ausearch --message AVC --just-one
-   ```
+   ??? info "Check firewall, fail2ban, and SELinux"
+      ```bash
+      nft list ruleset | grep perfsonar
+      fail2ban-client status
+      ausearch --message AVC --just-one
+      ```
 
-   Investigate any SELinux denials or repeated Fail2Ban bans.
+      Investigate any SELinux denials or repeated Fail2Ban bans.
 
 6. **LetsEncrypt certificate check:**
 
-   ```bash
-   openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
-   ```
+   ??? info "Verify certificate validity"
+      ```bash
+      openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
+      ```
 
-   Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
+      Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
 
-7. **Reporting:** run the perfSONAR toolkit daily report and send outputs to operations:
+7. **Reporting:**
 
-   ```bash
-   pscheduler troubleshoot
-   toolkit-system-health
-   ```
+   ??? info "Run perfSONAR diagnostic reports"
+      Run the perfSONAR toolkit daily report and send outputs to operations:
+
+      ```bash
+      pscheduler troubleshoot
+      toolkit-system-health
+      ```
 
 ---
 
