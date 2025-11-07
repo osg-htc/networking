@@ -62,6 +62,19 @@ Note: Repository clone instructions are in Step 2.
     dnf remove -y rsyslog
     ```
 
+    ??? info "Why disable unused services?"
+
+        We recommend disabling unused services during initial provisioning to
+        reduce complexity and avoid unexpected interference with network and
+        container setup. Services such as `firewalld`, `NetworkManager-wait-online`,
+        and `rsyslog` can alter networking state, hold boot or network events,
+        or conflict with the automated nftables/NetworkManager changes performed
+        by the helper scripts. Disabling non-essential services makes the
+        install deterministic, reduces the host attack surface, and avoids
+        delays or race conditions while configuring policy-based routing,
+        nftables rules, and container networking.
+
+
 1. **Record NIC names:** Document interface mappings for later PBR configuration.
 
     ```bash
