@@ -1,6 +1,9 @@
 ﻿# Installing a perfSONAR Testpoint for WLCG/OSG
 
-This quick-deploy playbook walks WLCG/OSG site administrators through the end-to-end installation, configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). Each phase references tooling that already lives in this repository so you can automate as much as possible while still capturing the site-specific information required by OSG/WLCG operations.
+This quick-deploy playbook walks WLCG/OSG site administrators through the end-to-end installation,
+configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). Each phase
+references tooling that already lives in this repository so you can automate as much as possible
+while still capturing the site-specific information required by OSG/WLCG operations.
 
 ---
 
@@ -19,7 +22,11 @@ Before you begin, gather the following information:
     - any site-specific psconfig or testpoint config files stored in container volumes or host paths
     - exported firewall, monitoring, and cron jobs that the current instance relies on
 
-   The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and keep a copy in your change log.
+The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-
+lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or
+the host; it can be used to extract registration config for re-use or migration. If you need to re-
+register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and
+keep a copy in your change log.
 
 
 ??? info "Quick capture of existing lsregistration config (if replacing)"
@@ -48,7 +55,8 @@ Before you begin, gather the following information:
         ```
 
 
-   Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so you can perform the clone once the host is provisioned.
+Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so
+you can perform the clone once the host is provisioned.
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
@@ -95,7 +103,8 @@ Before you begin, gather the following information:
 
 ## Step 2 – Clone the Repository
 
-This guide references multiple scripts from the osg-htc/networking repository. Clone the repository to your testpoint host for easy access to all tools.
+This guide references multiple scripts from the osg-htc/networking repository. Clone the repository
+to your testpoint host for easy access to all tools.
 
 **Recommended locations:**
 
@@ -108,9 +117,8 @@ First check out the perfSONAR testpoint (if you plan to run containers on the ho
 git clone https://github.com/perfsonar/testpoint.git /opt/perfsonar-tp
 ```
 
-Populate `/opt/perfsonar-tp/tools_scripts` from this repository using the
-convenience helper we provide. The helper performs a shallow sparse checkout
-and preserves executable bits:
+Populate `/opt/perfsonar-tp/tools_scripts` from this repository using the convenience helper we
+provide. The helper performs a shallow sparse checkout and preserves executable bits:
 
 ```bash
 # Preview what would happen (safe):
@@ -123,9 +131,8 @@ sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
 sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
 ```
 
-After running the helper, the scripts referenced below will be available at
-`/opt/perfsonar-tp/tools_scripts` and you can run them from there (or use a
-raw download when noted).
+After running the helper, the scripts referenced below will be available at `/opt/perfsonar-
+tp/tools_scripts` and you can run them from there (or use a raw download when noted).
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
@@ -158,7 +165,10 @@ raw download when noted).
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
-The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that automates NetworkManager configuration and routing rules and can auto-generate its config file. After Step 2, the local path for this script is `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh`.
+The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that
+automates NetworkManager configuration and routing rules and can auto-generate its config file.
+After Step 2, the local path for this script is `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-
+nm.sh`.
 
 
 1. **Run the PBR helper:** (already available from Step 2 in `/opt/perfsonar-tp/tools_scripts`)
@@ -212,7 +222,10 @@ The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-
 
 ### DNS: forward and reverse entries (required)
 
-All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.
+All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA)
+record and a matching reverse (PTR) record. This is required so remote test tools and site operators
+can reliably reach and identify your host, and because some measurement infrastructure and
+registration systems perform forward/reverse consistency checks.
 
 - For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
@@ -240,7 +253,8 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
     - For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages `dns.resolver` for async checks.
     - If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
 
-If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.
+If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS
+propagation before proceeding with registration and testing.
 
 <!-- Consolidated DNS checker instructions into a single admonition above -->
 
@@ -252,14 +266,15 @@ If any addresses fail these checks, correct the DNS zone (forward and/or reverse
    ip route show table <table-id>
    ```
 
-   Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default route.
+Confirm that non-default interfaces have their own routing tables and that the default interface
+owns the system default route.
 
 ---
 
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
-Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a
-hardened nftables profile with optional SELinux and Fail2Ban support.
+Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables
+profile with optional SELinux and Fail2Ban support.
 
 Prerequisites (not installed by the script):
 
@@ -356,9 +371,15 @@ systemctl reload nftables || systemctl restart nftables
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
 
-We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on the host are reflected inside the containers.
+We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll
+show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on
+the host are reflected inside the containers.
 
-Key paths to persist on the host will depend upon your deployment use-case.  For a simple perfSONAR testpoint deployment only, we only need to persist the /etc/perfsonar/psconfig area of the container.   If Lets Encrypt will be used, we also need to ensure visibility of certain locations between the containers and we do that be using the host filesystem.  However, this requires "seeding" those host directories initial as is covered below.
+Key paths to persist on the host will depend upon your deployment use-case.  For a simple perfSONAR
+testpoint deployment only, we only need to persist the /etc/perfsonar/psconfig area of the
+container.   If Lets Encrypt will be used, we also need to ensure visibility of certain locations
+between the containers and we do that be using the host filesystem.  However, this requires
+"seeding" those host directories initial as is covered below.
 
 - `/opt/perfsonar-tp/psconfig` → container `/etc/perfsonar/psconfig`
 - `/etc/apache2` → container `/etc/apache2` (Apache configs)
@@ -366,7 +387,8 @@ Key paths to persist on the host will depend upon your deployment use-case.  For
 - `/etc/letsencrypt` → container `/etc/letsencrypt` (certs/keys, if using Let’s Encrypt)
 
 
-Tip: you can use either `podman-compose` or `docker-compose` in the steps below. Substitute the command that matches your preference.
+Tip: you can use either `podman-compose` or `docker-compose` in the steps below. Substitute the
+command that matches your preference.
 
 ### Prepare directories on the host
 
@@ -380,7 +402,8 @@ mkdir -p /etc/letsencrypt
 
 ### Seed defaults from the testpoint container
 
-First, create a minimal compose file and start the container without host bind-mounts so we can copy baseline content out.
+First, create a minimal compose file and start the container without host bind-mounts so we can copy
+baseline content out.
 
 ```yaml
 version: "3.9"
@@ -420,7 +443,8 @@ docker cp perfsonar-testpoint:/var/www/html /var/www/html
 docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
 ```
 
-If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you don’t need manual `chcon`.
+If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you
+don’t need manual `chcon`.
 
 ### Replace the compose file with bind-mounts and optional certbot
 
@@ -435,7 +459,8 @@ curl -fsSL \
     -o /opt/perfsonar-tp/docker-compose.yml
 ```
 
-Or create/edit `/opt/perfsonar-tp/docker-compose.yml` with the following content (includes an optional `certbot` sidecar):
+Or create/edit `/opt/perfsonar-tp/docker-compose.yml` with the following content (includes an
+optional `certbot` sidecar):
 
 ```yaml
 version: "3.9"
@@ -487,7 +512,8 @@ services:
 
 ### Optional – obtain your first Let’s Encrypt certificate
 
-The `certbot` sidecar above continuously renews existing certs. For the initial issuance, run a one-shot command and then reload Apache inside the testpoint container:
+The `certbot` sidecar above continuously renews existing certs. For the initial issuance, run a one-
+shot command and then reload Apache inside the testpoint container:
 
 ```bash
 # Issue (HTTP-01 webroot challenge). Replace values accordingly.
@@ -506,7 +532,8 @@ docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachect
 
 ## Step 6 – Register and Configure with WLCG/OSG
 
-We need to register your instance and ensure it is configurated with the required meta data for the lsregistration daemon (see below).
+We need to register your instance and ensure it is configurated with the required meta data for the
+lsregistration daemon (see below).
 
 1. **OSG/WLCG registration workflow:**
 
@@ -517,24 +544,25 @@ We need to register your instance and ensure it is configurated with the require
 
 1. **pSConfig enrollment:**
 
-   For each active NIC, register with the psconfig service so measurements cover all paths.
+For each active NIC, register with the psconfig service so measurements cover all paths.
 
-Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
+Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface
+addresses (`ifaddr` tags).
 
 1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
 
 ### Update Lookup Service registration inside the container
 
-Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the
-running `perfsonar-testpoint` container and restart the daemon only if needed.
+Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running
+`perfsonar-testpoint` container and restart the daemon only if needed.
 
 - Script (browse): [perfSONAR-update-lsregistration.sh](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
 - Raw (download): [raw link](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
 
 Install and run examples (root shell):
 
-Note: the helper uses subcommands; use the `update` command to apply field changes.
-Other available commands: `save`, `restore`, `create`, `extract`.
+Note: the helper uses subcommands; use the `update` command to apply field changes. Other available
+commands: `save`, `restore`, `create`, `extract`.
 
 From the local tools checkout (preferred):
 
