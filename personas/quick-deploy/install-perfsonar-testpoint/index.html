@@ -1879,14 +1879,19 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <ol>
 <li><strong>Execute the script:</strong></li>
 </ol>
-<p>It is likely you will get disconnected if you are logged in via 'ssh'.  It is strongly recommended to run the script directly on the console or perhaps use 'nohup' in front of the command so that it will not drop the shell.  You can also use the --dry-run option to see what it will do without making changes.</p>
-<div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="n">Apply</span><span class="w"> </span><span class="n">changes</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">interactively</span><span class="w"> </span><span class="p">(</span><span class="n">auto</span><span class="o">-</span><span class="n">confirm</span><span class="p">):</span>
-
-<span class="err">```</span><span class="n">bash</span>
-<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="n">yes</span>
-<span class="err">```</span>
+<div class="admonition warning">
+<p class="admonition-title">Run from console or use a persistent session</p>
+<p>Running the PBR helper can modify network interfaces and routing and may
+drop active SSH sessions. Run the script from the host console when
+possible. If you must run it remotely, use a persistent session tool
+(screen, tmux) or prefix with <code>nohup</code> and check output later. Use
+<code>--dry-run</code> to preview actions before applying changes.</p>
+<ul>
+<li>Apply changes non-interactively (auto-confirm):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
-
+</div>
 <div class="admonition note">
 <p class="admonition-title">Missing gateways at apply time</p>
 <p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use <code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.</p>
