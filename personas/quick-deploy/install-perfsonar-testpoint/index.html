@@ -2253,10 +2253,13 @@ addresses (<code>ifaddr</code> tags).</p>
 <h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running
 <code>perfsonar-testpoint</code> container and restart the daemon only if needed.</p>
-<ul>
-<li>Script (browse): <a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh">perfSONAR-update-lsregistration.sh</a></li>
-<li>Raw (download): <a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh">raw link</a></li>
-</ul>
+<div class="codehilite"><pre><span></span><code><span class="p">-</span> <span class="nf">Script</span><span class="w"> </span><span class="p">(</span><span class="n">browse</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="p">.</span><span class="n">sh</span><span class="p">][</span><span class="n">psupdate</span><span class="p">]</span>
+<span class="o">-</span><span class="w"> </span><span class="n">Raw</span><span class="w"> </span><span class="p">(</span><span class="n">download</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="n">raw</span><span class="w"> </span><span class="n">link</span><span class="p">][</span><span class="n">psupdateraw</span><span class="p">]</span>
+
+<span class="p">[</span><span class="n">psupdate</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</span>
+<span class="p">[</span><span class="n">psupdateraw</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</span>
+</code></pre></div>
+
 <p>Install and run examples (root shell):</p>
 <p>Note: the helper uses subcommands; use the <code>update</code> command to apply field changes. Other available
 commands: <code>save</code>, <code>restore</code>, <code>create</code>, <code>extract</code>.</p>
