@@ -322,16 +322,16 @@ If any prerequisite is missing, the script skips that component and continues.
     }
 
     set ssh_access_ip6_subnets {
-type ipv6_addr
-flags interval
-elements = { 2001:db8:1::/64 }
-}
+        type ipv6_addr
+        flags interval
+        elements = { 2001:db8:1::/64 }
+    }
 
-set ssh_access_ip6_hosts {
-type ipv6_addr
-elements = { 2001:db8::10 }
-}
-```
+    set ssh_access_ip6_hosts {
+        type ipv6_addr
+        elements = { 2001:db8::10 }
+    }
+    ```
 
 Then validate and reload (root shell):
 
