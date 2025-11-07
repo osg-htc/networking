@@ -141,14 +141,18 @@ raw download when noted).
         /opt/perfsonar-tp/tools_scripts/check-deps.sh
         ```
 
-??? tip "Alternative: Download and run directly"
+??? tip "Alternative: one-off run without installing tools"
 
     ```bash
+    # Preferred: run from the installed tools path (see Step 2):
+    /opt/perfsonar-tp/tools_scripts/check-deps.sh
+
+    # If you must run it without installing the tools, download to /tmp and run
     curl -fsSL \
-        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
-        -o ./check-deps.sh
-    chmod 0755 ./check-deps.sh
-    ./check-deps.sh
+      https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
+      -o /tmp/check-deps.sh
+    chmod 0755 /tmp/check-deps.sh
+    sudo /tmp/check-deps.sh
     ```
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
@@ -216,17 +220,17 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 ??? example "Run the DNS checker"
     Run the shipped DNS checker to validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
 
-    ```bash
-    # Preferred: use the local tools checkout from Step 2
-    sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+        ```bash
+        # Preferred: use the local tools checkout from Step 2
+        sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
 
-    # Alternative: download and run directly
-    curl -fsSL \
-        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
-        -o ./check-perfsonar-dns.sh
-    chmod 0755 ./check-perfsonar-dns.sh
-    sudo ./check-perfsonar-dns.sh
-    ```
+        # If you must run without installing the tools first, download to /tmp and run
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
+            -o /tmp/check-perfsonar-dns.sh
+        chmod 0755 /tmp/check-perfsonar-dns.sh
+        sudo /tmp/check-perfsonar-dns.sh
+        ```
 
     **Notes and automation tips:**
 
