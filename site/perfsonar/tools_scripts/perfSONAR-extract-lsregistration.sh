@@ -17,7 +17,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"   # source to read
-SCRIPT_PATH="./perfSONAR-update-lsregistration.sh"     # updater to call in generated script
+SCRIPT_PATH="/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh"     # updater to call in generated script
 INCLUDE_SUDO=true
 ENGINE=""                 # optional engine to include in generated script
 CONTAINER_NAME="perfsonar-testpoint"
@@ -36,7 +36,7 @@ Options:
   --conf PATH             Source lsregistrationdaemon.conf to parse
                           (default: /etc/perfsonar/lsregistrationdaemon.conf)
   --script PATH           Path to perfSONAR-update-lsregistration.sh used by
-                          the generated script (default: ./perfSONAR-update-lsregistration.sh)
+                          the generated script (default: /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh)
   --local                 Generate script to restore on host (non-container)
   --target-conf PATH      Target conf path for local restore (default: /etc/perfsonar/lsregistrationdaemon.conf)
   --container NAME        Generate script to restore in container NAME (default: perfsonar-testpoint)

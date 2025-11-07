@@ -1018,15 +1018,15 @@ registration configuration in <code>lsregistrationdaemon.conf</code>.</p>
 </li>
 </ul>
 <p>Examples:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Update a few fields inside the container</span>
-sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Update a few fields inside the container (from installed tools path)</span>
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--container<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 
 <span class="c1"># Update the host file directly (non-container use)</span>
-sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w"> </span>--local<span class="w"> </span><span class="se">\</span>
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>--local<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--conf<span class="w"> </span>/etc/perfsonar/lsregistrationdaemon.conf<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US
 </code></pre></div>
@@ -1035,7 +1035,7 @@ sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w">
 <p>The combined helper contains an <code>extract</code> command that produces a
 self-contained restore script. Use <code>--output</code>/<code>--input</code> to control paths. Example:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Produce a self-contained restore script suitable for host restore</span>
-sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
 sudo<span class="w"> </span>/tmp/restore-lsreg.sh
 </code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
