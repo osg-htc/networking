@@ -23,18 +23,28 @@ Before you begin, gather the following information:
 
 ??? info "Quick capture of existing lsregistration config (if replacing)"
 
-    You can capture your current Lookup Service registration before redeploying.
+        You can capture your current Lookup Service registration before redeploying.
 
-    - Download the helper temporarily and extract a self-contained restore script (works even if you haven't done Step 2 yet):
+        - Preferred: use the installed tools. If you've populated `/opt/perfsonar-tp/tools_scripts`
+            (see Step 2), run the updater from that location to extract a self-contained
+            restore script:
 
-        ```bash
-        curl -fsSL \
-            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-            -o /tmp/perfSONAR-update-lsregistration.sh
-        chmod 0755 /tmp/perfSONAR-update-lsregistration.sh
-        sudo /tmp/perfSONAR-update-lsregistration.sh extract --output /root/restore-lsreg.sh
-        # Save /root/restore-lsreg.sh with your change notes
-        ```
+                ```bash
+                sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+                    extract --output /root/restore-lsreg.sh
+                # Save /root/restore-lsreg.sh with your change notes
+                ```
+
+        - If you haven't installed the tools into `/opt` yet, use the repository helper
+            to populate `/opt` (preview with --dry-run):
+
+                ```bash
+                # Preview what the installer would do (safe):
+                sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
+
+                # Install scripts into /opt/perfsonar-tp/tools_scripts:
+                sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
+                ```
 
 
    Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so you can perform the clone once the host is provisioned.
@@ -259,7 +269,7 @@ If any prerequisite is missing, the script skips that component and continues.
     1. **Run with desired options:**
 
     ```bash
-    ~/perfsonar-install-nftables.sh --selinux --fail2ban --yes
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
     ```
 
     - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
@@ -285,7 +295,7 @@ If any prerequisite is missing, the script skips that component and continues.
     You can preview the fully rendered nftables rules (no changes are made):
 
     ```bash
-    ~/perfsonar-install-nftables.sh --print-rules
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
     ```
 
 ??? tip "Manually add extra management hosts/subnets"
