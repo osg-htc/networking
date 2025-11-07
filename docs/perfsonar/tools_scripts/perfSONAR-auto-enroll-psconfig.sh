@@ -39,6 +39,20 @@ log() { echo "[INFO] $*"; }
 err() { echo "[ERROR] $*" >&2; }
 dbg() { [ "$VERBOSE" -eq 1 ] && echo "[DEBUG] $*" >&2 || true; }
 
+# Persistent logging: try to write to /var/log, fall back to /tmp
+LOGFILE="/var/log/perfsonar-auto-enroll-psconfig.log"
+append_log() {
+  local msg="$*"
+  # ensure timestamped entry
+  printf "%s %s\n" "$(date -Is)" "$msg" >> "$LOGFILE" 2>/dev/null || {
+    # fallback to /tmp if /var/log not writable
+    printf "%s %s\n" "$(date -Is)" "$msg" >> "/tmp/perfsonar-auto-enroll-psconfig.log" 2>/dev/null || true
+  }
+}
+
+# Wrap log to also persist
+logp() { log "$@"; append_log "$@"; }
+
 usage() { sed -n '1,/^$/p' "$0"; }
 
 while getopts ":c:f:ynvh" opt; do
@@ -76,12 +90,25 @@ fi
 FQDNS=()
 for ip in "${PS_IPS[@]}"; do
   dbg "Reverse lookup for $ip"
+  # strip CIDR if present (e.g. 192.0.2.10/24)
+  ip_addr=${ip%%/*}
+
+  # Only perform reverse lookups for public addresses.
+  # Skip RFC1918 private IPv4 ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16.
+  # If the address contains a colon it's IPv6; we don't filter IPv6 here.
+  if [[ "$ip_addr" != *:* ]]; then
+    if [[ "$ip_addr" =~ ^10\. ]] || [[ "$ip_addr" =~ ^192\.168\. ]] || [[ "$ip_addr" =~ ^172\.(1[6-9]|2[0-9]|3[0-1])\. ]]; then
+      dbg "Skipping RFC1918 private IPv4 address $ip_addr"
+      continue
+    fi
+  fi
+
   name=""
   if command -v getent >/dev/null 2>&1; then
-    name=$(getent hosts "$ip" 2>/dev/null | awk '{print $2}') || true
+    name=$(getent hosts "$ip_addr" 2>/dev/null | awk '{print $2}') || true
   fi
   if [ -z "$name" ] && command -v dig >/dev/null 2>&1; then
-    name=$(dig +short -x "$ip" | head -n1) || true
+    name=$(dig +short -x "$ip_addr" | head -n1) || true
   fi
   name=${name%.}
   if [ -n "$name" ]; then
@@ -104,7 +131,10 @@ if [ ${#UNIQ[@]} -eq 0 ]; then
 fi
 
 log "Discovered FQDNs (order preserved):"
-for fq in "${UNIQ[@]}"; do echo "  - $fq"; done
+for fq in "${UNIQ[@]}"; do
+  echo "  - $fq"
+  append_log "FQDN: $fq"
+done
 
 if [ $DRY_RUN -eq 1 ]; then
   echo "[DRY-RUN] Would enroll these auto URLs:" >&2
