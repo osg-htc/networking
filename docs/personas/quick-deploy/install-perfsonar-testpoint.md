@@ -633,6 +633,10 @@ chmod 0755 ~/perfSONAR-update-lsregistration.sh
     --city Berkeley --region CA --country US --zip 94720 \
     --latitude 37.5 --longitude -121.7469 \
     --admin-name "pS Admin" --admin-email admin@example.org
+
+# Produce a self-contained restore script for host restore
+sudo ~/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
+sudo /tmp/restore-lsreg.sh
 ```
 
 ---
