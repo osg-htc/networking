@@ -1729,19 +1729,30 @@
 <p>The repository includes a helper script <code>docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</code> which can copy and update <code>lsregistrationdaemon.conf</code> from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the <code>lsregistrationdaemon.conf</code> manually) and keep a copy in your change log.</p>
 <details class="info">
 <summary>Quick capture of existing lsregistration config (if replacing)</summary>
-<p>You can capture your current Lookup Service registration before redeploying.</p>
-<ul>
-<li>
-<p>Download the helper temporarily and extract a self-contained restore script (works even if you haven't done Step 2 yet):</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/tmp/perfSONAR-update-lsregistration.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/perfSONAR-update-lsregistration.sh
-sudo<span class="w"> </span>/tmp/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
-<span class="c1"># Save /root/restore-lsreg.sh with your change notes</span>
+<div class="codehilite"><pre><span></span><code><span class="n">You</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">capture</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="n">Lookup</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">registration</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">redeploying</span><span class="o">.</span>
+
+<span class="o">-</span><span class="w"> </span><span class="n">Preferred</span><span class="p">:</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">installed</span><span class="w"> </span><span class="n">tools</span><span class="o">.</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="s1">&#39;ve populated `/opt/perfsonar-tp/tools_scripts`</span>
+<span class="w">    </span><span class="p">(</span><span class="n">see</span><span class="w"> </span><span class="n">Step</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">updater</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">location</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="bp">self</span><span class="o">-</span><span class="n">contained</span>
+<span class="w">    </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="p">:</span>
+
+<span class="w">        </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
+<span class="w">            </span><span class="n">extract</span><span class="w"> </span><span class="o">--</span><span class="n">output</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">restore</span><span class="o">-</span><span class="n">lsreg</span><span class="o">.</span><span class="n">sh</span>
+<span class="w">        </span><span class="c1"># Save /root/restore-lsreg.sh with your change notes</span>
+<span class="w">        </span><span class="err">```</span>
+
+<span class="o">-</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">haven</span><span class="s1">&#39;t installed the tools into `/opt` yet, use the repository helper</span>
+<span class="w">    </span><span class="n">to</span><span class="w"> </span><span class="n">populate</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="err">`</span><span class="w"> </span><span class="p">(</span><span class="n">preview</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span><span class="p">):</span>
+
+<span class="w">        </span><span class="err">```</span><span class="n">bash</span>
+<span class="w">        </span><span class="c1"># Preview what the installer would do (safe):</span>
+<span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span>
+
+<span class="w">        </span><span class="c1"># Install scripts into /opt/perfsonar-tp/tools_scripts:</span>
+<span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span>
+<span class="w">        </span><span class="err">```</span>
 </code></pre></div>
-</li>
-</ul>
+
 </details>
 <p>Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so you can perform the clone once the host is provisioned.</p>
 <blockquote>
@@ -1942,7 +1953,7 @@ hardened nftables profile with optional SELinux and Fail2Ban support.</p>
 <ol>
 <li><strong>Run with desired options:</strong></li>
 </ol>
-<div class="highlight"><pre><span></span><code>~/perfsonar-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
 <ul>
 <li>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).</li>
@@ -1970,7 +1981,7 @@ jails—only if those components are already installed.</p>
 <details class="tip">
 <summary>Preview nftables rules before applying</summary>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
-<div class="highlight"><pre><span></span><code>~/perfsonar-install-nftables.sh<span class="w"> </span>--print-rules
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
 </details>
 <details class="tip">
