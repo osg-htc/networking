@@ -1,9 +1,6 @@
 ﻿# Installing a perfSONAR Testpoint for WLCG/OSG
 
-This quick-deploy playbook walks WLCG/OSG site administrators through the end-to-end installation,
-configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). Each phase
-references tooling that already lives in this repository so you can automate as much as possible
-while still capturing the site-specific information required by OSG/WLCG operations.
+This guide walks WLCG/OSG site administrators through end-to-end installation, configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). It uses automated tooling from this repository to streamline the process while accommodating site-specific requirements.
 
 ---
 
@@ -15,55 +12,32 @@ Before you begin, gather the following information:
 - **Network data:** IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN
   information, PSConfig registration URLs.
 - **Operational contacts:** site admin email, OSG facility name, latitude/longitude, usage policy link.
-- **Repository artifacts:** the scripts referenced below are in `docs/perfsonar/` in this repository.
+- **Repository artifacts:** Scripts and configurations from the [perfsonar/testpoint](https://github.com/perfsonar/testpoint) repository, installed to `/opt/perfsonar-tp/tools_scripts`.
 
-- **Existing perfSONAR configuration:** If you are replacing or upgrading an existing perfSONAR
-  instance, capture its configuration and registration data before taking services offline. Useful
-  items to collect include:
-
-    - `/etc/perfsonar/` configuration files, especially `lsregistrationdaemon.conf`
-    - any site-specific psconfig or testpoint config files stored in container volumes or host paths
-    - exported firewall, monitoring, and cron jobs that the current instance relies on
-
-The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-
-lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or
-the host; it can be used to extract registration config for re-use or migration. If you need to re-
-register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and
-keep a copy in your change log.
+- **Existing perfSONAR configuration:** If replacing an existing instance, back up `/etc/perfsonar/` files, especially `lsregistrationdaemon.conf`, and any container volumes. Use `perfSONAR-update-lsregistration.sh` to extract registration config.
 
 
 ??? info "Quick capture of existing lsregistration config (if replacing)"
 
-        You can capture your current Lookup Service registration before redeploying.
+    Use the installed tools to extract a restore script:
 
-        - Preferred: use the installed tools. If you've populated `/opt/perfsonar-tp/tools_scripts`
-
-            (see Step 2), run the updater from that location to extract a self-contained
-            restore script:
-
-    <!-- markdownlint-disable MD013 -->
     ```bash
-        sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
-            extract --output /root/restore-lsreg.sh
-        # Save /root/restore-lsreg.sh with your change notes
+    sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+        extract --output /root/restore-lsreg.sh
     ```
-    <!-- markdownlint-enable MD013 -->
 
-        - If you haven't installed the tools into `/opt` yet, use the repository helper
+    Or download temporarily:
 
-            to populate `/opt` (preview with --dry-run):
-
-        ```bash
-        # Preview what the installer would do (safe):
-        sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
-
-        # Install scripts into /opt/perfsonar-tp/tools_scripts:
-        sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
-        ```
+    ```bash
+    curl -fsSL \
+      https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+      -o /tmp/update-lsreg.sh
+    chmod 0755 /tmp/update-lsreg.sh
+    sudo /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
+    ```
 
 
-Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so
-you can perform the clone once the host is provisioned.
+Note: Repository clone instructions are in Step 2.
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
@@ -72,23 +46,6 @@ you can perform the clone once the host is provisioned.
 ## Step 1 – Install and Harden EL9
 
 1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
-
-1. **Apply baseline updates (and verify dependencies):**
-
-    Run the dependency checker after bootstrap (Step 2) or download it temporarily.
-
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/check-deps.sh
-    ```
-
-    ??? tip "Download one-off without installed tools"
-        ```bash
-        curl -fsSL \
-          https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
-          -o /tmp/check-deps.sh
-        chmod 0755 /tmp/check-deps.sh
-        sudo /tmp/check-deps.sh
-        ```
 
 1. **Set the hostname and time sync:** Pick the NIC that will own the default route for the hostname.
 
@@ -132,17 +89,13 @@ After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
 
 ---
 
-1. **Apply baseline updates (and verify dependencies):**
+1. **Apply baseline updates and verify dependencies:**
 
-    Use the repository's helper to check for required tools and print
-    copy/paste install commands. Then apply OS updates and any remaining
-    baseline packages.
+    Use the helper to check for required tools and apply OS updates.
 
-    - You can run check-deps.sh from the local copy:
-
-        ```bash
-        /opt/perfsonar-tp/tools_scripts/check-deps.sh
-        ```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/check-deps.sh
+    ```
 
 ??? tip "Alternative: one-off run without installing tools"
 
@@ -174,14 +127,7 @@ The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates Netwo
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
     ```
 
-    - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
-
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
-    ```
-
-    Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add
-    any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
+    Write the config file to `/etc/perfSONAR-multi-nic-config.conf`. Open and adjust site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries).
 
 !!! warning "Gateways required for addresses"
     Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address
@@ -196,29 +142,21 @@ The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates Netwo
     IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you
     use `--yes`.
 
-1. **Dry-run apply (no changes):**
+1. **Apply changes:**
+
+    Dry-run first:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
     ```
 
-    - Apply changes non-interactively (auto-confirm):
+    Apply non-interactively:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
     ```
 
-1. **Interactive run:**
-
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh
-    ```
-
-    The script creates a timestamped backup of existing NetworkManager profiles, seeds routing
-    tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after
-    the run and retain it with your change records.
-
-    On some hosts, we have had to reboot or power-cycle to get the new network settings in place.
+    The script backs up NetworkManager profiles, seeds routing tables, and applies rules. Review `/var/log/perfSONAR-multi-nic-config.log` and retain it. Reboot if needed.
 
 ### DNS: forward and reverse entries (required)
 
@@ -233,18 +171,21 @@ registration systems perform forward/reverse consistency checks.
   reverse records (A+PTR and AAAA+PTR).
 
 ??? example "Run the DNS checker"
-    Run the shipped DNS checker to validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
+    Validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
 
-        ```bash
-        # Preferred: use the local tools checkout from Step 2
-        sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    ```bash
+    sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    ```
 
-        # If you must run without installing the tools first, download to /tmp and run
-        curl -fsSL \
-            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
-            -o /tmp/check-perfsonar-dns.sh
-        chmod 0755 /tmp/check-perfsonar-dns.sh
-        sudo /tmp/check-perfsonar-dns.sh
+    Or download temporarily:
+
+    ```bash
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
+        -o /tmp/check-dns.sh
+    chmod 0755 /tmp/check-dns.sh
+    sudo /tmp/check-dns.sh
+    ```
         ```
 
     **Notes and automation tips:**
@@ -305,20 +246,11 @@ If any prerequisite is missing, the script skips that component and continues.
     `/etc/perfSONAR-multi-nic-config.conf`, optionally adjusts SELinux, and enables Fail2Ban
     jails—only if those components are already installed.
 
-??? info "How SSH allow-lists and validation work"
+??? info "SSH allow-lists and validation"
 
-    **SSH allow-list derivation:**
-
-    - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
-    - Address entries without a prefix are treated as single hosts.
-    - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
-
-    **Validation and output:**
-
-    - The generated nftables file is validated with `nft -c -f` before being written; on validation
-      failure, nothing is installed and a message is logged.
-    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-
-      nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+    - Derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf` (CIDR prefixes and addresses).
+    - Validates nftables rules before writing.
+    - Outputs: rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
 
 ??? tip "Preview nftables rules before applying"
     You can preview the fully rendered nftables rules (no changes are made):
@@ -379,24 +311,14 @@ systemctl reload nftables || systemctl restart nftables
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
 
-We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll
-show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on
-the host are reflected inside the containers.
+Run the official testpoint image using Podman or Docker. Bind-mount host paths for persistence.
 
-Key paths to persist on the host will depend upon your deployment use-case.  For a simple perfSONAR
-testpoint deployment only, we only need to persist the /etc/perfsonar/psconfig area of the
-container.   If Lets Encrypt will be used, we also need to ensure visibility of certain locations
-between the containers and we do that be using the host filesystem.  However, this requires
-"seeding" those host directories initial as is covered below.
+Key host paths:
 
 - `/opt/perfsonar-tp/psconfig` → container `/etc/perfsonar/psconfig`
-- `/etc/apache2` → container `/etc/apache2` (Apache configs)
-- `/var/www/html` → container `/var/www/html` (webroot for Toolkit and ACME challenges)
-- `/etc/letsencrypt` → container `/etc/letsencrypt` (certs/keys, if using Let’s Encrypt)
+- For Let's Encrypt: `/etc/apache2`, `/var/www/html`, `/etc/letsencrypt`
 
-
-Tip: you can use either `podman-compose` or `docker-compose` in the steps below. Substitute the
-command that matches your preference.
+Use `podman-compose` or `docker-compose`.
 
 ### Prepare directories on the host
 
