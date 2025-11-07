@@ -1791,36 +1791,24 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <ul>
 <li><strong>perfSONAR testpoint compose bundle:</strong> <code>/opt/perfsonar-tp</code> (if using containerized testpoint)</li>
 </ul>
-<p>First check out the perfSONAR testpoint:</p>
+<p>First check out the perfSONAR testpoint (if you plan to run containers on the host):</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/testpoint.git<span class="w"> </span>/opt/perfsonar-tp
 </code></pre></div>
-<p>We will then check out just the tools_scripts directory from THIS repo, to give us access to the appropriate scripts and tools.</p>
-<p>Create only the perfSONAR tools directory from this repository using a sparse checkout, and place it under <code>/opt/perfsonar-tp/tools_scripts</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Create destination directory</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/tools_scripts
+<p>Populate <code>/opt/perfsonar-tp/tools_scripts</code> from this repository using the
+convenience helper we provide. The helper performs a shallow sparse checkout
+and preserves executable bits:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Preview what would happen (safe):</span>
+sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--dry-run
 
-<span class="c1"># Use a temporary sparse checkout to fetch only docs/perfsonar/tools_scripts</span>
-<span class="nv">tmpdir</span><span class="o">=</span><span class="k">$(</span>mktemp<span class="w"> </span>-d<span class="k">)</span>
-git<span class="w"> </span>clone<span class="w"> </span>--depth<span class="o">=</span><span class="m">1</span><span class="w"> </span>--filter<span class="o">=</span>blob:none<span class="w"> </span>--sparse<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://github.com/osg-htc/networking.git<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$tmpdir</span><span class="s2">/networking&quot;</span>
+<span class="c1"># Install into /opt/perfsonar-tp/tools_scripts (creates directory if missing):</span>
+sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh
 
-<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$tmpdir</span><span class="s2">/networking&quot;</span>
-git<span class="w"> </span>sparse-checkout<span class="w"> </span><span class="nb">set</span><span class="w"> </span>docs/perfsonar/tools_scripts
-
-<span class="c1"># Copy the tools into /opt/perfsonar-tp/tools_scripts</span>
-rsync<span class="w"> </span>-a<span class="w"> </span>docs/perfsonar/tools_scripts/<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/
-
-<span class="c1"># Optional: list what was installed</span>
-ls<span class="w"> </span>-1<span class="w"> </span>/opt/perfsonar-tp/tools_scripts
-
-<span class="c1"># Cleanup</span>
-<span class="nb">cd</span><span class="w"> </span>/
-rm<span class="w"> </span>-rf<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$tmpdir</span><span class="s2">&quot;</span>
+<span class="c1"># If you already have /opt/perfsonar-tp, skip cloning the testpoint repo:</span>
+sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--skip-testpoint
 </code></pre></div>
-<p>Notes:
-- The source path in this repo is <code>docs/perfsonar/tools_scripts</code> (plural). We install it to <code>/opt/perfsonar-tp/tools_scripts</code> to keep the same name.
-- You don’t need to keep a full clone of the networking repo on the host for these tools; the sparse checkout above fetches only the needed directory.</p>
-<p>After preparing the host, assume scripts from this guide are available at <code>/opt/perfsonar-tp/tools_scripts</code> and run them from there unless a raw download is shown.</p>
+<p>After running the helper, the scripts referenced below will be available at
+<code>/opt/perfsonar-tp/tools_scripts</code> and you can run them from there (or use a
+raw download when noted).</p>
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
