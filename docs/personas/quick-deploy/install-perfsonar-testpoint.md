@@ -13,8 +13,6 @@ Before you begin, gather the following information:
 - **Operational contacts:** site admin email, OSG facility name, latitude/longitude, usage policy link.
 - **Repository artifacts:** the scripts referenced below are in `docs/perfsonar/` in this repository.
 
-- **Repository artifacts:** the scripts referenced below are in `docs/perfsonar/` in this repository.
-
 - **Existing perfSONAR configuration:** If you are replacing or upgrading an existing perfSONAR instance, capture its configuration and registration data before taking services offline. Useful items to collect include:
 
     - `/etc/perfsonar/` configuration files, especially `lsregistrationdaemon.conf`
@@ -22,6 +20,27 @@ Before you begin, gather the following information:
     - exported firewall, monitoring, and cron jobs that the current instance relies on
 
    The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and keep a copy in your change log.
+
+   ??? info "Quick capture of existing lsregistration config (if replacing)"
+
+        You can capture your current Lookup Service registration before redeploying.
+
+        - Option A: download the helper temporarily and extract a self-contained restore script (works even if you haven't done Step 2 yet):
+
+            ```bash
+            curl -fsSL \
+                https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+                -o /tmp/perfSONAR-update-lsregistration.sh
+            chmod 0755 /tmp/perfSONAR-update-lsregistration.sh
+            sudo /tmp/perfSONAR-update-lsregistration.sh extract --output /root/restore-lsreg.sh
+            # Save /root/restore-lsreg.sh with your change notes
+            ```
+
+        - Option B: if you already have the tools directory locally (from a previous run), you can save the current conf directly:
+
+            ```bash
+            sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh save --output /root/lsregistrationdaemon.conf
+            ```
 
    Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so you can perform the clone once the host is provisioned.
 
@@ -101,11 +120,6 @@ git sparse-checkout set docs/perfsonar/tools_scripts
 # Copy the tools into /opt/perfsonar-tp/tools_scripts
 rsync -a docs/perfsonar/tools_scripts/ /opt/perfsonar-tp/tools_scripts/
 
-# Ensure key scripts are executable (some source files are not marked exec in Git)
-chmod a+x \
-    /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh \
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
-
 # Optional: list what was installed
 ls -1 /opt/perfsonar-tp/tools_scripts
 
@@ -154,36 +168,27 @@ Script location in the repository:
 - [Directory (browse)](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts)
 - [Raw file (direct download)](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh)
 
-1. **Stage the script:**
+1. **Run the PBR helper:** (already available from Step 2 in `/opt/perfsonar-tp/tools_scripts`)
 
-    - From the local tools checkout:
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --help | sed -n '1,40p'
+    ```
 
-        ```bash
-        install -m 0755 /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh ~/perfsonar-pbr-nm.sh
-        ```
+1. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:**
 
-    ??? tip "Alternative: Download directly from the repository URL"
-
-        ```bash
-                curl -fsSL \
-                    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh \
-                    -o ./perfSONAR-pbr-nm.sh
-        chmod 0755 ./perfSONAR-pbr-nm.sh
-        ```
-
-2. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:** use the script’s generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
+    Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
 
     - Preview (no changes):
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --generate-config-debug
-        ```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
+    ```
 
     - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --generate-config-auto
-        ```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
+    ```
 
     Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
 
@@ -194,25 +199,25 @@ Script location in the repository:
 
         During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
 
-3. **Execute the script:**
+1. **Execute the script:**
 
     - Rehearsal (no changes, extra logging recommended on first run):
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --dry-run --debug
-        ```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
+    ```
 
     - Apply changes non-interactively (auto-confirm):
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh --yes
-        ```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
+    ```
 
     - Or run interactively and answer the confirmation prompt when ready:
 
-        ```bash
-        ~/perfsonar-pbr-nm.sh
-        ```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh
+    ```
 
     !!! note "Missing gateways at apply time"
 
@@ -228,21 +233,20 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
 - For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
 
-??? example "Example: Bash script to automate DNS verification"
-    The `perfSONAR-multi-nic-config.conf` contains the arrays `NIC_IPV4_ADDRS` and `NIC_IPV6_ADDRS` (with `-` for unused entries). You can automate a forward/reverse consistency check using `dig` or `host` by sourcing the config and iterating the arrays.
+??? example "Run the DNS checker"
+    Run the shipped DNS checker to validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
 
-            ```bash
-            # Preferred: run the shipped DNS checker from the local tools checkout
-            sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    ```bash
+    # Preferred: use the local tools checkout from Step 2
+    sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
 
-            # Or, download and run it directly (useful on any machine with network visibility
-            # to your DNS servers):
-            curl -fsSL \
-                https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
-                -o ./check-perfsonar-dns.sh
-            chmod a+x ./check-perfsonar-dns.sh
-            sudo ./check-perfsonar-dns.sh
-            ```
+    # Alternative: download and run directly
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
+        -o ./check-perfsonar-dns.sh
+    chmod 0755 ./check-perfsonar-dns.sh
+    sudo ./check-perfsonar-dns.sh
+    ```
 
     **Notes and automation tips:**
 
@@ -253,40 +257,7 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 
 If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before proceeding with registration and testing.
 
-??? example "Run or download the DNS checker"
-    From the local tools checkout (preferred):
-
-    ```bash
-    sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
-    ```
-
-    Or download and run the DNS checker directly on the host (or from any machine that has network visibility to your DNS servers). The script expects `/etc/perfSONAR-multi-nic-config.conf` to exist and be readable.
-
-    ```bash
-    # Download (curl)
-        curl -fsSL \
-            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
-            -o ./check-perfsonar-dns.sh
-    # Or download with wget
-    # wget -O ./check-perfsonar-dns.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh
-
-    chmod 0755 ./check-perfsonar-dns.sh
-
-    # Install DNS tools if missing (EL9)
-    sudo dnf install -y bind-utils
-
-    # Debian/Ubuntu alternative
-    # sudo apt-get update && sudo apt-get install -y dnsutils
-
-    # Run the check (needs to read /etc/perfSONAR-multi-nic-config.conf)
-    sudo ./check-perfsonar-dns.sh
-    ```
-
-    **Notes:**
-
-    - If you downloaded the script to a different path, either move it to the host and run it there, or copy `/etc/perfSONAR-multi-nic-config.conf` to the machine where you run the check (recommended only for temporary verification; treat the config as sensitive).
-    - The script uses `dig` (preferred) or `host` as a fallback; ensure one of those is installed.
-    - Run this check after you generate or edit `/etc/perfSONAR-multi-nic-config.conf` and before you register or start active measurements.
+<!-- Consolidated DNS checker instructions into a single admonition above -->
 
 1. **Verify the routing policy:**
 
@@ -302,7 +273,8 @@ If any addresses fail these checks, correct the DNS zone (forward and/or reverse
 
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
-Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support.
+Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a
+hardened nftables profile with optional SELinux and Fail2Ban support.
 
 Script location in the repository:
 
@@ -343,7 +315,9 @@ If any prerequisite is missing, the script skips that component and continues.
     - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
     - Add `--dry-run` for a rehearsal that only prints the planned actions.
 
-    The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf`, optionally adjusts SELinux, and enables Fail2Ban jails—only if those components are already installed.
+    The script writes nftables rules for perfSONAR services, derives SSH allow-lists from
+    `/etc/perfSONAR-multi-nic-config.conf`, optionally adjusts SELinux, and enables Fail2Ban
+    jails—only if those components are already installed.
 
 ??? info "How SSH allow-lists and validation work"
     **SSH allow-list derivation:**
@@ -602,40 +576,36 @@ We need to register your instance and ensure it is configurated with the require
 
 ### Update Lookup Service registration inside the container
 
-Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint` container and restart the daemon only if needed.
+Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the
+running `perfsonar-testpoint` container and restart the daemon only if needed.
 
 - Script (browse): [perfSONAR-update-lsregistration.sh](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
 - Raw (download): [raw link](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
 
 Install and run examples (root shell):
 
-Note: the helper uses subcommands; use the `update` command to apply field changes (other commands: `save`, `restore`, `create`, `extract`).
+Note: the helper uses subcommands; use the `update` command to apply field changes.
+Other available commands: `save`, `restore`, `create`, `extract`.
 
 From the local tools checkout (preferred):
 
 ```bash
-install -m 0755 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh ~/perfSONAR-update-lsregistration.sh
-```
-
-Or download the script and run it:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-    -o ~/perfSONAR-update-lsregistration.sh
-chmod 0755 ~/perfSONAR-update-lsregistration.sh
-
 # Preview changes only
-~/perfSONAR-update-lsregistration.sh update --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
+    --dry-run \
+    --site-name "Acme Co." --project WLCG \
+    --admin-email admin@example.org --admin-name "pS Admin"
 
 # Apply common updates and restart the daemon inside the container
-~/perfSONAR-update-lsregistration.sh update \
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
     --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
     --city Berkeley --region CA --country US --zip 94720 \
     --latitude 37.5 --longitude -121.7469 \
     --admin-name "pS Admin" --admin-email admin@example.org
 
 # Produce a self-contained restore script for host restore
-sudo ~/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
+sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh extract \
+    --output /tmp/restore-lsreg.sh
 sudo /tmp/restore-lsreg.sh
 ```
 
@@ -676,7 +646,8 @@ Perform these checks before handing the host over to operations:
 
         Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
-1. **Toolkit diagnostics:** visit the Toolkit UI → *Dashboard* → *Host Status* to confirm pScheduler, MaDDash, and owamp/bwctl services report healthy.
+1. **Toolkit diagnostics:** visit the Toolkit UI → *Dashboard* → *Host Status* to confirm
+    pScheduler, MaDDash, and owamp/bwctl services report healthy.
 
 1. **Security posture:**
 
