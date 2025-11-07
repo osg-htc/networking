@@ -2058,16 +2058,20 @@ mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/psconfi
 docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/perfsonar/psconfig<span class="w"> </span>/opt/perfsonar-tp/psconfig
 docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/var/www/html<span class="w"> </span>/var/www/html
 docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/apache2<span class="w"> </span>/etc/apache2
-docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/letsencrypt<span class="w"> </span>/etc/letsencrypt<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<span class="c1"># Seed /etc/letsencrypt from the certbot image (may be minimal; populated on first issuance)</span>
+docker<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>certbot-seed<span class="w"> </span>certbot/certbot<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+docker<span class="w"> </span>cp<span class="w"> </span>certbot-seed:/etc/letsencrypt<span class="w"> </span>/etc/letsencrypt<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+docker<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>certbot-seed<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
 </code></pre></div>
 <p>If SELinux is enforcing, the <code>:z</code>/<code>:Z</code> options in the next step handle labels; no manual <code>chcon</code> is
 required.</p>
 <details class="note">
 <summary>About /etc/letsencrypt seeding</summary>
-<p>If <code>/etc/letsencrypt</code> does not exist inside the temporary container, the copy command above
-will be skipped. This is expected. The host directory <code>/etc/letsencrypt</code> will be populated
-during the initial certificate issuance in Step 5.3. Keeping the directory present (even if
-empty) ensures the bind mount works and SELinux labels can be applied.</p>
+<p>The <code>/etc/letsencrypt</code> directory is seeded from the Certbot image (not the testpoint)
+to create the expected path on the host. This seed may be minimal or empty; it will be
+populated during the initial certificate issuance in Step 5.3. Keeping the directory present
+(even if empty) ensures the bind mount works and SELinux labels can be applied on enforcing
+hosts.</p>
 </details>
 <p>Stop the temporary container before switching to the final compose:</p>
 <div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>down<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose down</span>
