@@ -1,0 +1,10 @@
+[DEBUG] Parsing IPs from ./tmp/test-perfsonar-config.conf
+[DEBUG] Reverse lookup for (127.0.0.1
+[DEBUG] No PTR found for (127.0.0.1 (skipping)
+[DEBUG] Reverse lookup for 10.0.0.5
+[DEBUG] Skipping RFC1918 private IPv4 address 10.0.0.5
+[DEBUG] Reverse lookup for 192.0.2.10)
+[DEBUG] No PTR found for 192.0.2.10) (skipping)
+[DEBUG] Reverse lookup for (-)
+[DEBUG] No PTR found for (-) (skipping)
+[ERROR] No FQDNs derived from reverse lookups

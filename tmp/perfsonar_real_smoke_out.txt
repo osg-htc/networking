@@ -1,0 +1,10 @@
+[DEBUG] Parsing IPs from /etc/perfSONAR-multi-nic-config.conf
+[DEBUG] Reverse lookup for (192.41.230.59
+[DEBUG] No PTR found for (192.41.230.59 (skipping)
+[DEBUG] Reverse lookup for 192.41.230.60
+[DEBUG] Reverse lookup for 192.41.230.55
+[DEBUG] Reverse lookup for 10.10.1.60
+[DEBUG] Skipping RFC1918 private IPv4 address 10.10.1.60
+[DEBUG] Reverse lookup for 10.10.1.59)
+[DEBUG] Skipping RFC1918 private IPv4 address 10.10.1.59)
+[DEBUG] Reverse lookup for (2001:48a8:68f7:1:192:41:230:59
