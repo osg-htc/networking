@@ -108,7 +108,7 @@ if [ ${#suggest_dnf[@]} -gt 0 ]; then
   # Join packages with spaces explicitly to avoid IFS (set to "\n\t") introducing newlines
   dnf_pkgs=$(printf '%s ' "${uniq_dnf[@]}")
   dnf_pkgs=${dnf_pkgs% }  # trim trailing space
-  printf '  sudo dnf install -y %s\n' "$dnf_pkgs"
+  printf '  dnf install -y %s\n' "$dnf_pkgs"
   echo
 fi
 
@@ -118,7 +118,7 @@ if [ ${#suggest_apt[@]} -gt 0 ]; then
   # Join packages with spaces explicitly to avoid IFS newline joining
   apt_pkgs=$(printf '%s ' "${uniq_apt[@]}")
   apt_pkgs=${apt_pkgs% }
-  printf '  sudo apt-get update && sudo apt-get install -y %s\n' "$apt_pkgs"
+  printf '  apt-get update && apt-get install -y %s\n' "$apt_pkgs"
   echo
 fi
 
@@ -130,7 +130,7 @@ if [ ${#suggest_dnf_optional[@]} -gt 0 ]; then
   dnf_opt_pkgs=$(printf '%s ' "${uniq_dnf_opt[@]}")
   dnf_opt_pkgs=${dnf_opt_pkgs% }
   echo "Optional-only install example for Fedora/RHEL/CentOS (dnf):"
-  printf '  sudo dnf install -y %s\n' "$dnf_opt_pkgs"
+  printf '  dnf install -y %s\n' "$dnf_opt_pkgs"
   echo
 fi
 
@@ -139,7 +139,7 @@ if [ ${#suggest_apt_optional[@]} -gt 0 ]; then
   apt_opt_pkgs=$(printf '%s ' "${uniq_apt_opt[@]}")
   apt_opt_pkgs=${apt_opt_pkgs% }
   echo "Optional-only install example for Debian/Ubuntu (apt):"
-  printf '  sudo apt-get update && sudo apt-get install -y %s\n' "$apt_opt_pkgs"
+  printf '  apt-get update && apt-get install -y %s\n' "$apt_opt_pkgs"
   echo
 fi
 

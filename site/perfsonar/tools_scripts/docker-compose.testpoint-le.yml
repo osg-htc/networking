@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  testpoint:
+    container_name: perfsonar-testpoint
+    image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+    labels:
+      - io.containers.autoupdate=registry
+    network_mode: "host"
+    cgroup: host
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
+      - /var/www/html:/var/www/html:z
+      - /etc/apache2:/etc/apache2:z
+      - /etc/letsencrypt:/etc/letsencrypt:z
+    tty: true
+    pids_limit: 8192
+    cap_add:
+      - CAP_NET_RAW
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    labels:
+      - io.containers.autoupdate=registry
+    network_mode: "host"
+    restart: unless-stopped
+    entrypoint: ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+    depends_on:
+      - testpoint
+    volumes:
+      - /var/www/html:/var/www/html:z
+      - /etc/letsencrypt:/etc/letsencrypt:z

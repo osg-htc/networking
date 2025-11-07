@@ -10,8 +10,15 @@
       
         <link rel="canonical" href="https://osg-htc.org/networking/personas/quick-deploy/install-perfsonar-testpoint/">
       
+      
+        <link rel="prev" href="../landing/">
+      
+      
+        <link rel="next" href="../automated-setup/">
+      
+      
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.2.8">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
     
     
       
@@ -19,13 +26,14 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.644de097.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.84d31ad4.min.css">
       
-        
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.e6a45f82.min.css">
-        
       
+
+
     
+    
+      
     
     
       
@@ -39,7 +47,7 @@
     
       <link rel="stylesheet" href="../../../css/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -48,24 +56,19 @@
   
   
 
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","UA-69012-29"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","UA-69012-29",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=UA-69012-29",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
 
-  <script>window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-69012-29","auto"),ga("set","anonymizeIp",!0),ga("send","pageview"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){var e;this.value&&(e=document.location.pathname,ga("send","pageview",e+"?q="+this.value))}),"undefined"!=typeof location$&&location$.subscribe(function(e){ga("send","pageview",e.pathname)})})</script>
-  <script async src="https://www.google-analytics.com/analytics.js"></script>
-
-
+    
     
     
   </head>
   
   
-    
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+    <body dir="ltr">
   
-    
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -85,16 +88,19 @@
     
       
 
-<header class="md-header" data-md-component="header">
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -114,46 +120,56 @@
     </div>
     
     
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
-      <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </nav>
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
           </div>
-          <ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
         </div>
       </div>
     </div>
   </div>
 </div>
+      
     
     
       <div class="md-header__source">
         <a href="https://github.com/osg-htc/networking/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -183,12 +199,13 @@
                     
 
 
+
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     OSG Networking Area
@@ -198,7 +215,7 @@
       <a href="https://github.com/osg-htc/networking/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -210,14 +227,21 @@
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../.." class="md-nav__link">
-        OSG Networking Area
+        
+  
+  
+  <span class="md-ellipsis">
+    OSG Networking Area
+    
+  </span>
+  
+
       </a>
     </li>
   
@@ -225,326 +249,495 @@
     
       
       
-      
-
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2">
-          Network Monitoring (perfSONAR)
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Network Monitoring (perfSONAR)" data-md-level="1">
-        <label class="md-nav__title" for="__nav_2">
-          <span class="md-nav__icon md-icon"></span>
-          Network Monitoring (perfSONAR)
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
           
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Network Monitoring (perfSONAR)
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Network Monitoring (perfSONAR)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar-in-osg/" class="md-nav__link">
-        Motivation
+        
+  
+  
+  <span class="md-ellipsis">
+    Motivation
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/deployment-models/" class="md-nav__link">
-        Deployment
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/installation/" class="md-nav__link">
-        Installation and Maintenance
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation and Maintenance
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/faq/" class="md-nav__link">
-        Frequently Asked Questions
+        
+  
+  
+  <span class="md-ellipsis">
+    Frequently Asked Questions
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_3">
-          Network Troubleshooting
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Network Troubleshooting" data-md-level="1">
-        <label class="md-nav__title" for="__nav_3">
-          <span class="md-nav__icon md-icon"></span>
-          Network Troubleshooting
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
           
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Network Troubleshooting
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Network Troubleshooting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../network-troubleshooting/" class="md-nav__link">
-        Network Troubleshooting
+        
+  
+  
+  <span class="md-ellipsis">
+    Network Troubleshooting
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
-        OSG Network Debugging Document
+        
+  
+  
+  <span class="md-ellipsis">
+    OSG Network Debugging Document
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_4">
-          Network Services
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Network Services" data-md-level="1">
-        <label class="md-nav__title" for="__nav_4">
-          <span class="md-nav__icon md-icon"></span>
-          Network Services
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
           
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Network Services
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Network Services
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/psetf/" class="md-nav__link">
-        Infrastructure Monitoring
+        
+  
+  
+  <span class="md-ellipsis">
+    Infrastructure Monitoring
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../osg-network-services/" class="md-nav__link">
-        Network Datastore and Streaming
+        
+  
+  
+  <span class="md-ellipsis">
+    Network Datastore and Streaming
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../osg-network-analytics/" class="md-nav__link">
-        Network Analytics
+        
+  
+  
+  <span class="md-ellipsis">
+    Network Analytics
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Personas
+    
+  </span>
+  
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Personas
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
     
   
   
+  
+    
+    
+    
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5">
-          Personas
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Personas" data-md-level="1">
-        <label class="md-nav__title" for="__nav_5">
-          <span class="md-nav__icon md-icon"></span>
-          Personas
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" checked>
+        
           
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Quick Deploy
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            Quick Deploy
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
   
-  
-    
-  
-  
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" checked>
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5_1">
-          Quick Deploy
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Quick Deploy" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_1">
-          <span class="md-nav__icon md-icon"></span>
-          Quick Deploy
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
   
   
   
     <li class="md-nav__item">
       <a href="../landing/" class="md-nav__link">
-        Landing
+        
+  
+  
+  <span class="md-ellipsis">
+    Landing
+    
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
     
   
   
+  
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
         
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Quickstart: perfSONAR Testpoint
+          
+  
+  
+  <span class="md-ellipsis">
+    Quickstart: perfSONAR Testpoint
+    
+  </span>
+  
+
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Quickstart: perfSONAR Testpoint
+        
+  
+  
+  <span class="md-ellipsis">
+    Quickstart: perfSONAR Testpoint
+    
+  </span>
+  
+
       </a>
       
         
@@ -564,35 +757,36 @@
       
         <li class="md-nav__item">
   <a href="#prerequisites-and-planning" class="md-nav__link">
-    Prerequisites and Planning
+    <span class="md-ellipsis">
+      Prerequisites and Planning
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#step-1-install-and-harden-el9" class="md-nav__link">
-    Step 1 – Install and Harden EL9
+    <span class="md-ellipsis">
+      Step 1 – Install and Harden EL9
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-<<<<<<< HEAD
-  <a href="#step-2-clone-the-repository" class="md-nav__link">
-    Step 2 – Clone the Repository
-=======
   <a href="#step-2-bootstrap-the-testpoint-and-tools" class="md-nav__link">
     <span class="md-ellipsis">
       Step 2 – Bootstrap the Testpoint and Tools
     </span>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#step-3-configure-policy-based-routing-pbr" class="md-nav__link">
-    Step 3 – Configure Policy-Based Routing (PBR)
+    <span class="md-ellipsis">
+      Step 3 – Configure Policy-Based Routing (PBR)
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Step 3 – Configure Policy-Based Routing (PBR)">
@@ -600,7 +794,9 @@
         
           <li class="md-nav__item">
   <a href="#dns-forward-and-reverse-entries-required" class="md-nav__link">
-    DNS: forward and reverse entries (required)
+    <span class="md-ellipsis">
+      DNS: forward and reverse entries (required)
+    </span>
   </a>
   
 </li>
@@ -612,58 +808,71 @@
       
         <li class="md-nav__item">
   <a href="#step-4-configure-nftables-selinux-and-fail2ban" class="md-nav__link">
-    Step 4 – Configure nftables, SELinux, and Fail2Ban
+    <span class="md-ellipsis">
+      Step 4 – Configure nftables, SELinux, and Fail2Ban
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#step-5-deploy-the-containerized-perfsonar-testpoint" class="md-nav__link">
-    Step 5 – Deploy the Containerized perfSONAR Testpoint
+    <span class="md-ellipsis">
+      Step 5 – Deploy the Containerized perfSONAR Testpoint
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Step 5 – Deploy the Containerized perfSONAR Testpoint">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#prepare-directories-on-the-host" class="md-nav__link">
-    Prepare directories on the host
+  <a href="#option-a-testpoint-only-simplest" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A — Testpoint only (simplest)
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#seed-defaults-from-the-testpoint-container" class="md-nav__link">
-    Seed defaults from the testpoint container
+  <a href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B — Testpoint + Let’s Encrypt (shared Apache and certs)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option B — Testpoint + Let’s Encrypt (shared Apache and certs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-seed-host-directories-from-a-temporary-testpoint-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Seed host directories from a temporary testpoint container
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#copy-baseline-content-out-of-the-running-container" class="md-nav__link">
-    Copy baseline content out of the running container
+  <a href="#2-create-the-final-compose-with-shared-volumes-and-certbot" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Create the final compose with shared volumes and certbot
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#replace-the-compose-file-with-bind-mounts-and-optional-certbot" class="md-nav__link">
-    Replace the compose file with bind-mounts and optional certbot
+  <a href="#3-obtain-your-first-lets-encrypt-certificate-one-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      3) Obtain your first Let’s Encrypt certificate (one-time)
+    </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#restart-with-the-new-compose" class="md-nav__link">
-    Restart with the new compose
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optional-obtain-your-first-lets-encrypt-certificate" class="md-nav__link">
-    Optional – obtain your first Let’s Encrypt certificate
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
@@ -674,7 +883,9 @@
       
         <li class="md-nav__item">
   <a href="#step-6-register-and-configure-with-wlcgosg" class="md-nav__link">
-    Step 6 – Register and Configure with WLCG/OSG
+    <span class="md-ellipsis">
+      Step 6 – Register and Configure with WLCG/OSG
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Step 6 – Register and Configure with WLCG/OSG">
@@ -682,34 +893,9 @@
         
           <li class="md-nav__item">
   <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
-    Update Lookup Service registration inside the container
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-7-post-install-validation" class="md-nav__link">
-    Step 7 – Post-Install Validation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ongoing-maintenance" class="md-nav__link">
-    Ongoing Maintenance
-  </a>
-  
-    <nav class="md-nav" aria-label="Ongoing Maintenance">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
-    Automatic image updates and safe restarts
+    <span class="md-ellipsis">
+      Update Lookup Service registration inside the container
+    </span>
   </a>
   
 </li>
@@ -759,333 +945,528 @@
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../automated-setup/" class="md-nav__link">
-        Automated setup
+        
+  
+  
+  <span class="md-ellipsis">
+    Automated setup
+    
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5_2">
-          Troubleshooter
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Troubleshooter" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_2">
-          <span class="md-nav__icon md-icon"></span>
-          Troubleshooter
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
           
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooter
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            Troubleshooter
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../troubleshoot/landing/" class="md-nav__link">
-        Landing
+        
+  
+  
+  <span class="md-ellipsis">
+    Landing
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../troubleshoot/triage-checklist/" class="md-nav__link">
-        Triage checklist
+        
+  
+  
+  <span class="md-ellipsis">
+    Triage checklist
+    
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_3" type="checkbox" id="__nav_5_3" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5_3">
-          Researcher
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Researcher" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_3">
-          <span class="md-nav__icon md-icon"></span>
-          Researcher
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
           
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Researcher
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            Researcher
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../research/landing/" class="md-nav__link">
-        Landing
+        
+  
+  
+  <span class="md-ellipsis">
+    Landing
+    
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../research/architecture/" class="md-nav__link">
-        Architecture
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
   
   
   
+  
+    
+    
+    
+    
     
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_6">
-          Features
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Features" data-md-level="1">
-        <label class="md-nav__title" for="__nav_6">
-          <span class="md-nav__icon md-icon"></span>
-          Features
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
           
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Features
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Features
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../features/fail2ban/" class="md-nav__link">
-        fail2ban
+        
+  
+  
+  <span class="md-ellipsis">
+    fail2ban
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../features/selinux/" class="md-nav__link">
-        SELinux
+        
+  
+  
+  <span class="md-ellipsis">
+    SELinux
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../features/nftables/" class="md-nav__link">
-        nftables
+        
+  
+  
+  <span class="md-ellipsis">
+    nftables
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
     
       
       
-      
-
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_7">
-          Tools & Scripts
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Tools & Scripts" data-md-level="1">
-        <label class="md-nav__title" for="__nav_7">
-          <span class="md-nav__icon md-icon"></span>
-          Tools & Scripts
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
           
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tools & Scripts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Tools & Scripts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/tools_scripts/" class="md-nav__link">
-        Scripts and tools
+        
+  
+  
+  <span class="md-ellipsis">
+    Scripts and tools
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/tools_scripts/docker-compose.yml" class="md-nav__link">
-        Compose bundle (docker-compose.yml)
+        
+  
+  
+  <span class="md-ellipsis">
+    Compose bundle (docker-compose.yml)
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
-        LS registration updater (script)
+        
+  
+  
+  <span class="md-ellipsis">
+    LS registration updater (script)
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../perfsonar/tools_scripts/README-lsregistration/" class="md-nav__link">
-        LS registration helpers (README)
+        
+  
+  
+  <span class="md-ellipsis">
+    LS registration helpers (README)
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../../../tools/" class="md-nav__link">
-        Link-check tools
+        
+  
+  
+  <span class="md-ellipsis">
+    Link-check tools
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1118,35 +1499,36 @@
       
         <li class="md-nav__item">
   <a href="#prerequisites-and-planning" class="md-nav__link">
-    Prerequisites and Planning
+    <span class="md-ellipsis">
+      Prerequisites and Planning
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#step-1-install-and-harden-el9" class="md-nav__link">
-    Step 1 – Install and Harden EL9
+    <span class="md-ellipsis">
+      Step 1 – Install and Harden EL9
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-<<<<<<< HEAD
-  <a href="#step-2-clone-the-repository" class="md-nav__link">
-    Step 2 – Clone the Repository
-=======
   <a href="#step-2-bootstrap-the-testpoint-and-tools" class="md-nav__link">
     <span class="md-ellipsis">
       Step 2 – Bootstrap the Testpoint and Tools
     </span>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#step-3-configure-policy-based-routing-pbr" class="md-nav__link">
-    Step 3 – Configure Policy-Based Routing (PBR)
+    <span class="md-ellipsis">
+      Step 3 – Configure Policy-Based Routing (PBR)
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Step 3 – Configure Policy-Based Routing (PBR)">
@@ -1154,7 +1536,9 @@
         
           <li class="md-nav__item">
   <a href="#dns-forward-and-reverse-entries-required" class="md-nav__link">
-    DNS: forward and reverse entries (required)
+    <span class="md-ellipsis">
+      DNS: forward and reverse entries (required)
+    </span>
   </a>
   
 </li>
@@ -1166,58 +1550,71 @@
       
         <li class="md-nav__item">
   <a href="#step-4-configure-nftables-selinux-and-fail2ban" class="md-nav__link">
-    Step 4 – Configure nftables, SELinux, and Fail2Ban
+    <span class="md-ellipsis">
+      Step 4 – Configure nftables, SELinux, and Fail2Ban
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#step-5-deploy-the-containerized-perfsonar-testpoint" class="md-nav__link">
-    Step 5 – Deploy the Containerized perfSONAR Testpoint
+    <span class="md-ellipsis">
+      Step 5 – Deploy the Containerized perfSONAR Testpoint
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Step 5 – Deploy the Containerized perfSONAR Testpoint">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#prepare-directories-on-the-host" class="md-nav__link">
-    Prepare directories on the host
+  <a href="#option-a-testpoint-only-simplest" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A — Testpoint only (simplest)
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#seed-defaults-from-the-testpoint-container" class="md-nav__link">
-    Seed defaults from the testpoint container
+  <a href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B — Testpoint + Let’s Encrypt (shared Apache and certs)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option B — Testpoint + Let’s Encrypt (shared Apache and certs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-seed-host-directories-from-a-temporary-testpoint-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      1) Seed host directories from a temporary testpoint container
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#copy-baseline-content-out-of-the-running-container" class="md-nav__link">
-    Copy baseline content out of the running container
+  <a href="#2-create-the-final-compose-with-shared-volumes-and-certbot" class="md-nav__link">
+    <span class="md-ellipsis">
+      2) Create the final compose with shared volumes and certbot
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#replace-the-compose-file-with-bind-mounts-and-optional-certbot" class="md-nav__link">
-    Replace the compose file with bind-mounts and optional certbot
+  <a href="#3-obtain-your-first-lets-encrypt-certificate-one-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      3) Obtain your first Let’s Encrypt certificate (one-time)
+    </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#restart-with-the-new-compose" class="md-nav__link">
-    Restart with the new compose
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optional-obtain-your-first-lets-encrypt-certificate" class="md-nav__link">
-    Optional – obtain your first Let’s Encrypt certificate
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
@@ -1228,7 +1625,9 @@
       
         <li class="md-nav__item">
   <a href="#step-6-register-and-configure-with-wlcgosg" class="md-nav__link">
-    Step 6 – Register and Configure with WLCG/OSG
+    <span class="md-ellipsis">
+      Step 6 – Register and Configure with WLCG/OSG
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Step 6 – Register and Configure with WLCG/OSG">
@@ -1236,34 +1635,9 @@
         
           <li class="md-nav__item">
   <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
-    Update Lookup Service registration inside the container
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-7-post-install-validation" class="md-nav__link">
-    Step 7 – Post-Install Validation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ongoing-maintenance" class="md-nav__link">
-    Ongoing Maintenance
-  </a>
-  
-    <nav class="md-nav" aria-label="Ongoing Maintenance">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
-    Automatic image updates and safe restarts
+    <span class="md-ellipsis">
+      Update Lookup Service registration inside the container
+    </span>
   </a>
   
 </li>
@@ -1314,21 +1688,19 @@
               </div>
             
           
-          <div class="md-content" data-md-component="content">
-            <article class="md-content__inner md-typeset">
-              
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
                 
-<a href="https://github.com/osg-htc/networking/edit/master/docs/personas/quick-deploy/install-perfsonar-testpoint.md" title="Edit this page" class="md-content__button md-icon">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
-</a>
+                  
 
+
+  
+  
 
 
 <h1 id="installing-a-perfsonar-testpoint-for-wlcgosg">Installing a perfSONAR Testpoint for WLCG/OSG<a class="headerlink" href="#installing-a-perfsonar-testpoint-for-wlcgosg" title="Permanent link">&para;</a></h1>
-<p>This quick-deploy playbook walks WLCG/OSG site administrators through the end-to-end installation,
-configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). Each phase
-references tooling that already lives in this repository so you can automate as much as possible
-while still capturing the site-specific information required by OSG/WLCG operations.</p>
+<p>This guide walks WLCG/OSG site administrators through end-to-end installation, configuration, and validation of a perfSONAR testpoint on Enterprise Linux 9 (EL9). It uses automated tooling from this repository to streamline the process while accommodating site-specific requirements.</p>
 <hr />
 <h2 id="prerequisites-and-planning">Prerequisites and Planning<a class="headerlink" href="#prerequisites-and-planning" title="Permanent link">&para;</a></h2>
 <p>Before you begin, gather the following information:</p>
@@ -1336,60 +1708,29 @@ while still capturing the site-specific information required by OSG/WLCG operati
 <li><strong>Hardware details:</strong> hostname, BMC/iLO/iDRAC credentials (if used), interface names, available storage.</li>
 <li><strong>Network data:</strong> IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN
   information, PSConfig registration URLs.</li>
-<li><strong>Operational contacts:</strong> site admin email, OSG facility name, latitude/longitude, usage policy link.</li>
+<li><strong>Operational contacts:</strong> site admin email, OSG facility name, latitude/longitude.</li>
 <li>
-<p><strong>Repository artifacts:</strong> the scripts referenced below are in <code>docs/perfsonar/</code> in this repository.</p>
+<p><strong>Repository artifacts:</strong> Scripts and configurations from the <a href="https://github.com/perfsonar/testpoint">perfsonar/testpoint</a> repository, installed to <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
 </li>
 <li>
-<p><strong>Existing perfSONAR configuration:</strong> If you are replacing or upgrading an existing perfSONAR
-  instance, capture its configuration and registration data before taking services offline. Useful
-  items to collect include:</p>
-<ul>
-<li><code>/etc/perfsonar/</code> configuration files, especially <code>lsregistrationdaemon.conf</code></li>
-<li>any site-specific psconfig or testpoint config files stored in container volumes or host paths</li>
-<li>exported firewall, monitoring, and cron jobs that the current instance relies on</li>
-</ul>
+<p><strong>Existing perfSONAR configuration:</strong> If replacing an existing instance, back up <code>/etc/perfsonar/</code> files, especially <code>lsregistrationdaemon.conf</code>, and any container volumes. Use <code>perfSONAR-update-lsregistration.sh</code> to extract registration config.</p>
 </li>
 </ul>
-<p>The repository includes a helper script <code>docs/perfsonar/tools_scripts/perfSONAR-update-
-lsregistration.sh</code> which can copy and update <code>lsregistrationdaemon.conf</code> from running containers or
-the host; it can be used to extract registration config for re-use or migration. If you need to re-
-register or migrate metadata, run that script (or copy the <code>lsregistrationdaemon.conf</code> manually) and
-keep a copy in your change log.</p>
 <details class="info">
-<summary>Quick capture of existing lsregistration config (if replacing)</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">You</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">capture</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="n">Lookup</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">registration</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">redeploying</span><span class="o">.</span>
-
-<span class="o">-</span><span class="w"> </span><span class="n">Preferred</span><span class="p">:</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">installed</span><span class="w"> </span><span class="n">tools</span><span class="o">.</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="s1">&#39;ve populated `/opt/perfsonar-tp/tools_scripts`</span>
-
-<span class="w">    </span><span class="p">(</span><span class="n">see</span><span class="w"> </span><span class="n">Step</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">updater</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">location</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="bp">self</span><span class="o">-</span><span class="n">contained</span>
-<span class="w">    </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="p">:</span>
+<summary>Quick capture of existing lsregistration config (if you have a src)</summary>
+<p>Download temporarily:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>/tmp/update-lsreg.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-lsreg.sh
 </code></pre></div>
-
-<p><!-- markdownlint-disable MD013 -->
-<div class="highlight"><pre><span></span><code><span class="w">    </span>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
-<span class="w">    </span><span class="c1"># Save /root/restore-lsreg.sh with your change notes</span>
+<p>Use the downloaded tool to extract a restore script:</p>
+<div class="highlight"><pre><span></span><code>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
 </code></pre></div>
-<!-- markdownlint-enable MD013 --></p>
-<div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">haven</span><span class="s1">&#39;t installed the tools into `/opt` yet, use the repository helper</span>
-
-<span class="w">    </span><span class="n">to</span><span class="w"> </span><span class="n">populate</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="err">`</span><span class="w"> </span><span class="p">(</span><span class="n">preview</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span><span class="p">):</span>
-
-<span class="err">```</span><span class="n">bash</span>
-<span class="c1"># Preview what the installer would do (safe):</span>
-<span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span>
-
-<span class="c1"># Install scripts into /opt/perfsonar-tp/tools_scripts:</span>
-<span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span>
-<span class="err">```</span>
-</code></pre></div>
-
 </details>
-<p>Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so
-you can perform the clone once the host is provisioned.</p>
+<p>Note: Repository clone instructions are in Step 2.</p>
 <blockquote>
-<p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
+<p><strong>Note:</strong> All shell commands assume an interactive root shell.</p>
 </blockquote>
 <hr />
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
@@ -1398,185 +1739,85 @@ you can perform the clone once the host is provisioned.</p>
 <p><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</p>
 </li>
 <li>
-<<<<<<< HEAD
-=======
-<p><strong>Apply baseline updates (and verify dependencies):</strong></p>
-<p>Use the repository's helper to check for required tools and print
-copy/paste install commands. Then apply OS updates and any remaining
-baseline packages.</p>
-<ul>
-<li>
-<p>From your checked-out tools_scripts:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts
-./check-deps.sh
-</code></pre></div>
-</li>
-</ul>
-<details class="tip">
-<summary>Alternative: Download and run directly</summary>
-<div class="highlight"><pre><span></span><code><span class="w">        </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">            </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">            </span>-o<span class="w"> </span>./check-deps.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
-./check-deps.sh
-</code></pre></div>
-</details>
-<details class="info">
-<summary>Apply updates and install baseline packages</summary>
-<p>On EL9, apply updates and install common baseline packages, then add any
-packages suggested by the checker (copy/paste the printed dnf line):</p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
-dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
-<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
-<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
-</code></pre></div>
-</details>
-</li>
-<li>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
-<p><strong>Set the hostname and time sync:</strong></p>
-<p>Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that
-hosts the default route (See step 2 below).</p>
-</li>
-</ol>
-<details class="info">
-<summary>System configuration commands</summary>
+<p><strong>Set the hostname and time sync:</strong> Pick the NIC that will own the default route for the hostname.</p>
 <div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
 timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
 </code></pre></div>
-</details>
-<ol>
-<li><strong>Disable unused services:</strong></li>
-</ol>
-<details class="info">
-<summary>Service cleanup commands</summary>
+</li>
+<li>
+<p><strong>Disable unused services:</strong></p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
 dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
 </code></pre></div>
-</details>
-<ol>
-<li><strong>Record NIC names:</strong></li>
-</ol>
 <details class="info">
-<summary>Commands to list network interfaces</summary>
+<summary>Why disable unused services?</summary>
+<p>We recommend disabling unused services during initial provisioning to
+reduce complexity and avoid unexpected interference with network and
+container setup. Services such as <code>firewalld</code>, <code>NetworkManager-wait-online</code>,
+and <code>rsyslog</code> can alter networking state, hold boot or network events,
+or conflict with the automated nftables/NetworkManager changes performed
+by the helper scripts. Disabling non-essential services makes the
+install deterministic, reduces the host attack surface, and avoids
+delays or race conditions while configuring policy-based routing,
+nftables rules, and container networking.</p>
+</details>
+</li>
+<li>
+<p><strong>Record NIC names:</strong> Document interface mappings for later PBR configuration.</p>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>device<span class="w"> </span>status
 ip<span class="w"> </span>-br<span class="w"> </span>addr
 </code></pre></div>
-<p>Document interface mappings; you will need them for the policy-based routing configuration.</p>
-</details>
+</li>
+</ol>
 <hr />
-<<<<<<< HEAD
-<h2 id="step-2-clone-the-repository">Step 2 – Clone the Repository<a class="headerlink" href="#step-2-clone-the-repository" title="Permanent link">&para;</a></h2>
-<p>This guide references multiple scripts from the osg-htc/networking repository. Clone the repository
-to your testpoint host for easy access to all tools.</p>
-<p><strong>Recommended locations:</strong></p>
-<ul>
-<li><strong>perfSONAR testpoint compose bundle:</strong> <code>/opt/perfsonar-tp</code> (if using containerized testpoint)</li>
-</ul>
-<p>First check out the perfSONAR testpoint (if you plan to run containers on the host):</p>
-<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/perfsonar/testpoint.git<span class="w"> </span>/opt/perfsonar-tp
-</code></pre></div>
-<p>Populate <code>/opt/perfsonar-tp/tools_scripts</code> from this repository using the convenience helper we
-provide. The helper performs a shallow sparse checkout and preserves executable bits:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Preview what would happen (safe):</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--dry-run
-
-<span class="c1"># Install into /opt/perfsonar-tp/tools_scripts (creates directory if missing):</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh
-
-<span class="c1"># If you already have /opt/perfsonar-tp, skip cloning the testpoint repo:</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--skip-testpoint
-</code></pre></div>
-<p>After running the helper, the scripts referenced below will be available at <code>/opt/perfsonar-
-tp/tools_scripts</code> and you can run them from there (or use a raw download when noted).</p>
-=======
 <h2 id="step-2-bootstrap-the-testpoint-and-tools">Step 2 – Bootstrap the Testpoint and Tools<a class="headerlink" href="#step-2-bootstrap-the-testpoint-and-tools" title="Permanent link">&para;</a></h2>
-<p>Use the bootstrap script to clone the official perfSONAR testpoint repository into <code>/opt/perfsonar-tp</code> and install the helper scripts into <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
+<p>Use the bootstrap script to clone the perfSONAR testpoint repository into <code>/opt/perfsonar-tp</code> and install helper scripts under <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/tmp/install_tools_scripts.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install_tools_scripts.sh
 /tmp/install_tools_scripts.sh<span class="w"> </span>/opt/perfsonar-tp
 </code></pre></div>
-<p>Throughout this guide, script invocations use the toolkit at <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
+<p>After this step scripts are available at <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
 <hr />
 <ol>
 <li>
-<<<<<<< HEAD
-<p><strong>Apply baseline updates (and verify dependencies):</strong></p>
-<p>Use the repository's helper to check for required tools and print
-copy/paste install commands. Then apply OS updates and any remaining
-baseline packages.</p>
-<ul>
-<li>
-<p>You can run check-deps.sh from the local copy:</p>
+<p><strong>Apply baseline updates and verify dependencies:</strong></p>
+<p>Use the helper to check for required tools and apply OS updates.</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-deps.sh
 </code></pre></div>
 </li>
-</ul>
-</li>
 </ol>
-=======
-<p><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh">Raw file (direct download)</a></p>
-</li>
-<li>
-<p><strong>Locate the script:</strong> Already present in <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> (no installation step required).</p>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <details class="tip">
-<summary>Alternative: one-off run without installing tools</summary>
-<div class="highlight"><pre><span></span><code><span class="c1"># Preferred: run from the installed tools path (see Step 2):</span>
-/opt/perfsonar-tp/tools_scripts/check-deps.sh
+<summary>Alternative: check-deps.sh one-off run without installing tools</summary>
+<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
+<span class="c1"># Preferred: run from the installed tools path (see Step 2):</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
 
 <span class="c1"># If you must run it without installing the tools, download to /tmp and run</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-o<span class="w"> </span>/tmp/check-deps.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/check-deps.sh
-sudo<span class="w"> </span>/tmp/check-deps.sh
+<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
+<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
+<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
+<span class="err">```</span>
 </code></pre></div>
+
 </details>
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
-<p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that
-automates NetworkManager configuration and routing rules and can auto-generate its config file.
-After Step 2, the local path for this script is <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-
-nm.sh</code>.</p>
+<p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuraiton in <code>/etc/perfSONAR-multi-nic-config.conf</code></p>
 <ol>
 <li>
-<p><strong>Run the PBR helper:</strong> (already available from Step 2 in <code>/opt/perfsonar-tp/tools_scripts</code>)</p>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--help
-</code></pre></div>
-</li>
-<li>
-<p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong></p>
-<p>Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config
-you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
-<ul>
-<<<<<<< HEAD
-<li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
-</ul>
+<p><strong>Generate config file automatically:</strong></p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
-<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add
-any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+<p>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>. Open and adjust site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entries).</p>
 </li>
 </ol>
-=======
-<li>Preview (no changes):</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
-</code></pre></div>
-<ul>
-<li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
-</code></pre></div>
-<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <div class="admonition warning">
 <p class="admonition-title">Gateways required for addresses</p>
 <p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address
@@ -1591,50 +1832,19 @@ but no gateway could be determined, it will prompt you interactively to enter an
 IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive sessions or when you
 use <code>--yes</code>.</p>
 </div>
-<ol>
-<li><strong>Execute the script:</strong></li>
-</ol>
 <div class="admonition warning">
-<p class="admonition-title">Run from console or use a persistent session</p>
-<p>Running the PBR helper can modify network interfaces and routing and may
-drop active SSH sessions. Run the script from the host console when
-possible. If you must run it remotely, use a persistent session tool
-(screen, tmux) or prefix with <code>nohup</code> and check output later. Use
-<code>--dry-run</code> to preview actions before applying changes.</p>
-<ul>
-<<<<<<< HEAD
-<li>Apply changes non-interactively (auto-confirm):</li>
-</ul>
+<p class="admonition-title">Connect via console for network changes</p>
+<p>When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either direcatly to the console or by using 'nohup' in front of the script invocation.</p>
+</div>
+<ol>
+<li>
+<p><strong>Apply changes:</strong></p>
+<p>Apply non-interactively with <code>--yes</code> or interactively without:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
-</div>
-=======
-<li>Rehearsal (no changes, extra logging recommended on first run):</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
-</code></pre></div>
-<ul>
-<li>Apply changes non-interactively (auto-confirm):</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
-</code></pre></div>
-<ul>
-<li>Or run interactively and answer the confirmation prompt when ready:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh
-</code></pre></div>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
-<div class="admonition note">
-<p class="admonition-title">Missing gateways at apply time</p>
-<p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the
-script will prompt you interactively to provide a gateway before applying changes. Use
-<code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will
-cause validation to fail so you can correct the config first.</p>
-<p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing
-tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after
-the run and retain it with your change records.</p>
-<p>On some hosts, we have had to reboot or power-cycle to get the new network settings in place.</p>
-</div>
+<p>The script backs up NetworkManager profiles, seeds routing tables, and applies rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> and retain it. Reboot if needed.</p>
+</li>
+</ol>
 <h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
 <p>All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA)
 record and a matching reverse (PTR) record. This is required so remote test tools and site operators
@@ -1648,20 +1858,16 @@ registration systems perform forward/reverse consistency checks.</p>
 </ul>
 <details class="example">
 <summary>Run the DNS checker</summary>
-<p>Run the shipped DNS checker to validate forward/reverse DNS for addresses in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
-<span class="c1"># Preferred: use the local tools checkout from Step 2</span>
-<span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
-
-<span class="c1"># If you must run without installing the tools first, download to /tmp and run</span>
-<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
-<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
-<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
-<span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
-<span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
-<span class="err">```</span>
+<p>Validate forward/reverse DNS for addresses in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
 </code></pre></div>
-
+<p>Or download temporarily:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/tmp/check-dns.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/check-dns.sh
+/tmp/check-dns.sh
+</code></pre></div>
 <p><strong>Notes and automation tips:</strong></p>
 <ul>
 <li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it
@@ -1687,17 +1893,7 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 owns the system default route.</p>
 <hr />
 <h2 id="step-4-configure-nftables-selinux-and-fail2ban">Step 4 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-4-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
-<<<<<<< HEAD
-<p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables
-profile with optional SELinux and Fail2Ban support.</p>
-=======
-<p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> directly (already present if you cloned the toolkit or bootstrapped scripts) to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
-<p>Script location in the repository:</p>
-<ul>
-<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
-<li><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh">Raw file (direct download)</a></li>
-</ul>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
+<p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
 <p>Prerequisites (not installed by the script):</p>
 <ul>
 <li><code>nftables</code> must already be installed and available (<code>nft</code> binary) for firewall configuration.</li>
@@ -1707,14 +1903,7 @@ profile with optional SELinux and Fail2Ban support.</p>
 <p>If any prerequisite is missing, the script skips that component and continues.</p>
 <ol>
 <li>
-<<<<<<< HEAD
-<p><strong>Use the help script:</strong></p>
-<ol>
-<li><strong>Run with desired options:</strong></li>
-</ol>
-=======
 <p><strong>Run with desired options:</strong></p>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
 <ul>
@@ -1728,34 +1917,19 @@ jails—only if those components are already installed.</p>
 </li>
 </ol>
 <details class="info">
-<summary>How SSH allow-lists and validation work</summary>
-<p><strong>SSH allow-list derivation:</strong></p>
+<summary>SSH allow-lists and validation</summary>
 <ul>
-<li>CIDR values in <code>NIC_IPV4_PREFIXES</code>/<code>NIC_IPV6_PREFIXES</code> paired with corresponding addresses are treated as subnets.</li>
-<li>Address entries without a prefix are treated as single hosts.</li>
-<li>The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.</li>
-</ul>
-<p><strong>Validation and output:</strong></p>
-<ul>
-<li>The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation
-  failure, nothing is installed and a message is logged.</li>
-<li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-
-  nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
+<li>Derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-config.conf</code> (CIDR prefixes and addresses).</li>
+<li>Validates nftables rules before writing.</li>
+<li>Outputs: rules to <code>/etc/nftables.d/perfsonar.nft</code>, log to <code>/var/log/perfSONAR-install-nftables.log</code>, backups to <code>/var/backups/</code>.</li>
 </ul>
 </details>
 <details class="tip">
 <summary>Preview nftables rules before applying</summary>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
-<<<<<<< HEAD
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
 </details>
-=======
-</details>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--print-rules
-</code></pre></div>
-</details>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <details class="tip">
 <summary>Manually add extra management hosts/subnets</summary>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes,
@@ -1800,32 +1974,24 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 <hr />
 </details>
 <h2 id="step-5-deploy-the-containerized-perfsonar-testpoint">Step 5 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-5-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
-<p>We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll
-show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on
-the host are reflected inside the containers.</p>
-<p>Key paths to persist on the host will depend upon your deployment use-case.  For a simple perfSONAR
-testpoint deployment only, we only need to persist the /etc/perfsonar/psconfig area of the
-container.   If Lets Encrypt will be used, we also need to ensure visibility of certain locations
-between the containers and we do that be using the host filesystem.  However, this requires
-"seeding" those host directories initial as is covered below.</p>
+<p>Run the official testpoint image using Podman or Docker. Choose one of the two deployment modes:</p>
 <ul>
-<li><code>/opt/perfsonar-tp/psconfig</code> → container <code>/etc/perfsonar/psconfig</code></li>
-<li><code>/etc/apache2</code> → container <code>/etc/apache2</code> (Apache configs)</li>
-<li><code>/var/www/html</code> → container <code>/var/www/html</code> (webroot for Toolkit and ACME challenges)</li>
-<li><code>/etc/letsencrypt</code> → container <code>/etc/letsencrypt</code> (certs/keys, if using Let’s Encrypt)</li>
+<li>Option A: Testpoint only (simplest) — only bind-mount <code>/opt/perfsonar-tp/psconfig</code> for pSConfig.</li>
+<li>Option B: Testpoint + Let’s Encrypt — two containers that share Apache files and certs via
+    host bind mounts.</li>
 </ul>
-<p>Tip: you can use either <code>podman-compose</code> or <code>docker-compose</code> in the steps below. Substitute the
-command that matches your preference.</p>
-<h3 id="prepare-directories-on-the-host">Prepare directories on the host<a class="headerlink" href="#prepare-directories-on-the-host" title="Permanent link">&para;</a></h3>
+<p>Use <code>podman-compose</code> or <code>docker-compose</code> in the examples below.</p>
+<h3 id="option-a-testpoint-only-simplest">Option A — Testpoint only (simplest)<a class="headerlink" href="#option-a-testpoint-only-simplest" title="Permanent link">&para;</a></h3>
+<p>Prepare the pSConfig directory and a minimal compose file. No other host bind-mounts are required.</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/psconfig
-<span class="c1">#  The directories below are if we also use Lets Encrypt</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/var/www/html
-mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/apache2
-mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/letsencrypt
 </code></pre></div>
-<h3 id="seed-defaults-from-the-testpoint-container">Seed defaults from the testpoint container<a class="headerlink" href="#seed-defaults-from-the-testpoint-container" title="Permanent link">&para;</a></h3>
-<p>First, create a minimal compose file and start the container without host bind-mounts so we can copy
-baseline content out.</p>
+<p>Download a ready-made compose file (or copy it manually):<br />
+Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml">repo view</a></p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
+</code></pre></div>
+<p>Or create <code>/opt/perfsonar-tp/docker-compose.yml</code> with:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
@@ -1834,49 +2000,37 @@ baseline content out.</p>
 <span class="w">        </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
 <span class="w">        </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
 <span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
-
 <span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
 <span class="w">        </span><span class="nt">tmpfs</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
-
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
-
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z</span>
 <span class="w">        </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
 <span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
 </code></pre></div>
-<p>Bring it up with your preferred tool:</p>
+<p>Bring it up:</p>
 <div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or: (cd /opt/perfsonar-tp; docker-compose up -d)</span>
 </code></pre></div>
-<h3 id="copy-baseline-content-out-of-the-running-container">Copy baseline content out of the running container<a class="headerlink" href="#copy-baseline-content-out-of-the-running-container" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Use docker cp or podman cp (either works)</span>
-docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/apache2<span class="w"> </span>/etc/apache2
-docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/var/www/html<span class="w"> </span>/var/www/html
-docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/perfsonar/psconfig<span class="w"> </span>/opt/perfsonar-tp/psconfig
-</code></pre></div>
-<p>If SELinux is enforcing, we’ll relabel these paths when we mount (using <code>:z</code>/<code>:Z</code> below), so you
-don’t need manual <code>chcon</code>.</p>
-<h3 id="replace-the-compose-file-with-bind-mounts-and-optional-certbot">Replace the compose file with bind-mounts and optional certbot<a class="headerlink" href="#replace-the-compose-file-with-bind-mounts-and-optional-certbot" title="Permanent link">&para;</a></h3>
-<p>You can download a ready-to-use compose file from this repository, or create it manually.</p>
+<p>That’s it for the testpoint-only mode. Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on
+the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>.</p>
+<hr />
+<h3 id="option-b-testpoint-lets-encrypt-shared-apache-and-certs">Option B — Testpoint + Let’s Encrypt (shared Apache and certs)<a class="headerlink" href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" title="Permanent link">&para;</a></h3>
+<p>This mode runs two containers (<code>testpoint</code> and <code>certbot</code>) and bind-mounts the following host paths
+so Apache content and certificates persist on the host and are shared:</p>
 <ul>
-<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/docker-compose.yml">Browse</a></li>
-<li>Download directly:</li>
+<li><code>/var/www/html</code> — webroot used for HTTP-01 challenges</li>
+<li><code>/etc/apache2</code> — Apache configuration</li>
+<li><code>/etc/letsencrypt</code> — Let’s Encrypt certs and state</li>
 </ul>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
-</code></pre></div>
-<p>Or create/edit <code>/opt/perfsonar-tp/docker-compose.yml</code> with the following content (includes an
-optional <code>certbot</code> sidecar):</p>
+<h4 id="1-seed-host-directories-from-a-temporary-testpoint-container">1) Seed host directories from a temporary testpoint container<a class="headerlink" href="#1-seed-host-directories-from-a-temporary-testpoint-container" title="Permanent link">&para;</a></h4>
+<p>Start a temporary testpoint without bind-mounts, then copy baseline content out to the host.</p>
+<p>Create <code>/opt/perfsonar-tp/docker-compose.yml</code> (temporary) with:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
@@ -1885,56 +2039,82 @@ optional <code>certbot</code> sidecar):</p>
 <span class="w">        </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
 <span class="w">        </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
 <span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
-
 <span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
 <span class="w">        </span><span class="nt">tmpfs</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
-
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
+<span class="w">        </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
+<span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
+</code></pre></div>
+<p>Bring it up and seed:</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose up -d</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/psconfig<span class="w"> </span>/var/www/html<span class="w"> </span>/etc/apache2<span class="w"> </span>/etc/letsencrypt
+docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/perfsonar/psconfig<span class="w"> </span>/opt/perfsonar-tp/psconfig
+docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/var/www/html<span class="w"> </span>/var/www/html
+docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/apache2<span class="w"> </span>/etc/apache2
+</code></pre></div>
+<p>If SELinux is enforcing, the <code>:z</code>/<code>:Z</code> options in the next step handle labels; no manual <code>chcon</code> is
+required.</p>
+<p>Stop the temporary container before switching to the final compose:</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>down<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose down</span>
+</code></pre></div>
+<h4 id="2-create-the-final-compose-with-shared-volumes-and-certbot">2) Create the final compose with shared volumes and certbot<a class="headerlink" href="#2-create-the-final-compose-with-shared-volumes-and-certbot" title="Permanent link">&para;</a></h4>
+<p>Download a ready-made compose file (or copy it manually):<br />
+Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml">repo view</a></p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
+</code></pre></div>
+<p>Or create <code>/opt/perfsonar-tp/docker-compose.yml</code> with:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">perfsonar-testpoint</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/perfsonar/testpoint:5.2.4-systemd</span>
+<span class="w">        </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
+<span class="w">        </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
+<span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
+<span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+<span class="w">        </span><span class="nt">tmpfs</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
+<span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/www/html:/var/www/html:z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/apache2:/etc/apache2:z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/letsencrypt:/etc/letsencrypt:z</span>
-
 <span class="w">        </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
 <span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
 
-<span class="w">    </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
 <span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">certbot/certbot</span>
 <span class="w">        </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">certbot</span>
 <span class="w">        </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
 <span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
-<span class="w">        </span><span class="nt">entrypoint</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;trap</span><span class="nv"> </span><span class="s">exit</span><span class="nv"> </span><span class="s">TERM;</span><span class="nv"> </span><span class="s">while</span><span class="nv"> </span><span class="s">:;</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">certbot</span><span class="nv"> </span><span class="s">renew;</span><span class="nv"> </span><span class="s">sleep</span><span class="nv"> </span><span class="s">12h</span><span class="nv"> </span><span class="s">&amp;</span><span class="nv"> </span><span class="s">wait</span><span class="nv"> </span><span class="s">$${!};</span><span class="nv"> </span><span class="s">done;&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;trap</span><span class="nv"> </span><span class="s">exit</span><span class="nv"> </span><span class="s">TERM;</span><span class="nv"> </span><span class="s">while</span><span class="nv"> </span><span class="s">:;</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">certbot</span><span class="nv"> </span><span class="s">renew;</span><span class="nv"> </span><span class="s">sleep</span><span class="nv"> </span><span class="s">12h</span><span class="nv"> </span><span class="s">&amp;</span><span class="nv"> </span><span class="s">wait</span><span class="nv"> </span><span class="s">$${!};</span><span class="nv"> </span><span class="s">done;&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">        </span><span class="nt">depends_on</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testpoint</span>
-
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
-
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/www/html:/var/www/html:z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/letsencrypt:/etc/letsencrypt:z</span>
 </code></pre></div>
-<h3 id="restart-with-the-new-compose">Restart with the new compose<a class="headerlink" href="#restart-with-the-new-compose" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>down<span class="o">)</span>
-<span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose down &amp;&amp; docker-compose up -d</span>
+<p>Start the final stack:</p>
+<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose up -d</span>
 </code></pre></div>
-<h3 id="optional-obtain-your-first-lets-encrypt-certificate">Optional – obtain your first Let’s Encrypt certificate<a class="headerlink" href="#optional-obtain-your-first-lets-encrypt-certificate" title="Permanent link">&para;</a></h3>
-<p>The <code>certbot</code> sidecar above continuously renews existing certs. For the initial issuance, run a one-
-shot command and then reload Apache inside the testpoint container:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Issue (HTTP-01 webroot challenge). Replace values accordingly.</span>
-docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span>-v<span class="w"> </span>/var/www/html:/var/www/html<span class="w"> </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt<span class="w"> </span><span class="se">\</span>
+<h4 id="3-obtain-your-first-lets-encrypt-certificate-one-time">3) Obtain your first Let’s Encrypt certificate (one-time)<a class="headerlink" href="#3-obtain-your-first-lets-encrypt-certificate-one-time" title="Permanent link">&para;</a></h4>
+<p>The <code>certbot</code> sidecar above will renew automatically. For the initial issuance, run:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span>-v<span class="w"> </span>/var/www/html:/var/www/html<span class="w"> </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>certbot/certbot<span class="w"> </span>certonly<span class="w"> </span>--webroot<span class="w"> </span>-w<span class="w"> </span>/var/www/html<span class="w"> </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--email<span class="w"> </span>&lt;LETSENCRYPT_EMAIL&gt;<span class="w"> </span>--agree-tos<span class="w"> </span>--no-eff-email
 
@@ -1943,13 +2123,13 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </code></pre></div>
 <details class="info">
 <summary>Notes</summary>
-<ul>
-<li>Ensure port 80 on the host is reachable from the internet while issuing certificates.</li>
-<li>All shared paths use SELinux-aware <code>:z</code>/<code>:Z</code> to permit container access on enforcing hosts.</li>
-</ul>
+<div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="nv">Ensure</span><span class="w"> </span><span class="nv">TCP</span><span class="w"> </span><span class="nv">port</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">host</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">reachable</span><span class="w"> </span><span class="nv">from</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">internet</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nv">issuing</span><span class="w"> </span><span class="nv">certificates</span>.
+<span class="o">-</span><span class="w"> </span><span class="nv">Shared</span><span class="w"> </span><span class="nv">paths</span><span class="w"> </span><span class="nv">use</span><span class="w"> </span><span class="nv">SELinux</span><span class="o">-</span><span class="nv">aware</span><span class="w"> </span>`:<span class="nv">z</span>`<span class="o">/</span>`:<span class="nv">Z</span>`<span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">permit</span><span class="w"> </span><span class="nv">container</span><span class="w"> </span><span class="nv">access</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">enforcing</span><span class="w"> </span><span class="nv">hosts</span>.
+</code></pre></div>
+
 </details>
 <h2 id="step-6-register-and-configure-with-wlcgosg">Step 6 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-6-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
-<p>We need to register your instance and ensure it is configurated with the required meta data for the
+<p>We need to register your instance and ensure it is configured with the required meta data for the
 lsregistration daemon (see below).</p>
 <ol>
 <li><strong>OSG/WLCG registration workflow:</strong></li>
@@ -1978,64 +2158,22 @@ addresses (<code>ifaddr</code> tags).</p>
 <h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running
 <code>perfsonar-testpoint</code> container and restart the daemon only if needed.</p>
-<div class="codehilite"><pre><span></span><code><span class="p">-</span> <span class="nf">Script</span><span class="w"> </span><span class="p">(</span><span class="n">browse</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="p">.</span><span class="n">sh</span><span class="p">][</span><span class="n">psupdate</span><span class="p">]</span>
-<span class="o">-</span><span class="w"> </span><span class="n">Raw</span><span class="w"> </span><span class="p">(</span><span class="n">download</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="n">raw</span><span class="w"> </span><span class="n">link</span><span class="p">][</span><span class="n">psupdateraw</span><span class="p">]</span>
-
-<span class="o">&lt;!--</span><span class="w"> </span><span class="n">markdownlint</span><span class="o">-</span><span class="n">disable</span><span class="w"> </span><span class="n">MD013</span><span class="w"> </span><span class="o">--&gt;</span>
-<span class="p">[</span><span class="n">psupdate</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</span>
-<span class="p">[</span><span class="n">psupdateraw</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</span>
-<span class="o">&lt;!--</span><span class="w"> </span><span class="n">markdownlint</span><span class="o">-</span><span class="n">enable</span><span class="w"> </span><span class="n">MD013</span><span class="w"> </span><span class="o">--&gt;</span>
-</code></pre></div>
-
 <p>Install and run examples (root shell):</p>
-<<<<<<< HEAD
-<p>Note: the helper uses subcommands; use the <code>update</code> command to apply field changes. Other available
-commands: <code>save</code>, <code>restore</code>, <code>create</code>, <code>extract</code>.</p>
-<p>From the local tools checkout (preferred):</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only</span>
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--dry-run<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
-
-<span class="c1"># Apply common updates and restart the daemon inside the container</span>
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
-=======
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
 
-<span class="c1"># Apply common updates and restart the daemon inside the container</span>
+<span class="c1"># Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)</span>
+bash<span class="w"> </span>/root/restore-lsreg.sh
+
+<span class="c1"># Apply new settings and restart the daemon inside the container</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
-<<<<<<< HEAD
-
-<span class="c1"># Produce a self-contained restore script for host restore</span>
-sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
-sudo<span class="w"> </span>/tmp/restore-lsreg.sh
 </code></pre></div>
-=======
-</code></pre></div>
-<details class="tip">
-<summary>Alternative: download this script directly (if you didn't run the bootstrap)</summary>
-<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
-<span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span>
-<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
-<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
-<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span>
-<span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span>
-<span class="err">```</span>
-</code></pre></div>
-
-</details>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
-<hr />
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
 <ol>
@@ -2116,7 +2254,6 @@ toolkit-system-health
 <span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
 <span class="w">        </span><span class="c1"># ...</span>
 <span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
-<<<<<<< HEAD
 
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
 
@@ -2124,12 +2261,6 @@ toolkit-system-health
 <span class="w">        </span><span class="c1"># ...</span>
 <span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
 
-=======
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
-<span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># ...</span>
-<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
->>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
 </code></pre></div>
 <p>This instructs Podman to check the registry for newer images and restart only if an update is pulled.</p>
@@ -2154,49 +2285,30 @@ journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<s
 </ol>
 </details>
 
-              
-            </article>
-          </div>
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
       </main>
       
         <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        
-        <a href="../landing/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Landing" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Landing
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../automated-setup/" class="md-footer__link md-footer__link--next" aria-label="Next: Automated setup" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Automated setup
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -2218,10 +2330,14 @@ journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<s
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.5e67fbfe.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c44cc438.min.js"></script>
+    
+      
+      <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.f55a23d4.min.js"></script>
       
     
   </body>
