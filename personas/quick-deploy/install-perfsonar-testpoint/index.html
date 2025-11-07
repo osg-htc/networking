@@ -826,15 +826,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#install-container-tooling-podman-and-optional-docker-style-compose" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install container tooling (Podman and optional Docker-style compose)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#prepare-directories-on-the-host" class="md-nav__link">
     <span class="md-ellipsis">
       Prepare directories on the host
@@ -1580,15 +1571,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#install-container-tooling-podman-and-optional-docker-style-compose" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install container tooling (Podman and optional Docker-style compose)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#prepare-directories-on-the-host" class="md-nav__link">
     <span class="md-ellipsis">
       Prepare directories on the host
@@ -1745,10 +1727,11 @@
 </li>
 </ul>
 <p>The repository includes a helper script <code>docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</code> which can copy and update <code>lsregistrationdaemon.conf</code> from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the <code>lsregistrationdaemon.conf</code> manually) and keep a copy in your change log.</p>
-<p>??? info "Quick capture of existing lsregistration config (if replacing)"</p>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">You</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">capture</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="n">Lookup</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">registration</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">redeploying</span><span class="o">.</span>
+<div class="codehilite"><pre><span></span><code><span class="err">???</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="s2">&quot;Quick capture of existing lsregistration config (if replacing)&quot;</span>
 
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">Option</span><span class="w"> </span><span class="n">A</span><span class="p">:</span><span class="w"> </span><span class="n">download</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">helper</span><span class="w"> </span><span class="n">temporarily</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="bp">self</span><span class="o">-</span><span class="n">contained</span><span class="w"> </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="p">(</span><span class="n">works</span><span class="w"> </span><span class="n">even</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">haven</span><span class="s1">&#39;t done Step 2 yet):</span>
+<span class="w">   </span><span class="n">You</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">capture</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="n">Lookup</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">registration</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">redeploying</span><span class="o">.</span>
+
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Download</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">helper</span><span class="w"> </span><span class="n">temporarily</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="bp">self</span><span class="o">-</span><span class="n">contained</span><span class="w"> </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="p">(</span><span class="n">works</span><span class="w"> </span><span class="n">even</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">haven</span><span class="s1">&#39;t done Step 2 yet):</span>
 
 <span class="w">        </span><span class="err">```</span><span class="n">bash</span>
 <span class="w">        </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
@@ -1757,12 +1740,6 @@
 <span class="w">        </span><span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span>
 <span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="o">--</span><span class="n">output</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">restore</span><span class="o">-</span><span class="n">lsreg</span><span class="o">.</span><span class="n">sh</span>
 <span class="w">        </span><span class="c1"># Save /root/restore-lsreg.sh with your change notes</span>
-<span class="w">        </span><span class="err">```</span>
-
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">Option</span><span class="w"> </span><span class="n">B</span><span class="p">:</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">tools</span><span class="w"> </span><span class="n">directory</span><span class="w"> </span><span class="n">locally</span><span class="w"> </span><span class="p">(</span><span class="n">from</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">previous</span><span class="w"> </span><span class="n">run</span><span class="p">),</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">save</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="n">conf</span><span class="w"> </span><span class="n">directly</span><span class="p">:</span>
-
-<span class="w">        </span><span class="err">```</span><span class="n">bash</span>
-<span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="n">save</span><span class="w"> </span><span class="o">--</span><span class="n">output</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">lsregistrationdaemon</span><span class="o">.</span><span class="n">conf</span>
 <span class="w">        </span><span class="err">```</span>
 </code></pre></div>
 
@@ -1874,25 +1851,15 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </ol>
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <p>The repository ships an enhanced script <code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code> that automates NetworkManager configuration and routing rules and can auto-generate its config file. After Step 2, the local path for this script is <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code>.</p>
-<p>Script location in the repository:</p>
-<ul>
-<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
-<li>
-<p><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh">Raw file (direct download)</a></p>
-</li>
+<ol>
 <li>
 <p><strong>Run the PBR helper:</strong> (already available from Step 2 in <code>/opt/perfsonar-tp/tools_scripts</code>)</p>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--help<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s1">&#39;1,40p&#39;</span>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--help
 </code></pre></div>
 </li>
 <li>
 <p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong></p>
 <p>Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
-<ul>
-<li>Preview (no changes):</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
-</code></pre></div>
 <ul>
 <li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
 </ul>
@@ -1910,28 +1877,24 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </li>
 <li>
 <p><strong>Execute the script:</strong></p>
-<ul>
-<li>Rehearsal (no changes, extra logging recommended on first run):</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
-</code></pre></div>
-<ul>
-<li>Apply changes non-interactively (auto-confirm):</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
-</code></pre></div>
-<ul>
-<li>Or run interactively and answer the confirmation prompt when ready:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Missing gateways at apply time</p>
-<p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use <code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.</p>
-</div>
-<p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
 </li>
-</ul>
+</ol>
+<p>It is likely you will get disconnected if you are logged in via 'ssh'.  It is strongly recommended to run the script directly on the console or perhaps use 'nohup' in front of the command so that it will not drop the shell.  You can also use the --dry-run option to see what it will do without making changes.</p>
+<div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="n">Apply</span><span class="w"> </span><span class="n">changes</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">interactively</span><span class="w"> </span><span class="p">(</span><span class="n">auto</span><span class="o">-</span><span class="n">confirm</span><span class="p">):</span>
+
+<span class="err">```</span><span class="n">bash</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="n">yes</span>
+<span class="err">```</span>
+
+<span class="o">!!!</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="s2">&quot;Missing gateways at apply time&quot;</span>
+
+<span class="w">    </span><span class="n">If</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="n">still</span><span class="w"> </span><span class="n">contains</span><span class="w"> </span><span class="err">`</span><span class="o">-</span><span class="err">`</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">gateway</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">IP</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">interactively</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">provide</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">gateway</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">applying</span><span class="w"> </span><span class="n">changes</span><span class="o">.</span><span class="w"> </span><span class="n">Use</span><span class="w"> </span><span class="err">`</span><span class="o">--</span><span class="n">yes</span><span class="err">`</span><span class="w"> </span><span class="p">(</span><span class="ow">or</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">interactively</span><span class="p">)</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">suppress</span><span class="w"> </span><span class="n">prompts</span><span class="p">;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">case</span><span class="p">,</span><span class="w"> </span><span class="n">missing</span><span class="w"> </span><span class="n">gateways</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">cause</span><span class="w"> </span><span class="n">validation</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">fail</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">correct</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="n">first</span><span class="o">.</span>
+
+<span class="n">The</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">creates</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">timestamped</span><span class="w"> </span><span class="n">backup</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">existing</span><span class="w"> </span><span class="n">NetworkManager</span><span class="w"> </span><span class="n">profiles</span><span class="p">,</span><span class="w"> </span><span class="n">seeds</span><span class="w"> </span><span class="n">routing</span><span class="w"> </span><span class="n">tables</span><span class="p">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">applies</span><span class="w"> </span><span class="n">routing</span><span class="w"> </span><span class="n">rules</span><span class="o">.</span><span class="w"> </span><span class="n">Review</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">nic</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">log</span><span class="err">`</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">retain</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">change</span><span class="w"> </span><span class="n">records</span><span class="o">.</span>
+
+<span class="n">On</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">hosts</span><span class="p">,</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">had</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">reboot</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">power</span><span class="o">-</span><span class="n">cycle</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">get</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="n">settings</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">place</span><span class="o">.</span>
+</code></pre></div>
+
 <h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
 <p>All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.</p>
 <ul>
@@ -1975,11 +1938,6 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 <h2 id="step-4-configure-nftables-selinux-and-fail2ban">Step 4 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-4-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
 <p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a
 hardened nftables profile with optional SELinux and Fail2Ban support.</p>
-<p>Script location in the repository:</p>
-<ul>
-<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
-<li><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh">Raw file (direct download)</a></li>
-</ul>
 <p>Prerequisites (not installed by the script):</p>
 <ul>
 <li><code>nftables</code> must already be installed and available (<code>nft</code> binary) for firewall configuration.</li>
@@ -1989,22 +1947,7 @@ hardened nftables profile with optional SELinux and Fail2Ban support.</p>
 <p>If any prerequisite is missing, the script skips that component and continues.</p>
 <ol>
 <li>
-<p><strong>Stage the installer:</strong></p>
-<ul>
-<li>
-<p>From the local tools checkout:</p>
-<div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>~/perfsonar-install-nftables.sh
-</code></pre></div>
-</li>
-</ul>
-<details class="tip">
-<summary>Alternative: Download directly from the repository URL</summary>
-<div class="highlight"><pre><span></span><code><span class="w">        </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">            </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">            </span>-o<span class="w"> </span>~/perfsonar-install-nftables.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>~/perfsonar-install-nftables.sh
-</code></pre></div>
-</details>
+<p><strong>Use the help script:</strong></p>
 <ol>
 <li><strong>Run with desired options:</strong></li>
 </ol>
@@ -2086,20 +2029,17 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 </details>
 <h2 id="step-5-deploy-the-containerized-perfsonar-testpoint">Step 5 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-5-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
 <p>We’ll run the official testpoint image from the GitHub Container Registry using Podman, but we’ll show Docker-style commands so you can choose either tool. We’ll bind-mount host paths so edits on the host are reflected inside the containers.</p>
-<p>Key paths to persist on the host:</p>
+<p>Key paths to persist on the host will depend upon your deployment use-case.  For a simple perfSONAR testpoint deployment only, we only need to persist the /etc/perfsonar/psconfig area of the container.   If Lets Encrypt will be used, we also need to ensure visibility of certain locations between the containers and we do that be using the host filesystem.  However, this requires "seeding" those host directories initial as is covered below.</p>
 <ul>
 <li><code>/opt/perfsonar-tp/psconfig</code> → container <code>/etc/perfsonar/psconfig</code></li>
 <li><code>/etc/apache2</code> → container <code>/etc/apache2</code> (Apache configs)</li>
 <li><code>/var/www/html</code> → container <code>/var/www/html</code> (webroot for Toolkit and ACME challenges)</li>
 <li><code>/etc/letsencrypt</code> → container <code>/etc/letsencrypt</code> (certs/keys, if using Let’s Encrypt)</li>
 </ul>
-<h3 id="install-container-tooling-podman-and-optional-docker-style-compose">Install container tooling (Podman and optional Docker-style compose)<a class="headerlink" href="#install-container-tooling-podman-and-optional-docker-style-compose" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>podman<span class="w"> </span>podman-compose<span class="w"> </span>python3-pip
-pip3<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>docker-compose
-</code></pre></div>
 <p>Tip: you can use either <code>podman-compose</code> or <code>docker-compose</code> in the steps below. Substitute the command that matches your preference.</p>
 <h3 id="prepare-directories-on-the-host">Prepare directories on the host<a class="headerlink" href="#prepare-directories-on-the-host" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/psconfig
+<span class="c1">#  The directories below are if we also use Lets Encrypt</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/var/www/html
 mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/apache2
 mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/letsencrypt
@@ -2210,15 +2150,6 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </details>
 <h2 id="step-6-register-and-configure-with-wlcgosg">Step 6 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-6-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <p>We need to register your instance and ensure it is configurated with the required meta data for the lsregistration daemon (see below).</p>
-<details class="info">
-<summary>Configuration details to populate</summary>
-<ul>
-<li>Site contact email</li>
-<li>Usage policy URL</li>
-<li>Location (latitude/longitude)</li>
-<li>Export the configuration via <code>/etc/perfsonar/psconfig/nodes/local.json</code> for record keeping</li>
-</ul>
-</details>
 <ol>
 <li>
 <p><strong>OSG/WLCG registration workflow:</strong></p>
@@ -2309,10 +2240,6 @@ tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&
 </code></pre></div>
 <p>Confirm traffic uses the intended policy-based routes (check <code>ip route get &lt;dest&gt;</code>).</p>
 </details>
-</li>
-<li>
-<p><strong>Toolkit diagnostics:</strong> visit the Toolkit UI → <em>Dashboard</em> → <em>Host Status</em> to confirm
-    pScheduler, MaDDash, and owamp/bwctl services report healthy.</p>
 </li>
 <li>
 <p><strong>Security posture:</strong></p>
