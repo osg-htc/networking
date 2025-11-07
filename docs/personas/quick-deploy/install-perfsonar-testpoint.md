@@ -605,8 +605,11 @@ addresses (`ifaddr` tags).
 Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running
 `perfsonar-testpoint` container and restart the daemon only if needed.
 
-- Script (browse): [perfSONAR-update-lsregistration.sh](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
-- Raw (download): [raw link](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh)
+    - Script (browse): [perfSONAR-update-lsregistration.sh][psupdate]
+    - Raw (download): [raw link][psupdateraw]
+
+    [psupdate]: https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh
+    [psupdateraw]: https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh
 
 Install and run examples (root shell):
 
