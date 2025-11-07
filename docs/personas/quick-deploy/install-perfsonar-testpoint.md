@@ -420,10 +420,18 @@ mkdir -p /opt/perfsonar-tp/psconfig /var/www/html /etc/apache2 /etc/letsencrypt
 docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
 docker cp perfsonar-testpoint:/var/www/html /var/www/html
 docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
+docker cp perfsonar-testpoint:/etc/letsencrypt /etc/letsencrypt || true
 ```
 
 If SELinux is enforcing, the `:z`/`:Z` options in the next step handle labels; no manual `chcon` is
 required.
+
+??? note "About /etc/letsencrypt seeding"
+
+    If `/etc/letsencrypt` does not exist inside the temporary container, the copy command above
+    will be skipped. This is expected. The host directory `/etc/letsencrypt` will be populated
+    during the initial certificate issuance in Step 5.3. Keeping the directory present (even if
+    empty) ensures the bind mount works and SELinux labels can be applied.
 
 Stop the temporary container before switching to the final compose:
 
