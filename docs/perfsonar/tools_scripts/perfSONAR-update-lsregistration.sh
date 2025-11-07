@@ -1,37 +1,25 @@
 #!/usr/bin/env bash
-# Update lsregistrationdaemon.conf inside a perfSONAR testpoint container
-#
-# This script copies /etc/perfsonar/lsregistrationdaemon.conf out of the
-# container, applies requested changes, and copies it back. Optionally restarts
-# the lsregistration daemon inside the container. Works with either docker or
-# podman.
-#
-# Usage examples:
-#   sudo ./perfSONAR-update-lsregistration.sh \
-#     --site-name "Acme Co." \
-#     --domain example.org \
-#     --project WLCG --project OSG \
-#     --city Berkeley --region CA --country US --zip 94720 \
-#     --latitude 37.5 --longitude -121.7469 \
-#     --admin-name "pS Admin" --admin-email admin@example.org \
-#     --ls-instance https://ls.example.org/lookup/records \
-#     --ls-lease-duration 7200 --check-interval 3600 --allow-internal 0
-#
-#   # Use a non-default container name and skip restart
-#   sudo ./perfSONAR-update-lsregistration.sh --container perfsonar-testpoint --no-restart --dry-run
-#
+# Combined lsregistration helper
+# Supports: save, restore, create, update, extract
+# Works against a container (docker|podman) or local filesystem.
+
 set -euo pipefail
 IFS=$'\n\t'
 
-# Defaults
-CONTAINER="perfsonar-testpoint"
+PROG_NAME=$(basename "$0")
+
+DEFAULT_CONTAINER="perfsonar-testpoint"
+DEFAULT_CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"
+
+# Global defaults
+CONTAINER="$DEFAULT_CONTAINER"
 ENGINE="auto"   # auto|docker|podman
-CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"
+CONF_PATH="$DEFAULT_CONF_PATH"
 DRY_RUN=false
 NO_RESTART=false
-LOCAL_MODE=false   # when true, operate on local filesystem instead of container
+LOCAL_MODE=false
 
-# Values to set (all optional)
+# Common fields
 SITE_NAME=""
 DOMAIN=""
 PROJECTS=()
@@ -49,46 +37,54 @@ ADMIN_NAME=""
 ADMIN_EMAIL=""
 
 usage() {
-  cat <<'EOF'
-Usage: perfSONAR-update-lsregistration.sh [OPTIONS]
+	cat <<EOF
+Usage: $PROG_NAME <command> [OPTIONS]
 
-Options:
-  --container NAME           Container name (default: perfsonar-testpoint)
-  --engine [auto|docker|podman]  Container engine selector (default: auto)
-  --local                    Edit a local file instead of a container (see --conf)
-  --conf PATH                Path to lsregistrationdaemon.conf (default: /etc/perfsonar/lsregistrationdaemon.conf)
-  --dry-run                  Show diff but do not copy back or restart
-  --no-restart               Do not restart lsregistrationdaemon inside container
+Commands:
+	save    --output FILE       Save current lsregistrationdaemon.conf to FILE
+	restore --input FILE        Restore FILE into target (container or local)
+	create  --input FILE|--build Build a fresh conf from options and install
+	update  [options]           Update existing conf in-place (fields below)
+	extract --output FILE       Produce a self-contained restore script (host-targeted)
 
-  --site-name STR            Set site_name
-  --domain STR               Set domain
-  --project STR              Add a site_project (may be repeated)
-  --city STR                 Set city
-  --region STR               Set region (2-letter)
-  --country STR              Set country (2-letter ISO)
-  --zip STR                  Set zip_code
-  --latitude NUM             Set latitude
-  --longitude NUM            Set longitude
+Global options:
+	--container NAME            Container name (default: $DEFAULT_CONTAINER)
+	--engine [auto|docker|podman]
+	--conf PATH                 Path to lsregistrationdaemon.conf (default: $DEFAULT_CONF_PATH)
+	--local                     Operate on local filesystem instead of container
+	--dry-run                   Show actions but do not write back
+	--no-restart                Do not attempt to restart lsregistration daemon after write
 
-  --ls-instance URL          Set ls_instance
-  --ls-lease-duration SEC    Set ls_lease_duration (seconds)
-  --check-interval SEC       Set check_interval (seconds)
-  --allow-internal 0|1       Set allow_internal_addresses
-
-  --admin-name STR           Set administrator name (requires --admin-email)
-  --admin-email STR          Set administrator email (requires --admin-name)
+Fields (used by create/update):
+	--site-name STR
+	--domain STR
+	--project STR               (may be repeated)
+	--city STR
+	--region STR
+	--country STR
+	--zip STR
+	--latitude NUM
+	--longitude NUM
+	--ls-instance URL
+	--ls-lease-duration SEC
+	--check-interval SEC
+	--allow-internal 0|1
+	--admin-name STR
+	--admin-email STR
 
 Examples:
-  sudo ./perfSONAR-update-lsregistration.sh \
-    --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-    --city Berkeley --region CA --country US --zip 94720 \
-    --latitude 37.5 --longitude -121.7469 \
-    --admin-name "pS Admin" --admin-email admin@example.org
+	# Update fields in container
+	sudo $PROG_NAME update --site-name "Acme" --domain example.org --project OSG
 
-  # Operate on host file (non-container use)
-  sudo ./perfSONAR-update-lsregistration.sh --local \
-    --conf /etc/perfsonar/lsregistrationdaemon.conf \
-    --site-name "Acme Co." --domain example.org
+	# Save conf to local file
+	sudo $PROG_NAME save --output ./lsreg.conf
+
+	# Create a fresh conf from fields and install into container
+	sudo $PROG_NAME create --site-name "Acme" --domain example.org --project OSG
+
+	# Produce a self-contained restore script for host use
+	sudo $PROG_NAME extract --output restore-lsreg.sh
+
 EOF
 }
 
@@ -97,219 +93,364 @@ log() { printf '%s %s\n' "$(date +'%F %T')" "$*"; }
 need_cmd() { command -v "$1" >/dev/null 2>&1 || { echo "Missing required command: $1" >&2; exit 2; }; }
 
 pick_engine() {
-  if [[ "$ENGINE" == "docker" || "$ENGINE" == "podman" ]]; then
-    echo "$ENGINE"; return 0
-  fi
-  if command -v docker >/dev/null 2>&1 && docker ps >/dev/null 2>&1; then
-    echo docker; return 0
-  fi
-  if command -v podman >/dev/null 2>&1 && podman ps >/dev/null 2>&1; then
-    echo podman; return 0
-  fi
-  echo "No container engine found (docker/podman)" >&2
-  exit 2
+	if [[ "$ENGINE" == "docker" || "$ENGINE" == "podman" ]]; then
+		echo "$ENGINE"; return 0
+	fi
+	if command -v docker >/dev/null 2>&1 && docker ps >/dev/null 2>&1; then
+		echo docker; return 0
+	fi
+	if command -v podman >/dev/null 2>&1 && podman ps >/dev/null 2>&1; then
+		echo podman; return 0
+	fi
+	echo "No container engine found (docker/podman)" >&2
+	exit 2
 }
 
 container_exists() {
-  local eng=$1 name=$2
-  if [[ $eng == docker ]]; then
-    docker ps -a --format '{{.Names}}' | grep -Fxq "$name"
-  else
-    podman ps -a --format '{{.Names}}' | grep -Fxq "$name"
-  fi
+	local eng=$1 name=$2
+	if [[ $eng == docker ]]; then
+		docker ps -a --format '{{.Names}}' | grep -Fxq "$name"
+	else
+		podman ps -a --format '{{.Names}}' | grep -Fxq "$name"
+	fi
 }
 
 copy_from_container() {
-  local eng=$1 name=$2 src=$3 dst=$4
-  if [[ $eng == docker ]]; then
-    docker cp "$name:$src" "$dst"
-  else
-    podman cp "$name:$src" "$dst"
-  fi
+	local eng=$1 name=$2 src=$3 dst=$4
+	if [[ $eng == docker ]]; then
+		docker cp "$name:$src" "$dst"
+	else
+		podman cp "$name:$src" "$dst"
+	fi
 }
 
 copy_to_container() {
-  local eng=$1 name=$2 src=$3 dst=$4
-  if [[ $eng == docker ]]; then
-    docker cp "$src" "$name:$dst"
-  else
-    podman cp "$src" "$name:$dst"
-  fi
+	local eng=$1 name=$2 src=$3 dst=$4
+	if [[ $eng == docker ]]; then
+		docker cp "$src" "$name:$dst"
+	else
+		podman cp "$src" "$name:$dst"
+	fi
 }
 
 exec_in_container() {
-  local eng=$1 name=$2
-  shift 2
-  if [[ $eng == docker ]]; then
-    docker exec "$name" "$@"
-  else
-    podman exec "$name" "$@"
-  fi
+	local eng=$1 name=$2
+	shift 2
+	if [[ $eng == docker ]]; then
+		docker exec "$name" "$@"
+	else
+		podman exec "$name" "$@"
+	fi
 }
 
-# Parse CLI
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --help|-h) usage; exit 0;;
-    --container) CONTAINER="$2"; shift 2;;
-    --engine) ENGINE="$2"; shift 2;;
-    --local) LOCAL_MODE=true; shift;;
-    --conf) CONF_PATH="$2"; shift 2;;
-    --dry-run) DRY_RUN=true; shift;;
-    --no-restart) NO_RESTART=true; shift;;
-    --site-name) SITE_NAME="$2"; shift 2;;
-    --domain) DOMAIN="$2"; shift 2;;
-    --project) PROJECTS+=("$2"); shift 2;;
-    --city) CITY="$2"; shift 2;;
-    --region) REGION="$2"; shift 2;;
-    --country) COUNTRY="$2"; shift 2;;
-    --zip) ZIP="$2"; shift 2;;
-    --latitude) LATITUDE="$2"; shift 2;;
-    --longitude) LONGITUDE="$2"; shift 2;;
-    --ls-instance) LS_INSTANCE="$2"; shift 2;;
-    --ls-lease-duration) LS_LEASE_DURATION="$2"; shift 2;;
-    --check-interval) CHECK_INTERVAL="$2"; shift 2;;
-    --allow-internal) ALLOW_INTERNAL="$2"; shift 2;;
-    --admin-name) ADMIN_NAME="$2"; shift 2;;
-    --admin-email) ADMIN_EMAIL="$2"; shift 2;;
-    *) echo "Unknown option: $1" >&2; usage; exit 1;;
-  esac
-done
+make_workdir() {
+	mktemp -d
+}
 
-# Basic validation
-if [[ ( -n "$ADMIN_NAME" && -z "$ADMIN_EMAIL" ) || ( -n "$ADMIN_EMAIL" && -z "$ADMIN_NAME" ) ]]; then
-  echo "--admin-name and --admin-email must be set together" >&2
-  exit 1
-fi
-
-if [[ "$LOCAL_MODE" == true ]]; then
-  if [[ ! -f "$CONF_PATH" ]]; then
-    echo "Local conf not found: $CONF_PATH" >&2
-    exit 2
-  fi
-else
-  ENG=$(pick_engine)
-  need_cmd "$ENG"
-  if ! container_exists "$ENG" "$CONTAINER"; then
-    echo "Container '$CONTAINER' not found with $ENG" >&2
-    exit 1
-  fi
-fi
-
-workdir=$(mktemp -d)
-trap 'rm -rf "$workdir"' EXIT
-local_conf="$workdir/lsregistrationdaemon.conf"
-orig_conf="$workdir/lsregistrationdaemon.conf.orig"
-
-if [[ "$LOCAL_MODE" == true ]]; then
-  log "Copying local $CONF_PATH"
-  cp -a "$CONF_PATH" "$local_conf"
-else
-  log "Copying $CONF_PATH from container $CONTAINER"
-  copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$local_conf"
-fi
-cp -a "$local_conf" "$orig_conf"
-
-# Helpers to mutate the file
 append_header_once() {
-  local hdr='# --- Updated by perfSONAR-update-lsregistration.sh ---'
-  if ! grep -Fq "$hdr" "$local_conf"; then
-    printf '\n%s\n' "$hdr" >> "$local_conf"
-  fi
+	local file=$1
+	local hdr='# --- Updated by perfSONAR lsregistration helper ---'
+	if ! grep -Fq "$hdr" "$file"; then
+		printf '\n%s\n' "$hdr" >> "$file"
+	fi
 }
 
 upsert_kv() {
-  local key="$1" val="$2"
-  [[ -z "$val" ]] && return 0
-  # Remove existing uncommented occurrences of the key (start of line)
-  sed -i -E "/^\s*${key}\b/d" "$local_conf"
-  append_header_once
-  printf '%s %s\n' "$key" "$val" >> "$local_conf"
+	local file=$1 key=$2 val=$3
+	[[ -z "$val" ]] && return 0
+	sed -i -E "/^\s*${key}\b/d" "$file"
+	append_header_once "$file"
+	printf '%s %s\n' "$key" "$val" >> "$file"
 }
 
-set_projects() {
-  local -a items=("${PROJECTS[@]}")
-  [[ ${#items[@]} -eq 0 ]] && return 0
-  # Remove existing uncommented site_project lines, then add unique
-  sed -i -E '/^\s*site_project\b/d' "$local_conf"
-  # de-dup
-  mapfile -t items < <(printf '%s\n' "${items[@]}" | awk 'NF{seen[$0]++} END{for (i in seen) print i}' | sort)
-  append_header_once
-  for p in "${items[@]}"; do
-    printf 'site_project %s\n' "$p" >> "$local_conf"
-  done
+set_projects_in_file() {
+	local file=$1; shift
+	local -a items=("$@")
+	[[ ${#items[@]} -eq 0 ]] && return 0
+	sed -i -E '/^\s*site_project\b/d' "$file"
+	# de-dup and preserve order
+	declare -A seen=()
+	for p in "${items[@]}"; do
+		[[ -n "${p// /}" ]] || continue
+		if [[ -z "${seen[$p]:-}" ]]; then
+			echo "site_project $p" >> "$file"
+			seen[$p]=1
+		fi
+	done
 }
 
-set_admin_block() {
-  local name="$1" mail="$2"
-  [[ -z "$name" || -z "$mail" ]] && return 0
-  # Remove existing uncommented administrator block
-  awk 'BEGIN{skip=0} 
-       /^<administrator>/{skip=1; next}
-       /^<\/administrator>/{skip=0; next}
-       skip==0{print}' "$local_conf" > "$local_conf.tmp" && mv "$local_conf.tmp" "$local_conf"
-  append_header_once
-  cat >> "$local_conf" <<EOF
+set_admin_block_in_file() {
+	local file=$1 name=$2 mail=$3
+	[[ -z "$name" || -z "$mail" ]] && return 0
+	awk 'BEGIN{skip=0} /^<administrator>/{skip=1; next} /^<\/administrator>/{skip=0; next} skip==0{print}' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+	append_header_once "$file"
+	cat >> "$file" <<EOF
 <administrator>
-    name      $name
-    email     $mail
+		name      $name
+		email     $mail
 </administrator>
 EOF
 }
 
-# Apply requested changes
-upsert_kv site_name "$SITE_NAME"
-upsert_kv domain "$DOMAIN"
-set_projects
-upsert_kv city "$CITY"
-upsert_kv region "$REGION"
-upsert_kv country "$COUNTRY"
-upsert_kv zip_code "$ZIP"
-upsert_kv latitude "$LATITUDE"
-upsert_kv longitude "$LONGITUDE"
-upsert_kv ls_instance "$LS_INSTANCE"
-upsert_kv ls_lease_duration "$LS_LEASE_DURATION"
-upsert_kv check_interval "$CHECK_INTERVAL"
-upsert_kv allow_internal_addresses "$ALLOW_INTERNAL"
-set_admin_block "$ADMIN_NAME" "$ADMIN_EMAIL"
+do_save() {
+	local outpath="${OUT_PATH:-}" workdir
+	if [[ -z "$outpath" ]]; then echo "--output is required for save" >&2; exit 1; fi
+	workdir=$(make_workdir)
+	trap 'rm -rf "$workdir"' RETURN
+	local tmp="$workdir/lsregistrationdaemon.conf"
+	if [[ "$LOCAL_MODE" == true ]]; then
+		cp -a "$CONF_PATH" "$tmp"
+	else
+		ENG=$(pick_engine)
+		need_cmd "$ENG"
+		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$tmp"
+	fi
+	cp -a "$tmp" "$outpath"
+	log "Saved conf to $outpath"
+}
 
-# Show diff if any
-if command -v diff >/dev/null 2>&1; then
-  if ! diff -u "$orig_conf" "$local_conf" >/dev/null; then
-    log "Changes to be applied:"
-    diff -u "$orig_conf" "$local_conf" || true
-  else
-    log "No changes detected."
-  fi
-fi
+do_restore() {
+	local inpath="${IN_PATH:-}" workdir
+	if [[ -z "$inpath" ]]; then echo "--input is required for restore" >&2; exit 1; fi
+	if [[ ! -f "$inpath" ]]; then echo "Input file not found: $inpath" >&2; exit 1; fi
+	workdir=$(make_workdir)
+	trap 'rm -rf "$workdir"' RETURN
+	local tmp="$workdir/lsregistrationdaemon.conf"
+	cp -a "$inpath" "$tmp"
+	if [[ "$DRY_RUN" == true ]]; then log "Dry-run: would restore $inpath to target"; return 0; fi
+	if [[ "$LOCAL_MODE" == true ]]; then
+		log "Writing $inpath to $CONF_PATH"
+		cp -a "$tmp" "$CONF_PATH"
+		if [[ "$NO_RESTART" != true ]]; then
+			log "Restarting lsregistrationdaemon on host (best-effort)"
+			bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+		fi
+	else
+		ENG=$(pick_engine)
+		need_cmd "$ENG"
+		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
+		if [[ "$NO_RESTART" != true ]]; then
+			log "Restarting lsregistrationdaemon inside container (best-effort)"
+			exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+		fi
+	fi
+	log "Restore complete"
+}
 
-if [[ "$DRY_RUN" == true ]]; then
-  log "Dry-run: not copying updated file back."
-  exit 0
-fi
+do_update() {
+	# Copy out, mutate, copy back
+	local workdir=$(make_workdir)
+	trap 'rm -rf "$workdir"' RETURN
+	local tmp="$workdir/lsregistrationdaemon.conf"
+	local orig="$workdir/lsregistrationdaemon.conf.orig"
+	if [[ "$LOCAL_MODE" == true ]]; then
+		cp -a "$CONF_PATH" "$tmp"
+	else
+		ENG=$(pick_engine)
+		need_cmd "$ENG"
+		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$tmp"
+	fi
+	cp -a "$tmp" "$orig"
 
-if [[ "$LOCAL_MODE" == true ]]; then
-  log "Writing updated file to $CONF_PATH"
-  cp -a "$local_conf" "$CONF_PATH"
-  if [[ "$NO_RESTART" == true ]]; then
-    log "Skipping service restart as requested."
-    exit 0
-  fi
-  log "Restarting lsregistrationdaemon on host (best-effort)"
-  if ! bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'; then
-    log "Warning: failed to restart lsregistrationdaemon on host"
-  fi
+	upsert_kv "$tmp" site_name "$SITE_NAME"
+	upsert_kv "$tmp" domain "$DOMAIN"
+	set_projects_in_file "$tmp" "${PROJECTS[@]:-}"
+	upsert_kv "$tmp" city "$CITY"
+	upsert_kv "$tmp" region "$REGION"
+	upsert_kv "$tmp" country "$COUNTRY"
+	upsert_kv "$tmp" zip_code "$ZIP"
+	upsert_kv "$tmp" latitude "$LATITUDE"
+	upsert_kv "$tmp" longitude "$LONGITUDE"
+	upsert_kv "$tmp" ls_instance "$LS_INSTANCE"
+	upsert_kv "$tmp" ls_lease_duration "$LS_LEASE_DURATION"
+	upsert_kv "$tmp" check_interval "$CHECK_INTERVAL"
+	upsert_kv "$tmp" allow_internal_addresses "$ALLOW_INTERNAL"
+	set_admin_block_in_file "$tmp" "$ADMIN_NAME" "$ADMIN_EMAIL"
+
+	if command -v diff >/dev/null 2>&1; then
+		if ! diff -u "$orig" "$tmp" >/dev/null 2>&1; then
+			log "Changes to be applied:"
+			diff -u "$orig" "$tmp" || true
+		else
+			log "No changes detected."
+			return 0
+		fi
+	fi
+
+	if [[ "$DRY_RUN" == true ]]; then
+		log "Dry-run: not copying updated file back."
+		return 0
+	fi
+
+	if [[ "$LOCAL_MODE" == true ]]; then
+		log "Writing updated file to $CONF_PATH"
+		cp -a "$tmp" "$CONF_PATH"
+		if [[ "$NO_RESTART" != true ]]; then
+			log "Restarting lsregistrationdaemon on host (best-effort)"
+			bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+		fi
+	else
+		log "Copying updated file back to container"
+		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
+		if [[ "$NO_RESTART" != true ]]; then
+			log "Restarting lsregistrationdaemon inside container (best-effort)"
+			exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+		fi
+	fi
+	log "Update complete"
+}
+
+do_create() {
+	# Build a minimal conf from provided fields and install (similar to restore)
+	local workdir=$(make_workdir)
+	trap 'rm -rf "$workdir"' RETURN
+	local tmp="$workdir/lsregistrationdaemon.conf"
+	# Start from empty or a small header
+	cat > "$tmp" <<EOF
+# perfSONAR lsregistrationdaemon.conf generated by $PROG_NAME on $(date)
+EOF
+	upsert_kv "$tmp" site_name "$SITE_NAME"
+	upsert_kv "$tmp" domain "$DOMAIN"
+	set_projects_in_file "$tmp" "${PROJECTS[@]:-}"
+	upsert_kv "$tmp" city "$CITY"
+	upsert_kv "$tmp" region "$REGION"
+	upsert_kv "$tmp" country "$COUNTRY"
+	upsert_kv "$tmp" zip_code "$ZIP"
+	upsert_kv "$tmp" latitude "$LATITUDE"
+	upsert_kv "$tmp" longitude "$LONGITUDE"
+	upsert_kv "$tmp" ls_instance "$LS_INSTANCE"
+	upsert_kv "$tmp" ls_lease_duration "$LS_LEASE_DURATION"
+	upsert_kv "$tmp" check_interval "$CHECK_INTERVAL"
+	upsert_kv "$tmp" allow_internal_addresses "$ALLOW_INTERNAL"
+	set_admin_block_in_file "$tmp" "$ADMIN_NAME" "$ADMIN_EMAIL"
+
+	if [[ "$DRY_RUN" == true ]]; then
+		log "Dry-run: would write created conf:\n"; sed -n '1,200p' "$tmp"
+		return 0
+	fi
+
+	if [[ "$LOCAL_MODE" == true ]]; then
+		cp -a "$tmp" "$CONF_PATH"
+		if [[ "$NO_RESTART" != true ]]; then
+			log "Restarting lsregistrationdaemon on host (best-effort)"
+			bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+		fi
+	else
+		ENG=$(pick_engine)
+		need_cmd "$ENG"
+		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
+		if [[ "$NO_RESTART" != true ]]; then
+			exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+		fi
+	fi
+	log "Create/install complete"
+}
+
+do_extract() {
+	local out="${OUT_PATH:-}" workdir
+	if [[ -z "$out" ]]; then echo "--output is required for extract" >&2; exit 1; fi
+	workdir=$(make_workdir)
+	trap 'rm -rf "$workdir"' RETURN
+	local tmp="$workdir/lsregistrationdaemon.conf"
+	if [[ "$LOCAL_MODE" == true ]]; then
+		cp -a "$CONF_PATH" "$tmp"
+	else
+		ENG=$(pick_engine)
+		need_cmd "$ENG"
+		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$tmp"
+	fi
+	# Emit a self-contained restore script that writes the conf to /etc/perfsonar/lsregistrationdaemon.conf
+	cat > "$out" <<'SCRIPT_EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"
+TMPFILE=$(mktemp)
+cat > "$TMPFILE" <<'CONF_CONTENT'
+SCRIPT_EOF
+	# append the conf, escaping EOF delimiting
+	sed 's/^/ /' "$tmp" >> "$out"
+	cat >> "$out" <<'SCRIPT_EOF'
+CONF_CONTENT
+$(cat "$tmp")
+CONF_CONTENT
+SCRIPT_EOF
+	cat >> "$out" <<'SCRIPT_EOF'
+cp "$TMPFILE" "$CONF_PATH"
+rm -f "$TMPFILE"
+if command -v systemctl >/dev/null 2>&1; then
+	systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || true
 else
-  log "Copying updated file back to container"
-  copy_to_container "$ENG" "$CONTAINER" "$local_conf" "$CONF_PATH"
-  if [[ "$NO_RESTART" == true ]]; then
-    log "Skipping service restart as requested."
-    exit 0
-  fi
-  log "Restarting lsregistrationdaemon (best-effort)"
-  if ! exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'; then
-    log "Warning: failed to restart lsregistrationdaemon"
-  fi
+	pkill -HUP -f lsregistrationdaemon || true
+fi
+SCRIPT_EOF
+	chmod a+x "$out"
+	log "Wrote self-contained restore script to $out"
+}
+
+# CLI parsing: first arg is command
+if [[ $# -lt 1 ]]; then usage; exit 1; fi
+CMD="$1"; shift
+
+OUT_PATH="" IN_PATH=""
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--help|-h) usage; exit 0;;
+		--container) CONTAINER="$2"; shift 2;;
+		--engine) ENGINE="$2"; shift 2;;
+		--local) LOCAL_MODE=true; shift;;
+		--conf) CONF_PATH="$2"; shift 2;;
+		--dry-run) DRY_RUN=true; shift;;
+		--no-restart) NO_RESTART=true; shift;;
+		--output) OUT_PATH="$2"; shift 2;;
+		--input) IN_PATH="$2"; shift 2;;
+		--site-name) SITE_NAME="$2"; shift 2;;
+		--domain) DOMAIN="$2"; shift 2;;
+		--project) PROJECTS+=("$2"); shift 2;;
+		--city) CITY="$2"; shift 2;;
+		--region) REGION="$2"; shift 2;;
+		--country) COUNTRY="$2"; shift 2;;
+		--zip) ZIP="$2"; shift 2;;
+		--latitude) LATITUDE="$2"; shift 2;;
+		--longitude) LONGITUDE="$2"; shift 2;;
+		--ls-instance) LS_INSTANCE="$2"; shift 2;;
+		--ls-lease-duration) LS_LEASE_DURATION="$2"; shift 2;;
+		--check-interval) CHECK_INTERVAL="$2"; shift 2;;
+		--allow-internal) ALLOW_INTERNAL="$2"; shift 2;;
+		--admin-name) ADMIN_NAME="$2"; shift 2;;
+		--admin-email) ADMIN_EMAIL="$2"; shift 2;;
+		*) echo "Unknown option: $1" >&2; usage; exit 1;;
+	esac
+done
+
+# Basic validation
+if [[ ( -n "$ADMIN_NAME" && -z "$ADMIN_EMAIL" ) || ( -n "$ADMIN_EMAIL" && -z "$ADMIN_NAME" ) ]]; then
+	echo "--admin-name and --admin-email must be set together" >&2
+	exit 1
 fi
 
-log "Done."
+case "$CMD" in
+	save)
+		do_save
+		;;
+	restore)
+		do_restore
+		;;
+	update)
+		do_update
+		;;
+	create)
+		do_create
+		;;
+	extract)
+		do_extract
+		;;
+	*) echo "Unknown command: $CMD" >&2; usage; exit 1;;
+esac
+
+exit 0
