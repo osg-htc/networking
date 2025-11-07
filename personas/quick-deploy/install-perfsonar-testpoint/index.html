@@ -2288,6 +2288,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <li>Raw (download): <a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh">raw link</a></li>
 </ul>
 <p>Install and run examples (root shell):</p>
+<p>Note: the helper uses subcommands; use the <code>update</code> command to apply field changes (other commands: <code>save</code>, <code>restore</code>, <code>create</code>, <code>extract</code>).</p>
 <p>From the local tools checkout (preferred):</p>
 <div class="highlight"><pre><span></span><code>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>~/perfSONAR-update-lsregistration.sh
 </code></pre></div>
@@ -2297,14 +2298,18 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>~/perfSONAR-update-lsregistration.sh
 
 <span class="c1"># Preview changes only</span>
-~/perfSONAR-update-lsregistration.sh<span class="w"> </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
+~/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
 
 <span class="c1"># Apply common updates and restart the daemon inside the container</span>
-~/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+~/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
+
+<span class="c1"># Produce a self-contained restore script for host restore</span>
+sudo<span class="w"> </span>~/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
+sudo<span class="w"> </span>/tmp/restore-lsreg.sh
 </code></pre></div>
 <hr />
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
