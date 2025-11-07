@@ -241,8 +241,9 @@ do_restore() {
 
 do_update() {
 	# Copy out, mutate, copy back
-	local workdir=$(make_workdir)
-	trap 'rm -rf "$workdir"' RETURN
+		local workdir
+		workdir=$(make_workdir)
+		trap 'rm -rf "$workdir"' RETURN
 	local tmp="$workdir/lsregistrationdaemon.conf"
 	local orig="$workdir/lsregistrationdaemon.conf.orig"
 	if [[ "$LOCAL_MODE" == true ]]; then
@@ -305,8 +306,9 @@ do_update() {
 
 do_create() {
 	# Build a minimal conf from provided fields and install (similar to restore)
-	local workdir=$(make_workdir)
-	trap 'rm -rf "$workdir"' RETURN
+		local workdir
+		workdir=$(make_workdir)
+		trap 'rm -rf "$workdir"' RETURN
 	local tmp="$workdir/lsregistrationdaemon.conf"
 	# Start from empty or a small header
 	cat > "$tmp" <<EOF

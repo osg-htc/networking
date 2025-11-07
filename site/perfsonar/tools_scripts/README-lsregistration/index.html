@@ -834,20 +834,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../perfSONAR-extract-lsregistration.sh" class="md-nav__link">
-        LS registration extractor (script)
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -999,35 +985,36 @@
 
 
 <h1 id="perfsonar-lsregistration-helpers">perfSONAR lsregistration helpers<a class="headerlink" href="#perfsonar-lsregistration-helpers" title="Permanent link">&para;</a></h1>
-<p>This directory includes two helpers for managing the perfSONAR Lookup Service (LS)
+<p>This directory includes a helper for managing the perfSONAR Lookup Service (LS)
 registration configuration in <code>lsregistrationdaemon.conf</code>.</p>
 <ul>
-<li><code>perfSONAR-update-lsregistration.sh</code> — updates configuration either inside the
-  perfSONAR testpoint container or directly on the host (local mode).</li>
-<li><code>perfSONAR-extract-lsregistration.sh</code> — reads an existing
-  <code>lsregistrationdaemon.conf</code> and generates a self-contained restore script that
-  invokes the updater with all equivalent flags. This is useful after an upgrade
-  or rebuild to re-apply your previous configuration in one step.</li>
+<li><code>perfSONAR-update-lsregistration.sh</code> — a combined helper that can update,
+  save, restore, create, and extract a <code>lsregistrationdaemon.conf</code>. Use the
+  commands <code>update</code>, <code>save</code>, <code>restore</code>, <code>create</code>, and <code>extract</code> (see examples
+  below).</li>
 </ul>
 <h2 id="update-existing-configuration-container-or-local">Update existing configuration (container or local)<a class="headerlink" href="#update-existing-configuration-container-or-local" title="Permanent link">&para;</a></h2>
 <p>Script: <code>perfSONAR-update-lsregistration.sh</code></p>
 <ul>
-<li>Container mode (default): copies <code>/etc/perfsonar/lsregistrationdaemon.conf</code>
-  into a temp area, applies requested changes, writes it back into the
-  container, and restarts <code>lsregistrationdaemon</code> inside the container.</li>
 <li>
-<p>Key flags: <code>--container NAME</code> (default: <code>perfsonar-testpoint</code>),</p>
-<p><code>`--engine auto|docker|podman` (default: `auto`).</code></p>
+<p>Container mode (default): copies <code>/etc/perfsonar/lsregistrationdaemon.conf</code>
+  into a temp area, applies requested changes, writes it back into the
+  container, and restarts <code>lsregistrationdaemon</code> inside the container.</p>
+<ul>
+<li>Key flags: <code>--container NAME</code> (default: <code>perfsonar-testpoint</code>),
+  <code>--engine auto|docker|podman</code> (default: <code>auto</code>).</li>
+</ul>
 </li>
 <li>
 <p>Local mode: operates directly on the host filesystem without a container.</p>
-</li>
+<ul>
 <li>
-<p>Key flags: <code>--local</code>, <code>--conf PATH</code> (default:</p>
-<p><code>`/etc/perfsonar/lsregistrationdaemon.conf`).</code></p>
+<p>Key flags: <code>--local</code>, <code>--conf PATH</code> (default: <code>/etc/perfsonar/lsregistrationdaemon.conf</code>).</p>
 </li>
 <li>
 <p>Attempts a best-effort restart of <code>lsregistrationdaemon</code> on the host.</p>
+</li>
+</ul>
 </li>
 </ul>
 <p>Examples:</p>
@@ -1044,36 +1031,12 @@ sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w">
 <span class="w">  </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US
 </code></pre></div>
 <h2 id="generate-a-restore-script-from-an-existing-conf">Generate a restore script from an existing conf<a class="headerlink" href="#generate-a-restore-script-from-an-existing-conf" title="Permanent link">&para;</a></h2>
-<p>Script: <code>perfSONAR-extract-lsregistration.sh</code></p>
-<ul>
-<li>Reads values from an existing <code>lsregistrationdaemon.conf</code> (by default
-  <code>/etc/perfsonar/lsregistrationdaemon.conf</code>).</li>
-<li>Writes an executable restore script to <code>/tmp/</code> that invokes
-  <code>perfSONAR-update-lsregistration.sh</code> with the equivalent flags.</li>
-<li>Supports generating for container restore (default) or local restore.</li>
-</ul>
-<p>Common options:</p>
-<ul>
-<li><code>--conf PATH</code> — source conf to parse (default: <code>/etc/perfsonar/lsregistrationdaemon.conf</code>).</li>
-<li><code>--script PATH</code> — path the restore script will call (default: <code>./perfSONAR-update-lsregistration.sh</code>).</li>
-<li><code>--local</code> or <code>--container NAME</code> — choose local vs container restore target.</li>
-<li><code>--engine auto|docker|podman</code> — include engine selection in container mode.</li>
-<li><code>--out PATH</code> — where to write the restore script (default: <code>/tmp/perfSONAR-restore-lsregistration-&lt;timestamp&gt;.sh</code>).</li>
-<li><code>--no-sudo</code> — omit <code>sudo</code> in the generated command.</li>
-</ul>
-<p>Examples:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Build a container restore script (default container name)</span>
-./perfSONAR-extract-lsregistration.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--conf<span class="w"> </span>/etc/perfsonar/lsregistrationdaemon.conf<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--script<span class="w"> </span>./perfSONAR-update-lsregistration.sh
-
-<span class="c1"># Build a local restore script that targets the host file directly</span>
-./perfSONAR-extract-lsregistration.sh<span class="w"> </span>--local<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--target-conf<span class="w"> </span>/etc/perfsonar/lsregistrationdaemon.conf<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--out<span class="w"> </span>/tmp/perfSONAR-restore-local.sh
-</code></pre></div>
-<p>After generation, run the restore script to re-apply your configuration:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/tmp/perfSONAR-restore-lsregistration-YYYYmmddTHHMMSSZ.sh
+<p>Script: <code>perfSONAR-update-lsregistration.sh</code> (see above)</p>
+<p>The combined helper contains an <code>extract</code> command that produces a
+self-contained restore script. Use <code>--output</code>/<code>--input</code> to control paths. Example:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Produce a self-contained restore script suitable for host restore</span>
+sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
+sudo<span class="w"> </span>/tmp/restore-lsreg.sh
 </code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1095,7 +1058,7 @@ sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w">
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../perfSONAR-extract-lsregistration.sh" class="md-footer__link md-footer__link--prev" aria-label="Previous: LS registration extractor (script)" rel="prev">
+        <a href="../perfSONAR-update-lsregistration.sh" class="md-footer__link md-footer__link--prev" aria-label="Previous: LS registration updater (script)" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1104,7 +1067,7 @@ sudo<span class="w"> </span>./perfSONAR-update-lsregistration.sh<span class="w">
               <span class="md-footer__direction">
                 Previous
               </span>
-              LS registration extractor (script)
+              LS registration updater (script)
             </div>
           </div>
         </a>
