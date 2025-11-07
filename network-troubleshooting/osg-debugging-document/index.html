@@ -1427,7 +1427,7 @@
 <li><strong>Import the Internet2 Signing Key</strong></li>
 </ul>
 <p>The following command will import the key.</p>
-<p>sudo rpm --import <a href="http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2">http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2</a></p>
+<p>rpm --import <a href="http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2">http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2</a></p>
 <ul>
 <li><strong>Download RPM Software</strong></li>
 </ul>
@@ -1438,17 +1438,17 @@
 <li><strong>Run Yum Update</strong></li>
 </ul>
 <p>The following command will invoke updates to the yum system, and also prepare the newly installed perfSONAR repository:</p>
-<p>sudo yum update</p>
+<p>yum update</p>
 <ul>
 <li><strong>Search for Tools</strong></li>
 </ul>
 <p>Yum can be searched in the following manner:</p>
-<p>sudo yum search TOOLNAME</p>
+<p>yum search TOOLNAME</p>
 <ul>
 <li><strong>Install Tools</strong></li>
 </ul>
 <p>Yum can install tools in a similar fashion, the following command will install the client libraries:</p>
-<p>sudo yum install owamp-client bwctl-client ndt-client</p>
+<p>yum install owamp-client bwctl-client ndt-client</p>
 <p>Note that some other tools may be pulled in automatically.  Note that iperf and nuttcp are required for BWCTL to work.</p>
 <h2 id="tool-selection">Tool Selection<a class="headerlink" href="#tool-selection" title="Permanent link">&para;</a></h2>
 <p>Debugging network problems involves running several tools, and gathering results both an end-to-end basis as well as to points in the middle.  Initial tool selection can depend on a couple of factors:</p>

@@ -1714,7 +1714,7 @@
 <li><strong>Hardware details:</strong> hostname, BMC/iLO/iDRAC credentials (if used), interface names, available storage.</li>
 <li><strong>Network data:</strong> IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN
   information, PSConfig registration URLs.</li>
-<li><strong>Operational contacts:</strong> site admin email, OSG facility name, latitude/longitude, usage policy link.</li>
+<li><strong>Operational contacts:</strong> site admin email, OSG facility name, latitude/longitude.</li>
 <li>
 <p><strong>Repository artifacts:</strong> Scripts and configurations from the <a href="https://github.com/perfsonar/testpoint">perfsonar/testpoint</a> repository, installed to <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
 </li>
@@ -1723,22 +1723,20 @@
 </li>
 </ul>
 <details class="info">
-<summary>Quick capture of existing lsregistration config (if replacing)</summary>
-<p>Use the installed tools to extract a restore script:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
-</code></pre></div>
-<p>Or download temporarily:</p>
+<summary>Quick capture of existing lsregistration config (if you have a src)</summary>
+<p>Download temporarily:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-o<span class="w"> </span>/tmp/update-lsreg.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-lsreg.sh
-sudo<span class="w"> </span>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
+</code></pre></div>
+<p>Use the downloaded tool to extract a restore script:</p>
+<div class="highlight"><pre><span></span><code>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
 </code></pre></div>
 </details>
 <p>Note: Repository clone instructions are in Step 2.</p>
 <blockquote>
-<p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
+<p><strong>Note:</strong> All shell commands assume an interactive root shell.</p>
 </blockquote>
 <hr />
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
@@ -1789,17 +1787,20 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </li>
 </ol>
 <details class="tip">
-<summary>Alternative: one-off run without installing tools</summary>
-<div class="highlight"><pre><span></span><code><span class="c1"># Preferred: run from the installed tools path (see Step 2):</span>
-/opt/perfsonar-tp/tools_scripts/check-deps.sh
+<summary>Alternative: check-deps.sh one-off run without installing tools</summary>
+<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
+<span class="c1"># Preferred: run from the installed tools path (see Step 2):</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
 
 <span class="c1"># If you must run it without installing the tools, download to /tmp and run</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-o<span class="w"> </span>/tmp/check-deps.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/check-deps.sh
-sudo<span class="w"> </span>/tmp/check-deps.sh
+<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
+<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
+<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
+<span class="err">```</span>
 </code></pre></div>
+
 </details>
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup.</p>
@@ -1856,16 +1857,15 @@ registration systems perform forward/reverse consistency checks.</p>
 <details class="example">
 <summary>Run the DNS checker</summary>
 <p>Validate forward/reverse DNS for addresses in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
 </code></pre></div>
 <p>Or download temporarily:</p>
-<p><div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/tmp/check-dns.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/check-dns.sh
-sudo<span class="w"> </span>/tmp/check-dns.sh
+/tmp/check-dns.sh
 </code></pre></div>
-    ```</p>
 <p><strong>Notes and automation tips:</strong></p>
 <ul>
 <li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it
@@ -2027,9 +2027,10 @@ baseline content out.</p>
 </code></pre></div>
 <h3 id="copy-baseline-content-out-of-the-running-container">Copy baseline content out of the running container<a class="headerlink" href="#copy-baseline-content-out-of-the-running-container" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Use docker cp or podman cp (either works)</span>
+docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/perfsonar/psconfig<span class="w"> </span>/opt/perfsonar-tp/psconfig
+<span class="c1"># Below are if also using Lets Encrypt</span>
 docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/apache2<span class="w"> </span>/etc/apache2
 docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/var/www/html<span class="w"> </span>/var/www/html
-docker<span class="w"> </span>cp<span class="w"> </span>perfsonar-testpoint:/etc/perfsonar/psconfig<span class="w"> </span>/opt/perfsonar-tp/psconfig
 </code></pre></div>
 <p>If SELinux is enforcing, we’ll relabel these paths when we mount (using <code>:z</code>/<code>:Z</code> below), so you
 don’t need manual <code>chcon</code>.</p>
@@ -2117,7 +2118,7 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 </ul>
 </details>
 <h2 id="step-6-register-and-configure-with-wlcgosg">Step 6 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-6-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
-<p>We need to register your instance and ensure it is configurated with the required meta data for the
+<p>We need to register your instance and ensure it is configured with the required meta data for the
 lsregistration daemon (see below).</p>
 <ol>
 <li><strong>OSG/WLCG registration workflow:</strong></li>
@@ -2146,41 +2147,22 @@ addresses (<code>ifaddr</code> tags).</p>
 <h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running
 <code>perfsonar-testpoint</code> container and restart the daemon only if needed.</p>
-<div class="codehilite"><pre><span></span><code><span class="p">-</span> <span class="nf">Script</span><span class="w"> </span><span class="p">(</span><span class="n">browse</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="p">.</span><span class="n">sh</span><span class="p">][</span><span class="n">psupdate</span><span class="p">]</span>
-<span class="o">-</span><span class="w"> </span><span class="n">Raw</span><span class="w"> </span><span class="p">(</span><span class="n">download</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="n">raw</span><span class="w"> </span><span class="n">link</span><span class="p">][</span><span class="n">psupdateraw</span><span class="p">]</span>
-
-<span class="o">&lt;!--</span><span class="w"> </span><span class="n">markdownlint</span><span class="o">-</span><span class="n">disable</span><span class="w"> </span><span class="n">MD013</span><span class="w"> </span><span class="o">--&gt;</span>
-<span class="p">[</span><span class="n">psupdate</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</span>
-<span class="p">[</span><span class="n">psupdateraw</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh</span>
-<span class="o">&lt;!--</span><span class="w"> </span><span class="n">markdownlint</span><span class="o">-</span><span class="n">enable</span><span class="w"> </span><span class="n">MD013</span><span class="w"> </span><span class="o">--&gt;</span>
-</code></pre></div>
-
 <p>Install and run examples (root shell):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
 
-<span class="c1"># Apply common updates and restart the daemon inside the container</span>
+<span class="c1"># Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)</span>
+bash<span class="w"> </span>/root/restore-lsreg.sh
+
+<span class="c1"># Apply new settings and restart the daemon inside the container</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 </code></pre></div>
-<details class="tip">
-<summary>Alternative: download this script directly (if you didn't run the bootstrap)</summary>
-<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
-<span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span>
-<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
-<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
-<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span>
-<span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span>
-<span class="err">```</span>
-</code></pre></div>
-
-</details>
-<hr />
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
 <ol>

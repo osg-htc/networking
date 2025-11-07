@@ -74,16 +74,16 @@ Fields (used by create/update):
 
 Examples:
 	# Update fields in container
-	sudo $PROG_NAME update --site-name "Acme" --domain example.org --project OSG
+	$PROG_NAME update --site-name "Acme" --domain example.org --project OSG
 
 	# Save conf to local file
-	sudo $PROG_NAME save --output ./lsreg.conf
+	$PROG_NAME save --output ./lsreg.conf
 
 	# Create a fresh conf from fields and install into container
-	sudo $PROG_NAME create --site-name "Acme" --domain example.org --project OSG
+	$PROG_NAME create --site-name "Acme" --domain example.org --project OSG
 
 	# Produce a self-contained restore script for host use
-	sudo $PROG_NAME extract --output restore-lsreg.sh
+	$PROG_NAME extract --output restore-lsreg.sh
 
 EOF
 }

@@ -1376,20 +1376,20 @@ traceroute<span class="w"> </span>-n<span class="w"> </span>&lt;remote-ip-or-hos
 </ol>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-*
 ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
-sudo<span class="w"> </span>podman<span class="w"> </span>ps<span class="w"> </span><span class="o">||</span><span class="w"> </span>sudo<span class="w"> </span>docker<span class="w"> </span>ps
+podman<span class="w"> </span>ps<span class="w"> </span><span class="o">||</span><span class="w"> </span>docker<span class="w"> </span>ps
 </code></pre></div>
 <ol>
 <li>Check firewall and ports</li>
 </ol>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>nft<span class="w"> </span>list<span class="w"> </span>ruleset
-sudo<span class="w"> </span>ss<span class="w"> </span>-ltnp
+<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
+ss<span class="w"> </span>-ltnp
 </code></pre></div>
 <ol>
 <li>
 <p>Collect logs and measurements</p>
 </li>
 <li>
-<p>Container logs: <code>sudo podman logs perfsonar-testpoint</code></p>
+<p>Container logs: <code>podman logs perfsonar-testpoint</code></p>
 </li>
 <li>perfSONAR checks: <code>pscheduler tasks --host localhost</code></li>
 </ol>

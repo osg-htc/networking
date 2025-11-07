@@ -1586,14 +1586,14 @@ this repository using a shallow sparse checkout. It copies only the
 </ul>
 <h2 id="usage-examples">Usage examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
 <p>Preview what would happen (safe):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--dry-run
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--dry-run
 </code></pre></div>
 <p>Install into <code>/opt/perfsonar-tp/tools_scripts</code> (creates the directory if missing):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh
 </code></pre></div>
 <p>If you already have the perfSONAR testpoint repo checked out in <code>/opt/perfsonar-tp</code>,
 skip cloning with:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--skip-testpoint
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--skip-testpoint
 </code></pre></div>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1634,11 +1634,11 @@ either binary is present.</p>
 <p>Example install commands</p>
 <p>Note: package names vary slightly across distributions. Adapt as needed.</p>
 <p>Fedora / RHEL / CentOS (dnf):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bash<span class="w"> </span>coreutils<span class="w"> </span>iproute<span class="w"> </span>NetworkManager<span class="w"> </span>rsync<span class="w"> </span>curl<span class="w"> </span>openssl<span class="w"> </span>nftables<span class="w"> </span>podman<span class="w"> </span>podman-compose<span class="w"> </span>docker-compose<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bash<span class="w"> </span>coreutils<span class="w"> </span>iproute<span class="w"> </span>NetworkManager<span class="w"> </span>rsync<span class="w"> </span>curl<span class="w"> </span>openssl<span class="w"> </span>nftables<span class="w"> </span>podman<span class="w"> </span>podman-compose<span class="w"> </span>docker-compose<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils
 </code></pre></div>
 <p>Debian / Ubuntu (apt):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bash<span class="w"> </span>coreutils<span class="w"> </span>iproute2<span class="w"> </span>network-manager<span class="w"> </span>rsync<span class="w"> </span>curl<span class="w"> </span>openssl<span class="w"> </span>nftables<span class="w"> </span>podman<span class="w"> </span>podman-compose<span class="w"> </span>docker.io<span class="w"> </span>docker-compose<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils
+<div class="highlight"><pre><span></span><code>apt-get<span class="w"> </span>update
+apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bash<span class="w"> </span>coreutils<span class="w"> </span>iproute2<span class="w"> </span>network-manager<span class="w"> </span>rsync<span class="w"> </span>curl<span class="w"> </span>openssl<span class="w"> </span>nftables<span class="w"> </span>podman<span class="w"> </span>podman-compose<span class="w"> </span>docker.io<span class="w"> </span>docker-compose<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils
 </code></pre></div>
 <p>If you intend to use the lsregistration container helpers, ensure either
 <code>podman</code> or <code>docker</code> is installed and that the service can list and access
@@ -1667,18 +1667,18 @@ modifying anything.</p>
 </ul>
 <h2 id="how-to-run-dry-run-debug">How to run (dry-run / debug)<a class="headerlink" href="#how-to-run-dry-run-debug" title="Permanent link">&para;</a></h2>
 <p>Preview what the script would do without changing the system:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
 </code></pre></div>
 <p>Generate an example or auto-detected config (preview, dry-run only):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
 </code></pre></div>
 <p>Write the auto-detected config to /etc (does not apply changes):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
 <p>Run for real (be careful):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>perfSONAR-pbr-nm.sh
 <span class="c1"># or non-interactive</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
+bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
 <h2 id="gateway-requirement-inference-and-generator-warnings">Gateway requirement, inference, and generator warnings<a class="headerlink" href="#gateway-requirement-inference-and-generator-warnings" title="Permanent link">&para;</a></h2>
 <ul>
