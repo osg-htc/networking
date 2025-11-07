@@ -5,10 +5,10 @@ registration configuration in `lsregistrationdaemon.conf`.
 
 - `perfSONAR-update-lsregistration.sh` — updates configuration either inside the
   perfSONAR testpoint container or directly on the host (local mode).
-- `perfSONAR-extract-lsregistration.sh` — reads an existing
-  `lsregistrationdaemon.conf` and generates a self-contained restore script that
-  invokes the updater with all equivalent flags. This is useful after an upgrade
-  or rebuild to re-apply your previous configuration in one step.
+- `perfSONAR-update-lsregistration.sh` (combined) — updates configuration and
+  can also save/restore/extract a configuration. The single helper supports
+  the previous updater and extractor workflows via commands: `save`,
+  `restore`, `create`, `update`, and `extract`.
 
 ## Update existing configuration (container or local)
 
@@ -50,41 +50,15 @@ sudo ./perfSONAR-update-lsregistration.sh --local \
 
 ## Generate a restore script from an existing conf
 
-Script: `perfSONAR-extract-lsregistration.sh`
+Script: `perfSONAR-update-lsregistration.sh` (see above)
 
-- Reads values from an existing `lsregistrationdaemon.conf` (by default
-  `/etc/perfsonar/lsregistrationdaemon.conf`).
-- Writes an executable restore script to `/tmp/` that invokes
-  `perfSONAR-update-lsregistration.sh` with the equivalent flags.
-- Supports generating for container restore (default) or local restore.
-
-Common options:
-
-- `--conf PATH` — source conf to parse (default: `/etc/perfsonar/lsregistrationdaemon.conf`).
-- `--script PATH` — path the restore script will call (default: `./perfSONAR-update-lsregistration.sh`).
-- `--local` or `--container NAME` — choose local vs container restore target.
-- `--engine auto|docker|podman` — include engine selection in container mode.
-- `--out PATH` — where to write the restore script (default: `/tmp/perfSONAR-restore-lsregistration-<timestamp>.sh`).
-- `--no-sudo` — omit `sudo` in the generated command.
-
-Examples:
+The combined helper contains an `extract` command that produces a
+self-contained restore script. Use `--output`/`--input` to control paths. Example:
 
 ```bash
-# Build a container restore script (default container name)
-./perfSONAR-extract-lsregistration.sh \
-  --conf /etc/perfsonar/lsregistrationdaemon.conf \
-  --script ./perfSONAR-update-lsregistration.sh
-
-# Build a local restore script that targets the host file directly
-./perfSONAR-extract-lsregistration.sh --local \
-  --target-conf /etc/perfsonar/lsregistrationdaemon.conf \
-  --out /tmp/perfSONAR-restore-local.sh
-```
-
-After generation, run the restore script to re-apply your configuration:
-
-```bash
-sudo /tmp/perfSONAR-restore-lsregistration-YYYYmmddTHHMMSSZ.sh
+# Produce a self-contained restore script suitable for host restore
+sudo ./perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
+sudo /tmp/restore-lsreg.sh
 ```
 
 ## Notes
