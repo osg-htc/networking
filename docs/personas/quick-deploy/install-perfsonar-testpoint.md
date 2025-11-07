@@ -609,6 +609,8 @@ Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside 
 
 Install and run examples (root shell):
 
+Note: the helper uses subcommands; use the `update` command to apply field changes (other commands: `save`, `restore`, `create`, `extract`).
+
 From the local tools checkout (preferred):
 
 ```bash
@@ -623,14 +625,18 @@ curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perf
 chmod 0755 ~/perfSONAR-update-lsregistration.sh
 
 # Preview changes only
-~/perfSONAR-update-lsregistration.sh --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
+~/perfSONAR-update-lsregistration.sh update --dry-run --site-name "Acme Co." --project WLCG --admin-email admin@example.org --admin-name "pS Admin"
 
 # Apply common updates and restart the daemon inside the container
-~/perfSONAR-update-lsregistration.sh \
+~/perfSONAR-update-lsregistration.sh update \
     --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
     --city Berkeley --region CA --country US --zip 94720 \
     --latitude 37.5 --longitude -121.7469 \
     --admin-name "pS Admin" --admin-email admin@example.org
+
+# Produce a self-contained restore script for host restore
+sudo ~/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
+sudo /tmp/restore-lsreg.sh
 ```
 
 ---
