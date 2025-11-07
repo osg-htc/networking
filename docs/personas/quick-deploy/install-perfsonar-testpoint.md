@@ -420,7 +420,10 @@ mkdir -p /opt/perfsonar-tp/psconfig /var/www/html /etc/apache2 /etc/letsencrypt
 docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
 docker cp perfsonar-testpoint:/var/www/html /var/www/html
 docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
-docker cp perfsonar-testpoint:/etc/letsencrypt /etc/letsencrypt || true
+# Seed /etc/letsencrypt from the certbot image (may be minimal; populated on first issuance)
+docker create --name certbot-seed certbot/certbot >/dev/null 2>&1 || true
+docker cp certbot-seed:/etc/letsencrypt /etc/letsencrypt || true
+docker rm -f certbot-seed >/dev/null 2>&1 || true
 ```
 
 If SELinux is enforcing, the `:z`/`:Z` options in the next step handle labels; no manual `chcon` is
@@ -428,10 +431,11 @@ required.
 
 ??? note "About /etc/letsencrypt seeding"
 
-    If `/etc/letsencrypt` does not exist inside the temporary container, the copy command above
-    will be skipped. This is expected. The host directory `/etc/letsencrypt` will be populated
-    during the initial certificate issuance in Step 5.3. Keeping the directory present (even if
-    empty) ensures the bind mount works and SELinux labels can be applied.
+    The `/etc/letsencrypt` directory is seeded from the Certbot image (not the testpoint)
+    to create the expected path on the host. This seed may be minimal or empty; it will be
+    populated during the initial certificate issuance in Step 5.3. Keeping the directory present
+    (even if empty) ensures the bind mount works and SELinux labels can be applied on enforcing
+    hosts.
 
 Stop the temporary container before switching to the final compose:
 
