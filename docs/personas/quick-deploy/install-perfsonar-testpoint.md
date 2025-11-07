@@ -186,7 +186,13 @@ The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-
 
 1. **Execute the script:**
 
-   It is likely you will get disconnected if you are logged in via 'ssh'.  It is strongly recommended to run the script directly on the console or perhaps use 'nohup' in front of the command so that it will not drop the shell.  You can also use the --dry-run option to see what it will do without making changes.
+!!! warning "Run from console or use a persistent session"
+
+    Running the PBR helper can modify network interfaces and routing and may
+    drop active SSH sessions. Run the script from the host console when
+    possible. If you must run it remotely, use a persistent session tool
+    (screen, tmux) or prefix with `nohup` and check output later. Use
+    `--dry-run` to preview actions before applying changes.
 
     - Apply changes non-interactively (auto-confirm):
 
