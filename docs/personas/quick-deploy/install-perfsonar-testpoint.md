@@ -600,6 +600,36 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
 Verification: Confirm the files under `/etc/perfsonar/psconfig/pscheduler.d/` (inside the container) reflect the expected feeds and, where applicable, `ifaddr` entries match the intended interfaces.
 
+### Helper Script (Recommended)
+
+Instead of the ad-hoc automation snippet above, you can use the installed helper script:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh --help
+
+# Typical usage (podman):
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
+
+# Dry run only (show planned URLs):
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
+
+# Non-interactive (CI) enrollment:
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y
+
+# If your container name differs:
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -c my-ps-testpoint
+```
+
+The script:
+
+- Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf` (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
+- Performs reverse DNS lookups (getent/dig) to derive FQDNs.
+- Deduplicates while preserving discovery order.
+- Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
+- Lists configured remotes and returns non-zero if any enrollment fails.
+
+Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
+
 1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed
    URLs, and support contacts.
 
