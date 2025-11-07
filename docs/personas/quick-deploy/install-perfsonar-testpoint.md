@@ -21,20 +21,20 @@ Before you begin, gather the following information:
 
    The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and keep a copy in your change log.
 
-    ??? info "Quick capture of existing lsregistration config (if replacing)"
+??? info "Quick capture of existing lsregistration config (if replacing)"
 
-       You can capture your current Lookup Service registration before redeploying.
+    You can capture your current Lookup Service registration before redeploying.
 
-       - Download the helper temporarily and extract a self-contained restore script (works even if you haven't done Step 2 yet):
+    - Download the helper temporarily and extract a self-contained restore script (works even if you haven't done Step 2 yet):
 
-            ```bash
-            curl -fsSL \
-                https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-                -o /tmp/perfSONAR-update-lsregistration.sh
-            chmod 0755 /tmp/perfSONAR-update-lsregistration.sh
-            sudo /tmp/perfSONAR-update-lsregistration.sh extract --output /root/restore-lsreg.sh
-            # Save /root/restore-lsreg.sh with your change notes
-            ```
+        ```bash
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+            -o /tmp/perfSONAR-update-lsregistration.sh
+        chmod 0755 /tmp/perfSONAR-update-lsregistration.sh
+        sudo /tmp/perfSONAR-update-lsregistration.sh extract --output /root/restore-lsreg.sh
+        # Save /root/restore-lsreg.sh with your change notes
+        ```
 
 
    Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so you can perform the clone once the host is provisioned.
@@ -52,33 +52,33 @@ Before you begin, gather the following information:
 
     Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that hosts the default route (See step 2 below).
 
-    ??? info "System configuration commands"
+??? info "System configuration commands"
 
-        ```bash
-        hostnamectl set-hostname <testpoint-hostname>
-        systemctl enable --now chronyd
-        timedatectl set-timezone <Region/City>
-        ```
+    ```bash
+    hostnamectl set-hostname <testpoint-hostname>
+    systemctl enable --now chronyd
+    timedatectl set-timezone <Region/City>
+    ```
 
 4. **Disable unused services:**
 
-    ??? info "Service cleanup commands"
+??? info "Service cleanup commands"
 
-        ```bash
-        systemctl disable --now firewalld NetworkManager-wait-online
-        dnf remove -y rsyslog
-        ```
+    ```bash
+    systemctl disable --now firewalld NetworkManager-wait-online
+    dnf remove -y rsyslog
+    ```
 
 5. **Record NIC names:**
 
-    ??? info "Commands to list network interfaces"
+??? info "Commands to list network interfaces"
 
-        ```bash
-        nmcli device status
-        ip -br addr
-        ```
+    ```bash
+    nmcli device status
+    ip -br addr
+    ```
 
-        Document interface mappings; you will need them for the policy-based routing configuration.
+    Document interface mappings; you will need them for the policy-based routing configuration.
 
 ---
 
@@ -144,15 +144,15 @@ After preparing the host, assume scripts from this guide are available at `/opt/
         /opt/perfsonar-tp/tools_scripts/check-deps.sh
         ```
 
-    ??? tip "Alternative: Download and run directly"
+??? tip "Alternative: Download and run directly"
 
-        ```bash
-                curl -fsSL \
-                    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
-                    -o ./check-deps.sh
-        chmod 0755 ./check-deps.sh
-        ./check-deps.sh
-        ```
+    ```bash
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
+        -o ./check-deps.sh
+    chmod 0755 ./check-deps.sh
+    ./check-deps.sh
+    ```
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
@@ -177,12 +177,12 @@ The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-
 
     Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
 
-    !!! warning "Gateways required for addresses"
-        Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
+!!! warning "Gateways required for addresses"
+    Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
 
-    !!! note "Gateway prompts"
+!!! note "Gateway prompts"
 
-        During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
+    During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
 
 1. **Execute the script:**
 
@@ -194,9 +194,9 @@ The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
     ```
 
-    !!! note "Missing gateways at apply time"
+!!! note "Missing gateways at apply time"
 
-        If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
+    If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
 
     The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
 
@@ -277,71 +277,71 @@ If any prerequisite is missing, the script skips that component and continues.
     jails—only if those components are already installed.
 
 ??? info "How SSH allow-lists and validation work"
-    **SSH allow-list derivation:**
+**SSH allow-list derivation:**
 
-    - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
-    - Address entries without a prefix are treated as single hosts.
-    - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
+- CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
+- Address entries without a prefix are treated as single hosts.
+- The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
 
-    **Validation and output:**
+**Validation and output:**
 
-    - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
-    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+- The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
+- Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
-    ??? tip "Preview nftables rules before applying"
-        You can preview the fully rendered nftables rules (no changes are made):
-
-        ```bash
-        ~/perfsonar-install-nftables.sh --print-rules
-        ```
-
-??? tip "Manually add extra management hosts/subnets"
-    If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
-
-    ```nft
-    set ssh_access_ip4_subnets {
-    type ipv4_addr
-    flags interval
-    elements = { 192.0.2.0/24, 198.51.100.0/25 }
-    }
-
-    set ssh_access_ip4_hosts {
-    type ipv4_addr
-    elements = { 203.0.113.10, 203.0.113.11 }
-    }
-
-    set ssh_access_ip6_subnets {
-    type ipv6_addr
-    flags interval
-    elements = { 2001:db8:1::/64 }
-    }
-
-    set ssh_access_ip6_hosts {
-    type ipv6_addr
-    elements = { 2001:db8::10 }
-    }
-    ```
-
-    Then validate and reload (root shell):
+??? tip "Preview nftables rules before applying"
+    You can preview the fully rendered nftables rules (no changes are made):
 
     ```bash
-    nft -c -f /etc/nftables.d/perfsonar.nft
-    systemctl reload nftables || systemctl restart nftables
+    ~/perfsonar-install-nftables.sh --print-rules
     ```
+
+??? tip "Manually add extra management hosts/subnets"
+If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
+
+```nft
+set ssh_access_ip4_subnets {
+type ipv4_addr
+flags interval
+elements = { 192.0.2.0/24, 198.51.100.0/25 }
+}
+
+set ssh_access_ip4_hosts {
+type ipv4_addr
+elements = { 203.0.113.10, 203.0.113.11 }
+}
+
+set ssh_access_ip6_subnets {
+type ipv6_addr
+flags interval
+elements = { 2001:db8:1::/64 }
+}
+
+set ssh_access_ip6_hosts {
+type ipv6_addr
+elements = { 2001:db8::10 }
+}
+```
+
+Then validate and reload (root shell):
+
+```bash
+nft -c -f /etc/nftables.d/perfsonar.nft
+systemctl reload nftables || systemctl restart nftables
+```
 
     1. **Confirm firewall state and security services:**
 
-    ??? info "Verification commands"
+??? info "Verification commands"
 
-        ```bash
-        nft list ruleset
-        sestatus
-        systemctl status fail2ban
-        ```
+    ```bash
+    nft list ruleset
+    sestatus
+    systemctl status fail2ban
+    ```
 
-            Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
+    Document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
-            ---
+    ---
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
 
@@ -499,25 +499,25 @@ We need to register your instance and ensure it is configurated with the require
 
 1. **OSG/WLCG registration workflow:**
 
-    ??? info "Registration steps and portals"
-        - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
-        - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
-        - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+??? info "Registration steps and portals"
+    - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+    - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+    - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
 1. **pSConfig enrollment:**
 
    For each active NIC, register with the psconfig service so measurements cover all paths.
 
-    ??? info "Registration command and verification"
-    Example registration:
+??? info "Registration command and verification"
+Example registration:
 
-    ```bash
-    /usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
-    ```
+```bash
+/usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
+```
 
-    Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
+Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
 
-    1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
+1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
 
 ### Update Lookup Service registration inside the container
 
@@ -562,68 +562,68 @@ Perform these checks before handing the host over to operations:
 
 1. **System services:**
 
-    ??? info "Verify Podman and compose services"
+??? info "Verify Podman and compose services"
 
-        ```bash
-        systemctl status podman
-        systemctl --user status podman-compose@perfsonar-testpoint.service
-        ```
+    ```bash
+    systemctl status podman
+    systemctl --user status podman-compose@perfsonar-testpoint.service
+    ```
 
-        Ensure both are active/green.
+    Ensure both are active/green.
 
 1. **Container health:**
 
-    ??? info "Check container status and logs"
+??? info "Check container status and logs"
 
-        ```bash
-        podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-        podman logs pscheduler-agent | tail
-        ```
+    ```bash
+    podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+    podman logs pscheduler-agent | tail
+    ```
 
 1. **Network path validation:**
 
-    ??? info "Test network connectivity and routing"
+??? info "Test network connectivity and routing"
 
-        ```bash
-        pscheduler task throughput --dest <remote-testpoint>
-        tracepath -n <remote-testpoint>
-        ```
+    ```bash
+    pscheduler task throughput --dest <remote-testpoint>
+    tracepath -n <remote-testpoint>
+    ```
 
-        Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
+    Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
 1. **Security posture:**
 
-    ??? info "Check firewall, fail2ban, and SELinux"
+??? info "Check firewall, fail2ban, and SELinux"
 
-        ```bash
-        nft list ruleset | grep perfsonar
-        fail2ban-client status
-        ausearch --message AVC --just-one
-        ```
+    ```bash
+    nft list ruleset | grep perfsonar
+    fail2ban-client status
+    ausearch --message AVC --just-one
+    ```
 
-        Investigate any SELinux denials or repeated Fail2Ban bans.
+    Investigate any SELinux denials or repeated Fail2Ban bans.
 
 1. **LetsEncrypt certificate check:**
 
-    ??? info "Verify certificate validity"
+??? info "Verify certificate validity"
 
-        ```bash
-        openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
-        ```
+    ```bash
+    openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
+    ```
 
-        Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
+    Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
 
 1. **Reporting:**
 
-    ??? info "Run perfSONAR diagnostic reports"
-        Run the perfSONAR toolkit daily report and send outputs to operations:
+??? info "Run perfSONAR diagnostic reports"
+    Run the perfSONAR toolkit daily report and send outputs to operations:
 
-        ```bash
-        pscheduler troubleshoot
-        toolkit-system-health
-        ```
+    ```bash
+    pscheduler troubleshoot
+    toolkit-system-health
+    ```
 
-        ---
+    ---
 
 ## Ongoing Maintenance
 
