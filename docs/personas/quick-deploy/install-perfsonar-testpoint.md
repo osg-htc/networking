@@ -41,11 +41,13 @@ keep a copy in your change log.
             (see Step 2), run the updater from that location to extract a self-contained
             restore script:
 
-        ```bash
+    <!-- markdownlint-disable MD013 -->
+    ```bash
         sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
             extract --output /root/restore-lsreg.sh
         # Save /root/restore-lsreg.sh with your change notes
-        ```
+    ```
+    <!-- markdownlint-enable MD013 -->
 
         - If you haven't installed the tools into `/opt` yet, use the repository helper
 
@@ -608,8 +610,10 @@ Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside 
     - Script (browse): [perfSONAR-update-lsregistration.sh][psupdate]
     - Raw (download): [raw link][psupdateraw]
 
+    <!-- markdownlint-disable MD013 -->
     [psupdate]: https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh
     [psupdateraw]: https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh
+    <!-- markdownlint-enable MD013 -->
 
 Install and run examples (root shell):
 
