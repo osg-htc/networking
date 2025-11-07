@@ -328,7 +328,8 @@ Prepare the pSConfig directory and a minimal compose file. No other host bind-mo
 mkdir -p /opt/perfsonar-tp/psconfig
 ```
 
-Download a ready-made compose file (or copy it manually):
+Download a ready-made compose file (or copy it manually):  
+Browse: [repo view](https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
 
 ```bash
 curl -fsSL \
@@ -432,7 +433,8 @@ Stop the temporary container before switching to the final compose:
 
 #### 2) Create the final compose with shared volumes and certbot
 
-Download a ready-made compose file (or copy it manually):
+Download a ready-made compose file (or copy it manually):  
+Browse: [repo view](https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml)
 
 ```bash
 curl -fsSL \
