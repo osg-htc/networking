@@ -90,44 +90,31 @@ This guide references multiple scripts from the osg-htc/networking repository. C
 
 - **perfSONAR testpoint compose bundle:** `/opt/perfsonar-tp` (if using containerized testpoint)
 
-First check out the perfSONAR testpoint:
+
+First check out the perfSONAR testpoint (if you plan to run containers on the host):
 
 ```bash
 git clone https://github.com/perfsonar/testpoint.git /opt/perfsonar-tp
 ```
 
-We will then check out just the tools_scripts directory from THIS repo, to give us access to the appropriate scripts and tools.
-
-Create only the perfSONAR tools directory from this repository using a sparse checkout, and place it under `/opt/perfsonar-tp/tools_scripts`:
+Populate `/opt/perfsonar-tp/tools_scripts` from this repository using the
+convenience helper we provide. The helper performs a shallow sparse checkout
+and preserves executable bits:
 
 ```bash
-# Create destination directory
-mkdir -p /opt/perfsonar-tp/tools_scripts
+# Preview what would happen (safe):
+sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
 
-# Use a temporary sparse checkout to fetch only docs/perfsonar/tools_scripts
-tmpdir=$(mktemp -d)
-git clone --depth=1 --filter=blob:none --sparse \
-    https://github.com/osg-htc/networking.git "$tmpdir/networking"
+# Install into /opt/perfsonar-tp/tools_scripts (creates directory if missing):
+sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
 
-cd "$tmpdir/networking"
-git sparse-checkout set docs/perfsonar/tools_scripts
-
-# Copy the tools into /opt/perfsonar-tp/tools_scripts
-rsync -a docs/perfsonar/tools_scripts/ /opt/perfsonar-tp/tools_scripts/
-
-# Optional: list what was installed
-ls -1 /opt/perfsonar-tp/tools_scripts
-
-# Cleanup
-cd /
-rm -rf "$tmpdir"
+# If you already have /opt/perfsonar-tp, skip cloning the testpoint repo:
+sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
 ```
 
-Notes:
-- The source path in this repo is `docs/perfsonar/tools_scripts` (plural). We install it to `/opt/perfsonar-tp/tools_scripts` to keep the same name.
-- You don’t need to keep a full clone of the networking repo on the host for these tools; the sparse checkout above fetches only the needed directory.
-
-After preparing the host, assume scripts from this guide are available at `/opt/perfsonar-tp/tools_scripts` and run them from there unless a raw download is shown.
+After running the helper, the scripts referenced below will be available at
+`/opt/perfsonar-tp/tools_scripts` and you can run them from there (or use a
+raw download when noted).
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
