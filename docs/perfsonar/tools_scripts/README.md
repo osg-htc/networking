@@ -11,6 +11,38 @@ Quick overview
 - Config file: `/etc/perfSONAR-multi-nic-config.conf`
 - Log file: `/var/log/perfSONAR-multi-nic-config.log`
 
+Install helper
+--------------
+A small helper is provided to populate `/opt/perfsonar-tp/tools_scripts` from
+this repository using a shallow sparse checkout. It copies only the
+`docs/perfsonar/tools_scripts` directory and preserves executable bits.
+
+- Script: `install_tools_scripts.sh` (path: `docs/perfsonar/tools_scripts/install_tools_scripts.sh`)
+- Purpose: idempotent installer for `/opt/perfsonar-tp/tools_scripts`
+- Options: `--dry-run` (preview), `--skip-testpoint` (don't clone testpoint repo)
+
+Usage examples
+--------------
+
+Preview what would happen (safe):
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
+```
+
+Install into `/opt/perfsonar-tp/tools_scripts` (creates the directory if missing):
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
+```
+
+If you already have the perfSONAR testpoint repo checked out in `/opt/perfsonar-tp`,
+skip cloning with:
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
+```
+
 Requirements
 ------------
 - Must be run as root. The script now enforces running as root early in
