@@ -444,99 +444,65 @@ lsregistration daemon (see below).
 
 1. **pSConfig enrollment:**
 
-Register this host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
+Register each FQDN with the OSG/WLCG pSConfig service so tests are auto-configured.
 
-Basic enroll (interactive root on the host; runs inside the container):
+**Simple registration example (one FQDN):**
 
 ```bash
-# Replace with your actual FQDNs (one or two)
-FQDN_LAT="<latency.example.org>"
-FQDN_BW="<throughput.example.org>"   # optional if you use a second FQDN
-
-# Add auto URLs (configures archives too) and show configured remotes
+# Replace with your actual FQDN
 podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
-    "https://psconfig.opensciencegrid.org/pub/auto/${FQDN_LAT}"
-[ -n "${FQDN_BW}" ] && podman exec -it perfsonar-testpoint psconfig remote \
-    --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/${FQDN_BW}"
+    "https://psconfig.opensciencegrid.org/pub/auto/ps-lat.example.org"
 
+# List configured remotes to verify
 podman exec -it perfsonar-testpoint psconfig remote list
-# or with Docker:
-# docker exec -it perfsonar-testpoint psconfig remote list
 ```
 
-Remove any stale/old entries if present:
+**Remove any stale/old entries if present:**
 
 ```bash
 podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
 ```
 
-Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.
+**Automated enrollment using the helper script (recommended):**
+
+The helper discovers FQDNs from your configured IPs (reverse DNS) and enrolls them automatically:
 
 ```bash
-# Build candidate FQDN list from IPs referenced in /etc/perfSONAR-multi-nic-config.conf
-mapfile -t PS_IPS < <(awk -F= '/^NIC_(IPV4|IPV6)_ADDRS=/ {gsub(/"|\n/,"",$2); split($2,a,/[ ,]/); for(i in a) if (a[i] != "" && a[i] != "-") print a[i]; }' \
-    /etc/perfSONAR-multi-nic-config.conf)
-
-FQDNS=()
-for ip in "${PS_IPS[@]}"; do
-    # Reverse lookup; prefer getent for libc resolution, fallback to dig -x
-    name=$(getent hosts "$ip" 2>/dev/null | awk '{print $2}')
-    if [ -z "$name" ]; then
-        name=$(dig +short -x "$ip" | head -n1)
-    fi
-    name=${name%.}   # strip trailing dot
-    if [ -n "$name" ]; then FQDNS+=("$name"); fi
-done
-
-# Deduplicate while preserving order
-uniq_fqdns=()
-for n in "${FQDNS[@]}"; do
-    skip=""; for u in "${uniq_fqdns[@]}"; do [ "$u" = "$n" ] && skip=1 && break; done
-    [ -z "$skip" ] && uniq_fqdns+=("$n")
-done
-
-printf "Will enroll these FQDNs:\n"; printf " - %s\n" "${uniq_fqdns[@]}"
-read -r -p "Proceed with enrollment (y/N)? " ans; [ "$ans" = "y" ] || exit 0
-
-for fq in "${uniq_fqdns[@]}"; do
-    podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
-        "https://psconfig.opensciencegrid.org/pub/auto/${fq}"
-done
-
-podman exec -it perfsonar-testpoint psconfig remote list
-```
-
-Verification: Confirm the files under `/etc/perfsonar/psconfig/pscheduler.d/` (inside the container) reflect the expected feeds and, where applicable, `ifaddr` entries match the intended interfaces.
-
-### Helper Script (Recommended)
-
-Instead of the ad-hoc automation snippet above, you can use the installed helper script:
-
-```bash
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh --help
-
-# Typical usage (podman):
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
-
-# Dry run only (show planned URLs):
+# Show what would be done (dry-run)
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
 
-# Non-interactive (CI) enrollment:
+# Non-interactive enrollment (for CI/automation)
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y
-
-# If your container name differs:
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -c my-ps-testpoint
 ```
 
-The script:
+??? info "About the auto-enroll script"
 
-- Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf` (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
-- Performs reverse DNS lookups (getent/dig) to derive FQDNs.
-- Deduplicates while preserving discovery order.
-- Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
-- Lists configured remotes and returns non-zero if any enrollment fails.
+    The `perfSONAR-auto-enroll-psconfig.sh` script:
 
-Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
+    - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf` (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
+    - Performs reverse DNS lookups (getent/dig) to derive FQDNs; skips RFC1918 private addresses.
+    - Deduplicates while preserving discovery order.
+    - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
+    - Logs discovered FQDNs to `/var/log/perfsonar-auto-enroll-psconfig.log`.
+    - Returns non-zero if any enrollment fails.
+
+    Usage options:
+
+    ```bash
+    # Dry run (show planned URLs)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
+
+    # Verbose output
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
+
+    # Non-interactive (CI)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y
+
+    # Custom container name
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -c my-ps-testpoint
+    ```
+
+    Integrate into provisioning CI by running with `-n` for approval, then `-y` once approved.
 
 1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed
    URLs, and support contacts.

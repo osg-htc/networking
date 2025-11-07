@@ -29,6 +29,7 @@ scripts=(
     perfSONAR-install-nftables.sh
     perfSONAR-update-lsregistration.sh
     perfSONAR-extract-lsregistration.sh
+  perfSONAR-auto-enroll-psconfig.sh
     docker-compose.yml
 )
 
