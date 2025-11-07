@@ -1,14 +1,12 @@
 # perfSONAR lsregistration helpers
 
-This directory includes two helpers for managing the perfSONAR Lookup Service (LS)
+This directory includes a helper for managing the perfSONAR Lookup Service (LS)
 registration configuration in `lsregistrationdaemon.conf`.
 
-- `perfSONAR-update-lsregistration.sh` — updates configuration either inside the
-  perfSONAR testpoint container or directly on the host (local mode).
-- `perfSONAR-update-lsregistration.sh` (combined) — updates configuration and
-  can also save/restore/extract a configuration. The single helper supports
-  the previous updater and extractor workflows via commands: `save`,
-  `restore`, `create`, `update`, and `extract`.
+- `perfSONAR-update-lsregistration.sh` — a combined helper that can update,
+  save, restore, create, and extract a `lsregistrationdaemon.conf`. Use the
+  commands `update`, `save`, `restore`, `create`, and `extract` (see examples
+  below).
 
 ## Update existing configuration (container or local)
 
@@ -17,20 +15,13 @@ Script: `perfSONAR-update-lsregistration.sh`
 - Container mode (default): copies `/etc/perfsonar/lsregistrationdaemon.conf`
   into a temp area, applies requested changes, writes it back into the
   container, and restarts `lsregistrationdaemon` inside the container.
-  - Key flags: `--container NAME` (default: `perfsonar-testpoint`),
-
-    ```
-`--engine auto|docker|podman` (default: `auto`).
-    ```
+    - Key flags: `--container NAME` (default: `perfsonar-testpoint`),
+      `--engine auto|docker|podman` (default: `auto`).
 
 - Local mode: operates directly on the host filesystem without a container.
-  - Key flags: `--local`, `--conf PATH` (default:
+    - Key flags: `--local`, `--conf PATH` (default: `/etc/perfsonar/lsregistrationdaemon.conf`).
 
-    ```
-`/etc/perfsonar/lsregistrationdaemon.conf`).
-    ```
-
-  - Attempts a best-effort restart of `lsregistrationdaemon` on the host.
+    - Attempts a best-effort restart of `lsregistrationdaemon` on the host.
 
 Examples:
 
