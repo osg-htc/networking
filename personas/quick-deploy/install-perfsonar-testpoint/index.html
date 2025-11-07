@@ -1715,13 +1715,16 @@ while still capturing the site-specific information required by OSG/WLCG operati
 <p>Before you begin, gather the following information:</p>
 <ul>
 <li><strong>Hardware details:</strong> hostname, BMC/iLO/iDRAC credentials (if used), interface names, available storage.</li>
-<li><strong>Network data:</strong> IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN information, PSConfig registration URLs.</li>
+<li><strong>Network data:</strong> IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN
+  information, PSConfig registration URLs.</li>
 <li><strong>Operational contacts:</strong> site admin email, OSG facility name, latitude/longitude, usage policy link.</li>
 <li>
 <p><strong>Repository artifacts:</strong> the scripts referenced below are in <code>docs/perfsonar/</code> in this repository.</p>
 </li>
 <li>
-<p><strong>Existing perfSONAR configuration:</strong> If you are replacing or upgrading an existing perfSONAR instance, capture its configuration and registration data before taking services offline. Useful items to collect include:</p>
+<p><strong>Existing perfSONAR configuration:</strong> If you are replacing or upgrading an existing perfSONAR
+  instance, capture its configuration and registration data before taking services offline. Useful
+  items to collect include:</p>
 <ul>
 <li><code>/etc/perfsonar/</code> configuration files, especially <code>lsregistrationdaemon.conf</code></li>
 <li>any site-specific psconfig or testpoint config files stored in container volumes or host paths</li>
@@ -1739,6 +1742,7 @@ keep a copy in your change log.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">You</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">capture</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="n">Lookup</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">registration</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">redeploying</span><span class="o">.</span>
 
 <span class="o">-</span><span class="w"> </span><span class="n">Preferred</span><span class="p">:</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">installed</span><span class="w"> </span><span class="n">tools</span><span class="o">.</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="s1">&#39;ve populated `/opt/perfsonar-tp/tools_scripts`</span>
+
 <span class="w">    </span><span class="p">(</span><span class="n">see</span><span class="w"> </span><span class="n">Step</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">updater</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">location</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="bp">self</span><span class="o">-</span><span class="n">contained</span>
 <span class="w">    </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="p">:</span>
 
@@ -1749,6 +1753,7 @@ keep a copy in your change log.</p>
 <span class="err">```</span>
 
 <span class="o">-</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">haven</span><span class="s1">&#39;t installed the tools into `/opt` yet, use the repository helper</span>
+
 <span class="w">    </span><span class="n">to</span><span class="w"> </span><span class="n">populate</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="err">`</span><span class="w"> </span><span class="p">(</span><span class="n">preview</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span><span class="p">):</span>
 
 <span class="err">```</span><span class="n">bash</span>
@@ -1774,7 +1779,8 @@ you can perform the clone once the host is provisioned.</p>
 </li>
 <li>
 <p><strong>Set the hostname and time sync:</strong></p>
-<p>Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that hosts the default route (See step 2 below).</p>
+<p>Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that
+hosts the default route (See step 2 below).</p>
 </li>
 </ol>
 <details class="info">
@@ -1872,22 +1878,30 @@ nm.sh</code>.</p>
 </li>
 <li>
 <p><strong>Auto-generate <code>/etc/perfSONAR-multi-nic-config.conf</code>:</strong></p>
-<p>Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
+<p>Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config
+you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
 <ul>
 <li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
-<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add
+any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
 </li>
 </ol>
 <div class="admonition warning">
 <p class="admonition-title">Gateways required for addresses</p>
-<p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
+<p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address
+must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block
+to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly
+before applying changes.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Gateway prompts</p>
-<p>During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive sessions or when you use <code>--yes</code>.</p>
+<p>During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address
+but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or
+IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive sessions or when you
+use <code>--yes</code>.</p>
 </div>
 <ol>
 <li><strong>Execute the script:</strong></li>
@@ -1907,8 +1921,13 @@ possible. If you must run it remotely, use a persistent session tool
 </div>
 <div class="admonition note">
 <p class="admonition-title">Missing gateways at apply time</p>
-<p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use <code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.</p>
-<p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after the run and retain it with your change records.</p>
+<p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the
+script will prompt you interactively to provide a gateway before applying changes. Use
+<code>--yes</code> (or run non-interactively) to suppress prompts; in that case, missing gateways will
+cause validation to fail so you can correct the config first.</p>
+<p>The script creates a timestamped backup of existing NetworkManager profiles, seeds routing
+tables, and applies routing rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> after
+the run and retain it with your change records.</p>
 <p>On some hosts, we have had to reboot or power-cycle to get the new network settings in place.</p>
 </div>
 <h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
@@ -1919,7 +1938,8 @@ registration systems perform forward/reverse consistency checks.</p>
 <ul>
 <li>For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.</li>
 <li>For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.</li>
-<li>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).</li>
+<li>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and
+  reverse records (A+PTR and AAAA+PTR).</li>
 </ul>
 <details class="example">
 <summary>Run the DNS checker</summary>
@@ -1939,9 +1959,11 @@ registration systems perform forward/reverse consistency checks.</p>
 
 <p><strong>Notes and automation tips:</strong></p>
 <ul>
-<li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it to use <code>host</code> if preferred.</li>
+<li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it
+  to use <code>host</code> if preferred.</li>
 <li>Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.</li>
-<li>For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages <code>dns.resolver</code> for async checks.</li>
+<li>For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
+  script that leverages <code>dns.resolver</code> for async checks.</li>
 <li>If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.</li>
 </ul>
 </details>
@@ -1978,7 +2000,8 @@ profile with optional SELinux and Fail2Ban support.</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
 <ul>
-<li>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).</li>
+<li>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the
+  summary and answer manually).</li>
 <li>Add <code>--dry-run</code> for a rehearsal that only prints the planned actions.</li>
 </ul>
 <p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from
@@ -1996,8 +2019,10 @@ jails—only if those components are already installed.</p>
 </ul>
 <p><strong>Validation and output:</strong></p>
 <ul>
-<li>The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.</li>
-<li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
+<li>The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation
+  failure, nothing is installed and a message is logged.</li>
+<li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-
+  nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
 </ul>
 </details>
 <details class="tip">
@@ -2084,17 +2109,24 @@ baseline content out.</p>
 <span class="w">        </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
 <span class="w">        </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
 <span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
+
 <span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
 <span class="w">        </span><span class="nt">tmpfs</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
+
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
+
 <span class="w">        </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
 <span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
 </code></pre></div>
 <p>Bring it up with your preferred tool:</p>
@@ -2128,21 +2160,28 @@ optional <code>certbot</code> sidecar):</p>
 <span class="w">        </span><span class="nt">network_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;host&quot;</span>
 <span class="w">        </span><span class="nt">cgroup</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">host</span>
 <span class="w">        </span><span class="nt">environment</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=UTC</span>
+
 <span class="w">        </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
 <span class="w">        </span><span class="nt">tmpfs</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/run/lock</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp</span>
+
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/sys/fs/cgroup:/sys/fs/cgroup:rw</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/www/html:/var/www/html:z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/apache2:/etc/apache2:z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/letsencrypt:/etc/letsencrypt:z</span>
+
 <span class="w">        </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">pids_limit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
 <span class="w">        </span><span class="nt">cap_add</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CAP_NET_RAW</span>
 
 <span class="w">    </span><span class="c1"># Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint</span>
@@ -2154,8 +2193,11 @@ optional <code>certbot</code> sidecar):</p>
 <span class="w">        </span><span class="nt">entrypoint</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">[</span><span class="s">&quot;/bin/sh&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;-c&quot;</span><span class="p p-Indicator">,</span><span class="s">&quot;trap</span><span class="nv"> </span><span class="s">exit</span><span class="nv"> </span><span class="s">TERM;</span><span class="nv"> </span><span class="s">while</span><span class="nv"> </span><span class="s">:;</span><span class="nv"> </span><span class="s">do</span><span class="nv"> </span><span class="s">certbot</span><span class="nv"> </span><span class="s">renew;</span><span class="nv"> </span><span class="s">sleep</span><span class="nv"> </span><span class="s">12h</span><span class="nv"> </span><span class="s">&amp;</span><span class="nv"> </span><span class="s">wait</span><span class="nv"> </span><span class="s">$${!};</span><span class="nv"> </span><span class="s">done;&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">        </span><span class="nt">depends_on</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testpoint</span>
+
 <span class="w">        </span><span class="nt">volumes</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/www/html:/var/www/html:z</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/letsencrypt:/etc/letsencrypt:z</span>
 </code></pre></div>
@@ -2191,8 +2233,11 @@ lsregistration daemon (see below).</p>
 <summary>Registration steps and portals</summary>
 <ul>
 <li>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</li>
-<li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</li>
-<li>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</li>
+<li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.<ul>
+<li>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint
+    <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</li>
+</ul>
+</li>
 </ul>
 </details>
 <ol>
@@ -2202,7 +2247,8 @@ lsregistration daemon (see below).</p>
 <p>Confirm the resulting files in <code>/etc/perfsonar/psconfig/pscheduler.d/</code> map to the correct interface
 addresses (<code>ifaddr</code> tags).</p>
 <ol>
-<li><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.</li>
+<li><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed
+   URLs, and support contacts.</li>
 </ol>
 <h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running
@@ -2314,10 +2360,13 @@ toolkit-system-health
 <span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
 <span class="w">        </span><span class="c1"># ...</span>
 <span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+
 <span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
 <span class="w">        </span><span class="c1"># ...</span>
 <span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
 </code></pre></div>
 <p>This instructs Podman to check the registry for newer images and restart only if an update is pulled.</p>
