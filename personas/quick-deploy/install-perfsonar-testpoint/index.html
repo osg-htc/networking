@@ -892,6 +892,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#helper-script-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Helper Script (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
     <span class="md-ellipsis">
       Update Lookup Service registration inside the container
@@ -1634,6 +1643,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#helper-script-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Helper Script (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
     <span class="md-ellipsis">
       Update Lookup Service registration inside the container
@@ -2213,6 +2231,31 @@ mapfile<span class="w"> </span>-t<span class="w"> </span>PS_IPS<span class="w"> 
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>list
 </code></pre></div>
 <p>Verification: Confirm the files under <code>/etc/perfsonar/psconfig/pscheduler.d/</code> (inside the container) reflect the expected feeds and, where applicable, <code>ifaddr</code> entries match the intended interfaces.</p>
+<h3 id="helper-script-recommended">Helper Script (Recommended)<a class="headerlink" href="#helper-script-recommended" title="Permanent link">&para;</a></h3>
+<p>Instead of the ad-hoc automation snippet above, you can use the installed helper script:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>--help
+
+<span class="c1"># Typical usage (podman):</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-v
+
+<span class="c1"># Dry run only (show planned URLs):</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-n
+
+<span class="c1"># Non-interactive (CI) enrollment:</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-y
+
+<span class="c1"># If your container name differs:</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-c<span class="w"> </span>my-ps-testpoint
+</code></pre></div>
+<p>The script:</p>
+<ul>
+<li>Parses IP lists from <code>/etc/perfSONAR-multi-nic-config.conf</code> (<code>NIC_IPV4_ADDRS</code> / <code>NIC_IPV6_ADDRS</code>).</li>
+<li>Performs reverse DNS lookups (getent/dig) to derive FQDNs.</li>
+<li>Deduplicates while preserving discovery order.</li>
+<li>Adds each <code>https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> with <code>--configure-archives</code>.</li>
+<li>Lists configured remotes and returns non-zero if any enrollment fails.</li>
+</ul>
+<p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
 <ol>
 <li><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed
    URLs, and support contacts.</li>
