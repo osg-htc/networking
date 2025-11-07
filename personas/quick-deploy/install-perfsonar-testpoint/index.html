@@ -1995,32 +1995,33 @@ jails—only if those components are already installed.</p>
 <summary>Manually add extra management hosts/subnets</summary>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes,
 edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets. Example:</p>
-<p>```nft
-set ssh_access_ip4_subnets {
+<div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
     type ipv4_addr
     flags interval
     elements = { 192.0.2.0/24, 198.51.100.0/25 }
-}</p>
-<p>set ssh_access_ip4_hosts {
+}
+
+set ssh_access_ip4_hosts {
     type ipv4_addr
     elements = { 203.0.113.10, 203.0.113.11 }
-}</p>
-<p>set ssh_access_ip6_subnets {</p>
-</details>
-<p>type ipv6_addr
-flags interval
-elements = { 2001:db8:1::/64 }
-}</p>
-<p>set ssh_access_ip6_hosts {
-type ipv6_addr
-elements = { 2001:db8::10 }
 }
-<div class="highlight"><pre><span></span><code>Then validate and reload (root shell):
 
-```bash
-nft -c -f /etc/nftables.d/perfsonar.nft
-systemctl reload nftables || systemctl restart nftables
-</code></pre></div></p>
+set ssh_access_ip6_subnets {
+    type ipv6_addr
+    flags interval
+    elements = { 2001:db8:1::/64 }
+}
+
+set ssh_access_ip6_hosts {
+    type ipv6_addr
+    elements = { 2001:db8::10 }
+}
+</code></pre></div>
+</details>
+<p>Then validate and reload (root shell):</p>
+<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
+systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
+</code></pre></div>
 <div class="codehilite"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="o">**</span><span class="n">Confirm</span><span class="w"> </span><span class="n">firewall</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">security</span><span class="w"> </span><span class="n">services</span><span class="p">:</span><span class="o">**</span>
 </code></pre></div>
 
