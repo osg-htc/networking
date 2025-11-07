@@ -215,7 +215,7 @@ All perfSONAR software is available through an RPM (Red Hat Package Manager) rep
 
 The following command will import the key.
 
-sudo rpm --import [http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2](http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2)
+rpm --import [http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2](http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2)
 
 - **Download RPM Software**
 
@@ -229,19 +229,19 @@ Note that SL5 andSL6, RHEL 5 and RHEL 6 should work with these builds.  Those us
 
 The following command will invoke updates to the yum system, and also prepare the newly installed perfSONAR repository:
 
-sudo yum update
+yum update
 
 - **Search for Tools**
 
 Yum can be searched in the following manner:
 
-sudo yum search TOOLNAME
+yum search TOOLNAME
 
 - **Install Tools**
 
 Yum can install tools in a similar fashion, the following command will install the client libraries:
 
-sudo yum install owamp-client bwctl-client ndt-client
+yum install owamp-client bwctl-client ndt-client
 
 Note that some other tools may be pulled in automatically.  Note that iperf and nuttcp are required for BWCTL to work.
 

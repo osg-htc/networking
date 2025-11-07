@@ -27,20 +27,20 @@ Usage examples
 Preview what would happen (safe):
 
 ```bash
-sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
+bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
 ```
 
 Install into `/opt/perfsonar-tp/tools_scripts` (creates the directory if missing):
 
 ```bash
-sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
+bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
 ```
 
 If you already have the perfSONAR testpoint repo checked out in `/opt/perfsonar-tp`,
 skip cloning with:
 
 ```bash
-sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
+bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
 ```
 
 Requirements
@@ -90,14 +90,14 @@ Note: package names vary slightly across distributions. Adapt as needed.
 Fedora / RHEL / CentOS (dnf):
 
 ```bash
-sudo dnf install -y bash coreutils iproute NetworkManager rsync curl openssl nftables podman podman-compose docker-compose fail2ban policycoreutils
+dnf install -y bash coreutils iproute NetworkManager rsync curl openssl nftables podman podman-compose docker-compose fail2ban policycoreutils
 ```
 
 Debian / Ubuntu (apt):
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y bash coreutils iproute2 network-manager rsync curl openssl nftables podman podman-compose docker.io docker-compose fail2ban policycoreutils
+apt-get update
+apt-get install -y bash coreutils iproute2 network-manager rsync curl openssl nftables podman podman-compose docker.io docker-compose fail2ban policycoreutils
 ```
 
 If you intend to use the lsregistration container helpers, ensure either
@@ -133,27 +133,27 @@ How to run (dry-run / debug)
 Preview what the script would do without changing the system:
 
 ```bash
-sudo bash perfSONAR-pbr-nm.sh --dry-run --debug
+bash perfSONAR-pbr-nm.sh --dry-run --debug
 ```
 
 Generate an example or auto-detected config (preview, dry-run only):
 
 ```bash
-sudo bash perfSONAR-pbr-nm.sh --generate-config-debug
+bash perfSONAR-pbr-nm.sh --generate-config-debug
 ```
 
 Write the auto-detected config to /etc (does not apply changes):
 
 ```bash
-sudo bash perfSONAR-pbr-nm.sh --generate-config-auto
+bash perfSONAR-pbr-nm.sh --generate-config-auto
 ```
 
 Run for real (be careful):
 
 ```bash
-sudo bash perfSONAR-pbr-nm.sh
+bash perfSONAR-pbr-nm.sh
 # or non-interactive
-sudo bash perfSONAR-pbr-nm.sh --yes
+bash perfSONAR-pbr-nm.sh --yes
 
 ```
 

@@ -30,19 +30,19 @@ traceroute -n <remote-ip-or-host>
 ```bash
 systemctl status perfsonar-*
 ps aux | grep perfsonar
-sudo podman ps || sudo docker ps
+podman ps || docker ps
 ```
 
 4. Check firewall and ports
 
 ```bash
-sudo nft list ruleset
-sudo ss -ltnp
+nft list ruleset
+ss -ltnp
 ```
 
 5. Collect logs and measurements
 
-- Container logs: `sudo podman logs perfsonar-testpoint`
+- Container logs: `podman logs perfsonar-testpoint`
 - perfSONAR checks: `pscheduler tasks --host localhost`
 
 Use the scenario playbooks in `playbooks/` for step-by-step remediation instructions.

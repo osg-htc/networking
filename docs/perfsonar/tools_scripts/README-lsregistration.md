@@ -27,14 +27,14 @@ Examples:
 
 ```bash
 # Update a few fields inside the container (from installed tools path)
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
   --container perfsonar-testpoint \
   --site-name "Acme Co." --domain example.org \
   --project WLCG --project OSG \
   --admin-name "pS Admin" --admin-email admin@example.org
 
 # Update the host file directly (non-container use)
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh --local \
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh --local \
   --conf /etc/perfsonar/lsregistrationdaemon.conf \
   --city Berkeley --region CA --country US
 ```
@@ -48,8 +48,8 @@ self-contained restore script. Use `--output`/`--input` to control paths. Exampl
 
 ```bash
 # Produce a self-contained restore script suitable for host restore
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
-sudo /tmp/restore-lsreg.sh
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
+/tmp/restore-lsreg.sh
 ```
 
 ## Notes

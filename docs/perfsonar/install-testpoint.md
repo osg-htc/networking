@@ -11,19 +11,19 @@ curl -fsSL \
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
     -o /tmp/install_tools_scripts.sh
 chmod 0755 /tmp/install_tools_scripts.sh
-sudo /tmp/install_tools_scripts.sh /opt/perfsonar-tp
+/tmp/install_tools_scripts.sh /opt/perfsonar-tp
 ```
 
 ### Ensure the host is up to date
 
 ```bash
-sudo dnf update -y
+dnf update -y
 ```
 
 ### Install required packages
 
 ```bash
-sudo dnf install -y git podman podman-compose nftables iproute
+dnf install -y git podman podman-compose nftables iproute
 ```
 
 Note: Podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.
@@ -37,7 +37,7 @@ Note: Podman is the default container engine on EL9. If you wish to use Docker i
 You can use a ready-to-run compose file maintained in the osg-htc/networking repository:
 
 ```bash
-sudo mkdir -p /opt/perfsonar-tp
+mkdir -p /opt/perfsonar-tp
 curl -fsSL \
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
     -o /opt/perfsonar-tp/docker-compose.yml
@@ -46,7 +46,7 @@ curl -fsSL \
 ### Prepare configuration storage
 
 ```bash
-sudo mkdir -p /opt/perfsonar-tp/psconfig
+mkdir -p /opt/perfsonar-tp/psconfig
 ```
 
 ### Edit the compose file as needed
@@ -73,29 +73,29 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 
 1. Preview generation (no changes):
 
-```bash
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
-```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
+    ```
 
 1. Generate the config file automatically:
 
-```bash
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
-```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
+    ```
 
 Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
 
 1. Dry run the apply step:
 
-```bash
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
-```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
+    ```
 
 1. Apply changes:
 
-```bash
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
-```
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
+    ```
 
 The script backs up current NetworkManager profiles and logs actions to /var/log/perfSONAR-multi-nic-config.log.
 
@@ -118,16 +118,16 @@ Edit /etc/iproute2/rt\_tables and add:
 #### b) Add routes and rules (replace IPs as appropriate)
 
 \# Add rules for eth0 (latency)
-sudo ip rule add from 192.168.10.10/32 table eth0table
+ip rule add from 192.168.10.10/32 table eth0table
 
-sudo ip route add 192.168.10.0/24 dev eth0 scope link table eth0table
-sudo ip route add default via 192.168.10.1 dev eth0 table eth0table
+ip route add 192.168.10.0/24 dev eth0 scope link table eth0table
+ip route add default via 192.168.10.1 dev eth0 table eth0table
 
 \# Add rules for eth1 (throughput)
-sudo ip rule add from 10.20.30.10/32 table eth1table
+ip rule add from 10.20.30.10/32 table eth1table
 
-sudo ip route add 10.20.30.0/24 dev eth1 scope link table eth1table
-sudo ip route add default via 10.20.30.1 dev eth1 table eth1table
+ip route add 10.20.30.0/24 dev eth1 scope link table eth1table
+ip route add default via 10.20.30.1 dev eth1 table eth1table
 
 #### c) Make persistent
 
@@ -149,7 +149,7 @@ WantedBy\=multi-user.target
 
 Enable it:
 
-sudo systemctl enable \--now perfsonar-policy-routing
+systemctl enable \--now perfsonar-policy-routing
 
 ---
 
@@ -160,13 +160,13 @@ Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the 
 1. Run with options:
 
 ```bash
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
 ```
 
 1. Preview rules only:
 
 ```bash
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
 ```
 
 The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/perfSONAR-install-nftables.log.
@@ -228,8 +228,8 @@ chain input {
 
 Apply and persist:
 
-sudo nft \-f /etc/nftables.conf
-sudo systemctl enable \--now nftables
+nft -f /etc/nftables.conf
+systemctl enable --now nftables
 
 ---
 
@@ -244,15 +244,15 @@ If you want the container to use a specific NIC, adjust the docker-compose.syste
 Check containers:
 
 ```bash
-sudo podman ps
+podman ps
 # or
-sudo docker ps
+docker ps
 ```
 
 Check logs:
 
 ```bash
-sudo podman logs perfsonar-testpoint
+podman logs perfsonar-testpoint
 ```
 
 Test connectivity between testpoints.
@@ -264,8 +264,8 @@ Test connectivity between testpoints.
 To register your testpoint with a central config:
 
 ```bash
-sudo podman exec -it perfsonar-testpoint psconfig remote list
-sudo podman exec -it perfsonar-testpoint psconfig remote --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
+podman exec -it perfsonar-testpoint psconfig remote list
+podman exec -it perfsonar-testpoint psconfig remote --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
 ```
 
 ---

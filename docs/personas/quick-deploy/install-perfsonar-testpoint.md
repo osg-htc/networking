@@ -11,35 +11,35 @@ Before you begin, gather the following information:
 - **Hardware details:** hostname, BMC/iLO/iDRAC credentials (if used), interface names, available storage.
 - **Network data:** IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN
   information, PSConfig registration URLs.
-- **Operational contacts:** site admin email, OSG facility name, latitude/longitude, usage policy link.
+- **Operational contacts:** site admin email, OSG facility name, latitude/longitude.
 - **Repository artifacts:** Scripts and configurations from the [perfsonar/testpoint](https://github.com/perfsonar/testpoint) repository, installed to `/opt/perfsonar-tp/tools_scripts`.
 
 - **Existing perfSONAR configuration:** If replacing an existing instance, back up `/etc/perfsonar/` files, especially `lsregistrationdaemon.conf`, and any container volumes. Use `perfSONAR-update-lsregistration.sh` to extract registration config.
 
 
-??? info "Quick capture of existing lsregistration config (if replacing)"
+??? info "Quick capture of existing lsregistration config (if you have a src)"
 
-    Use the installed tools to extract a restore script:
-
-    ```bash
-    sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
-        extract --output /root/restore-lsreg.sh
-    ```
-
-    Or download temporarily:
+     Download temporarily:
 
     ```bash
     curl -fsSL \
       https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
       -o /tmp/update-lsreg.sh
     chmod 0755 /tmp/update-lsreg.sh
-    sudo /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
+
     ```
+    
+    Use the downloaded tool to extract a restore script:
+
+    ```bash
+    /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
+    ```
+
 
 
 Note: Repository clone instructions are in Step 2.
 
-> **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
+> **Note:** All shell commands assume an interactive root shell.
 
 ---
 
@@ -97,19 +97,19 @@ After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
     /opt/perfsonar-tp/tools_scripts/check-deps.sh
     ```
 
-??? tip "Alternative: one-off run without installing tools"
+??? tip "Alternative: check-deps.sh one-off run without installing tools"
 
-    ```bash
-    # Preferred: run from the installed tools path (see Step 2):
-    /opt/perfsonar-tp/tools_scripts/check-deps.sh
+        ```bash
+        # Preferred: run from the installed tools path (see Step 2):
+        /opt/perfsonar-tp/tools_scripts/check-deps.sh
 
-    # If you must run it without installing the tools, download to /tmp and run
-    curl -fsSL \
-      https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
-      -o /tmp/check-deps.sh
-    chmod 0755 /tmp/check-deps.sh
-    sudo /tmp/check-deps.sh
-    ```
+        # If you must run it without installing the tools, download to /tmp and run
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
+            -o /tmp/check-deps.sh
+        chmod 0755 /tmp/check-deps.sh
+        /tmp/check-deps.sh
+        ```
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
@@ -174,7 +174,7 @@ registration systems perform forward/reverse consistency checks.
     Validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
 
     ```bash
-    sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
     ```
 
     Or download temporarily:
@@ -184,9 +184,8 @@ registration systems perform forward/reverse consistency checks.
         https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-perfsonar-dns.sh \
         -o /tmp/check-dns.sh
     chmod 0755 /tmp/check-dns.sh
-    sudo /tmp/check-dns.sh
+    /tmp/check-dns.sh
     ```
-        ```
 
     **Notes and automation tips:**
 
@@ -376,9 +375,11 @@ Bring it up with your preferred tool:
 
 ```bash
 # Use docker cp or podman cp (either works)
+docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
+# Below are if also using Lets Encrypt
 docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
 docker cp perfsonar-testpoint:/var/www/html /var/www/html
-docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
+
 ```
 
 If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you
@@ -482,7 +483,7 @@ docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachect
 
 ## Step 6 – Register and Configure with WLCG/OSG
 
-We need to register your instance and ensure it is configurated with the required meta data for the
+We need to register your instance and ensure it is configured with the required meta data for the
 lsregistration daemon (see below).
 
 1. **OSG/WLCG registration workflow:**
@@ -509,14 +510,6 @@ addresses (`ifaddr` tags).
 Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running
 `perfsonar-testpoint` container and restart the daemon only if needed.
 
-    - Script (browse): [perfSONAR-update-lsregistration.sh][psupdate]
-    - Raw (download): [raw link][psupdateraw]
-
-    <!-- markdownlint-disable MD013 -->
-    [psupdate]: https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh
-    [psupdateraw]: https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh
-    <!-- markdownlint-enable MD013 -->
-
 Install and run examples (root shell):
 
 ```bash
@@ -525,24 +518,16 @@ Install and run examples (root shell):
     --dry-run --site-name "Acme Co." --project WLCG \
     --admin-email admin@example.org --admin-name "pS Admin"
 
-# Apply common updates and restart the daemon inside the container
+# Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)
+bash /root/restore-lsreg.sh
+
+# Apply new settings and restart the daemon inside the container
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
     --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
     --city Berkeley --region CA --country US --zip 94720 \
     --latitude 37.5 --longitude -121.7469 \
     --admin-name "pS Admin" --admin-email admin@example.org
 ```
-
-??? tip "Alternative: download this script directly (if you didn't run the bootstrap)"
-        ```bash
-        install -d /opt/perfsonar-tp/tools_scripts
-        curl -fsSL \
-            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-            -o /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
-        chmod 0755 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
-        ```
-
----
 
 ## Step 7 – Post-Install Validation
 
