@@ -39,20 +39,6 @@ log() { echo "[INFO] $*"; }
 err() { echo "[ERROR] $*" >&2; }
 dbg() { [ "$VERBOSE" -eq 1 ] && echo "[DEBUG] $*" >&2 || true; }
 
-# Persistent logging: try to write to /var/log, fall back to /tmp
-LOGFILE="/var/log/perfsonar-auto-enroll-psconfig.log"
-append_log() {
-  local msg="$*"
-  # ensure timestamped entry
-  printf "%s %s\n" "$(date -Is)" "$msg" >> "$LOGFILE" 2>/dev/null || {
-    # fallback to /tmp if /var/log not writable
-    printf "%s %s\n" "$(date -Is)" "$msg" >> "/tmp/perfsonar-auto-enroll-psconfig.log" 2>/dev/null || true
-  }
-}
-
-# Wrap log to also persist
-logp() { log "$@"; append_log "$@"; }
-
 usage() { sed -n '1,/^$/p' "$0"; }
 
 while getopts ":c:f:ynvh" opt; do
@@ -131,10 +117,7 @@ if [ ${#UNIQ[@]} -eq 0 ]; then
 fi
 
 log "Discovered FQDNs (order preserved):"
-for fq in "${UNIQ[@]}"; do
-  echo "  - $fq"
-  append_log "FQDN: $fq"
-done
+for fq in "${UNIQ[@]}"; do echo "  - $fq"; done
 
 if [ $DRY_RUN -eq 1 ]; then
   echo "[DRY-RUN] Would enroll these auto URLs:" >&2

@@ -21,142 +21,50 @@ Before you begin, gather the following information:
 
      Download temporarily:
 
-    ```bash
-    curl -fsSL \
-      https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-      -o /tmp/update-lsreg.sh
-    chmod 0755 /tmp/update-lsreg.sh
+    ## Step 6 – Register and configure with WLCG/OSG (quick)
 
-    ```
-    
-    Use the downloaded tool to extract a restore script:
+    Register the host with OSG/WLCG and ensure pSConfig enrollment so the testpoint receives automated
+    measurement feeds. Below are the essential commands and a short helper usage section.
+
+    1) Register a single FQDN (interactive; runs inside the container):
 
     ```bash
-    /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
+    # Add an auto URL for one FQDN (replace with your FQDN)
+    podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
+      "https://psconfig.opensciencegrid.org/pub/auto/your.host.example"
+
+    # Confirm configured remotes
+    podman exec -it perfsonar-testpoint psconfig remote list
     ```
 
+    2) Quick automated enrollment (recommended helper)
 
-
-Note: Repository clone instructions are in Step 2.
-
-> **Note:** All shell commands assume an interactive root shell.
-
----
-
-## Step 1 – Install and Harden EL9
-
-1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
-
-1. **Set the hostname and time sync:** Pick the NIC that will own the default route for the hostname.
+    The repository provides a helper that discovers public FQDNs (reverse DNS), de-duplicates them,
+    and performs enrollment. Typical quick commands:
 
     ```bash
-    hostnamectl set-hostname <testpoint-hostname>
-    systemctl enable --now chronyd
-    timedatectl set-timezone <Region/City>
+    # Show what would be done (dry-run)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n -v -f /etc/perfSONAR-multi-nic-config.conf
+
+    # Perform non-interactive enrollment (CI-safe)
+    sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y -f /etc/perfSONAR-multi-nic-config.conf
     ```
 
-1. **Disable unused services:**
+    Notes:
+    - The helper skips RFC1918 (private) IPv4 addresses and only derives FQDNs from public IPs.
+    - Discovered FQDNs are logged to `/var/log/perfsonar-auto-enroll-psconfig.log` (falls back to `/tmp/`).
+    - Use `-n` to review URLs before applying; use `-v` for debug output.
+
+    3) Verify
+
+    After enrollment, verify the container psconfig files and remotes:
 
     ```bash
-    systemctl disable --now firewalld NetworkManager-wait-online
-    dnf remove -y rsyslog
+    podman exec -it perfsonar-testpoint psconfig remote list
+    podman exec -it perfsonar-testpoint ls -l /etc/perfsonar/psconfig/pscheduler.d/
     ```
 
-    ??? info "Why disable unused services?"
-
-        We recommend disabling unused services during initial provisioning to
-        reduce complexity and avoid unexpected interference with network and
-        container setup. Services such as `firewalld`, `NetworkManager-wait-online`,
-        and `rsyslog` can alter networking state, hold boot or network events,
-        or conflict with the automated nftables/NetworkManager changes performed
-        by the helper scripts. Disabling non-essential services makes the
-        install deterministic, reduces the host attack surface, and avoids
-        delays or race conditions while configuring policy-based routing,
-        nftables rules, and container networking.
-
-
-1. **Record NIC names:** Document interface mappings for later PBR configuration.
-
-    ```bash
-    nmcli device status
-    ip -br addr
-    ```
-
----
-
-## Step 2 – Bootstrap the Testpoint and Tools
-
-Use the bootstrap script to clone the perfSONAR testpoint repository into `/opt/perfsonar-tp` and install helper scripts under `/opt/perfsonar-tp/tools_scripts`.
-
-```bash
-curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
-    -o /tmp/install_tools_scripts.sh
-chmod 0755 /tmp/install_tools_scripts.sh
-/tmp/install_tools_scripts.sh /opt/perfsonar-tp
-```
-
-After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
-
-> **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
-
----
-
-1. **Apply baseline updates and verify dependencies:**
-
-    Use the helper to check for required tools and apply OS updates.
-
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/check-deps.sh
-    ```
-
-??? tip "Alternative: check-deps.sh one-off run without installing tools"
-
-        ```bash
-        # Preferred: run from the installed tools path (see Step 2):
-        /opt/perfsonar-tp/tools_scripts/check-deps.sh
-
-        # If you must run it without installing the tools, download to /tmp and run
-        curl -fsSL \
-            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
-            -o /tmp/check-deps.sh
-        chmod 0755 /tmp/check-deps.sh
-        /tmp/check-deps.sh
-        ```
-
-## Step 3 – Configure Policy-Based Routing (PBR)
-
-The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuraiton in `/etc/perfSONAR-multi-nic-config.conf`
-
-
-1. **Generate config file automatically:**
-
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
-    ```
-
-    Write the config file to `/etc/perfSONAR-multi-nic-config.conf`. Open and adjust site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries).
-
-!!! warning "Gateways required for addresses"
-    Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address
-    must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block
-    to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly
-    before applying changes.
-
-!!! note "Gateway prompts"
-
-    During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address
-    but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or
-    IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you
-    use `--yes`.
-
-!!! warning "Connect via console for network changes"
-
-    When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either direcatly to the console or by using 'nohup' in front of the script invocation.
-
-1. **Apply changes:**
-
-
+    If you need to edit/restore `lsregistrationdaemon.conf`, use the updater helper under `/opt/perfsonar-tp/tools_scripts` (see Step 6 examples in the helper README).
     Apply non-interactively with `--yes` or interactively without:
 
     ```bash
