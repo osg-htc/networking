@@ -73,13 +73,24 @@ you can perform the clone once the host is provisioned.
 
 1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
 
+1. **Apply baseline updates (and verify dependencies):**
 
-1. **Set the hostname and time sync:**
+    Run the dependency checker after bootstrap (Step 2) or download it temporarily.
 
-    Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that
-    hosts the default route (See step 2 below).
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/check-deps.sh
+    ```
 
-??? info "System configuration commands"
+    ??? tip "Download one-off without installed tools"
+        ```bash
+        curl -fsSL \
+          https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
+          -o /tmp/check-deps.sh
+        chmod 0755 /tmp/check-deps.sh
+        sudo /tmp/check-deps.sh
+        ```
+
+1. **Set the hostname and time sync:** Pick the NIC that will own the default route for the hostname.
 
     ```bash
     hostnamectl set-hostname <testpoint-hostname>
@@ -89,58 +100,33 @@ you can perform the clone once the host is provisioned.
 
 1. **Disable unused services:**
 
-??? info "Service cleanup commands"
-
     ```bash
     systemctl disable --now firewalld NetworkManager-wait-online
     dnf remove -y rsyslog
     ```
 
-1. **Record NIC names:**
-
-??? info "Commands to list network interfaces"
+1. **Record NIC names:** Document interface mappings for later PBR configuration.
 
     ```bash
     nmcli device status
     ip -br addr
     ```
 
-    Document interface mappings; you will need them for the policy-based routing configuration.
-
 ---
 
-## Step 2 – Clone the Repository
+## Step 2 – Bootstrap the Testpoint and Tools
 
-This guide references multiple scripts from the osg-htc/networking repository. Clone the repository
-to your testpoint host for easy access to all tools.
-
-**Recommended locations:**
-
-- **perfSONAR testpoint compose bundle:** `/opt/perfsonar-tp` (if using containerized testpoint)
-
-
-First check out the perfSONAR testpoint (if you plan to run containers on the host):
+Use the bootstrap script to clone the perfSONAR testpoint repository into `/opt/perfsonar-tp` and install helper scripts under `/opt/perfsonar-tp/tools_scripts`.
 
 ```bash
-git clone https://github.com/perfsonar/testpoint.git /opt/perfsonar-tp
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
+    -o /tmp/install_tools_scripts.sh
+chmod 0755 /tmp/install_tools_scripts.sh
+/tmp/install_tools_scripts.sh /opt/perfsonar-tp
 ```
 
-Populate `/opt/perfsonar-tp/tools_scripts` from this repository using the convenience helper we
-provide. The helper performs a shallow sparse checkout and preserves executable bits:
-
-```bash
-# Preview what would happen (safe):
-sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
-
-# Install into /opt/perfsonar-tp/tools_scripts (creates directory if missing):
-sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
-
-# If you already have /opt/perfsonar-tp, skip cloning the testpoint repo:
-sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
-```
-
-After running the helper, the scripts referenced below will be available at `/opt/perfsonar-
-tp/tools_scripts` and you can run them from there (or use a raw download when noted).
+After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
@@ -174,22 +160,19 @@ tp/tools_scripts` and you can run them from there (or use a raw download when no
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
-The repository ships an enhanced script `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` that
-automates NetworkManager configuration and routing rules and can auto-generate its config file.
-After Step 2, the local path for this script is `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-
-nm.sh`.
+The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup.
 
-
-1. **Run the PBR helper:** (already available from Step 2 in `/opt/perfsonar-tp/tools_scripts`)
+1. **Preview generation (no changes):**
 
     ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --help
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
     ```
 
-1. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:**
+1. **Generate config file automatically:**
 
-    Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config
-    you can review/edit. Auto-generation is opt-in; it does not run by default.
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
+    ```
 
     - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
@@ -213,15 +196,11 @@ nm.sh`.
     IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you
     use `--yes`.
 
-1. **Execute the script:**
+1. **Dry-run apply (no changes):**
 
-!!! warning "Run from console or use a persistent session"
-
-    Running the PBR helper can modify network interfaces and routing and may
-    drop active SSH sessions. Run the script from the host console when
-    possible. If you must run it remotely, use a persistent session tool
-    (screen, tmux) or prefix with `nohup` and check output later. Use
-    `--dry-run` to preview actions before applying changes.
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
+    ```
 
     - Apply changes non-interactively (auto-confirm):
 
@@ -229,12 +208,11 @@ nm.sh`.
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
     ```
 
-!!! note "Missing gateways at apply time"
+1. **Interactive run:**
 
-    If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the
-    script will prompt you interactively to provide a gateway before applying changes. Use
-    `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will
-    cause validation to fail so you can correct the config first.
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh
+    ```
 
     The script creates a timestamped backup of existing NetworkManager profiles, seeds routing
     tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after
@@ -298,8 +276,12 @@ owns the system default route.
 
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
-Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables
-profile with optional SELinux and Fail2Ban support.
+Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.
+
+Script location in the repository:
+
+- [Directory (browse)](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts)
+- [Raw file (direct download)](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh)
 
 Prerequisites (not installed by the script):
 
@@ -309,9 +291,7 @@ Prerequisites (not installed by the script):
 
 If any prerequisite is missing, the script skips that component and continues.
 
-1. **Use the help script:**
-
-    1. **Run with desired options:**
+1. **Run with desired options:**
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
@@ -617,30 +597,28 @@ Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside 
 
 Install and run examples (root shell):
 
-Note: the helper uses subcommands; use the `update` command to apply field changes. Other available
-commands: `save`, `restore`, `create`, `extract`.
-
-From the local tools checkout (preferred):
-
 ```bash
-# Preview changes only
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
-    --dry-run \
-    --site-name "Acme Co." --project WLCG \
+# Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+    --dry-run --site-name "Acme Co." --project WLCG \
     --admin-email admin@example.org --admin-name "pS Admin"
 
 # Apply common updates and restart the daemon inside the container
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
     --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
     --city Berkeley --region CA --country US --zip 94720 \
     --latitude 37.5 --longitude -121.7469 \
     --admin-name "pS Admin" --admin-email admin@example.org
-
-# Produce a self-contained restore script for host restore
-sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh extract \
-    --output /tmp/restore-lsreg.sh
-sudo /tmp/restore-lsreg.sh
 ```
+
+??? tip "Alternative: download this script directly (if you didn't run the bootstrap)"
+        ```bash
+        install -d /opt/perfsonar-tp/tools_scripts
+        curl -fsSL \
+            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+            -o /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
+        chmod 0755 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
+        ```
 
 ---
 

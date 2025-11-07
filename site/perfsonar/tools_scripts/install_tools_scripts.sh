@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+<<<<<<< HEAD
 # install_tools_scripts.sh
 # Helper to populate /opt/perfsonar-tp/tools_scripts with the tools shipped
 # in this repository under docs/perfsonar/tools_scripts using a sparse checkout.
@@ -126,3 +127,47 @@ main() {
 }
 
 main "$@"
+=======
+set -euo pipefail
+
+# install_tools_scripts.sh (reverted workflow)
+# Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
+#          directory is present under /opt/perfsonar-tp/tools_scripts.
+
+DEST_ROOT=${1:-/opt/perfsonar-tp}
+TP_REPO_URL="https://github.com/perfsonar/testpoint.git"
+TOOLS_SRC="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts"
+
+echo "[INFO] Target root: $DEST_ROOT"
+mkdir -p "$DEST_ROOT"
+
+if [ ! -d "$DEST_ROOT/.git" ] && [ ! -d "$DEST_ROOT/psconfig" ]; then
+  echo "[INFO] Cloning perfSONAR testpoint repository..."
+  git clone "$TP_REPO_URL" "$DEST_ROOT"
+else
+  echo "[INFO] perfSONAR testpoint appears already present; skipping clone."
+fi
+
+TOOLS_DIR="$DEST_ROOT/tools_scripts"
+mkdir -p "$TOOLS_DIR"
+
+scripts=(
+  check-deps.sh
+  check-perfsonar-dns.sh
+  perfSONAR-pbr-nm.sh
+  perfSONAR-install-nftables.sh
+  perfSONAR-update-lsregistration.sh
+  perfSONAR-extract-lsregistration.sh
+  docker-compose.yml
+)
+
+echo "[INFO] Fetching helper scripts into $TOOLS_DIR"
+for s in "${scripts[@]}"; do
+  echo "  - $s"
+  curl -fsSL "$TOOLS_SRC/$s" -o "$TOOLS_DIR/$s"
+done
+
+chmod 0755 "$TOOLS_DIR"/*.sh || true
+
+echo "[INFO] Bootstrap complete. Testpoint root: $DEST_ROOT; scripts in $TOOLS_DIR"
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)

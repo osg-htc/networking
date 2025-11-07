@@ -1,62 +1,121 @@
-﻿## **1\. Prerequisites**
+﻿# perfSONAR Testpoint Installation (EL9)
 
-### **Ensure the host is up to date:**
+## 1. Prerequisites
 
-sudo dnf update \-y
+### Bootstrap the perfSONAR testpoint and tools (recommended)
 
-### **Install required packages:**
+Use the bootstrap script to clone the perfSONAR testpoint repo and install helper scripts under /opt/perfsonar-tp/tools_scripts.
 
-sudo dnf install \-y git podman docker-compose nftables iproute
+```bash
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
+    -o /tmp/install_tools_scripts.sh
+chmod 0755 /tmp/install_tools_scripts.sh
+sudo /tmp/install_tools_scripts.sh /opt/perfsonar-tp
+```
 
-* *Note*: podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.
+### Ensure the host is up to date
 
----
+```bash
+sudo dnf update -y
+```
 
-## **2\. Deploy the perfSONAR Testpoint Container**
+### Install required packages
 
-### **Clone the repository:**
+```bash
+sudo dnf install -y git podman podman-compose nftables iproute
+```
 
-git clone https://github.com/perfsonar/perfsonar-testpoint-docker.git
-cd perfsonar-testpoint-docker
-
-### **Prepare configuration storage:**
-
-sudo mkdir \-p /opt/perfsonar-tp/
-sudo cp \-r compose/psconfig /opt/perfsonar-tp/
-
-### **Edit the compose file as needed:**
-
-Edit docker-compose.systemd.yml if you need to customize e.g., resource limits or volumes.
-
----
-
-### **Pull and Launch the Container:**
-
-sudo podman-compose \-f docker-compose.systemd.yml pull
-sudo podman-compose \-f docker-compose.systemd.yml up \-d
-
-*Or, if using Docker:*
-
-sudo docker compose \-f docker-compose.systemd.yml pull
-sudo docker compose \-f docker-compose.systemd.yml up \-d
+Note: Podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.
 
 ---
 
-## **3\. Configure Policy-Based Routing for Multi-Homed NICs**
+## 2. Deploy the perfSONAR Testpoint Container
+
+### Obtain a compose file
+
+You can use a ready-to-run compose file maintained in the osg-htc/networking repository:
+
+```bash
+sudo mkdir -p /opt/perfsonar-tp
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
+    -o /opt/perfsonar-tp/docker-compose.yml
+```
+
+### Prepare configuration storage
+
+```bash
+sudo mkdir -p /opt/perfsonar-tp/psconfig
+```
+
+### Edit the compose file as needed
+
+Edit /opt/perfsonar-tp/docker-compose.yml if you need to customize resource limits or volumes.
+
+### Launch the container
+
+```bash
+(cd /opt/perfsonar-tp; podman-compose up -d)
+```
+
+Or, if using Docker:
+
+```bash
+(cd /opt/perfsonar-tp; docker-compose up -d)
+```
+
+---
+
+## 3. Configure Policy-Based Routing for Multi-Homed NICs
+
+Recommended: use the helper script to generate and apply NetworkManager profiles and routing rules for multi-NIC hosts.
+
+1. Preview generation (no changes):
+
+```bash
+sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
+```
+
+1. Generate the config file automatically:
+
+```bash
+sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
+```
+
+Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
+
+1. Dry run the apply step:
+
+```bash
+sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
+```
+
+1. Apply changes:
+
+```bash
+sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
+```
+
+The script backs up current NetworkManager profiles and logs actions to /var/log/perfSONAR-multi-nic-config.log.
+
+If you prefer to configure rules manually, see the example below.
+
+### Manual example
 
 Suppose:
 
 * eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1
 * eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1
 
-### **a) Add custom routing tables**
+#### a) Add custom routing tables
 
 Edit /etc/iproute2/rt\_tables and add:
 
 200  eth0table
 201  eth1table
 
-### **b) Add routes and rules (replace IPs as appropriate):**
+#### b) Add routes and rules (replace IPs as appropriate)
 
 \# Add rules for eth0 (latency)
 sudo ip rule add from 192.168.10.10/32 table eth0table
@@ -70,7 +129,7 @@ sudo ip rule add from 10.20.30.10/32 table eth1table
 sudo ip route add 10.20.30.0/24 dev eth1 scope link table eth1table
 sudo ip route add default via 10.20.30.1 dev eth1 table eth1table
 
-### **c) Make persistent**
+#### c) Make persistent
 
 For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.
 
@@ -94,7 +153,25 @@ sudo systemctl enable \--now perfsonar-policy-routing
 
 ---
 
-## **4\. Example NFTables Firewall Rules**
+## 4. Firewall and security
+
+Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the helper script.
+
+1. Run with options:
+
+```bash
+sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
+```
+
+1. Preview rules only:
+
+```bash
+sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
+```
+
+The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/perfSONAR-install-nftables.log.
+
+### Manual nftables example (optional)
 
 Below is a sample NFTables rule set that
 
@@ -156,39 +233,44 @@ sudo systemctl enable \--now nftables
 
 ---
 
-## **5\. Optional: perfSONAR Testpoint Container Networking**
+## 5. Optional: perfSONAR Testpoint Container Networking
 
 If you want the container to use a specific NIC, adjust the docker-compose.systemd.yml to use \--network host, or configure the container’s network accordingly. By default, host mode is recommended for testpoint deployments to avoid NAT and ensure direct packet timing.
 
 ---
 
-## **6\. Confirm Operation**
+## 6. Confirm Operation
 
 Check containers:
-sudo podman ps
-\# or
-sudo docker ps
 
-*
+```bash
+sudo podman ps
+# or
+sudo docker ps
+```
 
 Check logs:
-sudo podman logs perfsonar-testpoint
 
-*
-* Test connectivity between testpoints.
+```bash
+sudo podman logs perfsonar-testpoint
+```
+
+Test connectivity between testpoints.
 
 ---
 
-## **7\. (Optional) Configure perfSONAR Remotes**
+## 7. (Optional) Configure perfSONAR Remotes
 
 To register your testpoint with a central config:
 
-sudo podman exec \-it perfsonar-testpoint psconfig remote list
-sudo podman exec \-it perfsonar-testpoint psconfig remote \--configure-archives add http://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch
+```bash
+sudo podman exec -it perfsonar-testpoint psconfig remote list
+sudo podman exec -it perfsonar-testpoint psconfig remote --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
+```
 
 ---
 
-## **8\. References & Further Reading**
+## 8. References & Further Reading
 
 * [perfSONAR testpoint Docker GitHub](https://github.com/perfsonar/perfsonar-testpoint-docker/)
 * [perfSONAR Documentation](https://docs.perfsonar.net/)

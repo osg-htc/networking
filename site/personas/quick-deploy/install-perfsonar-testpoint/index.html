@@ -577,8 +577,15 @@
 </li>
       
         <li class="md-nav__item">
+<<<<<<< HEAD
   <a href="#step-2-clone-the-repository" class="md-nav__link">
     Step 2 – Clone the Repository
+=======
+  <a href="#step-2-bootstrap-the-testpoint-and-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2 – Bootstrap the Testpoint and Tools
+    </span>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
   </a>
   
 </li>
@@ -703,6 +710,39 @@
           <li class="md-nav__item">
   <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
     Automatic image updates and safe restarts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-post-install-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 7 – Post-Install Validation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ongoing-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ongoing Maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ongoing Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic image updates and safe restarts
+    </span>
   </a>
   
 </li>
@@ -1091,8 +1131,15 @@
 </li>
       
         <li class="md-nav__item">
+<<<<<<< HEAD
   <a href="#step-2-clone-the-repository" class="md-nav__link">
     Step 2 – Clone the Repository
+=======
+  <a href="#step-2-bootstrap-the-testpoint-and-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2 – Bootstrap the Testpoint and Tools
+    </span>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
   </a>
   
 </li>
@@ -1226,6 +1273,39 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#step-7-post-install-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 7 – Post-Install Validation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ongoing-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ongoing Maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Ongoing Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic image updates and safe restarts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1318,6 +1398,42 @@ you can perform the clone once the host is provisioned.</p>
 <p><strong>Provision EL9:</strong> Install AlmaLinux, Rocky Linux, or RHEL 9 with the <em>Minimal</em> profile.</p>
 </li>
 <li>
+<<<<<<< HEAD
+=======
+<p><strong>Apply baseline updates (and verify dependencies):</strong></p>
+<p>Use the repository's helper to check for required tools and print
+copy/paste install commands. Then apply OS updates and any remaining
+baseline packages.</p>
+<ul>
+<li>
+<p>From your checked-out tools_scripts:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts
+./check-deps.sh
+</code></pre></div>
+</li>
+</ul>
+<details class="tip">
+<summary>Alternative: Download and run directly</summary>
+<div class="highlight"><pre><span></span><code><span class="w">        </span>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">            </span>-o<span class="w"> </span>./check-deps.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>./check-deps.sh
+./check-deps.sh
+</code></pre></div>
+</details>
+<details class="info">
+<summary>Apply updates and install baseline packages</summary>
+<p>On EL9, apply updates and install common baseline packages, then add any
+packages suggested by the checker (copy/paste the printed dnf line):</p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>-y
+dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release<span class="w"> </span>chrony<span class="w"> </span>vim<span class="w"> </span>git
+<span class="c1"># (Optional) install any additional packages suggested by check-deps.sh</span>
+<span class="c1"># e.g., dnf install -y NetworkManager rsync curl openssl nftables</span>
+</code></pre></div>
+</details>
+</li>
+<li>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <p><strong>Set the hostname and time sync:</strong></p>
 <p>Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that
 hosts the default route (See step 2 below).</p>
@@ -1350,6 +1466,7 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <p>Document interface mappings; you will need them for the policy-based routing configuration.</p>
 </details>
 <hr />
+<<<<<<< HEAD
 <h2 id="step-2-clone-the-repository">Step 2 – Clone the Repository<a class="headerlink" href="#step-2-clone-the-repository" title="Permanent link">&para;</a></h2>
 <p>This guide references multiple scripts from the osg-htc/networking repository. Clone the repository
 to your testpoint host for easy access to all tools.</p>
@@ -1373,12 +1490,24 @@ sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scr
 </code></pre></div>
 <p>After running the helper, the scripts referenced below will be available at <code>/opt/perfsonar-
 tp/tools_scripts</code> and you can run them from there (or use a raw download when noted).</p>
+=======
+<h2 id="step-2-bootstrap-the-testpoint-and-tools">Step 2 – Bootstrap the Testpoint and Tools<a class="headerlink" href="#step-2-bootstrap-the-testpoint-and-tools" title="Permanent link">&para;</a></h2>
+<p>Use the bootstrap script to clone the official perfSONAR testpoint repository into <code>/opt/perfsonar-tp</code> and install the helper scripts into <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/tmp/install_tools_scripts.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install_tools_scripts.sh
+/tmp/install_tools_scripts.sh<span class="w"> </span>/opt/perfsonar-tp
+</code></pre></div>
+<p>Throughout this guide, script invocations use the toolkit at <code>/opt/perfsonar-tp/tools_scripts</code>.</p>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
 <hr />
 <ol>
 <li>
+<<<<<<< HEAD
 <p><strong>Apply baseline updates (and verify dependencies):</strong></p>
 <p>Use the repository's helper to check for required tools and print
 copy/paste install commands. Then apply OS updates and any remaining
@@ -1392,6 +1521,12 @@ baseline packages.</p>
 </ul>
 </li>
 </ol>
+=======
+<p><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh">Raw file (direct download)</a></p>
+</li>
+<li>
+<p><strong>Locate the script:</strong> Already present in <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> (no installation step required).</p>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <details class="tip">
 <summary>Alternative: one-off run without installing tools</summary>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preferred: run from the installed tools path (see Step 2):</span>
@@ -1421,6 +1556,7 @@ nm.sh</code>.</p>
 <p>Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config
 you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
 <ul>
+<<<<<<< HEAD
 <li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
@@ -1429,6 +1565,18 @@ you can review/edit. Auto-generation is opt-in; it does not run by default.</p>
 any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
 </li>
 </ol>
+=======
+<li>Preview (no changes):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+</code></pre></div>
+<ul>
+<li>Write the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+</code></pre></div>
+<p>Then open the file and adjust any site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add any <code>NIC_IPV4_ADDROUTE</code> entries, or replace “-” for unused IP/gateway fields).</p>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <div class="admonition warning">
 <p class="admonition-title">Gateways required for addresses</p>
 <p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address
@@ -1454,11 +1602,28 @@ possible. If you must run it remotely, use a persistent session tool
 (screen, tmux) or prefix with <code>nohup</code> and check output later. Use
 <code>--dry-run</code> to preview actions before applying changes.</p>
 <ul>
+<<<<<<< HEAD
 <li>Apply changes non-interactively (auto-confirm):</li>
 </ul>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
 </div>
+=======
+<li>Rehearsal (no changes, extra logging recommended on first run):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--dry-run<span class="w"> </span>--debug
+</code></pre></div>
+<ul>
+<li>Apply changes non-interactively (auto-confirm):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
+</code></pre></div>
+<ul>
+<li>Or run interactively and answer the confirmation prompt when ready:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh
+</code></pre></div>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <div class="admonition note">
 <p class="admonition-title">Missing gateways at apply time</p>
 <p>If the loaded config still contains <code>-</code> for a gateway on a NIC that has an IP address, the
@@ -1522,8 +1687,17 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 owns the system default route.</p>
 <hr />
 <h2 id="step-4-configure-nftables-selinux-and-fail2ban">Step 4 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-4-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
+<<<<<<< HEAD
 <p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables
 profile with optional SELinux and Fail2Ban support.</p>
+=======
+<p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> directly (already present if you cloned the toolkit or bootstrapped scripts) to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
+<p>Script location in the repository:</p>
+<ul>
+<li><a href="https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts">Directory (browse)</a></li>
+<li><a href="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh">Raw file (direct download)</a></li>
+</ul>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <p>Prerequisites (not installed by the script):</p>
 <ul>
 <li><code>nftables</code> must already be installed and available (<code>nft</code> binary) for firewall configuration.</li>
@@ -1533,10 +1707,14 @@ profile with optional SELinux and Fail2Ban support.</p>
 <p>If any prerequisite is missing, the script skips that component and continues.</p>
 <ol>
 <li>
+<<<<<<< HEAD
 <p><strong>Use the help script:</strong></p>
 <ol>
 <li><strong>Run with desired options:</strong></li>
 </ol>
+=======
+<p><strong>Run with desired options:</strong></p>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
 <ul>
@@ -1568,9 +1746,16 @@ jails—only if those components are already installed.</p>
 <details class="tip">
 <summary>Preview nftables rules before applying</summary>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
+<<<<<<< HEAD
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
 </details>
+=======
+</details>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--print-rules
+</code></pre></div>
+</details>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <details class="tip">
 <summary>Manually add extra management hosts/subnets</summary>
 <p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes,
@@ -1803,6 +1988,7 @@ addresses (<code>ifaddr</code> tags).</p>
 </code></pre></div>
 
 <p>Install and run examples (root shell):</p>
+<<<<<<< HEAD
 <p>Note: the helper uses subcommands; use the <code>update</code> command to apply field changes. Other available
 commands: <code>save</code>, <code>restore</code>, <code>create</code>, <code>extract</code>.</p>
 <p>From the local tools checkout (preferred):</p>
@@ -1814,16 +2000,41 @@ commands: <code>save</code>, <code>restore</code>, <code>create</code>, <code>ex
 
 <span class="c1"># Apply common updates and restart the daemon inside the container</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
+=======
+<div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
+
+<span class="c1"># Apply common updates and restart the daemon inside the container</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
+<<<<<<< HEAD
 
 <span class="c1"># Produce a self-contained restore script for host restore</span>
 sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
 sudo<span class="w"> </span>/tmp/restore-lsreg.sh
 </code></pre></div>
+=======
+</code></pre></div>
+<details class="tip">
+<summary>Alternative: download this script directly (if you didn't run the bootstrap)</summary>
+<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
+<span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span>
+<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
+<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
+<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span>
+<span class="err">```</span>
+</code></pre></div>
+
+</details>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <hr />
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
@@ -1905,6 +2116,7 @@ toolkit-system-health
 <span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
 <span class="w">        </span><span class="c1"># ...</span>
 <span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<<<<<<< HEAD
 
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
 
@@ -1912,6 +2124,12 @@ toolkit-system-health
 <span class="w">        </span><span class="c1"># ...</span>
 <span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
 
+=======
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+<span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># ...</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+>>>>>>> e109ae4 (Revert bootstrap workflow: clone perfSONAR testpoint repo and install helper scripts; update quick-deploy and install-testpoint docs; unify script invocation paths; adjust markdownlint line length)
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
 </code></pre></div>
 <p>This instructs Podman to check the registry for newer images and restart only if an update is pulled.</p>
