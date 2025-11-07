@@ -536,10 +536,69 @@ lsregistration daemon (see below).
 
 1. **pSConfig enrollment:**
 
-For each active NIC, register with the psconfig service so measurements cover all paths.
+Register this host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
 
-Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface
-addresses (`ifaddr` tags).
+Basic enroll (interactive root on the host; runs inside the container):
+
+```bash
+# Replace with your actual FQDNs (one or two)
+FQDN_LAT="<latency.example.org>"
+FQDN_BW="<throughput.example.org>"   # optional if you use a second FQDN
+
+# Add auto URLs (configures archives too) and show configured remotes
+podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
+    "https://psconfig.opensciencegrid.org/pub/auto/${FQDN_LAT}"
+[ -n "${FQDN_BW}" ] && podman exec -it perfsonar-testpoint psconfig remote \
+    --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/${FQDN_BW}"
+
+podman exec -it perfsonar-testpoint psconfig remote list
+# or with Docker:
+# docker exec -it perfsonar-testpoint psconfig remote list
+```
+
+Remove any stale/old entries if present:
+
+```bash
+podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
+```
+
+Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.
+
+```bash
+# Build candidate FQDN list from IPs referenced in /etc/perfSONAR-multi-nic-config.conf
+mapfile -t PS_IPS < <(awk -F= '/^NIC_(IPV4|IPV6)_ADDRS=/ {gsub(/"|\n/,"",$2); split($2,a,/[ ,]/); for(i in a) if (a[i] != "" && a[i] != "-") print a[i]; }' \
+    /etc/perfSONAR-multi-nic-config.conf)
+
+FQDNS=()
+for ip in "${PS_IPS[@]}"; do
+    # Reverse lookup; prefer getent for libc resolution, fallback to dig -x
+    name=$(getent hosts "$ip" 2>/dev/null | awk '{print $2}')
+    if [ -z "$name" ]; then
+        name=$(dig +short -x "$ip" | head -n1)
+    fi
+    name=${name%.}   # strip trailing dot
+    if [ -n "$name" ]; then FQDNS+=("$name"); fi
+done
+
+# Deduplicate while preserving order
+uniq_fqdns=()
+for n in "${FQDNS[@]}"; do
+    skip=""; for u in "${uniq_fqdns[@]}"; do [ "$u" = "$n" ] && skip=1 && break; done
+    [ -z "$skip" ] && uniq_fqdns+=("$n")
+done
+
+printf "Will enroll these FQDNs:\n"; printf " - %s\n" "${uniq_fqdns[@]}"
+read -r -p "Proceed with enrollment (y/N)? " ans; [ "$ans" = "y" ] || exit 0
+
+for fq in "${uniq_fqdns[@]}"; do
+    podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
+        "https://psconfig.opensciencegrid.org/pub/auto/${fq}"
+done
+
+podman exec -it perfsonar-testpoint psconfig remote list
+```
+
+Verification: Confirm the files under `/etc/perfsonar/psconfig/pscheduler.d/` (inside the container) reflect the expected feeds and, where applicable, `ifaddr` entries match the intended interfaces.
 
 1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed
    URLs, and support contacts.
