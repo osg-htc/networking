@@ -21,6 +21,7 @@ Before you begin, gather the following information:
 
    The repository includes a helper script `docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh` which can copy and update `lsregistrationdaemon.conf` from running containers or the host; it can be used to extract registration config for re-use or migration. If you need to re-register or migrate metadata, run that script (or copy the `lsregistrationdaemon.conf` manually) and keep a copy in your change log.
 
+
 ??? info "Quick capture of existing lsregistration config (if replacing)"
 
         You can capture your current Lookup Service registration before redeploying.
@@ -29,22 +30,22 @@ Before you begin, gather the following information:
             (see Step 2), run the updater from that location to extract a self-contained
             restore script:
 
-                ```bash
-                sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
-                    extract --output /root/restore-lsreg.sh
-                # Save /root/restore-lsreg.sh with your change notes
-                ```
+        ```bash
+        sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+            extract --output /root/restore-lsreg.sh
+        # Save /root/restore-lsreg.sh with your change notes
+        ```
 
         - If you haven't installed the tools into `/opt` yet, use the repository helper
             to populate `/opt` (preview with --dry-run):
 
-                ```bash
-                # Preview what the installer would do (safe):
-                sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
+        ```bash
+        # Preview what the installer would do (safe):
+        sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
 
-                # Install scripts into /opt/perfsonar-tp/tools_scripts:
-                sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
-                ```
+        # Install scripts into /opt/perfsonar-tp/tools_scripts:
+        sudo bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
+        ```
 
 
    Note: the full repository clone/checkout instructions have been moved to Step 2 (after Step 1) so you can perform the clone once the host is provisioned.
@@ -284,16 +285,17 @@ If any prerequisite is missing, the script skips that component and continues.
     jails—only if those components are already installed.
 
 ??? info "How SSH allow-lists and validation work"
-**SSH allow-list derivation:**
 
-- CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
-- Address entries without a prefix are treated as single hosts.
-- The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
+    **SSH allow-list derivation:**
 
-**Validation and output:**
+    - CIDR values in `NIC_IPV4_PREFIXES`/`NIC_IPV6_PREFIXES` paired with corresponding addresses are treated as subnets.
+    - Address entries without a prefix are treated as single hosts.
+    - The script logs the resolved lists (IPv4/IPv6 subnets and hosts) for review.
 
-- The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
-- Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+    **Validation and output:**
+
+    - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
+    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
 ??? tip "Preview nftables rules before applying"
     You can preview the fully rendered nftables rules (no changes are made):
@@ -303,21 +305,23 @@ If any prerequisite is missing, the script skips that component and continues.
     ```
 
 ??? tip "Manually add extra management hosts/subnets"
-If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets:
 
-```nft
-set ssh_access_ip4_subnets {
-type ipv4_addr
-flags interval
-elements = { 192.0.2.0/24, 198.51.100.0/25 }
-}
+    If you need to allow additional SSH sources not represented by your NIC-derived prefixes,
+    edit `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets. Example:
 
-set ssh_access_ip4_hosts {
-type ipv4_addr
-elements = { 203.0.113.10, 203.0.113.11 }
-}
+    ```nft
+    set ssh_access_ip4_subnets {
+        type ipv4_addr
+        flags interval
+        elements = { 192.0.2.0/24, 198.51.100.0/25 }
+    }
 
-set ssh_access_ip6_subnets {
+    set ssh_access_ip4_hosts {
+        type ipv4_addr
+        elements = { 203.0.113.10, 203.0.113.11 }
+    }
+
+    set ssh_access_ip6_subnets {
 type ipv6_addr
 flags interval
 elements = { 2001:db8:1::/64 }
@@ -514,13 +518,6 @@ We need to register your instance and ensure it is configurated with the require
 1. **pSConfig enrollment:**
 
    For each active NIC, register with the psconfig service so measurements cover all paths.
-
-??? info "Registration command and verification"
-Example registration:
-
-```bash
-/usr/bin/psconfig psconfig remote --configure-archives add --url https://psconfig.opensciencegrid.org/pub/auto/<NIC-FQDN>
-```
 
 Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface addresses (`ifaddr` tags).
 
