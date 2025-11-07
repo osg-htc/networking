@@ -1735,22 +1735,22 @@
 <span class="w">    </span><span class="p">(</span><span class="n">see</span><span class="w"> </span><span class="n">Step</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">updater</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">location</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="bp">self</span><span class="o">-</span><span class="n">contained</span>
 <span class="w">    </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="p">:</span>
 
-<span class="w">        </span><span class="err">```</span><span class="n">bash</span>
-<span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
-<span class="w">            </span><span class="n">extract</span><span class="w"> </span><span class="o">--</span><span class="n">output</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">restore</span><span class="o">-</span><span class="n">lsreg</span><span class="o">.</span><span class="n">sh</span>
-<span class="w">        </span><span class="c1"># Save /root/restore-lsreg.sh with your change notes</span>
-<span class="w">        </span><span class="err">```</span>
+<span class="err">```</span><span class="n">bash</span>
+<span class="n">sudo</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">update</span><span class="o">-</span><span class="n">lsregistration</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
+<span class="w">    </span><span class="n">extract</span><span class="w"> </span><span class="o">--</span><span class="n">output</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">restore</span><span class="o">-</span><span class="n">lsreg</span><span class="o">.</span><span class="n">sh</span>
+<span class="c1"># Save /root/restore-lsreg.sh with your change notes</span>
+<span class="err">```</span>
 
 <span class="o">-</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">haven</span><span class="s1">&#39;t installed the tools into `/opt` yet, use the repository helper</span>
 <span class="w">    </span><span class="n">to</span><span class="w"> </span><span class="n">populate</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="err">`</span><span class="w"> </span><span class="p">(</span><span class="n">preview</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span><span class="p">):</span>
 
-<span class="w">        </span><span class="err">```</span><span class="n">bash</span>
-<span class="w">        </span><span class="c1"># Preview what the installer would do (safe):</span>
-<span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span>
+<span class="err">```</span><span class="n">bash</span>
+<span class="c1"># Preview what the installer would do (safe):</span>
+<span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="n">dry</span><span class="o">-</span><span class="n">run</span>
 
-<span class="w">        </span><span class="c1"># Install scripts into /opt/perfsonar-tp/tools_scripts:</span>
-<span class="w">        </span><span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span>
-<span class="w">        </span><span class="err">```</span>
+<span class="c1"># Install scripts into /opt/perfsonar-tp/tools_scripts:</span>
+<span class="n">sudo</span><span class="w"> </span><span class="n">bash</span><span class="w"> </span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">install_tools_scripts</span><span class="o">.</span><span class="n">sh</span>
+<span class="err">```</span>
 </code></pre></div>
 
 </details>
@@ -1973,7 +1973,6 @@ jails—only if those components are already installed.</p>
 </ol>
 <details class="info">
 <summary>How SSH allow-lists and validation work</summary>
-</details>
 <p><strong>SSH allow-list derivation:</strong></p>
 <ul>
 <li>CIDR values in <code>NIC_IPV4_PREFIXES</code>/<code>NIC_IPV6_PREFIXES</code> paired with corresponding addresses are treated as subnets.</li>
@@ -1985,6 +1984,7 @@ jails—only if those components are already installed.</p>
 <li>The generated nftables file is validated with <code>nft -c -f</code> before being written; on validation failure, nothing is installed and a message is logged.</li>
 <li>Output locations: rules → <code>/etc/nftables.d/perfsonar.nft</code>, log → <code>/var/log/perfSONAR-install-nftables.log</code>, backups → <code>/var/backups/perfsonar-install-&lt;timestamp&gt;</code>.</li>
 </ul>
+</details>
 <details class="tip">
 <summary>Preview nftables rules before applying</summary>
 <p>You can preview the fully rendered nftables rules (no changes are made):</p>
@@ -1993,34 +1993,34 @@ jails—only if those components are already installed.</p>
 </details>
 <details class="tip">
 <summary>Manually add extra management hosts/subnets</summary>
+<p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes,
+edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets. Example:</p>
+<p>```nft
+set ssh_access_ip4_subnets {
+    type ipv4_addr
+    flags interval
+    elements = { 192.0.2.0/24, 198.51.100.0/25 }
+}</p>
+<p>set ssh_access_ip4_hosts {
+    type ipv4_addr
+    elements = { 203.0.113.10, 203.0.113.11 }
+}</p>
+<p>set ssh_access_ip6_subnets {</p>
 </details>
-<p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit <code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets:</p>
-<div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
-type ipv4_addr
-flags interval
-elements = { 192.0.2.0/24, 198.51.100.0/25 }
-}
-
-set ssh_access_ip4_hosts {
-type ipv4_addr
-elements = { 203.0.113.10, 203.0.113.11 }
-}
-
-set ssh_access_ip6_subnets {
-type ipv6_addr
+<p>type ipv6_addr
 flags interval
 elements = { 2001:db8:1::/64 }
-}
-
-set ssh_access_ip6_hosts {
+}</p>
+<p>set ssh_access_ip6_hosts {
 type ipv6_addr
 elements = { 2001:db8::10 }
 }
-</code></pre></div>
-<p>Then validate and reload (root shell):</p>
-<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
-systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
-</code></pre></div>
+<div class="highlight"><pre><span></span><code>Then validate and reload (root shell):
+
+```bash
+nft -c -f /etc/nftables.d/perfsonar.nft
+systemctl reload nftables || systemctl restart nftables
+</code></pre></div></p>
 <div class="codehilite"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="o">**</span><span class="n">Confirm</span><span class="w"> </span><span class="n">firewall</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">security</span><span class="w"> </span><span class="n">services</span><span class="p">:</span><span class="o">**</span>
 </code></pre></div>
 
@@ -2171,12 +2171,6 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <li><strong>pSConfig enrollment:</strong></li>
 </ol>
 <p>For each active NIC, register with the psconfig service so measurements cover all paths.</p>
-<details class="info">
-<summary>Registration command and verification</summary>
-</details>
-<p>Example registration:</p>
-<div class="highlight"><pre><span></span><code>/usr/bin/psconfig<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span>--url<span class="w"> </span>https://psconfig.opensciencegrid.org/pub/auto/&lt;NIC-FQDN&gt;
-</code></pre></div>
 <p>Confirm the resulting files in <code>/etc/perfsonar/psconfig/pscheduler.d/</code> map to the correct interface addresses (<code>ifaddr</code> tags).</p>
 <ol>
 <li><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.</li>
