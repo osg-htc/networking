@@ -126,13 +126,8 @@ After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
-The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup.
+The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuraiton in `/etc/perfSONAR-multi-nic-config.conf`
 
-1. **Preview generation (no changes):**
-
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
-    ```
 
 1. **Generate config file automatically:**
 
@@ -155,15 +150,14 @@ The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates Netwo
     IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you
     use `--yes`.
 
+!!! warning "Connect via console for network changes"
+
+    When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either direcatly to the console or by using 'nohup' in front of the script invocation.
+
 1. **Apply changes:**
 
-    Dry-run first:
 
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
-    ```
-
-    Apply non-interactively:
+    Apply non-interactively with `--yes` or interactively without:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
@@ -230,11 +224,6 @@ owns the system default route.
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
 Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.
-
-Script location in the repository:
-
-- [Directory (browse)](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts)
-- [Raw file (direct download)](https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-install-nftables.sh)
 
 Prerequisites (not installed by the script):
 
@@ -323,29 +312,23 @@ systemctl reload nftables || systemctl restart nftables
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
 
-Run the official testpoint image using Podman or Docker. Bind-mount host paths for persistence.
+Run the official testpoint image using Podman or Docker. Choose one of the two deployment modes:
 
-Key host paths:
+- Option A: Testpoint only (simplest) — only bind-mount `/opt/perfsonar-tp/psconfig` for pSConfig.
+- Option B: Testpoint + Let’s Encrypt — two containers that share Apache files and certs via
+    host bind mounts.
 
-- `/opt/perfsonar-tp/psconfig` → container `/etc/perfsonar/psconfig`
-- For Let's Encrypt: `/etc/apache2`, `/var/www/html`, `/etc/letsencrypt`
+Use `podman-compose` or `docker-compose` in the examples below.
 
-Use `podman-compose` or `docker-compose`.
+### Option A — Testpoint only (simplest)
 
-### Prepare directories on the host
+Prepare the pSConfig directory and a minimal compose file. No other host bind-mounts are required.
 
 ```bash
 mkdir -p /opt/perfsonar-tp/psconfig
-#  The directories below are if we also use Lets Encrypt
-mkdir -p /var/www/html
-mkdir -p /etc/apache2
-mkdir -p /etc/letsencrypt
 ```
 
-### Seed defaults from the testpoint container
-
-First, create a minimal compose file and start the container without host bind-mounts so we can copy
-baseline content out.
+Create `/opt/perfsonar-tp/docker-compose.yml` with:
 
 ```yaml
 version: "3.9"
@@ -356,63 +339,46 @@ services:
         network_mode: "host"
         cgroup: host
         environment:
-
             - TZ=UTC
-
         restart: unless-stopped
         tmpfs:
-
             - /run
             - /run/lock
             - /tmp
-
         volumes:
-
             - /sys/fs/cgroup:/sys/fs/cgroup:rw
-
+            - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
         tty: true
         pids_limit: 8192
         cap_add:
-
             - CAP_NET_RAW
-
 ```
 
-Bring it up with your preferred tool:
+Bring it up:
 
 ```bash
 (cd /opt/perfsonar-tp; podman-compose up -d)  # or: (cd /opt/perfsonar-tp; docker-compose up -d)
 ```
 
-### Copy baseline content out of the running container
+That’s it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on
+the host; they are consumed by the container at `/etc/perfsonar/psconfig`.
 
-```bash
-# Use docker cp or podman cp (either works)
-docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
-# Below are if also using Lets Encrypt
-docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
-docker cp perfsonar-testpoint:/var/www/html /var/www/html
+---
 
-```
+### Option B — Testpoint + Let’s Encrypt (shared Apache and certs)
 
-If SELinux is enforcing, we’ll relabel these paths when we mount (using `:z`/`:Z` below), so you
-don’t need manual `chcon`.
+This mode runs two containers (`testpoint` and `certbot`) and bind-mounts the following host paths
+so Apache content and certificates persist on the host and are shared:
 
-### Replace the compose file with bind-mounts and optional certbot
+- `/var/www/html` — webroot used for HTTP-01 challenges
+- `/etc/apache2` — Apache configuration
+- `/etc/letsencrypt` — Let’s Encrypt certs and state
 
-You can download a ready-to-use compose file from this repository, or create it manually.
+#### 1) Seed host directories from a temporary testpoint container
 
-- [Browse](https://github.com/osg-htc/networking/tree/master/docs/perfsonar/tools_scripts/docker-compose.yml)
-- Download directly:
+Start a temporary testpoint without bind-mounts, then copy baseline content out to the host.
 
-```bash
-curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
-    -o /opt/perfsonar-tp/docker-compose.yml
-```
-
-Or create/edit `/opt/perfsonar-tp/docker-compose.yml` with the following content (includes an
-optional `certbot` sidecar):
+Create `/opt/perfsonar-tp/docker-compose.yml` (temporary) with:
 
 ```yaml
 version: "3.9"
@@ -423,63 +389,93 @@ services:
         network_mode: "host"
         cgroup: host
         environment:
-
             - TZ=UTC
-
         restart: unless-stopped
         tmpfs:
-
             - /run
             - /run/lock
             - /tmp
-
         volumes:
+            - /sys/fs/cgroup:/sys/fs/cgroup:rw
+        tty: true
+        pids_limit: 8192
+        cap_add:
+            - CAP_NET_RAW
+```
 
+Bring it up and seed:
+
+```bash
+(cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose up -d
+mkdir -p /opt/perfsonar-tp/psconfig /var/www/html /etc/apache2 /etc/letsencrypt
+docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
+docker cp perfsonar-testpoint:/var/www/html /var/www/html
+docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
+```
+
+If SELinux is enforcing, the `:z`/`:Z` options in the next step handle labels; no manual `chcon` is
+required.
+
+Stop the temporary container before switching to the final compose:
+
+```bash
+(cd /opt/perfsonar-tp; podman-compose down)  # or docker-compose down
+```
+
+#### 2) Create the final compose with shared volumes and certbot
+
+Create `/opt/perfsonar-tp/docker-compose.yml` with:
+
+```yaml
+version: "3.9"
+services:
+    testpoint:
+        container_name: perfsonar-testpoint
+        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+        network_mode: "host"
+        cgroup: host
+        environment:
+            - TZ=UTC
+        restart: unless-stopped
+        tmpfs:
+            - /run
+            - /run/lock
+            - /tmp
+        volumes:
             - /sys/fs/cgroup:/sys/fs/cgroup:rw
             - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
             - /var/www/html:/var/www/html:z
             - /etc/apache2:/etc/apache2:z
             - /etc/letsencrypt:/etc/letsencrypt:z
-
         tty: true
         pids_limit: 8192
         cap_add:
-
             - CAP_NET_RAW
 
-    # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
     certbot:
         image: certbot/certbot
         container_name: certbot
         network_mode: "host"
         restart: unless-stopped
-        entrypoint:
-            ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+        entrypoint: ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
         depends_on:
-
             - testpoint
-
         volumes:
-
             - /var/www/html:/var/www/html:z
             - /etc/letsencrypt:/etc/letsencrypt:z
-
 ```
 
-### Restart with the new compose
+Start the final stack:
 
 ```bash
-(cd /opt/perfsonar-tp; podman-compose down)
-(cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose down && docker-compose up -d
+(cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose up -d
 ```
 
-### Optional – obtain your first Let’s Encrypt certificate
+#### 3) Obtain your first Let’s Encrypt certificate (one-time)
 
-The `certbot` sidecar above continuously renews existing certs. For the initial issuance, run a one-
-shot command and then reload Apache inside the testpoint container:
+The `certbot` sidecar above will renew automatically. For the initial issuance, run:
 
 ```bash
-# Issue (HTTP-01 webroot challenge). Replace values accordingly.
 docker run --rm --net=host -v /var/www/html:/var/www/html -v /etc/letsencrypt:/etc/letsencrypt \
     certbot/certbot certonly --webroot -w /var/www/html -d <SERVER_FQDN> \
     --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email
@@ -490,8 +486,8 @@ docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachect
 
 ??? info "Notes"
 
-    - Ensure port 80 on the host is reachable from the internet while issuing certificates.
-    - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
+        - Ensure TCP port 80 on the host is reachable from the internet while issuing certificates.
+        - Shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
 
 
 ## Step 6 – Register and Configure with WLCG/OSG
