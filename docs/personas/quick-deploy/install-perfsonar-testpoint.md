@@ -12,11 +12,14 @@ while still capturing the site-specific information required by OSG/WLCG operati
 Before you begin, gather the following information:
 
 - **Hardware details:** hostname, BMC/iLO/iDRAC credentials (if used), interface names, available storage.
-- **Network data:** IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN information, PSConfig registration URLs.
+- **Network data:** IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN
+  information, PSConfig registration URLs.
 - **Operational contacts:** site admin email, OSG facility name, latitude/longitude, usage policy link.
 - **Repository artifacts:** the scripts referenced below are in `docs/perfsonar/` in this repository.
 
-- **Existing perfSONAR configuration:** If you are replacing or upgrading an existing perfSONAR instance, capture its configuration and registration data before taking services offline. Useful items to collect include:
+- **Existing perfSONAR configuration:** If you are replacing or upgrading an existing perfSONAR
+  instance, capture its configuration and registration data before taking services offline. Useful
+  items to collect include:
 
     - `/etc/perfsonar/` configuration files, especially `lsregistrationdaemon.conf`
     - any site-specific psconfig or testpoint config files stored in container volumes or host paths
@@ -34,6 +37,7 @@ keep a copy in your change log.
         You can capture your current Lookup Service registration before redeploying.
 
         - Preferred: use the installed tools. If you've populated `/opt/perfsonar-tp/tools_scripts`
+
             (see Step 2), run the updater from that location to extract a self-contained
             restore script:
 
@@ -44,6 +48,7 @@ keep a copy in your change log.
         ```
 
         - If you haven't installed the tools into `/opt` yet, use the repository helper
+
             to populate `/opt` (preview with --dry-run):
 
         ```bash
@@ -67,9 +72,10 @@ you can perform the clone once the host is provisioned.
 1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
 
 
-3. **Set the hostname and time sync:**
+1. **Set the hostname and time sync:**
 
-    Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that hosts the default route (See step 2 below).
+    Note when you have multiple NICs pick one to be the hostname. That should also be the NIC that
+    hosts the default route (See step 2 below).
 
 ??? info "System configuration commands"
 
@@ -79,7 +85,7 @@ you can perform the clone once the host is provisioned.
     timedatectl set-timezone <Region/City>
     ```
 
-4. **Disable unused services:**
+1. **Disable unused services:**
 
 ??? info "Service cleanup commands"
 
@@ -88,7 +94,7 @@ you can perform the clone once the host is provisioned.
     dnf remove -y rsyslog
     ```
 
-5. **Record NIC names:**
+1. **Record NIC names:**
 
 ??? info "Commands to list network interfaces"
 
@@ -137,7 +143,8 @@ tp/tools_scripts` and you can run them from there (or use a raw download when no
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
 ---
-2. **Apply baseline updates (and verify dependencies):**
+
+1. **Apply baseline updates (and verify dependencies):**
 
     Use the repository's helper to check for required tools and print
     copy/paste install commands. Then apply OS updates and any remaining
@@ -179,7 +186,8 @@ nm.sh`.
 
 1. **Auto-generate `/etc/perfSONAR-multi-nic-config.conf`:**
 
-    Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config you can review/edit. Auto-generation is opt-in; it does not run by default.
+    Use the generator to detect NICs, addresses, prefixes, and gateways and write a starting config
+    you can review/edit. Auto-generation is opt-in; it does not run by default.
 
     - Write the config file to `/etc/perfSONAR-multi-nic-config.conf`:
 
@@ -187,14 +195,21 @@ nm.sh`.
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
     ```
 
-    Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
+    Then open the file and adjust any site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add
+    any `NIC_IPV4_ADDROUTE` entries, or replace “-” for unused IP/gateway fields).
 
 !!! warning "Gateways required for addresses"
-    Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
+    Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address
+    must have an IPv6 gateway. If the generator cannot detect a gateway, it adds a WARNING block
+    to the generated file listing affected NICs. Edit `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly
+    before applying changes.
 
 !!! note "Gateway prompts"
 
-    During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
+    During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address
+    but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or
+    IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you
+    use `--yes`.
 
 1. **Execute the script:**
 
@@ -214,9 +229,14 @@ nm.sh`.
 
 !!! note "Missing gateways at apply time"
 
-    If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the script will prompt you interactively to provide a gateway before applying changes. Use `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will cause validation to fail so you can correct the config first.
+    If the loaded config still contains `-` for a gateway on a NIC that has an IP address, the
+    script will prompt you interactively to provide a gateway before applying changes. Use
+    `--yes` (or run non-interactively) to suppress prompts; in that case, missing gateways will
+    cause validation to fail so you can correct the config first.
 
-    The script creates a timestamped backup of existing NetworkManager profiles, seeds routing tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after the run and retain it with your change records.
+    The script creates a timestamped backup of existing NetworkManager profiles, seeds routing
+    tables, and applies routing rules. Review `/var/log/perfSONAR-multi-nic-config.log` after
+    the run and retain it with your change records.
 
     On some hosts, we have had to reboot or power-cycle to get the new network settings in place.
 
@@ -229,7 +249,8 @@ registration systems perform forward/reverse consistency checks.
 
 - For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
-- For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
+- For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and
+  reverse records (A+PTR and AAAA+PTR).
 
 ??? example "Run the DNS checker"
     Run the shipped DNS checker to validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
@@ -248,9 +269,11 @@ registration systems perform forward/reverse consistency checks.
 
     **Notes and automation tips:**
 
-    - The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it to use `host` if preferred.
+    - The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it
+      to use `host` if preferred.
     - Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
-    - For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python script that leverages `dns.resolver` for async checks.
+    - For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
+      script that leverages `dns.resolver` for async checks.
     - If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
 
 If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS
@@ -292,7 +315,8 @@ If any prerequisite is missing, the script skips that component and continues.
     /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
     ```
 
-    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the summary and answer manually).
+    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
+      summary and answer manually).
     - Add `--dry-run` for a rehearsal that only prints the planned actions.
 
     The script writes nftables rules for perfSONAR services, derives SSH allow-lists from
@@ -309,8 +333,10 @@ If any prerequisite is missing, the script skips that component and continues.
 
     **Validation and output:**
 
-    - The generated nftables file is validated with `nft -c -f` before being written; on validation failure, nothing is installed and a message is logged.
-    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
+    - The generated nftables file is validated with `nft -c -f` before being written; on validation
+      failure, nothing is installed and a message is logged.
+    - Output locations: rules → `/etc/nftables.d/perfsonar.nft`, log → `/var/log/perfSONAR-install-
+      nftables.log`, backups → `/var/backups/perfsonar-install-<timestamp>`.
 
 ??? tip "Preview nftables rules before applying"
     You can preview the fully rendered nftables rules (no changes are made):
@@ -414,18 +440,26 @@ services:
         network_mode: "host"
         cgroup: host
         environment:
+
             - TZ=UTC
+
         restart: unless-stopped
         tmpfs:
+
             - /run
             - /run/lock
             - /tmp
+
         volumes:
+
             - /sys/fs/cgroup:/sys/fs/cgroup:rw
+
         tty: true
         pids_limit: 8192
         cap_add:
+
             - CAP_NET_RAW
+
 ```
 
 Bring it up with your preferred tool:
@@ -471,21 +505,28 @@ services:
         network_mode: "host"
         cgroup: host
         environment:
+
             - TZ=UTC
+
         restart: unless-stopped
         tmpfs:
+
             - /run
             - /run/lock
             - /tmp
+
         volumes:
+
             - /sys/fs/cgroup:/sys/fs/cgroup:rw
             - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
             - /var/www/html:/var/www/html:z
             - /etc/apache2:/etc/apache2:z
             - /etc/letsencrypt:/etc/letsencrypt:z
+
         tty: true
         pids_limit: 8192
         cap_add:
+
             - CAP_NET_RAW
 
     # Optional: Let’s Encrypt renewer sharing HTML and certs with testpoint
@@ -497,10 +538,14 @@ services:
         entrypoint:
             ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
         depends_on:
+
             - testpoint
+
         volumes:
+
             - /var/www/html:/var/www/html:z
             - /etc/letsencrypt:/etc/letsencrypt:z
+
 ```
 
 ### Restart with the new compose
@@ -526,6 +571,7 @@ docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachect
 ```
 
 ??? info "Notes"
+
     - Ensure port 80 on the host is reachable from the internet while issuing certificates.
     - All shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
 
@@ -538,9 +584,11 @@ lsregistration daemon (see below).
 1. **OSG/WLCG registration workflow:**
 
 ??? info "Registration steps and portals"
+
     - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
     - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
-    - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+        - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
+            `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
 1. **pSConfig enrollment:**
 
@@ -549,7 +597,8 @@ For each active NIC, register with the psconfig service so measurements cover al
 Confirm the resulting files in `/etc/perfsonar/psconfig/pscheduler.d/` map to the correct interface
 addresses (`ifaddr` tags).
 
-1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed URLs, and support contacts.
+1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed
+   URLs, and support contacts.
 
 ### Update Lookup Service registration inside the container
 
@@ -669,6 +718,7 @@ Perform these checks before handing the host over to operations:
 Keep containers current and only restart them when their image actually changes.
 
 ??? info "Auto-update via labels and a systemd timer"
+
     1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used):
 
         ```yaml
@@ -676,11 +726,15 @@ Keep containers current and only restart them when their image actually changes.
             testpoint:
                 # ...
                 labels:
+
                     - io.containers.autoupdate=registry
+
             certbot:
                 # ...
                 labels:
+
                     - io.containers.autoupdate=registry
+
         ```
 
         This instructs Podman to check the registry for newer images and restart only if an update is pulled.
