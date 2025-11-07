@@ -1390,36 +1390,45 @@
 <ul>
 <li>
 <p><strong>Bare metal</strong> - preffered option in one of two possible configurations:</p>
-<p><code>* Two bare metal servers, one for latency node, one for bandwidth node
+<p><code>text
+* Two bare metal servers, one for latency node, one for bandwidth node
 * One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to [dual NIC](#multiple-nic-network-interface-card-guidance) section for more details on this.</code></p>
 </li>
 <li>
 <p><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:</p>
-<p><code>* Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
+<p><code>text
+* Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
 * VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
 * Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production</code></p>
 </li>
 <li>
 <p><strong>Container</strong> - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <a href="https://docs.perfsonar.net/install_docker.html">https://docs.perfsonar.net/install_docker.html</a> but is not typically used in the same way as a full toolkit installation.</p>
-<p>```
+<p>```text
 * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.</p>
 <p>```</p>
 </li>
 </ul>
 <h3 id="perfsonar-toolkit-vs-testpoint">perfSONAR Toolkit vs Testpoint<a class="headerlink" href="#perfsonar-toolkit-vs-testpoint" title="Permanent link">&para;</a></h3>
 <p>The perfSONAR team has documented the types of installations supported at <a href="https://docs.perfsonar.net/install_options.html">https://docs.perfsonar.net/install_options.html</a>.   With the release of version 5, OSG/WLCG sites have a new option: instead of installing the full Toolkit sites can choose to install the Testpoint bundle.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">*</span> Pros
+
+    ```text
+</code></pre></div>
+
+<ul>
+<li>Simpler deployment when a local web interface is not needed and a central measurement archive is available.</li>
+<li>
+<p>Less resource intensive for both memory and I/O capacity.
+    ```</p>
 <ul>
 <li>
-<p>Pros</p>
-<p><code>* Simpler deployment when a local web interface is not needed and a central measurement archive is available.
-* Less resource intensive for both memory and I/O capacity.</code></p>
-</li>
-<li>
 <p>Cons</p>
-<p>```
+<p>```text
 * Measurements are not stored locally
 * No web interface to use for configuration or adding local tests
 * Unable to show results in MaDDash</p>
+</li>
+</ul>
 <p>```</p>
 </li>
 </ul>
@@ -1438,8 +1447,8 @@
 <li>You'll need to register two hostnames in <a href="../installation/">OIM</a>/<a href="../installation/">GOCDB</a> (and have two reverse DNS entries) as you would normally for two separate nodes.</li>
 <li>Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>psconfig remote add &quot;https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN_latency&gt;&quot;
-psconfig remote add &quot;https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN_throughput&gt;&quot;
+<div class="highlight"><pre><span></span><code>psconfig<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN_latency&gt;&quot;</span>
+psconfig<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN_throughput&gt;&quot;</span>
 ...
 </code></pre></div>
 

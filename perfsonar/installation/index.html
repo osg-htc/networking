@@ -1442,12 +1442,10 @@
 <h1 id="perfsonar-installation-guide">perfSONAR Installation Guide<a class="headerlink" href="#perfsonar-installation-guide" title="Permanent link">&para;</a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>```</p>
+<p>```text</p>
 </div>
-<p>This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.</p>
-<div class="codehilite"><pre><span></span><code>```
-</code></pre></div>
-
+<p>This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.
+    ```</p>
 <p>This page documents installing/upgrading <strong>perfSONAR</strong> for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult our <a href="../../perfsonar-in-osg/">overview</a> and possible <a href="../deployment-models/">deployment options</a> before installing. For troubleshooting an existing installation please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting Guide</a>, <a href="http://docs.perfsonar.net/FAQ.html">FAQ</a> as well as WLCG/OSG specific <a href="../faq/">FAQ</a>.</p>
 <p>For any questions or help with WLCG perfSONAR setup, please contact <a href="https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ">GGUS</a> WLCG perfSONAR support unit or OSG <a href="http://support.opensciencegrid.org">GOC</a>. We strongly recommend anyone maintaining/using perfSONAR to join <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">perfsonar-user</a> and <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">perfsonar-announce</a> mailing lists.</p>
 <h3 id="installation-or-upgrade">Installation or Upgrade<a class="headerlink" href="#installation-or-upgrade" title="Permanent link">&para;</a></h3>
@@ -1481,21 +1479,18 @@
 <p>You can see more details about EL supported installs at <a href="https://docs.perfsonar.net/install_el.html">https://docs.perfsonar.net/install_el.html</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>```</p>
+<p>```text</p>
 </div>
-<p>In all cases, we <strong>strongly recommend to keep auto-updates enabled</strong> as this is the default settings starting from perfSONAR 4+. With <code>yum</code> auto-updates in place there is a possibility that updated packages can "break" your perfSONAR install but this is viewed an acceptable risk in order to have security updates quickly applied on perfSONAR instances.</p>
-<div class="codehilite"><pre><span></span><code>```
-</code></pre></div>
-
+<p>In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
+    ```</p>
 <p>The following <em>additional</em> steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps described in the official guide:</p>
 <ul>
 <li>Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in OSG Topology below. For non-OSG sites, follow the details in <a href="#register-perfsonar-service-in-gocdb">GOCDB</a></li>
 <li>Please ensure you have added or updated your <a href="http://docs.perfsonar.net/manage_admin_info.html">administrative information</a></li>
 <li>
 <p>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:</p>
-<p><code>``
-* **For toolkit versions 5.0 and higher**, please run from the command line</code>psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN><code>. Replace</code><FQDN><code>with the fully qualified domain name of your host, e.g.,</code>psum01.aglt2.org<code>. To verify the configuration is correct, you can run</code>psconfig remote list`, which should show the URL configured, e.g.</p>
-<p>```</p>
+<p><code>text
+* For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;` replacing `&lt;FQDN&gt;` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.</code></p>
 </li>
 </ul>
 <p><code>json
@@ -1516,12 +1511,10 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>```</p>
+<p>```text</p>
 </div>
-<p>Until your host is added (on <a href="https://psconfig.opensciencegrid.org">https://psconfig.opensciencegrid.org</a> ) to one or more meshes by a mesh-config administrator, the automesh configuration above won't be returning any tests (See registration information above).</p>
-<div class="codehilite"><pre><span></span><code>```
-</code></pre></div>
-
+<p>Until your host is added on https://psconfig.opensciencegrid.org to one or more meshes by an administrator the automesh configuration above will not return any tests.
+    ```</p>
 <ul>
 <li>We <strong>strongly recommend</strong> configuring perfSONAR in <strong>dual-stack mode</strong> (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).</li>
 <li>Adding <em>communities</em> is optional, but if you do, we recommend putting in WLCG as well as your VO: <code>ATLAS</code>, <code>CMS</code>, etc. This just helps others from the community lookup your instances in the public lookup service. As noted in the documentation you can select from already registered communities as appropriate.</li>
@@ -1537,21 +1530,17 @@
 <p>The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation provides a lot of information on what security software is available and what firewall ports need to be opened, please see <a href="http://docs.perfsonar.net/manage_security.html">Manage Security</a> for details. The toolkit's purpose is to allow us to measure and diagnose network problems and we therefore need to be cautious about blocking needed functionality by site or host firewalls.   An overview of perfSONAR security is available at <a href="https://www.perfsonar.net/deployment_security.html">https://www.perfsonar.net/deployment_security.html</a></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>```</p>
+<p>```text</p>
 </div>
-<p>As of perfSONAR 4.0+ ALL perfSONAR instances need to have port 443 accessible to all the other perfSONAR instances. Allowing access to port 443 is <strong>required</strong> because it's now used as a controller port for scheduling tests (via pScheduler). If sites are unable to reach your instance on port 443, tests may not run and results may not be available. Starting from perfSONAR 4.0, HTTPS/443 is now by default configured on all perfSONAR instances, i.e. local iptables as well as httpd configuration comes out of the box and requires no extra steps, therefore opening is only needed if you have central/campus firewall.</p>
-<div class="codehilite"><pre><span></span><code>```
-</code></pre></div>
-
+<p>All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
+    ```</p>
 <p>For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users and network administrators to debug network issues.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>```</p>
+<p>```text</p>
 </div>
-<p>In case you have <strong>central/campus firewall</strong>, please check the required port openings in the <a href="http://docs.perfsonar.net/manage_security.html">perfSONAR security documentation</a>.</p>
-<div class="codehilite"><pre><span></span><code>```
-</code></pre></div>
-
+<p>If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
+    ```</p>
 <h3 id="enabling-snmp-plugins">Enabling SNMP plugins<a class="headerlink" href="#enabling-snmp-plugins" title="Permanent link">&para;</a></h3>
 <p>Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be captured and stored in the local measurement archive. This is currently a <a href="http://www.perfsonar.net/release-notes/version-4-0-2/">beta feature</a> that needs further testing and we're looking for volunteers willing to test, please let us know in case you would be interested.</p>
 <h3 id="register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB<a class="headerlink" href="#register-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h3>
@@ -1564,12 +1553,13 @@
 <ul>
 <li>There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).</li>
 <li>
-<p>For each form (i.e. for each service type) fill at least the important informations:</p>
-<p><code>* Hosting Site (drop-down menu, mandatory)
-* Service Type (drop-down menu, mandatory)
-* Host Name (free text, mandatory)
-* Host IP (free text, optional)
-* Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.</code></p>
+<p>For each form (service type) fill at least:</p>
+<p><code>text
+* Hosting Site
+* Service Type
+* Host Name
+* Host IP (optional)
+* Description (optional label used in MaDDash; keep short and unique)</code></p>
 </li>
 <li>
 <p>Check "N" when asked "Is it a beta service"</p>
