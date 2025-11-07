@@ -1985,7 +1985,12 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 <p>Prepare the pSConfig directory and a minimal compose file. No other host bind-mounts are required.</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/psconfig
 </code></pre></div>
-<p>Create <code>/opt/perfsonar-tp/docker-compose.yml</code> with:</p>
+<p>Download a ready-made compose file (or copy it manually):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
+</code></pre></div>
+<p>Or create <code>/opt/perfsonar-tp/docker-compose.yml</code> with:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
@@ -2059,7 +2064,12 @@ required.</p>
 <div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>down<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose down</span>
 </code></pre></div>
 <h4 id="2-create-the-final-compose-with-shared-volumes-and-certbot">2) Create the final compose with shared volumes and certbot<a class="headerlink" href="#2-create-the-final-compose-with-shared-volumes-and-certbot" title="Permanent link">&para;</a></h4>
-<p>Create <code>/opt/perfsonar-tp/docker-compose.yml</code> with:</p>
+<p>Download a ready-made compose file (or copy it manually):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
+</code></pre></div>
+<p>Or create <code>/opt/perfsonar-tp/docker-compose.yml</code> with:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span>
 <span class="nt">services</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
