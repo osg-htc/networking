@@ -58,7 +58,7 @@ Options:
     --print-rules        Render the nftables rules to stdout and exit (no writes)
 
 Example:
-  sudo ./perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
+    sudo /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
 
 Notes:
     - Run in a VM or console first. Use --dry-run to preview changes.
