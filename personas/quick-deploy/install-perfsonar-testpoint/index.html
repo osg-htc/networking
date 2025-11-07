@@ -874,15 +874,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#helper-script-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Helper Script (Recommended)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
     <span class="md-ellipsis">
       Update Lookup Service registration inside the container
@@ -1607,15 +1598,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#helper-script-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      Helper Script (Recommended)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
     <span class="md-ellipsis">
       Update Lookup Service registration inside the container
@@ -2051,84 +2033,52 @@ lsregistration daemon (see below).</p>
 <ol>
 <li><strong>pSConfig enrollment:</strong></li>
 </ol>
-<p>Register this host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).</p>
-<p>Basic enroll (interactive root on the host; runs inside the container):</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Replace with your actual FQDNs (one or two)</span>
-<span class="nv">FQDN_LAT</span><span class="o">=</span><span class="s2">&quot;&lt;latency.example.org&gt;&quot;</span>
-<span class="nv">FQDN_BW</span><span class="o">=</span><span class="s2">&quot;&lt;throughput.example.org&gt;&quot;</span><span class="w">   </span><span class="c1"># optional if you use a second FQDN</span>
-
-<span class="c1"># Add auto URLs (configures archives too) and show configured remotes</span>
+<p>Register each FQDN with the OSG/WLCG pSConfig service so tests are auto-configured.</p>
+<p><strong>Simple registration example (one FQDN):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Replace with your actual FQDN</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/</span><span class="si">${</span><span class="nv">FQDN_LAT</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="o">[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">FQDN_BW</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--configure-archives<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/</span><span class="si">${</span><span class="nv">FQDN_BW</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/ps-lat.example.org&quot;</span>
 
+<span class="c1"># List configured remotes to verify</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>list
-<span class="c1"># or with Docker:</span>
-<span class="c1"># docker exec -it perfsonar-testpoint psconfig remote list</span>
 </code></pre></div>
-<p>Remove any stale/old entries if present:</p>
+<p><strong>Remove any stale/old entries if present:</strong></p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>delete<span class="w"> </span><span class="s2">&quot;&lt;old-url&gt;&quot;</span>
 </code></pre></div>
-<p>Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Build candidate FQDN list from IPs referenced in /etc/perfSONAR-multi-nic-config.conf</span>
-mapfile<span class="w"> </span>-t<span class="w"> </span>PS_IPS<span class="w"> </span>&lt;<span class="w"> </span>&lt;<span class="o">(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^NIC_(IPV4|IPV6)_ADDRS=/ {gsub(/&quot;|\n/,&quot;&quot;,$2); split($2,a,/[ ,]/); for(i in a) if (a[i] != &quot;&quot; &amp;&amp; a[i] != &quot;-&quot;) print a[i]; }&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>/etc/perfSONAR-multi-nic-config.conf<span class="o">)</span>
-
-<span class="nv">FQDNS</span><span class="o">=()</span>
-<span class="k">for</span><span class="w"> </span>ip<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PS_IPS</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">    </span><span class="c1"># Reverse lookup; prefer getent for libc resolution, fallback to dig -x</span>
-<span class="w">    </span><span class="nv">name</span><span class="o">=</span><span class="k">$(</span>getent<span class="w"> </span>hosts<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="k">)</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$name</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">        </span><span class="nv">name</span><span class="o">=</span><span class="k">$(</span>dig<span class="w"> </span>+short<span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ip</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n1<span class="k">)</span>
-<span class="w">    </span><span class="k">fi</span>
-<span class="w">    </span><span class="nv">name</span><span class="o">=</span><span class="si">${</span><span class="nv">name</span><span class="p">%.</span><span class="si">}</span><span class="w">   </span><span class="c1"># strip trailing dot</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$name</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nv">FQDNS</span><span class="o">+=(</span><span class="s2">&quot;</span><span class="nv">$name</span><span class="s2">&quot;</span><span class="o">)</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
-<span class="k">done</span>
-
-<span class="c1"># Deduplicate while preserving order</span>
-<span class="nv">uniq_fqdns</span><span class="o">=()</span>
-<span class="k">for</span><span class="w"> </span>n<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">FQDNS</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">    </span><span class="nv">skip</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>u<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">uniq_fqdns</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$u</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$n</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">skip</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">break</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
-<span class="w">    </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$skip</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">uniq_fqdns</span><span class="o">+=(</span><span class="s2">&quot;</span><span class="nv">$n</span><span class="s2">&quot;</span><span class="o">)</span>
-<span class="k">done</span>
-
-<span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;Will enroll these FQDNs:\n&quot;</span><span class="p">;</span><span class="w"> </span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot; - %s\n&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">uniq_fqdns</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;Proceed with enrollment (y/N)? &quot;</span><span class="w"> </span>ans<span class="p">;</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ans</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;y&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">0</span>
-
-<span class="k">for</span><span class="w"> </span>fq<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">uniq_fqdns</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
-<span class="w">    </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/</span><span class="si">${</span><span class="nv">fq</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="k">done</span>
-
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>list
-</code></pre></div>
-<p>Verification: Confirm the files under <code>/etc/perfsonar/psconfig/pscheduler.d/</code> (inside the container) reflect the expected feeds and, where applicable, <code>ifaddr</code> entries match the intended interfaces.</p>
-<h3 id="helper-script-recommended">Helper Script (Recommended)<a class="headerlink" href="#helper-script-recommended" title="Permanent link">&para;</a></h3>
-<p>Instead of the ad-hoc automation snippet above, you can use the installed helper script:</p>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>--help
-
-<span class="c1"># Typical usage (podman):</span>
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-v
-
-<span class="c1"># Dry run only (show planned URLs):</span>
+<p><strong>Automated enrollment using the helper script (recommended):</strong></p>
+<p>The helper discovers FQDNs from your configured IPs (reverse DNS) and enrolls them automatically:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Show what would be done (dry-run)</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-n
 
-<span class="c1"># Non-interactive (CI) enrollment:</span>
+<span class="c1"># Non-interactive enrollment (for CI/automation)</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-y
-
-<span class="c1"># If your container name differs:</span>
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-c<span class="w"> </span>my-ps-testpoint
 </code></pre></div>
-<p>The script:</p>
+<details class="info">
+<summary>About the auto-enroll script</summary>
+<p>The <code>perfSONAR-auto-enroll-psconfig.sh</code> script:</p>
 <ul>
 <li>Parses IP lists from <code>/etc/perfSONAR-multi-nic-config.conf</code> (<code>NIC_IPV4_ADDRS</code> / <code>NIC_IPV6_ADDRS</code>).</li>
-<li>Performs reverse DNS lookups (getent/dig) to derive FQDNs.</li>
+<li>Performs reverse DNS lookups (getent/dig) to derive FQDNs; skips RFC1918 private addresses.</li>
 <li>Deduplicates while preserving discovery order.</li>
 <li>Adds each <code>https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> with <code>--configure-archives</code>.</li>
-<li>Lists configured remotes and returns non-zero if any enrollment fails.</li>
+<li>Logs discovered FQDNs to <code>/var/log/perfsonar-auto-enroll-psconfig.log</code>.</li>
+<li>Returns non-zero if any enrollment fails.</li>
 </ul>
-<p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
+<p>Usage options:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Dry run (show planned URLs)</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-n
+
+<span class="c1"># Verbose output</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-v
+
+<span class="c1"># Non-interactive (CI)</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-y
+
+<span class="c1"># Custom container name</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-c<span class="w"> </span>my-ps-testpoint
+</code></pre></div>
+<p>Integrate into provisioning CI by running with <code>-n</code> for approval, then <code>-y</code> once approved.</p>
+</details>
 <ol>
 <li><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed
    URLs, and support contacts.</li>
