@@ -108,19 +108,6 @@ Use the helper to check for required tools and apply OS updates.
 /opt/perfsonar-tp/tools_scripts/check-deps.sh
 ```
 
-??? tip "Alternative: check-deps.sh one-off run without installing tools"
-
-        ```bash
-        # Preferred: run from the installed tools path (see Step 2):
-        /opt/perfsonar-tp/tools_scripts/check-deps.sh
-
-        # If you must run it without installing the tools, download to /tmp and run
-        curl -fsSL \
-            https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/check-deps.sh \
-            -o /tmp/check-deps.sh
-        chmod 0755 /tmp/check-deps.sh
-        /tmp/check-deps.sh
-        ```
 ---
 ## Step 3 – Configure Policy-Based Routing (PBR)
 

@@ -1,10 +1,20 @@
-[{
-  "version": "1.00",
-  "title": "1.00 (Quick Deploy v1.00)",
-  "aliases": ["latest", "1.00", "1.0"]
-},
-{
-  "version": "0.9",
-  "title": "0.9 (previous)",
-  "aliases": ["0.9"]
-}]
+```json
+[
+  {
+    "version": "1.0.1",
+    "title": "1.0.1 (Quick Deploy v1.0.1)",
+    "aliases": ["latest", "1.0.1", "1.0"]
+  },
+  {
+    "version": "1.00",
+    "title": "1.00 (Quick Deploy v1.00)",
+    "aliases": ["1.00", "1.0"]
+  },
+  {
+    "version": "0.9",
+    "title": "0.9 (previous)",
+    "aliases": ["0.9"]
+  }
+]
+
+```
