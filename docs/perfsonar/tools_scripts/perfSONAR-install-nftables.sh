@@ -122,6 +122,16 @@ log() {
     printf '%s\n' "$line" >&2
 }
 
+# Print user-facing info. In --print-rules mode, route to stderr to keep stdout
+# reserved exclusively for the nft rules content.
+print_info() {
+    if [ "$PRINT_RULES" = true ]; then
+        printf '%s\n' "$*" >&2
+    else
+        printf '%s\n' "$*"
+    fi
+}
+
 run_cmd() {
     local cmd_repr
     cmd_repr=$(printf '%q ' "$@")
@@ -227,6 +237,7 @@ write_nft_rules() {
     [ -n "$ip6_hosts_join" ]   && SSH6_HOSTS_ELEMS="        elements = { $ip6_hosts_join }"
 
     # Small validation/logging of resolved SSH elements for operator visibility
+    # Visibility logs; always stderr via log()
     log "SSH IPv4 subnets: ${ip4_subnets_join:-<none>}"
     log "SSH IPv6 subnets: ${ip6_subnets_join:-<none>}"
     log "SSH IPv4 hosts:   ${ip4_hosts_join:-<none>}"
@@ -581,25 +592,25 @@ require_root
 log "Starting perfSONAR nftables installer"
 log "DRY_RUN=$DRY_RUN INSTALL_FAIL2BAN=$INSTALL_FAIL2BAN ENABLE_SELINUX=$ENABLE_SELINUX PERF_PORTS=$PERF_PORTS"
 
-# show planned actions
-printf '%b\n' "${GREEN}Planned actions:${NC}"
+# show planned actions (send to stderr in print mode)
+print_info "${GREEN}Planned actions:${NC}"
 if [ "$PRINT_RULES" = true ]; then
-    echo "- Preview (print) generated nftables rules (no changes)"
+    print_info "- Preview (print) generated nftables rules (no changes)"
 else
-    echo "- Configure nftables rules (if nftables is installed)"
+    print_info "- Configure nftables rules (if nftables is installed)"
 fi
 if [ "$INSTALL_FAIL2BAN" = true ]; then
-    echo "- Configure and enable fail2ban (if installed)"
+    print_info "- Configure and enable fail2ban (if installed)"
 fi
 if [ "$ENABLE_SELINUX" = true ]; then
-    echo "- Attempt to enable SELinux (if installed; may require reboot)"
+    print_info "- Attempt to enable SELinux (if installed; may require reboot)"
 fi
 if [ "$PRINT_RULES" = true ]; then
-    echo "- No files will be written; this is a print-only preview"
+    print_info "- No files will be written; this is a print-only preview"
 else
-    echo "- Write nftables rules to $NFT_RULE_FILE (backup created under $BACKUP_DIR)"
+    print_info "- Write nftables rules to $NFT_RULE_FILE (backup created under $BACKUP_DIR)"
 fi
-echo
+print_info ""
 
 # Only prompt for confirmation if we intend to make changes
 if [ "$PRINT_RULES" != true ]; then
