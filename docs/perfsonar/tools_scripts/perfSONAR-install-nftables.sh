@@ -114,9 +114,12 @@ EOF
 }
 
 log() {
-    local ts
+    local ts line
     ts=$(date +'%Y-%m-%d %H:%M:%S')
-    printf '%s %s\n' "$ts" "$*" | tee -a "$LOG_FILE"
+    line="$ts $*"
+    # Write to logfile and to stderr (do not contaminate stdout, which may carry nft rules)
+    printf '%s\n' "$line" >> "$LOG_FILE"
+    printf '%s\n' "$line" >&2
 }
 
 run_cmd() {
