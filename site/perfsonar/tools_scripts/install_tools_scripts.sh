@@ -23,14 +23,23 @@ TOOLS_DIR="$DEST_ROOT/tools_scripts"
 mkdir -p "$TOOLS_DIR"
 
 scripts=(
+    # helpers and installers
     check-deps.sh
     check-perfsonar-dns.sh
     perfSONAR-pbr-nm.sh
     perfSONAR-install-nftables.sh
     perfSONAR-update-lsregistration.sh
-    perfSONAR-extract-lsregistration.sh
-  perfSONAR-auto-enroll-psconfig.sh
+    perfSONAR-auto-enroll-psconfig.sh
+    seed_testpoint_host_dirs.sh
+
+    # compose examples / templates
     docker-compose.yml
+    docker-compose.testpoint.yml
+    docker-compose.testpoint-le.yml
+
+    # docs / READMEs (optional, copied so users can view usage offline)
+    README.md
+    README-lsregistration.md
 )
 
 echo "[INFO] Fetching helper scripts into $TOOLS_DIR"
@@ -38,6 +47,11 @@ for s in "${scripts[@]}"; do
   echo "  - $s"
   curl -fsSL "$TOOLS_SRC/$s" -o "$TOOLS_DIR/$s"
 done
+
+# Note: The script `perfSONAR-extract-lsregistration.sh` was deprecated and is
+# intentionally not included in the fetched helpers. See
+# docs/perfsonar/tools_scripts/DEPRECATION.md for details and migration
+# instructions.
 
 chmod 0755 "$TOOLS_DIR"/*.sh || true
 

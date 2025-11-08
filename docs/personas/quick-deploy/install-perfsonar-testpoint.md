@@ -76,6 +76,11 @@ Note: Repository clone instructions are in Step 2.
         delays or race conditions while configuring policy-based routing,
         nftables rules, and container networking.
 
+1. **Update the system and packages:**
+
+    ```bash
+    dnf -y update
+    ```
 
 1. **Record NIC names:** Document interface mappings for later PBR configuration.
 
@@ -101,9 +106,9 @@ After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
-**Apply baseline updates and verify dependencies:**
+**Find needed packages and verify dependencies:**
 
-Use the helper to check for required tools and apply OS updates.
+Use the helper to check for required tools.
 ```bash
 /opt/perfsonar-tp/tools_scripts/check-deps.sh
 ```
@@ -330,18 +335,10 @@ Start a temporary testpoint without bind-mounts, then copy baseline content out 
 Seed the host directories using the bundled helper script instead of running the one-off commands below. The install bootstrap places helper scripts under `/opt/perfsonar-tp/tools_scripts` when you run the bootstrap in Step 2. Run the helper as root (or with sudo):
 
 ```bash
-# after running the install bootstrap (Step 2):
-sudo chmod +x /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
-sudo /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
+# The install bootstrap (Step 2) provides a helper script to see the dirs:
+/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 ```
 
-If you don't want to install the full tools first, you can download the helper temporarily and run it from `/tmp`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/seed_testpoint_host_dirs.sh -o /tmp/seed_testpoint_host_dirs.sh
-sudo chmod +x /tmp/seed_testpoint_host_dirs.sh
-sudo /tmp/seed_testpoint_host_dirs.sh
-```
 
 If SELinux is enforcing, the `:z`/`:Z` options in the compose files handle labels; no manual `chcon` is required.
 
@@ -365,7 +362,7 @@ curl -fsSL \
 Start the final stack:
 
 ```bash
-(cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose up -d
+(cd /opt/perfsonar-tp; podman-compose up -d)
 ```
 
 #### 3) Obtain your first Let’s Encrypt certificate (one-time)
@@ -468,6 +465,52 @@ lsregistration daemon (see below).
         --admin-name "pS Admin" --admin-email admin@example.org
     ```
 
+1. **Automatic image updates and safe restarts**
+
+    Keep containers current and only restart them when their image actually changes.
+
+    ??? info "Auto-update via labels and a systemd timer"
+
+        1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used).  If you copied the example docker-compose.yml from the repo, this is already done:
+
+            ```yaml
+            services:
+                testpoint:
+                    # ...
+                    labels:
+
+                        - io.containers.autoupdate=registry
+
+                certbot:
+                    # ...
+                    labels:
+
+                        - io.containers.autoupdate=registry
+
+            ```
+
+            The lable instructs Podman to check the registry for newer images and restart only if an update is pulled but we need to turn on the auto-update timer:
+
+        1. Enable the Podman auto-update timer (runs daily by default):
+
+            ```bash
+            systemctl enable --now podman-auto-update.timer
+            ```
+
+        1. Run ad-hoc when desired and preview:
+
+            ```bash
+            podman auto-update --dry-run
+            podman auto-update
+            ```
+
+        1. Inspect recent runs:
+
+            ```bash
+            systemctl list-timers | grep podman-auto-update
+            journalctl -u podman-auto-update --since "1 day ago"
+            ```
+
 ---
 ## Step 7 – Post-Install Validation
 
@@ -544,50 +587,6 @@ Perform these checks before handing the host over to operations:
 - Monitor psconfig feeds for changes in mesh participation.
 - Track certificate expiry (`certbot renew --dry-run`) if you rely on Let’s Encrypt.
 
-### Automatic image updates and safe restarts
 
-Keep containers current and only restart them when their image actually changes.
-
-??? info "Auto-update via labels and a systemd timer"
-
-    1. Add an auto-update label to services in your compose file (both `testpoint` and `certbot` if used):
-
-        ```yaml
-        services:
-            testpoint:
-                # ...
-                labels:
-
-                    - io.containers.autoupdate=registry
-
-            certbot:
-                # ...
-                labels:
-
-                    - io.containers.autoupdate=registry
-
-        ```
-
-        This instructs Podman to check the registry for newer images and restart only if an update is pulled.
-
-    1. Enable the Podman auto-update timer (runs daily by default):
-
-        ```bash
-        systemctl enable --now podman-auto-update.timer
-        ```
-
-    1. Run ad-hoc when desired and preview:
-
-        ```bash
-        podman auto-update --dry-run
-        podman auto-update
-        ```
-
-    1. Inspect recent runs:
-
-        ```bash
-        systemctl list-timers | grep podman-auto-update
-        journalctl -u podman-auto-update --since "1 day ago"
-        ```
 
 

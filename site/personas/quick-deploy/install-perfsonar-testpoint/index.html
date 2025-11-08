@@ -677,19 +677,6 @@
     Ongoing Maintenance
   </a>
   
-    <nav class="md-nav" aria-label="Ongoing Maintenance">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
-    Automatic image updates and safe restarts
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1171,19 +1158,6 @@
     Ongoing Maintenance
   </a>
   
-    <nav class="md-nav" aria-label="Ongoing Maintenance">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automatic-image-updates-and-safe-restarts" class="md-nav__link">
-    Automatic image updates and safe restarts
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1265,6 +1239,11 @@ nftables rules, and container networking.</p>
 </details>
 </li>
 <li>
+<p><strong>Update the system and packages:</strong></p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>update
+</code></pre></div>
+</li>
+<li>
 <p><strong>Record NIC names:</strong> Document interface mappings for later PBR configuration.</p>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>device<span class="w"> </span>status
 ip<span class="w"> </span>-br<span class="w"> </span>addr
@@ -1284,8 +1263,8 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
-<p><strong>Apply baseline updates and verify dependencies:</strong></p>
-<p>Use the helper to check for required tools and apply OS updates.
+<p><strong>Find needed packages and verify dependencies:</strong></p>
+<p>Use the helper to check for required tools.
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-deps.sh
 </code></pre></div></p>
 <hr />
@@ -1472,14 +1451,8 @@ Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsona
 <h4 id="1-seed-host-directories-from-a-temporary-testpoint-container">1) Seed host directories from a temporary testpoint container<a class="headerlink" href="#1-seed-host-directories-from-a-temporary-testpoint-container" title="Permanent link">&para;</a></h4>
 <p>Start a temporary testpoint without bind-mounts, then copy baseline content out to the host.</p>
 <p>Seed the host directories using the bundled helper script instead of running the one-off commands below. The install bootstrap places helper scripts under <code>/opt/perfsonar-tp/tools_scripts</code> when you run the bootstrap in Step 2. Run the helper as root (or with sudo):</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># after running the install bootstrap (Step 2):</span>
-sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
-sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
-</code></pre></div>
-<p>If you don't want to install the full tools first, you can download the helper temporarily and run it from <code>/tmp</code>:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/seed_testpoint_host_dirs.sh<span class="w"> </span>-o<span class="w"> </span>/tmp/seed_testpoint_host_dirs.sh
-sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/tmp/seed_testpoint_host_dirs.sh
-sudo<span class="w"> </span>/tmp/seed_testpoint_host_dirs.sh
+<div class="highlight"><pre><span></span><code><span class="c1"># The install bootstrap (Step 2) provides a helper script to see the dirs:</span>
+/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 </code></pre></div>
 <p>If SELinux is enforcing, the <code>:z</code>/<code>:Z</code> options in the compose files handle labels; no manual <code>chcon</code> is required.</p>
 <details class="note">
@@ -1495,7 +1468,7 @@ Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsona
 <span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
 </code></pre></div>
 <p>Start the final stack:</p>
-<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w">  </span><span class="c1"># or docker-compose up -d</span>
+<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span>
 </code></pre></div>
 <h4 id="3-obtain-your-first-lets-encrypt-certificate-one-time">3) Obtain your first Let’s Encrypt certificate (one-time)<a class="headerlink" href="#3-obtain-your-first-lets-encrypt-certificate-one-time" title="Permanent link">&para;</a></h4>
 <p>The <code>certbot</code> sidecar above will renew automatically. For the initial issuance, run:</p>
@@ -1589,6 +1562,49 @@ bash<span class="w"> </span>/root/restore-lsreg.sh
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 </code></pre></div>
 </li>
+<li>
+<p><strong>Automatic image updates and safe restarts</strong></p>
+<p>Keep containers current and only restart them when their image actually changes.</p>
+<details class="info">
+<summary>Auto-update via labels and a systemd timer</summary>
+<ol>
+<li>
+<p>Add an auto-update label to services in your compose file (both <code>testpoint</code> and <code>certbot</code> if used).  If you copied the example docker-compose.yml from the repo, this is already done:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># ...</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+
+<span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># ...</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+</code></pre></div>
+<p>The lable instructs Podman to check the registry for newer images and restart only if an update is pulled but we need to turn on the auto-update timer:</p>
+</li>
+<li>
+<p>Enable the Podman auto-update timer (runs daily by default):</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>podman-auto-update.timer
+</code></pre></div>
+</li>
+<li>
+<p>Run ad-hoc when desired and preview:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>auto-update<span class="w"> </span>--dry-run
+podman<span class="w"> </span>auto-update
+</code></pre></div>
+</li>
+<li>
+<p>Inspect recent runs:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>podman-auto-update
+journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<span class="w"> </span>--since<span class="w"> </span><span class="s2">&quot;1 day ago&quot;</span>
+</code></pre></div>
+</li>
+</ol>
+</details>
+</li>
 </ol>
 <hr />
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
@@ -1661,47 +1677,6 @@ ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class=
 <li>Monitor psconfig feeds for changes in mesh participation.</li>
 <li>Track certificate expiry (<code>certbot renew --dry-run</code>) if you rely on Let’s Encrypt.</li>
 </ul>
-<h3 id="automatic-image-updates-and-safe-restarts">Automatic image updates and safe restarts<a class="headerlink" href="#automatic-image-updates-and-safe-restarts" title="Permanent link">&para;</a></h3>
-<p>Keep containers current and only restart them when their image actually changes.</p>
-<details class="info">
-<summary>Auto-update via labels and a systemd timer</summary>
-<ol>
-<li>
-<p>Add an auto-update label to services in your compose file (both <code>testpoint</code> and <code>certbot</code> if used):</p>
-<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># ...</span>
-<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
-
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
-
-<span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># ...</span>
-<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
-
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
-</code></pre></div>
-<p>This instructs Podman to check the registry for newer images and restart only if an update is pulled.</p>
-</li>
-<li>
-<p>Enable the Podman auto-update timer (runs daily by default):</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>podman-auto-update.timer
-</code></pre></div>
-</li>
-<li>
-<p>Run ad-hoc when desired and preview:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>auto-update<span class="w"> </span>--dry-run
-podman<span class="w"> </span>auto-update
-</code></pre></div>
-</li>
-<li>
-<p>Inspect recent runs:</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>podman-auto-update
-journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<span class="w"> </span>--since<span class="w"> </span><span class="s2">&quot;1 day ago&quot;</span>
-</code></pre></div>
-</li>
-</ol>
-</details>
 
               
             </article>

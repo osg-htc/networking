@@ -28,7 +28,7 @@ scripts=(
     check-perfsonar-dns.sh
     perfSONAR-pbr-nm.sh
     perfSONAR-install-nftables.sh
-  perfSONAR-update-lsregistration.sh
+    perfSONAR-update-lsregistration.sh
     perfSONAR-auto-enroll-psconfig.sh
     seed_testpoint_host_dirs.sh
 
