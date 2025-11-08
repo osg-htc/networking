@@ -212,6 +212,17 @@ write_nft_rules() {
     ip4_hosts_join=$(_join_by , "${ip4_hosts[@]}")
     ip6_hosts_join=$(_join_by , "${ip6_hosts[@]}")
 
+    # Conditionally render elements lines to avoid empty set syntax errors
+    local SSH4_SUBNETS_ELEMS SSH6_SUBNETS_ELEMS SSH4_HOSTS_ELEMS SSH6_HOSTS_ELEMS
+    SSH4_SUBNETS_ELEMS=""
+    SSH6_SUBNETS_ELEMS=""
+    SSH4_HOSTS_ELEMS=""
+    SSH6_HOSTS_ELEMS=""
+    [ -n "$ip4_subnets_join" ] && SSH4_SUBNETS_ELEMS="        elements = { $ip4_subnets_join }"
+    [ -n "$ip6_subnets_join" ] && SSH6_SUBNETS_ELEMS="        elements = { $ip6_subnets_join }"
+    [ -n "$ip4_hosts_join" ]   && SSH4_HOSTS_ELEMS="        elements = { $ip4_hosts_join }"
+    [ -n "$ip6_hosts_join" ]   && SSH6_HOSTS_ELEMS="        elements = { $ip6_hosts_join }"
+
     # Small validation/logging of resolved SSH elements for operator visibility
     log "SSH IPv4 subnets: ${ip4_subnets_join:-<none>}"
     log "SSH IPv6 subnets: ${ip6_subnets_join:-<none>}"
@@ -250,23 +261,23 @@ table inet nftables_svc {
     set ssh_access_ip4_subnets {
         type ipv4_addr
         flags interval
-        elements = { ${ip4_subnets_join} }
+${SSH4_SUBNETS_ELEMS}
     }
 
     set ssh_access_ip6_subnets {
         type ipv6_addr
         flags interval
-        elements = { ${ip6_subnets_join} }
+${SSH6_SUBNETS_ELEMS}
     }
 
     set ssh_access_ip4_hosts {
         type ipv4_addr
-        elements = { ${ip4_hosts_join} }
+${SSH4_HOSTS_ELEMS}
     }
 
     set ssh_access_ip6_hosts {
         type ipv6_addr
-        elements = { ${ip6_hosts_join} }
+${SSH6_HOSTS_ELEMS}
     }
 
     chain allow {
