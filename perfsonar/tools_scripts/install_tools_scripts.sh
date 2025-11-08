@@ -13,8 +13,15 @@ echo "[INFO] Target root: $DEST_ROOT"
 mkdir -p "$DEST_ROOT"
 
 if [ ! -d "$DEST_ROOT/.git" ] && [ ! -d "$DEST_ROOT/psconfig" ]; then
-  echo "[INFO] Cloning perfSONAR testpoint repository..."
-  git clone "$TP_REPO_URL" "$DEST_ROOT"
+  echo "[INFO] Cloning perfSONAR testpoint repository (non-interactive shallow clone)..."
+  # Prevent git from prompting interactively for credentials. If the clone
+  # fails (for example if the repo is private or network-restricted), fall
+  # back to creating the destination directory and continue fetching helper
+  # scripts from the docs tree (these are fetched below via raw.githubusercontent).
+  GIT_TERMINAL_PROMPT=0 git clone --depth 1 "$TP_REPO_URL" "$DEST_ROOT" || {
+    echo "[WARN] git clone failed or would prompt for credentials; creating $DEST_ROOT and continuing with helper downloads."
+    mkdir -p "$DEST_ROOT"
+  }
 else
   echo "[INFO] perfSONAR testpoint appears already present; skipping clone."
 fi
