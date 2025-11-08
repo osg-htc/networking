@@ -344,7 +344,7 @@ version: "3.9"
 services:
     testpoint:
         container_name: perfsonar-testpoint
-        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+    image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
         network_mode: "host"
         cgroup: host
         environment:
@@ -394,7 +394,7 @@ version: "3.9"
 services:
     testpoint:
         container_name: perfsonar-testpoint
-        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+    image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
         network_mode: "host"
         cgroup: host
         environment:
@@ -461,7 +461,7 @@ version: "3.9"
 services:
     testpoint:
         container_name: perfsonar-testpoint
-        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+    image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
         network_mode: "host"
         cgroup: host
         environment:
