@@ -663,19 +663,6 @@
     Step 6 – Register and Configure with WLCG/OSG
   </a>
   
-    <nav class="md-nav" aria-label="Step 6 – Register and Configure with WLCG/OSG">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
-    Update Lookup Service registration inside the container
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1170,19 +1157,6 @@
     Step 6 – Register and Configure with WLCG/OSG
   </a>
   
-    <nav class="md-nav" aria-label="Step 6 – Register and Configure with WLCG/OSG">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#update-lookup-service-registration-inside-the-container" class="md-nav__link">
-    Update Lookup Service registration inside the container
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1314,22 +1288,6 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p>Use the helper to check for required tools and apply OS updates.
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-deps.sh
 </code></pre></div></p>
-<details class="tip">
-<summary>Alternative: check-deps.sh one-off run without installing tools</summary>
-<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
-<span class="c1"># Preferred: run from the installed tools path (see Step 2):</span>
-<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
-
-<span class="c1"># If you must run it without installing the tools, download to /tmp and run</span>
-<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">fsSL</span><span class="w"> </span>\
-<span class="w">    </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">osg</span><span class="o">-</span><span class="n">htc</span><span class="o">/</span><span class="n">networking</span><span class="o">/</span><span class="k">master</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span>\
-<span class="w">    </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
-<span class="n">chmod</span><span class="w"> </span><span class="mi">0755</span><span class="w"> </span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
-<span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">deps</span><span class="o">.</span><span class="n">sh</span>
-<span class="err">```</span>
-</code></pre></div>
-
-</details>
 <hr />
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuraiton in <code>/etc/perfSONAR-multi-nic-config.conf</code></p>
@@ -1560,8 +1518,8 @@ docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p>We need to register your instance and ensure it is configured with the required meta data for the
 lsregistration daemon (see below).</p>
 <ol>
-<li><strong>OSG/WLCG registration workflow:</strong></li>
-</ol>
+<li>
+<p><strong>OSG/WLCG registration workflow:</strong></p>
 <details class="info">
 <summary>Registration steps and portals</summary>
 <ul>
@@ -1573,9 +1531,9 @@ lsregistration daemon (see below).</p>
 </li>
 </ul>
 </details>
-<ol>
-<li><strong>pSConfig enrollment:</strong></li>
-</ol>
+</li>
+<li>
+<p><strong>pSConfig enrollment:</strong></p>
 <p>Register this host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).</p>
 <p>Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add auto URLs (configures archives too) and show configured remotes</span>
@@ -1583,8 +1541,6 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <span class="w">    </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu&quot;</span>
 
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>list
-<span class="c1"># or with Docker:</span>
-<span class="c1"># docker exec -it perfsonar-testpoint psconfig remote list</span>
 </code></pre></div>
 <p>If there are any stale/old/incorrect entries, you can remove them:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>delete<span class="w"> </span><span class="s2">&quot;&lt;old-url&gt;&quot;</span>
@@ -1601,18 +1557,20 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <details class="note">
 <summary>The auto enroll script details</summary>
 <ul>
-<li>Parses IP lists from <code>/etc/perfSONAR-multi-nic-config.conf</code> (<code>NIC_IPV4_ADDRS</code> / <code>NIC_IPV6_ADDRS</code>).</li>
+<li>Parses IP lists from <code>/etc/perfSONAR-multi-nic-config.conf</code>  (<code>NIC_IPV4_ADDRS</code> / <code>NIC_IPV6_ADDRS</code>).</li>
 <li>Performs reverse DNS lookups (getent/dig) to derive FQDNs.</li>
 <li>Deduplicates while preserving discovery order.</li>
 <li>Adds each <code>https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> with <code>--configure-archives</code>.</li>
 <li>Lists configured remotes and returns non-zero if any enrollment fails.</li>
 </ul>
-<p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
 </details>
-<ol>
-<li><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.</li>
-</ol>
-<h3 id="update-lookup-service-registration-inside-the-container">Update Lookup Service registration inside the container<a class="headerlink" href="#update-lookup-service-registration-inside-the-container" title="Permanent link">&para;</a></h3>
+<p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
+</li>
+<li>
+<p><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.</p>
+</li>
+<li>
+<p><strong>Update Lookup Service registration inside the container</strong></p>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running <code>perfsonar-testpoint</code> container and restart the daemon only if needed.</p>
 <p>Install and run examples below, pick which type you want (root shell):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)</span>
@@ -1630,69 +1588,72 @@ bash<span class="w"> </span>/root/restore-lsreg.sh
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 </code></pre></div>
+</li>
+</ol>
 <hr />
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
 <ol>
-<li><strong>System services:</strong></li>
-</ol>
+<li>
+<p><strong>System services:</strong></p>
 <details class="info">
 <summary>Verify Podman and compose services</summary>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
 systemctl<span class="w"> </span>--user<span class="w"> </span>status<span class="w"> </span>podman-compose@perfsonar-testpoint.service
 </code></pre></div>
-<p>Ensure both are active/green.</p>
 </details>
-<ol>
-<li><strong>Container health:</strong></li>
-</ol>
+<p>Ensure both are active/green.</p>
+</li>
+<li>
+<p><strong>Container health:</strong></p>
 <details class="info">
 <summary>Check container status and logs</summary>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
 podman<span class="w"> </span>logs<span class="w"> </span>pscheduler-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail
 </code></pre></div>
 </details>
-<ol>
-<li><strong>Network path validation:</strong></li>
-</ol>
+</li>
+<li>
+<p><strong>Network path validation:</strong></p>
 <details class="info">
 <summary>Test network connectivity and routing</summary>
 <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
 tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
 </code></pre></div>
-<p>Confirm traffic uses the intended policy-based routes (check <code>ip route get &lt;dest&gt;</code>).</p>
 </details>
-<ol>
-<li><strong>Security posture:</strong></li>
-</ol>
+<p>Confirm traffic uses the intended policy-based routes (check <code>ip route get &lt;dest&gt;</code>).</p>
+</li>
+<li>
+<p><strong>Security posture:</strong></p>
 <details class="info">
 <summary>Check firewall, fail2ban, and SELinux</summary>
 <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
 fail2ban-client<span class="w"> </span>status
 ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class="w"> </span>--just-one
 </code></pre></div>
-<p>Investigate any SELinux denials or repeated Fail2Ban bans.</p>
 </details>
-<ol>
-<li><strong>LetsEncrypt certificate check:</strong></li>
-</ol>
+<p>Investigate any SELinux denials or repeated Fail2Ban bans.</p>
+</li>
+<li>
+<p><strong>LetsEncrypt certificate check:</strong></p>
 <details class="info">
 <summary>Verify certificate validity</summary>
 <div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;SERVER_FQDN&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
 </code></pre></div>
-<p>Ensure the issuer is Let’s Encrypt and the validity period is acceptable.</p>
 </details>
-<ol>
-<li><strong>Reporting:</strong></li>
-</ol>
+<p>Ensure the issuer is Let’s Encrypt and the validity period is acceptable.</p>
+</li>
+<li>
+<p><strong>Reporting:</strong></p>
 <details class="info">
 <summary>Run perfSONAR diagnostic reports</summary>
 <p>Run the perfSONAR toolkit daily report and send outputs to operations:</p>
 <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>troubleshoot
-toolkit-system-health
 </code></pre></div>
-<hr />
 </details>
+</li>
+</ol>
+<hr />
 <h2 id="ongoing-maintenance">Ongoing Maintenance<a class="headerlink" href="#ongoing-maintenance" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Schedule quarterly re-validation of routing policy and nftables rules.</li>

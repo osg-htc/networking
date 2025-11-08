@@ -171,6 +171,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://osg-htc.org/networking/release-notes/quick-deploy-1.0.0/</loc>
+         <lastmod>2025-11-08</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://osg-htc.org/networking/tools/</loc>
          <lastmod>2025-11-08</lastmod>
          <changefreq>daily</changefreq>
