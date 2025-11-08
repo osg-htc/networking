@@ -48,6 +48,11 @@ for s in "${scripts[@]}"; do
   curl -fsSL "$TOOLS_SRC/$s" -o "$TOOLS_DIR/$s"
 done
 
+# Note: The script `perfSONAR-extract-lsregistration.sh` was deprecated and is
+# intentionally not included in the fetched helpers. See
+# docs/perfsonar/tools_scripts/DEPRECATION.md for details and migration
+# instructions.
+
 chmod 0755 "$TOOLS_DIR"/*.sh || true
 
 echo "[INFO] Bootstrap complete. Testpoint root: $DEST_ROOT; scripts in $TOOLS_DIR"
