@@ -407,81 +407,79 @@ lsregistration daemon (see below).
 
 1. **OSG/WLCG registration workflow:**
 
-??? info "Registration steps and portals"
+    ??? info "Registration steps and portals"
 
-    - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
-    - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
-        - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
-            `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+        - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+        - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+            - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
+                `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
 1. **pSConfig enrollment:**
 
-Register this host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
+    Register this host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
 
-Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):
+    Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):
 
-```bash
-# Add auto URLs (configures archives too) and show configured remotes
-podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
-    "https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"
+    ```bash
+    # Add auto URLs (configures archives too) and show configured remotes
+    podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
+        "https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"
 
-podman exec -it perfsonar-testpoint psconfig remote list
-# or with Docker:
-# docker exec -it perfsonar-testpoint psconfig remote list
-```
+    podman exec -it perfsonar-testpoint psconfig remote list
+    ```
 
-If there are any stale/old/incorrect entries, you can remove them:
+    If there are any stale/old/incorrect entries, you can remove them:
 
-```bash
-podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
-```
+    ```bash
+    podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
+    ```
 
-Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.
+    Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.
 
-```bash
-# Dry run only (show planned URLs):
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
+    ```bash
+    # Dry run only (show planned URLs):
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
 
-# Typical usage (podman):
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
+    # Typical usage (podman):
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
 
-podman exec -it perfsonar-testpoint psconfig remote list
-```
+    podman exec -it perfsonar-testpoint psconfig remote list
+    ```
 
-??? note "The auto enroll script details"
+    ??? note "The auto enroll script details"
 
-    - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf` (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
-    - Performs reverse DNS lookups (getent/dig) to derive FQDNs.
-    - Deduplicates while preserving discovery order.
-    - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
-    - Lists configured remotes and returns non-zero if any enrollment fails.
+        - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf`  (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
+        - Performs reverse DNS lookups (getent/dig) to derive FQDNs.
+        - Deduplicates while preserving discovery order.
+        - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
+        - Lists configured remotes and returns non-zero if any enrollment fails.
 
     Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
 
 1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.
 
-### Update Lookup Service registration inside the container
+1. **Update Lookup Service registration inside the container**
 
-Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint` container and restart the daemon only if needed.
+    Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint` container and restart the daemon only if needed.
 
-Install and run examples below, pick which type you want (root shell):
+    Install and run examples below, pick which type you want (root shell):
 
-```bash
-# Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
-    --dry-run --site-name "Acme Co." --project WLCG \
-    --admin-email admin@example.org --admin-name "pS Admin"
+    ```bash
+    # Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+        --dry-run --site-name "Acme Co." --project WLCG \
+        --admin-email admin@example.org --admin-name "pS Admin"
 
-# Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)
-bash /root/restore-lsreg.sh
+    # Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)
+    bash /root/restore-lsreg.sh
 
-# Apply new settings and restart the daemon inside the container
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
-    --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-    --city Berkeley --region CA --country US --zip 94720 \
-    --latitude 37.5 --longitude -121.7469 \
-    --admin-name "pS Admin" --admin-email admin@example.org
-```
+    # Apply new settings and restart the daemon inside the container
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+        --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+        --city Berkeley --region CA --country US --zip 94720 \
+        --latitude 37.5 --longitude -121.7469 \
+        --admin-name "pS Admin" --admin-email admin@example.org
+    ```
 
 ---
 ## Step 7 – Post-Install Validation
@@ -490,68 +488,67 @@ Perform these checks before handing the host over to operations:
 
 1. **System services:**
 
-??? info "Verify Podman and compose services"
+    ??? info "Verify Podman and compose services"
 
-    ```bash
-    systemctl status podman
-    systemctl --user status podman-compose@perfsonar-testpoint.service
-    ```
+        ```bash
+        systemctl status podman
+        systemctl --user status podman-compose@perfsonar-testpoint.service
+        ```
 
     Ensure both are active/green.
 
 1. **Container health:**
 
-??? info "Check container status and logs"
+    ??? info "Check container status and logs"
 
-    ```bash
-    podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-    podman logs pscheduler-agent | tail
-    ```
+        ```bash
+        podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+        podman logs pscheduler-agent | tail
+        ```
 
 1. **Network path validation:**
 
-??? info "Test network connectivity and routing"
+    ??? info "Test network connectivity and routing"
 
-    ```bash
-    pscheduler task throughput --dest <remote-testpoint>
-    tracepath -n <remote-testpoint>
-    ```
+        ```bash
+        pscheduler task throughput --dest <remote-testpoint>
+        tracepath -n <remote-testpoint>
+        ```
 
     Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
 1. **Security posture:**
 
-??? info "Check firewall, fail2ban, and SELinux"
+    ??? info "Check firewall, fail2ban, and SELinux"
 
-    ```bash
-    nft list ruleset | grep perfsonar
-    fail2ban-client status
-    ausearch --message AVC --just-one
-    ```
+        ```bash
+        nft list ruleset | grep perfsonar
+        fail2ban-client status
+        ausearch --message AVC --just-one
+        ```
 
     Investigate any SELinux denials or repeated Fail2Ban bans.
 
 1. **LetsEncrypt certificate check:**
 
-??? info "Verify certificate validity"
+    ??? info "Verify certificate validity"
 
-    ```bash
-    openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
-    ```
+        ```bash
+        openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
+        ```
 
     Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
 
 1. **Reporting:**
 
-??? info "Run perfSONAR diagnostic reports"
-    Run the perfSONAR toolkit daily report and send outputs to operations:
+    ??? info "Run perfSONAR diagnostic reports"
+        Run the perfSONAR toolkit daily report and send outputs to operations:
 
-    ```bash
-    pscheduler troubleshoot
-    toolkit-system-health
-    ```
+        ```bash
+        pscheduler troubleshoot
+        ```
 
-    ---
+---
 
 ## Ongoing Maintenance
 
