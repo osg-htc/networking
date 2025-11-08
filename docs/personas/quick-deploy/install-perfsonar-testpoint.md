@@ -419,7 +419,7 @@ lsregistration daemon (see below).
         - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
             `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
-1. **pSConfig enrollment:**
+2. **pSConfig enrollment:**
 
 Register each FQDN with the OSG/WLCG pSConfig service so tests are auto-configured.
 
@@ -523,7 +523,7 @@ Perform these checks before handing the host over to operations:
 
     Ensure both are active/green.
 
-1. **Container health:**
+2. **Container health:**
 
 ??? info "Check container status and logs"
 
@@ -532,7 +532,7 @@ Perform these checks before handing the host over to operations:
     podman logs pscheduler-agent | tail
     ```
 
-1. **Network path validation:**
+3. **Network path validation:**
 
 ??? info "Test network connectivity and routing"
 
@@ -543,7 +543,7 @@ Perform these checks before handing the host over to operations:
 
     Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
-1. **Security posture:**
+4. **Security posture:**
 
 ??? info "Check firewall, fail2ban, and SELinux"
 
@@ -555,7 +555,7 @@ Perform these checks before handing the host over to operations:
 
     Investigate any SELinux denials or repeated Fail2Ban bans.
 
-1. **LetsEncrypt certificate check:**
+5. **LetsEncrypt certificate check:**
 
 ??? info "Verify certificate validity"
 
