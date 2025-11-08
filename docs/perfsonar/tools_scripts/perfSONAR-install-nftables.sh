@@ -37,6 +37,7 @@ NFT_RULE_FILE="/etc/nftables.d/perfsonar.nft"
 CONFIG_FILE="/etc/perfSONAR-multi-nic-config.conf"
 BACKUP_DIR="/var/backups/perfsonar-install-$(date +%s)"
 PRINT_RULES=false
+P3_AVAIL=false
 
 # Canonicalize a CIDR (IPv4/IPv6) to its network base using Python if available.
 # Falls back to returning the input unchanged if Python3 isn't present.
@@ -58,6 +59,26 @@ PY
         # Without python, return unchanged (may still validate if already canonical)
         printf '%s\n' "$cidr"
         return 0
+    fi
+}
+
+# Validate a single IP address (v4 or v6). Returns 0 if valid; non-zero if invalid.
+is_valid_ip() {
+    local ip="$1"
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$ip" <<'PY'
+import sys, ipaddress
+arg = sys.argv[1]
+try:
+    ipaddress.ip_address(arg)
+    sys.exit(0)
+except Exception:
+    sys.exit(3)
+PY
+        return $?
+    else
+        # No python available: conservative choice is to treat as invalid to avoid emitting bad rules
+        return 4
     fi
 }
 
@@ -468,11 +489,21 @@ derive_subnets_and_hosts_from_config() {
                         if canon=$(canon_cidr "${addr6}${prefix6}"); then
                             SUBNETS+=("$canon")
                         else
-                            log "Skipping invalid IPv6 CIDR: ${addr6}${prefix6}; adding as host instead"
-                            HOSTS+=("${addr6}")
+                            # If canonicalization fails, only add as host if it is a valid IP literal
+                            if is_valid_ip "$addr6"; then
+                                log "CIDR parse failed for ${addr6}${prefix6}; adding valid host $addr6 instead"
+                                HOSTS+=("${addr6}")
+                            else
+                                log "Skipping invalid IPv6 entry: ${addr6}${prefix6} (no valid address detected)"
+                            fi
                         fi
                     else
-                        HOSTS+=("${addr6}")
+                        # No prefix: treat as host only if it validates
+                        if is_valid_ip "$addr6"; then
+                            HOSTS+=("${addr6}")
+                        else
+                            log "Skipping invalid IPv6 host entry: ${addr6}"
+                        fi
                     fi
                 fi
             done
