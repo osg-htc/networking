@@ -38,6 +38,29 @@ CONFIG_FILE="/etc/perfSONAR-multi-nic-config.conf"
 BACKUP_DIR="/var/backups/perfsonar-install-$(date +%s)"
 PRINT_RULES=false
 
+# Canonicalize a CIDR (IPv4/IPv6) to its network base using Python if available.
+# Falls back to returning the input unchanged if Python3 isn't present.
+canon_cidr() {
+    local cidr="$1"
+    if command -v python3 >/dev/null 2>&1; then
+        # Use ipaddress to normalize to network base (strict=False allows host IPs)
+        python3 - "$cidr" <<'PY'
+import sys, ipaddress
+arg = sys.argv[1]
+try:
+    net = ipaddress.ip_network(arg, strict=False)
+    print(str(net))
+except Exception:
+    sys.exit(2)
+PY
+        return $?
+    else
+        # Without python, return unchanged (may still validate if already canonical)
+        printf '%s\n' "$cidr"
+        return 0
+    fi
+}
+
 # Colors
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -48,24 +71,24 @@ Usage: perfSONAR-install-nftables.sh [OPTIONS]
 
 Options:
   --help               Show this help
-    --dry-run            Print actions without making changes
+  --dry-run            Print actions without making changes
   --yes                Skip confirmation prompts
-    --fail2ban           Configure and enable a minimal fail2ban jail (if installed)
-    --selinux            Attempt to enable SELinux (if installed; may require reboot)
+  --fail2ban           Configure and enable a minimal fail2ban jail (if installed)
+  --selinux            Attempt to enable SELinux (if installed; may require reboot)
   --ports=CSV          Comma-separated list of TCP ports to allow (default: 22,80,443)
   --debug              Print commands (set -x) for troubleshooting
   --backup-dir=DIR     Where to store backups (default: auto under /var/backups)
-    --print-rules        Render the nftables rules to stdout and exit (no writes)
+  --print-rules        Render the nftables rules to stdout and exit (no writes)
 
 Example:
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
+  /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
 
 Notes:
-    - Run in a VM or console first. Use --dry-run to preview changes.
-    - SELinux enablement is a potentially disruptive operation; read the
-        script comments and test before enabling on production hosts.
-    - This script does not install packages; ensure nftables/fail2ban/SELinux
-        are present before using related flags.
+  - Run in a VM or console first. Use --dry-run to preview changes.
+  - SELinux enablement is a potentially disruptive operation; read the
+    script comments and test before enabling on production hosts.
+  - This script does not install packages; ensure nftables/fail2ban/SELinux
+    are present before using related flags.
 EOF
 }
 
@@ -268,8 +291,10 @@ table inet nftables_svc {
 EOF
 
     # Validate syntax before installing/printing the generated rules
-    if ! nft -c -f "$tmpfile" >/dev/null 2>&1; then
+    if ! out=$(nft -c -f "$tmpfile" 2>&1); then
         log "Validation failed for generated nftables rules. Not writing $NFT_RULE_FILE."
+        log "nft error output:"
+        printf '%s\n' "$out" | while IFS= read -r line; do log "$line"; done
         rm -f "$tmpfile"
         return 1
     fi
@@ -419,9 +444,14 @@ derive_subnets_and_hosts_from_config() {
                 addr="${NIC_IPV4_ADDRS[$i]:-}" || addr=""
                 prefix="${NIC_IPV4_PREFIXES[$i]:-}" || prefix=""
                 if [ -n "$addr" ] && [ "$addr" != "-" ]; then
-                    # If prefix is present and looks like /24 etc, combine; otherwise use /32
+                    # If prefix is present and looks like /24 etc, canonicalize to network base; otherwise treat as host
                     if [ -n "$prefix" ] && [[ "$prefix" == /* ]]; then
-                        SUBNETS+=("${addr}${prefix}")
+                        if canon=$(canon_cidr "${addr}${prefix}"); then
+                            SUBNETS+=("$canon")
+                        else
+                            log "Skipping invalid IPv4 CIDR: ${addr}${prefix}; adding as host instead"
+                            HOSTS+=("${addr}")
+                        fi
                     else
                         HOSTS+=("${addr}")
                     fi
@@ -435,7 +465,12 @@ derive_subnets_and_hosts_from_config() {
                 prefix6="${NIC_IPV6_PREFIXES[$i]:-}" || prefix6=""
                 if [ -n "$addr6" ] && [ "$addr6" != "-" ]; then
                     if [ -n "$prefix6" ] && [[ "$prefix6" == /* ]]; then
-                        SUBNETS+=("${addr6}${prefix6}")
+                        if canon=$(canon_cidr "${addr6}${prefix6}"); then
+                            SUBNETS+=("$canon")
+                        else
+                            log "Skipping invalid IPv6 CIDR: ${addr6}${prefix6}; adding as host instead"
+                            HOSTS+=("${addr6}")
+                        fi
                     else
                         HOSTS+=("${addr6}")
                     fi
