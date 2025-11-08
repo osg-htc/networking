@@ -252,7 +252,7 @@ version: "3.9"
 services:
     testpoint:
         container_name: perfsonar-testpoint
-        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+        image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
         network_mode: "host"
         cgroup: host
         environment:
@@ -295,36 +295,13 @@ so Apache content and certificates persist on the host and are shared:
 
 Start a temporary testpoint without bind-mounts, then copy baseline content out to the host.
 
-Create `/opt/perfsonar-tp/docker-compose.yml` (temporary) with:
-
-```yaml
-version: "3.9"
-services:
-    testpoint:
-        container_name: perfsonar-testpoint
-        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
-        network_mode: "host"
-        cgroup: host
-        environment:
-            - TZ=UTC
-        restart: unless-stopped
-        tmpfs:
-            - /run
-            - /run/lock
-            - /tmp
-        volumes:
-            - /sys/fs/cgroup:/sys/fs/cgroup:rw
-        tty: true
-        pids_limit: 8192
-        cap_add:
-            - CAP_NET_RAW
-```
 
 Bring it up and seed:
 
 ```bash
-(cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose up -d
+
 mkdir -p /opt/perfsonar-tp/psconfig /var/www/html /etc/apache2 /etc/letsencrypt
+docker create --name perfsonar-testpoint hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd >/dev/null 2>&1 || true
 docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
 docker cp perfsonar-testpoint:/var/www/html /var/www/html
 docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
@@ -369,7 +346,7 @@ version: "3.9"
 services:
     testpoint:
         container_name: perfsonar-testpoint
-        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+        image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
         network_mode: "host"
         cgroup: host
         environment:
