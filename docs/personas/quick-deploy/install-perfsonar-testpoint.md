@@ -252,7 +252,7 @@ version: "3.9"
 services:
     testpoint:
         container_name: perfsonar-testpoint
-        image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
+        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
         network_mode: "host"
         cgroup: host
         environment:
@@ -295,13 +295,36 @@ so Apache content and certificates persist on the host and are shared:
 
 Start a temporary testpoint without bind-mounts, then copy baseline content out to the host.
 
+Create `/opt/perfsonar-tp/docker-compose.yml` (temporary) with:
+
+```yaml
+version: "3.9"
+services:
+    testpoint:
+        container_name: perfsonar-testpoint
+        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
+        network_mode: "host"
+        cgroup: host
+        environment:
+            - TZ=UTC
+        restart: unless-stopped
+        tmpfs:
+            - /run
+            - /run/lock
+            - /tmp
+        volumes:
+            - /sys/fs/cgroup:/sys/fs/cgroup:rw
+        tty: true
+        pids_limit: 8192
+        cap_add:
+            - CAP_NET_RAW
+```
 
 Bring it up and seed:
 
 ```bash
-
+(cd /opt/perfsonar-tp; podman-compose up -d)  # or docker-compose up -d
 mkdir -p /opt/perfsonar-tp/psconfig /var/www/html /etc/apache2 /etc/letsencrypt
-docker create --name perfsonar-testpoint hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd >/dev/null 2>&1 || true
 docker cp perfsonar-testpoint:/etc/perfsonar/psconfig /opt/perfsonar-tp/psconfig
 docker cp perfsonar-testpoint:/var/www/html /var/www/html
 docker cp perfsonar-testpoint:/etc/apache2 /etc/apache2
@@ -346,7 +369,7 @@ version: "3.9"
 services:
     testpoint:
         container_name: perfsonar-testpoint
-        image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
+        image: ghcr.io/perfsonar/testpoint:5.2.4-systemd
         network_mode: "host"
         cgroup: host
         environment:
@@ -419,7 +442,7 @@ lsregistration daemon (see below).
         - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
             `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
-2. **pSConfig enrollment:**
+1. **pSConfig enrollment:**
 
 Register each FQDN with the OSG/WLCG pSConfig service so tests are auto-configured.
 
@@ -523,7 +546,7 @@ Perform these checks before handing the host over to operations:
 
     Ensure both are active/green.
 
-2. **Container health:**
+1. **Container health:**
 
 ??? info "Check container status and logs"
 
@@ -532,7 +555,7 @@ Perform these checks before handing the host over to operations:
     podman logs pscheduler-agent | tail
     ```
 
-3. **Network path validation:**
+1. **Network path validation:**
 
 ??? info "Test network connectivity and routing"
 
@@ -543,7 +566,7 @@ Perform these checks before handing the host over to operations:
 
     Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
-4. **Security posture:**
+1. **Security posture:**
 
 ??? info "Check firewall, fail2ban, and SELinux"
 
@@ -555,7 +578,7 @@ Perform these checks before handing the host over to operations:
 
     Investigate any SELinux denials or repeated Fail2Ban bans.
 
-5. **LetsEncrypt certificate check:**
+1. **LetsEncrypt certificate check:**
 
 ??? info "Verify certificate validity"
 
