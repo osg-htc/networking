@@ -1,8 +1,9 @@
 version: "3.9"
+
 services:
   testpoint:
     container_name: perfsonar-testpoint
-  image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production
+    image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production
     labels:
       - io.containers.autoupdate=registry
     network_mode: "host"
@@ -26,7 +27,7 @@ services:
       - CAP_NET_RAW
 
   certbot:
-    image: certbot/certbot
+    image: certbot/certbot:latest
     container_name: certbot
     labels:
       - io.containers.autoupdate=registry
