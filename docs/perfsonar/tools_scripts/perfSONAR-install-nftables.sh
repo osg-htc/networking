@@ -37,6 +37,7 @@ NFT_RULE_FILE="/etc/nftables.d/perfsonar.nft"
 CONFIG_FILE="/etc/perfSONAR-multi-nic-config.conf"
 BACKUP_DIR="/var/backups/perfsonar-install-$(date +%s)"
 PRINT_RULES=false
+STRICT_VERIFY=false
 P3_AVAIL=false
 
 # Canonicalize a CIDR (IPv4/IPv6) to its network base using Python if available.
@@ -100,6 +101,8 @@ Options:
   --debug              Print commands (set -x) for troubleshooting
   --backup-dir=DIR     Where to store backups (default: auto under /var/backups)
   --print-rules        Render the nftables rules to stdout and exit (no writes)
+    --strict-verify      After applying, require that ONLY 'inet nftables_svc' is present
+                                             in the active ruleset (default: presence-only check)
 
 Example:
   /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
@@ -437,8 +440,9 @@ enable_selinux() {
 }
 
 verify_only_perfsonar_ruleset() {
-    # Verify that the active nftables ruleset contains only the perfSONAR table
-    # (table inet nftables_svc) and no other tables. Returns 0 on success.
+    # Verify the active nftables tables. In default mode, succeed if the
+    # 'inet nftables_svc' table is present. In strict mode, require it to be
+    # the only table.
     if [ "$DRY_RUN" = true ]; then
         log "Dry-run: skip verification of active ruleset"
         return 0
@@ -449,27 +453,41 @@ verify_only_perfsonar_ruleset() {
     fi
 
     local tables
-    # list tables in the ruleset; output lines starting with 'table'
-    # format: table <family> <name> {
-    mapfile -t tables < <(nft list tables 2>/dev/null || nft list ruleset 2>/dev/null | awk '/^table /{print $2" "$3}')
+    # List tables in the ruleset and extract '<family> <name>' pairs.
+    # Ensure awk processes the command output by grouping with parentheses.
+    mapfile -t tables < <( (nft list tables 2>/dev/null || nft list ruleset 2>/dev/null) | awk '/^table /{print $2" "$3}')
     if [ ${#tables[@]} -eq 0 ]; then
         log "No nftables tables found in active ruleset"
         return 1
     fi
 
-    # Expect exactly one table named 'inet nftables_svc'
-    if [ ${#tables[@]} -ne 1 ]; then
-        log "Unexpected number of nftables tables: ${#tables[@]} -> ${tables[*]}"
-        return 2
+    if [ "$STRICT_VERIFY" = true ]; then
+        # Strict mode: must have exactly one table and it must be our table
+        if [ ${#tables[@]} -ne 1 ]; then
+            log "Unexpected number of nftables tables (strict): ${#tables[@]} -> ${tables[*]}"
+            return 2
+        fi
+        if [[ "${tables[0]}" != "inet nftables_svc" ]]; then
+            log "Active table is not 'inet nftables_svc' (strict): found '${tables[0]}'"
+            return 3
+        fi
+        log "Verified (strict) active nftables ruleset contains only 'inet nftables_svc'"
+        return 0
     fi
 
-    if [[ "${tables[0]}" != "inet nftables_svc" ]]; then
-        log "Active table is not 'inet nftables_svc': found '${tables[0]}'"
-        return 3
+    # Presence-only: succeed if our table is present among others
+    local found=false t
+    for t in "${tables[@]}"; do
+        if [[ "$t" == "inet nftables_svc" ]]; then
+            found=true; break
+        fi
+    done
+    if [ "$found" = true ]; then
+        log "Verified presence of 'inet nftables_svc' among active nftables tables"
+        return 0
     fi
-
-    log "Verified active nftables ruleset contains only 'inet nftables_svc'"
-    return 0
+    log "perfSONAR table 'inet nftables_svc' not found in active nftables tables: ${tables[*]}"
+    return 4
 }
 
 derive_subnets_and_hosts_from_config() {
@@ -581,6 +599,8 @@ while [[ ${#} -gt 0 ]]; do
             BACKUP_DIR="${1#*=}"; shift ;;
         --print-rules)
             PRINT_RULES=true; shift ;;
+        --strict-verify)
+            STRICT_VERIFY=true; shift ;;
         *)
             # ignore unknown for now
             shift ;;
@@ -653,8 +673,7 @@ if [ "$ENABLE_SELINUX" = true ]; then
     enable_selinux
 fi
 
-# Verify that only our perfSONAR ruleset is active; rollback if verification fails.
-# Skip verification entirely if nftables is not installed.
+# Verify ruleset; rollback if verification fails. Skip if nftables absent.
 if command -v nft >/dev/null 2>&1; then
     if ! verify_only_perfsonar_ruleset; then
         log "Verification of active nftables ruleset failed. Attempting rollback."
