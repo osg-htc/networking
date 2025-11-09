@@ -8,6 +8,7 @@ services:
       - io.containers.autoupdate=registry
     network_mode: "host"
     privileged: true
+    cgroupns: private
     environment:
       - TZ=UTC
       # Optional: Set SERVER_FQDN to explicitly specify which Let's Encrypt certificate to use.
@@ -22,7 +23,6 @@ services:
       - /run/lock
       - /tmp
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
       - /var/www/html:/var/www/html:z
       - /etc/apache2:/etc/apache2:z
