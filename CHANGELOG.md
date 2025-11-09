@@ -37,7 +37,7 @@ All notable changes to this repository will be documented in this file.
 
 ### Changed
 
-- Updated container image references in Quick Deploy to `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd`
+- Updated container image references in Quick Deploy to `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production`
 - Replaced inline seeding snippet with helper invocation in `docs/personas/quick-deploy/install-perfsonar-testpoint.md`
 
 ## [0.9] - previous

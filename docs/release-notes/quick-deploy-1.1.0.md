@@ -23,7 +23,7 @@ Highlights
   the deprecated extractor and includes a comment pointing to the deprecation
   doc.
 - Container image references in the Quick Deploy examples continue to point
-  at `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd`.
+  at `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production`.
 
 Notes for maintainers
 ---------------------

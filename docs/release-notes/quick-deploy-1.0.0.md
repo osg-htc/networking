@@ -10,7 +10,7 @@ formal v1.0.0 release. It contains the following user-facing changes and quality
 improvements:
 
 - Update container image references to use the OSG registry:
-  - `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd` (replaced earlier ghcr.io references)
+  -- `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production` (replaced earlier ghcr.io references)
 - Add `seed_testpoint_host_dirs.sh` helper to seed host directories from temporary containers
   - Installed at `docs/perfsonar/tools_scripts/seed_testpoint_host_dirs.sh` (also referenced in the Quick Deploy doc)
 - Replace the inline host-directory seeding snippet in Step 5 (Option B) with a reference and usage examples for the helper script.

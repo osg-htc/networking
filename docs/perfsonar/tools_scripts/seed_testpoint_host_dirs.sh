@@ -80,8 +80,8 @@ create_and_cp() {
 TMP_NAME_TP="perfsonar-seed-$$"
 TMP_NAME_CB="certbot-seed-$$"
 
-# Use the official perfsonar testpoint image (registry tag controlled by docs/compose examples)
-TP_IMAGE="hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd"
+# Use the official perfsonar testpoint image (use production tag)
+TP_IMAGE="hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production"
 
 create_and_cp "$TP_IMAGE" "/etc/perfsonar/psconfig" "$PSCONFIG_DIR" "$TMP_NAME_TP"
 create_and_cp "$TP_IMAGE" "/var/www/html" "/var/www/html" "$TMP_NAME_TP"

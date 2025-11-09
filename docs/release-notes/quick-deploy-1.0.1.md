@@ -8,7 +8,7 @@ Highlights
 
 - Marked the current site build as version 1.0.1 (`docs/versions.json`).
 - Cleaned `docs/versions.json` formatting so the versions list is valid JSON.
-- Several doc improvements and clarifications were retained from the v1.00 work: the `seed_testpoint_host_dirs.sh` helper is referenced in the Quick Deploy Step 5 instructions, container image references were updated to `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd`, and Step 6 enrollment guidance was consolidated and clarified.
+- Several doc improvements and clarifications were retained from the v1.00 work: the `seed_testpoint_host_dirs.sh` helper is referenced in the Quick Deploy Step 5 instructions, container image references were updated to `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production`, and Step 6 enrollment guidance was consolidated and clarified.
 
 Notes for operators
 
