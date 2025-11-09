@@ -81,7 +81,7 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 dbg "Parsing IPs from $CONFIG"
-mapfile -t PS_IPS < <(awk -F= '/^NIC_(IPV4|IPV6)_ADDRS=/ {gsub(/"|\r|\n/,"",$2); split($2,a,/[ ,]/); for(i in a) if (a[i] != "" && a[i] != "-") print a[i]; }' "$CONFIG")
+mapfile -t PS_IPS < <(awk -F= '/^NIC_(IPV4|IPV6)_ADDRS=/ {gsub(/"|\(|\)|\r|\n/,"",$2); split($2,a,/[ ,]/); for(i in a) if (a[i] != "" && a[i] != "-") print a[i]; }' "$CONFIG")
 
 if [ ${#PS_IPS[@]} -eq 0 ]; then
   err "No IPs discovered in config; check NIC_*_ADDRS entries"; exit 2
@@ -104,11 +104,12 @@ for ip in "${PS_IPS[@]}"; do
   fi
 
   name=""
-  if command -v getent >/dev/null 2>&1; then
-    name=$(getent hosts "$ip_addr" 2>/dev/null | awk '{print $2}') || true
-  fi
-  if [ -z "$name" ] && command -v dig >/dev/null 2>&1; then
+  if command -v dig >/dev/null 2>&1; then
     name=$(dig +short -x "$ip_addr" | head -n1) || true
+  fi
+  if [ -z "$name" ] && command -v getent >/dev/null 2>&1; then
+    # getent may return multiple hostnames; we want the canonical one (field 2)
+    name=$(getent hosts "$ip_addr" 2>/dev/null | awk '{print $2}') || true
   fi
   name=${name%.}
   if [ -n "$name" ]; then
