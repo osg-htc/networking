@@ -635,8 +635,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-create-the-final-compose-with-shared-volumes-and-certbot" class="md-nav__link">
-    2) Create the final compose with shared volumes and certbot
+  <a href="#2-prepare-a-temporary-webserver-testpoint-optional" class="md-nav__link">
+    2) Prepare a temporary webserver / testpoint (optional)
   </a>
   
 </li>
@@ -644,6 +644,13 @@
           <li class="md-nav__item">
   <a href="#3-obtain-your-first-lets-encrypt-certificate-one-time" class="md-nav__link">
     3) Obtain your first Let’s Encrypt certificate (one-time)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-the-final-compose-with-shared-volumes-and-certbot-renewals" class="md-nav__link">
+    4) Create the final compose with shared volumes and certbot (renewals)
   </a>
   
 </li>
@@ -1116,8 +1123,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-create-the-final-compose-with-shared-volumes-and-certbot" class="md-nav__link">
-    2) Create the final compose with shared volumes and certbot
+  <a href="#2-prepare-a-temporary-webserver-testpoint-optional" class="md-nav__link">
+    2) Prepare a temporary webserver / testpoint (optional)
   </a>
   
 </li>
@@ -1125,6 +1132,13 @@
           <li class="md-nav__item">
   <a href="#3-obtain-your-first-lets-encrypt-certificate-one-time" class="md-nav__link">
     3) Obtain your first Let’s Encrypt certificate (one-time)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-create-the-final-compose-with-shared-volumes-and-certbot-renewals" class="md-nav__link">
+    4) Create the final compose with shared volumes and certbot (renewals)
   </a>
   
 </li>
@@ -1449,43 +1463,68 @@ Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsona
 <li><code>/etc/letsencrypt</code> — Let’s Encrypt certs and state</li>
 </ul>
 <h4 id="1-seed-host-directories-from-a-temporary-testpoint-container">1) Seed host directories from a temporary testpoint container<a class="headerlink" href="#1-seed-host-directories-from-a-temporary-testpoint-container" title="Permanent link">&para;</a></h4>
-<p>Start a temporary testpoint without bind-mounts, then copy baseline content out to the host.</p>
-<p>Seed the host directories using the bundled helper script instead of running the one-off commands below. The install bootstrap places helper scripts under <code>/opt/perfsonar-tp/tools_scripts</code> when you run the bootstrap in Step 2. Run the helper as root (or with sudo):</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># The install bootstrap (Step 2) provides a helper script to see the dirs:</span>
+<p>Start a temporary testpoint (or use the provided helper) to copy baseline content out to the host.</p>
+<p>Use the bundled helper script (preferred) to seed the host directories. The install bootstrap places
+helper scripts under <code>/opt/perfsonar-tp/tools_scripts</code> when you run the bootstrap in Step 2. Run the
+helper as root (or with sudo):</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Seed host dirs with the helper provided by the bootstrap in Step 2</span>
 /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 </code></pre></div>
-<p>If SELinux is enforcing, the <code>:z</code>/<code>:Z</code> options in the compose files handle labels; no manual <code>chcon</code> is required.</p>
-<details class="note">
-<summary>About /etc/letsencrypt seeding</summary>
-<p>The <code>/etc/letsencrypt</code> directory is seeded from the Certbot image (not the testpoint)
-to create the expected path on the host. This seed may be minimal or empty; it will be populated during the initial certificate issuance in Step 5.3. Keeping the directory present (even if empty) ensures the bind mount works and SELinux labels can be applied on enforcing hosts.</p>
-</details>
-<h4 id="2-create-the-final-compose-with-shared-volumes-and-certbot">2) Create the final compose with shared volumes and certbot<a class="headerlink" href="#2-create-the-final-compose-with-shared-volumes-and-certbot" title="Permanent link">&para;</a></h4>
-<p>Download a ready-made compose file (or copy it manually):<br />
-Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml">repo view</a></p>
+<p>If SELinux is enforcing, the <code>:Z</code> options in the compose files will cause Podman to relabel the host
+paths when the containers start; manual <code>chcon</code> is not required provided you use <code>:Z</code> in mounts.</p>
+<h4 id="2-prepare-a-temporary-webserver-testpoint-optional">2) Prepare a temporary webserver / testpoint (optional)<a class="headerlink" href="#2-prepare-a-temporary-webserver-testpoint-optional" title="Permanent link">&para;</a></h4>
+<p>If you plan to use the webroot method, bring up the testpoint-only deployment (Option A) or a small
+temporary HTTP server so the ACME challenge files under <code>/var/www/html/.well-known/acme-challenge</code>
+can be served to the Internet. This can be a short-lived testpoint container (testpoint-only) or a
+simple Python/nginx server that serves <code>/var/www/html</code>.</p>
+<p>Example (temporary Python server on the host):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>http.server<span class="w"> </span><span class="m">80</span><span class="w"> </span>--directory<span class="w"> </span>/var/www/html<span class="w"> </span><span class="p">&amp;</span>
+</code></pre></div>
+<p>Or reuse the testpoint image in testpoint-only mode (Option A) to provide the webroot.</p>
+<h4 id="3-obtain-your-first-lets-encrypt-certificate-one-time">3) Obtain your first Let’s Encrypt certificate (one-time)<a class="headerlink" href="#3-obtain-your-first-lets-encrypt-certificate-one-time" title="Permanent link">&para;</a></h4>
+<p>Run Certbot to obtain the initial certificates. Two approaches are supported:</p>
+<ul>
+<li>Standalone (recommended when no webserver will be serving port 80): Certbot binds to port 80 to
+    perform HTTP-01 validation. Use Podman with host networking for the one-off issuance:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt:Z<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>certbot/certbot<span class="w"> </span>certonly<span class="w"> </span>--standalone<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;ALT_FQDN&gt;<span class="w"> </span>...<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--email<span class="w"> </span>&lt;LETSENCRYPT_EMAIL&gt;<span class="w"> </span>--agree-tos<span class="w"> </span>--no-eff-email<span class="w"> </span>-v
+</code></pre></div>
+<ul>
+<li>Webroot (when a webserver is serving <code>/var/www/html</code>): Use the webroot plugin and ensure the
+    temporary server or testpoint-only instance is reachable from the Internet while issuing:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span>-v<span class="w"> </span>/var/www/html:/var/www/html:Z<span class="w"> </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt:Z<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>certbot/certbot<span class="w"> </span>certonly<span class="w"> </span>--webroot<span class="w"> </span>-w<span class="w"> </span>/var/www/html<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;ALT_FQDN&gt;<span class="w"> </span>...<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--email<span class="w"> </span>&lt;LETSENCRYPT_EMAIL&gt;<span class="w"> </span>--agree-tos<span class="w"> </span>--no-eff-email<span class="w"> </span>-v
+</code></pre></div>
+<p>After successful issuance, stop any temporary webserver you started for the challenge.</p>
+<h4 id="4-create-the-final-compose-with-shared-volumes-and-certbot-renewals">4) Create the final compose with shared volumes and certbot (renewals)<a class="headerlink" href="#4-create-the-final-compose-with-shared-volumes-and-certbot-renewals" title="Permanent link">&para;</a></h4>
+<p>Now download or create the final compose file that runs the <code>perfsonar-testpoint</code> and <code>certbot</code>
+services together. The compose provided in this repo publishes ports for the <code>certbot</code> sidecar so it
+does not conflict with <code>perfsonar-testpoint</code> (which uses host networking). Download and start the
+stack:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
+<span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span>
 </code></pre></div>
-<p>Start the final stack:</p>
-<div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span>
+<p>Notes:</p>
+<ul>
+<li>The updated compose file publishes host ports <code>80:80</code> and <code>8443:443</code> for the <code>certbot</code> sidecar to
+    avoid collisions with <code>perfsonar-testpoint</code>'s host network. For initial issuance you may still run
+    Certbot standalone (Step 3) or use the published <code>80:80</code> mapping if your environment allows it.</li>
+<li>Healthchecks are enabled for both services in the compose file to help orchestration detect service
+    readiness and restart problems; check <code>podman ps</code> and <code>podman ps --filter health=unhealthy</code>.</li>
+<li>After starting the final stack, you can test renewal behavior with a dry-run:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt:Z<span class="w"> </span>certbot/certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run<span class="w"> </span>-v
 </code></pre></div>
-<h4 id="3-obtain-your-first-lets-encrypt-certificate-one-time">3) Obtain your first Let’s Encrypt certificate (one-time)<a class="headerlink" href="#3-obtain-your-first-lets-encrypt-certificate-one-time" title="Permanent link">&para;</a></h4>
-<p>The <code>certbot</code> sidecar above will renew automatically. For the initial issuance, run:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span>-v<span class="w"> </span>/var/www/html:/var/www/html<span class="w"> </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>certbot/certbot<span class="w"> </span>certonly<span class="w"> </span>--webroot<span class="w"> </span>-w<span class="w"> </span>/var/www/html<span class="w"> </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--email<span class="w"> </span>&lt;LETSENCRYPT_EMAIL&gt;<span class="w"> </span>--agree-tos<span class="w"> </span>--no-eff-email
-
-<span class="c1"># Gracefully reload Apache within the testpoint container (or restart the service)</span>
-docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>bash<span class="w"> </span>-lc<span class="w"> </span><span class="s1">&#39;systemctl reload httpd || apachectl -k graceful || true&#39;</span>
-</code></pre></div>
-<details class="info">
-<summary>Notes</summary>
-<div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="nv">Ensure</span><span class="w"> </span><span class="nv">TCP</span><span class="w"> </span><span class="nv">port</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">host</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">reachable</span><span class="w"> </span><span class="nv">from</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">internet</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nv">issuing</span><span class="w"> </span><span class="nv">certificates</span>.
-<span class="o">-</span><span class="w"> </span><span class="nv">Shared</span><span class="w"> </span><span class="nv">paths</span><span class="w"> </span><span class="nv">use</span><span class="w"> </span><span class="nv">SELinux</span><span class="o">-</span><span class="nv">aware</span><span class="w"> </span>`:<span class="nv">z</span>`<span class="o">/</span>`:<span class="nv">Z</span>`<span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">permit</span><span class="w"> </span><span class="nv">container</span><span class="w"> </span><span class="nv">access</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">enforcing</span><span class="w"> </span><span class="nv">hosts</span>.
-</code></pre></div>
-
-</details>
+<p>If you prefer the convenience of a sidecar that automates renewals, ensure the compose entry runs a
+controlled <code>certbot renew</code> (or a systemd timer) rather than a one-off container that immediately exits.</p>
 <hr />
 <h2 id="step-6-register-and-configure-with-wlcgosg">Step 6 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-6-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <p>We need to register your instance and ensure it is configured with the required meta data for the

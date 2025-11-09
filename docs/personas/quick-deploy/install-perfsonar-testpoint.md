@@ -90,6 +90,7 @@ Note: Repository clone instructions are in Step 2.
     ```
 
 ---
+
 ## Step 2 – Bootstrap the Testpoint and Tools
 
 Use the bootstrap script to clone the perfSONAR testpoint repository into `/opt/perfsonar-tp` and install helper scripts under `/opt/perfsonar-tp/tools_scripts`.
@@ -329,59 +330,91 @@ This mode runs two containers (`testpoint` and `certbot`) and bind-mounts the fo
 
 #### 1) Seed host directories from a temporary testpoint container
 
-Start a temporary testpoint without bind-mounts, then copy baseline content out to the host.
+Start a temporary testpoint (or use the provided helper) to copy baseline content out to the host.
 
-
-Seed the host directories using the bundled helper script instead of running the one-off commands below. The install bootstrap places helper scripts under `/opt/perfsonar-tp/tools_scripts` when you run the bootstrap in Step 2. Run the helper as root (or with sudo):
+Use the bundled helper script (preferred) to seed the host directories. The install bootstrap places
+helper scripts under `/opt/perfsonar-tp/tools_scripts` when you run the bootstrap in Step 2. Run the
+helper as root (or with sudo):
 
 ```bash
-# The install bootstrap (Step 2) provides a helper script to see the dirs:
+# Seed host dirs with the helper provided by the bootstrap in Step 2
 /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 ```
 
+If SELinux is enforcing, the `:Z` options in the compose files will cause Podman to relabel the host
+paths when the containers start; manual `chcon` is not required provided you use `:Z` in mounts.
 
-If SELinux is enforcing, the `:z`/`:Z` options in the compose files handle labels; no manual `chcon` is required.
+#### 2) Prepare a temporary webserver / testpoint (optional)
 
-??? note "About /etc/letsencrypt seeding"
+If you plan to use the webroot method, bring up the testpoint-only deployment (Option A) or a small
+temporary HTTP server so the ACME challenge files under `/var/www/html/.well-known/acme-challenge`
+can be served to the Internet. This can be a short-lived testpoint container (testpoint-only) or a
+simple Python/nginx server that serves `/var/www/html`.
 
-    The `/etc/letsencrypt` directory is seeded from the Certbot image (not the testpoint)
-    to create the expected path on the host. This seed may be minimal or empty; it will be populated during the initial certificate issuance in Step 5.3. Keeping the directory present (even if empty) ensures the bind mount works and SELinux labels can be applied on enforcing hosts.
+Example (temporary Python server on the host):
 
+```bash
+sudo python3 -m http.server 80 --directory /var/www/html &
+```
 
-#### 2) Create the final compose with shared volumes and certbot
+Or reuse the testpoint image in testpoint-only mode (Option A) to provide the webroot.
 
-Download a ready-made compose file (or copy it manually):  
-Browse: [repo view](https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml)
+#### 3) Obtain your first Let’s Encrypt certificate (one-time)
+
+Run Certbot to obtain the initial certificates. Two approaches are supported:
+
+- Standalone (recommended when no webserver will be serving port 80): Certbot binds to port 80 to
+    perform HTTP-01 validation. Use Podman with host networking for the one-off issuance:
+
+```bash
+podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:Z \
+    certbot/certbot certonly --standalone \
+    -d <SERVER_FQDN> -d <ALT_FQDN> ... \
+    --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email -v
+```
+
+- Webroot (when a webserver is serving `/var/www/html`): Use the webroot plugin and ensure the
+    temporary server or testpoint-only instance is reachable from the Internet while issuing:
+
+```bash
+podman run --rm --net=host -v /var/www/html:/var/www/html:Z -v /etc/letsencrypt:/etc/letsencrypt:Z \
+    certbot/certbot certonly --webroot -w /var/www/html \
+    -d <SERVER_FQDN> -d <ALT_FQDN> ... \
+    --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email -v
+```
+
+After successful issuance, stop any temporary webserver you started for the challenge.
+
+#### 4) Create the final compose with shared volumes and certbot (renewals)
+
+Now download or create the final compose file that runs the `perfsonar-testpoint` and `certbot`
+services together. The compose provided in this repo publishes ports for the `certbot` sidecar so it
+does not conflict with `perfsonar-testpoint` (which uses host networking). Download and start the
+stack:
 
 ```bash
 curl -fsSL \
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml \
     -o /opt/perfsonar-tp/docker-compose.yml
-```
-
-Start the final stack:
-
-```bash
 (cd /opt/perfsonar-tp; podman-compose up -d)
 ```
 
-#### 3) Obtain your first Let’s Encrypt certificate (one-time)
+Notes:
 
-The `certbot` sidecar above will renew automatically. For the initial issuance, run:
+- The updated compose file publishes host ports `80:80` and `8443:443` for the `certbot` sidecar to
+    avoid collisions with `perfsonar-testpoint`'s host network. For initial issuance you may still run
+    Certbot standalone (Step 3) or use the published `80:80` mapping if your environment allows it.
+- Healthchecks are enabled for both services in the compose file to help orchestration detect service
+    readiness and restart problems; check `podman ps` and `podman ps --filter health=unhealthy`.
+- After starting the final stack, you can test renewal behavior with a dry-run:
 
 ```bash
-docker run --rm --net=host -v /var/www/html:/var/www/html -v /etc/letsencrypt:/etc/letsencrypt \
-    certbot/certbot certonly --webroot -w /var/www/html -d <SERVER_FQDN> \
-    --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email
-
-# Gracefully reload Apache within the testpoint container (or restart the service)
-docker exec -it perfsonar-testpoint bash -lc 'systemctl reload httpd || apachectl -k graceful || true'
+podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:Z certbot/certbot renew --dry-run -v
 ```
 
-??? info "Notes"
+If you prefer the convenience of a sidecar that automates renewals, ensure the compose entry runs a
+controlled `certbot renew` (or a systemd timer) rather than a one-off container that immediately exits.
 
-        - Ensure TCP port 80 on the host is reachable from the internet while issuing certificates.
-        - Shared paths use SELinux-aware `:z`/`:Z` to permit container access on enforcing hosts.
 
 ---
 ## Step 6 – Register and Configure with WLCG/OSG

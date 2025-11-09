@@ -1,8 +1,9 @@
 version: "3.9"
+
 services:
   testpoint:
     container_name: perfsonar-testpoint
-    image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:5.2.3-systemd
+    image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production
     labels:
       - io.containers.autoupdate=registry
     network_mode: "host"
@@ -24,17 +25,38 @@ services:
     pids_limit: 8192
     cap_add:
       - CAP_NET_RAW
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sfS http://localhost/ || curl -kSfS https://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   certbot:
-    image: certbot/certbot
+    image: docker.io/certbot/certbot:latest
     container_name: certbot
     labels:
       - io.containers.autoupdate=registry
-    network_mode: "host"
+    # Use explicit port publishing to avoid host-network conflicts with the
+    # testpoint container (which uses host networking). Bind host:container
+    # ports so certbot can answer HTTP-01 challenges without sharing host
+    # network namespace with the testpoint service.
+    # Note: podman-compose will publish these ports on the host when using
+    # the default network mode. Keep testpoint as host-networked as required
+    # by that image.
+    ports:
+      - "80:80"
+      - "8443:443"
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -q '[c]ertbot' || exit 1"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 1m
     restart: unless-stopped
     entrypoint: ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
     depends_on:
       - testpoint
     volumes:
-      - /var/www/html:/var/www/html:z
-      - /etc/letsencrypt:/etc/letsencrypt:z
+      - /var/www/html:/var/www/html:Z
+      - /etc/letsencrypt:/etc/letsencrypt:Z

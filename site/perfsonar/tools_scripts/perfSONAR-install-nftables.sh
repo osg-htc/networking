@@ -21,7 +21,8 @@
 #     are already installed; otherwise related configuration steps are skipped.
 #
 # Author: Generated based on existing perfSONAR helper scripts
-# Version: 0.1.0 - 2025-11-03
+# Version: 0.1.1 - 2025-11-09
+VERSION="0.1.1"
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -32,11 +33,58 @@ AUTO_YES=false
 DEBUG=false
 INSTALL_FAIL2BAN=false
 ENABLE_SELINUX=false
-PERF_PORTS="443"
+# Additional user-specified ports (CSV) provided via --ports are merged into
+# the baseline perfSONAR service port list below. Leave empty by default so
+# that operator-specified values are purely additive.
+PERF_PORTS=""
 NFT_RULE_FILE="/etc/nftables.d/perfsonar.nft"
 CONFIG_FILE="/etc/perfSONAR-multi-nic-config.conf"
 BACKUP_DIR="/var/backups/perfsonar-install-$(date +%s)"
 PRINT_RULES=false
+STRICT_VERIFY=false
+
+# Canonicalize a CIDR (IPv4/IPv6) to its network base using Python if available.
+# Falls back to returning the input unchanged if Python3 isn't present.
+canon_cidr() {
+    local cidr="$1"
+    if command -v python3 >/dev/null 2>&1; then
+        # Use ipaddress to normalize to network base (strict=False allows host IPs)
+        python3 - "$cidr" <<'PY'
+import sys, ipaddress
+arg = sys.argv[1]
+try:
+    net = ipaddress.ip_network(arg, strict=False)
+    print(str(net))
+except Exception:
+    sys.exit(2)
+PY
+        return $?
+    else
+        # Without python, return unchanged (may still validate if already canonical)
+        printf '%s\n' "$cidr"
+        return 0
+    fi
+}
+
+# Validate a single IP address (v4 or v6). Returns 0 if valid; non-zero if invalid.
+is_valid_ip() {
+    local ip="$1"
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$ip" <<'PY'
+import sys, ipaddress
+arg = sys.argv[1]
+try:
+    ipaddress.ip_address(arg)
+    sys.exit(0)
+except Exception:
+    sys.exit(3)
+PY
+        return $?
+    else
+        # No python available: conservative choice is to treat as invalid to avoid emitting bad rules
+        return 4
+    fi
+}
 
 # Colors
 GREEN='\033[0;32m'
@@ -48,31 +96,46 @@ Usage: perfSONAR-install-nftables.sh [OPTIONS]
 
 Options:
   --help               Show this help
-    --dry-run            Print actions without making changes
+  --dry-run            Print actions without making changes
   --yes                Skip confirmation prompts
-    --fail2ban           Configure and enable a minimal fail2ban jail (if installed)
-    --selinux            Attempt to enable SELinux (if installed; may require reboot)
-  --ports=CSV          Comma-separated list of TCP ports to allow (default: 22,80,443)
+  --fail2ban           Configure and enable a minimal fail2ban jail (if installed)
+  --selinux            Attempt to enable SELinux (if installed; may require reboot)
+    --ports=CSV          Extra comma-separated TCP ports to allow (merged with baseline perfSONAR set)
   --debug              Print commands (set -x) for troubleshooting
   --backup-dir=DIR     Where to store backups (default: auto under /var/backups)
-    --print-rules        Render the nftables rules to stdout and exit (no writes)
+  --print-rules        Render the nftables rules to stdout and exit (no writes)
+    --strict-verify      After applying, require that ONLY 'inet nftables_svc' is present
+                                             in the active ruleset (default: presence-only check)
 
 Example:
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
+  /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --fail2ban --ports=22,80,443,8085
 
 Notes:
-    - Run in a VM or console first. Use --dry-run to preview changes.
-    - SELinux enablement is a potentially disruptive operation; read the
-        script comments and test before enabling on production hosts.
-    - This script does not install packages; ensure nftables/fail2ban/SELinux
-        are present before using related flags.
+  - Run in a VM or console first. Use --dry-run to preview changes.
+  - SELinux enablement is a potentially disruptive operation; read the
+    script comments and test before enabling on production hosts.
+  - This script does not install packages; ensure nftables/fail2ban/SELinux
+    are present before using related flags.
 EOF
 }
 
 log() {
-    local ts
+    local ts line
     ts=$(date +'%Y-%m-%d %H:%M:%S')
-    printf '%s %s\n' "$ts" "$*" | tee -a "$LOG_FILE"
+    line="$ts $*"
+    # Write to logfile and to stderr (do not contaminate stdout, which may carry nft rules)
+    printf '%s\n' "$line" >> "$LOG_FILE"
+    printf '%s\n' "$line" >&2
+}
+
+# Print user-facing info. In --print-rules mode, route to stderr to keep stdout
+# reserved exclusively for the nft rules content.
+print_info() {
+    if [ "$PRINT_RULES" = true ]; then
+        printf '%s\n' "$*" >&2
+    else
+        printf '%s\n' "$*"
+    fi
 }
 
 run_cmd() {
@@ -135,7 +198,7 @@ backup_file() {
 
 write_nft_rules() {
     local ports_csv=$1
-    log "write_nft_rules called with ports: $ports_csv"
+    log "write_nft_rules called with user-specified extra ports: ${ports_csv:-<none>}"
     if ! command -v nft >/dev/null 2>&1; then
         log "nft command not found; skipping nftables rules write (component not installed)."
         return 0
@@ -168,7 +231,19 @@ write_nft_rules() {
     ip4_hosts_join=$(_join_by , "${ip4_hosts[@]}")
     ip6_hosts_join=$(_join_by , "${ip6_hosts[@]}")
 
+    # Conditionally render elements lines to avoid empty set syntax errors
+    local SSH4_SUBNETS_ELEMS SSH6_SUBNETS_ELEMS SSH4_HOSTS_ELEMS SSH6_HOSTS_ELEMS
+    SSH4_SUBNETS_ELEMS=""
+    SSH6_SUBNETS_ELEMS=""
+    SSH4_HOSTS_ELEMS=""
+    SSH6_HOSTS_ELEMS=""
+    [ -n "$ip4_subnets_join" ] && SSH4_SUBNETS_ELEMS="        elements = { $ip4_subnets_join }"
+    [ -n "$ip6_subnets_join" ] && SSH6_SUBNETS_ELEMS="        elements = { $ip6_subnets_join }"
+    [ -n "$ip4_hosts_join" ]   && SSH4_HOSTS_ELEMS="        elements = { $ip4_hosts_join }"
+    [ -n "$ip6_hosts_join" ]   && SSH6_HOSTS_ELEMS="        elements = { $ip6_hosts_join }"
+
     # Small validation/logging of resolved SSH elements for operator visibility
+    # Visibility logs; always stderr via log()
     log "SSH IPv4 subnets: ${ip4_subnets_join:-<none>}"
     log "SSH IPv6 subnets: ${ip6_subnets_join:-<none>}"
     log "SSH IPv4 hosts:   ${ip4_hosts_join:-<none>}"
@@ -176,6 +251,39 @@ write_nft_rules() {
 
     local tmpfile
     tmpfile=$(mktemp)
+    # Baseline perfSONAR TCP ports (do not remove unless requirements change)
+    # 9090 (esmond/metrics UI), 123 (NTP), 443 (HTTPS), 861/862 (TWAMP),
+    # 5201 (iperf3), 5001 (legacy iperf), 5000/5101 (BWCTL/older perfSONAR)
+    local -a baseline_tcp_ports=(9090 123 443 861 862 5201 5001 5000 5101)
+
+    # Merge user-specified extra ports (if any)
+    local -a merged_tcp_ports=()
+    local p
+    for p in "${baseline_tcp_ports[@]}"; do
+        merged_tcp_ports+=("$p")
+    done
+    if [ -n "$ports_csv" ]; then
+        IFS=',' read -r -a _user_ports <<< "$ports_csv"
+        for p in "${_user_ports[@]}"; do
+            p="${p// /}"  # trim spaces
+            [[ -z "$p" ]] && continue
+            # numeric validation (1-65535)
+            if [[ "$p" =~ ^[0-9]+$ ]] && [ "$p" -ge 1 ] && [ "$p" -le 65535 ]; then
+                merged_tcp_ports+=("$p")
+            else
+                log "Ignoring invalid TCP port entry: '$p'"
+            fi
+        done
+    fi
+    # Deduplicate while preserving order (awk associative array trick)
+    mapfile -t merged_tcp_ports < <(printf '%s\n' "${merged_tcp_ports[@]}" | awk '!seen[$0]++')
+
+    # Render merged ports as comma-separated list with spaces for readability
+    local merged_tcp_ports_render
+    merged_tcp_ports_render=$(printf '%s, ' "${merged_tcp_ports[@]}")
+    merged_tcp_ports_render="${merged_tcp_ports_render%, }"
+    log "Final merged allowed TCP ports: ${merged_tcp_ports_render}"
+
     cat > "$tmpfile" <<EOF
 #!/usr/sbin/nft -f
 flush ruleset
@@ -194,7 +302,7 @@ table inet nftables_svc {
 
     set allowed_tcp_dports {
         type inet_service
-        elements = { 9090, 123, 443, 861, 862, 5201, 5001, 5000, 5101 }
+        elements = { ${merged_tcp_ports_render} }
     }
 
     set allowed_udp_ports {
@@ -206,23 +314,23 @@ table inet nftables_svc {
     set ssh_access_ip4_subnets {
         type ipv4_addr
         flags interval
-        elements = { ${ip4_subnets_join} }
+${SSH4_SUBNETS_ELEMS}
     }
 
     set ssh_access_ip6_subnets {
         type ipv6_addr
         flags interval
-        elements = { ${ip6_subnets_join} }
+${SSH6_SUBNETS_ELEMS}
     }
 
     set ssh_access_ip4_hosts {
         type ipv4_addr
-        elements = { ${ip4_hosts_join} }
+${SSH4_HOSTS_ELEMS}
     }
 
     set ssh_access_ip6_hosts {
         type ipv6_addr
-        elements = { ${ip6_hosts_join} }
+${SSH6_HOSTS_ELEMS}
     }
 
     chain allow {
@@ -268,8 +376,10 @@ table inet nftables_svc {
 EOF
 
     # Validate syntax before installing/printing the generated rules
-    if ! nft -c -f "$tmpfile" >/dev/null 2>&1; then
+    if ! out=$(nft -c -f "$tmpfile" 2>&1); then
         log "Validation failed for generated nftables rules. Not writing $NFT_RULE_FILE."
+        log "nft error output:"
+        printf '%s\n' "$out" | while IFS= read -r line; do log "$line"; done
         rm -f "$tmpfile"
         return 1
     fi
@@ -366,8 +476,9 @@ enable_selinux() {
 }
 
 verify_only_perfsonar_ruleset() {
-    # Verify that the active nftables ruleset contains only the perfSONAR table
-    # (table inet nftables_svc) and no other tables. Returns 0 on success.
+    # Verify the active nftables tables. In default mode, succeed if the
+    # 'inet nftables_svc' table is present. In strict mode, require it to be
+    # the only table.
     if [ "$DRY_RUN" = true ]; then
         log "Dry-run: skip verification of active ruleset"
         return 0
@@ -378,27 +489,54 @@ verify_only_perfsonar_ruleset() {
     fi
 
     local tables
-    # list tables in the ruleset; output lines starting with 'table'
-    # format: table <family> <name> {
-    mapfile -t tables < <(nft list tables 2>/dev/null || nft list ruleset 2>/dev/null | awk '/^table /{print $2" "$3}')
+    # List tables in the ruleset and extract '<family> <name>' pairs.
+    # Ensure awk processes the command output by grouping with parentheses.
+    mapfile -t tables < <( (nft list tables 2>/dev/null || nft list ruleset 2>/dev/null) | awk '/^table /{print $0}')
+    # Normalize entries: strip leading 'table ' and trailing '{' if present, collapse whitespace
+    local normalized=() raw
+    for raw in "${tables[@]}"; do
+        # Remove leading 'table '
+        raw="${raw#table }"
+        # Remove trailing '{' and anything after
+        raw="${raw%%\{}"; raw="${raw%% }"
+        # Collapse consecutive spaces
+        raw=$(printf '%s' "$raw" | awk '{print $1" "$2}')
+        normalized+=("$raw")
+    done
+    tables=("${normalized[@]}")
+    log "Active nftables tables normalized: ${tables[*]}"
     if [ ${#tables[@]} -eq 0 ]; then
         log "No nftables tables found in active ruleset"
         return 1
     fi
 
-    # Expect exactly one table named 'inet nftables_svc'
-    if [ ${#tables[@]} -ne 1 ]; then
-        log "Unexpected number of nftables tables: ${#tables[@]} -> ${tables[*]}"
-        return 2
+    if [ "$STRICT_VERIFY" = true ]; then
+        # Strict mode: must have exactly one table and it must be our table
+        if [ ${#tables[@]} -ne 1 ]; then
+            log "Unexpected number of nftables tables (strict): ${#tables[@]} -> ${tables[*]}"
+            return 2
+        fi
+        if [[ "${tables[0]}" != "inet nftables_svc" ]]; then
+            log "Active table is not 'inet nftables_svc' (strict): found '${tables[0]}'"
+            return 3
+        fi
+        log "Verified (strict) active nftables ruleset contains only 'inet nftables_svc'"
+        return 0
     fi
 
-    if [[ "${tables[0]}" != "inet nftables_svc" ]]; then
-        log "Active table is not 'inet nftables_svc': found '${tables[0]}'"
-        return 3
+    # Presence-only: succeed if our table is present among others
+    local found=false t
+    for t in "${tables[@]}"; do
+        if [[ "$t" == "inet nftables_svc" ]]; then
+            found=true; break
+        fi
+    done
+    if [ "$found" = true ]; then
+        log "Verified presence of 'inet nftables_svc' among active nftables tables"
+        return 0
     fi
-
-    log "Verified active nftables ruleset contains only 'inet nftables_svc'"
-    return 0
+    log "perfSONAR table 'inet nftables_svc' not found in active nftables tables: ${tables[*]}"
+    return 4
 }
 
 derive_subnets_and_hosts_from_config() {
@@ -419,9 +557,14 @@ derive_subnets_and_hosts_from_config() {
                 addr="${NIC_IPV4_ADDRS[$i]:-}" || addr=""
                 prefix="${NIC_IPV4_PREFIXES[$i]:-}" || prefix=""
                 if [ -n "$addr" ] && [ "$addr" != "-" ]; then
-                    # If prefix is present and looks like /24 etc, combine; otherwise use /32
+                    # If prefix is present and looks like /24 etc, canonicalize to network base; otherwise treat as host
                     if [ -n "$prefix" ] && [[ "$prefix" == /* ]]; then
-                        SUBNETS+=("${addr}${prefix}")
+                        if canon=$(canon_cidr "${addr}${prefix}"); then
+                            SUBNETS+=("$canon")
+                        else
+                            log "Skipping invalid IPv4 CIDR: ${addr}${prefix}; adding as host instead"
+                            HOSTS+=("${addr}")
+                        fi
                     else
                         HOSTS+=("${addr}")
                     fi
@@ -435,9 +578,24 @@ derive_subnets_and_hosts_from_config() {
                 prefix6="${NIC_IPV6_PREFIXES[$i]:-}" || prefix6=""
                 if [ -n "$addr6" ] && [ "$addr6" != "-" ]; then
                     if [ -n "$prefix6" ] && [[ "$prefix6" == /* ]]; then
-                        SUBNETS+=("${addr6}${prefix6}")
+                        if canon=$(canon_cidr "${addr6}${prefix6}"); then
+                            SUBNETS+=("$canon")
+                        else
+                            # If canonicalization fails, only add as host if it is a valid IP literal
+                            if is_valid_ip "$addr6"; then
+                                log "CIDR parse failed for ${addr6}${prefix6}; adding valid host $addr6 instead"
+                                HOSTS+=("${addr6}")
+                            else
+                                log "Skipping invalid IPv6 entry: ${addr6}${prefix6} (no valid address detected)"
+                            fi
+                        fi
                     else
-                        HOSTS+=("${addr6}")
+                        # No prefix: treat as host only if it validates
+                        if is_valid_ip "$addr6"; then
+                            HOSTS+=("${addr6}")
+                        else
+                            log "Skipping invalid IPv6 host entry: ${addr6}"
+                        fi
                     fi
                 fi
             done
@@ -490,6 +648,8 @@ while [[ ${#} -gt 0 ]]; do
             BACKUP_DIR="${1#*=}"; shift ;;
         --print-rules)
             PRINT_RULES=true; shift ;;
+        --strict-verify)
+            STRICT_VERIFY=true; shift ;;
         *)
             # ignore unknown for now
             shift ;;
@@ -499,27 +659,28 @@ done
 require_root
 
 log "Starting perfSONAR nftables installer"
+log "Script version: ${VERSION}"
 log "DRY_RUN=$DRY_RUN INSTALL_FAIL2BAN=$INSTALL_FAIL2BAN ENABLE_SELINUX=$ENABLE_SELINUX PERF_PORTS=$PERF_PORTS"
 
-# show planned actions
-printf '%b\n' "${GREEN}Planned actions:${NC}"
+# show planned actions (send to stderr in print mode)
+print_info "${GREEN}Planned actions:${NC}"
 if [ "$PRINT_RULES" = true ]; then
-    echo "- Preview (print) generated nftables rules (no changes)"
+    print_info "- Preview (print) generated nftables rules (no changes)"
 else
-    echo "- Configure nftables rules (if nftables is installed)"
+    print_info "- Configure nftables rules (if nftables is installed)"
 fi
 if [ "$INSTALL_FAIL2BAN" = true ]; then
-    echo "- Configure and enable fail2ban (if installed)"
+    print_info "- Configure and enable fail2ban (if installed)"
 fi
 if [ "$ENABLE_SELINUX" = true ]; then
-    echo "- Attempt to enable SELinux (if installed; may require reboot)"
+    print_info "- Attempt to enable SELinux (if installed; may require reboot)"
 fi
 if [ "$PRINT_RULES" = true ]; then
-    echo "- No files will be written; this is a print-only preview"
+    print_info "- No files will be written; this is a print-only preview"
 else
-    echo "- Write nftables rules to $NFT_RULE_FILE (backup created under $BACKUP_DIR)"
+    print_info "- Write nftables rules to $NFT_RULE_FILE (backup created under $BACKUP_DIR)"
 fi
-echo
+print_info ""
 
 # Only prompt for confirmation if we intend to make changes
 if [ "$PRINT_RULES" != true ]; then
@@ -562,8 +723,7 @@ if [ "$ENABLE_SELINUX" = true ]; then
     enable_selinux
 fi
 
-# Verify that only our perfSONAR ruleset is active; rollback if verification fails.
-# Skip verification entirely if nftables is not installed.
+# Verify ruleset; rollback if verification fails. Skip if nftables absent.
 if command -v nft >/dev/null 2>&1; then
     if ! verify_only_perfsonar_ruleset; then
         log "Verification of active nftables ruleset failed. Attempting rollback."
