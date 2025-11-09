@@ -620,7 +620,7 @@ lsregistration daemon (see below).
 
     ```bash
     # Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
         --dry-run --site-name "Acme Co." --project WLCG \
         --admin-email admin@example.org --admin-name "pS Admin"
 
@@ -628,7 +628,7 @@ lsregistration daemon (see below).
     bash /root/restore-lsreg.sh
 
     # Apply new settings and restart the daemon inside the container
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh \
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
         --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
         --city Berkeley --region CA --country US --zip 94720 \
         --latitude 37.5 --longitude -121.7469 \
