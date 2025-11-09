@@ -1953,6 +1953,14 @@ ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2
 relabel the host paths when containers start. No manual <code>chcon</code> commands are required.</p>
 </details>
 <h4 id="2-deploy-the-testpoint-with-automatic-ssl-patching-recommended">2) Deploy the testpoint with automatic SSL patching (recommended)<a class="headerlink" href="#2-deploy-the-testpoint-with-automatic-ssl-patching-recommended" title="Permanent link">&para;</a></h4>
+<p><strong>Prerequisites:</strong> Ensure <code>/opt/perfsonar-tp/tools_scripts</code> exists from Step 2 (bootstrap):</p>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+</code></pre></div>
+<p>If the file is missing, run the Step 2 bootstrap first:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>/opt/perfsonar-tp
+</code></pre></div>
 <p>Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses
 an entrypoint wrapper that auto-discovers Let's Encrypt certificates on container startup and
 automatically patches the Apache configuration.</p>
@@ -2036,6 +2044,23 @@ compose file and manually patch the Apache SSL configuration after obtaining cer
 <p>This approach requires manual intervention after initial certificate issuance and any time
 the container is recreated. The automatic approach (using the entrypoint wrapper) eliminates
 this manual step.</p>
+</details>
+<details class="warning">
+<summary>Troubleshooting: Container fails with 'executable file not found' error</summary>
+<p><strong>Error:</strong> <code>Error: unable to start container: crun: executable file /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh not found</code></p>
+<p><strong>Cause:</strong> The <code>/opt/perfsonar-tp/tools_scripts</code> directory doesn't exist or the entrypoint wrapper wasn't downloaded.</p>
+<p><strong>Fix:</strong> Run the Step 2 bootstrap script to fetch all helper scripts:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>/opt/perfsonar-tp
+</code></pre></div>
+<p>Then verify the entrypoint wrapper exists:</p>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+</code></pre></div>
+<p>If you've already started the container and it failed, remove it before retrying:</p>
+<div class="highlight"><pre><span></span><code>podman-compose<span class="w"> </span>down
+podman-compose<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
 </details>
 <hr />
 <h2 id="step-6-register-and-configure-with-wlcgosg">Step 6 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-6-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
