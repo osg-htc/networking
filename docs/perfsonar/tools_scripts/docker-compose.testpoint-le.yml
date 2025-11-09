@@ -21,7 +21,6 @@ services:
       - /var/www/html:/var/www/html:z
       - /etc/apache2:/etc/apache2:z
       - /etc/letsencrypt:/etc/letsencrypt:z
-    tty: true
     pids_limit: 8192
     cap_add:
       - CAP_NET_RAW

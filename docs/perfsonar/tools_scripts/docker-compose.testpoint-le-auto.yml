@@ -29,7 +29,6 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:z
       # Mount the tools_scripts directory so the entrypoint wrapper is available
       - /opt/perfsonar-tp/tools_scripts:/opt/perfsonar-tp/tools_scripts:ro
-    tty: true
     pids_limit: 8192
     cap_add:
       - CAP_NET_RAW
