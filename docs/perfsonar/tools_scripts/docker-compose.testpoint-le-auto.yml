@@ -7,7 +7,7 @@ services:
     labels:
       - io.containers.autoupdate=registry
     network_mode: "host"
-    cgroup: host
+    privileged: true
     environment:
       - TZ=UTC
       # Optional: Set SERVER_FQDN to explicitly specify which Let's Encrypt certificate to use.

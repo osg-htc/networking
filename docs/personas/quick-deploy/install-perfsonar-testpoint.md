@@ -383,6 +383,20 @@ ls -la /etc/apache2
 
 #### 2) Deploy the testpoint with automatic SSL patching (recommended)
 
+**Prerequisites:** Ensure `/opt/perfsonar-tp/tools_scripts` exists from Step 2 (bootstrap):
+
+```bash
+ls -la /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+```
+
+If the file is missing, run the Step 2 bootstrap first:
+
+```bash
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
+    | bash -s -- /opt/perfsonar-tp
+```
+
 Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses
 an entrypoint wrapper that auto-discovers Let's Encrypt certificates on container startup and
 automatically patches the Apache configuration.
@@ -510,6 +524,33 @@ podman restart perfsonar-testpoint
     This approach requires manual intervention after initial certificate issuance and any time
     the container is recreated. The automatic approach (using the entrypoint wrapper) eliminates
     this manual step.
+
+??? warning "Troubleshooting: Container fails with 'executable file not found' error"
+
+    **Error:** `Error: unable to start container: crun: executable file /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh not found`
+
+    **Cause:** The `/opt/perfsonar-tp/tools_scripts` directory doesn't exist or the entrypoint wrapper wasn't downloaded.
+
+    **Fix:** Run the Step 2 bootstrap script to fetch all helper scripts:
+
+    ```bash
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
+        | bash -s -- /opt/perfsonar-tp
+    ```
+
+    Then verify the entrypoint wrapper exists:
+
+    ```bash
+    ls -la /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+    ```
+
+    If you've already started the container and it failed, remove it before retrying:
+
+    ```bash
+    podman-compose down
+    podman-compose up -d
+    ```
 
 
 ---

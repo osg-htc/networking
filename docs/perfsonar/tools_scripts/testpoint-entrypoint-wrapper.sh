@@ -87,10 +87,10 @@ if [[ -n "$CERT_DIR" ]]; then
                     "$APACHE_SSL_CONF"
             else
                 # Add SSLCertificateChainFile after SSLCertificateKeyFile line
-                sed -i \
-                    -e "/SSLCertificateKeyFile.*${PRIVKEY}/a\\
-                SSLCertificateChainFile ${CHAIN}" \
-                    "$APACHE_SSL_CONF"
+                # Use awk to insert the line to avoid sed escaping issues
+                awk -v chain="$CHAIN" '/SSLCertificateKeyFile/ {print; print "                SSLCertificateChainFile " chain; next}1' \
+                    "$APACHE_SSL_CONF" > "${APACHE_SSL_CONF}.tmp" && \
+                    mv "${APACHE_SSL_CONF}.tmp" "$APACHE_SSL_CONF"
             fi
 
             # Create marker file to indicate patching was done

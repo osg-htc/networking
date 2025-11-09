@@ -6,7 +6,7 @@ services:
     labels:
       - io.containers.autoupdate=registry
     network_mode: "host"
-    cgroup: host
+    privileged: true
     environment:
       - TZ=UTC
     restart: unless-stopped
