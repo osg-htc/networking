@@ -1906,7 +1906,11 @@ Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsona
 <p>Bring it up:</p>
 <div class="highlight"><pre><span></span><code><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="p">;</span><span class="w"> </span>podman-compose<span class="w"> </span>up<span class="w"> </span>-d<span class="o">)</span><span class="w"> </span>
 </code></pre></div>
-<p>That’s it for the testpoint-only mode. Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>. Jump to Step 6 below.</p>
+<p>Verify the container is running and healthy:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps
+</code></pre></div>
+<p>The container should show <code>healthy</code> status. The healthcheck monitors Apache HTTPS availability.</p>
+<p>That's it for the testpoint-only mode. Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>. Jump to Step 6 below.</p>
 <hr />
 <h3 id="option-b-testpoint-lets-encrypt-shared-apache-and-certs">Option B — Testpoint + Let's Encrypt (shared Apache and certs)<a class="headerlink" href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" title="Permanent link">&para;</a></h3>
 <p>This mode runs two containers (<code>perfsonar-testpoint</code> and <code>certbot</code>) and bind-mounts the following host paths so Apache content and certificates persist on the host and are shared between containers:</p>
