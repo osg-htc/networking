@@ -317,7 +317,15 @@ Bring it up:
 (cd /opt/perfsonar-tp; podman-compose up -d) 
 ```
 
-That’s it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
+Verify the container is running and healthy:
+
+```bash
+podman ps
+```
+
+The container should show `healthy` status. The healthcheck monitors Apache HTTPS availability.
+
+That's it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
 
 ---
 ### Option B — Testpoint + Let's Encrypt (shared Apache and certs)

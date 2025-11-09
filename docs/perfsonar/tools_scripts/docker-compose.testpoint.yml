@@ -21,3 +21,9 @@ services:
     pids_limit: 8192
     cap_add:
       - CAP_NET_RAW
+    healthcheck:
+      test: ["CMD-SHELL", "curl -kSfS https://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

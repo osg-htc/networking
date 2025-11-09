@@ -38,11 +38,15 @@ scripts=(
     perfSONAR-update-lsregistration.sh
     perfSONAR-auto-enroll-psconfig.sh
     seed_testpoint_host_dirs.sh
+    
+    # SSL certificate helpers
+    patch_apache_ssl_for_letsencrypt.sh
+    testpoint-entrypoint-wrapper.sh
 
     # compose examples / templates
-    docker-compose.yml
     docker-compose.testpoint.yml
     docker-compose.testpoint-le.yml
+    docker-compose.testpoint-le-auto.yml
 
     # docs / READMEs (optional, copied so users can view usage offline)
     README.md
