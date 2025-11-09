@@ -81,7 +81,34 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 dbg "Parsing IPs from $CONFIG"
-mapfile -t PS_IPS < <(awk -F= '/^NIC_(IPV4|IPV6)_ADDRS=/ {gsub(/"|\(|\)|\r|\n/,"",$2); split($2,a,/[ ,]/); for(i in a) if (a[i] != "" && a[i] != "-") print a[i]; }' "$CONFIG")
+# Handle both single-line and multi-line bash array declarations
+# First collapse multi-line arrays into single lines, then parse
+mapfile -t PS_IPS < <(
+  awk '
+    /^NIC_(IPV4|IPV6)_ADDRS=/ {
+      line = $0
+      # If line ends with opening paren but no closing paren, its multi-line
+      if (line ~ /=\(/ && line !~ /\)/) {
+        # Accumulate lines until we find the closing paren
+        while (getline > 0) {
+          line = line " " $0
+          if ($0 ~ /\)/) break
+        }
+      }
+      # Now parse the complete line (single or accumulated multi-line)
+      gsub(/"|\(|\)|\r|\n/, "", line)
+      split(line, parts, /=/)
+      if (length(parts) >= 2) {
+        split(parts[2], addrs, /[ ,\t]+/)
+        for (i in addrs) {
+          if (addrs[i] != "" && addrs[i] != "-") {
+            print addrs[i]
+          }
+        }
+      }
+    }
+  ' "$CONFIG"
+)
 
 if [ ${#PS_IPS[@]} -eq 0 ]; then
   err "No IPs discovered in config; check NIC_*_ADDRS entries"; exit 2
