@@ -22,6 +22,7 @@
 #
 # Author: Generated based on existing perfSONAR helper scripts
 # Version: 0.1.1 - 2025-11-09
+VERSION="0.1.1"
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -658,6 +659,7 @@ done
 require_root
 
 log "Starting perfSONAR nftables installer"
+log "Script version: ${VERSION}"
 log "DRY_RUN=$DRY_RUN INSTALL_FAIL2BAN=$INSTALL_FAIL2BAN ENABLE_SELINUX=$ENABLE_SELINUX PERF_PORTS=$PERF_PORTS"
 
 # show planned actions (send to stderr in print mode)
