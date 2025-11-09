@@ -455,7 +455,20 @@ verify_only_perfsonar_ruleset() {
     local tables
     # List tables in the ruleset and extract '<family> <name>' pairs.
     # Ensure awk processes the command output by grouping with parentheses.
-    mapfile -t tables < <( (nft list tables 2>/dev/null || nft list ruleset 2>/dev/null) | awk '/^table /{print $2" "$3}')
+    mapfile -t tables < <( (nft list tables 2>/dev/null || nft list ruleset 2>/dev/null) | awk '/^table /{print $0}')
+    # Normalize entries: strip leading 'table ' and trailing '{' if present, collapse whitespace
+    local normalized=() raw
+    for raw in "${tables[@]}"; do
+        # Remove leading 'table '
+        raw="${raw#table }"
+        # Remove trailing '{' and anything after
+        raw="${raw%%\{}"; raw="${raw%% }"
+        # Collapse consecutive spaces
+        raw=$(printf '%s' "$raw" | awk '{print $1" "$2}')
+        normalized+=("$raw")
+    done
+    tables=("${normalized[@]}")
+    log "Active nftables tables normalized: ${tables[*]}"
     if [ ${#tables[@]} -eq 0 ]; then
         log "No nftables tables found in active ruleset"
         return 1
