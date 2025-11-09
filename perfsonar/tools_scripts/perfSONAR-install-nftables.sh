@@ -277,12 +277,12 @@ write_nft_rules() {
     fi
     # Deduplicate while preserving order (awk associative array trick)
     mapfile -t merged_tcp_ports < <(printf '%s\n' "${merged_tcp_ports[@]}" | awk '!seen[$0]++')
-    log "Final merged allowed TCP ports: ${merged_tcp_ports[*]}"
 
     # Render merged ports as comma-separated list with spaces for readability
     local merged_tcp_ports_render
     merged_tcp_ports_render=$(printf '%s, ' "${merged_tcp_ports[@]}")
     merged_tcp_ports_render="${merged_tcp_ports_render%, }"
+    log "Final merged allowed TCP ports: ${merged_tcp_ports_render}"
 
     cat > "$tmpfile" <<EOF
 #!/usr/sbin/nft -f
