@@ -21,7 +21,7 @@
 #     are already installed; otherwise related configuration steps are skipped.
 #
 # Author: Generated based on existing perfSONAR helper scripts
-# Version: 0.1.0 - 2025-11-03
+# Version: 0.1.1 - 2025-11-09
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -32,13 +32,15 @@ AUTO_YES=false
 DEBUG=false
 INSTALL_FAIL2BAN=false
 ENABLE_SELINUX=false
-PERF_PORTS="443"
+# Additional user-specified ports (CSV) provided via --ports are merged into
+# the baseline perfSONAR service port list below. Leave empty by default so
+# that operator-specified values are purely additive.
+PERF_PORTS=""
 NFT_RULE_FILE="/etc/nftables.d/perfsonar.nft"
 CONFIG_FILE="/etc/perfSONAR-multi-nic-config.conf"
 BACKUP_DIR="/var/backups/perfsonar-install-$(date +%s)"
 PRINT_RULES=false
 STRICT_VERIFY=false
-P3_AVAIL=false
 
 # Canonicalize a CIDR (IPv4/IPv6) to its network base using Python if available.
 # Falls back to returning the input unchanged if Python3 isn't present.
@@ -97,7 +99,7 @@ Options:
   --yes                Skip confirmation prompts
   --fail2ban           Configure and enable a minimal fail2ban jail (if installed)
   --selinux            Attempt to enable SELinux (if installed; may require reboot)
-  --ports=CSV          Comma-separated list of TCP ports to allow (default: 22,80,443)
+    --ports=CSV          Extra comma-separated TCP ports to allow (merged with baseline perfSONAR set)
   --debug              Print commands (set -x) for troubleshooting
   --backup-dir=DIR     Where to store backups (default: auto under /var/backups)
   --print-rules        Render the nftables rules to stdout and exit (no writes)
@@ -195,7 +197,7 @@ backup_file() {
 
 write_nft_rules() {
     local ports_csv=$1
-    log "write_nft_rules called with ports: $ports_csv"
+    log "write_nft_rules called with user-specified extra ports: ${ports_csv:-<none>}"
     if ! command -v nft >/dev/null 2>&1; then
         log "nft command not found; skipping nftables rules write (component not installed)."
         return 0
@@ -248,6 +250,39 @@ write_nft_rules() {
 
     local tmpfile
     tmpfile=$(mktemp)
+    # Baseline perfSONAR TCP ports (do not remove unless requirements change)
+    # 9090 (esmond/metrics UI), 123 (NTP), 443 (HTTPS), 861/862 (TWAMP),
+    # 5201 (iperf3), 5001 (legacy iperf), 5000/5101 (BWCTL/older perfSONAR)
+    local -a baseline_tcp_ports=(9090 123 443 861 862 5201 5001 5000 5101)
+
+    # Merge user-specified extra ports (if any)
+    local -a merged_tcp_ports=()
+    local p
+    for p in "${baseline_tcp_ports[@]}"; do
+        merged_tcp_ports+=("$p")
+    done
+    if [ -n "$ports_csv" ]; then
+        IFS=',' read -r -a _user_ports <<< "$ports_csv"
+        for p in "${_user_ports[@]}"; do
+            p="${p// /}"  # trim spaces
+            [[ -z "$p" ]] && continue
+            # numeric validation (1-65535)
+            if [[ "$p" =~ ^[0-9]+$ ]] && [ "$p" -ge 1 ] && [ "$p" -le 65535 ]; then
+                merged_tcp_ports+=("$p")
+            else
+                log "Ignoring invalid TCP port entry: '$p'"
+            fi
+        done
+    fi
+    # Deduplicate while preserving order (awk associative array trick)
+    mapfile -t merged_tcp_ports < <(printf '%s\n' "${merged_tcp_ports[@]}" | awk '!seen[$0]++')
+    log "Final merged allowed TCP ports: ${merged_tcp_ports[*]}"
+
+    # Render merged ports as comma-separated list with spaces for readability
+    local merged_tcp_ports_render
+    merged_tcp_ports_render=$(printf '%s, ' "${merged_tcp_ports[@]}")
+    merged_tcp_ports_render="${merged_tcp_ports_render%, }"
+
     cat > "$tmpfile" <<EOF
 #!/usr/sbin/nft -f
 flush ruleset
@@ -266,7 +301,7 @@ table inet nftables_svc {
 
     set allowed_tcp_dports {
         type inet_service
-        elements = { 9090, 123, 443, 861, 862, 5201, 5001, 5000, 5101 }
+        elements = { ${merged_tcp_ports_render} }
     }
 
     set allowed_udp_ports {
