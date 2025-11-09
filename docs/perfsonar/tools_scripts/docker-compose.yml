@@ -4,7 +4,7 @@ services:
   # perfSONAR testpoint container
   testpoint:
     container_name: perfsonar-testpoint
-  image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production
+    image: hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production
     network_mode: "host"
     cgroup: host
     environment:
@@ -30,9 +30,9 @@ services:
     labels:
       - io.containers.autoupdate=registry
 
-  # Optional: Letâ€™s Encrypt renewer sharing HTML and certs with testpoint
+  # Optional: Let's Encrypt renewer sharing HTML and certs with testpoint
   certbot:
-    image: certbot/certbot
+    image: certbot/certbot:latest
     container_name: certbot
     network_mode: "host"
     restart: unless-stopped
