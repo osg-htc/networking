@@ -320,100 +320,188 @@ Bring it up:
 That’s it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
 
 ---
-### Option B — Testpoint + Let’s Encrypt (shared Apache and certs)
+### Option B — Testpoint + Let's Encrypt (shared Apache and certs)
 
-This mode runs two containers (`testpoint` and `certbot`) and bind-mounts the following host paths so Apache content and certificates persist on the host and are shared:
+This mode runs two containers (`perfsonar-testpoint` and `certbot`) and bind-mounts the following host paths so Apache content and certificates persist on the host and are shared between containers:
 
-- `/var/www/html` — webroot used for HTTP-01 challenges
-- `/etc/apache2` — Apache configuration
-- `/etc/letsencrypt` — Let’s Encrypt certs and state
+- `/opt/perfsonar-tp/psconfig` → `/etc/perfsonar/psconfig` — perfSONAR configuration
+- `/var/www/html` → `/var/www/html` — Apache webroot (shared for HTTP-01 challenges)
+- `/etc/apache2` → `/etc/apache2` — Apache configuration (for SSL certificate patching)
+- `/etc/letsencrypt` → `/etc/letsencrypt` — Let's Encrypt certificates and state
 
-#### 1) Seed host directories from a temporary testpoint container
+#### 1) Seed required host directories (REQUIRED before first compose up)
 
-Start a temporary testpoint (or use the provided helper) to copy baseline content out to the host.
+**Why seed?** The perfsonar-testpoint container requires baseline configuration files from the image to be present on the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services to fail.
 
-Use the bundled helper script (preferred) to seed the host directories. The install bootstrap places
-helper scripts under `/opt/perfsonar-tp/tools_scripts` when you run the bootstrap in Step 2. Run the
-helper as root (or with sudo):
+**What's seeded:**
+- `/opt/perfsonar-tp/psconfig` — perfSONAR pSConfig files (baseline remotes and archives)
+- `/var/www/html` — Apache webroot with index.html (required for healthcheck)
+- `/etc/apache2` — Apache config including `sites-available/default-ssl.conf` (patched by entrypoint wrapper)
+
+**What's NOT seeded:**
+- `/etc/letsencrypt` — Certbot creates this automatically; no pre-seeding needed
+
+Run the bundled seeding helper script (automatically installed in Step 2):
 
 ```bash
-# Seed host dirs with the helper provided by the bootstrap in Step 2
 /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 ```
 
-If SELinux is enforcing, the `:Z` options in the compose files will cause Podman to relabel the host
-paths when the containers start; manual `chcon` is not required provided you use `:Z` in mounts.
+This script:
+- Pulls the latest perfSONAR testpoint image
+- Creates temporary containers to extract baseline files
+- Copies content to host directories
+- Verifies seeding was successful
+- Skips seeding if directories already have content (idempotent)
 
-#### 2) Prepare a temporary webserver / testpoint (optional)
-
-If you plan to use the webroot method, bring up the testpoint-only deployment (Option A) or a small
-temporary HTTP server so the ACME challenge files under `/var/www/html/.well-known/acme-challenge`
-can be served to the Internet. This can be a short-lived testpoint container (testpoint-only) or a
-simple Python/nginx server that serves `/var/www/html`.
-
-Example (temporary Python server on the host):
+Verify seeding succeeded:
 
 ```bash
-sudo python3 -m http.server 80 --directory /var/www/html &
+# Should show config files
+ls -la /opt/perfsonar-tp/psconfig
+
+# Should show index.html and perfsonar/ directory  
+ls -la /var/www/html
+
+# Should show sites-available/, sites-enabled/, etc.
+ls -la /etc/apache2
 ```
 
-Or reuse the testpoint image in testpoint-only mode (Option A) to provide the webroot.
+??? tip "SELinux labeling handled automatically"
 
-#### 3) Obtain your first Let’s Encrypt certificate (one-time)
+    If SELinux is enforcing, the `:Z` and `:z` options in the compose files will cause Podman to
+    relabel the host paths when containers start. No manual `chcon` commands are required.
 
-Run Certbot to obtain the initial certificates. Two approaches are supported:
 
-- Standalone (recommended when no webserver will be serving port 80): Certbot binds to port 80 to
-    perform HTTP-01 validation. Use Podman with host networking for the one-off issuance:
+#### 2) Deploy the testpoint with automatic SSL patching (recommended)
 
-```bash
-podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:Z \
-    certbot/certbot certonly --standalone \
-    -d <SERVER_FQDN> -d <ALT_FQDN> ... \
-    --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email -v
-```
+Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses
+an entrypoint wrapper that auto-discovers Let's Encrypt certificates on container startup and
+automatically patches the Apache configuration.
 
-- Webroot (when a webserver is serving `/var/www/html`): Use the webroot plugin and ensure the
-    temporary server or testpoint-only instance is reachable from the Internet while issuing:
-
-```bash
-podman run --rm --net=host -v /var/www/html:/var/www/html:Z -v /etc/letsencrypt:/etc/letsencrypt:Z \
-    certbot/certbot certonly --webroot -w /var/www/html \
-    -d <SERVER_FQDN> -d <ALT_FQDN> ... \
-    --email <LETSENCRYPT_EMAIL> --agree-tos --no-eff-email -v
-```
-
-After successful issuance, stop any temporary webserver you started for the challenge.
-
-#### 4) Create the final compose with shared volumes and certbot (renewals)
-
-Now download or create the final compose file that runs the `perfsonar-testpoint` and `certbot`
-services together. The compose provided in this repo publishes ports for the `certbot` sidecar so it
-does not conflict with `perfsonar-testpoint` (which uses host networking). Download and start the
-stack:
+Download the auto-patching compose file:
 
 ```bash
 curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le.yml \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le-auto.yml \
     -o /opt/perfsonar-tp/docker-compose.yml
-(cd /opt/perfsonar-tp; podman-compose up -d)
 ```
 
-Notes:
+**Note:** The `SERVER_FQDN` environment variable is **optional**. The entrypoint wrapper will
+auto-discover certificates in `/etc/letsencrypt/live` and use the first one found. Only set
+`SERVER_FQDN` if you have multiple certificates and need to specify which one to use.
 
-- The updated compose file publishes host ports `80:80` and `8443:443` for the `certbot` sidecar to
-    avoid collisions with `perfsonar-testpoint`'s host network. For initial issuance you may still run
-    Certbot standalone (Step 3) or use the published `80:80` mapping if your environment allows it.
-- Healthchecks are enabled for both services in the compose file to help orchestration detect service
-    readiness and restart problems; check `podman ps` and `podman ps --filter health=unhealthy`.
-- After starting the final stack, you can test renewal behavior with a dry-run:
+If you want to explicitly set the FQDN (optional):
 
 ```bash
-podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:Z certbot/certbot renew --dry-run -v
+# Optional: only needed if you have multiple certificates
+sed -i 's/# - SERVER_FQDN=.*/- SERVER_FQDN=<YOUR_FQDN>/' /opt/perfsonar-tp/docker-compose.yml
 ```
 
-If you prefer the convenience of a sidecar that automates renewals, ensure the compose entry runs a
-controlled `certbot renew` (or a systemd timer) rather than a one-off container that immediately exits.
+Start the containers:
+
+```bash
+cd /opt/perfsonar-tp
+podman-compose up -d
+```
+
+At this point, the testpoint is running with self-signed certificates. The certbot container is also
+running but won't renew anything until you obtain the initial certificates.
+
+#### 3) Obtain your first Let's Encrypt certificate (one-time)
+
+Use Certbot in standalone mode to obtain the initial certificates. The perfsonar-testpoint image is
+patched to NOT listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.
+
+**Important:** Stop the certbot sidecar temporarily to free port 80:
+
+```bash
+podman stop certbot
+```
+
+Now run Certbot standalone with host networking to bind port 80:
+
+```bash
+podman run --rm --net=host \
+    -v /etc/letsencrypt:/etc/letsencrypt:Z \
+    -v /var/www/html:/var/www/html:Z \
+    docker.io/certbot/certbot:latest certonly \
+    --standalone --agree-tos --non-interactive \
+    -d <SERVER_FQDN> -d <ALT_FQDN> \
+    -m <LETSENCRYPT_EMAIL>
+```
+
+Replace:
+- `<SERVER_FQDN>` with your primary hostname (e.g., `psum05.aglt2.org`)
+- `<ALT_FQDN>` with additional FQDNs if needed (one `-d` flag per FQDN)
+- `<LETSENCRYPT_EMAIL>` with your email for certificate notifications
+
+After successful issuance, restart the perfsonar-testpoint container to trigger the automatic patching:
+
+```bash
+podman restart perfsonar-testpoint
+```
+
+Check the logs to verify the SSL config was patched:
+
+```bash
+podman logs perfsonar-testpoint 2>&1 | grep -A5 "Patching Apache"
+```
+
+You should see output confirming the certificate paths were updated.
+
+#### 4) Restart the certbot sidecar for automatic renewals
+
+Now that certificates are in place, restart the certbot sidecar to enable automatic renewals:
+
+```bash
+podman start certbot
+```
+
+The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.
+
+**Note:** The certbot container in this setup uses **host networking mode** (via `network_mode: host` in the
+compose file) so it can bind directly to port 80 for HTTP-01 challenges during renewals. This works
+because the perfsonar-testpoint Apache is patched to NOT listen on port 80. Both containers share
+the host network namespace without conflict.
+
+Test renewal with a dry-run:
+
+```bash
+podman exec certbot certbot renew --dry-run
+```
+
+If successful, certificates will auto-renew before expiry. After each renewal, restart the testpoint
+to reload the certificates:
+
+```bash
+# Optional: add a systemd timer or cron job to restart testpoint after renewals
+podman restart perfsonar-testpoint
+```
+
+---
+
+??? info "Alternative: Manual SSL Patching (without automatic entrypoint wrapper)"
+
+    If you prefer not to use the automatic patching entrypoint wrapper, you can use the standard
+    compose file and manually patch the Apache SSL configuration after obtaining certificates.
+
+    1. Use `docker-compose.testpoint-le.yml` instead of `docker-compose.testpoint-le-auto.yml`
+    2. After obtaining Let's Encrypt certificates, run:
+
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/patch_apache_ssl_for_letsencrypt.sh <SERVER_FQDN>
+    ```
+
+    3. Reload Apache in the running container:
+
+    ```bash
+    podman exec perfsonar-testpoint apachectl -k graceful
+    ```
+
+    This approach requires manual intervention after initial certificate issuance and any time
+    the container is recreated. The automatic approach (using the entrypoint wrapper) eliminates
+    this manual step.
 
 
 ---
