@@ -32,7 +32,7 @@ services:
 
   # Optional: Let's Encrypt renewer sharing HTML and certs with testpoint
   certbot:
-    image: certbot/certbot:latest
+    image: docker.io/certbot/certbot:latest
     container_name: certbot
     network_mode: "host"
     restart: unless-stopped

@@ -27,7 +27,7 @@ services:
       - CAP_NET_RAW
 
   certbot:
-    image: certbot/certbot:latest
+    image: docker.io/certbot/certbot:latest
     container_name: certbot
     labels:
       - io.containers.autoupdate=registry
