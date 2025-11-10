@@ -7,6 +7,39 @@ set -euo pipefail
 #
 # Version: 1.0.0 - 2025-11-09
 
+VERSION="1.0.0"
+PROG_NAME="$(basename "$0")"
+
+# Check for --version or --help flags
+if [ "${1:-}" = "--version" ]; then
+    echo "$PROG_NAME version $VERSION"
+    exit 0
+elif [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+    cat <<EOF
+Usage: $PROG_NAME [DEST_ROOT] [--version|--help]
+
+Downloads perfSONAR helper scripts and tools to the specified directory.
+Optionally clones the perfSONAR testpoint repository if not already present.
+
+Arguments:
+  DEST_ROOT    Destination directory (default: /opt/perfsonar-tp)
+
+Options:
+  --version    Show version information
+  --help, -h   Show this help message
+
+Downloads:
+  - perfSONAR helper scripts (check-deps.sh, perfSONAR-pbr-nm.sh, etc.)
+  - Docker compose templates
+  - Documentation files (README.md, etc.)
+
+Exit codes:
+  0 - Success
+  1 - Download or installation error
+EOF
+    exit 0
+fi
+
 DEST_ROOT=${1:-/opt/perfsonar-tp}
 TP_REPO_URL="https://github.com/perfsonar/testpoint.git"
 TOOLS_SRC="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts"

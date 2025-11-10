@@ -8,6 +8,31 @@ IFS=$'\n\t'
 #
 # Version: 1.0.0 - 2025-11-09
 
+VERSION="1.0.0"
+PROG_NAME="$(basename "$0")"
+
+# Check for --version or --help flags
+if [ "${1:-}" = "--version" ]; then
+    echo "$PROG_NAME version $VERSION"
+    exit 0
+elif [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+    cat <<EOF
+Usage: $PROG_NAME [--version|--help]
+
+Checks for required and optional dependencies for perfSONAR installation scripts.
+Suggests package installation commands for EL (dnf) and Debian (apt) distributions.
+
+Options:
+  --version    Show version information
+  --help, -h   Show this help message
+
+Exit codes:
+  0 - All essential dependencies present
+  1 - Missing essential dependencies
+EOF
+    exit 0
+fi
+
 PKG_DNF=(bash coreutils iproute NetworkManager rsync curl openssl)
 PKG_APT=(bash coreutils iproute2 network-manager rsync curl openssl)
 

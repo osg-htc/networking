@@ -7,8 +7,33 @@ IFS=$'\n\t'
 # /etc/perfSONAR-multi-nic-config.conf
 #
 # Version: 1.0.0 - 2025-11-09
-# Usage: ./check-perfsonar-dns.sh
+# Usage: ./check-perfsonar-dns.sh [--version|--help]
 # Depends on: dig (bind-utils on EL, dnsutils on Debian/Ubuntu)
+
+VERSION="1.0.0"
+PROG_NAME="$(basename "$0")"
+
+# Check for --version or --help flags
+if [ "${1:-}" = "--version" ]; then
+    echo "$PROG_NAME version $VERSION"
+    exit 0
+elif [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+    cat <<EOF
+Usage: $PROG_NAME [--version|--help]
+
+Validates forward and reverse DNS consistency for all IP addresses
+configured in /etc/perfSONAR-multi-nic-config.conf.
+
+Requires: dig (from bind-utils/dnsutils package)
+
+Exit codes:
+  0 - All DNS checks passed
+  1 - One or more DNS checks failed
+  2 - Config file not found
+  3 - Neither dig nor host command available
+EOF
+    exit 0
+fi
 
 CONFIG=/etc/perfSONAR-multi-nic-config.conf
 [ -f "$CONFIG" ] || { echo "Config not found: $CONFIG" >&2; exit 2; }
