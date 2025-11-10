@@ -135,6 +135,7 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 - `--non-interactive` — skip pauses, auto-confirm
 - `--yes` — auto-confirm internal script prompts
 - `--dry-run` — preview steps without executing
+- `--auto-update` — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates `/usr/local/bin/perfsonar-auto-update.sh`, a systemd service and timer)
 
 **If you choose this path, skip to Step 7** (the orchestrator completes Steps 2–6 for you).
 
