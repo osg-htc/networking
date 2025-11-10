@@ -2147,43 +2147,95 @@ bash<span class="w"> </span>/root/restore-lsreg.sh
 <p><strong>Automatic image updates and safe restarts</strong></p>
 <p>Keep containers current and only restart them when their image actually changes.</p>
 <details class="info">
-<summary>Auto-update via labels and a systemd timer</summary>
+<summary>Auto-update for compose-managed containers</summary>
+<p>Since these containers are managed by <code>podman-compose</code>, we use a different approach than
+systemd-managed containers. Create a simple script and systemd timer to periodically pull
+new images and restart containers if updates are available.</p>
 <ol>
 <li>
-<p>Add an auto-update label to services in your compose file (both <code>testpoint</code> and <code>certbot</code> if used).  If you copied the example docker-compose.yml from the repo, this is already done:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">testpoint</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># ...</span>
-<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<p>Create an update script:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/perfsonar-auto-update.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">#!/bin/bash</span>
+<span class="s"># perfsonar-auto-update.sh - Check for and apply container image updates</span>
 
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+<span class="s">set -e</span>
 
-<span class="w">    </span><span class="nt">certbot</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># ...</span>
-<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<span class="s">COMPOSE_DIR=&quot;/opt/perfsonar-tp&quot;</span>
+<span class="s">LOGFILE=&quot;/var/log/perfsonar-auto-update.log&quot;</span>
 
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.containers.autoupdate=registry</span>
+<span class="s">log() {</span>
+<span class="s">    echo &quot;$(date -Iseconds) $*&quot; | tee -a &quot;$LOGFILE&quot;</span>
+<span class="s">}</span>
+
+<span class="s">cd &quot;$COMPOSE_DIR&quot;</span>
+
+<span class="s">log &quot;Checking for image updates...&quot;</span>
+
+<span class="s"># Pull latest images</span>
+<span class="s">if podman-compose pull 2&gt;&amp;1 | tee -a &quot;$LOGFILE&quot; | grep -q &quot;Downloaded newer image&quot;; then</span>
+<span class="s">    log &quot;New images found - recreating containers...&quot;</span>
+<span class="s">    podman-compose up -d</span>
+<span class="s">    log &quot;Containers updated successfully&quot;</span>
+<span class="s">else</span>
+<span class="s">    log &quot;No updates available&quot;</span>
+<span class="s">fi</span>
+<span class="s">EOF</span>
+
+chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/perfsonar-auto-update.sh
 </code></pre></div>
-<p>The lable instructs Podman to check the registry for newer images and restart only if an update is pulled but we need to turn on the auto-update timer:</p>
 </li>
 <li>
-<p>Enable the Podman auto-update timer (runs daily by default):</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>podman-auto-update.timer
+<p>Create a systemd service:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/perfsonar-auto-update.service<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">[Unit]</span>
+<span class="s">Description=perfSONAR Container Auto-Update</span>
+<span class="s">After=network-online.target</span>
+
+<span class="s">[Service]</span>
+<span class="s">Type=oneshot</span>
+<span class="s">ExecStart=/usr/local/bin/perfsonar-auto-update.sh</span>
+
+<span class="s">[Install]</span>
+<span class="s">WantedBy=multi-user.target</span>
+<span class="s">EOF</span>
 </code></pre></div>
 </li>
 <li>
-<p>Run ad-hoc when desired and preview:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>auto-update<span class="w"> </span>--dry-run
-podman<span class="w"> </span>auto-update
+<p>Create a systemd timer (runs daily at 3 AM):</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/perfsonar-auto-update.timer<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">[Unit]</span>
+<span class="s">Description=perfSONAR Container Auto-Update Timer</span>
+
+<span class="s">[Timer]</span>
+<span class="s">OnCalendar=daily</span>
+<span class="s">RandomizedDelaySec=1h</span>
+<span class="s">Persistent=true</span>
+
+<span class="s">[Install]</span>
+<span class="s">WantedBy=timers.target</span>
+<span class="s">EOF</span>
 </code></pre></div>
 </li>
 <li>
-<p>Inspect recent runs:</p>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>podman-auto-update
-journalctl<span class="w"> </span>-u<span class="w"> </span>podman-auto-update<span class="w"> </span>--since<span class="w"> </span><span class="s2">&quot;1 day ago&quot;</span>
+<p>Enable and start the timer:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>daemon-reload
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-auto-update.timer
+</code></pre></div>
+</li>
+<li>
+<p>Verify the timer is active:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span>perfsonar-auto-update.timer
+</code></pre></div>
+</li>
+<li>
+<p>Test manually (optional):</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-auto-update.service
+journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-auto-update.service<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
 </code></pre></div>
 </li>
 </ol>
+<p>This approach ensures containers are updated only when new images are available, minimizing
+unnecessary restarts while keeping your deployment current.</p>
 </details>
 </li>
 </ol>
