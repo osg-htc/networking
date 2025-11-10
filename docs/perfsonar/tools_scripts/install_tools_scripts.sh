@@ -4,6 +4,8 @@ set -euo pipefail
 # install_tools_scripts.sh (reverted workflow)
 # Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
+#
+# Version: 1.0.0 - 2025-11-09
 
 DEST_ROOT=${1:-/opt/perfsonar-tp}
 TP_REPO_URL="https://github.com/perfsonar/testpoint.git"

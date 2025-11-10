@@ -2,8 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# check-deps.sh
 # Simple dependency checker for perfSONAR tools in this directory.
 # Prints missing commands and suggests package install commands for apt/dnf.
+#
+# Version: 1.0.0 - 2025-11-09
 
 PKG_DNF=(bash coreutils iproute NetworkManager rsync curl openssl)
 PKG_APT=(bash coreutils iproute2 network-manager rsync curl openssl)

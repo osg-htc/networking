@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# seed_testpoint_host_dirs.sh
 # Seed host directories from perfSONAR testpoint image.
 # Intended to be run on the host as root (or with sudo) BEFORE first compose up.
+#
+# Version: 1.0.0 - 2025-11-09
 # Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp]
 
 RUNTIME=""

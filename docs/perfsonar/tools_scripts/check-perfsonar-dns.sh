@@ -6,6 +6,7 @@ IFS=$'\n\t'
 # Quick forward/reverse DNS consistency check for addresses in
 # /etc/perfSONAR-multi-nic-config.conf
 #
+# Version: 1.0.0 - 2025-11-09
 # Usage: ./check-perfsonar-dns.sh
 # Depends on: dig (bind-utils on EL, dnsutils on Debian/Ubuntu)
 

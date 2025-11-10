@@ -80,7 +80,10 @@ Note: Repository clone instructions are in Step 2.
 
     ```bash
     dnf -y update
+    dnf -y install bind-utils
     ```
+
+    The `bind-utils` package provides the `dig` command used for DNS validation in Step 3.
 
 1. **Record NIC names:** Document interface mappings for later PBR configuration.
 
@@ -107,6 +110,17 @@ After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
 
 > **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
+**Verify bootstrap completed successfully:**
+
+```bash
+# Check that all helper scripts were downloaded
+ls -1 /opt/perfsonar-tp/tools_scripts/*.sh | wc -l
+# Should show 11 shell scripts
+
+# Verify key scripts are present and executable
+ls -l /opt/perfsonar-tp/tools_scripts/{check-deps.sh,perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh}
+```
+
 **Find needed packages and verify dependencies:**
 
 Use the helper to check for required tools.
@@ -117,7 +131,7 @@ Use the helper to check for required tools.
 ---
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
-The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuraiton in `/etc/perfSONAR-multi-nic-config.conf`
+The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuration in `/etc/perfSONAR-multi-nic-config.conf`
 
 
 1. **Generate config file automatically:**
@@ -144,7 +158,15 @@ The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates Netwo
 
     !!! warning "Connect via console for network changes"
 
-        When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either direcatly to the console or by using 'nohup' in front of the script invocation.
+        When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script invocation.
+
+        **If SSH connection drops during network reconfiguration:**
+        
+        1. Access via BMC/iLO/iDRAC console or physical console
+        2. Review `/var/log/perfSONAR-multi-nic-config.log` for errors
+        3. Check network state with `nmcli connection show` and `ip addr`
+        4. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
+        5. Reapply config after corrections: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
 
     Apply non-interactively with `--yes` or interactively without:
 
@@ -379,6 +401,17 @@ ls -la /etc/apache2
 
     If SELinux is enforcing, the `:Z` and `:z` options in the compose files will cause Podman to
     relabel the host paths when containers start. No manual `chcon` commands are required.
+    
+    **SELinux Volume Labels:**
+    
+    - `:Z` (uppercase) - Exclusive access. Podman creates a unique SELinux label for this volume that only this specific container can access. Use for volumes that should not be shared between containers.
+    - `:z` (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.
+    
+    In our compose files:
+    
+    - `/etc/letsencrypt:/etc/letsencrypt:Z` - Exclusive to testpoint container
+    - `/var/www/html:/var/www/html:z` - Shared between testpoint and certbot containers
+    - `/etc/apache2:/etc/apache2:Z` - Exclusive to testpoint container
 
 
 #### 2) Deploy the testpoint with automatic SSL patching (recommended)
@@ -452,6 +485,24 @@ podman run --rm --net=host \
     -d <SERVER_FQDN> -d <ALT_FQDN> \
     -m <LETSENCRYPT_EMAIL>
 ```
+
+??? info "Certbot command explained"
+
+    **Podman options:**
+    
+    - `--rm` - Remove container after it exits
+    - `--net=host` - Use host network (allows binding port 80)
+    - `-v /etc/letsencrypt:/etc/letsencrypt:Z` - Mount certificate storage with exclusive SELinux label
+    - `-v /var/www/html:/var/www/html:Z` - Mount webroot for HTTP-01 challenge
+    
+    **Certbot options:**
+    
+    - `certonly` - Obtain certificate only, don't install it
+    - `--standalone` - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge
+    - `--agree-tos` - Agree to Let's Encrypt Terms of Service
+    - `--non-interactive` - Don't prompt for input (required for automation)
+    - `-d <FQDN>` - Domain name(s) for the certificate (repeat for each domain/SAN)
+    - `-m <EMAIL>` - Email for renewal notifications and account recovery
 
 Replace:
 - `<SERVER_FQDN>` with your primary hostname (e.g., `psum05.aglt2.org`)
@@ -738,6 +789,12 @@ lsregistration daemon (see below).
             journalctl -u perfsonar-auto-update.service -n 50
             ```
 
+        7. Monitor the update log:
+
+            ```bash
+            tail -f /var/log/perfsonar-auto-update.log
+            ```
+
         This approach ensures containers are updated only when new images are available, minimizing
         unnecessary restarts while keeping your deployment current.
 
@@ -770,9 +827,17 @@ Perform these checks before handing the host over to operations:
 
     ??? info "Test network connectivity and routing"
 
+        Test throughput to a remote testpoint (run from inside the container):
+
         ```bash
-        pscheduler task throughput --dest <remote-testpoint>
+        podman exec -it perfsonar-testpoint pscheduler task throughput --dest <remote-testpoint>
+        ```
+
+        Check routing from the host:
+
+        ```bash
         tracepath -n <remote-testpoint>
+        ip route get <remote-testpoint-ip>
         ```
 
     Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
@@ -802,20 +867,295 @@ Perform these checks before handing the host over to operations:
 1. **Reporting:**
 
     ??? info "Run perfSONAR diagnostic reports"
-        Run the perfSONAR toolkit daily report and send outputs to operations:
+        Run the perfSONAR troubleshoot command from inside the container and send outputs to operations:
 
         ```bash
-        pscheduler troubleshoot
+        podman exec -it perfsonar-testpoint pscheduler troubleshoot
         ```
 
 ---
 
 ## Ongoing Maintenance
 
-- Schedule quarterly re-validation of routing policy and nftables rules.
-- Apply `dnf update` monthly and reboot during the next maintenance window.
-- Monitor psconfig feeds for changes in mesh participation.
-- Track certificate expiry (`certbot renew --dry-run`) if you rely on Let’s Encrypt.
+- **Quarterly or as-needed:** Re-validate routing policy and nftables rules after network changes or security audits.
+- **Monthly or during maintenance windows:** Apply OS updates (`dnf update`) and reboot during scheduled downtime.
+- Monitor psconfig feeds for changes in mesh participation and test configuration.
+- Track certificate expiry with `certbot renew --dry-run` if you rely on Let's Encrypt (automatic renewal is configured but monitoring is recommended).
+- Review container logs periodically for errors: `podman logs perfsonar-testpoint` and `podman logs certbot`.
+- Verify auto-update timer is active: `systemctl list-timers perfsonar-auto-update.timer`.
+
+---
+
+## Troubleshooting
+
+### Container Issues
+
+??? failure "Container won't start or exits immediately"
+
+    **Symptoms:** `podman ps` shows no running containers, or container exits shortly after starting.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check container logs
+    podman logs perfsonar-testpoint
+    
+    # Check for systemd initialization errors
+    podman logs perfsonar-testpoint 2>&1 | grep -i "failed\|error"
+    
+    # Verify compose file syntax
+    cd /opt/perfsonar-tp
+    podman-compose config
+    ```
+    
+    **Common causes:**
+    
+    - Missing entrypoint wrapper: Ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
+    - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
+    - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
+    - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
+
+??? failure "SELinux denials blocking container operations"
+
+    **Symptoms:** Container starts but services fail, permission denied errors in logs.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check for recent SELinux denials
+    ausearch -m avc -ts recent
+    
+    # Temporarily set to permissive for testing
+    setenforce 0
+    
+    # Test if issue resolves, then check audit log
+    ausearch -m avc -ts recent > /tmp/selinux-denials.txt
+    ```
+    
+    **Solutions:**
+    
+    - Verify volume labels are correct (`:Z` for exclusive, `:z` for shared)
+    - Recreate containers to reapply SELinux labels: `podman-compose down && podman-compose up -d`
+    - If persistent issues, consider creating custom SELinux policy or running in permissive mode
+
+### Networking Issues
+
+??? failure "Policy-based routing not working correctly"
+
+    **Symptoms:** Traffic not using expected interfaces, routing to wrong gateway.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check routing rules
+    ip rule show
+    
+    # Check routing tables
+    ip route show table all
+    
+    # Test specific route lookup
+    ip route get <destination-ip>
+    
+    # Check NetworkManager connections
+    nmcli connection show
+    
+    # Review PBR script log
+    tail -100 /var/log/perfSONAR-multi-nic-config.log
+    ```
+    
+    **Solutions:**
+    
+    - Verify `/etc/perfSONAR-multi-nic-config.conf` has correct IPs and gateways
+    - Reapply configuration: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
+    - Reboot if rules are not being applied correctly
+    - Check for conflicting NetworkManager or systemd-networkd rules
+
+??? failure "DNS resolution failing for test endpoints"
+
+    **Symptoms:** perfSONAR tests fail with "unknown host" or DNS errors.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Test DNS resolution from container
+    podman exec -it perfsonar-testpoint dig <remote-testpoint>
+    
+    # Check container's resolv.conf
+    podman exec -it perfsonar-testpoint cat /etc/resolv.conf
+    
+    # Verify forward and reverse DNS
+    /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    ```
+    
+    **Solutions:**
+    
+    - Ensure DNS servers are correctly configured on host
+    - Fix missing PTR records in DNS zones
+    - Verify forward A/AAAA records match reverse PTR records
+
+### Certificate Issues
+
+??? failure "Let's Encrypt certificate issuance fails"
+
+    **Symptoms:** Certbot fails with "Failed to authenticate" or "Connection refused" errors.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check if port 80 is open
+    nft list ruleset | grep "80"
+    
+    # Verify Apache is NOT listening on port 80 in container
+    podman exec perfsonar-testpoint netstat -tlnp | grep :80
+    
+    # Test port 80 accessibility from external host
+    curl -v http://<your-fqdn>/
+    
+    # Run certbot in verbose mode
+    podman run --rm --net=host \
+        -v /etc/letsencrypt:/etc/letsencrypt:Z \
+        -v /var/www/html:/var/www/html:Z \
+        docker.io/certbot/certbot:latest certonly \
+        --standalone -d <SERVER_FQDN> -m <EMAIL> --dry-run -vvv
+    ```
+    
+    **Common causes:**
+    
+    - Port 80 blocked by firewall: Add with `perfSONAR-install-nftables.sh --ports=80,443`
+    - Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly
+    - DNS not propagated: Wait for DNS changes to propagate globally
+    - Rate limiting: Let's Encrypt has rate limits; wait if you've hit them
+
+??? failure "Certificate not loaded after renewal"
+
+    **Symptoms:** Old certificate still in use after automatic renewal.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check certificate files
+    ls -la /etc/letsencrypt/live/<fqdn>/
+    
+    # Verify deploy hook is configured
+    podman logs certbot 2>&1 | grep "deploy hook"
+    
+    # Check if container restarted
+    podman ps --format 'table {{.Names}}\t{{.Status}}'
+    
+    # Manually restart testpoint
+    podman restart perfsonar-testpoint
+    ```
+    
+    **Solutions:**
+    
+    - Ensure certbot container has deploy hook configured: `--deploy-hook /opt/certbot/deploy-hook.sh`
+    - Verify Podman socket is mounted in certbot container
+    - Manually restart testpoint after renewals if deploy hook fails
+
+### perfSONAR Service Issues
+
+??? failure "perfSONAR services not running"
+
+    **Symptoms:** Web interface not accessible, tests not running.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check service status inside container
+    podman exec perfsonar-testpoint systemctl status apache2
+    podman exec perfsonar-testpoint systemctl status pscheduler-ticker
+    podman exec perfsonar-testpoint systemctl status owamp-server
+    
+    # Check for errors in service logs
+    podman exec perfsonar-testpoint journalctl -u apache2 -n 50
+    podman exec perfsonar-testpoint journalctl -u pscheduler-ticker -n 50
+    ```
+    
+    **Solutions:**
+    
+    - Restart services inside container: `podman exec perfsonar-testpoint systemctl restart apache2`
+    - Check Apache SSL configuration was patched correctly
+    - Verify certificates are in place: `ls -la /etc/letsencrypt/live/`
+    - Restart container: `podman restart perfsonar-testpoint`
+
+### Auto-Update Issues
+
+??? failure "Auto-update not working"
+
+    **Symptoms:** Containers not updating despite new images available.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check timer status
+    systemctl status perfsonar-auto-update.timer
+    systemctl list-timers perfsonar-auto-update.timer
+    
+    # Check service logs
+    journalctl -u perfsonar-auto-update.service -n 100
+    
+    # Check update log
+    tail -50 /var/log/perfsonar-auto-update.log
+    
+    # Manually test update
+    systemctl start perfsonar-auto-update.service
+    ```
+    
+    **Solutions:**
+    
+    - Enable timer if not active: `systemctl enable --now perfsonar-auto-update.timer`
+    - Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
+    - Check podman-compose is installed and working
+    - Review script for errors and update if needed
+
+### General Debugging Tips
+
+??? tip "Useful debugging commands"
+
+    **Container management:**
+    
+    ```bash
+    # View all containers (running and stopped)
+    podman ps -a
+    
+    # View container resource usage
+    podman stats
+    
+    # Enter container for interactive debugging
+    podman exec -it perfsonar-testpoint /bin/bash
+    
+    # View compose configuration
+    cd /opt/perfsonar-tp && podman-compose config
+    ```
+    
+    **Networking:**
+    
+    ```bash
+    # Check which process is listening on a port
+    ss -tlnp | grep <port>
+    
+    # Test connectivity to remote testpoint
+    ping <remote-ip>
+    traceroute <remote-ip>
+    
+    # Check nftables rules
+    nft list ruleset
+    ```
+    
+    **Logs:**
+    
+    ```bash
+    # System journal for container runtime
+    journalctl -u podman -n 100
+    
+    # All logs from a container
+    podman logs perfsonar-testpoint --tail=100
+    
+    # Follow logs in real-time
+    podman logs -f perfsonar-testpoint
+    ```
+
+---
 
 
 
