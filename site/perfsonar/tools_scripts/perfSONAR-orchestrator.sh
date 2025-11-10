@@ -17,6 +17,7 @@ set -euo pipefail
 #   --email ADDRESS        Email for Let’s Encrypt (Option B)
 #   --non-interactive      Run without pauses (assumes defaults and --yes for internal scripts)
 #   --yes                  Auto-confirm internal script prompts
+#  --auto-update           Install and enable auto-update timer for compose-managed containers
 #   --dry-run              Print steps but do not execute destructive operations
 #
 # Log:
@@ -26,6 +27,7 @@ LOG_FILE="/var/log/perfsonar-orchestrator.log"
 DRY_RUN=false
 AUTO_YES=false
 NON_INTERACTIVE=false
+AUTO_UPDATE=false
 DEPLOY_OPTION="A"         # A or B
 LE_FQDN=""
 LE_EMAIL=""
@@ -85,6 +87,7 @@ parse_cli() {
       --help|-h)
         sed -n '1,80p' "$0" | sed -n '1,80p'
         exit 0;;
+      --auto-update) AUTO_UPDATE=true; shift;;
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
   done
@@ -174,6 +177,74 @@ step_security() {
   fi
   local sec_cmd=(/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes)
   run "${sec_cmd[@]}" || true
+  # Optional: setup auto-update timer for compose-managed containers (Step 7.4)
+  if command -v podman-compose >/dev/null 2>&1; then
+    if confirm "Step 7.4: Install auto-update timer for compose-managed containers (daily pull + restart if updated)?"; then
+      step_auto_update_compose
+    else
+      log "Skipping auto-update setup."
+    fi
+  else
+    log "podman-compose not present; skipping auto-update setup."
+  fi
+}
+
+step_auto_update_compose() {
+  # Create update script, systemd service and timer to run daily
+  if ! confirm "Create /usr/local/bin/perfsonar-auto-update.sh and enable systemd timer?"; then
+    log "User skipped creating auto-update artifacts."
+    return
+  fi
+
+  run bash -c "cat > /usr/local/bin/perfsonar-auto-update.sh <<'EOF'
+#!/bin/bash
+set -e
+COMPOSE_DIR=/opt/perfsonar-tp
+LOGFILE=/var/log/perfsonar-auto-update.log
+log() { echo \"$(date -Iseconds) $*\" | tee -a \"$LOGFILE\"; }
+cd \"$COMPOSE_DIR\"
+log \"Checking for image updates...\"
+# Pull latest images and detect if any were actually updated
+if podman-compose pull 2>&1 | tee -a \"$LOGFILE\" | grep -q -E 'Downloaded newer image|Pulling from'; then
+  log \"New images found - recreating containers...\"
+  podman-compose up -d 2>&1 | tee -a \"$LOGFILE\"
+  log \"Containers updated successfully\"
+else
+  log \"No updates available\"
+fi
+EOF"
+
+  run chmod 0755 /usr/local/bin/perfsonar-auto-update.sh
+
+  run bash -c "cat > /etc/systemd/system/perfsonar-auto-update.service <<'EOF'
+[Unit]
+Description=perfSONAR Container Auto-Update
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/perfsonar-auto-update.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF"
+
+  run bash -c "cat > /etc/systemd/system/perfsonar-auto-update.timer <<'EOF'
+[Unit]
+Description=perfSONAR Container Auto-Update Timer
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF"
+
+  run systemctl daemon-reload
+  run systemctl enable --now perfsonar-auto-update.timer
+  log "Installed and enabled perfsonar-auto-update.timer"
 }
 
 step_deploy_option_a() {
@@ -199,9 +270,19 @@ step_deploy_option_b() {
     for ip in "${NIC_IPV4_ADDRS[@]}" "${NIC_IPV6_ADDRS[@]}"; do
       [ "$ip" = "-" ] && continue
       
-      # Skip private/RFC1918 IPs (10.x, 172.16-31.x, 192.168.x)
-      if [[ "$ip" =~ ^10\. ]] || [[ "$ip" =~ ^192\.168\. ]] || [[ "$ip" =~ ^172\.(1[6-9]|2[0-9]|3[0-1])\. ]]; then
-        log "  $ip -> (skipped: private IP)"
+      # Skip private/non-routable IPs:
+      # RFC1918: 10.x, 172.16-31.x, 192.168.x
+      # IPv6: fc00::/7 (ULA), fe80::/10 (link-local), ::1 (loopback)
+      # Other: 127.x (IPv4 loopback), 169.254.x (link-local)
+      if [[ "$ip" =~ ^10\. ]] || \
+         [[ "$ip" =~ ^192\.168\. ]] || \
+         [[ "$ip" =~ ^172\.(1[6-9]|2[0-9]|3[0-1])\. ]] || \
+         [[ "$ip" =~ ^127\. ]] || \
+         [[ "$ip" =~ ^169\.254\. ]] || \
+         [[ "$ip" =~ ^(fc|fd)[0-9a-f]{2}: ]] || \
+         [[ "$ip" =~ ^fe[89ab][0-9a-f]: ]] || \
+         [[ "$ip" =~ ^::1$ ]]; then
+        log "  $ip -> (skipped: private/non-routable IP)"
         continue
       fi
       

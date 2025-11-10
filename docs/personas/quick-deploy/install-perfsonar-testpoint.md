@@ -910,10 +910,6 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
         This approach ensures containers are updated only when new images are available, minimizing
         unnecessary restarts while keeping your deployment current.
 
----
----
-
-            ```
 
 ---
 

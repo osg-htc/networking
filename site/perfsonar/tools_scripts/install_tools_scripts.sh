@@ -73,7 +73,7 @@ scripts=(
     perfSONAR-update-lsregistration.sh
     perfSONAR-auto-enroll-psconfig.sh
     seed_testpoint_host_dirs.sh
-  perfSONAR-orchestrator.sh
+    perfSONAR-orchestrator.sh
     
     # SSL certificate helpers
     patch_apache_ssl_for_letsencrypt.sh

@@ -975,15 +975,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#-" class="md-nav__link">
-    <span class="md-ellipsis">
-      ---
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#step-8-post-install-validation" class="md-nav__link">
     <span class="md-ellipsis">
       Step 8 – Post-Install Validation
@@ -1849,15 +1840,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#-" class="md-nav__link">
-    <span class="md-ellipsis">
-      ---
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#step-8-post-install-validation" class="md-nav__link">
     <span class="md-ellipsis">
       Step 8 – Post-Install Validation
@@ -2064,6 +2046,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li><code>--non-interactive</code> — skip pauses, auto-confirm</li>
 <li><code>--yes</code> — auto-confirm internal script prompts</li>
 <li><code>--dry-run</code> — preview steps without executing</li>
+<li><code>--auto-update</code> — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates <code>/usr/local/bin/perfsonar-auto-update.sh</code>, a systemd service and timer)</li>
 </ul>
 <p><strong>If you choose this path, skip to Step 7</strong> (the orchestrator completes Steps 2–6 for you).</p>
 <hr />
@@ -2705,10 +2688,6 @@ unnecessary restarts while keeping your deployment current.</p>
 </details>
 </li>
 </ol>
-<h2 id="-">---<a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><code>        ```
-</code></pre></div>
-
 <hr />
 <h2 id="step-8-post-install-validation">Step 8 – Post-Install Validation<a class="headerlink" href="#step-8-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
