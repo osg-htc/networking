@@ -1,0 +1,66 @@
+name: Code Quality (Markdown & Shell)
+
+on:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'docs/**/*.md'
+      - '.github/workflows/code-quality.yml'
+      - 'DEPRECATION.md'
+      - 'docs/perfsonar/tools_scripts/**/*.sh'
+  push:
+    branches: [ master ]
+    paths:
+      - 'docs/**/*.md'
+      - '.github/workflows/code-quality.yml'
+      - 'DEPRECATION.md'
+      - 'docs/perfsonar/tools_scripts/**/*.sh'
+  workflow_dispatch:
+
+jobs:
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install markdownlint-cli
+        run: |
+          npm install -g markdownlint-cli@0.39.0
+      - name: Run markdownlint
+        run: |
+          markdownlint \
+            --config .markdownlint.json \
+            "docs/**/*.md" \
+            "DEPRECATION.md" || {
+              echo "Markdownlint failed" >&2; exit 1; }
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      - name: Run ShellCheck on targeted scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t FILES < <(git ls-files 'docs/perfsonar/tools_scripts/*.sh' 'scripts/*.sh' | grep -v 'check-deps.sh' || true)
+          if [ ${#FILES[@]} -eq 0 ]; then
+            echo "No shell scripts found in targeted paths"; exit 0;
+          fi
+          echo "Checking files:" "${FILES[@]}"
+          shellcheck -S warning -e SC2148 "${FILES[@]}"
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [markdownlint, shellcheck]
+    if: always()
+    steps:
+      - name: Print result summary
+        run: |
+          echo "Markdownlint conclusion: ${{ needs.markdownlint.result }}"
+          echo "Shellcheck conclusion: ${{ needs.shellcheck.result }}"
+          if [ "${{ needs.markdownlint.result }}" = "success" ] && [ "${{ needs.shellcheck.result }}" = "success" ]; then
+            echo "All code quality checks passed."; exit 0; else
+            echo "One or more checks failed."; exit 1; fi

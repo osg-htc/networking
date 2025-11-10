@@ -1,7 +1,27 @@
 
 # Changelog
 
+<!-- markdownlint-disable MD024 -->
+
 All notable changes to this repository will be documented in this file.
+
+## [1.2.0] - 2025-11-10
+
+### Added
+
+- Release notes for Quick Deploy v1.4.0 (`docs/release-notes/quick-deploy-1.4.0.md`).
+- New guided installer: `docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh`.
+- Non-disruptive mode for PBR script: `docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh` defaults to in-place apply.
+- CI: add dedicated code quality workflow for Markdown and Shell scripts.
+
+### Changed
+
+- Streamlined Quick Deploy Steps 1–3 with a single prerequisite install and orchestrator-first flow.
+- Removed `sudo` prefixes from documentation examples and fixed markdownlint spacing issues.
+
+### Deprecated
+
+- `docs/perfsonar/tools_scripts/check-deps.sh` — see `DEPRECATION.md` for migration guidance.
 
 ## [1.1.0] - 2025-11-08
 
@@ -14,7 +34,7 @@ All notable changes to this repository will be documented in this file.
 
 - Marked the current docs build as version `1.1.0` in `docs/versions.json`.
 - Replaced `perfSONAR-extract-lsregistration.sh` with a deprecation stub and
-	added guidance to prefer `perfSONAR-update-lsregistration.sh`.
+  added guidance to prefer `perfSONAR-update-lsregistration.sh`.
 
 ## [1.0.1] - 2025-11-08
 

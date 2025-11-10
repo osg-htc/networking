@@ -4,6 +4,41 @@ set -euo pipefail
 # install_tools_scripts.sh (reverted workflow)
 # Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
+#
+# Version: 1.0.0 - 2025-11-09
+
+VERSION="1.0.0"
+PROG_NAME="$(basename "$0")"
+
+# Check for --version or --help flags
+if [ "${1:-}" = "--version" ]; then
+    echo "$PROG_NAME version $VERSION"
+    exit 0
+elif [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+    cat <<EOF
+Usage: $PROG_NAME [DEST_ROOT] [--version|--help]
+
+Downloads perfSONAR helper scripts and tools to the specified directory.
+Optionally clones the perfSONAR testpoint repository if not already present.
+
+Arguments:
+  DEST_ROOT    Destination directory (default: /opt/perfsonar-tp)
+
+Options:
+  --version    Show version information
+  --help, -h   Show this help message
+
+Downloads:
+  - perfSONAR helper scripts (check-deps.sh, perfSONAR-pbr-nm.sh, etc.)
+  - Docker compose templates
+  - Documentation files (README.md, etc.)
+
+Exit codes:
+  0 - Success
+  1 - Download or installation error
+EOF
+    exit 0
+fi
 
 DEST_ROOT=${1:-/opt/perfsonar-tp}
 TP_REPO_URL="https://github.com/perfsonar/testpoint.git"
@@ -38,11 +73,17 @@ scripts=(
     perfSONAR-update-lsregistration.sh
     perfSONAR-auto-enroll-psconfig.sh
     seed_testpoint_host_dirs.sh
+  perfSONAR-orchestrator.sh
+    
+    # SSL certificate helpers
+    patch_apache_ssl_for_letsencrypt.sh
+    testpoint-entrypoint-wrapper.sh
+    certbot-deploy-hook.sh
 
     # compose examples / templates
-    docker-compose.yml
     docker-compose.testpoint.yml
     docker-compose.testpoint-le.yml
+    docker-compose.testpoint-le-auto.yml
 
     # docs / READMEs (optional, copied so users can view usage offline)
     README.md

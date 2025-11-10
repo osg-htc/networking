@@ -7,7 +7,8 @@ services:
     labels:
       - io.containers.autoupdate=registry
     network_mode: "host"
-    cgroup: host
+    privileged: true
+    cgroupns: private
     environment:
       - TZ=UTC
       # Optional: Set SERVER_FQDN to explicitly specify which Let's Encrypt certificate to use.
@@ -22,17 +23,17 @@ services:
       - /run/lock
       - /tmp
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
       - /var/www/html:/var/www/html:z
       - /etc/apache2:/etc/apache2:z
       - /etc/letsencrypt:/etc/letsencrypt:z
       # Mount the tools_scripts directory so the entrypoint wrapper is available
       - /opt/perfsonar-tp/tools_scripts:/opt/perfsonar-tp/tools_scripts:ro
-    tty: true
     pids_limit: 8192
     cap_add:
       - CAP_NET_RAW
+      - CAP_SYS_ADMIN
+      - CAP_SYS_PTRACE
     healthcheck:
       test: ["CMD-SHELL", "curl -kSfS https://localhost/ || exit 1"]
       interval: 30s
@@ -50,6 +51,13 @@ services:
     # on port 80, avoiding conflicts. Both containers share the host network
     # namespace without collision.
     network_mode: "host"
+    # Mount the host's Podman socket to allow the deploy hook to restart containers
+    volumes:
+      - /run/podman/podman.sock:/run/podman/podman.sock:ro
+      - /var/www/html:/var/www/html:Z
+      - /etc/letsencrypt:/etc/letsencrypt:Z
+      # Mount the deploy hook script into the container
+      - ./tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "ps aux | grep -q '[c]ertbot' || exit 1"]
       interval: 5m
@@ -57,9 +65,15 @@ services:
       retries: 3
       start_period: 1m
     restart: unless-stopped
-    entrypoint: ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+    # The entrypoint now just runs 'certbot renew' in a loop.
+    # The --deploy-hook will automatically run our script after successful renewals.
+    entrypoint: >
+      /bin/sh -c "
+        trap exit TERM;
+        while :; do
+          certbot renew --deploy-hook /etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh;
+          sleep 12h & wait $${!};
+        done;
+      "
     depends_on:
       - testpoint
-    volumes:
-      - /var/www/html:/var/www/html:Z
-      - /etc/letsencrypt:/etc/letsencrypt:Z

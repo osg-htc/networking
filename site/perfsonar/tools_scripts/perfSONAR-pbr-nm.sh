@@ -51,6 +51,11 @@ DRY_RUN=false        # when true: print actions and do not make changes
 AUTO_YES=false       # when true: skip interactive confirmation
 DEBUG=false          # when true: run commands under bash -x for verbose output
 
+# Apply strategy flags
+REBUILD_ALL=false    # when true: destructive rewrite of NM profiles and rules
+# In-place mode is the default (non-destructive) unless --rebuild-all is set
+INPLACE_MODE=true
+
 # CLI-controlled behavior defaults
 RUN_SHELLCHECK=false
 GENERATE_CONFIG_AUTO=false
@@ -75,6 +80,8 @@ Options:
   --shellcheck                Enable running shellcheck before executing (default: disabled)
   --yes                       Skip the interactive confirmation prompt
   --debug                     Run commands in debug mode (bash -x)
+    --rebuild-all               Destructive full rebuild (remove all NM connections and rules first)
+    --apply-inplace             Explicitly select in-place apply (non-destructive, default)
 EOF
 }
 
@@ -88,6 +95,35 @@ log() {
     ts="$(date +'%Y-%m-%d %H:%M:%S')"
     # shellcheck disable=SC2086
     printf '%s %s\n' "$ts" "$*" | tee -a "$LOG_FILE"
+}
+
+# Determine the interface carrying the current SSH session (if any)
+detect_ssh_iface() {
+    # Prefer SSH_CONNECTION env var
+    if [ -n "${SSH_CONNECTION:-}" ]; then
+        # SSH_CONNECTION format: client_ip client_port server_ip server_port
+        set -- $SSH_CONNECTION || true
+        local client_ip="$1"
+        if [ -n "$client_ip" ]; then
+            ip route get "$client_ip" 2>/dev/null | awk '/ dev /{for(i=1;i<=NF;i++) if($i=="dev") {print $(i+1); exit}}'
+            return 0
+        fi
+    fi
+    # Fallback: inspect established sshd connections and pick first peer
+    if command -v ss >/dev/null 2>&1; then
+        local peer
+        peer=$(ss -tnp 2>/dev/null | awk '/sshd/ && /ESTAB/ {print $5; exit}') || true
+        if [ -n "$peer" ]; then
+            # peer like 203.0.113.10:54321 or [2001:db8::1]:54321
+            local ip
+            ip=$(printf '%s' "$peer" | sed -E 's/^\[?([^\]]+)\]?[:].*$/\1/')
+            if [ -n "$ip" ]; then
+                ip route get "$ip" 2>/dev/null | awk '/ dev /{for(i=1;i<=NF;i++) if($i=="dev") {print $(i+1); exit}}'
+                return 0
+            fi
+        fi
+    fi
+    return 1
 }
 
 run_cmd() {
@@ -1189,6 +1225,15 @@ configure_nic() {
     # Ensure the NIC's NetworkManager connection exists and is set to autoconnect
     run_cmd nmcli con mod "$conn" connection.autoconnect yes || handle_error "Failed to enable autoconnect for $nic (conn: $conn)"
 
+    # In in-place mode, clear old routes and routing-rules to avoid duplicates
+    if [ "$INPLACE_MODE" = true ]; then
+        log "  - Clearing existing routes and routing-rules on $conn (in-place mode)"
+        run_cmd nmcli con mod "$conn" ipv4.routes "" || true
+        run_cmd nmcli con mod "$conn" ipv6.routes "" || true
+        run_cmd nmcli con mod "$conn" ipv4.routing-rules "" || true
+        run_cmd nmcli con mod "$conn" ipv6.routing-rules "" || true
+    fi
+
     # Use manual IPv4 addressing
     run_cmd nmcli con mod "$conn" ipv4.method manual || handle_error "Failed to set IPv4 method for $nic (conn: $conn)"
 
@@ -1206,11 +1251,14 @@ configure_nic() {
     # Default route logic controlled by DEFAULT_ROUTE_NIC
     if [[ "$nic" == "$DEFAULT_ROUTE_NIC" ]]; then
         echo "  - ${nic} is the default route NIC" | tee -a "$LOG_FILE"
+        # Ensure default NIC is allowed to install default routes
+        run_cmd nmcli con mod "$conn" ipv4.never-default no || true
         if ! run_cmd nmcli con mod "$conn" +ipv4.routes "0.0.0.0/0 $ipv4_gw"; then
             log "nmcli failed to set default IPv4 route for $conn; falling back to ip route"
             run_cmd ip route replace default via "$ipv4_gw" dev "$nic" || handle_error "Failed to set fallback IPv4 default route for $nic"
         fi
         if [[ "$ipv6_addr" != "-" ]]; then
+            run_cmd nmcli con mod "$conn" ipv6.never-default no || true
             if ! run_cmd nmcli con mod "$conn" +ipv6.routes "::/0 $ipv6_gw"; then
                 log "nmcli failed to set default IPv6 route for $conn; falling back to ip -6 route"
                 run_cmd ip -6 route replace default via "$ipv6_gw" dev "$nic" || handle_error "Failed to set fallback IPv6 default route for $nic"
@@ -1227,7 +1275,7 @@ configure_nic() {
             echo "  - ${nic} adding static route to table $table_id for $ipv4_addroute" | tee -a "$LOG_FILE"
             if ! run_cmd nmcli con mod "$conn" +ipv4.routes "$ipv4_addroute table=$table_id"; then
                 log "nmcli failed to add custom IPv4 route for $conn; falling back to ip route"
-                run_cmd ip route add $ipv4_addroute table "$table_id" || log "Fallback: failed to add custom IPv4 route for $nic (may need manual intervention)"
+                run_cmd ip route replace $ipv4_addroute table "$table_id" || log "Fallback: failed to add custom IPv4 route for $nic (may need manual intervention)"
             fi
         fi
 
@@ -1243,22 +1291,22 @@ configure_nic() {
         echo "  - Applying IPv4 routing rules for $nic and table $table_id..." | tee -a "$LOG_FILE"
         if ! run_cmd nmcli con mod "$conn" ipv4.routing-rules "priority $priority iif $nic table $table_id"; then
             log "nmcli cannot set ipv4.routing-rules; adding ip rule fallback"
-            run_cmd ip rule add iif "$nic" table "$table_id" priority "$priority" || log "ip rule add iif failed or already present"
+            run_cmd ip rule replace iif "$nic" table "$table_id" priority "$priority" || log "ip rule replace iif failed"
         fi
         if ! run_cmd nmcli con mod "$conn" +ipv4.routing-rules "priority $priority from $ipv4_addr table $table_id"; then
             log "nmcli cannot set ipv4.from rule; adding ip rule fallback"
-            run_cmd ip rule add from "$ipv4_addr/32" table "$table_id" priority "$priority" || log "ip rule add from failed or already present"
+            run_cmd ip rule replace from "$ipv4_addr/32" table "$table_id" priority "$priority" || log "ip rule replace from failed"
         fi
 
         if [[ "$ipv6_addr" != "-" ]]; then
             echo "  - Applying IPv6 routing rules for $nic and table $table_id..." | tee -a "$LOG_FILE"
             if ! run_cmd nmcli con mod "$conn" ipv6.routing-rules "priority $priority iif $nic table $table_id"; then
                 log "nmcli cannot set ipv6.routing-rules; adding ip -6 rule fallback"
-                run_cmd ip -6 rule add iif "$nic" table "$table_id" priority "$priority" || log "ip -6 rule add iif failed or already present"
+                run_cmd ip -6 rule replace iif "$nic" table "$table_id" priority "$priority" || log "ip -6 rule replace iif failed"
             fi
             if ! run_cmd nmcli con mod "$conn" +ipv6.routing-rules "priority $priority from $ipv6_addr table $table_id"; then
                 log "nmcli cannot set ipv6.from rule; adding ip -6 rule fallback"
-                run_cmd ip -6 rule add from "$ipv6_addr/128" table "$table_id" priority "$priority" || log "ip -6 rule add from failed or already present"
+                run_cmd ip -6 rule replace from "$ipv6_addr/128" table "$table_id" priority "$priority" || log "ip -6 rule replace from failed"
             fi
         fi
 
@@ -1270,10 +1318,27 @@ configure_nic() {
         fi
     fi
 
-    # Bring up the connection and reapply device config
-    run_cmd nmcli conn up "$conn" || handle_error "Failed to bring up $nic (conn: $conn)"
-    sleep 1
-    run_cmd nmcli device reapply "$nic" || handle_error "Failed to reapply device config for $nic"
+    # Bring up/reapply the connection
+    if [ "$INPLACE_MODE" = true ]; then
+        # Avoid bringing down the SSH-carrying interface; prefer reapply when already connected
+        if [ -n "${SSH_IFACE:-}" ] && [ "$SSH_IFACE" = "$nic" ]; then
+            log "  - SSH interface detected ($nic); using non-disruptive reapply"
+            run_cmd nmcli device reapply "$nic" || handle_error "Failed to reapply device config for $nic"
+        else
+            # Check if device is connected
+            if nmcli -t -f GENERAL.STATE device show "$nic" 2>/dev/null | grep -qi connected; then
+                run_cmd nmcli device reapply "$nic" || handle_error "Failed to reapply device config for $nic"
+            else
+                run_cmd nmcli conn up "$conn" || handle_error "Failed to bring up $nic (conn: $conn)"
+                sleep 1
+                run_cmd nmcli device reapply "$nic" || handle_error "Failed to reapply device config for $nic"
+            fi
+        fi
+    else
+        run_cmd nmcli conn up "$conn" || handle_error "Failed to bring up $nic (conn: $conn)"
+        sleep 1
+        run_cmd nmcli device reapply "$nic" || handle_error "Failed to reapply device config for $nic"
+    fi
 }
 
 # ---- MAIN SCRIPT ----
@@ -1298,6 +1363,16 @@ while [[ ${#} -gt 0 ]]; do
             ;;
         --debug)
             DEBUG=true
+            shift
+            ;;
+        --rebuild-all)
+            REBUILD_ALL=true
+            INPLACE_MODE=false
+            shift
+            ;;
+        --apply-inplace)
+            INPLACE_MODE=true
+            REBUILD_ALL=false
             shift
             ;;
         --generate-config-auto)
@@ -1370,15 +1445,30 @@ validate_config
 # -------- Warning Prompt --------
 log "${RED}WARNING: This script will REMOVE ALL existing NetworkManager connections and apply new configurations.${NC}"
 log "${RED}  - You may wish to run this via a directly connected console since the network will drop briefly${NC}"
-if [ "$AUTO_YES" != true ]; then
-    echo "Do you want to proceed? (yes/no)"
-    read -r response
-    if [[ "$response" != "yes" ]]; then
-        log "Operation aborted by the user. Exiting."
-        exit 0
+if [ "$REBUILD_ALL" = true ]; then
+    log "Full rebuild requested (--rebuild-all). Existing NM connections will be removed."
+    if [ "$AUTO_YES" != true ]; then
+        echo "Proceed with DESTRUCTIVE full rebuild? (type: yes)"
+        read -r response
+        if [[ "$response" != "yes" ]]; then
+            log "Operation aborted by the user. Exiting."
+            exit 0
+        fi
+    else
+        log "Auto-confirm enabled; continuing with destructive rebuild without prompt."
     fi
 else
-    log "Auto-confirm enabled; continuing without prompt."
+    log "In-place mode selected (default). Existing NM connections retained; routes/rules adjusted non-destructively." 
+    if [ "$AUTO_YES" != true ]; then
+        echo "Proceed with in-place apply? (yes/no)"
+        read -r response
+        if [[ "$response" != "yes" ]]; then
+            log "Operation aborted by the user. Exiting."
+            exit 0
+        fi
+    else
+        log "Auto-confirm enabled; continuing with in-place apply without prompt."
+    fi
 fi
 
 # Validate configuration arrays are consistent in length
@@ -1393,30 +1483,43 @@ fi
 
 log "Starting policy based routing configuration for perfSONAR at $(date)"
 
-# Backup existing configurations
-backup_existing_configs
-
-# Flush existing routes (use sudo with tee via bash -c to avoid redirection issues)
-log "Flushing all existing routes..."
-run_cmd bash -c 'echo 1 > /proc/sys/net/ipv4/route/flush' || handle_error "Failed to flush IPv4 routes"
-run_cmd bash -c 'echo 1 > /proc/sys/net/ipv6/route/flush' || handle_error "Failed to flush IPv6 routes"
-run_cmd ip rule flush || handle_error "Failed to flush IP rules"
-
-# Remove previous NetworkManager configurations
-if [ "$BACKUP_OK" != true ]; then
-    handle_error "Backup did not succeed; refusing to remove existing NetworkManager configurations."
+SSH_IFACE="$(detect_ssh_iface || true)"
+if [ -n "$SSH_IFACE" ]; then
+    log "Detected SSH session via interface: $SSH_IFACE (will avoid disruptive down events on this NIC)."
+else
+    log "No active SSH interface detected or detection failed."
 fi
-log "Removing ALL existing network configurations..."
-# Execute removal via run_cmd and log failure explicitly; using an if/then
-# prevents shellcheck complaining that the '||' may be misinterpreted.
-if ! run_cmd rm -rf /etc/NetworkManager/system-connections/*; then
-    log "No existing configurations removed or rm failed"
+
+if [ "$REBUILD_ALL" = true ]; then
+    backup_existing_configs
+    # Flush existing routes (use sudo with tee via bash -c to avoid redirection issues)
+    log "Flushing all existing routes and rules (rebuild mode)..."
+    run_cmd bash -c 'echo 1 > /proc/sys/net/ipv4/route/flush' || handle_error "Failed to flush IPv4 routes"
+    run_cmd bash -c 'echo 1 > /proc/sys/net/ipv6/route/flush' || handle_error "Failed to flush IPv6 routes"
+    run_cmd ip rule flush || handle_error "Failed to flush IP rules"
+
+    # Remove previous NetworkManager configurations
+    if [ "$BACKUP_OK" != true ]; then
+        handle_error "Backup did not succeed; refusing to remove existing NetworkManager configurations."
+    fi
+    log "Removing ALL existing network configurations (rebuild mode)..."
+    if ! run_cmd rm -rf /etc/NetworkManager/system-connections/*; then
+        log "No existing configurations removed or rm failed"
+    fi
+else
+    log "Rebuild not requested: skipping route/rule flush and NM connection deletion."
 fi
 
 # Configure each NIC from arrays defined in the config file
 count=${#NIC_NAMES[@]}
 for ((i = 0; i < count; i++)); do
-    configure_nic "$i"
+    if [ -n "$SSH_IFACE" ] && [ "$SSH_IFACE" = "${NIC_NAMES[$i]}" ] && [ "$REBUILD_ALL" != true ]; then
+        log "Skipping potential disruptive reset for SSH interface ${NIC_NAMES[$i]} (in-place mode). Applying rules only."
+        # Minimal application: ensure connection exists and apply rules without bringing interface down
+        configure_nic "$i" || true
+    else
+        configure_nic "$i"
+    fi
 done
 
 printf "\n%sAll NICs configured. Done at %s.%s\n\n" "$GREEN" "$(date)" "$NC" | tee -a "$LOG_FILE"

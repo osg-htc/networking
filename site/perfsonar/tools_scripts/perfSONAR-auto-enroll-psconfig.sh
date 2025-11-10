@@ -4,6 +4,7 @@
 # by deriving FQDNs from IPs listed in /etc/perfSONAR-multi-nic-config.conf (reverse DNS)
 # and adding the corresponding auto URLs via `psconfig remote --configure-archives add`.
 #
+# Version: 1.0.0 - 2025-11-09
 # Usage:
 #   perfSONAR-auto-enroll-psconfig.sh [OPTIONS]
 #
@@ -28,6 +29,8 @@
 
 set -euo pipefail
 
+VERSION="1.0.0"
+PROG_NAME="$(basename "$0")"
 CONTAINER="perfsonar-testpoint"
 CONFIG="/etc/perfSONAR-multi-nic-config.conf"
 ASSUME_YES=0
@@ -53,9 +56,40 @@ append_log() {
 # Wrap log to also persist
 logp() { log "$@"; append_log "$@"; }
 
-usage() { sed -n '1,/^$/p' "$0"; }
+usage() { 
+    cat <<EOF
+perfSONAR-auto-enroll-psconfig.sh v$VERSION
 
-while getopts ":c:f:ynvh" opt; do
+Purpose: Automatically enroll a perfSONAR testpoint container with OSG/WLCG pSConfig
+by deriving FQDNs from IPs listed in /etc/perfSONAR-multi-nic-config.conf (reverse DNS)
+and adding the corresponding auto URLs via 'psconfig remote --configure-archives add'.
+
+Usage:
+  $PROG_NAME [OPTIONS]
+
+Options:
+  -c <container>   Container name (default: perfsonar-testpoint)
+  -f <config>      Path to multi-NIC config (default: /etc/perfSONAR-multi-nic-config.conf)
+  -y               Assume yes; do not prompt for confirmation
+  -n               Dry-run; show FQDNs and planned URLs but do not enroll
+  -v               Verbose output
+  --version        Show version information
+  -h               Help
+
+Requirements:
+  - podman (preferred) or docker available
+  - running perfSONAR testpoint container accessible
+  - dig OR getent for reverse lookups
+
+Exit codes:
+  0 - Success
+  1 - Usage error
+  2 - No FQDNs discovered
+  3 - Enrollment failures (one or more adds failed)
+EOF
+}
+
+while getopts ":c:f:ynvh-:" opt; do
   case $opt in
     c) CONTAINER="$OPTARG";;
     f) CONFIG="$OPTARG";;
@@ -63,6 +97,12 @@ while getopts ":c:f:ynvh" opt; do
     n) DRY_RUN=1;;
     v) VERBOSE=1;;
     h) usage; exit 0;;
+    -)
+      case "$OPTARG" in
+        version) echo "$PROG_NAME version $VERSION"; exit 0;;
+        *) err "Unknown option: --$OPTARG"; usage; exit 1;;
+      esac
+      ;;
     *) err "Unknown option: -$OPTARG"; usage; exit 1;;
   esac
 done
@@ -81,7 +121,34 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 dbg "Parsing IPs from $CONFIG"
-mapfile -t PS_IPS < <(awk -F= '/^NIC_(IPV4|IPV6)_ADDRS=/ {gsub(/"|\r|\n/,"",$2); split($2,a,/[ ,]/); for(i in a) if (a[i] != "" && a[i] != "-") print a[i]; }' "$CONFIG")
+# Handle both single-line and multi-line bash array declarations
+# First collapse multi-line arrays into single lines, then parse
+mapfile -t PS_IPS < <(
+  awk '
+    /^NIC_(IPV4|IPV6)_ADDRS=/ {
+      line = $0
+      # If line ends with opening paren but no closing paren, its multi-line
+      if (line ~ /=\(/ && line !~ /\)/) {
+        # Accumulate lines until we find the closing paren
+        while (getline > 0) {
+          line = line " " $0
+          if ($0 ~ /\)/) break
+        }
+      }
+      # Now parse the complete line (single or accumulated multi-line)
+      gsub(/"|\(|\)|\r|\n/, "", line)
+      split(line, parts, /=/)
+      if (length(parts) >= 2) {
+        split(parts[2], addrs, /[ ,\t]+/)
+        for (i in addrs) {
+          if (addrs[i] != "" && addrs[i] != "-") {
+            print addrs[i]
+          }
+        }
+      }
+    }
+  ' "$CONFIG"
+)
 
 if [ ${#PS_IPS[@]} -eq 0 ]; then
   err "No IPs discovered in config; check NIC_*_ADDRS entries"; exit 2
@@ -104,11 +171,12 @@ for ip in "${PS_IPS[@]}"; do
   fi
 
   name=""
-  if command -v getent >/dev/null 2>&1; then
-    name=$(getent hosts "$ip_addr" 2>/dev/null | awk '{print $2}') || true
-  fi
-  if [ -z "$name" ] && command -v dig >/dev/null 2>&1; then
+  if command -v dig >/dev/null 2>&1; then
     name=$(dig +short -x "$ip_addr" | head -n1) || true
+  fi
+  if [ -z "$name" ] && command -v getent >/dev/null 2>&1; then
+    # getent may return multiple hostnames; we want the canonical one (field 2)
+    name=$(getent hosts "$ip_addr" 2>/dev/null | awk '{print $2}') || true
   fi
   name=${name%.}
   if [ -n "$name" ]; then
