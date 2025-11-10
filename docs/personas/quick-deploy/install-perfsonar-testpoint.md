@@ -628,7 +628,7 @@ lsregistration daemon (see below).
     bash /root/restore-lsreg.sh
 
     # Apply new settings and restart the daemon inside the container
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh create \
         --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
         --city Berkeley --region CA --country US --zip 94720 \
         --latitude 37.5 --longitude -121.7469 \
