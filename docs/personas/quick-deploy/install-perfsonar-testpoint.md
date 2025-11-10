@@ -805,22 +805,37 @@ Perform these checks before handing the host over to operations:
 
 1. **System services:**
 
-    ??? info "Verify Podman and compose services"
+    ??? info "Verify Podman runtime and containers"
 
         ```bash
+        # Check Podman service is available
         systemctl status podman
-        systemctl --user status podman-compose@perfsonar-testpoint.service
+        
+        # Verify containers are managed by compose
+        cd /opt/perfsonar-tp && podman-compose ps
+        
+        # Alternative: check containers directly
+        podman ps --filter name=perfsonar
         ```
 
-    Ensure both are active/green.
+    Ensure Podman is active and containers are running.
 
 1. **Container health:**
 
     ??? info "Check container status and logs"
 
         ```bash
+        # Check all containers are running and healthy
         podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-        podman logs pscheduler-agent | tail
+        
+        # Check perfsonar-testpoint logs for errors
+        podman logs perfsonar-testpoint --tail 50
+        
+        # If using Let's Encrypt, check certbot logs
+        podman logs certbot --tail 20 2>/dev/null || echo "Certbot container not present (testpoint-only mode)"
+        
+        # Verify services inside container are running
+        podman exec perfsonar-testpoint systemctl status apache2 psconfig-pscheduler-agent --no-pager
         ```
 
 1. **Network path validation:**
@@ -847,9 +862,24 @@ Perform these checks before handing the host over to operations:
     ??? info "Check firewall, fail2ban, and SELinux"
 
         ```bash
+        # Check nftables firewall rules
         nft list ruleset | grep perfsonar
-        fail2ban-client status
-        ausearch --message AVC --just-one
+        
+        # Check fail2ban status (if installed in Step 4)
+        if command -v fail2ban-client >/dev/null 2>&1; then
+            fail2ban-client status
+        else
+            echo "fail2ban not installed (optional)"
+        fi
+        
+        # Check for recent SELinux denials
+        if command -v ausearch >/dev/null 2>&1; then
+            ausearch --message AVC --just-one
+        elif [ -f /var/log/audit/audit.log ]; then
+            grep -i "avc.*denied" /var/log/audit/audit.log | tail -5
+        else
+            echo "SELinux audit tools not available"
+        fi
         ```
 
     Investigate any SELinux denials or repeated Fail2Ban bans.
@@ -859,10 +889,14 @@ Perform these checks before handing the host over to operations:
     ??? info "Verify certificate validity"
 
         ```bash
-        openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> | openssl x509 -noout -dates -issuer
+        # Check certificate via HTTPS connection
+        echo | openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> 2>/dev/null | openssl x509 -noout -dates -issuer
+        
+        # Alternative: Check certificate files directly
+        sudo openssl x509 -in /etc/letsencrypt/live/<SERVER_FQDN>/cert.pem -noout -dates -issuer
         ```
 
-    Ensure the issuer is Let’s Encrypt and the validity period is acceptable.
+    Ensure the issuer is Let's Encrypt and the validity period is acceptable. This check only applies if you configured Let's Encrypt in Step 3.
 
 1. **Reporting:**
 
