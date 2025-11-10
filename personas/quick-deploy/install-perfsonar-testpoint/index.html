@@ -811,6 +811,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#quick-one-time-package-install-minimal-rhel-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick One-Time Package Install (Minimal RHEL 9)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orchestrated-guided-install-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Orchestrated Guided Install (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#safety-enhancements" class="md-nav__link">
     <span class="md-ellipsis">
       Safety Enhancements
@@ -1628,6 +1646,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#quick-one-time-package-install-minimal-rhel-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick One-Time Package Install (Minimal RHEL 9)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orchestrated-guided-install-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Orchestrated Guided Install (Optional)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#safety-enhancements" class="md-nav__link">
     <span class="md-ellipsis">
       Safety Enhancements
@@ -1942,15 +1978,21 @@ ls<span class="w"> </span>-1<span class="w"> </span>/opt/perfsonar-tp/tools_scri
 <span class="c1"># Should show 11 shell scripts</span>
 
 <span class="c1"># Verify key scripts are present and executable</span>
-ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/<span class="o">{</span>check-deps.sh,perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh<span class="o">}</span>
+ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/<span class="o">{</span>perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,perfSONAR-orchestrator.sh<span class="o">}</span>
 </code></pre></div>
-<p><strong>Find needed packages and verify dependencies:</strong></p>
-<p>Use the helper to check for required tools.
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-deps.sh
-</code></pre></div></p>
+<p><strong>Install base packages (minimal RHEL 9):</strong></p>
+<p>We recommend installing prerequisites in one step so later commands (DNS check, nftables, compose) work out of the box:</p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>podman<span class="w"> </span>podman-docker<span class="w"> </span>podman-compose<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>jq<span class="w"> </span>curl<span class="w"> </span>tar<span class="w"> </span>gzip<span class="w"> </span>rsync<span class="w"> </span>bind-utils<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>nftables<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils-python-utils<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>python3<span class="w"> </span>iproute<span class="w"> </span>iputils<span class="w"> </span>procps-ng<span class="w"> </span>sed<span class="w"> </span>grep<span class="w"> </span>awk
+</code></pre></div>
 <hr />
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup. It fills out and consumes the network configuration in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
+<p>If you prefer a guided, pause-by-pause workflow that covers packages, bootstrap, PBR, DNS, security, deploy, certificates, and pSConfig, you can run the orchestrator now and follow the prompts:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh
+</code></pre></div>
 <h3 id="modes">Modes<a class="headerlink" href="#modes" title="Permanent link">&para;</a></h3>
 <p>By default the script now performs an <strong>in-place apply</strong> that adjusts routes, rules, and NetworkManager connection properties <strong>without deleting existing connections or flushing all system routes</strong>. This minimizes disruption and usually avoids the need for a reboot.</p>
 <p>An optional destructive mode <code>--rebuild-all</code> performs the original full workflow: backup existing profiles, flush all routes and rules, remove every NetworkManager connection, then recreate connections from scratch. Use this only for initial deployments or when you must completely reset inconsistent legacy state.</p>
@@ -1978,6 +2020,23 @@ ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-tp/tools_scri
 </tr>
 </tbody>
 </table>
+<h3 id="quick-one-time-package-install-minimal-rhel-9">Quick One-Time Package Install (Minimal RHEL 9)<a class="headerlink" href="#quick-one-time-package-install-minimal-rhel-9" title="Permanent link">&para;</a></h3>
+<p>On minimal hosts several required tools (e.g. <code>dig</code>, <code>nft</code>, <code>podman-compose</code>) are missing. You can install all recommended prerequisites in one command:</p>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>podman<span class="w"> </span>podman-docker<span class="w"> </span>podman-compose<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>jq<span class="w"> </span>curl<span class="w"> </span>tar<span class="w"> </span>gzip<span class="w"> </span>rsync<span class="w"> </span>bind-utils<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>nftables<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils-python-utils<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>python3<span class="w"> </span>iproute<span class="w"> </span>iputils<span class="w"> </span>procps-ng<span class="w"> </span>sed<span class="w"> </span>grep<span class="w"> </span>awk
+</code></pre></div>
+<p>This replaces scattered individual package instructions and ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their dependencies available.</p>
+<h3 id="orchestrated-guided-install-optional">Orchestrated Guided Install (Optional)<a class="headerlink" href="#orchestrated-guided-install-optional" title="Permanent link">&para;</a></h3>
+<p>Prefer a single guided script with pauses? After bootstrapping tools (Step 2) run:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh
+</code></pre></div>
+<p>Flags:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--option<span class="w"> </span>B<span class="w"> </span>--fqdn<span class="w"> </span>psum01.aglt2.org<span class="w"> </span>--email<span class="w"> </span>you@example.org
+</code></pre></div>
+<p>Use <code>--non-interactive</code> to skip pauses (auto-confirms) and <code>--dry-run</code> to preview.</p>
 <h3 id="safety-enhancements">Safety Enhancements<a class="headerlink" href="#safety-enhancements" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Detects active SSH session interface and avoids extra disruption to that NIC in in-place mode.</li>
