@@ -76,14 +76,11 @@ Note: Repository clone instructions are in Step 2.
         delays or race conditions while configuring policy-based routing,
         nftables rules, and container networking.
 
-1. **Update the system and packages:**
+1. **Update the system:**
 
     ```bash
     dnf -y update
-    dnf -y install bind-utils
     ```
-
-    The `bind-utils` package provides the `dig` command used for DNS validation in Step 3.
 
 1. **Record NIC names:** Document interface mappings for later PBR configuration.
 
@@ -94,9 +91,75 @@ Note: Repository clone instructions are in Step 2.
 
 ---
 
-## Step 2 – Bootstrap the Testpoint and Tools
+## Step 2 – Choose Your Deployment Path
 
-Use the bootstrap script to clone the perfSONAR testpoint repository into `/opt/perfsonar-tp` and install helper scripts under `/opt/perfsonar-tp/tools_scripts`.
+After completing Step 1 (minimal OS hardening), you can proceed in one of two ways:
+
+### Path A: Orchestrated Guided Install (Recommended for New Deployments)
+
+The orchestrator automates package installation, bootstrap, PBR configuration, security hardening, container deployment, certificate issuance, and pSConfig enrollment with interactive pauses (or non-interactive batch mode).
+
+**Download and run the orchestrator:**
+
+```bash
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh \
+    -o /tmp/perfSONAR-orchestrator.sh
+chmod 0755 /tmp/perfSONAR-orchestrator.sh
+/tmp/perfSONAR-orchestrator.sh
+```
+
+**Interactive mode** (pause at each step, confirm/skip/quit):
+
+```bash
+/tmp/perfSONAR-orchestrator.sh
+```
+
+**Non-interactive mode** (auto-confirm all steps):
+
+```bash
+/tmp/perfSONAR-orchestrator.sh --non-interactive --option A
+```
+
+**With Let's Encrypt (Option B):**
+
+```bash
+/tmp/perfSONAR-orchestrator.sh --option B --fqdn <FQDN> --email <EMAIL>
+```
+
+**Flags:**
+
+- `--option {A|B}` — A = testpoint only; B = testpoint + Let's Encrypt
+- `--fqdn NAME` — primary FQDN for certificates (Option B)
+- `--email ADDRESS` — email for Let's Encrypt (Option B)
+- `--non-interactive` — skip pauses, auto-confirm
+- `--yes` — auto-confirm internal script prompts
+- `--dry-run` — preview steps without executing
+
+**If you choose this path, skip to Step 7** (the orchestrator completes Steps 2–6 for you).
+
+---
+
+### Path B: Manual Step-by-Step
+
+For users who prefer granular control or need to customize each stage, continue with manual package installation, bootstrap, and configuration.
+
+#### Step 2.1 – Install Base Packages
+
+On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) are missing. Install all recommended prerequisites in one command:
+
+```bash
+dnf -y install podman podman-docker podman-compose \
+    jq curl tar gzip rsync bind-utils \
+    nftables fail2ban policycoreutils-python-utils \
+    python3 iproute iputils procps-ng sed grep awk
+```
+
+This ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their dependencies available.
+
+#### Step 2.2 – Bootstrap Helper Scripts
+
+Use the bootstrap script to install helper scripts under `/opt/perfsonar-tp/tools_scripts`:
 
 ```bash
 curl -fsSL \
@@ -105,10 +168,6 @@ curl -fsSL \
 chmod 0755 /tmp/install_tools_scripts.sh
 /tmp/install_tools_scripts.sh /opt/perfsonar-tp
 ```
-
-After this step scripts are available at `/opt/perfsonar-tp/tools_scripts`.
-
-> **Note:** All shell commands assume an interactive root shell. Prefix with `sudo` when running as a non-root user.
 
 **Verify bootstrap completed successfully:**
 
@@ -121,27 +180,15 @@ ls -1 /opt/perfsonar-tp/tools_scripts/*.sh | wc -l
 ls -l /opt/perfsonar-tp/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,perfSONAR-orchestrator.sh}
 ```
 
-**Install base packages (minimal RHEL 9):**
-
-We recommend installing prerequisites in one step so later commands (DNS check, nftables, compose) work out of the box:
-
-```bash
-dnf -y install podman podman-docker podman-compose \
-    jq curl tar gzip rsync bind-utils \
-    nftables fail2ban policycoreutils-python-utils \
-    python3 iproute iputils procps-ng sed grep awk
-```
-
 ---
+
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
+!!! note "Skip this step if you used the orchestrator (Path A)"
+
+    The orchestrator automates PBR configuration. If you ran it in Step 2, skip to [Step 4](#step-4-configure-nftables-selinux-and-fail2ban).
+
 The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup. It fills out and consumes the network configuration in `/etc/perfSONAR-multi-nic-config.conf`.
-
-If you prefer a guided, pause-by-pause workflow that covers packages, bootstrap, PBR, DNS, security, deploy, certificates, and pSConfig, you can run the orchestrator now and follow the prompts:
-
-```bash
-/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh
-```
 
 ### Modes
 
@@ -153,36 +200,6 @@ An optional destructive mode `--rebuild-all` performs the original full workflow
 |------|------|------------|-------------|
 | In-place (default) | (none) or `--apply-inplace` | Low (interfaces stay up; rules adjusted) | Routine updates, gateway changes, add routes |
 | Full rebuild | `--rebuild-all` | High (connections removed; brief connectivity drop) | First-time setup, severe misconfiguration |
-
-### Quick One-Time Package Install (Minimal RHEL 9)
-
-On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) are missing. You can install all recommended prerequisites in one command:
-
-```bash
-dnf -y install podman podman-docker podman-compose \
-    jq curl tar gzip rsync bind-utils \
-    nftables fail2ban policycoreutils-python-utils \
-    python3 iproute iputils procps-ng sed grep awk
-```
-
-This replaces scattered individual package instructions and ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their dependencies available.
-
-### Orchestrated Guided Install (Optional)
-
-Prefer a single guided script with pauses? After bootstrapping tools (Step 2) run:
-
-```bash
-/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh
-```
-
-Flags:
-
-```bash
-/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh \
-    --option B --fqdn psum01.aglt2.org --email you@example.org
-```
-
-Use `--non-interactive` to skip pauses (auto-confirms) and `--dry-run` to preview.
 
 ### Safety Enhancements
 
@@ -295,6 +312,10 @@ Use `--non-interactive` to skip pauses (auto-confirms) and `--dry-run` to previe
 
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
+!!! note "Skip this step if you used the orchestrator (Path A)"
+
+    The orchestrator automates security hardening. If you ran it in Step 2, skip to [Step 5](#step-5-deploy-the-containerized-perfsonar-testpoint).
+
 Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.
 
 Prerequisites (not installed by the script and should have been installed when check-deps.sh was run above):
@@ -382,6 +403,10 @@ If any prerequisite is missing, the script skips that component and continues.
 ---
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
+
+!!! note "Skip this step if you used the orchestrator (Path A)"
+
+    The orchestrator automates container deployment and certificate issuance. If you ran it in Step 2, skip to [Step 6](#step-6-configure-and-enroll-in-psconfig).
 
 Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:
 
@@ -694,10 +719,55 @@ podman logs certbot 2>&1 | grep -A5 "deploy hook"
 
 ---
 
-## Step 6 – Register and Configure with WLCG/OSG
+## Step 6 – Configure and Enroll in pSConfig
 
-We need to register your instance and ensure it is configured with the required meta data for the
-lsregistration daemon (see below).
+!!! note "Skip this step if you used the orchestrator (Path A)"
+
+    The orchestrator automates pSConfig enrollment. If you ran it in Step 2, skip to [Step 7](#step-7-register-and-configure-with-wlcgosg).
+
+We need to enroll your testpoint with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
+
+Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):
+
+```bash
+# Add auto URLs (configures archives too) and show configured remotes
+podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
+    "https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"
+
+podman exec -it perfsonar-testpoint psconfig remote list
+```
+
+If there are any stale/old/incorrect entries, you can remove them:
+
+```bash
+podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
+```
+
+Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.
+
+```bash
+# Dry run only (show planned URLs):
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
+
+# Typical usage (podman):
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
+
+podman exec -it perfsonar-testpoint psconfig remote list
+```
+
+??? note "The auto enroll script details"
+
+    - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf`  (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
+    - Performs reverse DNS lookups (getent/dig) to derive FQDNs.
+    - Deduplicates while preserving discovery order.
+    - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
+    - Lists configured remotes and returns non-zero if any enrollment fails.
+
+Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
+
+---
+
+## Step 7 – Register and Configure with WLCG/OSG
 
 1. **OSG/WLCG registration workflow:**
 
@@ -707,48 +777,6 @@ lsregistration daemon (see below).
         - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
             - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
                 `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
-
-1. **pSConfig enrollment:**
-
-    Register this host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
-
-    Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):
-
-    ```bash
-    # Add auto URLs (configures archives too) and show configured remotes
-    podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
-        "https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"
-
-    podman exec -it perfsonar-testpoint psconfig remote list
-    ```
-
-    If there are any stale/old/incorrect entries, you can remove them:
-
-    ```bash
-    podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
-    ```
-
-    Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.
-
-    ```bash
-    # Dry run only (show planned URLs):
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
-
-    # Typical usage (podman):
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
-
-    podman exec -it perfsonar-testpoint psconfig remote list
-    ```
-
-    ??? note "The auto enroll script details"
-
-        - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf`  (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
-        - Performs reverse DNS lookups (getent/dig) to derive FQDNs.
-        - Deduplicates while preserving discovery order.
-        - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
-        - Lists configured remotes and returns non-zero if any enrollment fails.
-
-    Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
 
 1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.
 
@@ -884,7 +912,11 @@ lsregistration daemon (see below).
 ---
 ---
 
-## Step 7 – Post-Install Validation
+            ```
+
+---
+
+## Step 8 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
 
