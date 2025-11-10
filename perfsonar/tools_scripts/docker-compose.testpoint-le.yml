@@ -43,6 +43,13 @@ services:
     # on port 80, avoiding conflicts. Both containers share the host network
     # namespace without collision.
     network_mode: "host"
+    # Mount the host's Podman socket to allow the deploy hook to restart containers
+    volumes:
+      - /run/podman/podman.sock:/run/podman/podman.sock:ro
+      - /var/www/html:/var/www/html:Z
+      - /etc/letsencrypt:/etc/letsencrypt:Z
+      # Mount the deploy hook script into the container
+      - ./tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "ps aux | grep -q '[c]ertbot' || exit 1"]
       interval: 5m
@@ -50,9 +57,15 @@ services:
       retries: 3
       start_period: 1m
     restart: unless-stopped
-    entrypoint: ["/bin/sh","-c","trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;"]
+    # The entrypoint now just runs 'certbot renew' in a loop.
+    # The --deploy-hook will automatically run our script after successful renewals.
+    entrypoint: >
+      /bin/sh -c "
+        trap exit TERM;
+        while :; do
+          certbot renew --deploy-hook /etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh;
+          sleep 12h & wait $${!};
+        done;
+      "
     depends_on:
       - testpoint
-    volumes:
-      - /var/www/html:/var/www/html:Z
-      - /etc/letsencrypt:/etc/letsencrypt:Z
