@@ -131,10 +131,28 @@ Use the helper to check for required tools.
 ---
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
-The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuration in `/etc/perfSONAR-multi-nic-config.conf`
+The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup. It fills out and consumes the network configuration in `/etc/perfSONAR-multi-nic-config.conf`.
+
+### Modes
+
+By default the script now performs an **in-place apply** that adjusts routes, rules, and NetworkManager connection properties **without deleting existing connections or flushing all system routes**. This minimizes disruption and usually avoids the need for a reboot.
+
+An optional destructive mode `--rebuild-all` performs the original full workflow: backup existing profiles, flush all routes and rules, remove every NetworkManager connection, then recreate connections from scratch. Use this only for initial deployments or when you must completely reset inconsistent legacy state.
+
+| Mode | Flag | Disruption | When to use |
+|------|------|------------|-------------|
+| In-place (default) | (none) or `--apply-inplace` | Low (interfaces stay up; rules adjusted) | Routine updates, gateway changes, add routes |
+| Full rebuild | `--rebuild-all` | High (connections removed; brief connectivity drop) | First-time setup, severe misconfiguration |
+
+### Safety Enhancements
+
+- Detects active SSH session interface and avoids extra disruption to that NIC in in-place mode.
+- Prompts are still skipped with `--yes`.
+- Dry-run preview supported via `--dry-run` (combine with `--debug` for verbose output).
+- Reboot is **no longer generally required**; only consider one if NetworkManager fails to apply the new rules cleanly.
 
 
-1. **Generate config file automatically:**
+1. **Generate config file automatically (or preview):**
 
     !!! warning "Gateways required for addresses"
 
@@ -148,13 +166,21 @@ The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates Netwo
         but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or
         IPv6 gateway (or `-` to skip). Prompts are skipped in non-interactive sessions or when you use `--yes`.
 
+    Preview generation (no changes):
+
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
+    ```
+
+    Generate and write the config file:
+
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
     ```
 
     The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g., confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network changes...
 
-1. **Apply changes:**
+1. **Apply changes (in-place default):**
 
     !!! warning "Connect via console for network changes"
 
@@ -168,13 +194,23 @@ The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates Netwo
         4. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
         5. Reapply config after corrections: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
 
-    Apply non-interactively with `--yes` or interactively without:
+    In-place apply (recommended):
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
     ```
 
-    The script backs up NetworkManager profiles, seeds routing tables, and applies rules. Review `/var/log/perfSONAR-multi-nic-config.log` and retain it. Reboot if needed (sometimes this seems to be required to get the changed networking in place).
+    Full rebuild (destructive – removes all NM connections first):
+
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
+    ```
+
+    The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual NetworkManager restart:
+
+    ```bash
+    systemctl restart NetworkManager
+    ```
 
 1. **DNS: forward and reverse entries (required):**
 
@@ -350,6 +386,7 @@ The container should show `healthy` status. The healthcheck monitors Apache HTTP
 That's it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
 
 ---
+
 ### Option B — Testpoint + Let's Encrypt (shared Apache and certs)
 
 This mode runs two containers (`perfsonar-testpoint` and `certbot`) and bind-mounts the following host paths so Apache content and certificates persist on the host and are shared between containers:
@@ -364,11 +401,13 @@ This mode runs two containers (`perfsonar-testpoint` and `certbot`) and bind-mou
 **Why seed?** The perfsonar-testpoint container requires baseline configuration files from the image to be present on the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services to fail.
 
 **What's seeded:**
+
 - `/opt/perfsonar-tp/psconfig` — perfSONAR pSConfig files (baseline remotes and archives)
 - `/var/www/html` — Apache webroot with index.html (required for healthcheck)
 - `/etc/apache2` — Apache config including `sites-available/default-ssl.conf` (patched by entrypoint wrapper)
 
 **What's NOT seeded:**
+
 - `/etc/letsencrypt` — Certbot creates this automatically; no pre-seeding needed
 
 Run the bundled seeding helper script (automatically installed in Step 2):
@@ -378,6 +417,7 @@ Run the bundled seeding helper script (automatically installed in Step 2):
 ```
 
 This script:
+
 - Pulls the latest perfSONAR testpoint image
 - Creates temporary containers to extract baseline files
 - Copies content to host directories
@@ -505,6 +545,7 @@ podman run --rm --net=host \
     - `-m <EMAIL>` - Email for renewal notifications and account recovery
 
 Replace:
+
 - `<SERVER_FQDN>` with your primary hostname (e.g., `psum05.aglt2.org`)
 - `<ALT_FQDN>` with additional FQDNs if needed (one `-d` flag per FQDN)
 - `<LETSENCRYPT_EMAIL>` with your email for certificate notifications
@@ -611,6 +652,7 @@ podman logs certbot 2>&1 | grep -A5 "deploy hook"
 
 
 ---
+
 ## Step 6 – Register and Configure with WLCG/OSG
 
 We need to register your instance and ensure it is configured with the required meta data for the
@@ -799,6 +841,8 @@ lsregistration daemon (see below).
         unnecessary restarts while keeping your deployment current.
 
 ---
+---
+
 ## Step 7 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
