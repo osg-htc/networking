@@ -911,6 +911,75 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#container-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#networking-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Networking Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certificate-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Certificate Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perfsonar-service-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      perfSONAR Service Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-update-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Auto-Update Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general-debugging-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Debugging Tips
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1626,6 +1695,75 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#container-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#networking-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Networking Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certificate-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Certificate Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perfsonar-service-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      perfSONAR Service Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-update-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Auto-Update Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general-debugging-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Debugging Tips
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1708,7 +1846,9 @@ nftables rules, and container networking.</p>
 <li>
 <p><strong>Update the system and packages:</strong></p>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>update
+dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>bind-utils
 </code></pre></div>
+<p>The <code>bind-utils</code> package provides the <code>dig</code> command used for DNS validation in Step 3.</p>
 </li>
 <li>
 <p><strong>Record NIC names:</strong> Document interface mappings for later PBR configuration.</p>
@@ -1730,13 +1870,21 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <blockquote>
 <p><strong>Note:</strong> All shell commands assume an interactive root shell. Prefix with <code>sudo</code> when running as a non-root user.</p>
 </blockquote>
+<p><strong>Verify bootstrap completed successfully:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check that all helper scripts were downloaded</span>
+ls<span class="w"> </span>-1<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/*.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+<span class="c1"># Should show 11 shell scripts</span>
+
+<span class="c1"># Verify key scripts are present and executable</span>
+ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/<span class="o">{</span>check-deps.sh,perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh<span class="o">}</span>
+</code></pre></div>
 <p><strong>Find needed packages and verify dependencies:</strong></p>
 <p>Use the helper to check for required tools.
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-deps.sh
 </code></pre></div></p>
 <hr />
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
-<p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuraiton in <code>/etc/perfSONAR-multi-nic-config.conf</code></p>
+<p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuration in <code>/etc/perfSONAR-multi-nic-config.conf</code></p>
 <ol>
 <li>
 <p><strong>Generate config file automatically:</strong></p>
@@ -1760,7 +1908,15 @@ IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive
 <p><strong>Apply changes:</strong></p>
 <div class="admonition warning">
 <p class="admonition-title">Connect via console for network changes</p>
-<p>When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either direcatly to the console or by using 'nohup' in front of the script invocation.</p>
+<p>When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script invocation.</p>
+<p><strong>If SSH connection drops during network reconfiguration:</strong></p>
+<ol>
+<li>Access via BMC/iLO/iDRAC console or physical console</li>
+<li>Review <code>/var/log/perfSONAR-multi-nic-config.log</code> for errors</li>
+<li>Check network state with <code>nmcli connection show</code> and <code>ip addr</code></li>
+<li>Restore from backup if needed: backups are in <code>/var/backups/nm-connections-&lt;timestamp&gt;/</code></li>
+<li>Reapply config after corrections: <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes</code></li>
+</ol>
 </div>
 <p>Apply non-interactively with <code>--yes</code> or interactively without:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
@@ -1951,6 +2107,17 @@ ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2
 <summary>SELinux labeling handled automatically</summary>
 <p>If SELinux is enforcing, the <code>:Z</code> and <code>:z</code> options in the compose files will cause Podman to
 relabel the host paths when containers start. No manual <code>chcon</code> commands are required.</p>
+<p><strong>SELinux Volume Labels:</strong></p>
+<ul>
+<li><code>:Z</code> (uppercase) - Exclusive access. Podman creates a unique SELinux label for this volume that only this specific container can access. Use for volumes that should not be shared between containers.</li>
+<li><code>:z</code> (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.</li>
+</ul>
+<p>In our compose files:</p>
+<ul>
+<li><code>/etc/letsencrypt:/etc/letsencrypt:Z</code> - Exclusive to testpoint container</li>
+<li><code>/var/www/html:/var/www/html:z</code> - Shared between testpoint and certbot containers</li>
+<li><code>/etc/apache2:/etc/apache2:Z</code> - Exclusive to testpoint container</li>
+</ul>
 </details>
 <h4 id="2-deploy-the-testpoint-with-automatic-ssl-patching-recommended">2) Deploy the testpoint with automatic SSL patching (recommended)<a class="headerlink" href="#2-deploy-the-testpoint-with-automatic-ssl-patching-recommended" title="Permanent link">&para;</a></h4>
 <p><strong>Prerequisites:</strong> Ensure <code>/opt/perfsonar-tp/tools_scripts</code> exists from Step 2 (bootstrap):</p>
@@ -1997,6 +2164,25 @@ patched to NOT listen on port 80, so port 80 is available for Certbot's HTTP-01 
 <span class="w">    </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span>-d<span class="w"> </span>&lt;ALT_FQDN&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-m<span class="w"> </span>&lt;LETSENCRYPT_EMAIL&gt;
 </code></pre></div>
+<details class="info">
+<summary>Certbot command explained</summary>
+<p><strong>Podman options:</strong></p>
+<ul>
+<li><code>--rm</code> - Remove container after it exits</li>
+<li><code>--net=host</code> - Use host network (allows binding port 80)</li>
+<li><code>-v /etc/letsencrypt:/etc/letsencrypt:Z</code> - Mount certificate storage with exclusive SELinux label</li>
+<li><code>-v /var/www/html:/var/www/html:Z</code> - Mount webroot for HTTP-01 challenge</li>
+</ul>
+<p><strong>Certbot options:</strong></p>
+<ul>
+<li><code>certonly</code> - Obtain certificate only, don't install it</li>
+<li><code>--standalone</code> - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge</li>
+<li><code>--agree-tos</code> - Agree to Let's Encrypt Terms of Service</li>
+<li><code>--non-interactive</code> - Don't prompt for input (required for automation)</li>
+<li><code>-d &lt;FQDN&gt;</code> - Domain name(s) for the certificate (repeat for each domain/SAN)</li>
+<li><code>-m &lt;EMAIL&gt;</code> - Email for renewal notifications and account recovery</li>
+</ul>
+</details>
 <p>Replace:
 - <code>&lt;SERVER_FQDN&gt;</code> with your primary hostname (e.g., <code>psum05.aglt2.org</code>)
 - <code>&lt;ALT_FQDN&gt;</code> with additional FQDNs if needed (one <code>-d</code> flag per FQDN)
@@ -2233,6 +2419,11 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-auto-update.service<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
 </code></pre></div>
 </li>
+<li>
+<p>Monitor the update log:</p>
+<div class="highlight"><pre><span></span><code>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/perfsonar-auto-update.log
+</code></pre></div>
+</li>
 </ol>
 <p>This approach ensures containers are updated only when new images are available, minimizing
 unnecessary restarts while keeping your deployment current.</p>
@@ -2266,8 +2457,12 @@ podman<span class="w"> </span>logs<span class="w"> </span>pscheduler-agent<span 
 <p><strong>Network path validation:</strong></p>
 <details class="info">
 <summary>Test network connectivity and routing</summary>
-<div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
-tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
+<p>Test throughput to a remote testpoint (run from inside the container):</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
+</code></pre></div>
+<p>Check routing from the host:</p>
+<div class="highlight"><pre><span></span><code>tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
+ip<span class="w"> </span>route<span class="w"> </span>get<span class="w"> </span>&lt;remote-testpoint-ip&gt;
 </code></pre></div>
 </details>
 <p>Confirm traffic uses the intended policy-based routes (check <code>ip route get &lt;dest&gt;</code>).</p>
@@ -2296,8 +2491,8 @@ ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class=
 <p><strong>Reporting:</strong></p>
 <details class="info">
 <summary>Run perfSONAR diagnostic reports</summary>
-<p>Run the perfSONAR toolkit daily report and send outputs to operations:</p>
-<div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>troubleshoot
+<p>Run the perfSONAR troubleshoot command from inside the container and send outputs to operations:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>pscheduler<span class="w"> </span>troubleshoot
 </code></pre></div>
 </details>
 </li>
@@ -2305,11 +2500,245 @@ ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class=
 <hr />
 <h2 id="ongoing-maintenance">Ongoing Maintenance<a class="headerlink" href="#ongoing-maintenance" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Schedule quarterly re-validation of routing policy and nftables rules.</li>
-<li>Apply <code>dnf update</code> monthly and reboot during the next maintenance window.</li>
-<li>Monitor psconfig feeds for changes in mesh participation.</li>
-<li>Track certificate expiry (<code>certbot renew --dry-run</code>) if you rely on Let’s Encrypt.</li>
+<li><strong>Quarterly or as-needed:</strong> Re-validate routing policy and nftables rules after network changes or security audits.</li>
+<li><strong>Monthly or during maintenance windows:</strong> Apply OS updates (<code>dnf update</code>) and reboot during scheduled downtime.</li>
+<li>Monitor psconfig feeds for changes in mesh participation and test configuration.</li>
+<li>Track certificate expiry with <code>certbot renew --dry-run</code> if you rely on Let's Encrypt (automatic renewal is configured but monitoring is recommended).</li>
+<li>Review container logs periodically for errors: <code>podman logs perfsonar-testpoint</code> and <code>podman logs certbot</code>.</li>
+<li>Verify auto-update timer is active: <code>systemctl list-timers perfsonar-auto-update.timer</code>.</li>
 </ul>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="container-issues">Container Issues<a class="headerlink" href="#container-issues" title="Permanent link">&para;</a></h3>
+<details class="failure">
+<summary>Container won't start or exits immediately</summary>
+<p><strong>Symptoms:</strong> <code>podman ps</code> shows no running containers, or container exits shortly after starting.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check container logs</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># Check for systemd initialization errors</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;failed\|error&quot;</span>
+
+<span class="c1"># Verify compose file syntax</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp
+podman-compose<span class="w"> </span>config
+</code></pre></div>
+<p><strong>Common causes:</strong></p>
+<ul>
+<li>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</li>
+<li>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</li>
+<li>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</li>
+<li>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</li>
+</ul>
+</details>
+<details class="failure">
+<summary>SELinux denials blocking container operations</summary>
+<p><strong>Symptoms:</strong> Container starts but services fail, permission denied errors in logs.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check for recent SELinux denials</span>
+ausearch<span class="w"> </span>-m<span class="w"> </span>avc<span class="w"> </span>-ts<span class="w"> </span>recent
+
+<span class="c1"># Temporarily set to permissive for testing</span>
+setenforce<span class="w"> </span><span class="m">0</span>
+
+<span class="c1"># Test if issue resolves, then check audit log</span>
+ausearch<span class="w"> </span>-m<span class="w"> </span>avc<span class="w"> </span>-ts<span class="w"> </span>recent<span class="w"> </span>&gt;<span class="w"> </span>/tmp/selinux-denials.txt
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Verify volume labels are correct (<code>:Z</code> for exclusive, <code>:z</code> for shared)</li>
+<li>Recreate containers to reapply SELinux labels: <code>podman-compose down &amp;&amp; podman-compose up -d</code></li>
+<li>If persistent issues, consider creating custom SELinux policy or running in permissive mode</li>
+</ul>
+</details>
+<h3 id="networking-issues">Networking Issues<a class="headerlink" href="#networking-issues" title="Permanent link">&para;</a></h3>
+<details class="failure">
+<summary>Policy-based routing not working correctly</summary>
+<p><strong>Symptoms:</strong> Traffic not using expected interfaces, routing to wrong gateway.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check routing rules</span>
+ip<span class="w"> </span>rule<span class="w"> </span>show
+
+<span class="c1"># Check routing tables</span>
+ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </span>table<span class="w"> </span>all
+
+<span class="c1"># Test specific route lookup</span>
+ip<span class="w"> </span>route<span class="w"> </span>get<span class="w"> </span>&lt;destination-ip&gt;
+
+<span class="c1"># Check NetworkManager connections</span>
+nmcli<span class="w"> </span>connection<span class="w"> </span>show
+
+<span class="c1"># Review PBR script log</span>
+tail<span class="w"> </span>-100<span class="w"> </span>/var/log/perfSONAR-multi-nic-config.log
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Verify <code>/etc/perfSONAR-multi-nic-config.conf</code> has correct IPs and gateways</li>
+<li>Reapply configuration: <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes</code></li>
+<li>Reboot if rules are not being applied correctly</li>
+<li>Check for conflicting NetworkManager or systemd-networkd rules</li>
+</ul>
+</details>
+<details class="failure">
+<summary>DNS resolution failing for test endpoints</summary>
+<p><strong>Symptoms:</strong> perfSONAR tests fail with "unknown host" or DNS errors.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Test DNS resolution from container</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>dig<span class="w"> </span>&lt;remote-testpoint&gt;
+
+<span class="c1"># Check container&#39;s resolv.conf</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>cat<span class="w"> </span>/etc/resolv.conf
+
+<span class="c1"># Verify forward and reverse DNS</span>
+/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Ensure DNS servers are correctly configured on host</li>
+<li>Fix missing PTR records in DNS zones</li>
+<li>Verify forward A/AAAA records match reverse PTR records</li>
+</ul>
+</details>
+<h3 id="certificate-issues">Certificate Issues<a class="headerlink" href="#certificate-issues" title="Permanent link">&para;</a></h3>
+<details class="failure">
+<summary>Let's Encrypt certificate issuance fails</summary>
+<p><strong>Symptoms:</strong> Certbot fails with "Failed to authenticate" or "Connection refused" errors.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if port 80 is open</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;80&quot;</span>
+
+<span class="c1"># Verify Apache is NOT listening on port 80 in container</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>netstat<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:80
+
+<span class="c1"># Test port 80 accessibility from external host</span>
+curl<span class="w"> </span>-v<span class="w"> </span>http://&lt;your-fqdn&gt;/
+
+<span class="c1"># Run certbot in verbose mode</span>
+podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--net<span class="o">=</span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>/etc/letsencrypt:/etc/letsencrypt:Z<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>/var/www/html:/var/www/html:Z<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>docker.io/certbot/certbot:latest<span class="w"> </span>certonly<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--standalone<span class="w"> </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span>-m<span class="w"> </span>&lt;EMAIL&gt;<span class="w"> </span>--dry-run<span class="w"> </span>-vvv
+</code></pre></div>
+<p><strong>Common causes:</strong></p>
+<ul>
+<li>Port 80 blocked by firewall: Add with <code>perfSONAR-install-nftables.sh --ports=80,443</code></li>
+<li>Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly</li>
+<li>DNS not propagated: Wait for DNS changes to propagate globally</li>
+<li>Rate limiting: Let's Encrypt has rate limits; wait if you've hit them</li>
+</ul>
+</details>
+<details class="failure">
+<summary>Certificate not loaded after renewal</summary>
+<p><strong>Symptoms:</strong> Old certificate still in use after automatic renewal.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check certificate files</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/etc/letsencrypt/live/&lt;fqdn&gt;/
+
+<span class="c1"># Verify deploy hook is configured</span>
+podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;deploy hook&quot;</span>
+
+<span class="c1"># Check if container restarted</span>
+podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}&#39;</span>
+
+<span class="c1"># Manually restart testpoint</span>
+podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Ensure certbot container has deploy hook configured: <code>--deploy-hook /opt/certbot/deploy-hook.sh</code></li>
+<li>Verify Podman socket is mounted in certbot container</li>
+<li>Manually restart testpoint after renewals if deploy hook fails</li>
+</ul>
+</details>
+<h3 id="perfsonar-service-issues">perfSONAR Service Issues<a class="headerlink" href="#perfsonar-service-issues" title="Permanent link">&para;</a></h3>
+<details class="failure">
+<summary>perfSONAR services not running</summary>
+<p><strong>Symptoms:</strong> Web interface not accessible, tests not running.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check service status inside container</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>apache2
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>pscheduler-ticker
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>owamp-server
+
+<span class="c1"># Check for errors in service logs</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>apache2<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>pscheduler-ticker<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Restart services inside container: <code>podman exec perfsonar-testpoint systemctl restart apache2</code></li>
+<li>Check Apache SSL configuration was patched correctly</li>
+<li>Verify certificates are in place: <code>ls -la /etc/letsencrypt/live/</code></li>
+<li>Restart container: <code>podman restart perfsonar-testpoint</code></li>
+</ul>
+</details>
+<h3 id="auto-update-issues">Auto-Update Issues<a class="headerlink" href="#auto-update-issues" title="Permanent link">&para;</a></h3>
+<details class="failure">
+<summary>Auto-update not working</summary>
+<p><strong>Symptoms:</strong> Containers not updating despite new images available.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check timer status</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-auto-update.timer
+systemctl<span class="w"> </span>list-timers<span class="w"> </span>perfsonar-auto-update.timer
+
+<span class="c1"># Check service logs</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-auto-update.service<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+
+<span class="c1"># Check update log</span>
+tail<span class="w"> </span>-50<span class="w"> </span>/var/log/perfsonar-auto-update.log
+
+<span class="c1"># Manually test update</span>
+systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-auto-update.service
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Enable timer if not active: <code>systemctl enable --now perfsonar-auto-update.timer</code></li>
+<li>Verify script exists and is executable: <code>ls -la /usr/local/bin/perfsonar-auto-update.sh</code></li>
+<li>Check podman-compose is installed and working</li>
+<li>Review script for errors and update if needed</li>
+</ul>
+</details>
+<h3 id="general-debugging-tips">General Debugging Tips<a class="headerlink" href="#general-debugging-tips" title="Permanent link">&para;</a></h3>
+<details class="tip">
+<summary>Useful debugging commands</summary>
+<p><strong>Container management:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># View all containers (running and stopped)</span>
+podman<span class="w"> </span>ps<span class="w"> </span>-a
+
+<span class="c1"># View container resource usage</span>
+podman<span class="w"> </span>stats
+
+<span class="c1"># Enter container for interactive debugging</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>/bin/bash
+
+<span class="c1"># View compose configuration</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>podman-compose<span class="w"> </span>config
+</code></pre></div>
+<p><strong>Networking:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check which process is listening on a port</span>
+ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>&lt;port&gt;
+
+<span class="c1"># Test connectivity to remote testpoint</span>
+ping<span class="w"> </span>&lt;remote-ip&gt;
+traceroute<span class="w"> </span>&lt;remote-ip&gt;
+
+<span class="c1"># Check nftables rules</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset
+</code></pre></div>
+<p><strong>Logs:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># System journal for container runtime</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>podman<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+
+<span class="c1"># All logs from a container</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span>
+
+<span class="c1"># Follow logs in real-time</span>
+podman<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>perfsonar-testpoint
+</code></pre></div>
+</details>
+<hr />
 
 
 

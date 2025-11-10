@@ -1,16 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# seed_testpoint_host_dirs.sh
 # Seed host directories from perfSONAR testpoint image.
 # Intended to be run on the host as root (or with sudo) BEFORE first compose up.
-# Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp]
+#
+# Version: 1.0.0 - 2025-11-09
+# Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp] [--version|--help]
 
+VERSION="1.0.0"
+PROG_NAME="$(basename "$0")"
 RUNTIME=""
 BASE_DIR="/opt/perfsonar-tp"
 
+# Check for --version flag first
+if [ "${1:-}" = "--version" ]; then
+    echo "$PROG_NAME version $VERSION"
+    exit 0
+fi
+
 usage() {
     cat <<EOF
-Usage: $0 [--runtime docker|podman] [--base DIR]
+Usage: $0 [--runtime docker|podman] [--base DIR] [--version|--help]
 
 Prepares host directories for perfSONAR testpoint container bind-mounts by
 copying baseline content from the container image. This must be run BEFORE
@@ -23,9 +34,20 @@ Creates and populates:
 
 Note: /etc/letsencrypt does NOT need seeding - certbot creates it automatically.
 
+Options:
+  --runtime RUNTIME   Specify container runtime (docker or podman)
+  --base DIR          Base directory for perfSONAR testpoint (default: /opt/perfsonar-tp)
+  --version           Show version information
+  --help, -h          Show this help message
+
 Examples:
   sudo $0
   sudo $0 --runtime podman --base /opt/perfsonar-tp
+
+Exit codes:
+  0 - Success (directories seeded or already present)
+  1 - Runtime not found
+  2 - Invalid arguments
 EOF
 }
 
