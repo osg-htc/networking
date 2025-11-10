@@ -118,20 +118,30 @@ ls -1 /opt/perfsonar-tp/tools_scripts/*.sh | wc -l
 # Should show 11 shell scripts
 
 # Verify key scripts are present and executable
-ls -l /opt/perfsonar-tp/tools_scripts/{check-deps.sh,perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh}
+ls -l /opt/perfsonar-tp/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,perfSONAR-orchestrator.sh}
 ```
 
-**Find needed packages and verify dependencies:**
+**Install base packages (minimal RHEL 9):**
 
-Use the helper to check for required tools.
+We recommend installing prerequisites in one step so later commands (DNS check, nftables, compose) work out of the box:
+
 ```bash
-/opt/perfsonar-tp/tools_scripts/check-deps.sh
+dnf -y install podman podman-docker podman-compose \
+    jq curl tar gzip rsync bind-utils \
+    nftables fail2ban policycoreutils-python-utils \
+    python3 iproute iputils procps-ng sed grep awk
 ```
 
 ---
 ## Step 3 – Configure Policy-Based Routing (PBR)
 
 The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule setup. It fills out and consumes the network configuration in `/etc/perfSONAR-multi-nic-config.conf`.
+
+If you prefer a guided, pause-by-pause workflow that covers packages, bootstrap, PBR, DNS, security, deploy, certificates, and pSConfig, you can run the orchestrator now and follow the prompts:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh
+```
 
 ### Modes
 
@@ -143,6 +153,36 @@ An optional destructive mode `--rebuild-all` performs the original full workflow
 |------|------|------------|-------------|
 | In-place (default) | (none) or `--apply-inplace` | Low (interfaces stay up; rules adjusted) | Routine updates, gateway changes, add routes |
 | Full rebuild | `--rebuild-all` | High (connections removed; brief connectivity drop) | First-time setup, severe misconfiguration |
+
+### Quick One-Time Package Install (Minimal RHEL 9)
+
+On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) are missing. You can install all recommended prerequisites in one command:
+
+```bash
+dnf -y install podman podman-docker podman-compose \
+    jq curl tar gzip rsync bind-utils \
+    nftables fail2ban policycoreutils-python-utils \
+    python3 iproute iputils procps-ng sed grep awk
+```
+
+This replaces scattered individual package instructions and ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their dependencies available.
+
+### Orchestrated Guided Install (Optional)
+
+Prefer a single guided script with pauses? After bootstrapping tools (Step 2) run:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh
+```
+
+Flags:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh \
+    --option B --fqdn psum01.aglt2.org --email you@example.org
+```
+
+Use `--non-interactive` to skip pauses (auto-confirms) and `--dry-run` to preview.
 
 ### Safety Enhancements
 
@@ -252,6 +292,7 @@ An optional destructive mode `--rebuild-all` performs the original full workflow
     Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default route.
 
 ---
+
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
 Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.
