@@ -199,20 +199,25 @@ step_deploy_option_b() {
     for ip in "${NIC_IPV4_ADDRS[@]}" "${NIC_IPV6_ADDRS[@]}"; do
       [ "$ip" = "-" ] && continue
       
-      # Skip private/RFC1918 IPs (10.x, 172.16-31.x, 192.168.x)
-      if [[ "$ip" =~ ^10\. ]] || [[ "$ip" =~ ^192\.168\. ]] || [[ "$ip" =~ ^172\.(1[6-9]|2[0-9]|3[0-1])\. ]]; then
-        log "  $ip -> (skipped: private IP)"
+      # Skip private/non-routable IPs:
+      # RFC1918: 10.x, 172.16-31.x, 192.168.x
+      # IPv6: fc00::/7 (ULA), fe80::/10 (link-local), ::1 (loopback)
+      # Other: 127.x (IPv4 loopback), 169.254.x (link-local)
+      if [[ "$ip" =~ ^10\. ]] || \
+         [[ "$ip" =~ ^192\.168\. ]] || \
+         [[ "$ip" =~ ^172\.(1[6-9]|2[0-9]|3[0-1])\. ]] || \
+         [[ "$ip" =~ ^127\. ]] || \
+         [[ "$ip" =~ ^169\.254\. ]] || \
+         [[ "$ip" =~ ^(fc|fd)[0-9a-f]{2}: ]] || \
+         [[ "$ip" =~ ^fe[89ab][0-9a-f]: ]] || \
+         [[ "$ip" =~ ^::1$ ]]; then
+        log "  $ip -> (skipped: private/non-routable IP)"
         continue
       fi
       
       local fqdn
       fqdn=$(dig +short -x "$ip" 2>/dev/null | sed 's/\.$//' || true)
       if [ -n "$fqdn" ]; then
-        # Filter out invalid/reserved TLDs that Let's Encrypt won't accept
-        if [[ "$fqdn" =~ \.local$ ]] || [[ "$fqdn" =~ \.localhost$ ]] || [[ "$fqdn" =~ \.localdomain$ ]] || [[ "$fqdn" =~ \.internal$ ]] || [[ "$fqdn" =~ \.lan$ ]]; then
-          log "  $ip -> $fqdn (skipped: invalid TLD for public certificate)"
-          continue
-        fi
         log "  $ip -> $fqdn"
         fqdns+=("$fqdn")
       else
