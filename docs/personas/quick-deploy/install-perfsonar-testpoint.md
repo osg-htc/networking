@@ -482,6 +482,12 @@ podman start certbot
 
 The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.
 
+**Automatic Container Restart:** After each successful certificate renewal, certbot automatically runs
+a deploy hook script (`certbot-deploy-hook.sh`) that gracefully restarts the `perfsonar-testpoint`
+container. This ensures the new certificates are loaded without manual intervention. The deploy hook
+uses the mounted Podman socket (`/run/podman/podman.sock`) to communicate with the host's container
+runtime.
+
 **Note:** The certbot container in this setup uses **host networking mode** (via `network_mode: host` in the
 compose file) so it can bind directly to port 80 for HTTP-01 challenges during renewals. This works
 because the perfsonar-testpoint Apache is patched to NOT listen on port 80. Both containers share
@@ -493,12 +499,12 @@ Test renewal with a dry-run:
 podman exec certbot certbot renew --dry-run
 ```
 
-If successful, certificates will auto-renew before expiry. After each renewal, restart the testpoint
-to reload the certificates:
+If successful, certificates will auto-renew before expiry, and the testpoint will be automatically
+restarted to load the new certificates. You can verify this behavior by checking the certbot logs
+after a renewal:
 
 ```bash
-# Optional: add a systemd timer or cron job to restart testpoint after renewals
-podman restart perfsonar-testpoint
+podman logs certbot 2>&1 | grep -A5 "deploy hook"
 ```
 
 ---
