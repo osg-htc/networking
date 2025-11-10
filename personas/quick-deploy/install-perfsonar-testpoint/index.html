@@ -2437,19 +2437,34 @@ unnecessary restarts while keeping your deployment current.</p>
 <li>
 <p><strong>System services:</strong></p>
 <details class="info">
-<summary>Verify Podman and compose services</summary>
-<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>podman
-systemctl<span class="w"> </span>--user<span class="w"> </span>status<span class="w"> </span>podman-compose@perfsonar-testpoint.service
+<summary>Verify Podman runtime and containers</summary>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check Podman service is available</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>podman
+
+<span class="c1"># Verify containers are managed by compose</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>podman-compose<span class="w"> </span>ps
+
+<span class="c1"># Alternative: check containers directly</span>
+podman<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w"> </span><span class="nv">name</span><span class="o">=</span>perfsonar
 </code></pre></div>
 </details>
-<p>Ensure both are active/green.</p>
+<p>Ensure Podman is active and containers are running.</p>
 </li>
 <li>
 <p><strong>Container health:</strong></p>
 <details class="info">
 <summary>Check container status and logs</summary>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
-podman<span class="w"> </span>logs<span class="w"> </span>pscheduler-agent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail
+<div class="highlight"><pre><span></span><code><span class="c1"># Check all containers are running and healthy</span>
+podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
+
+<span class="c1"># Check perfsonar-testpoint logs for errors</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="w"> </span><span class="m">50</span>
+
+<span class="c1"># If using Let&#39;s Encrypt, check certbot logs</span>
+podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span>--tail<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Certbot container not present (testpoint-only mode)&quot;</span>
+
+<span class="c1"># Verify services inside container are running</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>apache2<span class="w"> </span>psconfig-pscheduler-agent<span class="w"> </span>--no-pager
 </code></pre></div>
 </details>
 </li>
@@ -2471,9 +2486,24 @@ ip<span class="w"> </span>route<span class="w"> </span>get<span class="w"> </spa
 <p><strong>Security posture:</strong></p>
 <details class="info">
 <summary>Check firewall, fail2ban, and SELinux</summary>
-<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
-fail2ban-client<span class="w"> </span>status
-ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class="w"> </span>--just-one
+<div class="highlight"><pre><span></span><code><span class="c1"># Check nftables firewall rules</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+
+<span class="c1"># Check fail2ban status (if installed in Step 4)</span>
+<span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>fail2ban-client<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span>fail2ban-client<span class="w"> </span>status
+<span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;fail2ban not installed (optional)&quot;</span>
+<span class="k">fi</span>
+
+<span class="c1"># Check for recent SELinux denials</span>
+<span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>ausearch<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span>ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class="w"> </span>--just-one
+<span class="k">elif</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-f<span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;avc.*denied&quot;</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+<span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;SELinux audit tools not available&quot;</span>
+<span class="k">fi</span>
 </code></pre></div>
 </details>
 <p>Investigate any SELinux denials or repeated Fail2Ban bans.</p>
@@ -2482,10 +2512,14 @@ ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class=
 <p><strong>LetsEncrypt certificate check:</strong></p>
 <details class="info">
 <summary>Verify certificate validity</summary>
-<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;SERVER_FQDN&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
+<div class="highlight"><pre><span></span><code><span class="c1"># Check certificate via HTTPS connection</span>
+<span class="nb">echo</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;SERVER_FQDN&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
+
+<span class="c1"># Alternative: Check certificate files directly</span>
+sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>/etc/letsencrypt/live/&lt;SERVER_FQDN&gt;/cert.pem<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
 </code></pre></div>
 </details>
-<p>Ensure the issuer is Let’s Encrypt and the validity period is acceptable.</p>
+<p>Ensure the issuer is Let's Encrypt and the validity period is acceptable. This check only applies if you configured Let's Encrypt in Step 3.</p>
 </li>
 <li>
 <p><strong>Reporting:</strong></p>
