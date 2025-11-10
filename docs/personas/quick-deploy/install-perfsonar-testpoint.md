@@ -152,7 +152,7 @@ On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) ar
 dnf -y install podman podman-docker podman-compose \
     jq curl tar gzip rsync bind-utils \
     nftables fail2ban policycoreutils-python-utils \
-    python3 iproute iputils procps-ng sed grep awk
+    python3 iproute iputils procps-ng sed grep gawk
 ```
 
 This ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their dependencies available.

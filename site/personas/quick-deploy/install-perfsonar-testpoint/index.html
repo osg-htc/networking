@@ -2074,7 +2074,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>podman<span class="w"> </span>podman-docker<span class="w"> </span>podman-compose<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>jq<span class="w"> </span>curl<span class="w"> </span>tar<span class="w"> </span>gzip<span class="w"> </span>rsync<span class="w"> </span>bind-utils<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>nftables<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils-python-utils<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>python3<span class="w"> </span>iproute<span class="w"> </span>iputils<span class="w"> </span>procps-ng<span class="w"> </span>sed<span class="w"> </span>grep<span class="w"> </span>awk
+<span class="w">    </span>python3<span class="w"> </span>iproute<span class="w"> </span>iputils<span class="w"> </span>procps-ng<span class="w"> </span>sed<span class="w"> </span>grep<span class="w"> </span>gawk
 </code></pre></div>
 <p>This ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their dependencies available.</p>
 <h4 id="step-22-bootstrap-helper-scripts">Step 2.2 – Bootstrap Helper Scripts<a class="headerlink" href="#step-22-bootstrap-helper-scripts" title="Permanent link">&para;</a></h4>
