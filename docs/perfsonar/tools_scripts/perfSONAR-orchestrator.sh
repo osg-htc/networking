@@ -208,6 +208,11 @@ step_deploy_option_b() {
       local fqdn
       fqdn=$(dig +short -x "$ip" 2>/dev/null | sed 's/\.$//' || true)
       if [ -n "$fqdn" ]; then
+        # Filter out invalid/reserved TLDs that Let's Encrypt won't accept
+        if [[ "$fqdn" =~ \.local$ ]] || [[ "$fqdn" =~ \.localhost$ ]] || [[ "$fqdn" =~ \.localdomain$ ]] || [[ "$fqdn" =~ \.internal$ ]] || [[ "$fqdn" =~ \.lan$ ]]; then
+          log "  $ip -> $fqdn (skipped: invalid TLD for public certificate)"
+          continue
+        fi
         log "  $ip -> $fqdn"
         fqdns+=("$fqdn")
       else
