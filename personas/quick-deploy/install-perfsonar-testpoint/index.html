@@ -798,6 +798,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Step 3 – Configure Policy-Based Routing (PBR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safety-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Safety Enhancements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -888,6 +912,15 @@
   <a href="#step-6-register-and-configure-with-wlcgosg" class="md-nav__link">
     <span class="md-ellipsis">
       Step 6 – Register and Configure with WLCG/OSG
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-" class="md-nav__link">
+    <span class="md-ellipsis">
+      ---
     </span>
   </a>
   
@@ -1582,6 +1615,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Step 3 – Configure Policy-Based Routing (PBR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Modes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#safety-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Safety Enhancements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1672,6 +1729,15 @@
   <a href="#step-6-register-and-configure-with-wlcgosg" class="md-nav__link">
     <span class="md-ellipsis">
       Step 6 – Register and Configure with WLCG/OSG
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-" class="md-nav__link">
+    <span class="md-ellipsis">
+      ---
     </span>
   </a>
   
@@ -1884,10 +1950,44 @@ ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-tp/tools_scri
 </code></pre></div></p>
 <hr />
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
-<p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup.  It attempts to fill out the needed network configuration in <code>/etc/perfSONAR-multi-nic-config.conf</code></p>
-<ol>
+<p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule setup. It fills out and consumes the network configuration in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
+<h3 id="modes">Modes<a class="headerlink" href="#modes" title="Permanent link">&para;</a></h3>
+<p>By default the script now performs an <strong>in-place apply</strong> that adjusts routes, rules, and NetworkManager connection properties <strong>without deleting existing connections or flushing all system routes</strong>. This minimizes disruption and usually avoids the need for a reboot.</p>
+<p>An optional destructive mode <code>--rebuild-all</code> performs the original full workflow: backup existing profiles, flush all routes and rules, remove every NetworkManager connection, then recreate connections from scratch. Use this only for initial deployments or when you must completely reset inconsistent legacy state.</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Flag</th>
+<th>Disruption</th>
+<th>When to use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In-place (default)</td>
+<td>(none) or <code>--apply-inplace</code></td>
+<td>Low (interfaces stay up; rules adjusted)</td>
+<td>Routine updates, gateway changes, add routes</td>
+</tr>
+<tr>
+<td>Full rebuild</td>
+<td><code>--rebuild-all</code></td>
+<td>High (connections removed; brief connectivity drop)</td>
+<td>First-time setup, severe misconfiguration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="safety-enhancements">Safety Enhancements<a class="headerlink" href="#safety-enhancements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Detects active SSH session interface and avoids extra disruption to that NIC in in-place mode.</li>
+<li>Prompts are still skipped with <code>--yes</code>.</li>
+<li>Dry-run preview supported via <code>--dry-run</code> (combine with <code>--debug</code> for verbose output).</li>
 <li>
-<p><strong>Generate config file automatically:</strong></p>
+<p>Reboot is <strong>no longer generally required</strong>; only consider one if NetworkManager fails to apply the new rules cleanly.</p>
+</li>
+<li>
+<p><strong>Generate config file automatically (or preview):</strong></p>
 <div class="admonition warning">
 <p class="admonition-title">Gateways required for addresses</p>
 <p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address
@@ -1900,12 +2000,16 @@ to the generated file listing affected NICs. Edit <code>NIC_IPV4_GWS</code>/<cod
 but no gateway could be determined, it will prompt you interactively to enter an IPv4 and/or
 IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive sessions or when you use <code>--yes</code>.</p>
 </div>
+<p>Preview generation (no changes):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+</code></pre></div>
+<p>Generate and write the config file:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
 <p>The script writes the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>. Edit to adjust site-specific values (e.g., confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entries) and verify the entries.  Next step is to apply the network changes...</p>
 </li>
 <li>
-<p><strong>Apply changes:</strong></p>
+<p><strong>Apply changes (in-place default):</strong></p>
 <div class="admonition warning">
 <p class="admonition-title">Connect via console for network changes</p>
 <p>When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script invocation.</p>
@@ -1918,10 +2022,15 @@ IPv6 gateway (or <code>-</code> to skip). Prompts are skipped in non-interactive
 <li>Reapply config after corrections: <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes</code></li>
 </ol>
 </div>
-<p>Apply non-interactively with <code>--yes</code> or interactively without:</p>
+<p>In-place apply (recommended):</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
-<p>The script backs up NetworkManager profiles, seeds routing tables, and applies rules. Review <code>/var/log/perfSONAR-multi-nic-config.log</code> and retain it. Reboot if needed (sometimes this seems to be required to get the changed networking in place).</p>
+<p>Full rebuild (destructive – removes all NM connections first):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--rebuild-all<span class="w"> </span>--yes
+</code></pre></div>
+<p>The script logs to <code>/var/log/perfSONAR-multi-nic-config.log</code>. After an in-place apply, a reboot is typically unnecessary. If connectivity or rules appear inconsistent (<code>ip rule show</code> / <code>ip route</code> mismatch), consider a manual NetworkManager restart:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>NetworkManager
+</code></pre></div>
 </li>
 <li>
 <p><strong>DNS: forward and reverse entries (required):</strong></p>
@@ -1959,7 +2068,7 @@ ip<span class="w"> </span>route<span class="w"> </span>show<span class="w"> </sp
 </code></pre></div>
 <p>Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default route.</p>
 </li>
-</ol>
+</ul>
 <hr />
 <h2 id="step-4-configure-nftables-selinux-and-fail2ban">Step 4 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-4-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
 <p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables profile with optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
@@ -2078,21 +2187,27 @@ Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsona
 </ul>
 <h4 id="1-seed-required-host-directories-required-before-first-compose-up">1) Seed required host directories (REQUIRED before first compose up)<a class="headerlink" href="#1-seed-required-host-directories-required-before-first-compose-up" title="Permanent link">&para;</a></h4>
 <p><strong>Why seed?</strong> The perfsonar-testpoint container requires baseline configuration files from the image to be present on the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services to fail.</p>
-<p><strong>What's seeded:</strong>
-- <code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)
-- <code>/var/www/html</code> — Apache webroot with index.html (required for healthcheck)
-- <code>/etc/apache2</code> — Apache config including <code>sites-available/default-ssl.conf</code> (patched by entrypoint wrapper)</p>
-<p><strong>What's NOT seeded:</strong>
-- <code>/etc/letsencrypt</code> — Certbot creates this automatically; no pre-seeding needed</p>
+<p><strong>What's seeded:</strong></p>
+<ul>
+<li><code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)</li>
+<li><code>/var/www/html</code> — Apache webroot with index.html (required for healthcheck)</li>
+<li><code>/etc/apache2</code> — Apache config including <code>sites-available/default-ssl.conf</code> (patched by entrypoint wrapper)</li>
+</ul>
+<p><strong>What's NOT seeded:</strong></p>
+<ul>
+<li><code>/etc/letsencrypt</code> — Certbot creates this automatically; no pre-seeding needed</li>
+</ul>
 <p>Run the bundled seeding helper script (automatically installed in Step 2):</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 </code></pre></div>
-<p>This script:
-- Pulls the latest perfSONAR testpoint image
-- Creates temporary containers to extract baseline files
-- Copies content to host directories
-- Verifies seeding was successful
-- Skips seeding if directories already have content (idempotent)</p>
+<p>This script:</p>
+<ul>
+<li>Pulls the latest perfSONAR testpoint image</li>
+<li>Creates temporary containers to extract baseline files</li>
+<li>Copies content to host directories</li>
+<li>Verifies seeding was successful</li>
+<li>Skips seeding if directories already have content (idempotent)</li>
+</ul>
 <p>Verify seeding succeeded:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Should show config files</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
@@ -2183,10 +2298,12 @@ patched to NOT listen on port 80, so port 80 is available for Certbot's HTTP-01 
 <li><code>-m &lt;EMAIL&gt;</code> - Email for renewal notifications and account recovery</li>
 </ul>
 </details>
-<p>Replace:
-- <code>&lt;SERVER_FQDN&gt;</code> with your primary hostname (e.g., <code>psum05.aglt2.org</code>)
-- <code>&lt;ALT_FQDN&gt;</code> with additional FQDNs if needed (one <code>-d</code> flag per FQDN)
-- <code>&lt;LETSENCRYPT_EMAIL&gt;</code> with your email for certificate notifications</p>
+<p>Replace:</p>
+<ul>
+<li><code>&lt;SERVER_FQDN&gt;</code> with your primary hostname (e.g., <code>psum05.aglt2.org</code>)</li>
+<li><code>&lt;ALT_FQDN&gt;</code> with additional FQDNs if needed (one <code>-d</code> flag per FQDN)</li>
+<li><code>&lt;LETSENCRYPT_EMAIL&gt;</code> with your email for certificate notifications</li>
+</ul>
 <p>After successful issuance, restart the perfsonar-testpoint container to trigger the automatic patching:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
 </code></pre></div>
@@ -2430,7 +2547,7 @@ unnecessary restarts while keeping your deployment current.</p>
 </details>
 </li>
 </ol>
-<hr />
+<h2 id="-">---<a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
 <h2 id="step-7-post-install-validation">Step 7 – Post-Install Validation<a class="headerlink" href="#step-7-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
 <ol>
