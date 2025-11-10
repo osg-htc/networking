@@ -188,20 +188,72 @@ step_deploy_option_b() {
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le-auto.yml -o /opt/perfsonar-tp/docker-compose.yml"
   run bash -c "cd /opt/perfsonar-tp && podman-compose up -d"
   run podman ps
-  if [ -n "$LE_FQDN" ] && [ -n "$LE_EMAIL" ]; then
+  
+  # Auto-detect FQDNs from reverse DNS if not provided
+  local fqdns=()
+  if [ -n "$LE_FQDN" ]; then
+    fqdns=("$LE_FQDN")
+  else
+    log "No --fqdn provided; attempting to auto-detect from reverse DNS..."
+    if [ -f /etc/perfSONAR-multi-nic-config.conf ]; then
+      # Source the config to get IP arrays
+      # shellcheck disable=SC1091
+      source /etc/perfSONAR-multi-nic-config.conf || true
+      for ip in "${NIC_IPV4_ADDRS[@]}" "${NIC_IPV6_ADDRS[@]}"; do
+        [ "$ip" = "-" ] && continue
+        local fqdn
+        fqdn=$(dig +short -x "$ip" 2>/dev/null | sed 's/\.$//' || true)
+        [ -n "$fqdn" ] && fqdns+=("$fqdn")
+      done
+    fi
+  fi
+  
+  # Deduplicate FQDNs
+  if [ ${#fqdns[@]} -gt 0 ]; then
+    mapfile -t fqdns < <(printf '%s\n' "${fqdns[@]}" | sort -u)
+    log "FQDNs for certificate: ${fqdns[*]}"
+  fi
+  
+  if [ ${#fqdns[@]} -gt 0 ] && [ -n "$LE_EMAIL" ]; then
     log "Attempting one-time certificate issuance with certbot (standalone on port 80)"
+    log "NOTE: Ensure port 80 is open inbound for Let's Encrypt validation"
+    log "Checking if port 80 is available..."
+    
+    # Check if port 80 is already in use
+    if ss -tnlp | grep -q ':80 '; then
+      log "WARNING: Port 80 appears to be in use. Certbot standalone mode requires exclusive access."
+      ss -tnlp | grep ':80 ' | tee -a "$LOG_FILE" || true
+    fi
+    
     run podman stop certbot || true
-    run podman run --rm --net=host \
-      -v /etc/letsencrypt:/etc/letsencrypt:Z \
-      -v /var/www/html:/var/www/html:Z \
-      docker.io/certbot/certbot:latest certonly \
-      --standalone --agree-tos --non-interactive \
-      -d "$LE_FQDN" -m "$LE_EMAIL"
+    
+    # Build certbot command with all FQDNs as SANs
+    local certbot_cmd=(
+      podman run --rm --net=host
+      -v /etc/letsencrypt:/etc/letsencrypt:Z
+      -v /var/www/html:/var/www/html:Z
+      docker.io/certbot/certbot:latest certonly
+      --standalone --agree-tos --non-interactive
+      -m "$LE_EMAIL"
+    )
+    for fqdn in "${fqdns[@]}"; do
+      certbot_cmd+=(-d "$fqdn")
+    done
+    
+    if ! run "${certbot_cmd[@]}"; then
+      log "ERROR: Certificate issuance failed. Common issues:"
+      log "  1. Port 80 blocked by firewall/nftables (check nft list ruleset)"
+      log "  2. Network ACLs blocking inbound HTTP from Let's Encrypt CAs"
+      log "  3. DNS not properly configured (verify: dig +short <fqdn>)"
+      log "You can retry manually or skip and configure certificates later."
+      return 1
+    fi
+    
     run podman restart perfsonar-testpoint || true
     run podman start certbot || true
     run podman exec certbot certbot renew --dry-run || true
   else
-    log "Skipping certificate issuance (missing --fqdn/--email). You can do this later."
+    log "Skipping certificate issuance (missing --fqdn/--email or no FQDNs detected). You can do this later."
   fi
 }
 
