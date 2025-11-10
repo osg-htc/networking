@@ -35,7 +35,7 @@ RECOMMENDED_PACKAGES=(
   podman podman-docker podman-compose
   jq curl tar gzip rsync bind-utils
   nftables fail2ban policycoreutils-python-utils
-  python3 iproute iputils procps-ng sed grep awk
+  python3 iproute iputils procps-ng sed grep gawk
 )
 
 log() {
