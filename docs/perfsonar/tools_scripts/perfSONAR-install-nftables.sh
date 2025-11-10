@@ -255,6 +255,13 @@ write_nft_rules() {
     # 9090 (esmond/metrics UI), 123 (NTP), 443 (HTTPS), 861/862 (TWAMP),
     # 5201 (iperf3), 5001 (legacy iperf), 5000/5101 (BWCTL/older perfSONAR)
     local -a baseline_tcp_ports=(9090 123 443 861 862 5201 5001 5000 5101)
+    
+    # Check if Let's Encrypt is deployed (certbot container or /etc/letsencrypt exists)
+    # If so, add port 80 for HTTP-01 challenges and renewals
+    if [ -d /etc/letsencrypt ] || podman ps --format '{{.Names}}' 2>/dev/null | grep -q certbot; then
+        log "Let's Encrypt deployment detected; adding port 80 for HTTP-01 challenges"
+        baseline_tcp_ports+=(80)
+    fi
 
     # Merge user-specified extra ports (if any)
     local -a merged_tcp_ports=()
