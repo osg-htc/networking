@@ -1234,18 +1234,14 @@ configure_nic() {
         run_cmd nmcli con mod "$conn" ipv6.routing-rules "" || true
     fi
 
-    # Use manual IPv4 addressing
-    run_cmd nmcli con mod "$conn" ipv4.method manual || handle_error "Failed to set IPv4 method for $nic (conn: $conn)"
-
-    # Configure static IPv4 address + gateway (use canonical nmcli keys)
-    log "  - Setting IPv4 address and gateway"
-    run_cmd nmcli con mod "$conn" ipv4.addresses "$ipv4_addr$ipv4_prefix" ipv4.gateway "$ipv4_gw" || handle_error "Failed to set IPv4 address for $nic (conn: $conn)"
+    # Configure static IPv4 address + gateway (set method and address together to avoid NM errors)
+    log "  - Setting IPv4 method manual with address and gateway"
+    run_cmd nmcli con mod "$conn" ipv4.method manual ipv4.addresses "$ipv4_addr$ipv4_prefix" ipv4.gateway "$ipv4_gw" || handle_error "Failed to set IPv4 configuration for $nic (conn: $conn)"
 
     # Configure static IPv6 if present
     if [[ "$ipv6_addr" != "-" ]]; then
-        run_cmd nmcli con mod "$conn" ipv6.method manual || handle_error "Failed to set IPv6 method for $nic (conn: $conn)"
-        log "  - Setting IPv6 address and gateway"
-        run_cmd nmcli con mod "$conn" ipv6.addresses "$ipv6_addr$ipv6_prefix" ipv6.gateway "$ipv6_gw" || handle_error "Failed to set IPv6 address for $nic (conn: $conn)"
+        log "  - Setting IPv6 method manual with address and gateway"
+        run_cmd nmcli con mod "$conn" ipv6.method manual ipv6.addresses "$ipv6_addr$ipv6_prefix" ipv6.gateway "$ipv6_gw" || handle_error "Failed to set IPv6 configuration for $nic (conn: $conn)"
     fi
 
     # Default route logic controlled by DEFAULT_ROUTE_NIC
