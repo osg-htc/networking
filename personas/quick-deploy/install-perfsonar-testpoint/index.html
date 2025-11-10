@@ -2013,6 +2013,11 @@ patched to NOT listen on port 80, so port 80 is available for Certbot's HTTP-01 
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>start<span class="w"> </span>certbot
 </code></pre></div>
 <p>The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.</p>
+<p><strong>Automatic Container Restart:</strong> After each successful certificate renewal, certbot automatically runs
+a deploy hook script (<code>certbot-deploy-hook.sh</code>) that gracefully restarts the <code>perfsonar-testpoint</code>
+container. This ensures the new certificates are loaded without manual intervention. The deploy hook
+uses the mounted Podman socket (<code>/run/podman/podman.sock</code>) to communicate with the host's container
+runtime.</p>
 <p><strong>Note:</strong> The certbot container in this setup uses <strong>host networking mode</strong> (via <code>network_mode: host</code> in the
 compose file) so it can bind directly to port 80 for HTTP-01 challenges during renewals. This works
 because the perfsonar-testpoint Apache is patched to NOT listen on port 80. Both containers share
@@ -2020,10 +2025,10 @@ the host network namespace without conflict.</p>
 <p>Test renewal with a dry-run:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>certbot<span class="w"> </span>certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run
 </code></pre></div>
-<p>If successful, certificates will auto-renew before expiry. After each renewal, restart the testpoint
-to reload the certificates:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Optional: add a systemd timer or cron job to restart testpoint after renewals</span>
-podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+<p>If successful, certificates will auto-renew before expiry, and the testpoint will be automatically
+restarted to load the new certificates. You can verify this behavior by checking the certbot logs
+after a renewal:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;deploy hook&quot;</span>
 </code></pre></div>
 <hr />
 <details class="info">

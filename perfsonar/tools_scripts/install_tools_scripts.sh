@@ -42,6 +42,7 @@ scripts=(
     # SSL certificate helpers
     patch_apache_ssl_for_letsencrypt.sh
     testpoint-entrypoint-wrapper.sh
+    certbot-deploy-hook.sh
 
     # compose examples / templates
     docker-compose.testpoint.yml
