@@ -189,29 +189,53 @@ step_deploy_option_b() {
   run bash -c "cd /opt/perfsonar-tp && podman-compose up -d"
   run podman ps
   
-  # Auto-detect FQDNs from reverse DNS if not provided
+  # Auto-detect FQDNs from reverse DNS of all configured IPs
   local fqdns=()
-  if [ -n "$LE_FQDN" ]; then
-    fqdns=("$LE_FQDN")
-  else
-    log "No --fqdn provided; attempting to auto-detect from reverse DNS..."
-    if [ -f /etc/perfSONAR-multi-nic-config.conf ]; then
-      # Source the config to get IP arrays
-      # shellcheck disable=SC1091
-      source /etc/perfSONAR-multi-nic-config.conf || true
-      for ip in "${NIC_IPV4_ADDRS[@]}" "${NIC_IPV6_ADDRS[@]}"; do
-        [ "$ip" = "-" ] && continue
-        local fqdn
-        fqdn=$(dig +short -x "$ip" 2>/dev/null | sed 's/\.$//' || true)
-        [ -n "$fqdn" ] && fqdns+=("$fqdn")
-      done
-    fi
+  log "Auto-detecting FQDNs from reverse DNS of configured IPs..."
+  if [ -f /etc/perfSONAR-multi-nic-config.conf ]; then
+    # Source the config to get IP arrays
+    # shellcheck disable=SC1091
+    source /etc/perfSONAR-multi-nic-config.conf || true
+    for ip in "${NIC_IPV4_ADDRS[@]}" "${NIC_IPV6_ADDRS[@]}"; do
+      [ "$ip" = "-" ] && continue
+      
+      # Skip private/non-routable IPs:
+      # RFC1918: 10.x, 172.16-31.x, 192.168.x
+      # IPv6: fc00::/7 (ULA), fe80::/10 (link-local), ::1 (loopback)
+      # Other: 127.x (IPv4 loopback), 169.254.x (link-local)
+      if [[ "$ip" =~ ^10\. ]] || \
+         [[ "$ip" =~ ^192\.168\. ]] || \
+         [[ "$ip" =~ ^172\.(1[6-9]|2[0-9]|3[0-1])\. ]] || \
+         [[ "$ip" =~ ^127\. ]] || \
+         [[ "$ip" =~ ^169\.254\. ]] || \
+         [[ "$ip" =~ ^(fc|fd)[0-9a-f]{2}: ]] || \
+         [[ "$ip" =~ ^fe[89ab][0-9a-f]: ]] || \
+         [[ "$ip" =~ ^::1$ ]]; then
+        log "  $ip -> (skipped: private/non-routable IP)"
+        continue
+      fi
+      
+      local fqdn
+      fqdn=$(dig +short -x "$ip" 2>/dev/null | sed 's/\.$//' || true)
+      if [ -n "$fqdn" ]; then
+        log "  $ip -> $fqdn"
+        fqdns+=("$fqdn")
+      else
+        log "  $ip -> (no PTR record)"
+      fi
+    done
   fi
   
-  # Deduplicate FQDNs
+  # Add user-provided FQDN if specified (in addition to auto-detected)
+  if [ -n "$LE_FQDN" ]; then
+    log "Adding user-provided FQDN: $LE_FQDN"
+    fqdns+=("$LE_FQDN")
+  fi
+  
+  # Deduplicate FQDNs and filter out invalid entries
   if [ ${#fqdns[@]} -gt 0 ]; then
-    mapfile -t fqdns < <(printf '%s\n' "${fqdns[@]}" | sort -u)
-    log "FQDNs for certificate: ${fqdns[*]}"
+    mapfile -t fqdns < <(printf '%s\n' "${fqdns[@]}" | grep -v '^$' | sort -u)
+    log "Final FQDNs for certificate (${#fqdns[@]} total): ${fqdns[*]}"
   fi
   
   if [ ${#fqdns[@]} -gt 0 ] && [ -n "$LE_EMAIL" ]; then
