@@ -152,7 +152,7 @@ step_apply_pbr() {
   run "${pbr_cmd[@]}"
   run nmcli connection show
   run ip rule show
-  run bash -c 'grep -E "_[sS]ource_route" /etc/iproute2/rt_tables 2>/dev/null | awk '{'print $1'}' | while read -r t; do echo "=== TABLE $t ==="; ip route show table "$t"; done'
+  run bash -c 'grep -E "_[sS]ource_route" /etc/iproute2/rt_tables 2>/dev/null | awk "{print \$1}" | while read -r t; do echo "=== TABLE $t ==="; ip route show table "$t"; done'
 }
 
 step_dns_check() {
@@ -238,7 +238,7 @@ step_validate() {
   run podman ps
   run ss -tnlp | grep -E ':443|:80' || true
   run ip rule show
-  run bash -c 'grep -E "_[sS]ource_route" /etc/iproute2/rt_tables 2>/dev/null | awk '{'print $1'}' | while read -r t; do echo "=== TABLE $t ==="; ip route show table "$t"; done'
+  run bash -c 'grep -E "_[sS]ource_route" /etc/iproute2/rt_tables 2>/dev/null | awk "{print \$1}" | while read -r t; do echo "=== TABLE $t ==="; ip route show table "$t"; done'
   if [ -n "$LE_FQDN" ]; then
     run bash -c "openssl s_client -connect $LE_FQDN:443 -servername $LE_FQDN -showcerts </dev/null 2>/dev/null | openssl x509 -noout -issuer -subject -dates" || true
   fi
