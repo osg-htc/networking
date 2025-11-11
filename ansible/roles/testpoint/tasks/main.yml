@@ -29,3 +29,7 @@
     reload: yes
   loop: "{{ testpoint_sysctls }}"
   tags: ['perfsonar', 'sysctl']
+
+- name: Include optional bootstrap and PBR tasks
+  import_tasks: 99-bootstrap-pbr.yml
+  tags: ['perfsonar', 'bootstrap']

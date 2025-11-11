@@ -1,0 +1,26 @@
+---
+# Example playbook: safe bootstrap + non-destructive PBR generation
+#
+# This playbook is intentionally conservative:
+# - It downloads the perfSONAR helper scripts to the target host
+# - It optionally runs `check-deps.sh` (safe, non-fatal)
+# - It runs the PBR generator (`perfSONAR-pbr-nm.sh --generate-config-auto`) which
+#   writes `/etc/perfSONAR-multi-nic-config.conf` for inspection but does not
+#   apply network changes.
+#
+# Usage:
+#   ansible-playbook -i ansible/inventory.example ansible/playbooks/bootstrap-generate.yml
+
+- hosts: testpoints
+  become: true
+  vars:
+    # Opt in to fetching helper scripts on the target host
+    perfsonar_install_tools_scripts: true
+    perfsonar_tools_root: /opt/perfsonar-tp
+    # Run check-deps as a diagnostic (optional, safe)
+    perfsonar_run_check_deps: true
+    # Only generate the multi-nic config (non-destructive)
+    perfsonar_pbr_action: 'generate'
+
+  roles:
+    - role: testpoint

@@ -1,0 +1,31 @@
+---
+# Playbook: generate multi-nic config and fetch it back for inspection
+# Safe, non-destructive: runs generator only (no network apply), then fetches
+# `/etc/perfSONAR-multi-nic-config.conf` to `./artifacts/` on the control node.
+
+- hosts: testpoints
+  become: true
+  vars:
+    perfsonar_install_tools_scripts: true
+    perfsonar_tools_root: /opt/perfsonar-tp
+    perfsonar_run_check_deps: false
+    perfsonar_pbr_action: 'generate'
+
+  roles:
+    - role: testpoint
+
+  tasks:
+    - name: Ensure artifacts directory exists on control host
+      file:
+        path: ./artifacts
+        state: directory
+        mode: '0755'
+      delegate_to: localhost
+      run_once: true
+
+    - name: Fetch generated perfSONAR multi-nic config if present
+      fetch:
+        src: /etc/perfSONAR-multi-nic-config.conf
+        dest: ./artifacts/{{ inventory_hostname }}-perfsonar-multi-nic-config.conf
+        flat: true
+      ignore_errors: true

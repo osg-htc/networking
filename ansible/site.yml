@@ -1,9 +1,18 @@
 - hosts: testpoints
   become: true
   vars:
+    # Feature toggles (override in group_vars or via -e)
     enable_fail2ban: false
     enable_selinux: false
     enable_nftables: false
+
+    # Optional: bootstrap perfSONAR helper scripts and run PBR actions
+    # These are opt-in. Set via -e or in group_vars/testpoints.yml
+    perfsonar_install_tools_scripts: false    # fetch helper scripts to perfsonar_tools_root
+    perfsonar_tools_root: /opt/perfsonar-tp
+    perfsonar_run_check_deps: false          # run check-deps.sh after bootstrap (non-fatal)
+    # perfsonar_pbr_action: 'none' | 'generate' | 'apply' | 'rebuild'
+    perfsonar_pbr_action: 'none'
 
     # Defaults can be overridden in group_vars/ or via -e
     selinux_state: enforcing
