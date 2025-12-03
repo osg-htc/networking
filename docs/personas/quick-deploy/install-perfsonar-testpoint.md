@@ -452,18 +452,26 @@ The container should show `healthy` status. The healthcheck monitors Apache HTTP
 
 That's it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
 
-#### Ensure containers restart automatically on reboot (systemd service)
+#### Ensure containers restart automatically on reboot (systemd units - REQUIRED)
 
-Without a service manager, compose-managed containers may not come back after a host reboot. Install the provided systemd service to make container startup persistent across reboots:
+!!! warning "podman-compose limitation with systemd containers"
+
+    The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always`
+    flag to function correctly. **podman-compose does not support this flag**, which causes
+    containers to crash-loop after reboot with exit code 255.
+    
+    You **must** use the systemd unit approach below instead of relying on compose alone.
+
+Install the provided systemd units to manage containers with proper systemd support:
 
 ```bash
 curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh \
-    -o /tmp/install-systemd-service.sh
-chmod 0755 /tmp/install-systemd-service.sh
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
+    -o /tmp/install-systemd-units.sh
+chmod 0755 /tmp/install-systemd-units.sh
 
-# Install for compose directory /opt/perfsonar-tp
-/tmp/install-systemd-service.sh /opt/perfsonar-tp
+# Install testpoint-only systemd unit
+/tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp
 
 # Enable and start now
 systemctl enable --now perfsonar-testpoint.service
@@ -474,9 +482,10 @@ podman ps
 ```
 
 Notes:
-- The service uses `podman-compose up -d` at boot and `podman-compose down` on stop.
-- If you keep your compose files elsewhere, pass that directory as the first argument to the installer.
-- To update the compose files, edit `/opt/perfsonar-tp/docker-compose.yml` and run `systemctl restart perfsonar-testpoint.service`.
+- The service uses `podman run --systemd=always` to enable proper systemd operation inside the container
+- The compose file is kept for reference but not used by the systemd units
+- If you need to update container configuration, edit the systemd unit file directly: `/etc/systemd/system/perfsonar-testpoint.service`
+- After editing the unit file, reload and restart: `systemctl daemon-reload && systemctl restart perfsonar-testpoint.service`
 
 ---
 
@@ -596,19 +605,33 @@ podman-compose up -d
 At this point, the testpoint is running with self-signed certificates. The certbot container is also
 running but won't renew anything until you obtain the initial certificates.
 
-#### Ensure containers restart automatically on reboot (systemd service)
+#### Ensure containers restart automatically on reboot (systemd units - REQUIRED)
 
-Install and enable the systemd service so the compose stack starts on boot:
+!!! warning "podman-compose limitation with systemd containers"
+
+    The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always`
+    flag to function correctly. **podman-compose does not support this flag**, which causes
+    containers to crash-loop after reboot with exit code 255.
+    
+    You **must** use the systemd unit approach below instead of relying on compose alone.
+
+Install and enable the systemd units so containers start on boot with proper systemd support:
 
 ```bash
 curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh \
-    -o /tmp/install-systemd-service.sh
-chmod 0755 /tmp/install-systemd-service.sh
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
+    -o /tmp/install-systemd-units.sh
+chmod 0755 /tmp/install-systemd-units.sh
 
-/tmp/install-systemd-service.sh /opt/perfsonar-tp
-systemctl enable --now perfsonar-testpoint.service
-systemctl status perfsonar-testpoint.service --no-pager
+# Install both testpoint and certbot systemd units
+/tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
+
+# Enable and start services
+systemctl enable --now perfsonar-testpoint.service perfsonar-certbot.service
+
+# Verify services
+systemctl status perfsonar-testpoint.service perfsonar-certbot.service --no-pager
+podman ps
 ```
 
 #### 3) Obtain your first Let's Encrypt certificate (one-time)
@@ -1103,6 +1126,93 @@ Perform these checks before handing the host over to operations:
     - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
     - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
     - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
+
+??? failure "Container won't start or exits immediately"
+
+    **Symptoms:** `podman ps` shows no running containers, or container exits shortly after starting.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check container logs
+    podman logs perfsonar-testpoint
+    
+    # Check for systemd initialization errors
+    podman logs perfsonar-testpoint 2>&1 | grep -i "failed\|error"
+    
+    # Verify compose file syntax
+    cd /opt/perfsonar-tp
+    podman-compose config
+    ```
+    
+    **Common causes:**
+    
+    - Missing entrypoint wrapper: Ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
+    - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
+    - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
+    - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
+
+??? failure "Container crashes after reboot with exit code 255"
+
+    **Symptoms:** Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts with exit code 255.
+    
+    **Cause:** The perfSONAR testpoint image runs systemd internally but podman-compose doesn't support the `--systemd=always` flag required for proper systemd operation in containers.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check container status
+    podman ps -a
+    
+    # Check systemd service status
+    systemctl status perfsonar-testpoint.service
+    
+    # View recent container logs
+    podman logs perfsonar-testpoint --tail 100
+    
+    # Check if using compose-based service (BAD)
+    grep -A5 "ExecStart" /etc/systemd/system/perfsonar-testpoint.service
+    ```
+    
+    **Solution:**
+    
+    Replace the compose-based systemd service with proper systemd units that use `podman run --systemd=always`:
+    
+    ```bash
+    # Stop and disable old service
+    systemctl stop perfsonar-testpoint.service
+    systemctl disable perfsonar-testpoint.service
+    
+    # Install new systemd units
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
+        -o /tmp/install-systemd-units.sh
+    chmod 0755 /tmp/install-systemd-units.sh
+    
+    # For testpoint only:
+    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp
+    
+    # For testpoint + certbot:
+    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
+    
+    # Enable and start
+    systemctl enable --now perfsonar-testpoint.service
+    
+    # If using certbot:
+    systemctl enable --now perfsonar-certbot.service
+    
+    # Verify containers are running
+    podman ps
+    curl -kI https://127.0.0.1/
+    ```
+    
+    **Verification:**
+    
+    After installing the new units, the testpoint should:
+    - Start successfully on boot
+    - Run systemd properly inside the container
+    - Maintain state across reboots
+    - Show "Up" status in `podman ps` (not "Exited" or crash-looping)
 
 ??? failure "SELinux denials blocking container operations"
 
