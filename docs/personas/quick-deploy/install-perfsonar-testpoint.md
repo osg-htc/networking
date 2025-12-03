@@ -1401,9 +1401,13 @@ Perform these checks before handing the host over to operations:
     
     **Solutions:**
     
-    - Ensure certbot container has deploy hook configured: `--deploy-hook /opt/certbot/deploy-hook.sh`
-    - Verify Podman socket is mounted in certbot container
-    - Manually restart testpoint after renewals if deploy hook fails
+    - Verify deploy hook script exists and is executable: `/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh`
+    - Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
+    - Verify Podman socket is mounted in certbot container: `/run/podman/podman.sock`
+    - Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
+    - Manually restart testpoint after renewals if deploy hook fails: `podman restart perfsonar-testpoint`
+    
+    **Note:** Certbot automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are renewed. Do not use `--deploy-hook` parameter with full paths ending in `.sh` as certbot will append `-hook` to the filename.
 
 ### perfSONAR Service Issues
 

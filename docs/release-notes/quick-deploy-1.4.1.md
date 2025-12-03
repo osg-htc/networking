@@ -14,11 +14,12 @@ The `perfsonar-certbot.service` systemd unit has been fixed to properly manage t
 
 **Root Cause:** The certbot container image has a built-in entrypoint that expects direct certbot commands. When the systemd unit attempted to run a shell loop for certificate renewal, the entrypoint incorrectly interpreted the shell command as a config file path.
 
-**Solution:** Two critical fixes were applied to the `install-systemd-units.sh` script:
+**Solution:** Three critical fixes were applied to the `install-systemd-units.sh` script:
 
 1. **Added `--entrypoint=/bin/sh`** to override the container's built-in entrypoint, allowing shell commands to execute properly
 2. **Added `--systemd=always`** to ensure proper systemd integration and automatic container restart after host reboots
 3. **Improved command syntax** from `/bin/sh -c '...'` to `-c "..."` with proper signal handling
+4. **Removed `--deploy-hook` parameter** from certbot renew command - certbot automatically discovers and executes hooks in `/etc/letsencrypt/renewal-hooks/deploy/` (using `--deploy-hook` with paths ending in `.sh` causes certbot to append `-hook` to the filename, breaking hook execution)
 
 ## Detailed Changes
 
@@ -29,6 +30,7 @@ The `perfsonar-certbot.service` systemd unit has been fixed to properly manage t
   - Added `--entrypoint=/bin/sh` to override certbot container entrypoint
   - Changed trap handling from `trap exit TERM` to `trap 'exit 0' TERM` for cleaner shutdown
   - Fixed command syntax to use `-c` flag properly with entrypoint override
+  - Removed `--deploy-hook` parameter from `certbot renew` command to use automatic hook discovery
 
 ### Documentation Updates
 
