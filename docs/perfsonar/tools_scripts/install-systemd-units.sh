@@ -146,7 +146,7 @@ ExecStart=/usr/bin/podman run --name certbot \\
   -v $INSTALL_DIR/tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro \\
   --label=io.containers.autoupdate=registry \\
   docker.io/certbot/certbot:latest \\
-  -c "trap 'exit 0' TERM; while :; do certbot renew --deploy-hook /etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh; sleep 12h & wait \$\$!; done"
+  -c "trap 'exit 0' TERM; while :; do certbot renew; sleep 12h & wait \$\$!; done"
 ExecStop=/usr/bin/podman stop -t 10 certbot
 ExecStopPost=/usr/bin/podman rm -f certbot
 
