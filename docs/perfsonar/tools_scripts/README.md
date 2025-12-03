@@ -7,12 +7,14 @@ static IPv4/IPv6 addressing and per-NIC source-based routing via NetworkManager
 
 Quick overview
 --------------
+
 - Script: `perfSONAR-pbr-nm.sh`
 - Config file: `/etc/perfSONAR-multi-nic-config.conf`
 - Log file: `/var/log/perfSONAR-multi-nic-config.log`
 
 Install helper
 --------------
+
 A small helper is provided to populate `/opt/perfsonar-tp/tools_scripts` from
 this repository using a shallow sparse checkout. It copies only the
 `docs/perfsonar/tools_scripts` directory and preserves executable bits.
@@ -20,6 +22,34 @@ this repository using a shallow sparse checkout. It copies only the
 - Script: `install_tools_scripts.sh` (path: `docs/perfsonar/tools_scripts/install_tools_scripts.sh`)
 - Purpose: idempotent installer for `/opt/perfsonar-tp/tools_scripts`
 - Options: `--dry-run` (preview), `--skip-testpoint` (don't clone testpoint repo)
+
+Systemd service installer
+--------------------------
+
+A helper script is provided to install and enable a systemd service for
+automatic container restart on boot. This ensures perfSONAR testpoint containers
+managed by podman-compose restart automatically after a host reboot.
+
+- Script: `install-systemd-service.sh`
+- Purpose: Creates and enables systemd service for perfsonar-testpoint containers
+- Service file: `/etc/systemd/system/perfsonar-testpoint.service`
+- Must be run as root
+
+Usage:
+
+```bash
+# Install with default path (/opt/perfsonar-tp)
+sudo bash install-systemd-service.sh
+
+# Install with custom path
+sudo bash install-systemd-service.sh /custom/path/to/perfsonar-tp
+```
+
+After installation:
+
+- Containers will automatically start on boot
+- Use `systemctl start|stop|restart|status perfsonar-testpoint` to manage
+- View logs with `journalctl -u perfsonar-testpoint -f`
 
 Usage examples
 --------------
@@ -45,6 +75,7 @@ bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
 
 Requirements
 ------------
+
 - Must be run as root. The script now enforces running as root early in
   execution and will exit if run as a non-privileged user. Run it with sudo
   or from a root shell.
@@ -109,6 +140,7 @@ installing `rsync` provides safer, more robust backups.
 
 Safety first
 ------------
+
 This script will REMOVE ALL existing NetworkManager connections when run.
 Always test in a VM or console-attached host and use `--dry-run` to preview
 changes. The script creates a timestamped backup of existing connections before
@@ -162,12 +194,12 @@ Gateway requirement, inference, and generator warnings
 
 - Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.
 - Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.
-  - IPv4: subnets are checked in bash; one unambiguous match is required.
-  - IPv6: requires `python3` (`ipaddress` module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.
-  - If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.
+    - IPv4: subnets are checked in bash; one unambiguous match is required.
+    - IPv6: requires `python3` (`ipaddress` module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.
+    - If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.
 - This inference runs in two places:
-  1) During auto-generation (`--generate-config-auto` or `--generate-config-debug`) so the written config can be immediately useful.
-  2) During normal execution after loading the config but before validation, so missing gateways may be filled automatically.
+    1. During auto-generation (`--generate-config-auto` or `--generate-config-debug`) so the written config can be immediately useful.
+    1. During normal execution after loading the config but before validation, so missing gateways may be filled automatically.
 
 Example: generated config with inferred gateways
 
@@ -212,7 +244,6 @@ Backups and safety
 ------------------
 
 - Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
-
 
 Tests
 -----

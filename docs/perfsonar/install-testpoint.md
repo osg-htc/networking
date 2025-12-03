@@ -65,6 +65,55 @@ Or, if using Docker:
 (cd /opt/perfsonar-tp; docker-compose up -d)
 ```
 
+### Enable automatic container restart on boot
+
+To ensure containers restart automatically after a host reboot, install and enable the systemd service:
+
+```bash
+# Using the helper script (recommended)
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh \
+    -o /tmp/install-systemd-service.sh
+chmod +x /tmp/install-systemd-service.sh
+sudo /tmp/install-systemd-service.sh /opt/perfsonar-tp
+```
+
+Or manually create the service file:
+
+```bash
+sudo tee /etc/systemd/system/perfsonar-testpoint.service > /dev/null << 'EOF'
+[Unit]
+Description=perfSONAR Testpoint Container Service
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/opt/perfsonar-tp
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/perfsonar-tp
+ExecStart=/usr/bin/podman-compose up -d
+ExecStop=/usr/bin/podman-compose down
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable perfsonar-testpoint.service
+```
+
+Useful commands:
+
+- Start service: `systemctl start perfsonar-testpoint`
+- Stop service: `systemctl stop perfsonar-testpoint`
+- Restart service: `systemctl restart perfsonar-testpoint`
+- Check status: `systemctl status perfsonar-testpoint`
+- View logs: `journalctl -u perfsonar-testpoint -f`
+
 ---
 
 ## 3. Configure Policy-Based Routing for Multi-Homed NICs
@@ -105,8 +154,8 @@ If you prefer to configure rules manually, see the example below.
 
 Suppose:
 
-* eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1
-* eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1
+- eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1
+- eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1
 
 #### a) Add custom routing tables
 
@@ -175,9 +224,9 @@ The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/pe
 
 Below is a sample NFTables rule set that
 
-* Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)
-* Restricts SSH access to trusted subnets/hosts
-* Accepts ICMP/ICMPv6 and related/permitted connections
+- Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)
+- Restricts SSH access to trusted subnets/hosts
+- Accepts ICMP/ICMPv6 and related/permitted connections
 
 /etc/nftables.conf:
 
@@ -272,8 +321,7 @@ podman exec -it perfsonar-testpoint psconfig remote --configure-archives add "ht
 
 ## 8. References & Further Reading
 
-* [perfSONAR testpoint Docker GitHub](https://github.com/perfsonar/perfsonar-testpoint-docker/)
-* [perfSONAR Documentation](https://docs.perfsonar.net/)
-* Red Hat Policy Routing [BROKEN-LINK: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_configuring-policy-based-routing_configuring-and-managing-networking]
-* [NFTables Wiki](https://wiki.nftables.org/)
-
+- [perfSONAR testpoint Docker GitHub](https://github.com/perfsonar/perfsonar-testpoint-docker/)
+- [perfSONAR Documentation](https://docs.perfsonar.net/)
+- Red Hat Policy Routing [BROKEN-LINK: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_configuring-policy-based-routing_configuring-and-managing-networking]
+- [NFTables Wiki](https://wiki.nftables.org/)

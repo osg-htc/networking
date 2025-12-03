@@ -1,0 +1,102 @@
+---
+# Playbook: Deploy perfSONAR testpoint container with podman-compose
+# Installs required packages, deploys docker-compose.yml, and sets up
+# systemd service for automatic container restart on boot.
+
+- hosts: testpoints
+  become: true
+  vars:
+    perfsonar_install_dir: /opt/perfsonar-tp
+    perfsonar_compose_url: https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml
+    perfsonar_tools_install_url: https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh
+    perfsonar_systemd_install_url: https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh
+    
+  tasks:
+    - name: Ensure system is up to date
+      package:
+        name: '*'
+        state: latest
+      tags: ['system', 'packages']
+
+    - name: Install required packages for podman-compose
+      package:
+        name:
+          - git
+          - podman
+          - podman-compose
+          - nftables
+          - iproute
+        state: present
+      tags: ['packages']
+
+    - name: Create perfSONAR installation directory
+      file:
+        path: "{{ perfsonar_install_dir }}"
+        state: directory
+        mode: '0755'
+      tags: ['deploy']
+
+    - name: Download and install tools_scripts
+      shell: |
+        curl -fsSL {{ perfsonar_tools_install_url }} -o /tmp/install_tools_scripts.sh
+        chmod +x /tmp/install_tools_scripts.sh
+        /tmp/install_tools_scripts.sh {{ perfsonar_install_dir }}
+        rm -f /tmp/install_tools_scripts.sh
+      args:
+        creates: "{{ perfsonar_install_dir }}/tools_scripts/README.md"
+      tags: ['deploy']
+
+    - name: Download docker-compose.yml
+      get_url:
+        url: "{{ perfsonar_compose_url }}"
+        dest: "{{ perfsonar_install_dir }}/docker-compose.yml"
+        mode: '0644'
+      tags: ['deploy']
+
+    - name: Create psconfig directory
+      file:
+        path: "{{ perfsonar_install_dir }}/psconfig"
+        state: directory
+        mode: '0755'
+      tags: ['deploy']
+
+    - name: Download and run systemd service installer
+      shell: |
+        curl -fsSL {{ perfsonar_systemd_install_url }} -o /tmp/install-systemd-service.sh
+        chmod +x /tmp/install-systemd-service.sh
+        /tmp/install-systemd-service.sh {{ perfsonar_install_dir }}
+        rm -f /tmp/install-systemd-service.sh
+      args:
+        creates: /etc/systemd/system/perfsonar-testpoint.service
+      tags: ['systemd']
+
+    - name: Ensure perfsonar-testpoint service is enabled
+      systemd:
+        name: perfsonar-testpoint
+        enabled: true
+        daemon_reload: true
+      tags: ['systemd']
+
+    - name: Start perfsonar-testpoint service
+      systemd:
+        name: perfsonar-testpoint
+        state: started
+      tags: ['systemd', 'start']
+
+    - name: Wait for containers to be healthy
+      shell: podman ps --filter "name=perfsonar-testpoint" --format "{{ '{{' }}.Status{{ '}}' }}"
+      register: container_status
+      until: "'Up' in container_status.stdout"
+      retries: 10
+      delay: 10
+      tags: ['verify']
+
+    - name: Display container status
+      command: podman ps
+      register: podman_ps
+      tags: ['verify']
+
+    - name: Show running containers
+      debug:
+        var: podman_ps.stdout_lines
+      tags: ['verify']
