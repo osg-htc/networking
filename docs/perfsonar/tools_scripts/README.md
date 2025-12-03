@@ -21,6 +21,32 @@ this repository using a shallow sparse checkout. It copies only the
 - Purpose: idempotent installer for `/opt/perfsonar-tp/tools_scripts`
 - Options: `--dry-run` (preview), `--skip-testpoint` (don't clone testpoint repo)
 
+Systemd service installer
+--------------------------
+A helper script is provided to install and enable a systemd service for
+automatic container restart on boot. This ensures perfSONAR testpoint containers
+managed by podman-compose restart automatically after a host reboot.
+
+- Script: `install-systemd-service.sh`
+- Purpose: Creates and enables systemd service for perfsonar-testpoint containers
+- Service file: `/etc/systemd/system/perfsonar-testpoint.service`
+- Must be run as root
+
+Usage:
+
+```bash
+# Install with default path (/opt/perfsonar-tp)
+sudo bash install-systemd-service.sh
+
+# Install with custom path
+sudo bash install-systemd-service.sh /custom/path/to/perfsonar-tp
+```
+
+After installation:
+- Containers will automatically start on boot
+- Use `systemctl start|stop|restart|status perfsonar-testpoint` to manage
+- View logs with `journalctl -u perfsonar-testpoint -f`
+
 Usage examples
 --------------
 

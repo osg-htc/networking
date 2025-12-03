@@ -1,19 +1,52 @@
 # Ansible: perfSONAR Testpoint (Minimal Skeleton)
 
-This minimal Ansible skeleton installs and configures a perfSONAR testpoint on RHEL-family systems with optional features you can toggle:
+This minimal Ansible skeleton installs and configures perfSONAR testpoints on RHEL-family systems with optional features you can toggle:
 - fail2ban
 - SELinux
 - nftables
+
+It includes support for both bare-metal and containerized deployments:
+- **Bare-metal deployment**: Traditional perfSONAR testpoint package installation
+- **Container deployment**: Podman-compose based containerized testpoint with automatic restart
 
 It is designed to be small, idempotent, and easy to try. Extend as needed for your environment.
 
 ## Prerequisites
 - Control node with Ansible >= 2.12
 - Target host: RHEL/Alma/Rocky 8/9 (sudo privileges)
-- Network access to OS and perfSONAR repos
+- Network access to OS and perfSONAR repos (for bare-metal)
+- Network access to container registries (for containerized deployment)
 
 ## Inventory Example
 See [inventory.example](inventory.example). Place your target host(s) in the `testpoints` group.
+
+## Deployment Options
+
+### Container Deployment (Recommended)
+Deploy perfSONAR testpoint as containers with automatic restart on boot:
+
+```bash
+# Deploy container-based testpoint with systemd service
+ansible-playbook -i ansible/inventory.example ansible/playbooks/deploy-testpoint-container.yml
+```
+
+Features:
+- Installs podman and podman-compose
+- Deploys docker-compose.yml from upstream
+- Installs and enables systemd service for automatic restart on boot
+- Includes health checks and verification
+
+### Bare-metal Deployment (Traditional)
+Install perfSONAR testpoint packages directly on the host:
+
+```bash
+# Dry run
+ansible-playbook -i ansible/inventory.example ansible/site.yml --check
+
+# Apply with optional features enabled
+ansible-playbook -i ansible/inventory.example ansible/site.yml \
+  -e enable_fail2ban=true -e enable_selinux=true -e enable_nftables=true
+```
 
 ## Feature Toggles
 These booleans can be set in group_vars, host_vars, or via `-e` extra vars:
