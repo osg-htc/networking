@@ -154,8 +154,8 @@ If you prefer to configure rules manually, see the example below.
 
 Suppose:
 
-* eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1
-* eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1
+- eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1
+- eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1
 
 #### a) Add custom routing tables
 
@@ -224,9 +224,9 @@ The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/pe
 
 Below is a sample NFTables rule set that
 
-* Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)
-* Restricts SSH access to trusted subnets/hosts
-* Accepts ICMP/ICMPv6 and related/permitted connections
+- Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)
+- Restricts SSH access to trusted subnets/hosts
+- Accepts ICMP/ICMPv6 and related/permitted connections
 
 /etc/nftables.conf:
 
@@ -321,7 +321,7 @@ podman exec -it perfsonar-testpoint psconfig remote --configure-archives add "ht
 
 ## 8. References & Further Reading
 
-* [perfSONAR testpoint Docker GitHub](https://github.com/perfsonar/perfsonar-testpoint-docker/)
-* [perfSONAR Documentation](https://docs.perfsonar.net/)
-* Red Hat Policy Routing [BROKEN-LINK: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_configuring-policy-based-routing_configuring-and-managing-networking]
-* [NFTables Wiki](https://wiki.nftables.org/)
+- [perfSONAR testpoint Docker GitHub](https://github.com/perfsonar/perfsonar-testpoint-docker/)
+- [perfSONAR Documentation](https://docs.perfsonar.net/)
+- Red Hat Policy Routing [BROKEN-LINK: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_configuring-policy-based-routing_configuring-and-managing-networking]
+- [NFTables Wiki](https://wiki.nftables.org/)
