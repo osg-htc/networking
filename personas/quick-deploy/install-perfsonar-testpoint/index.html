@@ -3342,6 +3342,50 @@ curl<span class="w"> </span>-kI<span class="w"> </span>https://127.0.0.1/
 - Show "Up" status in <code>podman ps</code> (not "Exited" or crash-looping)</p>
 </details>
 <details class="failure">
+<summary>Certbot service fails with 'Unable to open config file' error</summary>
+<p><strong>Symptoms:</strong> <code>perfsonar-certbot.service</code> fails immediately after starting with exit code 2. Logs show: <code>certbot: error: Unable to open config file: trap exit TERM; while...</code></p>
+<p><strong>Cause:</strong> The certbot container image has a built-in entrypoint that expects certbot commands directly. When using a shell loop for renewal, the entrypoint tries to parse the shell command as a certbot config file, causing this error.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check certbot service status</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-certbot.service
+
+<span class="c1"># View detailed logs</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+
+<span class="c1"># Check for the error in logs</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Unable to open config file&quot;</span>
+
+<span class="c1"># Verify service file configuration</span>
+grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;ExecStart&quot;</span><span class="w"> </span>/etc/systemd/system/perfsonar-certbot.service
+</code></pre></div>
+<p><strong>Solution:</strong></p>
+<p>The certbot service needs two flags:
+- <code>--systemd=always</code> for proper systemd integration and reboot persistence
+- <code>--entrypoint=/bin/sh</code> to override the built-in entrypoint</p>
+<p>Re-run the installation script to get the fixed version:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Stop current service</span>
+systemctl<span class="w"> </span>stop<span class="w"> </span>perfsonar-certbot.service
+
+<span class="c1"># Download and install updated systemd units</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
+
+<span class="c1"># Install with certbot support</span>
+/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span>--with-certbot
+
+<span class="c1"># Start the fixed service</span>
+systemctl<span class="w"> </span>daemon-reload
+systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-certbot.service
+
+<span class="c1"># Verify it&#39;s running</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-certbot.service
+podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>certbot
+</code></pre></div>
+<p><strong>Expected result:</strong> The certbot container should be running (not exiting) and the service should be in "active (running)" state.</p>
+</details>
+<details class="failure">
 <summary>SELinux denials blocking container operations</summary>
 <p><strong>Symptoms:</strong> Container starts but services fail, permission denied errors in logs.</p>
 <p><strong>Diagnostic steps:</strong></p>
@@ -3456,10 +3500,13 @@ podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
 </code></pre></div>
 <p><strong>Solutions:</strong></p>
 <ul>
-<li>Ensure certbot container has deploy hook configured: <code>--deploy-hook /opt/certbot/deploy-hook.sh</code></li>
-<li>Verify Podman socket is mounted in certbot container</li>
-<li>Manually restart testpoint after renewals if deploy hook fails</li>
+<li>Verify deploy hook script exists and is executable: <code>/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh</code></li>
+<li>Ensure deploy hook is mounted in container at: <code>/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh</code></li>
+<li>Verify Podman socket is mounted in certbot container: <code>/run/podman/podman.sock</code></li>
+<li>Check deploy hook logs: <code>journalctl -u perfsonar-certbot.service | grep deploy</code></li>
+<li>Manually restart testpoint after renewals if deploy hook fails: <code>podman restart perfsonar-testpoint</code></li>
 </ul>
+<p><strong>Note:</strong> Certbot automatically executes scripts in <code>/etc/letsencrypt/renewal-hooks/deploy/</code> when certificates are renewed. Do not use <code>--deploy-hook</code> parameter with full paths ending in <code>.sh</code> as certbot will append <code>-hook</code> to the filename.</p>
 </details>
 <h3 id="perfsonar-service-issues">perfSONAR Service Issues<a class="headerlink" href="#perfsonar-service-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
