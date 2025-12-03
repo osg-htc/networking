@@ -1042,10 +1042,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-service" class="md-nav__link">
+  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-units-required" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ensure containers restart automatically on reboot (systemd service)
+        Ensure containers restart automatically on reboot (systemd units - REQUIRED)
       
     </span>
   </a>
@@ -1092,10 +1092,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-service_1" class="md-nav__link">
+  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-units-required_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ensure containers restart automatically on reboot (systemd service)
+        Ensure containers restart automatically on reboot (systemd units - REQUIRED)
       
     </span>
   </a>
@@ -2096,10 +2096,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-service" class="md-nav__link">
+  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-units-required" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ensure containers restart automatically on reboot (systemd service)
+        Ensure containers restart automatically on reboot (systemd units - REQUIRED)
       
     </span>
   </a>
@@ -2146,10 +2146,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-service_1" class="md-nav__link">
+  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-units-required_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ensure containers restart automatically on reboot (systemd service)
+        Ensure containers restart automatically on reboot (systemd units - REQUIRED)
       
     </span>
   </a>
@@ -2706,15 +2706,22 @@ Browse: <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsona
 </code></pre></div>
 <p>The container should show <code>healthy</code> status. The healthcheck monitors Apache HTTPS availability.</p>
 <p>That's it for the testpoint-only mode. Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>. Jump to Step 6 below.</p>
-<h4 id="ensure-containers-restart-automatically-on-reboot-systemd-service">Ensure containers restart automatically on reboot (systemd service)<a class="headerlink" href="#ensure-containers-restart-automatically-on-reboot-systemd-service" title="Permanent link">&para;</a></h4>
-<p>Without a service manager, compose-managed containers may not come back after a host reboot. Install the provided systemd service to make container startup persistent across reboots:</p>
+<h4 id="ensure-containers-restart-automatically-on-reboot-systemd-units-required">Ensure containers restart automatically on reboot (systemd units - REQUIRED)<a class="headerlink" href="#ensure-containers-restart-automatically-on-reboot-systemd-units-required" title="Permanent link">&para;</a></h4>
+<div class="admonition warning">
+<p class="admonition-title">podman-compose limitation with systemd containers</p>
+<p>The perfSONAR testpoint image runs <strong>systemd internally</strong> and requires the <code>--systemd=always</code>
+flag to function correctly. <strong>podman-compose does not support this flag</strong>, which causes
+containers to crash-loop after reboot with exit code 255.</p>
+<p>You <strong>must</strong> use the systemd unit approach below instead of relying on compose alone.</p>
+</div>
+<p>Install the provided systemd units to manage containers with proper systemd support:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-service.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-service.sh
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
 
-<span class="c1"># Install for compose directory /opt/perfsonar-tp</span>
-/tmp/install-systemd-service.sh<span class="w"> </span>/opt/perfsonar-tp
+<span class="c1"># Install testpoint-only systemd unit</span>
+/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp
 
 <span class="c1"># Enable and start now</span>
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
@@ -2724,9 +2731,10 @@ systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoi
 podman<span class="w"> </span>ps
 </code></pre></div>
 <p>Notes:
-- The service uses <code>podman-compose up -d</code> at boot and <code>podman-compose down</code> on stop.
-- If you keep your compose files elsewhere, pass that directory as the first argument to the installer.
-- To update the compose files, edit <code>/opt/perfsonar-tp/docker-compose.yml</code> and run <code>systemctl restart perfsonar-testpoint.service</code>.</p>
+- The service uses <code>podman run --systemd=always</code> to enable proper systemd operation inside the container
+- The compose file is kept for reference but not used by the systemd units
+- If you need to update container configuration, edit the systemd unit file directly: <code>/etc/systemd/system/perfsonar-testpoint.service</code>
+- After editing the unit file, reload and restart: <code>systemctl daemon-reload &amp;&amp; systemctl restart perfsonar-testpoint.service</code></p>
 <hr />
 <h3 id="option-b-testpoint-lets-encrypt-shared-apache-and-certs">Option B — Testpoint + Let's Encrypt (shared Apache and certs)<a class="headerlink" href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" title="Permanent link">&para;</a></h3>
 <p>This mode runs two containers (<code>perfsonar-testpoint</code> and <code>certbot</code>) and bind-mounts the following host paths so Apache content and certificates persist on the host and are shared between containers:</p>
@@ -2815,16 +2823,29 @@ podman-compose<span class="w"> </span>up<span class="w"> </span>-d
 </code></pre></div>
 <p>At this point, the testpoint is running with self-signed certificates. The certbot container is also
 running but won't renew anything until you obtain the initial certificates.</p>
-<h4 id="ensure-containers-restart-automatically-on-reboot-systemd-service_1">Ensure containers restart automatically on reboot (systemd service)<a class="headerlink" href="#ensure-containers-restart-automatically-on-reboot-systemd-service_1" title="Permanent link">&para;</a></h4>
-<p>Install and enable the systemd service so the compose stack starts on boot:</p>
+<h4 id="ensure-containers-restart-automatically-on-reboot-systemd-units-required_1">Ensure containers restart automatically on reboot (systemd units - REQUIRED)<a class="headerlink" href="#ensure-containers-restart-automatically-on-reboot-systemd-units-required_1" title="Permanent link">&para;</a></h4>
+<div class="admonition warning">
+<p class="admonition-title">podman-compose limitation with systemd containers</p>
+<p>The perfSONAR testpoint image runs <strong>systemd internally</strong> and requires the <code>--systemd=always</code>
+flag to function correctly. <strong>podman-compose does not support this flag</strong>, which causes
+containers to crash-loop after reboot with exit code 255.</p>
+<p>You <strong>must</strong> use the systemd unit approach below instead of relying on compose alone.</p>
+</div>
+<p>Install and enable the systemd units so containers start on boot with proper systemd support:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-service.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-service.sh
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
 
-/tmp/install-systemd-service.sh<span class="w"> </span>/opt/perfsonar-tp
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
-systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>--no-pager
+<span class="c1"># Install both testpoint and certbot systemd units</span>
+/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span>--with-certbot
+
+<span class="c1"># Enable and start services</span>
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>perfsonar-certbot.service
+
+<span class="c1"># Verify services</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span>--no-pager
+podman<span class="w"> </span>ps
 </code></pre></div>
 <h4 id="3-obtain-your-first-lets-encrypt-certificate-one-time">3) Obtain your first Let's Encrypt certificate (one-time)<a class="headerlink" href="#3-obtain-your-first-lets-encrypt-certificate-one-time" title="Permanent link">&para;</a></h4>
 <p>Use Certbot in standalone mode to obtain the initial certificates. The perfsonar-testpoint image is
@@ -3245,6 +3266,80 @@ podman-compose<span class="w"> </span>config
 <li>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</li>
 <li>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</li>
 </ul>
+</details>
+<details class="failure">
+<summary>Container won't start or exits immediately</summary>
+<p><strong>Symptoms:</strong> <code>podman ps</code> shows no running containers, or container exits shortly after starting.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check container logs</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># Check for systemd initialization errors</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;failed\|error&quot;</span>
+
+<span class="c1"># Verify compose file syntax</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp
+podman-compose<span class="w"> </span>config
+</code></pre></div>
+<p><strong>Common causes:</strong></p>
+<ul>
+<li>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</li>
+<li>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</li>
+<li>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</li>
+<li>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</li>
+</ul>
+</details>
+<details class="failure">
+<summary>Container crashes after reboot with exit code 255</summary>
+<p><strong>Symptoms:</strong> Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts with exit code 255.</p>
+<p><strong>Cause:</strong> The perfSONAR testpoint image runs systemd internally but podman-compose doesn't support the <code>--systemd=always</code> flag required for proper systemd operation in containers.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check container status</span>
+podman<span class="w"> </span>ps<span class="w"> </span>-a
+
+<span class="c1"># Check systemd service status</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service
+
+<span class="c1"># View recent container logs</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span>
+
+<span class="c1"># Check if using compose-based service (BAD)</span>
+grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;ExecStart&quot;</span><span class="w"> </span>/etc/systemd/system/perfsonar-testpoint.service
+</code></pre></div>
+<p><strong>Solution:</strong></p>
+<p>Replace the compose-based systemd service with proper systemd units that use <code>podman run --systemd=always</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Stop and disable old service</span>
+systemctl<span class="w"> </span>stop<span class="w"> </span>perfsonar-testpoint.service
+systemctl<span class="w"> </span>disable<span class="w"> </span>perfsonar-testpoint.service
+
+<span class="c1"># Install new systemd units</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
+
+<span class="c1"># For testpoint only:</span>
+/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp
+
+<span class="c1"># For testpoint + certbot:</span>
+/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span>--with-certbot
+
+<span class="c1"># Enable and start</span>
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
+
+<span class="c1"># If using certbot:</span>
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-certbot.service
+
+<span class="c1"># Verify containers are running</span>
+podman<span class="w"> </span>ps
+curl<span class="w"> </span>-kI<span class="w"> </span>https://127.0.0.1/
+</code></pre></div>
+<p><strong>Verification:</strong></p>
+<p>After installing the new units, the testpoint should:
+- Start successfully on boot
+- Run systemd properly inside the container
+- Maintain state across reboots
+- Show "Up" status in <code>podman ps</code> (not "Exited" or crash-looping)</p>
 </details>
 <details class="failure">
 <summary>SELinux denials blocking container operations</summary>
