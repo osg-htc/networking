@@ -1214,6 +1214,60 @@ Perform these checks before handing the host over to operations:
     - Maintain state across reboots
     - Show "Up" status in `podman ps` (not "Exited" or crash-looping)
 
+??? failure "Certbot service fails with 'Unable to open config file' error"
+
+    **Symptoms:** `perfsonar-certbot.service` fails immediately after starting with exit code 2. Logs show: `certbot: error: Unable to open config file: trap exit TERM; while...`
+    
+    **Cause:** The certbot container image has a built-in entrypoint that expects certbot commands directly. When using a shell loop for renewal, the entrypoint tries to parse the shell command as a certbot config file, causing this error.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check certbot service status
+    systemctl status perfsonar-certbot.service
+    
+    # View detailed logs
+    journalctl -u perfsonar-certbot.service -n 50
+    
+    # Check for the error in logs
+    journalctl -u perfsonar-certbot.service | grep "Unable to open config file"
+    
+    # Verify service file configuration
+    grep -A5 "ExecStart" /etc/systemd/system/perfsonar-certbot.service
+    ```
+    
+    **Solution:**
+    
+    The certbot service needs two flags:
+    - `--systemd=always` for proper systemd integration and reboot persistence
+    - `--entrypoint=/bin/sh` to override the built-in entrypoint
+    
+    Re-run the installation script to get the fixed version:
+    
+    ```bash
+    # Stop current service
+    systemctl stop perfsonar-certbot.service
+    
+    # Download and install updated systemd units
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
+        -o /tmp/install-systemd-units.sh
+    chmod 0755 /tmp/install-systemd-units.sh
+    
+    # Install with certbot support
+    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
+    
+    # Start the fixed service
+    systemctl daemon-reload
+    systemctl start perfsonar-certbot.service
+    
+    # Verify it's running
+    systemctl status perfsonar-certbot.service
+    podman ps | grep certbot
+    ```
+    
+    **Expected result:** The certbot container should be running (not exiting) and the service should be in "active (running)" state.
+
 ??? failure "SELinux denials blocking container operations"
 
     **Symptoms:** Container starts but services fail, permission denied errors in logs.
