@@ -51,6 +51,20 @@ After installation:
 - Use `systemctl start|stop|restart|status perfsonar-testpoint` to manage
 - View logs with `journalctl -u perfsonar-testpoint -f`
 
+Integration tips
+----------------
+
+- Orchestrated installs: If you use `perfSONAR-orchestrator.sh`, you can run the systemd installer after the compose stack is up so containers start on boot. Example:
+
+  ```bash
+  /opt/perfsonar-tp/tools_scripts/install-systemd-service.sh /opt/perfsonar-tp
+  systemctl enable --now perfsonar-testpoint.service
+  ```
+
+- Manual installs: After `podman-compose up -d`, install and enable the service as shown above.
+
+- Updating compose files: Edit `/opt/perfsonar-tp/docker-compose.yml` and run `systemctl restart perfsonar-testpoint.service` to apply changes cleanly.
+
 Usage examples
 --------------
 

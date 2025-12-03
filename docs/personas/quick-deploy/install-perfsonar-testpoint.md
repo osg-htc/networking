@@ -452,6 +452,32 @@ The container should show `healthy` status. The healthcheck monitors Apache HTTP
 
 That's it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
 
+#### Ensure containers restart automatically on reboot (systemd service)
+
+Without a service manager, compose-managed containers may not come back after a host reboot. Install the provided systemd service to make container startup persistent across reboots:
+
+```bash
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh \
+    -o /tmp/install-systemd-service.sh
+chmod 0755 /tmp/install-systemd-service.sh
+
+# Install for compose directory /opt/perfsonar-tp
+/tmp/install-systemd-service.sh /opt/perfsonar-tp
+
+# Enable and start now
+systemctl enable --now perfsonar-testpoint.service
+
+# Verify service and containers
+systemctl status perfsonar-testpoint.service --no-pager
+podman ps
+```
+
+Notes:
+- The service uses `podman-compose up -d` at boot and `podman-compose down` on stop.
+- If you keep your compose files elsewhere, pass that directory as the first argument to the installer.
+- To update the compose files, edit `/opt/perfsonar-tp/docker-compose.yml` and run `systemctl restart perfsonar-testpoint.service`.
+
 ---
 
 ### Option B — Testpoint + Let's Encrypt (shared Apache and certs)
@@ -569,6 +595,21 @@ podman-compose up -d
 
 At this point, the testpoint is running with self-signed certificates. The certbot container is also
 running but won't renew anything until you obtain the initial certificates.
+
+#### Ensure containers restart automatically on reboot (systemd service)
+
+Install and enable the systemd service so the compose stack starts on boot:
+
+```bash
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-service.sh \
+    -o /tmp/install-systemd-service.sh
+chmod 0755 /tmp/install-systemd-service.sh
+
+/tmp/install-systemd-service.sh /opt/perfsonar-tp
+systemctl enable --now perfsonar-testpoint.service
+systemctl status perfsonar-testpoint.service --no-pager
+```
 
 #### 3) Obtain your first Let's Encrypt certificate (one-time)
 
