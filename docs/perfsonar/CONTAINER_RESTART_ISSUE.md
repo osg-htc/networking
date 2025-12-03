@@ -7,6 +7,7 @@ The perfSONAR testpoint container enters a restart loop when using certain docke
 ## Root Cause
 
 The issue occurs when the docker-compose.yml file is configured with:
+
 - `privileged: true`
 - `cgroupns: private`
 - **Missing** `/sys/fs/cgroup:/sys/fs/cgroup:rw` volume mount
@@ -50,19 +51,22 @@ services:
 If you have an existing deployment with the restart loop issue:
 
 1. Stop the containers:
+
    ```bash
    cd /opt/perfsonar-tp
    podman-compose down
    ```
 
-2. Update the docker-compose.yml file to use the recommended configuration from:
+1. Update the docker-compose.yml file to use the recommended configuration from:
+
    ```bash
    curl -fsSL \
        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
        -o /opt/perfsonar-tp/docker-compose.yml
    ```
 
-3. Restart the service:
+1. Restart the service:
+
    ```bash
    systemctl restart perfsonar-testpoint
    ```
