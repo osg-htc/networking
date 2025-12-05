@@ -52,6 +52,7 @@ APPLY_IOMMU=0
 APPLY_SMT=""
 PERSIST_SMT=0
 AUTO_YES=0
+DRY_RUN=0
 
 usage() {
   cat <<'EOF'
@@ -69,6 +70,7 @@ Options:
   --apply-smt STATE Apply runtime SMT change (on|off). Requires --mode apply
   --persist-smt     (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
   --yes             Skip interactive confirmations (use with caution)
+  --dry-run         Preview the exact GRUB/sysfs changes without applying them (safe)
   --verbose         More detail in audit output
   -h, --help        Show this help
 EOF
@@ -285,7 +287,9 @@ cache_kernel_versions() {
 
 apply_sysctl() {
   local outfile="/etc/sysctl.d/90-fasterdata.conf"
-  require_root
+  if [[ $DRY_RUN -ne 1 ]]; then
+    require_root
+  fi
   log_info "Writing $outfile"
   # backup existing file
   if [[ -f "$outfile" ]]; then
@@ -458,7 +462,9 @@ create_ethtool_persist_service() {
   # Generates systemd service to persist ethtool settings across reboots
   local svcfile="/etc/systemd/system/ethtool-persist.service"
   local dry_run=${1:-0}
-  require_root
+  if [[ $DRY_RUN -ne 1 ]]; then
+    require_root
+  fi
   
   log_info "Generating $svcfile to persist ethtool settings"
   
@@ -639,6 +645,15 @@ apply_iommu() {
     return
   fi
   log_warn "IOMMU not in kernel cmdline (CPU: $cpu_vendor). Will add: $iommu_cmd"
+  local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo
+    echo "=== IOMMU change PREVIEW ==="
+    echo "Current kernel cmdline: $cmdline"
+    echo "Would ensure GRUB_CMDLINE_LINUX contains: $iommu_cmd"
+    echo "The script would backup /etc/default/grub to $backup and run grub2-mkconfig -o /boot/grub2/grub.cfg (or update-grub)"
+    return
+  fi
   if [[ $AUTO_YES -ne 1 ]]; then
     read -r -p "Update /etc/default/grub and regenerate GRUB to add '$iommu_cmd'? [y/N] " resp
     if [[ ! "$resp" =~ ^[Yy]$ ]]; then
@@ -648,24 +663,45 @@ apply_iommu() {
   fi
   # Backup grub config
   local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
-  cp -a /etc/default/grub "$backup"
-  log_info "Backed up /etc/default/grub to $backup"
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "Dry-run: would copy /etc/default/grub -> $backup"
+  else
+    cp -a /etc/default/grub "$backup"
+    log_info "Backed up /etc/default/grub to $backup"
+  fi
   # Read existing value and ensure we append without duplicates
   local existing
   existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
-  if [[ -z "$existing" ]]; then
-    echo "GRUB_CMDLINE_LINUX=\"$iommu_cmd\"" >> /etc/default/grub
-  else
-    if echo "$existing" | grep -qF "$iommu_cmd"; then
-      log_info "GRUB already contains required IOMMU flags"
+  if [[ $DRY_RUN -eq 1 ]]; then
+    if [[ -z "$existing" ]]; then
+      echo "Dry-run: would set GRUB_CMDLINE_LINUX=\"$iommu_cmd\""
     else
-      # Append flags
-      local newval="$existing $iommu_cmd"
-      # Replace the line
-      sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+      if echo "$existing" | grep -qF "$iommu_cmd"; then
+        echo "Dry-run: GRUB already contains required IOMMU flags"
+      else
+        local newval="$existing $iommu_cmd"
+        echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
+      fi
+    fi
+  else
+    if [[ -z "$existing" ]]; then
+      echo "GRUB_CMDLINE_LINUX=\"$iommu_cmd\"" >> /etc/default/grub
+    else
+      if echo "$existing" | grep -qF "$iommu_cmd"; then
+        log_info "GRUB already contains required IOMMU flags"
+      else
+        # Append flags
+        local newval="$existing $iommu_cmd"
+        # Replace the line
+        sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+      fi
     fi
   fi
   # Regenerate grub
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+    return
+  fi
   if command -v grub2-mkconfig >/dev/null 2>&1; then
     grub2-mkconfig -o /boot/grub2/grub.cfg
   elif command -v update-grub >/dev/null 2>&1; then
@@ -697,6 +733,14 @@ apply_smt() {
     log_info "SMT already set to $cur"
   else
     log_warn "Changing SMT from $cur to $APPLY_SMT"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo
+      echo "=== SMT change PREVIEW ==="
+      echo "Current SMT: $cur"
+      echo "Would run: echo $APPLY_SMT | sudo tee /sys/devices/system/cpu/smt/control"
+      echo "Dry-run: SMT will not be changed. Use --mode apply without --dry-run to apply."
+      return
+    fi
     if [[ $AUTO_YES -ne 1 ]]; then
       read -r -p "Apply SMT change now (writes to /sys/devices/system/cpu/smt/control)? [y/N] " resp
       if [[ ! "$resp" =~ ^[Yy]$ ]]; then
@@ -717,27 +761,58 @@ apply_smt() {
     fi
     # Edit GRUB similar to apply_iommu (backup/append/remove nosmt)
     local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
-    cp -a /etc/default/grub "$backup"
-    log_info "Backed up /etc/default/grub to $backup"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "Dry-run: would copy /etc/default/grub -> $backup"
+    else
+      cp -a /etc/default/grub "$backup"
+      log_info "Backed up /etc/default/grub to $backup"
+    fi
     local existing
     existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
-    if [[ -z "$existing" ]]; then
-      if [[ -n "$grubnosmt" ]]; then
-        echo "GRUB_CMDLINE_LINUX=\"$grubnosmt\"" >> /etc/default/grub
-      fi
-    else
-      if [[ -n "$grubnosmt" ]]; then
-        if echo "$existing" | grep -qF "$grubnosmt"; then
-          log_info "GRUB already contains $grubnosmt"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      if [[ -z "$existing" ]]; then
+        if [[ -n "$grubnosmt" ]]; then
+          echo "Dry-run: would set GRUB_CMDLINE_LINUX=\"$grubnosmt\""
         else
-          local newval="$existing $grubnosmt"
-          sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+          echo "Dry-run: would not change GRUB_CMDLINE_LINUX (no nosmt present)"
         fi
       else
-        # Remove nosmt bit if present
-        local newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
-        sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+        if [[ -n "$grubnosmt" ]]; then
+          if echo "$existing" | grep -qF "$grubnosmt"; then
+            echo "Dry-run: GRUB already contains $grubnosmt"
+          else
+            local newval="$existing $grubnosmt"
+            echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
+          fi
+        else
+          # Remove nosmt bit if present (preview)
+          local newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+          echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
+        fi
       fi
+    else
+      if [[ -z "$existing" ]]; then
+        if [[ -n "$grubnosmt" ]]; then
+          echo "GRUB_CMDLINE_LINUX=\"$grubnosmt\"" >> /etc/default/grub
+        fi
+      else
+        if [[ -n "$grubnosmt" ]]; then
+          if echo "$existing" | grep -qF "$grubnosmt"; then
+            log_info "GRUB already contains $grubnosmt"
+          else
+            local newval="$existing $grubnosmt"
+            sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+          fi
+        else
+          # Remove nosmt bit if present
+          local newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+          sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+        fi
+      fi
+    fi
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+      return
     fi
     if command -v grub2-mkconfig >/dev/null 2>&1; then
       grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -964,6 +1039,7 @@ main() {
       --apply-smt) APPLY_SMT="$2"; shift 2;;
       --persist-smt) PERSIST_SMT=1; shift;;
       --yes) AUTO_YES=1; shift;;
+      --dry-run) DRY_RUN=1; shift;;
       -h|--help) usage; exit 0;;
       *) echo "Unknown arg: $1" >&2; usage; exit 1;;
     esac

@@ -159,6 +159,12 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply
 
 ```
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-smt off --persist-smt --yes
+
+Preview (dry-run) example:
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
+```
 ```
 
 ## Manual checklist (summary of recommendations)

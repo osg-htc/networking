@@ -96,6 +96,12 @@ Optional apply flags (use with `--mode apply`):
 - `--apply-smt on|off`: Toggle SMT state at runtime. Requires `--mode apply`. Example: `--apply-smt off`.
 - `--persist-smt`: If set along with `--apply-smt`, also persist the change via GRUB edits (`nosmt` applied/removed).
 - `--yes`: Skip interactive confirmations; use with caution.
+- `--dry-run`: Preview the exact GRUB and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.
+Example (preview only):
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
+```
 
 Reference and source
 --------------------

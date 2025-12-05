@@ -86,6 +86,7 @@ Optional flags (apply mode only)
 - `--apply-smt on|off`: Change SMT state at runtime; use `--persist-smt` to also persist via GRUB edits.
 - `--persist-smt`: Persist SMT change by adding/removing `nosmt` in the kernel cmdline.
 - `--yes`: Non-interactive confirmation for apply flags.
+- `--dry-run`: Preview the changes that would be made (GRUB edits and sysfs writes) without applying them. Use for validation and audits.
 
 Usage examples
 --------------
