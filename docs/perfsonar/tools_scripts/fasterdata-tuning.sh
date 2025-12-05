@@ -48,6 +48,10 @@ readonly C_RESET='\033[0m'
 
 MODE="audit"
 IFACES=""
+APPLY_IOMMU=0
+APPLY_SMT=""
+PERSIST_SMT=0
+AUTO_YES=0
 
 usage() {
   cat <<'EOF'
@@ -61,6 +65,10 @@ Options:
   --ifaces LIST     Comma-separated interfaces to check/tune. Default: all up, non-loopback
   --target TYPE     Host type: measurement (default) or dtn (data transfer node)
   --color           Use color codes (green=ok, yellow=warning, red=critical)
+  --apply-iommu     (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
+  --apply-smt STATE Apply runtime SMT change (on|off). Requires --mode apply
+  --persist-smt     (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
+  --yes             Skip interactive confirmations (use with caution)
   --verbose         More detail in audit output
   -h, --help        Show this help
 EOF
@@ -606,6 +614,143 @@ check_iommu() {
   fi
 }
 
+apply_iommu() {
+  # Apply GRUB edits to enable IOMMU (intel/amd + iommu=pt) if requested. Safe, interactive by default.
+  if [[ "$MODE" != "apply" ]]; then
+    log_warn "--apply-iommu ignored unless --mode apply"
+    return
+  fi
+  require_root
+  local cmdline
+  cmdline=$(cat /proc/cmdline 2>/dev/null || true)
+  local cpu_vendor iommu_cmd
+  if grep -q '^vendor_id.*GenuineIntel' /proc/cpuinfo 2>/dev/null; then
+    cpu_vendor="Intel"
+    iommu_cmd="intel_iommu=on iommu=pt"
+  elif grep -q '^vendor_id.*AuthenticAMD' /proc/cpuinfo 2>/dev/null; then
+    cpu_vendor="AMD"
+    iommu_cmd="amd_iommu=on iommu=pt"
+  else
+    cpu_vendor="unknown"
+    iommu_cmd="iommu=pt"
+  fi
+  if echo "$cmdline" | grep -q -E 'iommu=pt|intel_iommu=on|amd_iommu=on'; then
+    log_info "IOMMU appears to be enabled: $cmdline"
+    return
+  fi
+  log_warn "IOMMU not in kernel cmdline (CPU: $cpu_vendor). Will add: $iommu_cmd"
+  if [[ $AUTO_YES -ne 1 ]]; then
+    read -r -p "Update /etc/default/grub and regenerate GRUB to add '$iommu_cmd'? [y/N] " resp
+    if [[ ! "$resp" =~ ^[Yy]$ ]]; then
+      log_info "Skipping GRUB edit for IOMMU"
+      return
+    fi
+  fi
+  # Backup grub config
+  local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+  cp -a /etc/default/grub "$backup"
+  log_info "Backed up /etc/default/grub to $backup"
+  # Read existing value and ensure we append without duplicates
+  local existing
+  existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
+  if [[ -z "$existing" ]]; then
+    echo "GRUB_CMDLINE_LINUX=\"$iommu_cmd\"" >> /etc/default/grub
+  else
+    if echo "$existing" | grep -qF "$iommu_cmd"; then
+      log_info "GRUB already contains required IOMMU flags"
+    else
+      # Append flags
+      local newval="$existing $iommu_cmd"
+      # Replace the line
+      sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+    fi
+  fi
+  # Regenerate grub
+  if command -v grub2-mkconfig >/dev/null 2>&1; then
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+  elif command -v update-grub >/dev/null 2>&1; then
+    update-grub || true
+  else
+    log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+    return
+  fi
+  log_info "GRUB config updated; please reboot to apply IOMMU settings"
+}
+
+apply_smt() {
+  # Apply SMT changes at runtime and optionally persist via GRUB (adds/removes 'nosmt')
+  if [[ "$MODE" != "apply" ]]; then
+    log_warn "--apply-smt ignored unless --mode apply"
+    return
+  fi
+  require_root
+  if [[ ! -r /sys/devices/system/cpu/smt/control ]]; then
+    log_warn "SMT control not available on this system"
+    return
+  fi
+  local cur=$(cat /sys/devices/system/cpu/smt/control)
+  if [[ "$APPLY_SMT" != "on" && "$APPLY_SMT" != "off" ]]; then
+    log_warn "Invalid or missing --apply-smt STATE (expected 'on' or 'off')"
+    return
+  fi
+  if [[ "$cur" == "$APPLY_SMT" ]]; then
+    log_info "SMT already set to $cur"
+  else
+    log_warn "Changing SMT from $cur to $APPLY_SMT"
+    if [[ $AUTO_YES -ne 1 ]]; then
+      read -r -p "Apply SMT change now (writes to /sys/devices/system/cpu/smt/control)? [y/N] " resp
+      if [[ ! "$resp" =~ ^[Yy]$ ]]; then
+        log_info "SMT change cancelled"
+        return
+      fi
+    fi
+    echo "$APPLY_SMT" | tee /sys/devices/system/cpu/smt/control >/dev/null
+    log_info "SMT set to $APPLY_SMT"
+  fi
+  # If persist requested, update grub kernel cmdline
+  if [[ $PERSIST_SMT -eq 1 ]]; then
+    local grubnosmt
+    if [[ "$APPLY_SMT" == "off" ]]; then
+      grubnosmt="nosmt"
+    else
+      grubnosmt=""
+    fi
+    # Edit GRUB similar to apply_iommu (backup/append/remove nosmt)
+    local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+    cp -a /etc/default/grub "$backup"
+    log_info "Backed up /etc/default/grub to $backup"
+    local existing
+    existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
+    if [[ -z "$existing" ]]; then
+      if [[ -n "$grubnosmt" ]]; then
+        echo "GRUB_CMDLINE_LINUX=\"$grubnosmt\"" >> /etc/default/grub
+      fi
+    else
+      if [[ -n "$grubnosmt" ]]; then
+        if echo "$existing" | grep -qF "$grubnosmt"; then
+          log_info "GRUB already contains $grubnosmt"
+        else
+          local newval="$existing $grubnosmt"
+          sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+        fi
+      else
+        # Remove nosmt bit if present
+        local newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+        sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+      fi
+    fi
+    if command -v grub2-mkconfig >/dev/null 2>&1; then
+      grub2-mkconfig -o /boot/grub2/grub.cfg
+    elif command -v update-grub >/dev/null 2>&1; then
+      update-grub || true
+    else
+      log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+      return
+    fi
+    log_info "GRUB updated to persist SMT change; reboot to apply"
+  fi
+}
+
 print_host_info() {
   local os_release kernel_ver mem_info_str fqdn smt_status cpu_info cpu_vendor
   os_release=$(awk -F'=' '/^PRETTY_NAME/ {print $2}' /etc/os-release 2>/dev/null | tr -d '"')
@@ -815,6 +960,10 @@ main() {
       --ifaces) IFACES="$2"; shift 2;;
       --target) TARGET_TYPE="$2"; shift 2;;
       --color) USE_COLOR=1; shift;;
+      --apply-iommu) APPLY_IOMMU=1; shift;;
+      --apply-smt) APPLY_SMT="$2"; shift 2;;
+      --persist-smt) PERSIST_SMT=1; shift;;
+      --yes) AUTO_YES=1; shift;;
       -h|--help) usage; exit 0;;
       *) echo "Unknown arg: $1" >&2; usage; exit 1;;
     esac
@@ -833,6 +982,18 @@ main() {
     echo "ERROR: --mode must be audit or apply" >&2; exit 1
   fi
   [[ "$MODE" == "apply" ]] && require_root
+
+  # Validate apply flags
+  if [[ -n "$APPLY_SMT" ]]; then
+    if [[ "$APPLY_SMT" != "on" && "$APPLY_SMT" != "off" ]]; then
+      echo "ERROR: --apply-smt requires 'on' or 'off'" >&2
+      exit 1
+    fi
+  fi
+  if [[ $PERSIST_SMT -eq 1 && -z "$APPLY_SMT" ]]; then
+    echo "ERROR: --persist-smt requires --apply-smt to be set" >&2
+    exit 1
+  fi
 
   if [[ "$MODE" == "audit" ]]; then
     print_host_info
@@ -867,6 +1028,13 @@ main() {
 
   if [[ "$MODE" == "apply" ]]; then
     create_ethtool_persist_service
+    # Apply optional additional host changes requested via flags
+    if [[ $APPLY_IOMMU -eq 1 ]]; then
+      apply_iommu
+    fi
+    if [[ -n "$APPLY_SMT" ]]; then
+      apply_smt
+    fi
     log_info "Apply complete. Consider rebooting or rerunning audit to confirm settings."
   else
     log_info "Audit complete. Entries marked with '*' differ from recommended values."

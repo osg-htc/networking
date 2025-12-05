@@ -145,6 +145,22 @@ If a kernel update is available, the summary will recommend: `dnf update kernel 
 - Always validate after applying: check `podman ps`/services, run a quick throughput test, and review `dmesg`/`journal` for NIC or driver warnings.
 - To verify ethtool persistence service: `systemctl status ethtool-persist` and `systemctl cat ethtool-persist.service`
 
+Optional apply flags
+--------------------
+The script supports a few additional opt-in apply flags when run with `--mode apply`:
+
+- `--apply-iommu`: Edit GRUB to add recommended `iommu=pt` plus vendor-specific flags (Intel/AMD) and regenerate grub. Requires root and careful review before committing. Example:
+
+```
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --yes
+```
+
+- `--apply-smt on|off`: Apply SMT change at runtime. Use `--persist-smt` to make the choice persistent in GRUB. Example:
+
+```
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-smt off --persist-smt --yes
+```
+
 ## Manual checklist (summary of recommendations)
 
 Values shown below are baseline (1Gbps). The script scales them by fastest NIC speed and target type.

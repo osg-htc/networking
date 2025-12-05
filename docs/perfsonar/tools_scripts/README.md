@@ -71,6 +71,22 @@ sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubuserconten
 sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 ```
 
+Verify checksum
+---------------
+You can verify the script integrity with the provided SHA256 file:
+
+```bash
+curl -L -o /tmp/fasterdata-tuning.sh.sha256 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
+sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
+```
+
+Optional flags (apply mode only)
+--------------------------------
+- `--apply-iommu`: Update GRUB `GRUB_CMDLINE_LINUX` to add vendor + `iommu=pt` and regenerate grub (requires `--mode apply` and root).
+- `--apply-smt on|off`: Change SMT state at runtime; use `--persist-smt` to also persist via GRUB edits.
+- `--persist-smt`: Persist SMT change by adding/removing `nosmt` in the kernel cmdline.
+- `--yes`: Non-interactive confirmation for apply flags.
+
 Usage examples
 --------------
 

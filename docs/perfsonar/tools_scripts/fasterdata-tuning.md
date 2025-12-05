@@ -21,6 +21,16 @@ sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://osg-htc.org/networki
 sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 ```
 
+Verify the checksum
+-------------------
+To verify the script integrity, compare the downloaded script with the provided SHA256 checksum file in this repo:
+
+```bash
+curl -L -o /tmp/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+curl -L -o /tmp/fasterdata-tuning.sh.sha256 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
+sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
+```
+
 Why use this script?
 ---------------------
 This script packages ESnet Fasterdata best practices into an audit/apply helper that:
@@ -79,6 +89,13 @@ Notes
 - IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present. It only recommends GRUB edits (requires reboot) — it does not modify GRUB automatically unless you explicitly opt-in via a future apply flag.
 - SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.
 - Apply mode writes `/etc/sysctl.d/90-fasterdata.conf` and creates `/etc/systemd/system/ethtool-persist.service` when necessary.
+
+Optional apply flags (use with `--mode apply`):
+
+- `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate grub. Requires confirmation or `--yes` to skip interactive prompt.
+- `--apply-smt on|off`: Toggle SMT state at runtime. Requires `--mode apply`. Example: `--apply-smt off`.
+- `--persist-smt`: If set along with `--apply-smt`, also persist the change via GRUB edits (`nosmt` applied/removed).
+- `--yes`: Skip interactive confirmations; use with caution.
 
 Reference and source
 --------------------
