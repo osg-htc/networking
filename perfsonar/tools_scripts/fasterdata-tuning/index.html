@@ -1422,6 +1422,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verify-the-checksum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify the checksum
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-use-this-script" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1675,6 +1686,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verify-the-checksum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify the checksum
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-use-this-script" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1785,6 +1807,12 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </sp
 sudo<span class="w"> </span>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh
 </code></pre></div>
+<h2 id="verify-the-checksum">Verify the checksum<a class="headerlink" href="#verify-the-checksum" title="Permanent link">&para;</a></h2>
+<p>To verify the script integrity, compare the downloaded script with the provided SHA256 checksum file in this repo:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
+sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256<span class="w"> </span>--status<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checksum mismatch&quot;</span>
+</code></pre></div>
 <h2 id="why-use-this-script">Why use this script?<a class="headerlink" href="#why-use-this-script" title="Permanent link">&para;</a></h2>
 <p>This script packages ESnet Fasterdata best practices into an audit/apply helper that:</p>
 <ul>
@@ -1832,6 +1860,17 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 <li>SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.</li>
 <li>Apply mode writes <code>/etc/sysctl.d/90-fasterdata.conf</code> and creates <code>/etc/systemd/system/ethtool-persist.service</code> when necessary.</li>
 </ul>
+<p>Optional apply flags (use with <code>--mode apply</code>):</p>
+<ul>
+<li><code>--apply-iommu</code>: Edit GRUB to add <code>iommu=pt</code> and vendor-specific flags (e.g., <code>intel_iommu=on iommu=pt</code>) to the kernel cmdline and regenerate grub. Requires confirmation or <code>--yes</code> to skip interactive prompt.</li>
+<li><code>--apply-smt on|off</code>: Toggle SMT state at runtime. Requires <code>--mode apply</code>. Example: <code>--apply-smt off</code>.</li>
+<li><code>--persist-smt</code>: If set along with <code>--apply-smt</code>, also persist the change via GRUB edits (<code>nosmt</code> applied/removed).</li>
+<li><code>--yes</code>: Skip interactive confirmations; use with caution.</li>
+<li><code>--dry-run</code>: Preview the exact GRUB and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.
+Example (preview only):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--dry-run
+</code></pre></div>
 <h2 id="reference-and-source">Reference and source<a class="headerlink" href="#reference-and-source" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Source script: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></li>

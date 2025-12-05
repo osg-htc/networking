@@ -1460,6 +1460,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verify-checksum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify checksum
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-flags-apply-mode-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional flags (apply mode only)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usage-examples_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1862,6 +1884,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#verify-checksum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify checksum
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-flags-apply-mode-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional flags (apply mode only)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usage-examples_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2099,6 +2143,19 @@ skip cloning with:</p>
 sudo<span class="w"> </span>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
 sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh
 </code></pre></div>
+<h2 id="verify-checksum">Verify checksum<a class="headerlink" href="#verify-checksum" title="Permanent link">&para;</a></h2>
+<p>You can verify the script integrity with the provided SHA256 file:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
+sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256<span class="w"> </span>--status<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checksum mismatch&quot;</span>
+</code></pre></div>
+<h2 id="optional-flags-apply-mode-only">Optional flags (apply mode only)<a class="headerlink" href="#optional-flags-apply-mode-only" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>--apply-iommu</code>: Update GRUB <code>GRUB_CMDLINE_LINUX</code> to add vendor + <code>iommu=pt</code> and regenerate grub (requires <code>--mode apply</code> and root).</li>
+<li><code>--apply-smt on|off</code>: Change SMT state at runtime; use <code>--persist-smt</code> to also persist via GRUB edits.</li>
+<li><code>--persist-smt</code>: Persist SMT change by adding/removing <code>nosmt</code> in the kernel cmdline.</li>
+<li><code>--yes</code>: Non-interactive confirmation for apply flags.</li>
+<li><code>--dry-run</code>: Preview the changes that would be made (GRUB edits and sysfs writes) without applying them. Use for validation and audits.</li>
+</ul>
 <h2 id="usage-examples_1">Usage examples<a class="headerlink" href="#usage-examples_1" title="Permanent link">&para;</a></h2>
 <p>Audit (default) a measurement host:
 <div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement

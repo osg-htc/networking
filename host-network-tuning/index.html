@@ -1634,49 +1634,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#manual-checklist-summary-of-recommendations" class="md-nav__link">
+  <a href="#optional-apply-flags" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Manual checklist (summary of recommendations)
+        Optional apply flags
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verification-after-tuning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verification after tuning
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#additional-topics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Additional Topics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Additional Topics">
+    <nav class="md-nav" aria-label="Optional apply flags">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#smt-simultaneous-multi-threading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SMT (Simultaneous Multi-Threading)
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#driver-updates" class="md-nav__link">
@@ -1861,41 +1828,63 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </sp
 <li>Always validate after applying: check <code>podman ps</code>/services, run a quick throughput test, and review <code>dmesg</code>/<code>journal</code> for NIC or driver warnings.</li>
 <li>To verify ethtool persistence service: <code>systemctl status ethtool-persist</code> and <code>systemctl cat ethtool-persist.service</code></li>
 </ul>
-<h2 id="manual-checklist-summary-of-recommendations">Manual checklist (summary of recommendations)<a class="headerlink" href="#manual-checklist-summary-of-recommendations" title="Permanent link">&para;</a></h2>
-<p>Values shown below are baseline (1Gbps). The script scales them by fastest NIC speed and target type.</p>
+<h2 id="optional-apply-flags">Optional apply flags<a class="headerlink" href="#optional-apply-flags" title="Permanent link">&para;</a></h2>
+<p>The script supports a few additional opt-in apply flags when run with <code>--mode apply</code>:</p>
 <ul>
-<li>Sysctl</li>
-<li><code>net.core.rmem_max</code>/<code>wmem_max</code>: 536M–1G (measurement); 1G (dtn at 100Gbps)</li>
-<li><code>net.core.rmem_default</code>/<code>wmem_default</code>: 128M</li>
-<li><code>net.core.netdev_max_backlog</code>: 250k–500k (measurement); 250k–600k (dtn)</li>
-<li><code>net.core.default_qdisc</code>: <code>fq</code></li>
-<li><code>net.ipv4.tcp_rmem</code>: <code>4096 87380 536870912</code></li>
-<li><code>net.ipv4.tcp_wmem</code>: <code>4096 65536 536870912</code></li>
-<li><code>net.ipv4.tcp_congestion_control</code>: <code>bbr</code> (or <code>cubic</code> if <code>bbr</code> absent)</li>
-<li><code>net.ipv4.tcp_mtu_probing</code>: <code>1</code></li>
-<li><code>net.ipv4.tcp_window_scaling</code>: <code>1</code></li>
-<li><code>net.ipv4.tcp_timestamps</code>: <code>1</code></li>
-<li><code>net.ipv4.tcp_sack</code>: <code>1</code></li>
-<li><code>net.ipv4.tcp_low_latency</code>: <code>0</code></li>
-<li>Tuned: <code>tuned-adm profile network-throughput</code></li>
-<li>Interfaces</li>
-<li><code>txqueuelen</code> ≥ 10000</li>
-<li>RX/TX rings at driver max (<code>ethtool -g</code> / <code>-G</code>)</li>
-<li>GRO/GSO/TSO on; checksums on; LRO off</li>
-<li>qdisc <code>fq</code> (root)</li>
+<li><code>--apply-iommu</code>: Edit GRUB to add recommended <code>iommu=pt</code> plus vendor-specific flags (Intel/AMD) and regenerate grub. Requires root and careful review before committing. Example:</li>
 </ul>
-<h2 id="verification-after-tuning">Verification after tuning<a class="headerlink" href="#verification-after-tuning" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --yes
+</code></pre></div>
 <ul>
-<li><code>sysctl -a | egrep "(rmem|wmem|max_backlog|default_qdisc|tcp_congestion_control|tcp_mtu_probing)"</code></li>
-<li><code>tuned-adm active</code></li>
-<li>For each NIC: <code>ethtool -k &lt;iface&gt;</code>, <code>ethtool -g &lt;iface&gt;</code>, <code>tc qdisc show dev &lt;iface&gt;</code>, <code>cat /sys/class/net/&lt;iface&gt;/tx_queue_len</code></li>
-<li>Run a representative throughput test (e.g., <code>iperf3</code>) end-to-end.</li>
+<li><code>--apply-smt on|off</code>: Apply SMT change at runtime. Use <code>--persist-smt</code> to make the choice persistent in GRUB. Example:</li>
 </ul>
-<h2 id="additional-topics">Additional Topics<a class="headerlink" href="#additional-topics" title="Permanent link">&para;</a></h2>
-<h3 id="smt-simultaneous-multi-threading">SMT (Simultaneous Multi-Threading)<a class="headerlink" href="#smt-simultaneous-multi-threading" title="Permanent link">&para;</a></h3>
-<p>The script detects and reports SMT status. For most measurement hosts (perfSONAR), <strong>SMT should be on</strong> to maximize CPU throughput. However, for isolated low-latency workloads, SMT off may reduce jitter.</p>
-<p><strong>To check SMT status:</strong>
-<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>/sys/devices/system/cpu/smt/control
+<p><div class="highlight"><pre><span></span><code>sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-smt off --persist-smt --yes
+
+Preview (dry-run) example:
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>## Manual checklist (summary of recommendations)
+
+Values shown below are baseline (1Gbps). The script scales them by fastest NIC speed and target type.
+
+- Sysctl
+  - `net.core.rmem_max`/`wmem_max`: 536M–1G (measurement); 1G (dtn at 100Gbps)
+  - `net.core.rmem_default`/`wmem_default`: 128M
+  - `net.core.netdev_max_backlog`: 250k–500k (measurement); 250k–600k (dtn)
+  - `net.core.default_qdisc`: `fq`
+  - `net.ipv4.tcp_rmem`: `4096 87380 536870912`
+  - `net.ipv4.tcp_wmem`: `4096 65536 536870912`
+  - `net.ipv4.tcp_congestion_control`: `bbr` (or `cubic` if `bbr` absent)
+  - `net.ipv4.tcp_mtu_probing`: `1`
+  - `net.ipv4.tcp_window_scaling`: `1`
+  - `net.ipv4.tcp_timestamps`: `1`
+  - `net.ipv4.tcp_sack`: `1`
+  - `net.ipv4.tcp_low_latency`: `0`
+- Tuned: `tuned-adm profile network-throughput`
+- Interfaces
+  - `txqueuelen` ≥ 10000
+  - RX/TX rings at driver max (`ethtool -g` / `-G`)
+  - GRO/GSO/TSO on; checksums on; LRO off
+  - qdisc `fq` (root)
+
+## Verification after tuning
+
+- `sysctl -a | egrep &quot;(rmem|wmem|max_backlog|default_qdisc|tcp_congestion_control|tcp_mtu_probing)&quot;`
+- `tuned-adm active`
+- For each NIC: `ethtool -k &lt;iface&gt;`, `ethtool -g &lt;iface&gt;`, `tc qdisc show dev &lt;iface&gt;`, `cat /sys/class/net/&lt;iface&gt;/tx_queue_len`
+- Run a representative throughput test (e.g., `iperf3`) end-to-end.
+
+## Additional Topics
+
+### SMT (Simultaneous Multi-Threading)
+
+The script detects and reports SMT status. For most measurement hosts (perfSONAR), **SMT should be on** to maximize CPU throughput. However, for isolated low-latency workloads, SMT off may reduce jitter.
+
+**To check SMT status:**
+```bash
+cat /sys/devices/system/cpu/smt/control
 </code></pre></div></p>
 <p><strong>To enable SMT:</strong>
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span>on<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/sys/devices/system/cpu/smt/control
