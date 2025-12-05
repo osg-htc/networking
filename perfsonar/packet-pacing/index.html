@@ -1,0 +1,2398 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/packet-pacing/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Packet Pacing for Data Transfer Nodes - OSG Networking Area</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","UA-69012-29"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","UA-69012-29",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=UA-69012-29",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#packet-pacing-for-data-transfer-nodes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OSG Networking Area
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Packet Pacing for Data Transfer Nodes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/osg-htc/networking/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OSG Networking Area
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/osg-htc/networking/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSG Networking Area
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Monitoring (perfSONAR)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Network Monitoring (perfSONAR)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../perfsonar-in-osg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Motivation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation and Maintenance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frequently Asked Questions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Network Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../network-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSG Network Debugging Document
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Services
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Network Services
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../psetf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../osg-network-services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Datastore and Streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../osg-network-analytics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Personas
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Personas
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Deploy
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quick Deploy
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/quick-deploy/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart: perfSONAR Testpoint
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/quick-deploy/automated-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automated setup
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooter
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooter
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/triage-checklist/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage checklist
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Researcher
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Researcher
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/research/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Landing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/research/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/fail2ban/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fail2ban
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/selinux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SELinux
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../features/nftables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nftables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools & Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools & Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools_scripts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scripts and tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools_scripts/fasterdata-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fasterdata host tuning (EL9)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools_scripts/docker-compose.yml" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose bundle (docker-compose.yml)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LS registration updater (script)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools_scripts/README-lsregistration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LS registration helpers (README)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Link-check tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem-data-rate-bottlenecks-and-packet-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem: Data Rate Bottlenecks and Packet Loss
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Problem: Data Rate Bottlenecks and Packet Loss">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-bottleneck-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Bottleneck Scenarios
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-packet-pacing-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Packet Pacing Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Packet Pacing Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mechanism-fair-queuing-fq-qdisc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mechanism: Fair Queuing (FQ) Qdisc
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mechanism: Fair Queuing (FQ) Qdisc">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fq-vs-fq_codel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FQ vs FQ_CODEL
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting-with-token-bucket-filter-tbf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting with Token Bucket Filter (TBF)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-packet-pacing-works-esnet-research-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Packet Pacing Works: ESnet Research Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Why Packet Pacing Works: ESnet Research Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-dtn-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-World DTN Scenario
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-pacing-rates-for-common-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Pacing Rates for Common Scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Pacing Rates for Common Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rule-of-thumb-80-90-of-nic-speed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule of Thumb: 80-90% of NIC Speed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-using-fasterdata-tuningsh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation: Using fasterdata-tuning.sh
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation: Using fasterdata-tuning.sh">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#audit-current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Current State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply-packet-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Apply Packet Pacing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dry-run-preview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dry-Run Preview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#burst-size-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Burst Size Calculation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-configuration-with-tc-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual Configuration with tc Command
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manual Configuration with tc Command">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-current-qdisc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Current Qdisc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-fair-queuing-with-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set Fair Queuing with Pacing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-pacing-revert-to-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete Pacing (Revert to Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-token-bucket-filter-tbf-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Token Bucket Filter (TBF) Instead
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing and Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing and Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify-pacing-is-active" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Pacing is Active
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-with-iperf3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test with iperf3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-with-perfsonar-pscheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test with perfSONAR pscheduler
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-issues-and-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues and Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues and Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-pacing-not-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Pacing Not Applied
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-throughput-still-low-after-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Throughput Still Low After Pacing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-pacing-configuration-lost-after-reboot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Pacing Configuration Lost After Reboot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-not-to-use-packet-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When NOT to Use Packet Pacing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-per-application-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced: Per-Application Pacing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esnet-fasterdata-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESnet Fasterdata Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-kernel-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux Kernel Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools-and-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools and Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#related-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="packet-pacing-for-data-transfer-nodes">Packet Pacing for Data Transfer Nodes<a class="headerlink" href="#packet-pacing-for-data-transfer-nodes" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p><strong>Packet pacing</strong> is a critical tuning technique for high-performance Data Transfer Nodes (DTNs) and other hosts that need to move large amounts of data reliably across wide-area networks. By controlling the rate at which packets are sent from the host, packet pacing can dramatically reduce packet loss, prevent receiver buffer overflows, and improve overall throughput — sometimes by <strong>2-4x on long paths</strong>.</p>
+<p>This document explains why packet pacing matters, how it works, and how to implement it on DTN nodes using Linux traffic control (<code>tc</code>).</p>
+<hr />
+<h2 id="the-problem-data-rate-bottlenecks-and-packet-loss">The Problem: Data Rate Bottlenecks and Packet Loss<a class="headerlink" href="#the-problem-data-rate-bottlenecks-and-packet-loss" title="Permanent link">&para;</a></h2>
+<p>When transferring data across a network, the effective throughput is limited by the <strong>minimum of three factors</strong>:</p>
+<ol>
+<li><strong>Source host read rate</strong> — How fast the sending host can read data from storage/memory</li>
+<li><strong>Available network bandwidth</strong> — The capacity of the network path</li>
+<li><strong>Destination write rate</strong> — How fast the receiving host can write data to storage/memory</li>
+</ol>
+<h3 id="common-bottleneck-scenarios">Common Bottleneck Scenarios<a class="headerlink" href="#common-bottleneck-scenarios" title="Permanent link">&para;</a></h3>
+<p><strong>Scenario 1: Fast Source, Slower Network Path</strong>
+- A 10G DTN sends to a 1G receiver or via a 1G network path
+- Without pacing, the DTN floods the network with packets
+- The receiver cannot keep up, leading to buffer overflow and packet loss
+- TCP backs off, causing dramatic throughput drops</p>
+<p><strong>Scenario 2: Multiple Parallel Streams</strong>
+- A 10G DTN with 4-8 parallel GridFTP streams to a 10G receiver
+- Total available bandwidth is 10G, but each stream tries to max out its connection
+- Streams compete for buffers on the receiver
+- Packet loss and TCP backing off reduce overall throughput</p>
+<p><strong>Scenario 3: Unbalanced CPU/Network Performance</strong>
+- A fast 40G/100G host with a slower CPU
+- Network can send packets faster than the CPU can process them
+- Receive-side bottleneck at the slower host
+- Packet loss and retransmission overhead</p>
+<p><strong>Scenario 4: Long-Distance Paths (50-80ms RTT)</strong>
+- Network paths with high latency across continents
+- Even with adequate bandwidth, mismatched send/receive rates cause issues
+- Packets arrive faster than the receiver can drain them
+- Studies show 2-4x throughput improvement with pacing on these paths</p>
+<hr />
+<h2 id="how-packet-pacing-works">How Packet Pacing Works<a class="headerlink" href="#how-packet-pacing-works" title="Permanent link">&para;</a></h2>
+<p>Packet pacing solves this problem by <strong>controlling the rate at which packets leave the source host</strong>, ensuring the receiver is never overwhelmed and can process packets at a sustainable rate.</p>
+<h3 id="mechanism-fair-queuing-fq-qdisc">Mechanism: Fair Queuing (FQ) Qdisc<a class="headerlink" href="#mechanism-fair-queuing-fq-qdisc" title="Permanent link">&para;</a></h3>
+<p>Modern Linux (kernel 3.11+) includes the <strong>Fair Queuing (FQ)</strong> scheduler, which implements sophisticated packet pacing. The FQ qdisc:</p>
+<ul>
+<li><strong>Maintains separate queues</strong> for different flows (distinguishing between different streams)</li>
+<li><strong>Ensures fair bandwidth sharing</strong> — each flow gets an equal share of available bandwidth</li>
+<li><strong>Paces packets intelligently</strong> — spreads packets out over time instead of sending them in bursts</li>
+<li><strong>Reduces buffer pressure</strong> — keeps receiving end from being overwhelmed</li>
+</ul>
+<h4 id="fq-vs-fq_codel">FQ vs FQ_CODEL<a class="headerlink" href="#fq-vs-fq_codel" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>FQ</strong> (Fair Queuing): Excellent for high-throughput TCP and data transfer</li>
+<li><strong>FQ_CODEL</strong>: Default in modern kernels (4.12+), but less optimal for sustained high-throughput transfers</li>
+</ul>
+<p>For DTN and high-speed data transfer, <strong>FQ is recommended over FQ_CODEL</strong>.</p>
+<h3 id="rate-limiting-with-token-bucket-filter-tbf">Rate Limiting with Token Bucket Filter (TBF)<a class="headerlink" href="#rate-limiting-with-token-bucket-filter-tbf" title="Permanent link">&para;</a></h3>
+<p>The <strong>Token Bucket Filter (TBF)</strong> qdisc enforces a maximum rate limit by:</p>
+<ul>
+<li><strong>Accumulating tokens</strong> at a configured rate (e.g., 2 Gbps)</li>
+<li><strong>Requiring tokens to send packets</strong> — each packet consumes tokens equal to its size</li>
+<li><strong>Queuing packets</strong> when no tokens are available</li>
+<li><strong>Smoothing traffic</strong> into a predictable, controlled rate</li>
+</ul>
+<p>The burst size determines how many back-to-back packets can be sent before rate limiting kicks in. Typically, we calculate burst as 1-2ms worth of packets at the target rate.</p>
+<hr />
+<h2 id="why-packet-pacing-works-esnet-research-results">Why Packet Pacing Works: ESnet Research Results<a class="headerlink" href="#why-packet-pacing-works-esnet-research-results" title="Permanent link">&para;</a></h2>
+<p>ESnet's performance testing with Berkeley Lab and others has demonstrated significant improvements from packet pacing:</p>
+<h3 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Reduced Packet Loss</strong>: By preventing receiver buffer overflow</li>
+<li><strong>Higher Sustained Throughput</strong>: 2-4x improvements on long paths (50-80ms RTT)</li>
+<li><strong>Better Resource Utilization</strong>: Prevents wasted retransmissions and TCP back-off</li>
+<li><strong>Predictable Performance</strong>: More consistent results across different network conditions</li>
+<li><strong>Multi-Stream Benefits</strong>: Especially effective with 4-8 parallel streams (common with GridFTP)</li>
+</ol>
+<h3 id="real-world-dtn-scenario">Real-World DTN Scenario<a class="headerlink" href="#real-world-dtn-scenario" title="Permanent link">&para;</a></h3>
+<p><strong>Configuration</strong>: 10G DTN with 4 parallel GridFTP streams to a 10G receiver</p>
+<p><strong>Without Pacing</strong>:
+- Bursts of packets overwhelm receiver
+- Packet loss triggers TCP retransmissions
+- TCP congestion control backs off aggressively
+- Throughput: ~3-5 Gbps (underutilizing available 10G)</p>
+<p><strong>With Pacing at 2 Gbps per stream</strong> (8 Gbps total from 4 streams):
+- Smooth traffic reduces packet loss
+- TCP can maintain higher congestion window
+- Better resource utilization at receiver
+- Throughput: ~8-9 Gbps (near line rate)</p>
+<p><strong>Result</strong>: 2-3x throughput improvement</p>
+<hr />
+<h2 id="recommended-pacing-rates-for-common-scenarios">Recommended Pacing Rates for Common Scenarios<a class="headerlink" href="#recommended-pacing-rates-for-common-scenarios" title="Permanent link">&para;</a></h2>
+<h3 id="rule-of-thumb-80-90-of-nic-speed">Rule of Thumb: 80-90% of NIC Speed<a class="headerlink" href="#rule-of-thumb-80-90-of-nic-speed" title="Permanent link">&para;</a></h3>
+<p>For a DTN with <strong>N parallel streams</strong>, divide available bandwidth accordingly:</p>
+<table>
+<thead>
+<tr>
+<th>Host NIC Speed</th>
+<th>Parallel Streams</th>
+<th>Recommended Per-Stream Rate</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10G</td>
+<td>4</td>
+<td>2 Gbps</td>
+<td><code>tc qdisc add dev eth0 root fq maxrate 2gbit</code></td>
+</tr>
+<tr>
+<td>10G</td>
+<td>8</td>
+<td>1 Gbps</td>
+<td><code>tc qdisc add dev eth0 root fq maxrate 1gbit</code></td>
+</tr>
+<tr>
+<td>40G</td>
+<td>4</td>
+<td>8 Gbps</td>
+<td><code>tc qdisc add dev eth0 root fq maxrate 8gbit</code></td>
+</tr>
+<tr>
+<td>40G</td>
+<td>8</td>
+<td>5 Gbps</td>
+<td><code>tc qdisc add dev eth0 root fq maxrate 5gbit</code></td>
+</tr>
+<tr>
+<td>100G</td>
+<td>8</td>
+<td>10-12 Gbps</td>
+<td><code>tc qdisc add dev eth0 root fq maxrate 10gbit</code></td>
+</tr>
+<tr>
+<td>100G (to 10G paths)</td>
+<td>Any</td>
+<td>2 Gbps</td>
+<td><code>tc qdisc add dev eth0 root fq maxrate 2gbit</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Conservative default: 2 Gbps</strong> — Works for most 10G-to-10G transfers, prevents overwhelming typical receivers</li>
+<li><strong>Adjust based on RTT</strong>: Longer paths benefit from slightly lower rates</li>
+<li><strong>Divide bandwidth</strong>: With 4 parallel streams on 10G NIC, 2 Gbps/stream = 8 Gbps total (80% utilization)</li>
+<li><strong>Monitor and tune</strong>: Use <code>iperf3 --fq-rate</code> or perfSONAR pscheduler to test your specific path</li>
+</ul>
+<hr />
+<h2 id="implementation-using-fasterdata-tuningsh">Implementation: Using fasterdata-tuning.sh<a class="headerlink" href="#implementation-using-fasterdata-tuningsh" title="Permanent link">&para;</a></h2>
+<p>The <code>fasterdata-tuning.sh</code> script includes automated packet pacing configuration for DTN nodes.</p>
+<h3 id="audit-current-state">Audit Current State<a class="headerlink" href="#audit-current-state" title="Permanent link">&para;</a></h3>
+<p>Check what pacing rates are recommended for your DTN:</p>
+<div class="highlight"><pre><span></span><code>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>dtn
+</code></pre></div>
+<p>Output shows:
+- Whether packet pacing is currently applied
+- Recommended default rate: 2 Gbps (2000mbps)</p>
+<h3 id="apply-packet-pacing">Apply Packet Pacing<a class="headerlink" href="#apply-packet-pacing" title="Permanent link">&para;</a></h3>
+<p>Apply packet pacing with default 2 Gbps rate:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing
+</code></pre></div>
+<p>Apply with custom rate (e.g., for 100G host with 8 streams):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>10gbps
+</code></pre></div>
+<p>Supported rate units: <code>kbps</code>, <code>mbps</code>, <code>gbps</code>, <code>tbps</code></p>
+<p>Examples:
+- <code>2gbps</code> — 2 Gigabits per second
+- <code>10000mbps</code> — 10 Gigabits per second (equivalent to 10gbps)
+- <code>2000mbps</code> — 2 Gigabits per second (default)</p>
+<h3 id="dry-run-preview">Dry-Run Preview<a class="headerlink" href="#dry-run-preview" title="Permanent link">&para;</a></h3>
+<p>Preview what would be applied without making changes:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--dry-run
+</code></pre></div>
+<p>Output shows the exact <code>tc</code> commands that would be executed on each interface.</p>
+<h3 id="burst-size-calculation">Burst Size Calculation<a class="headerlink" href="#burst-size-calculation" title="Permanent link">&para;</a></h3>
+<p>The script automatically calculates burst size as 1 millisecond worth of packets:</p>
+<ul>
+<li><strong>2 Gbps</strong> → 250 KB burst</li>
+<li><strong>5 Gbps</strong> → 625 KB burst</li>
+<li><strong>10 Gbps</strong> → 1.25 MB burst</li>
+</ul>
+<p>Burst is clamped to safe bounds:
+- <strong>Minimum</strong>: 1,500 bytes (typical MTU size)
+- <strong>Maximum</strong>: 10 MB (prevents excessive buffering)</p>
+<hr />
+<h2 id="manual-configuration-with-tc-command">Manual Configuration with <code>tc</code> Command<a class="headerlink" href="#manual-configuration-with-tc-command" title="Permanent link">&para;</a></h2>
+<p>If you prefer to configure packet pacing manually, use the <code>tc</code> command directly:</p>
+<h3 id="check-current-qdisc">Check Current Qdisc<a class="headerlink" href="#check-current-qdisc" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+</code></pre></div>
+<h3 id="set-fair-queuing-with-pacing">Set Fair Queuing with Pacing<a class="headerlink" href="#set-fair-queuing-with-pacing" title="Permanent link">&para;</a></h3>
+<p>Replace <code>eth0</code> with your actual interface name:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>replace<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>fq<span class="w"> </span>maxrate<span class="w"> </span>2gbit
+</code></pre></div>
+<h3 id="verify-configuration">Verify Configuration<a class="headerlink" href="#verify-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+tc<span class="w"> </span>qdisc<span class="w"> </span>stat<span class="w"> </span>dev<span class="w"> </span>eth0
+</code></pre></div>
+<h3 id="delete-pacing-revert-to-default">Delete Pacing (Revert to Default)<a class="headerlink" href="#delete-pacing-revert-to-default" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>del<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root
+</code></pre></div>
+<h3 id="using-token-bucket-filter-tbf-instead">Using Token Bucket Filter (TBF) Instead<a class="headerlink" href="#using-token-bucket-filter-tbf-instead" title="Permanent link">&para;</a></h3>
+<p>For more granular control, use TBF instead of FQ:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>replace<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>tbf<span class="w"> </span>rate<span class="w"> </span>2gbit<span class="w"> </span>burst<span class="w"> </span><span class="m">250000</span><span class="w"> </span>latency<span class="w"> </span>100ms
+</code></pre></div>
+<p>Where:
+- <code>rate</code> = packet pacing rate (e.g., 2gbit, 5gbit)
+- <code>burst</code> = maximum burst size in bytes
+- <code>latency</code> = maximum queuing latency before dropping packets</p>
+<hr />
+<h2 id="testing-and-validation">Testing and Validation<a class="headerlink" href="#testing-and-validation" title="Permanent link">&para;</a></h2>
+<h3 id="verify-pacing-is-active">Verify Pacing is Active<a class="headerlink" href="#verify-pacing-is-active" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>sysctl<span class="w"> </span>net.core.default_qdisc
+<span class="c1"># Should show: net.core.default_qdisc = fq</span>
+
+tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+<span class="c1"># Should show: qdisc fq 8001: root refcnt 2 limit 10000p flows 1024 ...</span>
+</code></pre></div>
+<h3 id="test-with-iperf3">Test with iperf3<a class="headerlink" href="#test-with-iperf3" title="Permanent link">&para;</a></h3>
+<p>iperf3 supports FQ-based pacing via the <code>--fq-rate</code> option:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Test WITH pacing (recommended)</span>
+iperf3<span class="w"> </span>-c<span class="w"> </span>&lt;receiver&gt;<span class="w"> </span>-P<span class="w"> </span><span class="m">4</span><span class="w"> </span>--time<span class="w"> </span><span class="m">60</span><span class="w"> </span>--fq-rate<span class="w"> </span>2gbps
+
+<span class="c1"># Compare to WITHOUT pacing</span>
+iperf3<span class="w"> </span>-c<span class="w"> </span>&lt;receiver&gt;<span class="w"> </span>-P<span class="w"> </span><span class="m">4</span><span class="w"> </span>--time<span class="w"> </span><span class="m">60</span>
+</code></pre></div>
+<p>Expected improvement: 10-50% higher throughput with pacing on long paths.</p>
+<h3 id="test-with-perfsonar-pscheduler">Test with perfSONAR pscheduler<a class="headerlink" href="#test-with-perfsonar-pscheduler" title="Permanent link">&para;</a></h3>
+<p>perfSONAR's pscheduler also supports pacing. Check your perfSONAR configuration for pacing-aware tests.</p>
+<hr />
+<h2 id="common-issues-and-troubleshooting">Common Issues and Troubleshooting<a class="headerlink" href="#common-issues-and-troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="issue-pacing-not-applied">Issue: Pacing Not Applied<a class="headerlink" href="#issue-pacing-not-applied" title="Permanent link">&para;</a></h3>
+<p><strong>Symptom</strong>: <code>tc qdisc show</code> shows <code>qdisc mq</code> instead of <code>qdisc fq</code></p>
+<p><strong>Solution</strong>: Ensure <code>/etc/sysctl.conf</code> contains:
+<div class="highlight"><pre><span></span><code>net.core.default_qdisc<span class="w"> </span><span class="o">=</span><span class="w"> </span>fq
+sysctl<span class="w"> </span>-p
+</code></pre></div></p>
+<p>Then reapply pacing with <code>fasterdata-tuning.sh</code> or <code>tc</code> command.</p>
+<h3 id="issue-throughput-still-low-after-pacing">Issue: Throughput Still Low After Pacing<a class="headerlink" href="#issue-throughput-still-low-after-pacing" title="Permanent link">&para;</a></h3>
+<p><strong>Causes</strong>:
+- Pacing rate too conservative — try increasing by 10-20%
+- Receiver still bottlenecked — verify receiver can sustain higher rates
+- Network path issue — check for packet loss with <code>mtr</code> or <code>iperf3</code></p>
+<p><strong>Debug Steps</strong>:
+1. Test between same hosts in reverse direction (verify it's not sender-specific)
+2. Gradually increase pacing rate in 1-2 Gbps increments
+3. Monitor <code>tc -s qdisc show dev eth0</code> for dropped/delayed packets</p>
+<h3 id="issue-pacing-configuration-lost-after-reboot">Issue: Pacing Configuration Lost After Reboot<a class="headerlink" href="#issue-pacing-configuration-lost-after-reboot" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: The <code>fasterdata-tuning.sh</code> apply mode creates a systemd service for persistence. Enable it:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ethtool-persist.service
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>ethtool-persist.service
+</code></pre></div>
+<p>Verify:
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>ethtool-persist.service
+tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+</code></pre></div></p>
+<hr />
+<h2 id="when-not-to-use-packet-pacing">When NOT to Use Packet Pacing<a class="headerlink" href="#when-not-to-use-packet-pacing" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Low-latency, low-throughput applications</strong> — Pacing adds latency</li>
+<li><strong>Latency-sensitive protocols</strong> (HFT, gaming, VoIP) — Avoid pacing</li>
+<li><strong>Measurement hosts</strong> — Pacing should not be applied to measurement/monitor hosts</li>
+<li><strong>Low-bandwidth transfers</strong> — Pacing provides little benefit below 1G</li>
+</ul>
+<hr />
+<h2 id="advanced-per-application-pacing">Advanced: Per-Application Pacing<a class="headerlink" href="#advanced-per-application-pacing" title="Permanent link">&para;</a></h2>
+<p>If you need finer control than host-level pacing, applications can set pacing rates using the <code>SO_MAX_PACING_RATE</code> socket option:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/socket.h&gt;</span>
+
+<span class="c1">// In your application code:</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">pacing_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2000000000</span><span class="p">;</span><span class="w">  </span><span class="c1">// 2 Gbps in bytes per second</span>
+<span class="n">setsockopt</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span><span class="w"> </span><span class="n">SOL_SOCKET</span><span class="p">,</span><span class="w"> </span><span class="n">SO_MAX_PACING_RATE</span><span class="p">,</span><span class="w"> </span>
+<span class="w">           </span><span class="o">&amp;</span><span class="n">pacing_rate</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">pacing_rate</span><span class="p">));</span>
+</code></pre></div>
+<p><strong>Requirements</strong>:
+- Kernel 4.13+
+- Host configured with <code>net.core.default_qdisc = fq</code> or <code>fq_codel</code>
+- Application code changes required</p>
+<hr />
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<h3 id="esnet-fasterdata-documentation">ESnet Fasterdata Documentation<a class="headerlink" href="#esnet-fasterdata-documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>DTN Tuning Guide</strong>: https://fasterdata.es.net/DTN/tuning/</li>
+<li><strong>Packet Pacing Guide</strong>: https://fasterdata.es.net/host-tuning/linux/packet-pacing/</li>
+<li><strong>FQ Pacing Research Results</strong>: https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf</li>
+</ul>
+<h3 id="linux-kernel-documentation">Linux Kernel Documentation<a class="headerlink" href="#linux-kernel-documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>tc-fq man page</strong>: <code>man 8 tc-fq</code></li>
+<li><strong>tc-tbf man page</strong>: <code>man 8 tc-tbf</code></li>
+<li><strong>tc man page</strong>: <code>man 8 tc</code></li>
+<li><strong>LWN Article on FQ</strong>: https://lwn.net/Articles/564978/</li>
+</ul>
+<h3 id="tools-and-testing">Tools and Testing<a class="headerlink" href="#tools-and-testing" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>iperf3</strong>: https://iperf.fr/ (with <code>--fq-rate</code> support)</li>
+<li><strong>perfSONAR</strong>: https://www.perfsonar.net/ (pscheduler with pacing)</li>
+<li><strong>mtr</strong> (traceroute tool): <code>mtr &lt;destination&gt;</code></li>
+</ul>
+<h3 id="related-tuning">Related Tuning<a class="headerlink" href="#related-tuning" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>SYSCTL Tuning</strong>: See <code>fasterdata-tuning.sh</code> for buffer sizing recommendations</li>
+<li><strong>100G+ Tuning</strong>: https://fasterdata.es.net/host-tuning/linux/100g-tuning/</li>
+<li><strong>BBR Congestion Control</strong>: https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/</li>
+</ul>
+<hr />
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p><strong>Packet pacing is essential for DTN nodes and high-performance data transfer</strong> because it:</p>
+<ol>
+<li>✅ <strong>Prevents receiver buffer overflow</strong> — Smooth traffic instead of bursts</li>
+<li>✅ <strong>Reduces packet loss</strong> — Eliminates TCP back-off and retransmission overhead</li>
+<li>✅ <strong>Improves throughput 2-4x</strong> — Especially on long paths with high latency</li>
+<li>✅ <strong>Fair bandwidth sharing</strong> — Each flow gets equal treatment</li>
+<li>✅ <strong>Easy to implement</strong> — Single command or script invocation</li>
+</ol>
+<p><strong>Recommended Configuration for 10G DTN with 4 parallel streams</strong>:
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>2gbps
+</code></pre></div></p>
+<p><strong>Expected Result</strong>: Near-line-rate throughput with minimal packet loss.</p>
+<hr />
+<p><em>Last Updated: December 2025</em>
+<em>References: ESnet Fasterdata, Linux kernel tc documentation</em></p>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>
