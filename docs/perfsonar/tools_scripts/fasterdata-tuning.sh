@@ -167,6 +167,13 @@ apply_sysctl() {
   local outfile="/etc/sysctl.d/90-fasterdata.conf"
   require_root
   log_info "Writing $outfile"
+  # backup existing file
+  if [[ -f "$outfile" ]]; then
+    local timestamp
+    timestamp=$(date -u +%Y%m%dT%H%M%SZ)
+    cp -a "$outfile" "${outfile}.${timestamp}.bak" 2>/dev/null || true
+    log_info "Backed up existing $outfile to ${outfile}.${timestamp}.bak"
+  fi
   # Scale recommended values based on max NIC speed
   local max_speed_mbps
   max_speed_mbps=$(get_max_link_speed)
