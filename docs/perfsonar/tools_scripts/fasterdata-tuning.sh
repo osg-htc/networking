@@ -18,7 +18,7 @@
 #
 # Notes:
 #   - Uses conservative recommendations suitable for perfSONAR/DTN-style hosts on EL9.
-#   - Apply mode writes /etc/sysctl.d/90-fasterdata.conf and applies live settings.
+#   - Apply mode updates /etc/sysctl.conf with recommended parameters and applies live settings.
 #   - ethtool changes are immediate but not persisted across reboots; consider
 #     running this script from a boot-time unit if persistence is required.
 
@@ -198,7 +198,11 @@ print_sysctl_diff() {
     wanted=${SYSCTL_RECS[$key]}
     current=$(sysctl -n "$key" 2>/dev/null || echo "(unset)")
     status=""
-    if [[ "$current" != "$wanted" ]]; then
+    # Normalize whitespace (tabs and multiple spaces) into single spaces for comparison
+    # using awk's field re-assignment which converts all whitespace to single spaces
+    local current_normalized=$(echo "$current" | awk '{$1=$1; print}')
+    local wanted_normalized=$(echo "$wanted" | awk '{$1=$1; print}')
+    if [[ "$current_normalized" != "$wanted_normalized" ]]; then
       status="*"
       ((SYSCTL_MISMATCHES+=1))
       log_detail "SYSCTL mismatch: $key current='$current' recommended='$wanted'"
@@ -286,43 +290,54 @@ cache_kernel_versions() {
 }
 
 apply_sysctl() {
-  local outfile="/etc/sysctl.d/90-fasterdata.conf"
+  local sysctl_file="/etc/sysctl.conf"
   if [[ $DRY_RUN -ne 1 ]]; then
     require_root
   fi
-  log_info "Writing $outfile"
+  log_info "Updating $sysctl_file with fasterdata tuning parameters"
   # backup existing file
-  if [[ -f "$outfile" ]]; then
+  if [[ -f "$sysctl_file" ]]; then
     local timestamp
     timestamp=$(date -u +%Y%m%dT%H%M%SZ)
-    cp -a "$outfile" "${outfile}.${timestamp}.bak" 2>/dev/null || true
-    log_info "Backed up existing $outfile to ${outfile}.${timestamp}.bak"
+    cp -a "$sysctl_file" "${sysctl_file}.${timestamp}.bak" 2>/dev/null || true
+    log_info "Backed up existing $sysctl_file to ${sysctl_file}.${timestamp}.bak"
   fi
   log_info "Detected max link speed (Mbps): ${MAX_LINK_SPEED:-0}"
 
-  cat > "$outfile" <<EOF
-# Fasterdata-inspired tuning (https://fasterdata.es.net/)
-# Applied by fasterdata-tuning.sh
-net.core.rmem_max = ${SCALED_RMEM_MAX}
-net.core.wmem_max = ${SCALED_WMEM_MAX}
-net.core.rmem_default = 134217728
-net.core.wmem_default = 134217728
-net.core.netdev_max_backlog = ${SCALED_BACKLOG}
-net.core.default_qdisc = fq
-net.ipv4.tcp_rmem = 4096 87380 536870912
-net.ipv4.tcp_wmem = 4096 65536 536870912
-net.ipv4.tcp_congestion_control = bbr
-net.ipv4.tcp_mtu_probing = 1
-net.ipv4.tcp_window_scaling = 1
-net.ipv4.tcp_timestamps = 1
-net.ipv4.tcp_sack = 1
-net.ipv4.tcp_low_latency = 0
-EOF
+  # Update or add each sysctl parameter in /etc/sysctl.conf
+  local updates=(
+    "net.core.rmem_max=${SCALED_RMEM_MAX}"
+    "net.core.wmem_max=${SCALED_WMEM_MAX}"
+    "net.core.rmem_default=134217728"
+    "net.core.wmem_default=134217728"
+    "net.core.netdev_max_backlog=${SCALED_BACKLOG}"
+    "net.core.default_qdisc=fq"
+    "net.ipv4.tcp_rmem=4096 87380 536870912"
+    "net.ipv4.tcp_wmem=4096 65536 536870912"
+    "net.ipv4.tcp_congestion_control=bbr"
+    "net.ipv4.tcp_mtu_probing=1"
+    "net.ipv4.tcp_window_scaling=1"
+    "net.ipv4.tcp_timestamps=1"
+    "net.ipv4.tcp_sack=1"
+    "net.ipv4.tcp_low_latency=0"
+  )
+  
+  for update in "${updates[@]}"; do
+    local key="${update%%=*}"
+    local value="${update#*=}"
+    local escaped_key="${key//./\\.}"
+    if grep -q "^${escaped_key}=" "$sysctl_file" 2>/dev/null; then
+      sed -i "s|^${escaped_key}=.*|${update}|" "$sysctl_file"
+    else
+      echo "$update" >> "$sysctl_file"
+    fi
+  done
+  
   if ! has_bbr; then
     log_warn "bbr not available; falling back to cubic at runtime (file still sets bbr)"
   fi
   log_info "Applying sysctl settings"
-  sysctl --system >/dev/null
+  sysctl -p "$sysctl_file" >/dev/null 2>&1 || sysctl --system >/dev/null
   # If bbr missing, set congestion control to cubic live to avoid failure
   if ! has_bbr; then
     sysctl -w net.ipv4.tcp_congestion_control=cubic >/dev/null
@@ -387,7 +402,9 @@ iface_audit() {
   if [[ "$txqlen" != "?" && "$txqlen" -lt "$desired_txqlen" ]]; then
     issues+=("txqlen $txqlen<${desired_txqlen}")
   fi
-  if [[ "${qdisc:-}" != "fq" ]]; then
+  # Extract just the first word of qdisc (e.g., "fq" from "fq 8005: root")
+  local qdisc_type="${qdisc%% *}"
+  if [[ "${qdisc_type:-}" != "fq" ]]; then
     issues+=("qdisc=${qdisc:-unknown}")
   fi
   if [[ "$offload_issue" != "ok" ]]; then
