@@ -573,14 +573,14 @@ iface_apply_packet_pacing() {
 }
 
 create_ethtool_persist_service() {
-  # Generates systemd service to persist ethtool settings across reboots
+  # Generates systemd service to persist ethtool settings and qdisc across reboots
   local svcfile="/etc/systemd/system/ethtool-persist.service"
   local dry_run=${1:-0}
   if [[ $DRY_RUN -ne 1 ]]; then
     require_root
   fi
   
-  log_info "Generating $svcfile to persist ethtool settings"
+  log_info "Generating $svcfile to persist ethtool settings and qdisc"
   
   # Build list of ExecStart commands from applied ethtool changes
   local exec_cmds=()
@@ -607,12 +607,43 @@ create_ethtool_persist_service() {
     if [[ -n "$txqlen" && "$txqlen" != "?" ]]; then
       exec_cmds+=("ExecStart=/sbin/ip link set dev $iface txqueuelen $txqlen")
     fi
+    
+    # Capture qdisc settings (fq for normal mode, tbf for packet pacing)
+    if [[ "$TARGET_TYPE" == "dtn" ]] && [[ $APPLY_PACKET_PACING -eq 1 ]]; then
+      # DTN with packet pacing: use tbf qdisc
+      local pacing_rate="$PACKET_PACING_RATE"
+      local rate_normalized="${pacing_rate,,}"
+      local burst_bytes
+      case "$rate_normalized" in
+        *gbps)
+          local gbps_val="${rate_normalized%gbps}"
+          burst_bytes=$((gbps_val * 125000))
+          ;;
+        *mbps)
+          local mbps_val="${rate_normalized%mbps}"
+          burst_bytes=$((mbps_val * 125))
+          ;;
+        *kbps)
+          local kbps_val="${rate_normalized%kbps}"
+          burst_bytes=$((kbps_val / 8))
+          ;;
+        *)
+          burst_bytes=1000000
+          ;;
+      esac
+      [[ $burst_bytes -lt 1500 ]] && burst_bytes=1500
+      [[ $burst_bytes -gt 10485760 ]] && burst_bytes=10485760
+      exec_cmds+=("ExecStart=/sbin/tc qdisc replace dev $iface root tbf rate $rate_normalized burst $burst_bytes latency 100ms")
+    else
+      # Default: use fq qdisc for fair queuing
+      exec_cmds+=("ExecStart=/sbin/tc qdisc replace dev $iface root fq")
+    fi
   done
   
   # Show what would be written (always to log; to stdout if requested)
   {
     echo "[Unit]"
-    echo "Description=Persist ethtool settings (Fasterdata)"
+    echo "Description=Persist ethtool settings and qdisc (Fasterdata)"
     echo "After=network.target"
     echo "Wants=network.target"
     echo ""
@@ -631,7 +662,7 @@ create_ethtool_persist_service() {
   if [[ $dry_run -eq 0 ]]; then
     {
       echo "[Unit]"
-      echo "Description=Persist ethtool settings (Fasterdata)"
+      echo "Description=Persist ethtool settings and qdisc (Fasterdata)"
       echo "After=network.target"
       echo "Wants=network.target"
       echo ""
