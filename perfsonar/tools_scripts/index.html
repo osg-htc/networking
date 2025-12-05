@@ -14,7 +14,7 @@
         <link rel="prev" href="../../features/nftables/">
       
       
-        <link rel="next" href="docker-compose.yml">
+        <link rel="next" href="fasterdata-tuning/">
       
       
         
@@ -1427,6 +1427,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fasterdata-host-tuning-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fasterdata host tuning script
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1515,7 +1548,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#notes" class="md-nav__link">
+  <a href="#notes_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Notes
@@ -1540,6 +1573,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="fasterdata-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fasterdata host tuning (EL9)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1746,6 +1807,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fasterdata-host-tuning-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fasterdata host tuning script
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1834,7 +1928,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#notes" class="md-nav__link">
+  <a href="#notes_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Notes
@@ -1882,6 +1976,7 @@ static IPv4/IPv6 addressing and per-NIC source-based routing via NetworkManager
 <h2 id="quick-overview">Quick overview<a class="headerlink" href="#quick-overview" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Script: <code>perfSONAR-pbr-nm.sh</code></li>
+<li>Script: <code>fasterdata-tuning.sh</code> (Fasterdata audit/apply host tuning script)</li>
 <li>Config file: <code>/etc/perfSONAR-multi-nic-config.conf</code></li>
 <li>Log file: <code>/var/log/perfSONAR-multi-nic-config.log</code></li>
 </ul>
@@ -1943,6 +2038,23 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 skip cloning with:</p>
 <div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--skip-testpoint
 </code></pre></div>
+<h2 id="fasterdata-host-tuning-script">Fasterdata host tuning script<a class="headerlink" href="#fasterdata-host-tuning-script" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Script: <code>fasterdata-tuning.sh</code> — audit/apply host &amp; NIC tuning (ESnet Fasterdata-aligned) for EL9 systems</li>
+<li>Path: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></li>
+</ul>
+<h2 id="usage-examples_1">Usage examples<a class="headerlink" href="#usage-examples_1" title="Permanent link">&para;</a></h2>
+<p>Audit (default) a measurement host:
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
+</code></pre></div></p>
+<p>Apply tuning (requires root):
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
+</code></pre></div></p>
+<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Shows a <code>Host Info</code> summary and performs various checks (sysctl, ethtool, drivers, SMT, IOMMU). IOMMU changes require GRUB edits and reboot; SMT toggles can be done via <code>/sys/devices/system/cpu/smt/control</code>.</li>
+<li>In apply mode the script writes <code>/etc/sysctl.d/90-fasterdata.conf</code> and writes/enables a systemd <code>ethtool-persist.service</code> to persist NIC settings.</li>
+</ul>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Must be run as root. The script now enforces running as root early in
@@ -2090,7 +2202,7 @@ non-destructive way.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>docs/perfsonar
 ./tests/run_tests.sh
 </code></pre></div>
-<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<h2 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h2>
 <ul>
 <li>The script requires Bash (uses <code>local -n</code> namerefs). Run tests on a system
   with Bash 4.3+.</li>

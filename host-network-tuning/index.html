@@ -8,13 +8,9 @@
       
       
       
-        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar-in-osg/">
+        <link rel="canonical" href="https://osg-htc.org/networking/host-network-tuning/">
       
       
-        <link rel="prev" href="..">
-      
-      
-        <link rel="next" href="../perfsonar/deployment-models/">
       
       
         
@@ -25,7 +21,7 @@
     
     
       
-        <title>Motivation - OSG Networking Area</title>
+        <title>Host and Network Tuning (EL9) - OSG Networking Area</title>
       
     
     
@@ -78,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview-of-perfsonar" class="md-skip">
+        <a href="#host-and-network-tuning-el9" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Motivation
+              Host and Network Tuning (EL9)
             
           </span>
         </div>
@@ -258,20 +254,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
@@ -292,7 +286,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -307,37 +301,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Motivation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../perfsonar-in-osg/" class="md-nav__link">
         
   
   
@@ -353,54 +320,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#motivation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Motivation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Motivation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#changes-for-perfsonar-50" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Changes for perfSONAR 5.0
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1582,22 +1501,89 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#motivation" class="md-nav__link">
+  <a href="#what-this-covers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Motivation
+        What this covers
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Motivation">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use this
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#script-fasterdata-tuningsh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script: fasterdata-tuning.sh
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Script: fasterdata-tuning.sh">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#changes-for-perfsonar-50" class="md-nav__link">
+  <a href="#host-types" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Changes for perfSONAR 5.0
+        Host Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-script-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the script does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-and-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output and logs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Output and logs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#color-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Color Output
       
     </span>
   </a>
@@ -1606,6 +1592,127 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#driver-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Driver Guidance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cautions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cautions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-checklist-summary-of-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual checklist (summary of recommendations)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-after-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification after tuning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Topics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Additional Topics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smt-simultaneous-multi-threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SMT (Simultaneous Multi-Threading)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#driver-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Driver Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#persistence-service-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Persistence Service Details
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#persistence-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Persistence notes
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1629,47 +1736,192 @@
   
 
 
-<h1 id="overview-of-perfsonar">Overview of perfSONAR<a class="headerlink" href="#overview-of-perfsonar" title="Permanent link">&para;</a></h1>
-<p>For those not familiar with <code>perfSONAR</code>, this page provides a quick overview of what it is and why we recommend its deployment at OSG and WLCG sites.</p>
-<p>OSG is working to support the scientific networking needs of it's constituents and collaborators. To do this, we are recommending all sites deploy perfSONAR so we can measure, monitor and diagnose the OSG (and WLCG) networks.</p>
-<h3 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">&para;</a></h3>
-<p>Distributed scientific computing relies upon networks to interconnect resources and make them usable for scientific workflows. This dependency upon the network means that issues in our networks can significantly impact the behavior of all the various cyber-infrastructure components that rely upon it. Compounding the problem is that networks, by their nature, are distributed and typically involve many different "owners" and administrators. When a problem arises somewhere along a network path, it can be very difficult to identify and localize.</p>
-<p>This was the context for the formation of the <a href="https://www.perfsonar.net/about/mission-statement">perfSONAR collaboration</a>. This collaboration is focused on developing and deploying the <code>perfSONAR</code> software suite in support of network monitoring across the global set of research and education (R&amp;E) networks. The <strong>Open Science Grid</strong> (<strong>OSG</strong>) has chosen to base the core of its network monitoring framework on <code>perfSONAR</code> because of both the capabilities of the toolkit for measuring our networks and its global acceptance as the defacto network monitoring infrastructure of first choice.</p>
-<p>The <a href="https://www.perfsonar.net/about/what-is-perfsonar/">https://www.perfsonar.net/about/what-is-perfsonar/</a> provides a succinct summary: <em>perfSONAR is a network measurement toolkit designed to provide federated coverage of paths,
-and help to establish end-to-end usage expectations. There are 1000s of perfSONAR instances deployed world wide, many of which are available for open testing of key measures of network
-performance. This global infrastructure helps to identify and isolate problems as they happen, making the role of supporting network users easier for engineering teams, and increasing
-productivity when utilizing network resources.</em></p>
-<p><strong>How can OSG/WLCG members and collaborators understand, maintain and effectively utilize the networks that form the basis of their distributed collaborations?</strong></p>
-<p>Our answer starts by providing visibility into our networks by the deployment of <code>perfSONAR</code>. perfSONAR allows us to regularly and consistently measure a set of network metrics that we can use to understand how our networks are operating. When problems arise, the data, along with access to the <code>perfSONAR</code> tools, can be used to diagnose and localize problems. The presence of perfSONAR toolkit deployments across our sites and networks makes identifying and fixing network problems feasible.</p>
-<p>We strongly recommend that all OSG (and WLCG) sites deploy <code>perfSONAR</code> toolkit instances as described in our <a href="../perfsonar/installation/">installation guide</a>. Before installing you should consult the <a href="../perfsonar/deployment-models/">requirements</a> along with the guidance on <a href="../perfsonar/deployment-models/">deployment models</a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-</div>
-<p>Installing perfSONAR not only benefits users at a site but will enable network engineers and OSG staff to much more effectively support those sites if network issues are suspected.</p>
-<p>All OSG and WLCG sites should deploy <strong>two</strong> <code>perfSONAR</code> instances: one to measure latency/packet loss and one to measure bandwidth.
-It is possible to install both versions on a single host with at least two NICs by following the instructions at <a href="../perfsonar/deployment-models/">multiple NIC guidance page</a>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-</div>
-<p>It is <strong>very important</strong> that the perfSONAR instances be located in the same subnet as the primary storage for the site.
- This is to ensure that we are measuring as much of the network path involved with data transfer as possible.</p>
-<p>The <a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics">WLCG Network Throughput Working Group</a> is responsible for monitoring the WLCG/OSG instances and for defining and maintaining the mesh-configurations that we use to control perfSONAR testing. Please contact us if you have questions or suggestions related to perfSONAR testing amongst WLCG sites.</p>
-<p>For anyone maintaining/using perfSONAR we suggest to join either/both of the following mailing lists:</p>
+<h1 id="host-and-network-tuning-el9">Host and Network Tuning (EL9)<a class="headerlink" href="#host-and-network-tuning-el9" title="Permanent link">&para;</a></h1>
+<p>This guide distills ESnet Fasterdata recommendations for high-throughput hosts (perfSONAR/DTN-style) on Enterprise Linux 9. Primary sources:</p>
 <ul>
-<li><strong>User's Mailing List</strong> The perfSONAR project maintains a mailing list for communication on matters of installation, configuration, bug reports, or general performance discussions: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-user">https://lists.internet2.edu/sympa/subscribe/perfsonar-user</a></li>
-<li><strong>Announcement Mailing List</strong> The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <a href="https://lists.internet2.edu/sympa/subscribe/perfsonar-announce">https://lists.internet2.edu/sympa/subscribe/perfsonar-announce</a></li>
+<li>https://fasterdata.es.net/host-tuning/</li>
+<li>https://fasterdata.es.net/network-tuning/</li>
+<li>https://fasterdata.es.net/DTN/</li>
 </ul>
-<h4 id="changes-for-perfsonar-50">Changes for perfSONAR 5.0<a class="headerlink" href="#changes-for-perfsonar-50" title="Permanent link">&para;</a></h4>
-<p>The first release of <a href="https://www.perfsonar.net/releasenotes-2023-04-17-5-0-0.html">perfSONAR 5.0.0</a> was available on April 17, 2023, followed by a version supporting EL8/EL9 on June 21, 2023 (<a href="https://www.perfsonar.net/releasenotes-2023-06-16-5-0-3.html">version 5.0.3</a>). All sites following our recommendation of having auto-updates enabled should have upgraded during within 1-2 days after the releases.   Version 5 marks a transition for the OSG/WLCG perfSONAR deployment, enabling us to migrate to a new network data pipeline where perfSONAR hosts directly send their measurement data to our central Elasticsearch instance via an HTTP-Archiver and Logstash.</p>
-<p>Highlights include:</p>
+<p>Use the provided audit/apply script to check your host against these recommendations and optionally enforce them. Read the cautions before applying.</p>
+<h2 id="what-this-covers">What this covers<a class="headerlink" href="#what-this-covers" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Use of Opensearch for the measurement archive, replacing ESmond</li>
-<li>Support for new OSes, include EL8 and EL9.</li>
-<li>No longer supports ISO install option.</li>
-<li>Significant number of bug fixes and new features.</li>
+<li>Kernel networking sysctls: buffers, congestion control, qdisc, MTU probing</li>
+<li>Tuned profile: <code>network-throughput</code></li>
+<li>Per-interface checks: ring buffers, GRO/GSO/TSO on, LRO off, checksum on, txqueuelen, fq qdisc</li>
+<li>Congestion control: prefer <code>bbr</code> (fallback to <code>cubic</code> if unavailable)</li>
 </ul>
-<p>We recommend deploying or updating to the latest version available (v5.2.3 as of October 2025).</p>
-<p>For a more complete list of changes, see the full release notes at <a href="https://www.perfsonar.net/docs_releasenotes.html">https://www.perfsonar.net/docs_releasenotes.html</a></p>
+<h2 id="when-to-use-this">When to use this<a class="headerlink" href="#when-to-use-this" title="Permanent link">&para;</a></h2>
+<ul>
+<li>perfSONAR testpoints, DTNs, and other dedicated measurement/transfer hosts on EL9</li>
+<li>Fresh installs or periodic compliance checks against Fasterdata guidance</li>
+<li>Not for multi-tenant or latency-sensitive hosts without review</li>
+</ul>
+<h2 id="script-fasterdata-tuningsh">Script: <code>fasterdata-tuning.sh</code><a class="headerlink" href="#script-fasterdata-tuningsh" title="Permanent link">&para;</a></h2>
+<p>Path: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></p>
+<p>Modes:
+- <code>audit</code> (default): show current settings vs recommendations, no changes
+- <code>apply</code>: set recommended values (requires root)</p>
+<p>Options:
+- <code>--mode audit|apply</code>: mode selection
+- <code>--target measurement|dtn</code>: host type for scaled recommendations (default: <code>measurement</code>)
+- <code>--ifaces eth0,eth1</code>: comma-separated interface list (default: auto-detect physical NICs)
+- <code>--color</code>: enable color-coded output (green=compliant, yellow=warning, red=critical)</p>
+<h3 id="host-types">Host Types<a class="headerlink" href="#host-types" title="Permanent link">&para;</a></h3>
+<p>The script tailors recommendations by host type:</p>
+<ul>
+<li><strong>measurement</strong>: perfSONAR testpoints, measurement nodes (primary focus)</li>
+<li><strong>dtn</strong>: Data Transfer Nodes (larger buffers for bulk throughput)</li>
+</ul>
+<p>Differences:
+- <code>net.core.netdev_max_backlog</code>: measurement uses 500k at 100Gbps; dtn uses 600k
+- <code>txqueuelen</code>: measurement targets 10k/15k/20k; dtn targets 12k/18k/25k (per link speed)</p>
+<h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h3>
+<p>Audit a measurement host:
+<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
+</code></pre></div></p>
+<p>Apply tuning for a DTN (100Gbps links):
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
+</code></pre></div></p>
+<p>Limit to specific NICs:
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--ifaces<span class="w"> </span><span class="s2">&quot;ens1f0np0,ens1f1np1&quot;</span>
+</code></pre></div></p>
+<h3 id="what-the-script-does">What the script does<a class="headerlink" href="#what-the-script-does" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Sysctl</strong>: Sets larger rmem/wmem, netdev backlog, <code>default_qdisc=fq</code>, <code>tcp_mtu_probing=1</code>, TCP r/w mem, timestamps/SACK on, low_latency off; prefers <code>bbr</code> if available. Values scale with fastest NIC link speed and target type (measurement vs dtn). Settings written to <code>/etc/sysctl.d/90-fasterdata.conf</code> in apply mode.</li>
+<li><strong>Tuned</strong>: Ensures <code>network-throughput</code> profile if <code>tuned-adm</code> is present.</li>
+<li><strong>Ethtool persistence</strong> (apply mode): Creates or updates <code>/etc/systemd/system/ethtool-persist.service</code> to persist NIC tunings across reboots (ring buffers, offloads, txqueuelen).</li>
+<li><strong>Driver checks</strong>: Detects driver vendor/version (Mellanox, Broadcom, Intel, other); reports kernel/firmware updates available; provides vendor-specific guidance (e.g., "keep kernel+linux-firmware current", "consider NVIDIA OFED for Mellanox").</li>
+<li><strong>Interfaces</strong> (per NIC, scaled by link speed):</li>
+<li>Set <code>txqueuelen</code> to ≥ 10k (measurement) or ≥ 12k (dtn); 20k/25k for 100Gbps</li>
+<li>Set RX/TX rings to driver max (if reported)</li>
+<li>Enable GRO/GSO/TSO and checksums; disable LRO</li>
+<li>Replace qdisc with <code>fq</code></li>
+</ul>
+<h3 id="output-and-logs">Output and logs<a class="headerlink" href="#output-and-logs" title="Permanent link">&para;</a></h3>
+<p>The script outputs a <strong>Host Info</strong> section at the top showing:
+- Hostname (FQDN)
+- OS name/version (from <code>/etc/os-release</code>)
+- Running kernel version
+- System memory (GiB)
+- SMT status (on/off/unavailable); yellow warning if SMT is off (off-topic: helps isolate jitter in measurement contexts, but should be on by default for throughput)</p>
+<p>Then it displays sysctl audit and per-NIC summaries, followed by a summary block showing:
+- Target type (measurement/dtn)
+- Sysctl mismatches (count)
+- Per-interface issues (tx queue, qdisc, offloads, rings)
+- Driver/version actions (kernel updates available, vendor guidance)
+- SMT control guidance (if SMT is off, suggests toggle commands)
+- Missing tools (ethtool, tuned-adm, cpupower)</p>
+<p>Detailed log with full ethtool/sysctl/tc output is written to <code>/tmp/fasterdata-tuning-&lt;UTC&gt;.log</code> (configurable via <code>LOGFILE</code> env var).</p>
+<h4 id="color-output">Color Output<a class="headerlink" href="#color-output" title="Permanent link">&para;</a></h4>
+<p>Use <code>--color</code> flag to enable ANSI color codes:
+- Green: settings comply with recommendations
+- Yellow: warning/attention needed (e.g., SMT off, missing tools, suboptimal settings)
+- Red: critical issues requiring immediate attention (not currently used, reserved for future severity levels)</p>
+<h3 id="driver-guidance">Driver Guidance<a class="headerlink" href="#driver-guidance" title="Permanent link">&para;</a></h3>
+<p>The script identifies your NIC drivers and provides upgrade paths:</p>
+<ul>
+<li><strong>Mellanox/NVIDIA</strong> (<code>mlx5_core</code>, <code>mlx4_en</code>): Keep kernel+linux-firmware current or use NVIDIA OFED (https://network.nvidia.com/products/ethernet-drivers/).</li>
+<li><strong>Broadcom</strong> (<code>bnxt_en</code>, <code>tg3</code>, <code>bnx2x</code>, <code>bnx2</code>): Track distro kernel; use vendor firmware tools (e.g., <code>bnxtnvm</code>) when available.</li>
+<li><strong>Intel</strong> (<code>ixgbe</code>, <code>i40e</code>, <code>ice</code>, <code>e1000e</code>, <code>igb</code>): Update kernel+linux-firmware for latest drivers and firmware blobs.</li>
+</ul>
+<p>If a kernel update is available, the summary will recommend: <code>dnf update kernel &amp;&amp; reboot</code>.</p>
+<h3 id="cautions">Cautions<a class="headerlink" href="#cautions" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Apply mode changes the running system</strong> and writes sysctl to <code>/etc/sysctl.d/90-fasterdata.conf</code>.</li>
+<li><strong>Persistence of ethtool settings</strong>: In apply mode, the script automatically creates or updates <code>/etc/systemd/system/ethtool-persist.service</code> to persist NIC tunings (ring buffers, offloads, txqueuelen) across reboots. The service is enabled automatically.</li>
+<li><strong>Sysctl settings</strong> in <code>/etc/sysctl.d/90-fasterdata.conf</code> persist across reboots.</li>
+<li><strong>SMT control</strong> (if changed) requires GRUB config to persist; see <a href="#smt-simultaneous-multi-threading">SMT section</a> below.</li>
+<li><strong>Tuned profile</strong> changes persist if tuned-adm writes to its default config.</li>
+<li>The script assumes EL9 userland (<code>sysctl</code>, <code>ethtool</code>, <code>tc</code>, <code>tuned-adm</code>). It skips steps if tools are missing.</li>
+<li>If <code>bbr</code> is not available, it falls back to <code>cubic</code> live but keeps <code>bbr</code> in the config for future kernels.</li>
+<li>Always validate after applying: check <code>podman ps</code>/services, run a quick throughput test, and review <code>dmesg</code>/<code>journal</code> for NIC or driver warnings.</li>
+<li>To verify ethtool persistence service: <code>systemctl status ethtool-persist</code> and <code>systemctl cat ethtool-persist.service</code></li>
+</ul>
+<h2 id="manual-checklist-summary-of-recommendations">Manual checklist (summary of recommendations)<a class="headerlink" href="#manual-checklist-summary-of-recommendations" title="Permanent link">&para;</a></h2>
+<p>Values shown below are baseline (1Gbps). The script scales them by fastest NIC speed and target type.</p>
+<ul>
+<li>Sysctl</li>
+<li><code>net.core.rmem_max</code>/<code>wmem_max</code>: 536M–1G (measurement); 1G (dtn at 100Gbps)</li>
+<li><code>net.core.rmem_default</code>/<code>wmem_default</code>: 128M</li>
+<li><code>net.core.netdev_max_backlog</code>: 250k–500k (measurement); 250k–600k (dtn)</li>
+<li><code>net.core.default_qdisc</code>: <code>fq</code></li>
+<li><code>net.ipv4.tcp_rmem</code>: <code>4096 87380 536870912</code></li>
+<li><code>net.ipv4.tcp_wmem</code>: <code>4096 65536 536870912</code></li>
+<li><code>net.ipv4.tcp_congestion_control</code>: <code>bbr</code> (or <code>cubic</code> if <code>bbr</code> absent)</li>
+<li><code>net.ipv4.tcp_mtu_probing</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_window_scaling</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_timestamps</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_sack</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_low_latency</code>: <code>0</code></li>
+<li>Tuned: <code>tuned-adm profile network-throughput</code></li>
+<li>Interfaces</li>
+<li><code>txqueuelen</code> ≥ 10000</li>
+<li>RX/TX rings at driver max (<code>ethtool -g</code> / <code>-G</code>)</li>
+<li>GRO/GSO/TSO on; checksums on; LRO off</li>
+<li>qdisc <code>fq</code> (root)</li>
+</ul>
+<h2 id="verification-after-tuning">Verification after tuning<a class="headerlink" href="#verification-after-tuning" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>sysctl -a | egrep "(rmem|wmem|max_backlog|default_qdisc|tcp_congestion_control|tcp_mtu_probing)"</code></li>
+<li><code>tuned-adm active</code></li>
+<li>For each NIC: <code>ethtool -k &lt;iface&gt;</code>, <code>ethtool -g &lt;iface&gt;</code>, <code>tc qdisc show dev &lt;iface&gt;</code>, <code>cat /sys/class/net/&lt;iface&gt;/tx_queue_len</code></li>
+<li>Run a representative throughput test (e.g., <code>iperf3</code>) end-to-end.</li>
+</ul>
+<h2 id="additional-topics">Additional Topics<a class="headerlink" href="#additional-topics" title="Permanent link">&para;</a></h2>
+<h3 id="smt-simultaneous-multi-threading">SMT (Simultaneous Multi-Threading)<a class="headerlink" href="#smt-simultaneous-multi-threading" title="Permanent link">&para;</a></h3>
+<p>The script detects and reports SMT status. For most measurement hosts (perfSONAR), <strong>SMT should be on</strong> to maximize CPU throughput. However, for isolated low-latency workloads, SMT off may reduce jitter.</p>
+<p><strong>To check SMT status:</strong>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>/sys/devices/system/cpu/smt/control
+</code></pre></div></p>
+<p><strong>To enable SMT:</strong>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span>on<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/sys/devices/system/cpu/smt/control
+</code></pre></div></p>
+<p><strong>To disable SMT:</strong>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span>off<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/sys/devices/system/cpu/smt/control
+</code></pre></div></p>
+<p>Note: SMT changes take effect immediately but are not persisted across reboots. To persist, add to kernel command line (GRUB): <code>nosmt</code> (to disable) or remove it (to enable).</p>
+<h3 id="driver-updates">Driver Updates<a class="headerlink" href="#driver-updates" title="Permanent link">&para;</a></h3>
+<p>The script checks for available kernel and driver updates via <code>dnf list --showduplicates kernel</code>. If an update is available, the summary recommends:
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>kernel<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>reboot
+</code></pre></div></p>
+<p>For vendor-specific drivers (Mellanox OFED, Broadcom firmware tools), the script provides URLs and guidance. Always validate driver compatibility before updating in production.</p>
+<h3 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h3>
+<p>If the script fails to detect certain hardware or settings:
+- <strong>Missing <code>ethtool</code></strong>: Install via <code>dnf install ethtool</code>
+- <strong>Missing <code>tuned-adm</code></strong>: Install via <code>dnf install tuned</code>
+- <strong>No cpufreq/governor</strong>: Some VMs lack CPU frequency scaling; this is normal
+- <strong>No IOMMU</strong>: Fasterdata recommends <code>iommu=pt</code> generally, with vendor additions: enable in GRUB (e.g., <code>intel_iommu=on iommu=pt</code> for Intel, <code>amd_iommu=on iommu=pt</code> for AMD) if using SR-IOV or isolation features. Add <code>iommu=pt</code> to improve throughput on high-speed NICs.
+- <strong>ethtool-persist.service fails to start</strong>: Check <code>/var/log/messages</code> or <code>journalctl -u ethtool-persist</code> for errors; ensure ethtool and ip commands exist at <code>/sbin/</code> paths</p>
+<h3 id="persistence-service-details">Persistence Service Details<a class="headerlink" href="#persistence-service-details" title="Permanent link">&para;</a></h3>
+<p>When running with <code>--mode apply</code>, the script generates <code>/etc/systemd/system/ethtool-persist.service</code> containing:</p>
+<div class="highlight"><pre><span></span><code>[Unit]
+Description=Persist ethtool settings (Fasterdata)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ethtool -G &lt;iface&gt; rx &lt;max&gt; tx &lt;max&gt;
+ExecStart=/sbin/ethtool -K &lt;iface&gt; gro on gso on tso on rx on tx on lro off
+ExecStart=/sbin/ip link set dev &lt;iface&gt; txqueuelen &lt;value&gt;
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+</code></pre></div>
+<p>The service is automatically enabled. To verify:
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>ethtool-persist.service
+systemctl<span class="w"> </span>cat<span class="w"> </span>ethtool-persist.service
+</code></pre></div></p>
+<p>To manually update this service, re-run the script with <code>--mode apply</code> to regenerate it with current NIC settings.</p>
+<h2 id="persistence-notes">Persistence notes<a class="headerlink" href="#persistence-notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Sysctl settings persist via <code>/etc/sysctl.d/90-fasterdata.conf</code></li>
+<li>NIC ethtool changes do not persist by default; consider:</li>
+<li>running this script from a boot-time systemd unit, or</li>
+<li>translating the settings into your network manager configuration</li>
+</ul>
 
 
 
