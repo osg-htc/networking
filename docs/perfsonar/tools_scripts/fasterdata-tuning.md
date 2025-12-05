@@ -37,7 +37,8 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
 
 - Provides a non-invasive audit mode to compare current host settings against Fasterdata recommendations tailored by NIC speed and host role (measurement vs DTN).
 - Centralizes recommended sysctl tuning for high-throughput, long-distance transfers (buffer sizing, qdisc, congestion control), reducing guesswork and manual errors.
-- Applies and persists sysctl settings in `/etc/sysctl.d/90-fasterdata.conf` and helps persist per-NIC settings (ethtool) via a `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
+- Applies and persists sysctl settings in `/etc/sysctl.conf` and helps persist per-NIC settings (ethtool) via a `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
+- For DTN nodes: Supports packet pacing via traffic control (tc) token bucket filter (tbf) to limit outgoing traffic to a specified rate, important for multi-stream transfer scenarios.
 
 Who should use it?
 ------------------
@@ -84,19 +85,34 @@ Limit apply to specific NICs (comma-separated):
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces "ens1f0np0,ens1f1np1"
 ```
 
+Apply packet pacing to DTN nodes (limit traffic to 5 Gbps):
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 5gbps
+```
+
+Audit without applying changes (DTN target with custom pacing rate):
+
+```bash
+bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
+```
+
 Notes
 -----
 - IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present. It only recommends GRUB edits (requires reboot) — it does not modify GRUB automatically unless you explicitly opt-in via a future apply flag.
 - SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.
-- Apply mode writes `/etc/sysctl.d/90-fasterdata.conf` and creates `/etc/systemd/system/ethtool-persist.service` when necessary.
+- Apply mode writes to `/etc/sysctl.conf` and creates `/etc/systemd/system/ethtool-persist.service` when necessary.
+- **Packet Pacing (DTN only):** For Data Transfer Node targets, the script can apply token bucket filter (tbf) qdisc to pace outgoing traffic. This is recommended when a DTN node handles multiple simultaneous transfers where the effective transfer rate is limited by the minimum of: source read rate, network bandwidth, and destination write rate. See the `--apply-packet-pacing` and `--packet-pacing-rate` flags below.
 
 Optional apply flags (use with `--mode apply`):
 
+- `--apply-packet-pacing`: Apply packet pacing to DTN interfaces via tc token bucket filter. Only works with `--target dtn`. Default pacing rate is 2 Gbps (adjustable with `--packet-pacing-rate`).
+- `--packet-pacing-rate RATE`: Set the packet pacing rate for DTN nodes. Accepts units: kbps, mbps, gbps, tbps (e.g., `2gbps`, `10gbps`, `10000mbps`). Default: 2000mbps. Burst size is automatically calculated as 1 millisecond worth of packets at the specified rate.
 - `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate grub. Requires confirmation or `--yes` to skip interactive prompt.
 - `--apply-smt on|off`: Toggle SMT state at runtime. Requires `--mode apply`. Example: `--apply-smt off`.
 - `--persist-smt`: If set along with `--apply-smt`, also persist the change via GRUB edits (`nosmt` applied/removed).
 - `--yes`: Skip interactive confirmations; use with caution.
-- `--dry-run`: Preview the exact GRUB and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.
+- `--dry-run`: Preview the exact GRUB, sysctl, tc, and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.
 Example (preview only):
 
 ```bash
@@ -107,5 +123,6 @@ Reference and source
 --------------------
 - Source script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 - Fasterdata docs: https://fasterdata.es.net/host-tuning/
+- DTN tuning and packet pacing guidance: https://fasterdata.es.net/DTN/tuning/
 
 If you use this script as part of a host onboarding flow, ensure you test it in a VM or staging host before applying to production hosts.
