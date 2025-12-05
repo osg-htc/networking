@@ -80,7 +80,31 @@ get_ifaces() {
     echo "$IFACES" | tr ',' ' '
     return
   fi
-  ip -o link show up | awk -F': ' '{print $2}' | grep -vE '^(lo|docker|cni|veth|br-)' || true
+
+  # prefer physical NICs under /sys/class/net/<iface>/device (PCI devices)
+  local _path iface
+  for _path in /sys/class/net/*; do
+    iface=$(basename "$_path")
+    # filter common virtual interface prefixes
+    if [[ "$iface" =~ ^(lo|docker|cni|veth|br-|virbr|vmnet|vnet|ovs-) ]]; then
+      continue
+    fi
+    # physical devices appear under /sys/class/net/<iface>/device
+    if [[ -d "/sys/class/net/$iface/device" ]]; then
+      echo "$iface"
+      continue
+    fi
+    # fall back: include interfaces with carrier/link detected (up or carrier)
+    if ip -o link show "$iface" 2>/dev/null | grep -q 'state UP'; then
+      echo "$iface"
+      continue
+    fi
+    if command -v ethtool >/dev/null 2>&1; then
+      if ethtool "$iface" 2>/dev/null | grep -q 'Link detected: yes'; then
+        echo "$iface"
+      fi
+    fi
+  done | sort -u
 }
 
 print_sysctl_diff() {
@@ -97,18 +121,80 @@ print_sysctl_diff() {
   done
 }
 
+get_max_link_speed() {
+  # returns max link speed in Mbps across candidate interfaces
+  local max=0
+  for iface in $(get_ifaces); do
+    if command -v ethtool >/dev/null 2>&1; then
+      local s
+      s=$(ethtool "$iface" 2>/dev/null | awk -F': ' '/Speed:/ {print $2}' | tr -d '[:space:]') || continue
+      # s often like '100Gb/s' or '1000Mb/s' or 'Unknown!'
+      if [[ "$s" =~ ^([0-9]+)(G|M)b/s$ ]]; then
+        local val=${BASH_REMATCH[1]}
+        local unit=${BASH_REMATCH[2]}
+        if [[ "$unit" == "G" ]]; then
+          val=$((val * 1000))
+        fi
+        if (( val > max )); then max=$val; fi
+      fi
+    fi
+  done
+  echo "$max"
+}
+
+get_iface_speed() {
+  local iface="$1"
+  if ! command -v ethtool >/dev/null 2>&1; then
+    echo 0
+    return
+  fi
+  local s
+  s=$(ethtool "$iface" 2>/dev/null | awk -F': ' '/Speed:/ {print $2}' | tr -d '[:space:]' || true)
+  if [[ "$s" =~ ^([0-9]+)(G|M)b/s$ ]]; then
+    local val=${BASH_REMATCH[1]}
+    local unit=${BASH_REMATCH[2]}
+    if [[ "$unit" == "G" ]]; then
+      echo $((val * 1000))
+    else
+      echo "$val"
+    fi
+  else
+    echo 0
+  fi
+}
+
 apply_sysctl() {
   local outfile="/etc/sysctl.d/90-fasterdata.conf"
   require_root
   log_info "Writing $outfile"
-  cat > "$outfile" <<'EOF'
+  # Scale recommended values based on max NIC speed
+  local max_speed_mbps
+  max_speed_mbps=$(get_max_link_speed)
+  log_info "Detected max link speed (Mbps): ${max_speed_mbps:-0}"
+
+  # Choose scaled recommendations
+  local rmem_max=536870912
+  local wmem_max=536870912
+  local default_backlog=250000
+  if (( max_speed_mbps >= 100000 )); then
+    # 100Gbps or higher: be more generous
+    rmem_max=1073741824
+    wmem_max=1073741824
+    default_backlog=500000
+  elif (( max_speed_mbps >= 40000 )); then
+    rmem_max=536870912
+    wmem_max=536870912
+    default_backlog=350000
+  fi
+
+  cat > "$outfile" <<EOF
 # Fasterdata-inspired tuning (https://fasterdata.es.net/)
 # Applied by fasterdata-tuning.sh
-net.core.rmem_max = 536870912
-net.core.wmem_max = 536870912
+net.core.rmem_max = ${rmem_max}
+net.core.wmem_max = ${wmem_max}
 net.core.rmem_default = 134217728
 net.core.wmem_default = 134217728
-net.core.netdev_max_backlog = 250000
+net.core.netdev_max_backlog = ${default_backlog}
 net.core.default_qdisc = fq
 net.ipv4.tcp_rmem = 4096 87380 536870912
 net.ipv4.tcp_wmem = 4096 65536 536870912
@@ -132,7 +218,7 @@ EOF
 
 iface_audit() {
   local iface="$1"
-  echo "\nInterface: $iface"
+  printf "\nInterface: %s\n" "$iface"
   ip -brief address show "$iface"
 
   # Queue length
@@ -140,16 +226,42 @@ iface_audit() {
   txqlen=$(cat "/sys/class/net/$iface/tx_queue_len" 2>/dev/null || echo "?")
   echo "  txqueuelen: $txqlen (rec: >= 10000)"
 
+  # speed
+  if command -v ethtool >/dev/null 2>&1; then
+    local s
+    s=$(ethtool "$iface" 2>/dev/null | awk -F': ' '/Speed:/ {print $2}' | tr -d '[:space:]' || true)
+    if [[ -n "$s" ]]; then
+      echo "  Speed: $s"
+    fi
+  fi
+
   # ethtool settings
   if command -v ethtool >/dev/null 2>&1; then
     local offload
     offload=$(ethtool -k "$iface" 2>/dev/null | grep -E 'gro:|gso:|tso:|rx-checksumming:|tx-checksumming:|lro:') || true
     echo "  Offloads (current):"
-    echo "$offload" | sed 's/^/    /'
+    # indent offload lines
+    if [[ -n "$offload" ]]; then
+      # indent offload lines (avoid external sed usage if empty)
+      if [[ -n "$offload" ]]; then
+        while IFS= read -r line; do
+          printf "    %s\n" "$line"
+        done <<<"$offload"
+      fi
+    fi
 
     local rings
     rings=$(ethtool -g "$iface" 2>/dev/null | sed 's/^/    /') || true
-    [[ -n "$rings" ]] && echo "  Rings:" && echo "$rings"
+    if [[ -n "$rings" ]]; then
+      echo "  Rings:"
+      echo "$rings"
+    fi
+    # driver details
+    local drv
+    drv=$(ethtool -i "$iface" 2>/dev/null | awk -F': ' '/driver/ {print $2}') || true
+    if [[ -n "$drv" ]]; then
+      echo "  driver: $drv"
+    fi
   else
     echo "  ethtool not installed; skipping offload/ring audit"
   fi
@@ -167,9 +279,18 @@ iface_apply() {
   # txqueuelen
   if [[ -f /sys/class/net/$iface/tx_queue_len ]]; then
     local cur
-    cur=$(cat /sys/class/net/$iface/tx_queue_len)
-    if [[ "$cur" -lt 10000 ]]; then
-      ip link set dev "$iface" txqueuelen 10000
+    cur=$(cat "/sys/class/net/$iface/tx_queue_len")
+    # scale queue by link speed
+    local if_speed
+    if_speed=$(get_iface_speed "$iface")
+    local desired_txqlen=10000
+    if (( if_speed >= 100000 )); then
+      desired_txqlen=20000
+    elif (( if_speed >= 40000 )); then
+      desired_txqlen=15000
+    fi
+    if [[ "$cur" -lt "$desired_txqlen" ]]; then
+      ip link set dev "$iface" txqueuelen "$desired_txqlen"
     fi
   fi
 
@@ -178,8 +299,12 @@ iface_apply() {
     local max_rx max_tx
     max_rx=$(ethtool -g "$iface" 2>/dev/null | awk '/RX:/ {rx=$2} /RX max:/ {rxmax=$3} END {if(rxmax>0) print rxmax}' || true)
     max_tx=$(ethtool -g "$iface" 2>/dev/null | awk '/TX:/ {tx=$2} /TX max:/ {txmax=$3} END {if(txmax>0) print txmax}' || true)
-    [[ -n "$max_rx" ]] && ethtool -G "$iface" rx "$max_rx" >/dev/null 2>&1 || true
-    [[ -n "$max_tx" ]] && ethtool -G "$iface" tx "$max_tx" >/dev/null 2>&1 || true
+    if [[ -n "$max_rx" ]]; then
+      ethtool -G "$iface" rx "$max_rx" >/dev/null 2>&1 || true
+    fi
+    if [[ -n "$max_tx" ]]; then
+      ethtool -G "$iface" tx "$max_tx" >/dev/null 2>&1 || true
+    fi
 
     # Offloads: enable GRO/GSO/TSO, checksums; disable LRO
     ethtool -K "$iface" gro on gso on tso on rx on tx on >/dev/null 2>&1 || true
@@ -207,6 +332,56 @@ ensure_tuned_profile() {
   fi
 }
 
+apply_cpu_governor() {
+  if [[ ! -d /sys/devices/system/cpu/cpu0/cpufreq ]]; then
+    log_warn "Cannot set CPU governor: cpufreq not supported on this host"
+    return
+  fi
+  if command -v cpupower >/dev/null 2>&1; then
+    log_info "Setting CPU governor to 'performance' using cpupower"
+    cpupower frequency-set -g performance || log_warn "cpupower failed"
+  else
+    log_info "Setting CPU governors to 'performance' via sysfs"
+    for gov in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+      echo performance >"$gov" 2>/dev/null || true
+    done
+  fi
+}
+
+check_cpu_governor() {
+  if [[ ! -d /sys/devices/system/cpu/cpu0/cpufreq ]]; then
+    log_warn "cpufreq not available or governor support missing; skipping governor check"
+    return
+  fi
+  local governors
+  governors=$(for cf in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do cat "$cf" 2>/dev/null || true; done | sort -u)
+  echo "CPU governors: $governors"
+  if [[ "$governors" != "performance" ]]; then
+    log_warn "Non 'performance' CPU governor detected: $governors (rec: performance)"
+  fi
+}
+
+check_iommu() {
+  # Check kernel cmdline for IOMMU options
+  local cmdline
+  cmdline=$(cat /proc/cmdline 2>/dev/null || true)
+  if echo "$cmdline" | grep -q -E 'intel_iommu=on|amd_iommu=on|iommu=pt|iommu=on'; then
+    echo "IOMMU enabled via kernel command-line: $cmdline" | sed 's/^/  /'
+  else
+    log_warn "IOMMU not enabled in kernel command-line (rec: intel_iommu=on or amd_iommu=on for SR-IOV/perf tuning)"
+  fi
+}
+
+check_drivers() {
+  for iface in $(get_ifaces); do
+    if command -v ethtool >/dev/null 2>&1; then
+      local drv
+      drv=$(ethtool -i "$iface" 2>/dev/null | awk -F': ' '/driver/ {print $2}') || true
+      echo "Interface $iface uses driver: ${drv:-unknown}"
+    fi
+  done
+}
+
 main() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -229,6 +404,7 @@ main() {
       log_warn "bbr not available; will set cubic live but leave bbr in config"
     fi
     apply_sysctl
+    apply_cpu_governor
   fi
 
   ensure_tuned_profile
@@ -242,6 +418,13 @@ main() {
       iface_apply "$iface"
     fi
   done
+
+  # Extra host checks
+  if [[ "$MODE" == "audit" ]]; then
+    check_cpu_governor
+    check_iommu
+    check_drivers
+  fi
 
   if [[ "$MODE" == "apply" ]]; then
     log_info "Apply complete. Consider rebooting or rerunning audit to confirm settings."
