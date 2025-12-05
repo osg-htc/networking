@@ -1438,6 +1438,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Download
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usage-examples_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1818,6 +1840,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Download
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#usage-examples_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2043,6 +2087,18 @@ skip cloning with:</p>
 <li>Script: <code>fasterdata-tuning.sh</code> — audit/apply host &amp; NIC tuning (ESnet Fasterdata-aligned) for EL9 systems</li>
 <li>Path: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></li>
 </ul>
+<h2 id="download">Download<a class="headerlink" href="#download" title="Permanent link">&para;</a></h2>
+<p>You can download the raw script from the GitHub repo (master branch):</p>
+<div class="highlight"><pre><span></span><code>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+</code></pre></div>
+<p>Or once the site is built, from the site URL:</p>
+<div class="highlight"><pre><span></span><code>https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
+</code></pre></div>
+<h2 id="quick-install">Quick install<a class="headerlink" href="#quick-install" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download and install in /usr/local/bin</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh
+</code></pre></div>
 <h2 id="usage-examples_1">Usage examples<a class="headerlink" href="#usage-examples_1" title="Permanent link">&para;</a></h2>
 <p>Audit (default) a measurement host:
 <div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
