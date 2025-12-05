@@ -19,6 +19,10 @@ Network Troubleshooting
 -----------------------
 Users with network issues should check the [troubleshooting link](network-troubleshooting.md) below for initial guidance on how best to get their issue resolved. In addition, you can refer to the [ESNet network performance guide](https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/) for a detailed instructions on how to identify and isolate network performance issues using perfSONAR.
 
+Host and Network Tuning
+-----------------------
+- [Fasterdata-aligned host/network tuning (EL9)](host-network-tuning.md) — summarizes ESnet guidance and includes an audit/apply script.
+
 Network Services
 ----------------
 
