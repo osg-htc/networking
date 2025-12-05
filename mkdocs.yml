@@ -43,6 +43,7 @@ nav:
     - 'nftables': 'features/nftables.md'
   - Tools & Scripts:
     - 'Scripts and tools': 'perfsonar/tools_scripts/README.md'
+    - 'Fasterdata host tuning (EL9)': 'perfsonar/tools_scripts/fasterdata-tuning.md'
     - 'Compose bundle (docker-compose.yml)': 'perfsonar/tools_scripts/docker-compose.yml'
     - 'LS registration updater (script)': 'perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh'
     - 'LS registration helpers (README)': 'perfsonar/tools_scripts/README-lsregistration.md'

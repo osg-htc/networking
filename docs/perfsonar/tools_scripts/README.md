@@ -8,6 +8,7 @@ static IPv4/IPv6 addressing and per-NIC source-based routing via NetworkManager
 Quick overview
 --------------
 - Script: `perfSONAR-pbr-nm.sh`
+- Script: `fasterdata-tuning.sh` (Fasterdata audit/apply host tuning script)
 - Config file: `/etc/perfSONAR-multi-nic-config.conf`
 - Log file: `/var/log/perfSONAR-multi-nic-config.log`
 
@@ -42,6 +43,29 @@ skip cloning with:
 ```bash
 bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
 ```
+
+Fasterdata host tuning script
+-----------------------------
+- Script: `fasterdata-tuning.sh` — audit/apply host & NIC tuning (ESnet Fasterdata-aligned) for EL9 systems
+- Path: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
+
+Usage examples
+--------------
+
+Audit (default) a measurement host:
+```bash
+bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
+```
+
+Apply tuning (requires root):
+```bash
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
+```
+
+Notes
+-----
+- Shows a `Host Info` summary and performs various checks (sysctl, ethtool, drivers, SMT, IOMMU). IOMMU changes require GRUB edits and reboot; SMT toggles can be done via `/sys/devices/system/cpu/smt/control`.
+- In apply mode the script writes `/etc/sysctl.d/90-fasterdata.conf` and writes/enables a systemd `ethtool-persist.service` to persist NIC settings.
 
 Requirements
 ------------
