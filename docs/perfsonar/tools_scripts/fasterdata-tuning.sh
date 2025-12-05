@@ -15,10 +15,13 @@
 #   - Tuned profile suggestion (network-throughput)
 #   - Per-interface checks: GRO/TSO/GSO/checksums, LRO off, ring buffers to max,
 #     txqueuelen, qdisc fq
+#   - DTN-specific: Packet pacing via tc tbf qdisc (optional, configurable rate)
 #
 # Notes:
 #   - Uses conservative recommendations suitable for perfSONAR/DTN-style hosts on EL9.
 #   - Apply mode updates /etc/sysctl.conf with recommended parameters and applies live settings.
+#   - Packet pacing for DTN nodes: Uses token bucket filter (tbf) to pace outgoing traffic.
+#     Default rate: 2 Gbps (adjust via --packet-pacing-rate). Enable with --apply-packet-pacing.
 #   - ethtool changes are immediate but not persisted across reboots; consider
 #     running this script from a boot-time unit if persistence is required.
 
@@ -53,6 +56,8 @@ APPLY_SMT=""
 PERSIST_SMT=0
 AUTO_YES=0
 DRY_RUN=0
+PACKET_PACING_RATE="2000mbps"
+APPLY_PACKET_PACING=0
 
 usage() {
   cat <<'EOF'
@@ -63,16 +68,19 @@ Modes:
   apply             Apply recommended values (requires root)
 
 Options:
-  --ifaces LIST     Comma-separated interfaces to check/tune. Default: all up, non-loopback
-  --target TYPE     Host type: measurement (default) or dtn (data transfer node)
-  --color           Use color codes (green=ok, yellow=warning, red=critical)
-  --apply-iommu     (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
-  --apply-smt STATE Apply runtime SMT change (on|off). Requires --mode apply
-  --persist-smt     (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
-  --yes             Skip interactive confirmations (use with caution)
-  --dry-run         Preview the exact GRUB/sysfs changes without applying them (safe)
-  --verbose         More detail in audit output
-  -h, --help        Show this help
+  --ifaces LIST              Comma-separated interfaces to check/tune. Default: all up, non-loopback
+  --target TYPE              Host type: measurement (default) or dtn (data transfer node)
+  --packet-pacing-rate RATE  Packet pacing rate for DTN nodes (default: 2000mbps)
+                             Units: kbps, mbps, gbps (e.g., 2gbps, 10gbps, 10000mbps)
+  --apply-packet-pacing      (apply only) Apply packet pacing via tc tbf qdisc (DTN only)
+  --color                    Use color codes (green=ok, yellow=warning, red=critical)
+  --apply-iommu              (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
+  --apply-smt STATE          Apply runtime SMT change (on|off). Requires --mode apply
+  --persist-smt              (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
+  --yes                      Skip interactive confirmations (use with caution)
+  --dry-run                  Preview the exact GRUB/sysfs changes without applying them (safe)
+  --verbose                  More detail in audit output
+  -h, --help                 Show this help
 EOF
 }
 
@@ -473,6 +481,95 @@ iface_apply() {
 
   # qdisc fq
   tc qdisc replace dev "$iface" root fq >/dev/null 2>&1 || true
+}
+
+iface_packet_pacing_audit() {
+  local iface="$1"
+  local pacing_rate="$2"
+  
+  # Only audit packet pacing for DTN nodes
+  if [[ "$TARGET_TYPE" != "dtn" ]]; then
+    return 0
+  fi
+  
+  # Check current qdisc - should be tbf (token bucket filter) for pacing
+  local current_qdisc
+  current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1)
+  
+  # If we're not applying pacing, just report current state
+  if [[ $APPLY_PACKET_PACING -eq 0 ]]; then
+    if [[ "$current_qdisc" != *"tbf"* ]]; then
+      return 1  # Not using tbf; would need packet pacing applied
+    fi
+    return 0  # Already using tbf
+  fi
+  
+  return 0
+}
+
+iface_apply_packet_pacing() {
+  local iface="$1"
+  local pacing_rate="$2"
+  
+  if [[ "$TARGET_TYPE" != "dtn" ]] || [[ $APPLY_PACKET_PACING -eq 0 ]]; then
+    return
+  fi
+  
+  log_info "Applying packet pacing ($pacing_rate) to $iface via tc tbf qdisc"
+  
+  # Parse rate and convert to bits per second for tc
+  # tc expects rate in: bit, kbit, mbit, gbit, tbit, or bps, kbps, mbps, gbps, tbps
+  local rate_normalized="$pacing_rate"
+  
+  # Normalize case if needed (tc accepts both cases)
+  rate_normalized="${rate_normalized,,}"  # lowercase
+  
+  # Verify rate is in acceptable format
+  if ! [[ "$rate_normalized" =~ ^[0-9]+(kbps|mbps|gbps|tbps|kbit|mbit|gbit|tbit|bit|bps)$ ]]; then
+    log_warn "Invalid packet pacing rate format: $pacing_rate (use e.g., 2gbps, 10000mbps)"
+    return 1
+  fi
+  
+  # Get interface speed to validate pacing rate doesn't exceed link speed
+  local if_speed
+  if_speed=$(get_iface_speed "$iface")
+  
+  # Set up tbf (token bucket filter) qdisc
+  # tbf parameters: rate=limit latency=burst
+  # burst size calculation: typical is rate * 0.001 (1ms worth of packets)
+  # For example: 2gbps with 1ms latency = 2000000000 bits/sec * 0.001 = 2000000 bits = 250000 bytes
+  
+  # Calculate burst size in bytes (assuming 1ms worth of packets at the specified rate)
+  # Formula: (rate in bps) * 0.001 seconds / 8 bits per byte
+  local burst_bytes
+  case "$rate_normalized" in
+    *gbps)
+      local gbps_val="${rate_normalized%gbps}"
+      burst_bytes=$((gbps_val * 125000))  # (gbps * 1e9 bits/s * 0.001s) / 8 bits/byte
+      ;;
+    *mbps)
+      local mbps_val="${rate_normalized%mbps}"
+      burst_bytes=$((mbps_val * 125))  # (mbps * 1e6 bits/s * 0.001s) / 8 bits/byte
+      ;;
+    *kbps)
+      local kbps_val="${rate_normalized%kbps}"
+      burst_bytes=$((kbps_val / 8))  # (kbps * 1e3 bits/s * 0.001s) / 8 bits/byte
+      ;;
+    *)
+      # Default burst size: 1 MB for very high rates, smaller for others
+      burst_bytes=1000000
+      ;;
+  esac
+  
+  # Ensure burst size is reasonable (minimum 1500 bytes for MTU, maximum 10 MB)
+  [[ $burst_bytes -lt 1500 ]] && burst_bytes=1500
+  [[ $burst_bytes -gt 10485760 ]] && burst_bytes=10485760
+  
+  # Apply tbf qdisc with the specified rate and calculated burst
+  tc qdisc replace dev "$iface" root tbf rate "$rate_normalized" burst "$burst_bytes" latency 100ms >/dev/null 2>&1 || \
+    log_warn "Failed to apply packet pacing qdisc to $iface"
+  
+  log_info "Packet pacing qdisc set on $iface: rate=$rate_normalized burst=$burst_bytes"
 }
 
 create_ethtool_persist_service() {
@@ -995,6 +1092,14 @@ check_drivers() {
 print_summary() {
   printf "\nSummary:\n"
   echo "- Target type: $TARGET_TYPE"
+  if [[ "$TARGET_TYPE" == "dtn" ]]; then
+    if [[ $APPLY_PACKET_PACING -eq 1 ]]; then
+      echo "- Packet pacing: ENABLED (rate=$PACKET_PACING_RATE, qdisc=tbf)"
+    else
+      echo "- Packet pacing: not applied (use --apply-packet-pacing with --mode apply to enable)"
+      echo "  Recommended pacing rate: $PACKET_PACING_RATE (adjustable via --packet-pacing-rate)"
+    fi
+  fi
   echo "- Sysctl mismatches: $SYSCTL_MISMATCHES"
   if (( ${#IF_ISSUES[@]} > 0 )); then
     echo "- Interfaces needing attention (${#IF_ISSUES[@]}):"
@@ -1051,6 +1156,8 @@ main() {
       --mode) MODE="$2"; shift 2;;
       --ifaces) IFACES="$2"; shift 2;;
       --target) TARGET_TYPE="$2"; shift 2;;
+      --packet-pacing-rate) PACKET_PACING_RATE="$2"; shift 2;;
+      --apply-packet-pacing) APPLY_PACKET_PACING=1; shift;;
       --color) USE_COLOR=1; shift;;
       --apply-iommu) APPLY_IOMMU=1; shift;;
       --apply-smt) APPLY_SMT="$2"; shift 2;;
@@ -1088,6 +1195,18 @@ main() {
     exit 1
   fi
 
+  # Validate packet pacing flags
+  if [[ $APPLY_PACKET_PACING -eq 1 ]]; then
+    if [[ "$MODE" != "apply" ]]; then
+      log_warn "--apply-packet-pacing ignored unless --mode apply"
+      APPLY_PACKET_PACING=0
+    fi
+    if [[ "$TARGET_TYPE" != "dtn" ]]; then
+      log_warn "--apply-packet-pacing is for DTN targets only (--target dtn); ignoring"
+      APPLY_PACKET_PACING=0
+    fi
+  fi
+
   if [[ "$MODE" == "audit" ]]; then
     print_host_info
     print_sysctl_diff
@@ -1106,8 +1225,12 @@ main() {
   for iface in $ifs; do
     if [[ "$MODE" == "audit" ]]; then
       iface_audit "$iface"
+      if ! iface_packet_pacing_audit "$iface" "$PACKET_PACING_RATE"; then
+        IF_ISSUES+=("$iface: needs packet pacing (DTN target with non-tbf qdisc)")
+      fi
     else
       iface_apply "$iface"
+      iface_apply_packet_pacing "$iface" "$PACKET_PACING_RATE"
     fi
   done
 
