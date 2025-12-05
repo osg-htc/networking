@@ -192,7 +192,7 @@ If the script fails to detect certain hardware or settings:
 - **Missing `ethtool`**: Install via `dnf install ethtool`
 - **Missing `tuned-adm`**: Install via `dnf install tuned`
 - **No cpufreq/governor**: Some VMs lack CPU frequency scaling; this is normal
-- **No IOMMU**: Enable in GRUB (`intel_iommu=on` for Intel, `amd_iommu=on` for AMD) if using SR-IOV or isolation features
+- **No IOMMU**: Fasterdata recommends `iommu=pt` generally, with vendor additions: enable in GRUB (e.g., `intel_iommu=on iommu=pt` for Intel, `amd_iommu=on iommu=pt` for AMD) if using SR-IOV or isolation features. Add `iommu=pt` to improve throughput on high-speed NICs.
 - **ethtool-persist.service fails to start**: Check `/var/log/messages` or `journalctl -u ethtool-persist` for errors; ensure ethtool and ip commands exist at `/sbin/` paths
 
 ### Persistence Service Details
