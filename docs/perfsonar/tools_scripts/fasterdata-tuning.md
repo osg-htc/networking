@@ -6,14 +6,59 @@ Script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
 Purpose
 -------
-- Audit system settings (sysctl, qdiscs, ethtool, SMT, IOMMU, drivers) against Fasterdata recommendations.
-- Apply tuned sysctl settings and persist NIC tunings (via systemd service) when run in `--mode apply`.
+ 
+Download & Install
+------------------
+You can download the script directly from the website or GitHub raw URL and install it locally for repeated use:
+
+```bash
+# Download via curl to a system location and make it executable
+sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
+
+# Or download directly from the site (if published):
+sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
+sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
+```
+
+Why use this script?
+---------------------
+This script packages ESnet Fasterdata best practices into an audit/apply helper that:
+
+- Provides a non-invasive audit mode to compare current host settings against Fasterdata recommendations tailored by NIC speed and host role (measurement vs DTN).
+- Centralizes recommended sysctl tuning for high-throughput, long-distance transfers (buffer sizing, qdisc, congestion control), reducing guesswork and manual errors.
+- Applies and persists sysctl settings in `/etc/sysctl.d/90-fasterdata.conf` and helps persist per-NIC settings (ethtool) via a `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
+
+Who should use it?
+------------------
+- perfSONAR testpoints, dedicated DTNs and other throughput-focused hosts on EL9 where you control the host configuration.
+- NOT for multi-tenant or general-purpose interactive servers without prior review — these sysctl changes can affect other services.
+
+Verification & Basic checks
+--------------------------
+After running the script (audit or apply), verify key settings:
+
+```bash
+# Sysctl
+sysctl net.core.rmem_max net.core.wmem_max net.core.netdev_max_backlog net.core.default_qdisc
+# Tuned active profile
+tuned-adm active || echo "tuned-adm not present"
+# Per NIC checks
+ethtool -k <iface> # offload features
+ethtool -g <iface> # ring buffer sizes
+tc qdisc show dev <iface>
+# Verify IOMMU in kernel cmdline
+cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
+```
+
+Security & Safety
+-----------------
+- Always test in a staging environment first. Use `--mode audit` to review before applying.
+- The `iommu` and `SMT` settings are environment-sensitive: IOMMU changes require GRUB kernel cmdline edits and a reboot. The script only suggests GRUB edits and does not automatically change the bootloader.
+- If you require automated GRUB edits or SMT toggles, those should be opt-in with thorough confirmation prompts and recovery steps.
 
 Usage
 -----
-Audit a measurement host (default):
-
-```bash
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
 ```
 

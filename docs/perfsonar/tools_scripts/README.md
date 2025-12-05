@@ -93,6 +93,28 @@ Fasterdata host tuning script
 - Script: `fasterdata-tuning.sh` — audit/apply host & NIC tuning (ESnet Fasterdata-aligned) for EL9 systems
 - Path: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
+Download
+--------
+You can download the raw script from the GitHub repo (master branch):
+
+```
+https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+```
+
+Or once the site is built, from the site URL:
+
+```
+https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
+```
+
+Quick install
+-------------
+```bash
+# Download and install in /usr/local/bin
+sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
+```
+
 Usage examples
 --------------
 

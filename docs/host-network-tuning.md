@@ -94,6 +94,28 @@ Then it displays sysctl audit and per-NIC summaries, followed by a summary block
 
 Detailed log with full ethtool/sysctl/tc output is written to `/tmp/fasterdata-tuning-<UTC>.log` (configurable via `LOGFILE` env var).
 
+Getting the Fasterdata script
+-----------------------------
+You can download the script directly from the GitHub repo (raw) or the site after it is published:
+
+```
+https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
+```
+
+Install quickly as follows:
+
+```bash
+sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
+```
+
+Then run an audit before applying changes:
+
+```bash
+bash /usr/local/bin/fasterdata-tuning.sh --mode audit --target measurement
+```
+
 #### Color Output
 
 Use `--color` flag to enable ANSI color codes:
