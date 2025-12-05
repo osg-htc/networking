@@ -75,12 +75,17 @@ Options:
   --apply-packet-pacing      (apply only) Apply packet pacing via tc tbf qdisc (DTN only)
   --color                    Use color codes (green=ok, yellow=warning, red=critical)
   --apply-iommu              (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
+                             Note: Optimized for EL9; will warn on other systems
   --apply-smt STATE          Apply runtime SMT change (on|off). Requires --mode apply
   --persist-smt              (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
+                             Note: Optimized for EL9; will warn on other systems
   --yes                      Skip interactive confirmations (use with caution)
   --dry-run                  Preview the exact GRUB/sysfs changes without applying them (safe)
   --verbose                  More detail in audit output
   -h, --help                 Show this help
+
+Note: This script is optimized for Enterprise Linux 9 (RHEL/Rocky/AlmaLinux).
+      GRUB/BLS operations will work on other systems but may require adjustments.
 EOF
 }
 
@@ -122,6 +127,38 @@ require_root() {
     echo "ERROR: --mode apply requires root" >&2
     exit 1
   fi
+}
+
+# Detect if running on EL9
+is_el9() {
+  if [[ -f /etc/os-release ]]; then
+    local version_id
+    version_id=$(awk -F= '/^VERSION_ID=/ {print $2}' /etc/os-release | tr -d '"')
+    if [[ "$version_id" =~ ^9\. ]]; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+# Warn if not on EL9 (for GRUB/BLS operations)
+warn_if_not_el9() {
+  local operation="$1"
+  if ! is_el9; then
+    local os_name
+    os_name=$(awk -F= '/^PRETTY_NAME=/ {print $2}' /etc/os-release 2>/dev/null | tr -d '"' || echo "unknown")
+    log_warn "Detected OS: $os_name (not EL9)"
+    log_warn "The $operation operation is optimized for Enterprise Linux 9"
+    log_warn "On non-EL9 systems, GRUB configuration may differ - proceed with caution"
+    if [[ $DRY_RUN -ne 1 ]] && [[ $AUTO_YES -ne 1 ]]; then
+      read -r -p "Continue anyway? [y/N] " resp
+      if [[ ! "$resp" =~ ^[Yy]$ ]]; then
+        log_info "$operation cancelled by user"
+        return 1
+      fi
+    fi
+  fi
+  return 0
 }
 
 # Recommended sysctl values (Fasterdata-inspired, EL9 context)
@@ -772,6 +809,10 @@ apply_iommu() {
     return
   fi
   require_root
+  
+  # Warn if not on EL9
+  warn_if_not_el9 "IOMMU configuration" || return
+  
   local cmdline
   cmdline=$(cat /proc/cmdline 2>/dev/null || true)
   local cpu_vendor iommu_cmd
@@ -816,7 +857,7 @@ apply_iommu() {
   fi
   # Read existing value and ensure we append without duplicates
   local existing
-  existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=("|")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
+  existing=$(grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | head -1 | sed 's/^GRUB_CMDLINE_LINUX="\(.*\)"$/\1/' || true)
   if [[ $DRY_RUN -eq 1 ]]; then
     if [[ -z "$existing" ]]; then
       echo "Dry-run: would set GRUB_CMDLINE_LINUX=\"$iommu_cmd\""
@@ -842,18 +883,34 @@ apply_iommu() {
       fi
     fi
   fi
-  # Regenerate grub
+  # Regenerate grub - on RHEL/Rocky 9+ with BLS, use grubby instead
   if [[ $DRY_RUN -eq 1 ]]; then
-    echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+    if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+      echo "Dry-run: would run grubby --update-kernel=ALL --args=\"$iommu_cmd\""
+    else
+      echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+    fi
     return
   fi
-  if command -v grub2-mkconfig >/dev/null 2>&1; then
-    grub2-mkconfig -o /boot/grub2/grub.cfg
-  elif command -v update-grub >/dev/null 2>&1; then
-    update-grub || true
+  
+  # Check if system uses BLS (Boot Loader Specification) - RHEL/Rocky 9+
+  if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+    log_info "Detected BLS boot system, using grubby to update kernel entries"
+    if ! grubby --update-kernel=ALL --args="$iommu_cmd" 2>&1; then
+      log_warn "grubby failed to update kernel entries"
+      return
+    fi
+    log_info "Updated all kernel entries with IOMMU parameters using grubby"
   else
-    log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
-    return
+    # Traditional GRUB2 system
+    if command -v grub2-mkconfig >/dev/null 2>&1; then
+      grub2-mkconfig -o /boot/grub2/grub.cfg
+    elif command -v update-grub >/dev/null 2>&1; then
+      update-grub || true
+    else
+      log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+      return
+    fi
   fi
   log_info "GRUB config updated; please reboot to apply IOMMU settings"
 }
@@ -898,6 +955,9 @@ apply_smt() {
   fi
   # If persist requested, update grub kernel cmdline
   if [[ $PERSIST_SMT -eq 1 ]]; then
+    # Warn if not on EL9
+    warn_if_not_el9 "SMT persistence (GRUB)" || return
+    
     local grubnosmt
     if [[ "$APPLY_SMT" == "off" ]]; then
       grubnosmt="nosmt"
@@ -913,7 +973,7 @@ apply_smt() {
       log_info "Backed up /etc/default/grub to $backup"
     fi
     local existing
-    existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=("|")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
+    existing=$(grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | head -1 | sed 's/^GRUB_CMDLINE_LINUX="\(.*\)"$/\1/' || true)
     if [[ $DRY_RUN -eq 1 ]]; then
       if [[ -z "$existing" ]]; then
         if [[ -n "$grubnosmt" ]]; then
@@ -955,17 +1015,47 @@ apply_smt() {
         fi
       fi
     fi
+    # Regenerate grub - on RHEL/Rocky 9+ with BLS, use grubby instead
     if [[ $DRY_RUN -eq 1 ]]; then
-      echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+      if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+        if [[ -n "$grubnosmt" ]]; then
+          echo "Dry-run: would run grubby --update-kernel=ALL --args=\"$grubnosmt\""
+        else
+          echo "Dry-run: would run grubby --update-kernel=ALL --remove-args=\"nosmt\""
+        fi
+      else
+        echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+      fi
       return
     fi
-    if command -v grub2-mkconfig >/dev/null 2>&1; then
-      grub2-mkconfig -o /boot/grub2/grub.cfg
-    elif command -v update-grub >/dev/null 2>&1; then
-      update-grub || true
+    
+    # Check if system uses BLS (Boot Loader Specification) - RHEL/Rocky 9+
+    if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+      log_info "Detected BLS boot system, using grubby to update kernel entries"
+      if [[ -n "$grubnosmt" ]]; then
+        if ! grubby --update-kernel=ALL --args="$grubnosmt" 2>&1; then
+          log_warn "grubby failed to update kernel entries"
+          return
+        fi
+        log_info "Updated all kernel entries with nosmt parameter using grubby"
+      else
+        # Remove nosmt from all kernels
+        if ! grubby --update-kernel=ALL --remove-args="nosmt" 2>&1; then
+          log_warn "grubby failed to remove nosmt from kernel entries"
+          return
+        fi
+        log_info "Removed nosmt parameter from all kernel entries using grubby"
+      fi
     else
-      log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
-      return
+      # Traditional GRUB2 system
+      if command -v grub2-mkconfig >/dev/null 2>&1; then
+        grub2-mkconfig -o /boot/grub2/grub.cfg
+      elif command -v update-grub >/dev/null 2>&1; then
+        update-grub || true
+      else
+        log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+        return
+      fi
     fi
     log_info "GRUB updated to persist SMT change; reboot to apply"
   fi
