@@ -671,7 +671,7 @@ apply_iommu() {
   fi
   # Read existing value and ensure we append without duplicates
   local existing
-  existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
+  existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=("|")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
   if [[ $DRY_RUN -eq 1 ]]; then
     if [[ -z "$existing" ]]; then
       echo "Dry-run: would set GRUB_CMDLINE_LINUX=\"$iommu_cmd\""
@@ -768,7 +768,7 @@ apply_smt() {
       log_info "Backed up /etc/default/grub to $backup"
     fi
     local existing
-    existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
+    existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=("|")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
     if [[ $DRY_RUN -eq 1 ]]; then
       if [[ -z "$existing" ]]; then
         if [[ -n "$grubnosmt" ]]; then
