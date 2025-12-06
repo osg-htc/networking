@@ -83,6 +83,12 @@ Options:
   --debug                     Run commands in debug mode (bash -x)
     --rebuild-all               Destructive full rebuild (remove all NM connections and rules first)
     --apply-inplace             Explicitly select in-place apply (non-destructive, default)
+  
+Note:
+    --generate-config-auto will skip NICs that do not have either an IPv4 or
+    IPv6 gateway (i.e., management-only NICs) to avoid creating non-functional
+    NM connection files unless they are explicitly set as DEFAULT_ROUTE_NIC
+    or provided with a gateway.
 EOF
 }
 
@@ -352,6 +358,12 @@ run_shellcheck() {
 #     (or prints a preview in debug/dry-run mode).
 #   - Side effect (export): sets DEFAULT_ROUTE_NIC in the current shell so
 #     the caller can inspect which interface was chosen.
+#
+# Note: The auto-generator will skip NICs that lack both an IPv4 and IPv6
+# gateway (for example, management-only NICs) to avoid generating
+# non-functional NetworkManager connection profiles. The device will be
+# preserved if it is explicitly marked as DEFAULT_ROUTE_NIC or if you set an
+# explicit gateway.
 generate_config_from_system() {
     log "Auto-detecting network interfaces to generate $CONFIG_FILE"
 

@@ -1873,6 +1873,7 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 <p>Generate the config file automatically:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
+<p>Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an explicit gateway or mark it as <code>DEFAULT_ROUTE_NIC</code> in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
 </li>
 </ol>
 <p>Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.</p>
