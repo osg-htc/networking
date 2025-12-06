@@ -77,12 +77,14 @@ Options:
   --target measurement|dtn  Target type for tuning (default: measurement)
   --apply-jumbo           Apply jumbo MTU when --mode apply
   --apply-tcp-cc ALGO     Apply TCP congestion control ALGO in --mode apply
+  --apply-iommu           Apply IOMMU kernel cmdline options (requires --mode apply; vendor auto-detected)
   --apply-smt on|off      Enable or disable SMT (requires root)
   --persist-smt           Make SMT configuration persistent in GRUB (requires --apply-smt)
   --apply-packet-pacing   Enable packet pacing (DTN targets only); sets qdisc=tbf when applied
   --packet-pacing-rate RATE  Set the packet pacing rate (default: 2000mbps)
   --yes                   Skip interactive prompts and accept defaults
   --json                  Print JSON machine-readable audit (audit mode only)
+  --iommu-args ARGS       Optional custom kernel cmdline args to set for IOMMU (default: vendor-specific intel|amd args)
   --color                 Enable colorized output (default)
   --nocolor               Disable colorized output
   --dry-run               Do not make changes when in apply mode; show actions only
@@ -202,6 +204,7 @@ readonly C_RESET='\033[0m'
 MODE="audit"
 IFACES=""
 APPLY_IOMMU=0
+IOMMU_ARGS=""  # Optional override for kernel cmdline IOMMU flags (e.g., "intel_iommu=on iommu=pt")
 APPLY_SMT=""
 PERSIST_SMT=0
 AUTO_YES=0
@@ -1536,6 +1539,11 @@ apply_iommu() {
     cpu_vendor="unknown"
     iommu_cmd="iommu=pt"
   fi
+  # If the caller supplied custom IOMMU args via --iommu-args, use that instead
+  if [[ -n "$IOMMU_ARGS" ]]; then
+    iommu_cmd="$IOMMU_ARGS"
+    log_info "Using custom IOMMU args: $IOMMU_ARGS"
+  fi
   if echo "$cmdline" | grep -q -E 'iommu=pt|intel_iommu=on|amd_iommu=on'; then
     log_info "IOMMU appears to be enabled: $cmdline"
     return
@@ -2183,7 +2191,8 @@ main() {
       --apply-packet-pacing) APPLY_PACKET_PACING=1; shift;;
       --color) USE_COLOR=1; shift;;
       --nocolor) USE_COLOR=0; shift;;
-      --apply-iommu) APPLY_IOMMU=1; shift;;
+        --apply-iommu) APPLY_IOMMU=1; shift;;
+        --iommu-args) IOMMU_ARGS="$2"; shift 2;;
       --apply-smt) APPLY_SMT="$2"; shift 2;;
       --persist-smt) PERSIST_SMT=1; shift;;
       --apply-tcp-cc) APPLY_TCP_CC="$2"; shift 2;;
