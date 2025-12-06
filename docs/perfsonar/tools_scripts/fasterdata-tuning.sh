@@ -371,6 +371,7 @@ get_ifaces() {
       fi
     fi
   done
+  # Nothing else to add for get_ifaces; return list of candidates
 
   # De-duplicate and print
   if [[ ${#candidates[@]} -gt 0 ]]; then
@@ -449,9 +450,10 @@ verify_dns_match() {
 get_host_fqdns() {
   local iface ip fqdn fqdns=()
   for iface in $(get_ifaces); do
-    # Try to get IPs from both IPv4 and IPv6
+    # Try to get IPs from both IPv4 and IPv6 using a stable ip/awk approach
+    # `ip -o addr` prints a single-line per address; the 4th field is <addr>/<prefix>
     local ips
-    ips=$(ip addr show "$iface" 2>/dev/null | grep -oP '(?<=inet[6]?\s)\S+(?=/)')
+    ips=$(ip -o addr show "$iface" 2>/dev/null | awk '{print $4}')
     while IFS= read -r ip; do
       [[ -z "$ip" ]] && continue
       # Remove CIDR notation if present
@@ -466,10 +468,31 @@ get_host_fqdns() {
           fqdns+=("$fqdn (DNS mismatch!)")
         fi
       else
-        fqdns+=("(no reverse DNS for $ip)")
+        # Try to get names from /etc/hosts or NSS (getent hosts) before giving up
+        local hostline
+        hostline=$(getent hosts "$ip" 2>/dev/null || true)
+        if [[ -n "$hostline" ]]; then
+          # getent hosts returns: IP cname alias1 alias2...
+          local hostnames
+          hostnames=$(echo "$hostline" | awk '{$1=""; print $0}' | xargs)
+          for name in $hostnames; do
+            fqdns+=("$name")
+          done
+        else
+          fqdns+=("(no reverse DNS for $ip)")
+        fi
       fi
     done <<<"$ips"
   done
+  # Also include hostnames returned by 'hostname -A' (all aliases)
+  local alias_names
+  alias_names=$(hostname -A 2>/dev/null || true)
+  if [[ -n "$alias_names" ]]; then
+    for name in $alias_names; do
+      [[ -z "$name" ]] && continue
+      fqdns+=("$name")
+    done
+  fi
   printf '%s\n' "${fqdns[@]}" | sort -u
 }
 
