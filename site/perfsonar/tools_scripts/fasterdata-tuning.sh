@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.1.2
+# Version: 1.1.3
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -1502,7 +1502,18 @@ check_iommu() {
     echo "  1. Edit /etc/default/grub"
     echo "  2. Add to GRUB_CMDLINE_LINUX: $iommu_cmd"
     echo "  3. Example: GRUB_CMDLINE_LINUX=\"root=... $iommu_cmd ...\""
-    echo "  4. Regenerate GRUB: grub2-mkconfig -o /boot/grub2/grub.cfg"
+    # Suggest the right GRUB regeneration command depending on boot style
+    local regen_cmd
+    if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+      regen_cmd="grubby --update-kernel=ALL --args=\"$iommu_cmd\""
+    elif command -v grub2-mkconfig >/dev/null 2>&1; then
+      regen_cmd="grub2-mkconfig -o /boot/grub2/grub.cfg"
+    elif command -v update-grub >/dev/null 2>&1; then
+      regen_cmd="update-grub"
+    else
+      regen_cmd="(use the distro-specific grub regen command, e.g. grubby/grub2-mkconfig/update-grub)"
+    fi
+    echo "  4. Regenerate GRUB: ${regen_cmd}"
     echo "  5. Reboot the system for changes to take effect"
     echo "  6. Verify with: cat /proc/cmdline (should show iommu=pt)"
   fi
