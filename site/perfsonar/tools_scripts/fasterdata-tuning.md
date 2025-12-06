@@ -108,9 +108,8 @@ Optional apply flags (use with `--mode apply`):
 
 - `--apply-packet-pacing`: Apply packet pacing to DTN interfaces via tc token bucket filter. Only works with `--target dtn`. Default pacing rate is 2 Gbps (adjustable with `--packet-pacing-rate`).
 - `--packet-pacing-rate RATE`: Set the packet pacing rate for DTN nodes. Accepts units: kbps, mbps, gbps, tbps (e.g., `2gbps`, `10gbps`, `10000mbps`). Default: 2000mbps. Burst size is automatically calculated as 1 millisecond worth of packets at the specified rate.
-- `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate grub. Requires confirmation or `--yes` to skip interactive prompt.
- - `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate grub. Requires confirmation or `--yes` to skip interactive prompt.
- - `--iommu-args ARGS`: Provide custom kernel cmdline arguments to apply for IOMMU (e.g., `intel_iommu=on iommu=pt`). When set, these args override vendor-appropriate defaults.
+- `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate GRUB. On EL9/BLS systems the script will use `grubby` to update kernel entries; otherwise it falls back to `grub2-mkconfig -o /boot/grub2/grub.cfg` or `update-grub` as available. Requires confirmation or `--yes` to skip the interactive prompt.
+- `--iommu-args ARGS`: Provide custom kernel cmdline arguments to apply for IOMMU (e.g., `intel_iommu=on iommu=pt`). When set, these args override vendor-appropriate defaults.
 - `--apply-smt on|off`: Toggle SMT state at runtime. Requires `--mode apply`. Example: `--apply-smt off`.
 - `--persist-smt`: If set along with `--apply-smt`, also persist the change via GRUB edits (`nosmt` applied/removed).
 - `--yes`: Skip interactive confirmations; use with caution.
