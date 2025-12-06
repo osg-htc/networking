@@ -12,15 +12,23 @@ pass() { echo "[PASS] $*"; }
 # Prepare arrays with CR and NUL characters embedded
 # Use printf to create values with control characters
 CR=$'\r'
+# shellcheck disable=SC2034
 NUL=$(printf '\000')
 
+# shellcheck disable=SC2034
 NIC_NAMES=("eth0")
+# shellcheck disable=SC2034
 NIC_IPV4_ADDRS=("$(printf '192.0.2.10%s' "$CR")")
+# shellcheck disable=SC2034
 NIC_IPV4_PREFIXES=("/24")
 NIC_IPV4_GWS=("$(printf '192.0.2.1%s' "$CR")")
+# shellcheck disable=SC2034
 NIC_IPV4_ADDROUTE=("-")
+# shellcheck disable=SC2034
 NIC_IPV6_ADDRS=("-")
+# shellcheck disable=SC2034
 NIC_IPV6_PREFIXES=("-")
+# shellcheck disable=SC2034
 NIC_IPV6_GWS=("-")
 DEFAULT_ROUTE_NIC="$(printf 'eth0%s' "$CR")"
 

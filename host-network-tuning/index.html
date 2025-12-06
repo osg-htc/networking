@@ -1642,8 +1642,52 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Optional apply flags">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-checklist-summary-of-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual checklist (summary of recommendations)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-after-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification after tuning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Additional Topics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Additional Topics">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smt-simultaneous-multi-threading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SMT (Simultaneous Multi-Threading)
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#driver-updates" class="md-nav__link">
@@ -1717,9 +1761,9 @@
 <h1 id="host-and-network-tuning-el9">Host and Network Tuning (EL9)<a class="headerlink" href="#host-and-network-tuning-el9" title="Permanent link">&para;</a></h1>
 <p>This guide distills ESnet Fasterdata recommendations for high-throughput hosts (perfSONAR/DTN-style) on Enterprise Linux 9. Primary sources:</p>
 <ul>
-<li>https://fasterdata.es.net/host-tuning/</li>
-<li>https://fasterdata.es.net/network-tuning/</li>
-<li>https://fasterdata.es.net/DTN/</li>
+<li><a href="https://fasterdata.es.net/host-tuning/">https://fasterdata.es.net/host-tuning/</a></li>
+<li><a href="https://fasterdata.es.net/network-tuning/">https://fasterdata.es.net/network-tuning/</a></li>
+<li><a href="https://fasterdata.es.net/DTN/">https://fasterdata.es.net/DTN/</a></li>
 </ul>
 <p>Use the provided audit/apply script to check your host against these recommendations and optionally enforce them. Read the cautions before applying.</p>
 <h2 id="what-this-covers">What this covers<a class="headerlink" href="#what-this-covers" title="Permanent link">&para;</a></h2>
@@ -1737,59 +1781,71 @@
 </ul>
 <h2 id="script-fasterdata-tuningsh">Script: <code>fasterdata-tuning.sh</code><a class="headerlink" href="#script-fasterdata-tuningsh" title="Permanent link">&para;</a></h2>
 <p>Path: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></p>
-<p>Modes:
-- <code>audit</code> (default): show current settings vs recommendations, no changes
-- <code>apply</code>: set recommended values (requires root)</p>
-<p>Options:
-- <code>--mode audit|apply</code>: mode selection
-- <code>--target measurement|dtn</code>: host type for scaled recommendations (default: <code>measurement</code>)
-- <code>--ifaces eth0,eth1</code>: comma-separated interface list (default: auto-detect physical NICs)
-- <code>--color</code>: enable color-coded output (green=compliant, yellow=warning, red=critical)</p>
+<p>Modes:</p>
+<ul>
+<li><code>audit</code> (default): show current settings vs recommendations, no changes</li>
+<li><code>apply</code>: set recommended values (requires root)</li>
+</ul>
+<p>Options:</p>
+<ul>
+<li><code>--mode audit|apply</code>: mode selection</li>
+<li><code>--target measurement|dtn</code>: host type for scaled recommendations (default: <code>measurement</code>)</li>
+<li><code>--ifaces eth0,eth1</code>: comma-separated interface list (default: auto-detect physical NICs)</li>
+<li><code>--color</code>: enable color-coded output (green=compliant, yellow=warning, red=critical)</li>
+</ul>
 <h3 id="host-types">Host Types<a class="headerlink" href="#host-types" title="Permanent link">&para;</a></h3>
 <p>The script tailors recommendations by host type:</p>
 <ul>
 <li><strong>measurement</strong>: perfSONAR testpoints, measurement nodes (primary focus)</li>
 <li><strong>dtn</strong>: Data Transfer Nodes (larger buffers for bulk throughput)</li>
 </ul>
-<p>Differences:
-- <code>net.core.netdev_max_backlog</code>: measurement uses 500k at 100Gbps; dtn uses 600k
-- <code>txqueuelen</code>: measurement targets 10k/15k/20k; dtn targets 12k/18k/25k (per link speed)</p>
+<p>Differences:</p>
+<ul>
+<li><code>net.core.netdev_max_backlog</code>: measurement uses 500k at 100Gbps; dtn uses 600k</li>
+<li><code>txqueuelen</code>: measurement targets 10k/15k/20k; dtn targets 12k/18k/25k (per link speed)</li>
+</ul>
 <h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h3>
-<p>Audit a measurement host:
+<p>Audit a measurement host:</p>
 <div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
-</code></pre></div></p>
-<p>Apply tuning for a DTN (100Gbps links):
+</code></pre></div>
+<p>Apply tuning for a DTN (100Gbps links):</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
-</code></pre></div></p>
-<p>Limit to specific NICs:
+</code></pre></div>
+<p>Limit to specific NICs:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--ifaces<span class="w"> </span><span class="s2">&quot;ens1f0np0,ens1f1np1&quot;</span>
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="what-the-script-does">What the script does<a class="headerlink" href="#what-the-script-does" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Sysctl</strong>: Sets larger rmem/wmem, netdev backlog, <code>default_qdisc=fq</code>, <code>tcp_mtu_probing=1</code>, TCP r/w mem, timestamps/SACK on, low_latency off; prefers <code>bbr</code> if available. Values scale with fastest NIC link speed and target type (measurement vs dtn). Settings written to <code>/etc/sysctl.d/90-fasterdata.conf</code> in apply mode.</li>
 <li><strong>Tuned</strong>: Ensures <code>network-throughput</code> profile if <code>tuned-adm</code> is present.</li>
 <li><strong>Ethtool persistence</strong> (apply mode): Creates or updates <code>/etc/systemd/system/ethtool-persist.service</code> to persist NIC tunings across reboots (ring buffers, offloads, txqueuelen).</li>
 <li><strong>Driver checks</strong>: Detects driver vendor/version (Mellanox, Broadcom, Intel, other); reports kernel/firmware updates available; provides vendor-specific guidance (e.g., "keep kernel+linux-firmware current", "consider NVIDIA OFED for Mellanox").</li>
-<li><strong>Interfaces</strong> (per NIC, scaled by link speed):</li>
+<li><strong>Interfaces</strong> (per NIC, scaled by link speed):<ul>
 <li>Set <code>txqueuelen</code> to ≥ 10k (measurement) or ≥ 12k (dtn); 20k/25k for 100Gbps</li>
 <li>Set RX/TX rings to driver max (if reported)</li>
 <li>Enable GRO/GSO/TSO and checksums; disable LRO</li>
 <li>Replace qdisc with <code>fq</code></li>
 </ul>
+</li>
+</ul>
 <h3 id="output-and-logs">Output and logs<a class="headerlink" href="#output-and-logs" title="Permanent link">&para;</a></h3>
-<p>The script outputs a <strong>Host Info</strong> section at the top showing:
-- Hostname (FQDN)
-- OS name/version (from <code>/etc/os-release</code>)
-- Running kernel version
-- System memory (GiB)
-- SMT status (on/off/unavailable); yellow warning if SMT is off (off-topic: helps isolate jitter in measurement contexts, but should be on by default for throughput)</p>
-<p>Then it displays sysctl audit and per-NIC summaries, followed by a summary block showing:
-- Target type (measurement/dtn)
-- Sysctl mismatches (count)
-- Per-interface issues (tx queue, qdisc, offloads, rings)
-- Driver/version actions (kernel updates available, vendor guidance)
-- SMT control guidance (if SMT is off, suggests toggle commands)
-- Missing tools (ethtool, tuned-adm, cpupower)</p>
+<p>The script outputs a <strong>Host Info</strong> section at the top showing:</p>
+<ul>
+<li>Hostname (FQDN)</li>
+<li>OS name/version (from <code>/etc/os-release</code>)</li>
+<li>Running kernel version</li>
+<li>System memory (GiB)</li>
+<li>SMT status (on/off/unavailable); yellow warning if SMT is off (off-topic: helps isolate jitter in measurement contexts, but should be on by default for throughput)</li>
+</ul>
+<p>Then it displays sysctl audit and per-NIC summaries, followed by a summary block showing:</p>
+<ul>
+<li>Target type (measurement/dtn)</li>
+<li>Sysctl mismatches (count)</li>
+<li>Per-interface issues (tx queue, qdisc, offloads, rings)</li>
+<li>Driver/version actions (kernel updates available, vendor guidance)</li>
+<li>SMT control guidance (if SMT is off, suggests toggle commands)</li>
+<li>Missing tools (ethtool, tuned-adm, cpupower)</li>
+</ul>
 <p>Detailed log with full ethtool/sysctl/tc output is written to <code>/tmp/fasterdata-tuning-&lt;UTC&gt;.log</code> (configurable via <code>LOGFILE</code> env var).</p>
 <h2 id="getting-the-fasterdata-script">Getting the Fasterdata script<a class="headerlink" href="#getting-the-fasterdata-script" title="Permanent link">&para;</a></h2>
 <p>You can download the script directly from the GitHub repo (raw) or the site after it is published:</p>
@@ -1801,17 +1857,19 @@ https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh
 </code></pre></div>
 <p>Then run an audit before applying changes:</p>
-<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
+<div class="highlight"><pre><span></span><code>bash /usr/local/bin/fasterdata-tuning.sh --mode audit --target measurement
 </code></pre></div>
-<h4 id="color-output">Color Output<a class="headerlink" href="#color-output" title="Permanent link">&para;</a></h4>
-<p>Use <code>--color</code> flag to enable ANSI color codes:
-- Green: settings comply with recommendations
-- Yellow: warning/attention needed (e.g., SMT off, missing tools, suboptimal settings)
-- Red: critical issues requiring immediate attention (not currently used, reserved for future severity levels)</p>
+<h3 id="color-output">Color Output<a class="headerlink" href="#color-output" title="Permanent link">&para;</a></h3>
+<p>Use <code>--color</code> flag to enable ANSI color codes:</p>
+<ul>
+<li>Green: settings comply with recommendations</li>
+<li>Yellow: warning/attention needed (e.g., SMT off, missing tools, suboptimal settings)</li>
+<li>Red: critical issues requiring immediate attention (not currently used, reserved for future severity levels)</li>
+</ul>
 <h3 id="driver-guidance">Driver Guidance<a class="headerlink" href="#driver-guidance" title="Permanent link">&para;</a></h3>
 <p>The script identifies your NIC drivers and provides upgrade paths:</p>
 <ul>
-<li><strong>Mellanox/NVIDIA</strong> (<code>mlx5_core</code>, <code>mlx4_en</code>): Keep kernel+linux-firmware current or use NVIDIA OFED (https://network.nvidia.com/products/ethernet-drivers/).</li>
+<li><strong>Mellanox/NVIDIA</strong> (<code>mlx5_core</code>, <code>mlx4_en</code>): Keep kernel+linux-firmware current or use NVIDIA OFED (<a href="https://network.nvidia.com/products/ethernet-drivers/">https://network.nvidia.com/products/ethernet-drivers/</a>).</li>
 <li><strong>Broadcom</strong> (<code>bnxt_en</code>, <code>tg3</code>, <code>bnx2x</code>, <code>bnx2</code>): Track distro kernel; use vendor firmware tools (e.g., <code>bnxtnvm</code>) when available.</li>
 <li><strong>Intel</strong> (<code>ixgbe</code>, <code>i40e</code>, <code>ice</code>, <code>e1000e</code>, <code>igb</code>): Update kernel+linux-firmware for latest drivers and firmware blobs.</li>
 </ul>
@@ -1833,106 +1891,106 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </sp
 <ul>
 <li><code>--apply-iommu</code>: Edit GRUB to add recommended <code>iommu=pt</code> plus vendor-specific flags (Intel/AMD) and regenerate grub. Requires root and careful review before committing. Example:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --yes
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--yes
 </code></pre></div>
 <ul>
 <li><code>--apply-smt on|off</code>: Apply SMT change at runtime. Use <code>--persist-smt</code> to make the choice persistent in GRUB. Example:</li>
 </ul>
-<p><div class="highlight"><pre><span></span><code>sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-smt off --persist-smt --yes
-
-Preview (dry-run) example:
-
-```bash
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-smt<span class="w"> </span>off<span class="w"> </span>--persist-smt<span class="w"> </span>--yes
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>## Manual checklist (summary of recommendations)
-
-Values shown below are baseline (1Gbps). The script scales them by fastest NIC speed and target type.
-
-- Sysctl
-  - `net.core.rmem_max`/`wmem_max`: 536M–1G (measurement); 1G (dtn at 100Gbps)
-  - `net.core.rmem_default`/`wmem_default`: 128M
-  - `net.core.netdev_max_backlog`: 250k–500k (measurement); 250k–600k (dtn)
-  - `net.core.default_qdisc`: `fq`
-  - `net.ipv4.tcp_rmem`: `4096 87380 536870912`
-  - `net.ipv4.tcp_wmem`: `4096 65536 536870912`
-  - `net.ipv4.tcp_congestion_control`: `bbr` (or `cubic` if `bbr` absent)
-  - `net.ipv4.tcp_mtu_probing`: `1`
-  - `net.ipv4.tcp_window_scaling`: `1`
-  - `net.ipv4.tcp_timestamps`: `1`
-  - `net.ipv4.tcp_sack`: `1`
-  - `net.ipv4.tcp_low_latency`: `0`
-- Tuned: `tuned-adm profile network-throughput`
-- Interfaces
-  - `txqueuelen` ≥ 10000
-  - RX/TX rings at driver max (`ethtool -g` / `-G`)
-  - GRO/GSO/TSO on; checksums on; LRO off
-  - qdisc `fq` (root)
-
-## Verification after tuning
-
-- `sysctl -a | egrep &quot;(rmem|wmem|max_backlog|default_qdisc|tcp_congestion_control|tcp_mtu_probing)&quot;`
-- `tuned-adm active`
-- For each NIC: `ethtool -k &lt;iface&gt;`, `ethtool -g &lt;iface&gt;`, `tc qdisc show dev &lt;iface&gt;`, `cat /sys/class/net/&lt;iface&gt;/tx_queue_len`
-- Run a representative throughput test (e.g., `iperf3`) end-to-end.
-
-## Additional Topics
-
-### SMT (Simultaneous Multi-Threading)
-
-The script detects and reports SMT status. For most measurement hosts (perfSONAR), **SMT should be on** to maximize CPU throughput. However, for isolated low-latency workloads, SMT off may reduce jitter.
-
-**To check SMT status:**
-```bash
-cat /sys/devices/system/cpu/smt/control
-</code></pre></div></p>
-<p><strong>To enable SMT:</strong>
+<p>Preview (dry-run) example:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--dry-run
+</code></pre></div>
+<h2 id="manual-checklist-summary-of-recommendations">Manual checklist (summary of recommendations)<a class="headerlink" href="#manual-checklist-summary-of-recommendations" title="Permanent link">&para;</a></h2>
+<p>Values shown below are baseline (1Gbps). The script scales them by fastest NIC speed and target type.</p>
+<ul>
+<li>Sysctl<ul>
+<li><code>net.core.rmem_max</code>/<code>wmem_max</code>: 536M–1G (measurement); 1G (dtn at 100Gbps)s)</li>
+<li><code>net.core.rmem_default</code>/<code>wmem_default</code>: 128M</li>
+<li><code>net.core.netdev_max_backlog</code>: 250k–500k (measurement); 250k–600k (dtn)</li>
+<li><code>net.core.default_qdisc</code>: <code>fq</code></li>
+<li><code>net.ipv4.tcp_rmem</code>: <code>4096 87380 536870912</code></li>
+<li><code>net.ipv4.tcp_wmem</code>: <code>4096 65536 536870912</code></li>
+<li><code>net.ipv4.tcp_congestion_control</code>: <code>bbr</code> (or <code>cubic</code> if <code>bbr</code> absent)</li>
+<li><code>net.ipv4.tcp_mtu_probing</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_window_scaling</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_timestamps</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_sack</code>: <code>1</code></li>
+<li><code>net.ipv4.tcp_low_latency</code>: <code>0</code></li>
+</ul>
+</li>
+<li>Tuned: <code>tuned-adm profile network-throughput</code></li>
+<li>Interfaces<ul>
+<li><code>txqueuelen</code> ≥ 10000</li>
+<li>RX/TX rings at driver max (<code>ethtool -g</code> / <code>-G</code>)</li>
+<li>GRO/GSO/TSO on; checksums on; LRO off</li>
+<li>qdisc <code>fq</code> (root)</li>
+</ul>
+</li>
+</ul>
+<h2 id="verification-after-tuning">Verification after tuning<a class="headerlink" href="#verification-after-tuning" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>sysctl<span class="w"> </span>-a<span class="w"> </span><span class="p">|</span><span class="w"> </span>egrep<span class="w"> </span><span class="s2">&quot;(rmem|wmem|max_backlog|default_qdisc|tcp_congestion_control|tcp_mtu_probing)&quot;</span>
+tuned-adm<span class="w"> </span>active
+</code></pre></div>
+<p>For each NIC: <code>ethtool -k &lt;iface&gt;</code>, <code>ethtool -g &lt;iface&gt;</code>, <code>tc qdisc show dev &lt;iface&gt;</code>, <code>cat /sys/class/net/&lt;iface&gt;/tx_queue_len</code></p>
+<p>Run a representative throughput test (e.g., <code>iperf3</code>) end-to-end.</p>
+<h2 id="additional-topics">Additional Topics<a class="headerlink" href="#additional-topics" title="Permanent link">&para;</a></h2>
+<h3 id="smt-simultaneous-multi-threading">SMT (Simultaneous Multi-Threading)<a class="headerlink" href="#smt-simultaneous-multi-threading" title="Permanent link">&para;</a></h3>
+<p>The script detects and reports SMT status. For most measurement hosts (perfSONAR), <strong>SMT should be on</strong> to maximize CPU throughput. However, for isolated low-latency workloads, SMT off may reduce jitter.</p>
+<p><strong>To check SMT status:</strong></p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>/sys/devices/system/cpu/smt/control
+</code></pre></div>
+<p><strong>To enable SMT:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span>on<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/sys/devices/system/cpu/smt/control
-</code></pre></div></p>
-<p><strong>To disable SMT:</strong>
+</code></pre></div>
+<p><strong>To disable SMT:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span>off<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/sys/devices/system/cpu/smt/control
-</code></pre></div></p>
+</code></pre></div>
 <p>Note: SMT changes take effect immediately but are not persisted across reboots. To persist, add to kernel command line (GRUB): <code>nosmt</code> (to disable) or remove it (to enable).</p>
 <h3 id="driver-updates">Driver Updates<a class="headerlink" href="#driver-updates" title="Permanent link">&para;</a></h3>
-<p>The script checks for available kernel and driver updates via <code>dnf list --showduplicates kernel</code>. If an update is available, the summary recommends:
+<p>The script checks for available kernel and driver updates via <code>dnf list --showduplicates kernel</code>. If an update is available, the summary recommends:</p>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>update<span class="w"> </span>kernel<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>reboot
-</code></pre></div></p>
+</code></pre></div>
 <p>For vendor-specific drivers (Mellanox OFED, Broadcom firmware tools), the script provides URLs and guidance. Always validate driver compatibility before updating in production.</p>
 <h3 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h3>
-<p>If the script fails to detect certain hardware or settings:
-- <strong>Missing <code>ethtool</code></strong>: Install via <code>dnf install ethtool</code>
-- <strong>Missing <code>tuned-adm</code></strong>: Install via <code>dnf install tuned</code>
-- <strong>No cpufreq/governor</strong>: Some VMs lack CPU frequency scaling; this is normal
-- <strong>No IOMMU</strong>: Fasterdata recommends <code>iommu=pt</code> generally, with vendor additions: enable in GRUB (e.g., <code>intel_iommu=on iommu=pt</code> for Intel, <code>amd_iommu=on iommu=pt</code> for AMD) if using SR-IOV or isolation features. Add <code>iommu=pt</code> to improve throughput on high-speed NICs.
-- <strong>ethtool-persist.service fails to start</strong>: Check <code>/var/log/messages</code> or <code>journalctl -u ethtool-persist</code> for errors; ensure ethtool and ip commands exist at <code>/sbin/</code> paths</p>
+<p>If the script fails to detect certain hardware or settings:</p>
+<ul>
+<li><strong>Missing <code>ethtool</code></strong>: Install via <code>dnf install ethtool</code></li>
+<li><strong>Missing <code>tuned-adm</code></strong>: Install via <code>dnf install tuned</code></li>
+<li><strong>No cpufreq/governor</strong>: Some VMs lack CPU frequency scaling; this is normal</li>
+<li><strong>No IOMMU</strong>: Fasterdata recommends <code>iommu=pt</code> generally, with vendor additions: enable in GRUB (e.g., <code>intel_iommu=on iommu=pt</code> for Intel, <code>amd_iommu=on iommu=pt</code> for AMD) if using SR-IOV or isolation features. Add <code>iommu=pt</code> to improve throughput on high-speed NICs.</li>
+<li><strong>ethtool-persist.service fails to start</strong>: Check <code>/var/log/messages</code> or <code>journalctl -u ethtool-persist</code> for errors; ensure ethtool and ip commands exist at <code>/sbin/</code> paths</li>
+</ul>
 <h3 id="persistence-service-details">Persistence Service Details<a class="headerlink" href="#persistence-service-details" title="Permanent link">&para;</a></h3>
 <p>When running with <code>--mode apply</code>, the script generates <code>/etc/systemd/system/ethtool-persist.service</code> containing:</p>
-<div class="highlight"><pre><span></span><code>[Unit]
-Description=Persist ethtool settings (Fasterdata)
-After=network.target
-Wants=network.target
+<div class="highlight"><pre><span></span><code><span class="k">[Unit]</span>
+<span class="na">Description</span><span class="o">=</span><span class="s">Persist ethtool settings (Fasterdata)</span>
+<span class="na">After</span><span class="o">=</span><span class="s">network.target</span>
+<span class="na">Wants</span><span class="o">=</span><span class="s">network.target</span>
 
-[Service]
-Type=oneshot
-ExecStart=/sbin/ethtool -G &lt;iface&gt; rx &lt;max&gt; tx &lt;max&gt;
-ExecStart=/sbin/ethtool -K &lt;iface&gt; gro on gso on tso on rx on tx on lro off
-ExecStart=/sbin/ip link set dev &lt;iface&gt; txqueuelen &lt;value&gt;
-RemainAfterExit=yes
+<span class="k">[Service]</span>
+<span class="na">Type</span><span class="o">=</span><span class="s">oneshot</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/sbin/ethtool -G &lt;iface&gt; rx &lt;max&gt; tx &lt;max&gt;</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/sbin/ethtool -K &lt;iface&gt; gro on gso on tso on rx on tx on lro off</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/sbin/ip link set dev &lt;iface&gt; txqueuelen &lt;value&gt;</span>
+<span class="na">RemainAfterExit</span><span class="o">=</span><span class="s">yes</span>
 
-[Install]
-WantedBy=multi-user.target
+<span class="k">[Install]</span>
+<span class="na">WantedBy</span><span class="o">=</span><span class="s">multi-user.target</span>
 </code></pre></div>
-<p>The service is automatically enabled. To verify:
+<p>The service is automatically enabled. To verify:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>ethtool-persist.service
 systemctl<span class="w"> </span>cat<span class="w"> </span>ethtool-persist.service
-</code></pre></div></p>
+</code></pre></div>
 <p>To manually update this service, re-run the script with <code>--mode apply</code> to regenerate it with current NIC settings.</p>
 <h2 id="persistence-notes">Persistence notes<a class="headerlink" href="#persistence-notes" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Sysctl settings persist via <code>/etc/sysctl.d/90-fasterdata.conf</code></li>
-<li>NIC ethtool changes do not persist by default; consider:</li>
+<li>NIC ethtool changes do not persist by default; consider:<ul>
 <li>running this script from a boot-time systemd unit, or</li>
 <li>translating the settings into your network manager configuration</li>
+</ul>
+</li>
 </ul>
 
 

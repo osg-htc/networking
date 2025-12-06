@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # Combined lsregistration helper
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Supports: save, restore, create, update, extract
 # Works against a container (docker|podman) or local filesystem.
 

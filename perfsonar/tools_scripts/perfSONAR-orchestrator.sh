@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 # perfSONAR-orchestrator.sh
 # Guided installer with interactive pauses for deploying a containerized perfSONAR Testpoint
@@ -87,7 +90,7 @@ parse_cli() {
       --help|-h)
         sed -n '1,80p' "$0" | sed -n '1,80p'
         exit 0;;
-      --auto-update) AUTO_UPDATE=true; shift;;
+      --auto-update) AUTO_UPDATE=true; shift;;  # shellcheck disable=SC2034
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
   done
@@ -191,6 +194,7 @@ step_security() {
 
 step_auto_update_compose() {
   # Create update script, systemd service and timer to run daily
+  # shellcheck disable=SC2120
   if ! confirm "Create /usr/local/bin/perfsonar-auto-update.sh and enable systemd timer?"; then
     log "User skipped creating auto-update artifacts."
     return

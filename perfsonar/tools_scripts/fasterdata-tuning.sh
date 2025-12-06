@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
+#
 # Audit and optionally apply host/network tuning recommended by ESnet Fasterdata
 # for high-throughput hosts (EL9 focus). Defaults to audit-only.
 #
@@ -42,6 +46,8 @@ SCALED_BACKLOG=250000
 RUNNING_KERNEL=""
 LATEST_KERNEL=""
 USE_COLOR=0
+APPLY_TCP_CC=""
+APPLY_JUMBO=0
 
 # Color codes for terminal output
 readonly C_GREEN='\033[0;32m'
@@ -79,6 +85,8 @@ Options:
   --apply-smt STATE          Apply runtime SMT change (on|off). Requires --mode apply
   --persist-smt              (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
                              Note: Optimized for EL9; will warn on other systems
+  --apply-tcp-cc ALGORITHM   (apply only) Set TCP congestion control algorithm (e.g., bbr, cubic, reno)
+  --apply-jumbo              (apply only) Apply 9000 MTU jumbo frames to all NICs (if supported)
   --yes                      Skip interactive confirmations (use with caution)
   --dry-run                  Preview the exact GRUB/sysfs changes without applying them (safe)
   --verbose                  More detail in audit output
@@ -233,6 +241,89 @@ desired_txqlen_for_speed() {
   echo "$base"
 }
 
+# Get available TCP congestion control algorithms
+get_tcp_cc_available() {
+  sysctl -n net.ipv4.tcp_available_congestion_control 2>/dev/null || echo ""
+}
+
+# Get current TCP congestion control algorithm
+get_tcp_cc_current() {
+  sysctl -n net.ipv4.tcp_congestion_control 2>/dev/null || echo "unknown"
+}
+
+# Check if BBRv3 is available
+has_bbrv3() {
+  get_tcp_cc_available | grep -qw "bbr"
+}
+
+# Get NIC max MTU capability
+get_nic_max_mtu() {
+  local iface="$1"
+  if command -v ethtool >/dev/null 2>&1; then
+    ethtool "$iface" 2>/dev/null | grep -i "max mtu" | awk '{print $NF}' || echo "unknown"
+  else
+    echo "unknown"
+  fi
+}
+
+# Get current MTU for NIC
+get_nic_mtu() {
+  local iface="$1"
+  ip link show "$iface" 2>/dev/null | grep -oP 'mtu \K\d+' || echo "unknown"
+}
+
+# Reverse DNS lookup for IP
+reverse_dns_lookup() {
+  local ip="$1"
+  if command -v dig >/dev/null 2>&1; then
+    dig +short -x "$ip" 2>/dev/null | sed 's/\.$//' || echo ""
+  elif command -v host >/dev/null 2>&1; then
+    host "$ip" 2>/dev/null | awk '{print $NF}' | sed 's/\.$//' || echo ""
+  else
+    echo ""
+  fi
+}
+
+# Forward DNS lookup to verify match
+verify_dns_match() {
+  local fqdn="$1" ip="$2"
+  if command -v dig >/dev/null 2>&1; then
+    dig +short "$fqdn" A 2>/dev/null | grep -q "^${ip}$"
+  elif command -v host >/dev/null 2>&1; then
+    host "$fqdn" 2>/dev/null | grep -q "$ip"
+  else
+    return 1
+  fi
+}
+
+# Get all FQDNs for the host
+get_host_fqdns() {
+  local iface ip fqdn fqdns=()
+  for iface in $(get_ifaces); do
+    # Try to get IPs from both IPv4 and IPv6
+    local ips
+    ips=$(ip addr show "$iface" 2>/dev/null | grep -oP '(?<=inet[6]?\s)\S+(?=/)')
+    while IFS= read -r ip; do
+      [[ -z "$ip" ]] && continue
+      # Remove CIDR notation if present
+      ip="${ip%/*}"
+      # Skip link-local and loopback
+      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
+      fqdn=$(reverse_dns_lookup "$ip")
+      if [[ -n "$fqdn" ]]; then
+        if verify_dns_match "$fqdn" "$ip"; then
+          fqdns+=("$fqdn")
+        else
+          fqdns+=("$fqdn (DNS mismatch!)")
+        fi
+      else
+        fqdns+=("(no reverse DNS for $ip)")
+      fi
+    done <<<"$ips"
+  done
+  printf '%s\n' "${fqdns[@]}" | sort -u
+}
+
 print_sysctl_diff() {
   local key wanted current status
   log_detail "Sysctl audit (current vs recommended)"
@@ -245,8 +336,10 @@ print_sysctl_diff() {
     status=""
     # Normalize whitespace (tabs and multiple spaces) into single spaces for comparison
     # using awk's field re-assignment which converts all whitespace to single spaces
-    local current_normalized=$(echo "$current" | awk '{$1=$1; print}')
-    local wanted_normalized=$(echo "$wanted" | awk '{$1=$1; print}')
+    local current_normalized
+    current_normalized=$(echo "$current" | awk '{$1=$1; print}')
+    local wanted_normalized
+    wanted_normalized=$(echo "$wanted" | awk '{$1=$1; print}')
     if [[ "$current_normalized" != "$wanted_normalized" ]]; then
       status="*"
       ((SYSCTL_MISMATCHES+=1))
@@ -369,7 +462,6 @@ apply_sysctl() {
   
   for update in "${updates[@]}"; do
     local key="${update%%=*}"
-    local value="${update#*=}"
     local escaped_key="${key//./\\.}"
     if grep -q "^${escaped_key}=" "$sysctl_file" 2>/dev/null; then
       sed -i "s|^${escaped_key}=.*|${update}|" "$sysctl_file"
@@ -436,11 +528,21 @@ iface_audit() {
     fi
   fi
 
-  local short_line="$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen" "$desired_txqlen" "${qdisc:-?}" "$driver")"
+  local short_line
+  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen" "$desired_txqlen" "${qdisc:-?}" "$driver")
   printf "\n%s" "$short_line"
   local offload_str="offload=${offload_issue}"
   [[ -n "$rings_note" ]] && offload_str+=" $rings_note"
   printf " %s\n" "$offload_str"
+
+  # Jumbo frame (MTU) audit
+  local current_mtu max_mtu mtu_status=""
+  current_mtu=$(get_nic_mtu "$iface")
+  max_mtu=$(get_nic_max_mtu "$iface")
+  if [[ "$current_mtu" == "unknown" || "$current_mtu" -lt 9000 ]]; then
+    mtu_status="mtu=$current_mtu (recomm: 9000)"
+  fi
+  [[ -n "$mtu_status" ]] && printf "  MTU: current=%s max=%s\n" "$current_mtu" "$max_mtu"
 
   # Track issues for summary
   local issues=()
@@ -609,6 +711,7 @@ iface_apply_packet_pacing() {
   log_info "Packet pacing qdisc set on $iface: rate=$rate_normalized burst=$burst_bytes"
 }
 
+# shellcheck disable=SC2120
 create_ethtool_persist_service() {
   # Generates systemd service to persist ethtool settings and qdisc across reboots
   local svcfile="/etc/systemd/system/ethtool-persist.service"
@@ -831,7 +934,8 @@ apply_iommu() {
     return
   fi
   log_warn "IOMMU not in kernel cmdline (CPU: $cpu_vendor). Will add: $iommu_cmd"
-  local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+  local backup
+  backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
   if [[ $DRY_RUN -eq 1 ]]; then
     echo
     echo "=== IOMMU change PREVIEW ==="
@@ -848,7 +952,8 @@ apply_iommu() {
     fi
   fi
   # Backup grub config
-  local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+  local backup
+  backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
   if [[ $DRY_RUN -eq 1 ]]; then
     echo "Dry-run: would copy /etc/default/grub -> $backup"
   else
@@ -865,7 +970,8 @@ apply_iommu() {
       if echo "$existing" | grep -qF "$iommu_cmd"; then
         echo "Dry-run: GRUB already contains required IOMMU flags"
       else
-        local newval="$existing $iommu_cmd"
+        local newval
+        newval="$existing $iommu_cmd"
         echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
       fi
     fi
@@ -877,7 +983,8 @@ apply_iommu() {
         log_info "GRUB already contains required IOMMU flags"
       else
         # Append flags
-        local newval="$existing $iommu_cmd"
+        local newval
+        newval="$existing $iommu_cmd"
         # Replace the line
         sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
       fi
@@ -926,7 +1033,8 @@ apply_smt() {
     log_warn "SMT control not available on this system"
     return
   fi
-  local cur=$(cat /sys/devices/system/cpu/smt/control)
+  local cur
+  cur=$(cat /sys/devices/system/cpu/smt/control)
   if [[ "$APPLY_SMT" != "on" && "$APPLY_SMT" != "off" ]]; then
     log_warn "Invalid or missing --apply-smt STATE (expected 'on' or 'off')"
     return
@@ -965,7 +1073,8 @@ apply_smt() {
       grubnosmt=""
     fi
     # Edit GRUB similar to apply_iommu (backup/append/remove nosmt)
-    local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+    local backup
+    backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
     if [[ $DRY_RUN -eq 1 ]]; then
       echo "Dry-run: would copy /etc/default/grub -> $backup"
     else
@@ -986,12 +1095,14 @@ apply_smt() {
           if echo "$existing" | grep -qF "$grubnosmt"; then
             echo "Dry-run: GRUB already contains $grubnosmt"
           else
-            local newval="$existing $grubnosmt"
+            local newval
+            newval="$existing $grubnosmt"
             echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
           fi
         else
           # Remove nosmt bit if present (preview)
-          local newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+          local newval
+          newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
           echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
         fi
       fi
@@ -1005,12 +1116,14 @@ apply_smt() {
           if echo "$existing" | grep -qF "$grubnosmt"; then
             log_info "GRUB already contains $grubnosmt"
           else
-            local newval="$existing $grubnosmt"
+            local newval
+            newval="$existing $grubnosmt"
             sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
           fi
         else
           # Remove nosmt bit if present
-          local newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+          local newval
+          newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
           sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
         fi
       fi
@@ -1059,6 +1172,67 @@ apply_smt() {
     fi
     log_info "GRUB updated to persist SMT change; reboot to apply"
   fi
+}
+
+apply_tcp_cc() {
+  # Apply TCP congestion control algorithm
+  if [[ -z "$APPLY_TCP_CC" ]]; then
+    return
+  fi
+  require_root
+  
+  if [[ $DRY_RUN -eq 1 ]]; then
+    local current
+    current=$(get_tcp_cc_current)
+    echo "Dry-run: would change TCP congestion control from $current to $APPLY_TCP_CC"
+    return
+  fi
+  
+  log_info "Setting TCP congestion control to $APPLY_TCP_CC"
+  if sysctl -w "net.ipv4.tcp_congestion_control=$APPLY_TCP_CC" >/dev/null 2>&1; then
+    log_info "TCP congestion control set to $APPLY_TCP_CC"
+  else
+    log_warn "Failed to set TCP congestion control to $APPLY_TCP_CC"
+  fi
+}
+
+apply_jumbo() {
+  # Apply 9000 MTU jumbo frames to all NICs
+  if [[ $APPLY_JUMBO -ne 1 ]]; then
+    return
+  fi
+  require_root
+  
+  local iface current_mtu max_mtu target_mtu=9000
+  for iface in $(get_ifaces); do
+    current_mtu=$(get_nic_mtu "$iface")
+    max_mtu=$(get_nic_max_mtu "$iface")
+    
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "Dry-run: would set $iface MTU to $target_mtu (current=$current_mtu, max=$max_mtu)"
+      continue
+    fi
+    
+    # Check if NIC supports jumbo frames
+    if [[ "$max_mtu" != "unknown" && "$max_mtu" -ge "$target_mtu" ]]; then
+      if [[ "$current_mtu" != "$target_mtu" ]]; then
+        log_info "Setting $iface MTU to $target_mtu (was $current_mtu)"
+        if ip link set dev "$iface" mtu "$target_mtu" >/dev/null 2>&1; then
+          log_info "$iface MTU set to $target_mtu"
+        else
+          log_warn "Failed to set $iface MTU to $target_mtu"
+        fi
+      else
+        log_info "$iface MTU already at $target_mtu"
+      fi
+    else
+      if [[ "$max_mtu" == "unknown" ]]; then
+        log_warn "$iface max MTU unknown; skipping (may not support jumbo frames)"
+      else
+        log_warn "$iface max MTU is $max_mtu; cannot set to $target_mtu"
+      fi
+    fi
+  done
 }
 
 print_host_info() {
@@ -1123,11 +1297,32 @@ print_host_info() {
   
   echo "Host Info:"
   echo "  FQDN: $fqdn"
+  
+  # Show all FQDNs if multiple NICs have IPs
+  local all_fqdns
+  all_fqdns=$(get_host_fqdns)
+  if [[ -n "$all_fqdns" ]]; then
+    echo "  All FQDNs:"
+    while IFS= read -r fq; do
+      echo "    - $fq"
+    done <<<"$all_fqdns"
+  fi
+  
   echo "  OS: ${os_release:-unknown}"
   echo "  Kernel: $kernel_ver"
   echo "  Memory: $mem_info_str"
   echo "  CPUs: $cpu_info"
   echo "  SMT: $smt_status"
+  
+  # Show TCP congestion control info
+  local tcp_cc_current tcp_cc_available bbrv3_note
+  tcp_cc_current=$(get_tcp_cc_current)
+  tcp_cc_available=$(get_tcp_cc_available)
+  bbrv3_note=""
+  if has_bbrv3; then
+    bbrv3_note=" (BBRv3 available - preferred)"
+  fi
+  echo "  TCP Congestion Control: $tcp_cc_current (available: $tcp_cc_available)$bbrv3_note"
 }
 
 check_smt() {
@@ -1175,7 +1370,7 @@ check_drivers() {
     bus=$(awk -F': ' '/bus-info:/ {print $2}' <<<"$info")
     local vendor
     vendor=$(driver_vendor_hint "$drv")
-    local modpath pkg pkgver
+    local modpath pkg
     modpath=$(modinfo -n "$drv" 2>/dev/null || true)
     pkg=$(rpm -q --whatprovides "$modpath" 2>/dev/null | head -n1 || true)
 
@@ -1283,6 +1478,8 @@ main() {
       --apply-iommu) APPLY_IOMMU=1; shift;;
       --apply-smt) APPLY_SMT="$2"; shift 2;;
       --persist-smt) PERSIST_SMT=1; shift;;
+      --apply-tcp-cc) APPLY_TCP_CC="$2"; shift 2;;
+      --apply-jumbo) APPLY_JUMBO=1; shift;;
       --yes) AUTO_YES=1; shift;;
       --dry-run) DRY_RUN=1; shift;;
       -h|--help) usage; exit 0;;
@@ -1313,6 +1510,26 @@ main() {
   fi
   if [[ $PERSIST_SMT -eq 1 && -z "$APPLY_SMT" ]]; then
     echo "ERROR: --persist-smt requires --apply-smt to be set" >&2
+    exit 1
+  fi
+  
+  # Validate TCP CC flags
+  if [[ -n "$APPLY_TCP_CC" ]]; then
+    if [[ "$MODE" != "apply" ]]; then
+      echo "ERROR: --apply-tcp-cc requires --mode apply" >&2
+      exit 1
+    fi
+    local available_cc
+    available_cc=$(get_tcp_cc_available)
+    if ! echo "$available_cc" | grep -qw "$APPLY_TCP_CC"; then
+      echo "ERROR: TCP congestion control '$APPLY_TCP_CC' not available. Available: $available_cc" >&2
+      exit 1
+    fi
+  fi
+  
+  # Validate jumbo flag
+  if [[ $APPLY_JUMBO -eq 1 && "$MODE" != "apply" ]]; then
+    echo "ERROR: --apply-jumbo requires --mode apply" >&2
     exit 1
   fi
 
@@ -1371,6 +1588,12 @@ main() {
     fi
     if [[ -n "$APPLY_SMT" ]]; then
       apply_smt
+    fi
+    if [[ -n "$APPLY_TCP_CC" ]]; then
+      apply_tcp_cc
+    fi
+    if [[ $APPLY_JUMBO -eq 1 ]]; then
+      apply_jumbo
     fi
     log_info "Apply complete. Consider rebooting or rerunning audit to confirm settings."
   else
