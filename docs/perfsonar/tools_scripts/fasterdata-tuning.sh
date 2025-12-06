@@ -1897,11 +1897,18 @@ print_host_info() {
   
   # Check SMT status
   if [[ -r /sys/devices/system/cpu/smt/control ]]; then
-    smt_status=$(cat /sys/devices/system/cpu/smt/control)
-    if [[ "$smt_status" == "on" ]]; then
-      smt_status="$(colorize yellow "on")"
+    smt_status_raw=$(cat /sys/devices/system/cpu/smt/control)
+    local recommended_smt
+    if [[ "$TARGET_TYPE" == "dtn" ]]; then
+      recommended_smt="on"
     else
-      smt_status="$(colorize green "$smt_status")"
+      recommended_smt="off"
+    fi
+    # Color based on whether current matches recommended
+    if [[ "$smt_status_raw" == "$recommended_smt" ]]; then
+      smt_status="$(colorize green "$smt_status_raw")"
+    else
+      smt_status="$(colorize yellow "$smt_status_raw")"
     fi
   else
     smt_status="not available"
