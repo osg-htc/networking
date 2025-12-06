@@ -954,6 +954,7 @@ apply_sysctl() {
   log_info "Detected max link speed (Mbps): ${MAX_LINK_SPEED:-0}"
 
   # Iterate all recommendations from SYSCTL_RECS so we apply the scaled values.
+  log_info "Applying live sysctl values for keys:"
   for key in $(printf '%s\n' "${!SYSCTL_RECS[@]}" | sort); do
     local value
     value=${SYSCTL_RECS[$key]}
@@ -974,6 +975,27 @@ apply_sysctl() {
   log_info "Applying sysctl settings"
   # Use --system to make sure sysctl.d files are read in the correct order
   sysctl --system >/dev/null 2>&1 || sysctl -p "$sysctl_file" >/dev/null 2>&1 || true
+  # Ensure running kernel receives the exact recommendation by setting live values.
+  for key in $(printf '%s\n' "${!SYSCTL_RECS[@]}" | sort); do
+    local value
+    value=${SYSCTL_RECS[$key]}
+    # Live apply and verify
+    if sysctl -w "$key=$value" >/dev/null 2>&1; then
+      local cur
+      cur=$(sysctl -n "$key" 2>/dev/null || echo "(unset)")
+      # Normalize strings with awk for whitespace comparisons
+      local cur_n wanted_n
+      cur_n=$(echo "$cur" | awk '{$1=$1; print}')
+      wanted_n=$(echo "$value" | awk '{$1=$1; print}')
+      if [[ "$cur_n" != "$wanted_n" ]]; then
+        log_warn "Sysctl $key live value did not match applied value: current='$cur' expected='$value'"
+      else
+        log_info "Applied sysctl $key=$value"
+      fi
+    else
+      log_warn "Failed to apply sysctl $key=$value (sysctl -w failed)"
+    fi
+  done
   # If bbr missing, set congestion control to cubic live to avoid failure
   if ! has_bbr; then
     sysctl -w net.ipv4.tcp_congestion_control=cubic >/dev/null
@@ -1939,8 +1961,15 @@ check_smt() {
   smt_status=$(cat /sys/devices/system/cpu/smt/control)
   log_detail "SMT status: $smt_status"
   
-  if [[ "$smt_status" != "on" ]]; then
-    log_warn "SMT is currently $smt_status (recommendation: on for measurement hosts; off for low-latency/isolated workloads)"
+  local recommended_smt
+  if [[ "$TARGET_TYPE" == "dtn" ]]; then
+    recommended_smt="on"
+  else
+    # default to measurement behavior
+    recommended_smt="off"
+  fi
+  if [[ "$smt_status" != "$recommended_smt" ]]; then
+    log_warn "SMT is currently $smt_status (recommendation: $recommended_smt for $TARGET_TYPE hosts)"
     echo "SMT control: to enable, run: echo on | sudo tee /sys/devices/system/cpu/smt/control"
     echo "SMT control: to disable, run: echo off | sudo tee /sys/devices/system/cpu/smt/control"
   fi
