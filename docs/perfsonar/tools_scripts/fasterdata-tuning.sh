@@ -181,36 +181,151 @@ DRY_RUN=0
 PACKET_PACING_RATE="2000mbps"
 APPLY_PACKET_PACING=0
 
-usage() {
-  cat <<'EOF'
-Usage: fasterdata-tuning.sh [--mode audit|apply] [--ifaces "eth0,eth1"] [--target measurement|dtn] [--color] [--verbose]
+get_host_fqdns() {
+  local iface ip ip_cidr fqdn
+  declare -A fq_ifaces=()
+  declare -A fq_sources=()
+  declare -A fq_mismatch=()
+  declare -A fq_ips=()
+  declare -A fq_verified=()
 
-Modes:
-  audit   (default) Show current values vs. Fasterdata recommendations
-  apply             Apply recommended values (requires root)
+  for iface in $(get_ifaces); do
+    # Use ip -o addr and treat the 4th column as addr/prefix
+    local ips
+    ips=$(ip -o addr show "$iface" 2>/dev/null | awk '{print $4}')
+    while IFS= read -r ip_cidr; do
+      [[ -z "$ip_cidr" ]] && continue
+      ip="${ip_cidr%/*}"
+      # Skip link-local and loopback
+      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
 
-Options:
-  --ifaces LIST              Comma-separated interfaces to check/tune. Default: all up, non-loopback
-  --target TYPE              Host type: measurement (default) or dtn (data transfer node)
-  --packet-pacing-rate RATE  Packet pacing rate for DTN nodes (default: 2000mbps)
-                             Units: kbps, mbps, gbps (e.g., 2gbps, 10gbps, 10000mbps)
-  --apply-packet-pacing      (apply only) Apply packet pacing via tc tbf qdisc (DTN only)
-  --color                    Use color codes (green=ok, yellow=warning, red=critical)
-  --apply-iommu              (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
-                             Note: Optimized for EL9; will warn on other systems
-  --apply-smt STATE          Apply runtime SMT change (on|off). Requires --mode apply
-  --persist-smt              (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
-                             Note: Optimized for EL9; will warn on other systems
-  --apply-tcp-cc ALGORITHM   (apply only) Set TCP congestion control algorithm (e.g., bbr, cubic, reno)
-  --apply-jumbo              (apply only) Apply 9000 MTU jumbo frames to all NICs (if supported)
-  --yes                      Skip interactive confirmations (use with caution)
-  --dry-run                  Preview the exact GRUB/sysfs changes without applying them (safe)
-  --verbose                  More detail in audit output
-  -h, --help                 Show this help
+      fqdn=$(reverse_dns_lookup "$ip")
+      if [[ -n "$fqdn" ]]; then
+        # We have a reverse DNS name. Check forward DNS for a match
+        if verify_dns_match "$fqdn" "$ip"; then
+          # Confirmed DNS mapping
+          fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+          fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}dns"
+          fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+          fq_verified[$fqdn]=1
+          fq_mismatch[$fqdn]=0
+        else
+          # Reverse returns a name but forward DNS doesn't match
+          # Check /etc/hosts (NSS) for an authoritative hosts entry for this IP
+          local hostline
+          hostline=$(getent hosts "$ip" 2>/dev/null || true)
+          if [[ -n "$hostline" ]] && echo "$hostline" | awk '{for (i=2;i<=NF;i++) print $i}' | grep -qw "${fqdn}"; then
+            # The /etc/hosts name matches the reverse name; treat as hosts-sourced
+            fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+            fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}hosts"
+            fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+            fq_verified[$fqdn]=1
+            fq_mismatch[$fqdn]=0
+          else
+            # Genuine DNS mismatch
+            fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+            fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}dns"
+            fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+            fq_verified[$fqdn]=0
+            fq_mismatch[$fqdn]=1
+          fi
+        fi
+      else
+        # No reverse DNS; check getent hosts for names mapping to this IP
+        local hostline
+        hostline=$(getent hosts "$ip" 2>/dev/null || true)
+        if [[ -n "$hostline" ]]; then
+          # add all names from getent (NSS), treat as hosts-sourced
+          local names
+          names=$(echo "$hostline" | awk '{$1=""; print $0}' | xargs)
+          for name in $names; do
+            [[ -z "$name" ]] && continue
+            fq_ifaces[$name]="${fq_ifaces[$name]:+${fq_ifaces[$name]},}$iface"
+            fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}hosts"
+            fq_ips[$name]="${fq_ips[$name]:+${fq_ips[$name]},}$ip"
+            fq_verified[$name]=1
+            fq_mismatch[$name]=0
+          done
+        else
+          # No name available; add a placeholder with IP
+          local placeholder="(no reverse DNS for ${ip})"
+          fq_ifaces["$placeholder"]="${fq_ifaces["$placeholder"]:+${fq_ifaces["$placeholder"]},}$iface"
+          fq_sources["$placeholder"]="none"
+          fq_ips["$placeholder"]="${fq_ips["$placeholder"]:+${fq_ips["$placeholder"]},}$ip"
+          fq_mismatch["$placeholder"]=0
+          fq_verified["$placeholder"]=0
+        fi
+      fi
+    done <<<"$ips"
+  done
 
-Note: This script is optimized for Enterprise Linux 9 (RHEL/Rocky/AlmaLinux).
-      GRUB/BLS operations will work on other systems but may require adjustments.
-EOF
+  # Also include aliases returned by hostname -A (all names) so local names are visible
+  local alias_names
+  alias_names=$(hostname -A 2>/dev/null || true)
+  if [[ -n "$alias_names" ]]; then
+    for name in $alias_names; do
+      [[ -z "$name" ]] && continue
+      # If not already known, just add with empty iface/source
+      if [[ -z "${fq_ifaces[$name]:-}" ]]; then
+        fq_ifaces[$name]=""
+        fq_sources[$name]="alias"
+        fq_ips[$name]=""
+        fq_mismatch[$name]=0
+      fi
+    done
+  fi
+
+  # Build output lines: fqdn [iface1,iface2] (source) (DNS mismatch!)
+  local out=()
+  local f s ifs ips mismatch srcstr
+  for f in "${!fq_ifaces[@]}"; do
+    ifs=${fq_ifaces[$f]:-}
+    # Convert comma list into bracketed list
+    if [[ -n "$ifs" ]]; then
+      # Deduplicate comma-separated iface list while preserving order
+      IFS=',' read -r -a __arr <<<"$ifs"
+      declare -A __seen=()
+      __uniq=""
+      for __v in "${__arr[@]}"; do
+        if [[ -z "${__seen[$__v]:-}" ]]; then
+          __seen[$__v]=1
+          __uniq+="${__uniq:+,}${__v}"
+        fi
+      done
+      ifs="[${__uniq}]"
+    else
+      ifs=""
+    fi
+    mismatch=${fq_mismatch[$f]:-0}
+    # If we've verified any address for this name, consider it not mismatch
+    if [[ ${fq_verified[$f]:-0} -eq 1 ]]; then
+      mismatch=0
+    fi
+    srcstr=${fq_sources[$f]:-}
+    # Colorization / tags
+    local tag=""
+    if [[ "$mismatch" -eq 1 ]]; then
+      tag="(DNS mismatch!)"
+      f="$(colorize red "$f")"
+    elif [[ "$srcstr" =~ hosts ]]; then
+      tag="(via /etc/hosts)"
+      f="$(colorize yellow "$f")"
+    elif [[ "$srcstr" =~ alias ]]; then
+      tag="(alias)"
+      f="$(colorize yellow "$f")"
+    else
+      # default: dns or none
+      f="$(colorize green "$f")"
+    fi
+    if [[ -n "$ifs" ]]; then
+      out+=("$f $ifs $tag")
+    else
+      out+=("$f $tag")
+    fi
+  done
+
+  # Print deduplicated sorted lines
+  printf '%s\n' "${out[@]}" | sort -u
 }
 
 init_log() {
@@ -437,64 +552,31 @@ reverse_dns_lookup() {
 # Forward DNS lookup to verify match
 verify_dns_match() {
   local fqdn="$1" ip="$2"
+  local is_ipv6=0
+  if [[ "$ip" == *":"* ]]; then
+    is_ipv6=1
+  fi
   if command -v dig >/dev/null 2>&1; then
-    dig +short "$fqdn" A 2>/dev/null | grep -q "^${ip}$"
+    if (( is_ipv6 )); then
+      dig +short "$fqdn" AAAA 2>/dev/null | grep -q "^${ip}$"
+    else
+      dig +short "$fqdn" A 2>/dev/null | grep -q "^${ip}$"
+    fi
+    return $?
   elif command -v host >/dev/null 2>&1; then
-    host "$fqdn" 2>/dev/null | grep -q "$ip"
+    if (( is_ipv6 )); then
+      host "$fqdn" 2>/dev/null | grep -q "has IPv6 address $ip"
+    else
+      host "$fqdn" 2>/dev/null | grep -q "has address $ip"
+    fi
+    return $?
   else
     return 1
   fi
 }
 
 # Get all FQDNs for the host
-get_host_fqdns() {
-  local iface ip fqdn fqdns=()
-  for iface in $(get_ifaces); do
-    # Try to get IPs from both IPv4 and IPv6 using a stable ip/awk approach
-    # `ip -o addr` prints a single-line per address; the 4th field is <addr>/<prefix>
-    local ips
-    ips=$(ip -o addr show "$iface" 2>/dev/null | awk '{print $4}')
-    while IFS= read -r ip; do
-      [[ -z "$ip" ]] && continue
-      # Remove CIDR notation if present
-      ip="${ip%/*}"
-      # Skip link-local and loopback
-      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
-      fqdn=$(reverse_dns_lookup "$ip")
-      if [[ -n "$fqdn" ]]; then
-        if verify_dns_match "$fqdn" "$ip"; then
-          fqdns+=("$fqdn")
-        else
-          fqdns+=("$fqdn (DNS mismatch!)")
-        fi
-      else
-        # Try to get names from /etc/hosts or NSS (getent hosts) before giving up
-        local hostline
-        hostline=$(getent hosts "$ip" 2>/dev/null || true)
-        if [[ -n "$hostline" ]]; then
-          # getent hosts returns: IP cname alias1 alias2...
-          local hostnames
-          hostnames=$(echo "$hostline" | awk '{$1=""; print $0}' | xargs)
-          for name in $hostnames; do
-            fqdns+=("$name")
-          done
-        else
-          fqdns+=("(no reverse DNS for $ip)")
-        fi
-      fi
-    done <<<"$ips"
-  done
-  # Also include hostnames returned by 'hostname -A' (all aliases)
-  local alias_names
-  alias_names=$(hostname -A 2>/dev/null || true)
-  if [[ -n "$alias_names" ]]; then
-    for name in $alias_names; do
-      [[ -z "$name" ]] && continue
-      fqdns+=("$name")
-    done
-  fi
-  printf '%s\n' "${fqdns[@]}" | sort -u
-}
+ 
 
 # Check if IPv6 is configured on any non-loopback interface
 check_ipv6_config() {
