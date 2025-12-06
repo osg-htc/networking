@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.1.1
+# Version: 1.1.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #

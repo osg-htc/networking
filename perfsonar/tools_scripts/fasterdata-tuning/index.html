@@ -1863,7 +1863,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 </code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
 <ul>
-<li>IOMMU: The script checks whether <code>iommu=pt</code> plus vendor-specific flags (<code>intel_iommu=on</code> or <code>amd_iommu=on</code>) are present. It only recommends GRUB edits (requires reboot) — it does not modify GRUB automatically unless you explicitly opt-in via a future apply flag.</li>
+<li>IOMMU: The script checks whether <code>iommu=pt</code> plus vendor-specific flags (<code>intel_iommu=on</code> or <code>amd_iommu=on</code>) are present. When you run with <code>--apply-iommu</code> and <code>--mode apply</code>, the script will optionally back up <code>/etc/default/grub</code>, append the appropriate IOMMU flags (or use values provided via <code>--iommu-args</code>) and regenerate GRUB (using <code>grubby</code> or <code>grub2-mkconfig</code> where available). Use <code>--dry-run</code> to preview the GRUB changes. You may also set <code>--iommu-args "intel_iommu=on iommu=pt"</code> to provide custom boot args.</li>
 <li>SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.</li>
 <li>Apply mode writes to <code>/etc/sysctl.conf</code> and creates <code>/etc/systemd/system/ethtool-persist.service</code> when necessary.</li>
 <li><strong>Packet Pacing (DTN only):</strong> For Data Transfer Node targets, the script can apply token bucket filter (tbf) qdisc to pace outgoing traffic. This is recommended when a DTN node handles multiple simultaneous transfers where the effective transfer rate is limited by the minimum of: source read rate, network bandwidth, and destination write rate. See the <code>--apply-packet-pacing</code> and <code>--packet-pacing-rate</code> flags below. For detailed information on why packet pacing is important and how it works, see the separate <a href="../../packet-pacing/">Packet Pacing guide</a>.</li>
@@ -1873,6 +1873,8 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 <li><code>--apply-packet-pacing</code>: Apply packet pacing to DTN interfaces via tc token bucket filter. Only works with <code>--target dtn</code>. Default pacing rate is 2 Gbps (adjustable with <code>--packet-pacing-rate</code>).</li>
 <li><code>--packet-pacing-rate RATE</code>: Set the packet pacing rate for DTN nodes. Accepts units: kbps, mbps, gbps, tbps (e.g., <code>2gbps</code>, <code>10gbps</code>, <code>10000mbps</code>). Default: 2000mbps. Burst size is automatically calculated as 1 millisecond worth of packets at the specified rate.</li>
 <li><code>--apply-iommu</code>: Edit GRUB to add <code>iommu=pt</code> and vendor-specific flags (e.g., <code>intel_iommu=on iommu=pt</code>) to the kernel cmdline and regenerate grub. Requires confirmation or <code>--yes</code> to skip interactive prompt.</li>
+<li><code>--apply-iommu</code>: Edit GRUB to add <code>iommu=pt</code> and vendor-specific flags (e.g., <code>intel_iommu=on iommu=pt</code>) to the kernel cmdline and regenerate grub. Requires confirmation or <code>--yes</code> to skip interactive prompt.</li>
+<li><code>--iommu-args ARGS</code>: Provide custom kernel cmdline arguments to apply for IOMMU (e.g., <code>intel_iommu=on iommu=pt</code>). When set, these args override vendor-appropriate defaults.</li>
 <li><code>--apply-smt on|off</code>: Toggle SMT state at runtime. Requires <code>--mode apply</code>. Example: <code>--apply-smt off</code>.</li>
 <li><code>--persist-smt</code>: If set along with <code>--apply-smt</code>, also persist the change via GRUB edits (<code>nosmt</code> applied/removed).</li>
 <li><code>--yes</code>: Skip interactive confirmations; use with caution.</li>
@@ -1880,6 +1882,9 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 Example (preview only):</li>
 </ul>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--dry-run
+</code></pre></div>
+<p>To actually apply and pass specific IOMMU args:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--iommu-args<span class="w"> </span><span class="s2">&quot;intel_iommu=on iommu=pt&quot;</span><span class="w"> </span>--yes
 </code></pre></div>
 <h2 id="reference-and-source">Reference and source<a class="headerlink" href="#reference-and-source" title="Permanent link">&para;</a></h2>
 <ul>
