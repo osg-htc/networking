@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.0.0
+# Version: 1.1.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -10,24 +10,39 @@
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
+# What this script does:
+#   - Audits sysctl network parameters (TCP buffers, congestion control, qdisc, MTU probing)
+#   - Checks tuned profile (recommends network-throughput)
+#   - Per-NIC checks: GRO/TSO/GSO on, LRO off, checksums on, ring buffers at max,
+#     txqueuelen scaled by link speed, qdisc fq
+#   - TCP congestion control: detects available algorithms, prefers BBR, applies if requested
+#   - Jumbo frames: checks MTU 9000 capability, applies if requested
+#   - Reverse DNS: validates forward/reverse DNS matches for all NICs, displays all FQDNs
+#   - IPv6: checks for dual-stack configuration (IPv4 + IPv6)
+#   - Driver updates: checks kernel version, suggests updates for NIC drivers
+#   - Speed-specific recommendations: tuning values scaled by NIC speed (10G/25G/40G/100G/200G/400G)
+#
 # Modes:
 #   --mode audit   (default)  -> read current settings, show differences
 #   --mode apply               -> apply recommended values (requires root)
 #
-# Scope:
-#   - Sysctl networking parameters (buffers, congestion control, qdisc)
-#   - Tuned profile suggestion (network-throughput)
-#   - Per-interface checks: GRO/TSO/GSO/checksums, LRO off, ring buffers to max,
-#     txqueuelen, qdisc fq
-#   - DTN-specific: Packet pacing via tc tbf qdisc (optional, configurable rate)
+# Apply mode actions:
+#   - Writes sysctl settings to /etc/sysctl.d/90-fasterdata.conf
+#   - Applies live sysctl changes
+#   - Generates /etc/systemd/system/ethtool-persist.service for NIC settings persistence
+#   - Optional: --apply-tcp-cc ALGORITHM  -> sets TCP congestion control
+#   - Optional: --apply-jumbo              -> sets MTU 9000 on capable NICs
+#   - Optional: --apply-iommu              -> adds iommu=pt to GRUB config
+#   - Optional: --apply-smt on|off         -> enables/disables SMT
+#   - Optional: --persist-smt              -> makes SMT setting persistent in GRUB
 #
 # Notes:
-#   - Uses conservative recommendations suitable for perfSONAR/DTN-style hosts on EL9.
-#   - Apply mode updates /etc/sysctl.conf with recommended parameters and applies live settings.
-#   - Packet pacing for DTN nodes: Uses token bucket filter (tbf) to pace outgoing traffic.
-#     Default rate: 2 Gbps (adjust via --packet-pacing-rate). Enable with --apply-packet-pacing.
-#   - ethtool changes are immediate but not persisted across reboots; consider
-#     running this script from a boot-time unit if persistence is required.
+#   - Ethtool settings persist via systemd service created in apply mode
+#   - Sysctl settings persist via /etc/sysctl.d/90-fasterdata.conf
+#   - Color output is enabled by default; use --nocolor to disable
+#   - JSON machine-readable output available with --json flag (audit mode only)
+#   - Dry-run available with --dry-run flag
+#   - Detailed logs written to /tmp/fasterdata-tuning-<timestamp>.log
 
 set -euo pipefail
 # Ignore SIGPIPE to avoid non-zero exits when output is piped/truncated
@@ -45,14 +60,137 @@ SCALED_WMEM_MAX=536870912
 SCALED_BACKLOG=250000
 RUNNING_KERNEL=""
 LATEST_KERNEL=""
-USE_COLOR=0
+USE_COLOR=1
 APPLY_TCP_CC=""
 APPLY_JUMBO=0
+OUTPUT_JSON=0
+
+usage() {
+  cat <<'EOF'
+Usage: fasterdata-tuning.sh [OPTIONS]
+
+Options:
+  --mode audit|apply      Mode to run (default: audit)
+  --ifaces IFACE[,IFACE]  Comma-separated list of interfaces to check
+  --target measurement|dtn  Target type for tuning (default: measurement)
+  --apply-jumbo           Apply jumbo MTU when --mode apply
+  --apply-tcp-cc ALGO     Apply TCP congestion control ALGO in --mode apply
+  --apply-smt on|off      Enable or disable SMT (requires root)
+  --json                  Print JSON machine-readable audit (audit mode only)
+  --color                 Enable colorized output (default)
+  --nocolor               Disable colorized output
+  --dry-run               Do not make changes when in apply mode; show actions only
+  --help                  Show this help
+EOF
+}
+
+# Speed-specific tuning recommendations from ESnet fasterdata.es.net
+# Values indexed by link speed in Mbps: [rmem_max, wmem_max, tcp_rmem_max, tcp_wmem_max, netdev_max_backlog]
+# For measurement hosts (perfSONAR): optimized for moderate RTT (50-100ms) paths
+# For DTN hosts: optimized for data transfer efficiency
+# shellcheck disable=SC2034
+declare -A TUNING_10G_MEASUREMENT=(
+  [rmem_max]=268435456      # 256 MB for 100ms RTT paths
+  [wmem_max]=268435456      # 256 MB
+  [tcp_rmem]="4096 87380 134217728"    # min default max (128 MB)
+  [tcp_wmem]="4096 65536 134217728"    # min default max (128 MB)
+  [netdev_max_backlog]=250000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_10G_DTN=(
+  [rmem_max]=67108864       # 64 MB for general DTN use
+  [wmem_max]=67108864       # 64 MB
+  [tcp_rmem]="4096 87380 33554432"     # min default max (32 MB)
+  [tcp_wmem]="4096 65536 33554432"     # min default max (32 MB)
+  [netdev_max_backlog]=250000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_25G_MEASUREMENT=(
+  [rmem_max]=402653184      # 384 MB (interpolated between 10G and 40G)
+  [wmem_max]=402653184      # 384 MB
+  [tcp_rmem]="4096 87380 201326592"    # min default max (192 MB)
+  [tcp_wmem]="4096 65536 201326592"    # min default max (192 MB)
+  [netdev_max_backlog]=300000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_25G_DTN=(
+  [rmem_max]=100663296      # 96 MB (interpolated)
+  [wmem_max]=100663296      # 96 MB
+  [tcp_rmem]="4096 87380 50331648"     # min default max (48 MB)
+  [tcp_wmem]="4096 65536 50331648"     # min default max (48 MB)
+  [netdev_max_backlog]=300000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_40G_MEASUREMENT=(
+  [rmem_max]=536870912      # 512 MB for 100ms RTT paths
+  [wmem_max]=536870912      # 512 MB
+  [tcp_rmem]="4096 87380 268435456"    # min default max (256 MB)
+  [tcp_wmem]="4096 65536 268435456"    # min default max (256 MB)
+  [netdev_max_backlog]=400000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_40G_DTN=(
+  [rmem_max]=134217728      # 128 MB for general DTN use
+  [wmem_max]=134217728      # 128 MB
+  [tcp_rmem]="4096 87380 67108864"     # min default max (64 MB)
+  [tcp_wmem]="4096 65536 67108864"     # min default max (64 MB)
+  [netdev_max_backlog]=400000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_100G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB for high RTT/100G paths
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=500000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_100G_DTN=(
+  [rmem_max]=2147483647     # 2 GB for 100G+ DTN
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=500000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_200G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB (same as 100G)
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=750000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_200G_DTN=(
+  [rmem_max]=2147483647     # 2 GB
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=750000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_400G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB (kernel max)
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=1000000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_400G_DTN=(
+  [rmem_max]=2147483647     # 2 GB
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=1000000
+)
+
 
 # Color codes for terminal output
 readonly C_GREEN='\033[0;32m'
 readonly C_YELLOW='\033[0;33m'
 readonly C_RED='\033[0;31m'
+readonly C_CYAN='\033[1;36m'
 readonly C_RESET='\033[0m'
 
 MODE="audit"
@@ -65,36 +203,174 @@ DRY_RUN=0
 PACKET_PACING_RATE="2000mbps"
 APPLY_PACKET_PACING=0
 
-usage() {
-  cat <<'EOF'
-Usage: fasterdata-tuning.sh [--mode audit|apply] [--ifaces "eth0,eth1"] [--target measurement|dtn] [--color] [--verbose]
+get_host_fqdns() {
+  local iface ip ip_cidr fqdn
+  declare -A fq_ifaces=()
+  declare -A fq_sources=()
+  declare -A fq_mismatch=()
+  declare -A fq_ips=()
+  declare -A fq_verified=()
 
-Modes:
-  audit   (default) Show current values vs. Fasterdata recommendations
-  apply             Apply recommended values (requires root)
+  for iface in $(get_ifaces); do
+    # Use ip -o addr and treat the 4th column as addr/prefix
+    local ips
+    ips=$(ip -o addr show "$iface" 2>/dev/null | awk '{print $4}')
+    while IFS= read -r ip_cidr; do
+      [[ -z "$ip_cidr" ]] && continue
+      ip="${ip_cidr%/*}"
+      # Skip link-local and loopback
+      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
 
-Options:
-  --ifaces LIST              Comma-separated interfaces to check/tune. Default: all up, non-loopback
-  --target TYPE              Host type: measurement (default) or dtn (data transfer node)
-  --packet-pacing-rate RATE  Packet pacing rate for DTN nodes (default: 2000mbps)
-                             Units: kbps, mbps, gbps (e.g., 2gbps, 10gbps, 10000mbps)
-  --apply-packet-pacing      (apply only) Apply packet pacing via tc tbf qdisc (DTN only)
-  --color                    Use color codes (green=ok, yellow=warning, red=critical)
-  --apply-iommu              (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
-                             Note: Optimized for EL9; will warn on other systems
-  --apply-smt STATE          Apply runtime SMT change (on|off). Requires --mode apply
-  --persist-smt              (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
-                             Note: Optimized for EL9; will warn on other systems
-  --apply-tcp-cc ALGORITHM   (apply only) Set TCP congestion control algorithm (e.g., bbr, cubic, reno)
-  --apply-jumbo              (apply only) Apply 9000 MTU jumbo frames to all NICs (if supported)
-  --yes                      Skip interactive confirmations (use with caution)
-  --dry-run                  Preview the exact GRUB/sysfs changes without applying them (safe)
-  --verbose                  More detail in audit output
-  -h, --help                 Show this help
+      fqdn=$(reverse_dns_lookup "$ip")
+      if [[ -n "$fqdn" ]]; then
+        # We have a reverse DNS name. Check forward DNS for a match
+        if verify_dns_match "$fqdn" "$ip"; then
+          # Confirmed DNS mapping
+          fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+          fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}dns"
+          fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+          fq_verified[$fqdn]=1
+          fq_mismatch[$fqdn]=0
+        else
+          local hostline
+          hostline=$(getent hosts "$ip" 2>/dev/null || true)
+          if [[ -n "$hostline" ]] && echo "$hostline" | awk '{for (i=2;i<=NF;i++) print $i}' | grep -qw "${fqdn}"; then
+            # The /etc/hosts name matches the reverse name; treat as hosts-sourced
+            fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+          
+            fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+            fq_verified[$fqdn]=1
+            fq_mismatch[$fqdn]=0
+          else
+            # Genuine DNS mismatch
+            fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+            fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}dns"
+            fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+            fq_verified[$fqdn]=0
+            fq_mismatch[$fqdn]=1
+          fi
+        fi
+      else
+        # No reverse DNS; check getent hosts for names mapping to this IP
+        local hostline
+        hostline=$(getent hosts "$ip" 2>/dev/null || true)
+        if [[ -n "$hostline" ]]; then
+          # add all names from getent (NSS), treat as hosts-sourced
+          local names
+          names=$(echo "$hostline" | awk '{$1=""; print $0}' | xargs)
+          for name in $names; do
+            [[ -z "$name" ]] && continue
+            fq_ifaces[$name]="${fq_ifaces[$name]:+${fq_ifaces[$name]},}$iface"
+            fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}hosts"
+            fq_ips[$name]="${fq_ips[$name]:+${fq_ips[$name]},}$ip"
+            fq_verified[$name]=1
+            fq_mismatch[$name]=0
+          done
+        else
+          # No name available; add a placeholder with IP
+          local placeholder="(no reverse DNS for ${ip})"
+          fq_ifaces["$placeholder"]="${fq_ifaces["$placeholder"]:+${fq_ifaces["$placeholder"]},}$iface"
+          fq_sources["$placeholder"]="none"
+          fq_ips["$placeholder"]="${fq_ips["$placeholder"]:+${fq_ips["$placeholder"]},}$ip"
+          fq_mismatch["$placeholder"]=0
+          fq_verified["$placeholder"]=0
+        fi
+      fi
+    done <<<"$ips"
+  done
 
-Note: This script is optimized for Enterprise Linux 9 (RHEL/Rocky/AlmaLinux).
-      GRUB/BLS operations will work on other systems but may require adjustments.
-EOF
+  # Also include aliases returned by hostname -A (all names) so local names are visible
+  local alias_names
+  alias_names=$(hostname -A 2>/dev/null || true)
+  if [[ -n "$alias_names" ]]; then
+    for name in $alias_names; do
+      [[ -z "$name" ]] && continue
+      # If not already known, just add with empty iface/source
+      if [[ -z "${fq_ifaces[$name]:-}" ]]; then
+        fq_ifaces[$name]=""
+        fq_sources[$name]="alias"
+        fq_ips[$name]=""
+        fq_mismatch[$name]=0
+      fi
+      # Try to resolve the name to IPs and map to a local iface if possible
+      local resolved_ips
+      resolved_ips=$(getent hosts "$name" 2>/dev/null | awk '{print $1}' || true)
+      if [[ -z "$resolved_ips" ]] && command -v dig >/dev/null 2>&1; then
+        resolved_ips=$(dig +short "$name" | sed -n '1,100p' || true)
+      fi
+      if [[ -n "$resolved_ips" ]]; then
+        for rip in $resolved_ips; do
+          local mapped_iface
+          mapped_iface=$(ip_to_iface "$rip" || true)
+          if [[ -n "$mapped_iface" ]]; then
+            # Mark as mapped to a local interface and mark source as hosts/dns appropriately
+            fq_ifaces[$name]="${fq_ifaces[$name]:+${fq_ifaces[$name]},}$mapped_iface"
+            # If the resolved IP came from getent, use hosts, otherwise dig -> dns
+            if getent hosts "$name" >/dev/null 2>&1; then
+              fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}hosts"
+            else
+              fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}dns"
+            fi
+            fq_ips[$name]="${fq_ips[$name]:+${fq_ips[$name]},}$rip"
+            fq_verified[$name]=1
+            fq_mismatch[$name]=0
+          fi
+        done
+      fi
+    done
+  fi
+
+  # Build output lines: fqdn [iface1,iface2] (source) (DNS mismatch!)
+  local out=()
+  local f s ifs ips mismatch srcstr
+  for f in "${!fq_ifaces[@]}"; do
+    ifs=${fq_ifaces[$f]:-}
+    # Convert comma list into bracketed list
+    if [[ -n "$ifs" ]]; then
+      # Deduplicate comma-separated iface list while preserving order
+      IFS=',' read -r -a __arr <<<"$ifs"
+      declare -A __seen=()
+      __uniq=""
+      for __v in "${__arr[@]}"; do
+        if [[ -z "${__seen[$__v]:-}" ]]; then
+          __seen[$__v]=1
+          __uniq+="${__uniq:+,}${__v}"
+        fi
+      done
+      ifs="[${__uniq}]"
+    else
+      ifs=""
+    fi
+    mismatch=${fq_mismatch[$f]:-0}
+    # If we've verified any address for this name, consider it not mismatch
+    if [[ ${fq_verified[$f]:-0} -eq 1 ]]; then
+      mismatch=0
+    fi
+    srcstr=${fq_sources[$f]:-}
+    # Colorization / tags
+    local tag=""
+    if [[ "$mismatch" -eq 1 ]]; then
+      tag="(DNS mismatch!)"
+      f="$(colorize red "$f")"
+    elif [[ "$srcstr" =~ hosts ]]; then
+      tag="(via /etc/hosts)"
+      f="$(colorize cyan "$f")"
+    elif [[ "$srcstr" =~ alias ]]; then
+      tag="(alias)"
+      f="$(colorize cyan "$f")"
+    else
+      # default: dns or none
+      f="$(colorize green "$f")"
+    fi
+    if [[ -n "$ifs" ]]; then
+      out+=("$f $ifs $tag")
+    else
+      out+=("$f $tag")
+    fi
+  done
+
+  # Print deduplicated sorted lines
+  printf '%s\n' "${out[@]}" | sort -u
 }
 
 init_log() {
@@ -110,6 +386,183 @@ init_log() {
   fi
 }
 
+json_quote() {
+  # Quote and escape a string for JSON. Prefer python3 if available for reliable JSON encoding.
+  local s
+  s="$1"
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s' "$s" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+  elif command -v python >/dev/null 2>&1; then
+    printf '%s' "$s" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+  else
+    # Fallback minimal escaping
+    printf '%s' "$s" | sed -e 's/\\/\\\\/g' -e 's/"/\\\"/g' -e ':a;N;$!ba;s/\n/\\n/g' | awk '{printf "\"%s\"", $0}'
+  fi
+}
+
+print_json() {
+  # Disable color in json mode
+  local old_color="$USE_COLOR"
+  USE_COLOR=0
+
+  local hostname os kernel mem_kb mem_gb cpu_count smt ipv6 tcp_cc_current tcp_cc_available
+  hostname=$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo "unknown")
+  os=$(awk -F'=' '/^PRETTY_NAME/ {print $2}' /etc/os-release 2>/dev/null | tr -d '"' || echo "unknown")
+  kernel=$(uname -r)
+  mem_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)
+  mem_gb=$((mem_kb / 1024 / 1024))
+  cpu_count=$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || echo 0)
+  smt=$(cat /sys/devices/system/cpu/smt/control 2>/dev/null || echo "unknown")
+  ipv6=$(check_ipv6_config)
+  local ipv6_json=false
+  if [[ "$ipv6" -eq 1 ]]; then ipv6_json=true; fi
+  tcp_cc_current=$(get_tcp_cc_current)
+  tcp_cc_available=$(get_tcp_cc_available)
+
+  # FQDNs
+  local fqdns_json="[]"
+  local all_fqdns
+  all_fqdns=$(get_host_fqdns)
+  if [[ -n "$all_fqdns" ]]; then
+    local arr=()
+    while IFS= read -r line; do arr+=("$line"); done <<<"$all_fqdns"
+    fqdns_json="["
+    local first=1
+    for name in "${arr[@]}"; do
+      if (( first )); then
+        first=0
+      else
+        fqdns_json+=",";
+      fi
+      fqdns_json+=$(json_quote "$name")
+    done
+    fqdns_json+="]"
+  fi
+
+  # Sysctl recs
+  local sysctl_entries="["
+  local first_entry=1
+  for key in "${!SYSCTL_RECS[@]}"; do
+    local wanted current
+    wanted=${SYSCTL_RECS[$key]}
+    current=$(sysctl -n "$key" 2>/dev/null || echo "(unset)")
+    # normalize whitespace
+    local current_normalized wanted_normalized
+    current_normalized=$(echo "$current" | awk '{$1=$1; print}')
+    wanted_normalized=$(echo "$wanted" | awk '{$1=$1; print}')
+    local match=false
+    if [[ "$current_normalized" == "$wanted_normalized" ]]; then match=true; fi
+    if (( first_entry )); then first_entry=0; else sysctl_entries+=","; fi
+    sysctl_entries+="{\"key\":$(json_quote "$key"),\"current\":$(json_quote "$current"),\"recommended\":$(json_quote "$wanted"),\"match\":$match}"
+  done
+  sysctl_entries+="]"
+
+  # Interfaces
+  # Read interface list into array to avoid word-splitting issues
+  local ifs=()
+  readarray -t ifs <<<"$(get_ifaces)"
+  local if_entries="["
+  local first_if=1
+  for iface in "${ifs[@]}"; do
+    # Gather data similar to iface_audit
+    local state txqlen if_speed desired_txqlen qdisc driver offload_issue current_mtu max_mtu rings_cur rings_max
+    state=$(ip -o link show "$iface" 2>/dev/null | awk '{print $9}' || echo "unknown")
+    txqlen=$(cat "/sys/class/net/$iface/tx_queue_len" 2>/dev/null || echo "?" )
+    if_speed=$(get_iface_speed "$iface")
+    desired_txqlen=$(desired_txqlen_for_speed "$if_speed")
+    qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 | awk '{print $2,$3,$4}' || echo "unknown")
+    driver=$(ethtool -i "$iface" 2>/dev/null | awk -F': ' '/driver/ {print $2}' || echo "unknown")
+    offload_issue="ok"
+    if command -v ethtool >/dev/null 2>&1; then
+      local offload_devs
+      offload_devs=$(ethtool -k "$iface" 2>/dev/null | grep -E 'gro:|gso:|tso:|rx-checksumming:|tx-checksumming:|lro:' || true)
+      if [[ "$offload_devs" =~ lro:[[:space:]]*on ]]; then offload_issue="lro on"; fi
+      if ! echo "$offload_devs" | grep -q 'rx-checksumming:.*on'; then offload_issue="rx csum off"; fi
+      if ! echo "$offload_devs" | grep -q 'tx-checksumming:.*on'; then offload_issue="tx csum off"; fi
+    else
+      offload_issue="missing ethtool"
+    fi
+    rings_cur=$(ethtool -g "$iface" 2>/dev/null | awk '/RX:/ {rx=$2} /TX:/ {tx=$2} END {print rx"/"tx}' || true)
+    rings_max=$(ethtool -g "$iface" 2>/dev/null | awk '/RX max:/ {rx=$3} /TX max:/ {tx=$3} END {print rx"/"tx}' || true)
+    current_mtu=$(get_nic_mtu "$iface")
+    max_mtu=$(get_nic_max_mtu "$iface")
+    # compute issues array
+    local issues_arr=()
+    if [[ "$txqlen" != "?" && "$txqlen" -lt "$desired_txqlen" ]]; then issues_arr+=("txqlen $txqlen<${desired_txqlen}"); fi
+    local qdisc_type="${qdisc%% *}"
+    if [[ "$qdisc_type" != "fq" ]]; then issues_arr+=("qdisc=${qdisc:-unknown}"); fi
+    if [[ "$offload_issue" != "ok" ]]; then issues_arr+=("$offload_issue"); fi
+    if [[ -n "$rings_cur" && -n "$rings_max" && "$rings_cur" != "$rings_max" ]]; then issues_arr+=("rings $rings_cur (max $rings_max)"); fi
+    # JSON entry for this iface
+    if (( first_if )); then first_if=0; else if_entries+=","; fi
+    if_entries+="{\"iface\":$(json_quote "$iface"),\"state\":$(json_quote "$state"),\"speed_mbps\":$(json_quote "$if_speed"),\"txqlen\":$(json_quote "$txqlen"),\"desired_txqlen\":$(json_quote "$desired_txqlen"),\"qdisc\":$(json_quote "$qdisc"),\"driver\":$(json_quote "$driver"),\"current_mtu\":$(json_quote "$current_mtu"),\"max_mtu\":$(json_quote "$max_mtu"),\"offload_issue\":$(json_quote "$offload_issue"),\"issues\":["
+    local first_j=1
+    for j in "${issues_arr[@]}"; do
+      if (( first_j )); then first_j=0; else if_entries+=','; fi
+      if_entries+=$(json_quote "$j")
+    done
+    if_entries+="]}"
+  done
+  if_entries+="]"
+
+  # Missing tools
+  local missing_json="[]"
+  if (( ${#MISSING_TOOLS[@]} > 0 )); then
+    missing_json="["
+    local mi=1
+    for t in "${MISSING_TOOLS[@]}"; do
+      if [[ $mi -eq 1 ]]; then mi=0; else missing_json+=","; fi
+      missing_json+=$(json_quote "$t")
+    done
+    missing_json+="]"
+  fi
+
+  # driver updates unique
+  local driver_json="[]"
+  if (( ${#DRIVER_UPDATES[@]} > 0 )); then
+    driver_json="["
+    local di=1
+    for d in "${DRIVER_UPDATES[@]}"; do
+      if [[ $di -eq 1 ]]; then di=0; else driver_json+=","; fi
+      driver_json+=$(json_quote "$d")
+    done
+    driver_json+="]"
+  fi
+
+  # Build top-level JSON
+  printf "{\n"
+  printf "  \"hostname\": %s,\n" "$(json_quote "$hostname")"
+  printf "  \"os\": %s,\n" "$(json_quote "$os")"
+  printf "  \"kernel\": %s,\n" "$(json_quote "$kernel")"
+  printf "  \"memory_gib\": %s,\n" "$mem_gb"
+  printf "  \"cpus\": %s,\n" "$cpu_count"
+  printf "  \"smt\": %s,\n" "$(json_quote "$smt")"
+  printf "  \"ipv6_present\": %s,\n" "$ipv6_json"
+  printf "  \"tcp_cc_current\": %s,\n" "$(json_quote "$tcp_cc_current")"
+  printf "  \"tcp_cc_available\": %s,\n" "$(json_quote "$tcp_cc_available")"
+  printf "  \"fqdns\": %s,\n" "$fqdns_json"
+  printf "  \"sysctl_recs\": %s,\n" "$sysctl_entries"
+  printf "  \"interfaces\": %s,\n" "$if_entries"
+  printf "  \"missing_tools\": %s,\n" "$missing_json"
+  printf "  \"driver_updates\": %s,\n" "$driver_json"
+  # Interface-specific issues
+  local if_issues_json="[]"
+  if (( ${#IF_ISSUES[@]} > 0 )); then
+    if_issues_json="["
+    local ii=1
+    for t in "${IF_ISSUES[@]}"; do
+      if [[ $ii -eq 1 ]]; then ii=0; else if_issues_json+=","; fi
+      if_issues_json+=$(json_quote "$t")
+    done
+    if_issues_json+="]"
+  fi
+  printf "  \"iface_issues\": %s,\n" "$if_issues_json"
+  printf "  \"sysctl_mismatches\": %s\n" "$SYSCTL_MISMATCHES"
+  printf "}\n"
+
+  USE_COLOR=$old_color
+}
+
 log() { echo "$*"; }
 log_warn() { echo "[WARN] $*" >&2; }
 log_info() { echo "[INFO] $*"; }
@@ -120,6 +573,7 @@ colorize() {
   case "$level" in
     green) echo -e "${C_GREEN}${text}${C_RESET}";;
     yellow) echo -e "${C_YELLOW}${text}${C_RESET}";;
+    cyan) echo -e "${C_CYAN}${text}${C_RESET}";;
     red) echo -e "${C_RED}${text}${C_RESET}";;
     *) echo "$text";;
   esac
@@ -167,6 +621,39 @@ warn_if_not_el9() {
     fi
   fi
   return 0
+}
+
+# Get tuning parameters for a specific link speed and target type
+# Usage: get_tuning_for_speed <speed_mbps> <target_type> <param_name>
+# Returns: the specific parameter value for the speed/type combination
+get_tuning_for_speed() {
+  local speed="$1"
+  local target="$2"
+  local param="$3"
+  local -n tuning_table
+  
+  # Determine which tuning table to use based on speed and target type
+  if [[ $speed -ge 400000 ]]; then
+    # 400G+
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_400G_MEASUREMENT || tuning_table=TUNING_400G_DTN
+  elif [[ $speed -ge 200000 ]]; then
+    # 200G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_200G_MEASUREMENT || tuning_table=TUNING_200G_DTN
+  elif [[ $speed -ge 100000 ]]; then
+    # 100G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_100G_MEASUREMENT || tuning_table=TUNING_100G_DTN
+  elif [[ $speed -ge 40000 ]]; then
+    # 40G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_40G_MEASUREMENT || tuning_table=TUNING_40G_DTN
+  elif [[ $speed -ge 25000 ]]; then
+    # 25G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_25G_MEASUREMENT || tuning_table=TUNING_25G_DTN
+  else
+    # 10G and below
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_10G_MEASUREMENT || tuning_table=TUNING_10G_DTN
+  fi
+  
+  echo "${tuning_table[$param]}"
 }
 
 # Recommended sysctl values (Fasterdata-inspired, EL9 context)
@@ -222,11 +709,20 @@ get_ifaces() {
       fi
     fi
   done
+  # Nothing else to add for get_ifaces; return list of candidates
 
   # De-duplicate and print
   if [[ ${#candidates[@]} -gt 0 ]]; then
     printf "%s\n" "${candidates[@]}" | sort -u
   fi
+}
+
+# Given an IP address, return the interface name that has that address configured
+ip_to_iface() {
+  local ip="$1"
+  # Match the address portion before slash
+  # ip -o addr prints: <idx>: <iface> <family> <addr>/<prefix> ...
+  ip -o addr 2>/dev/null | awk -v ip="$ip" '$4 ~ ip"/" {print $2; exit}' || true
 }
 
 desired_txqlen_for_speed() {
@@ -287,41 +783,51 @@ reverse_dns_lookup() {
 # Forward DNS lookup to verify match
 verify_dns_match() {
   local fqdn="$1" ip="$2"
+  # Query both A and AAAA records and match whichever corresponds to the local IP
+  local answers a mapped_iface local_iface
+  answers=""
   if command -v dig >/dev/null 2>&1; then
-    dig +short "$fqdn" A 2>/dev/null | grep -q "^${ip}$"
+    answers=$( (dig +short A "$fqdn" 2>/dev/null || true; dig +short AAAA "$fqdn" 2>/dev/null || true) | tr '\n' ' ' )
   elif command -v host >/dev/null 2>&1; then
-    host "$fqdn" 2>/dev/null | grep -q "$ip"
+    answers=$(host "$fqdn" 2>/dev/null | awk '/has address|has IPv6 address/ {print $NF}' | tr '\n' ' ')
   else
     return 1
   fi
+
+  # If the explicit IP is present among resolved answers, it is an exact match
+  for a in $answers; do
+    [[ "$a" == "$ip" ]] && return 0
+  done
+
+  # Otherwise, attempt to treat a match if any resolved address belongs to the same
+  # local interface as the supplied IP (i.e., aliasing or IPv4/IPv6 pair on same iface)
+  local_iface=$(ip_to_iface "$ip" || true)
+  if [[ -z "$local_iface" ]]; then
+    return 1
+  fi
+  for a in $answers; do
+    mapped_iface=$(ip_to_iface "$a" || true)
+    if [[ -n "$mapped_iface" ]] && [[ "$mapped_iface" == "$local_iface" ]]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 # Get all FQDNs for the host
-get_host_fqdns() {
-  local iface ip fqdn fqdns=()
+ 
+
+# Check if IPv6 is configured on any non-loopback interface
+check_ipv6_config() {
+  local iface ipv6_found=0
   for iface in $(get_ifaces); do
-    # Try to get IPs from both IPv4 and IPv6
-    local ips
-    ips=$(ip addr show "$iface" 2>/dev/null | grep -oP '(?<=inet[6]?\s)\S+(?=/)')
-    while IFS= read -r ip; do
-      [[ -z "$ip" ]] && continue
-      # Remove CIDR notation if present
-      ip="${ip%/*}"
-      # Skip link-local and loopback
-      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
-      fqdn=$(reverse_dns_lookup "$ip")
-      if [[ -n "$fqdn" ]]; then
-        if verify_dns_match "$fqdn" "$ip"; then
-          fqdns+=("$fqdn")
-        else
-          fqdns+=("$fqdn (DNS mismatch!)")
-        fi
-      else
-        fqdns+=("(no reverse DNS for $ip)")
-      fi
-    done <<<"$ips"
+    # Check for global unicast IPv6 addresses (exclude link-local fe80:: and loopback ::1)
+    if ip -6 addr show "$iface" 2>/dev/null | grep -q 'scope global'; then
+      ipv6_found=1
+      break
+    fi
   done
-  printf '%s\n' "${fqdns[@]}" | sort -u
+  echo "$ipv6_found"
 }
 
 print_sysctl_diff() {
@@ -347,7 +853,14 @@ print_sysctl_diff() {
     else
       log_detail "SYSCTL ok: $key=$current"
     fi
-    printf "%-35s %-35s %-35s %s\n" "$key" "$current" "$wanted" "$status"
+    # Colorize current value - green when equal, yellow otherwise
+    local current_print
+    if [[ "$current_normalized" == "$wanted_normalized" ]]; then
+      current_print="$(colorize green "$current")"
+    else
+      current_print="$(colorize yellow "$current")"
+    fi
+    printf "%-35s %-35s %-35s %s\n" "$key" "$current_print" "$wanted" "$status"
   done
 }
 
@@ -395,28 +908,25 @@ get_iface_speed() {
 
 set_speed_scaled_recs() {
   MAX_LINK_SPEED=$(get_max_link_speed)
-  SCALED_RMEM_MAX=536870912
-  SCALED_WMEM_MAX=536870912
-  SCALED_BACKLOG=250000
-  if (( MAX_LINK_SPEED >= 100000 )); then
-    SCALED_RMEM_MAX=1073741824
-    SCALED_WMEM_MAX=1073741824
-    SCALED_BACKLOG=500000
-  elif (( MAX_LINK_SPEED >= 40000 )); then
-    SCALED_RMEM_MAX=536870912
-    SCALED_WMEM_MAX=536870912
-    SCALED_BACKLOG=350000
-  fi
-  if [[ "$TARGET_TYPE" == "dtn" ]]; then
-    if (( MAX_LINK_SPEED >= 100000 )); then
-      SCALED_BACKLOG=600000
-    elif (( MAX_LINK_SPEED >= 40000 )); then
-      SCALED_BACKLOG=400000
-    fi
-  fi
+  
+  # Use speed-specific tuning tables from fasterdata.es.net recommendations
+  SCALED_RMEM_MAX=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "rmem_max")
+  SCALED_WMEM_MAX=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "wmem_max")
+  SCALED_BACKLOG=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "netdev_max_backlog")
+  local tcp_rmem tcp_wmem
+  tcp_rmem=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "tcp_rmem")
+  tcp_wmem=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "tcp_wmem")
+  
+  # Update SYSCTL_RECS with speed-specific values
   SYSCTL_RECS[net.core.rmem_max]=$SCALED_RMEM_MAX
   SYSCTL_RECS[net.core.wmem_max]=$SCALED_WMEM_MAX
   SYSCTL_RECS[net.core.netdev_max_backlog]=$SCALED_BACKLOG
+  SYSCTL_RECS[net.ipv4.tcp_rmem]="$tcp_rmem"
+  SYSCTL_RECS[net.ipv4.tcp_wmem]="$tcp_wmem"
+  
+  # Set defaults to 1/4 of max (common practice)
+  SYSCTL_RECS[net.core.rmem_default]=$((SCALED_RMEM_MAX / 4))
+  SYSCTL_RECS[net.core.wmem_default]=$((SCALED_WMEM_MAX / 4))
 }
 
 cache_kernel_versions() {
@@ -428,7 +938,8 @@ cache_kernel_versions() {
 }
 
 apply_sysctl() {
-  local sysctl_file="/etc/sysctl.conf"
+  # Write tuned sysctls to a sysctl.d file to avoid clobbering /etc/sysctl.conf
+  local sysctl_file="/etc/sysctl.d/90-fasterdata.conf"
   if [[ $DRY_RUN -ne 1 ]]; then
     require_root
   fi
@@ -442,39 +953,56 @@ apply_sysctl() {
   fi
   log_info "Detected max link speed (Mbps): ${MAX_LINK_SPEED:-0}"
 
-  # Update or add each sysctl parameter in /etc/sysctl.conf
-  local updates=(
-    "net.core.rmem_max=${SCALED_RMEM_MAX}"
-    "net.core.wmem_max=${SCALED_WMEM_MAX}"
-    "net.core.rmem_default=134217728"
-    "net.core.wmem_default=134217728"
-    "net.core.netdev_max_backlog=${SCALED_BACKLOG}"
-    "net.core.default_qdisc=fq"
-    "net.ipv4.tcp_rmem=4096 87380 536870912"
-    "net.ipv4.tcp_wmem=4096 65536 536870912"
-    "net.ipv4.tcp_congestion_control=bbr"
-    "net.ipv4.tcp_mtu_probing=1"
-    "net.ipv4.tcp_window_scaling=1"
-    "net.ipv4.tcp_timestamps=1"
-    "net.ipv4.tcp_sack=1"
-    "net.ipv4.tcp_low_latency=0"
-  )
-  
-  for update in "${updates[@]}"; do
-    local key="${update%%=*}"
-    local escaped_key="${key//./\\.}"
+  # Iterate all recommendations from SYSCTL_RECS so we apply the scaled values.
+  log_info "Applying live sysctl values for keys:"
+  for key in $(printf '%s\n' "${!SYSCTL_RECS[@]}" | sort); do
+    local value
+    value=${SYSCTL_RECS[$key]}
+    local update
+    update="$key=$value"
+    local escaped_key
+    escaped_key="${key//./\.}"
     if grep -q "^${escaped_key}=" "$sysctl_file" 2>/dev/null; then
       sed -i "s|^${escaped_key}=.*|${update}|" "$sysctl_file"
     else
       echo "$update" >> "$sysctl_file"
     fi
   done
+  # Show the file we wrote for debugging visibility
+  log_info "Wrote sysctl file: $sysctl_file"
+  log_detail "--- BEGIN $sysctl_file ---"
+  if [[ -r "$sysctl_file" ]]; then
+    while IFS= read -r line; do log_detail "$line"; done <"$sysctl_file"
+  fi
+  log_detail "--- END $sysctl_file ---"
   
   if ! has_bbr; then
     log_warn "bbr not available; falling back to cubic at runtime (file still sets bbr)"
   fi
   log_info "Applying sysctl settings"
-  sysctl -p "$sysctl_file" >/dev/null 2>&1 || sysctl --system >/dev/null
+  # Use --system to make sure sysctl.d files are read in the correct order
+  sysctl --system >/dev/null 2>&1 || sysctl -p "$sysctl_file" >/dev/null 2>&1 || true
+  # Ensure running kernel receives the exact recommendation by setting live values.
+  for key in $(printf '%s\n' "${!SYSCTL_RECS[@]}" | sort); do
+    local value
+    value=${SYSCTL_RECS[$key]}
+    # Live apply and verify
+    if sysctl -w "$key=$value" >/dev/null 2>&1; then
+      local cur
+      cur=$(sysctl -n "$key" 2>/dev/null || echo "(unset)")
+      # Normalize strings with awk for whitespace comparisons
+      local cur_n wanted_n
+      cur_n=$(echo "$cur" | awk '{$1=$1; print}')
+      wanted_n=$(echo "$value" | awk '{$1=$1; print}')
+      if [[ "$cur_n" != "$wanted_n" ]]; then
+        log_warn "Sysctl $key live value did not match applied value: current='$cur' expected='$value'"
+      else
+        log_info "Applied sysctl $key=$value"
+      fi
+    else
+      log_warn "Failed to apply sysctl $key=$value (sysctl -w failed)"
+    fi
+  done
   # If bbr missing, set congestion control to cubic live to avoid failure
   if ! has_bbr; then
     sysctl -w net.ipv4.tcp_congestion_control=cubic >/dev/null
@@ -529,7 +1057,28 @@ iface_audit() {
   fi
 
   local short_line
-  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen" "$desired_txqlen" "${qdisc:-?}" "$driver")
+  # Colorize txqlen: green if it meets/exceeds desired txqlen, yellow otherwise
+  local txqlen_display="$txqlen"
+  if [[ "$txqlen" =~ ^[0-9]+$ ]] && [[ "$desired_txqlen" =~ ^[0-9]+$ ]] && (( txqlen >= desired_txqlen )); then
+    txqlen_display="$(colorize green "$txqlen")"
+  else
+    txqlen_display="$(colorize yellow "$txqlen")"
+  fi
+  # Prepare qdisc display, color only the qdisc 'value' (first word)
+  local qdisc_val qdisc_rest qdisc_display
+  if [[ -n "$qdisc" ]]; then
+    qdisc_val="${qdisc%% *}"
+    qdisc_rest="${qdisc#${qdisc_val}}"
+  else
+    qdisc_val="?"
+    qdisc_rest=""
+  fi
+  if [[ "$qdisc_val" == "fq" ]]; then
+    qdisc_display="$(colorize green "$qdisc_val")${qdisc_rest}"
+  else
+    qdisc_display="$(colorize yellow "$qdisc_val")${qdisc_rest}"
+  fi
+  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen_display" "$desired_txqlen" "$qdisc_display" "$driver")
   printf "\n%s" "$short_line"
   local offload_str="offload=${offload_issue}"
   [[ -n "$rings_note" ]] && offload_str+=" $rings_note"
@@ -539,10 +1088,25 @@ iface_audit() {
   local current_mtu max_mtu mtu_status=""
   current_mtu=$(get_nic_mtu "$iface")
   max_mtu=$(get_nic_max_mtu "$iface")
+  # Colorize current MTU (>=9000 = green, otherwise yellow)
+  local mtu_color="yellow" current_mtu_disp
+  if [[ "$current_mtu" =~ ^[0-9]+$ ]] && [[ "$current_mtu" -ge 9000 ]]; then
+    mtu_color="green"
+  fi
+  current_mtu_disp=$(colorize "$mtu_color" "$current_mtu")
+  # Only show max if known
+  local max_mtu_disp
+  if [[ "$max_mtu" != "unknown" ]]; then
+    max_mtu_disp=" max=$max_mtu"
+  else
+    max_mtu_disp=""
+  fi
+  printf "  MTU: current=%s%s\n" "$current_mtu_disp" "$max_mtu_disp"
   if [[ "$current_mtu" == "unknown" || "$current_mtu" -lt 9000 ]]; then
     mtu_status="mtu=$current_mtu (recomm: 9000)"
+    # Add to issues so it shows up in the interface summary
+    issues+=("$mtu_status")
   fi
-  [[ -n "$mtu_status" ]] && printf "  MTU: current=%s max=%s\n" "$current_mtu" "$max_mtu"
 
   # Track issues for summary
   local issues=()
@@ -831,9 +1395,17 @@ ensure_tuned_profile() {
     return
   fi
   local active
-  active=$(tuned-adm active 2>/dev/null | awk '{print $3}' || true)
+  active=$(tuned-adm active 2>/dev/null | awk '{print $4}' || true)
   if [[ "$MODE" == "audit" ]]; then
-    echo "tuned-adm active: ${active:-unknown} (rec: network-throughput)"
+    local tuned_display
+    if [[ -z "$active" ]] || [[ "$active" == "unknown" ]]; then
+      tuned_display="$(colorize red "unknown")"
+    elif [[ "$active" == "network-throughput" ]]; then
+      tuned_display="$(colorize green "$active")"
+    else
+      tuned_display="$(colorize yellow "$active")"
+    fi
+    echo "tuned-adm active: ${tuned_display} (rec: network-throughput)"
   else
     if [[ "$active" != "network-throughput" ]]; then
       log_info "Setting tuned profile to network-throughput"
@@ -892,9 +1464,10 @@ check_iommu() {
   fi
   
   if echo "$cmdline" | grep -q -E 'intel_iommu=on|amd_iommu=on|iommu=pt|iommu=on'; then
-    echo "IOMMU enabled via kernel command-line: $cmdline" | sed 's/^/  /'
+    echo "IOMMU enabled via kernel command-line: $(colorize green enabled)"
   else
     log_warn "IOMMU not enabled in kernel command-line (CPU: $cpu_vendor, rec: $iommu_cmd for SR-IOV/perf tuning)"
+    echo "IOMMU: $(colorize yellow disabled)"
     echo "IOMMU setup: Edit GRUB configuration to enable IOMMU (per Fasterdata):"
     echo "  1. Edit /etc/default/grub"
     echo "  2. Add to GRUB_CMDLINE_LINUX: $iommu_cmd"
@@ -1219,6 +1792,31 @@ apply_jumbo() {
         log_info "Setting $iface MTU to $target_mtu (was $current_mtu)"
         if ip link set dev "$iface" mtu "$target_mtu" >/dev/null 2>&1; then
           log_info "$iface MTU set to $target_mtu"
+          # Persist MTU across reboots: try NetworkManager (nmcli) first
+          if command -v nmcli >/dev/null 2>&1; then
+            local conn_names
+            conn_names=$(nmcli -t -f NAME,DEVICE connection show | awk -F: -v dev="$iface" '$2==dev {print $1}')
+            for conn in $conn_names; do
+              log_info "Persisting MTU to $conn via nmcli"
+              if nmcli connection modify "$conn" 802-3-ethernet.mtu "$target_mtu" >/dev/null 2>&1; then
+                nmcli connection up "$conn" >/dev/null 2>&1 || log_warn "Failed to bring connection $conn back up after MTU change"
+              else
+                log_warn "Failed to persist MTU for $conn via nmcli"
+              fi
+            done
+          else
+            # Try interface config file for classic ifcfg (RHEL-style) and set MTU
+            local ifcfg_file="/etc/sysconfig/network-scripts/ifcfg-$iface"
+            if [[ -f "$ifcfg_file" ]]; then
+              if grep -q '^MTU=' "$ifcfg_file"; then
+                sed -i "s/^MTU=.*/MTU=$target_mtu/" "$ifcfg_file" || log_warn "Failed to update $ifcfg_file MTU"
+              else
+                echo "MTU=$target_mtu" >> "$ifcfg_file" || log_warn "Failed to append MTU to $ifcfg_file"
+              fi
+            else
+              log_info "No NM or ifcfg file found; MTU will not be persisted for $iface (please configure NM or ifcfg to persist)"
+            fi
+          fi
         else
           log_warn "Failed to set $iface MTU to $target_mtu"
         fi
@@ -1245,6 +1843,27 @@ print_host_info() {
   if [[ -n "$mem_total_kb" ]]; then
     local mem_gb=$((mem_total_kb / 1024 / 1024))
     mem_info_str="${mem_gb} GiB"
+    # Colorize memory based on host target type
+    local mem_color="green"
+    if [[ "$TARGET_TYPE" == "measurement" ]]; then
+      if (( mem_gb >= 16 )); then
+        mem_color="green"
+      elif (( mem_gb >= 8 )); then
+        mem_color="yellow"
+      else
+        mem_color="red"
+      fi
+    else
+      # DTN thresholds
+      if (( mem_gb >= 128 )); then
+        mem_color="green"
+      elif (( mem_gb >= 32 )); then
+        mem_color="yellow"
+      else
+        mem_color="red"
+      fi
+    fi
+    mem_info_str="$(colorize "$mem_color" "${mem_info_str}")"
   else
     mem_info_str="unknown"
   fi
@@ -1285,18 +1904,25 @@ print_host_info() {
   
   # Check SMT status
   if [[ -r /sys/devices/system/cpu/smt/control ]]; then
-    smt_status=$(cat /sys/devices/system/cpu/smt/control)
-    if [[ "$smt_status" == "on" ]]; then
-      smt_status="$(colorize green "on")"
+    smt_status_raw=$(cat /sys/devices/system/cpu/smt/control)
+    local recommended_smt
+    if [[ "$TARGET_TYPE" == "dtn" ]]; then
+      recommended_smt="on"
     else
-      smt_status="$(colorize yellow "$smt_status")"
+      recommended_smt="off"
+    fi
+    # Color based on whether current matches recommended
+    if [[ "$smt_status_raw" == "$recommended_smt" ]]; then
+      smt_status="$(colorize green "$smt_status_raw")"
+    else
+      smt_status="$(colorize yellow "$smt_status_raw")"
     fi
   else
     smt_status="not available"
   fi
   
   echo "Host Info:"
-  echo "  FQDN: $fqdn"
+  echo "  Hostname: $fqdn"
   
   # Show all FQDNs if multiple NICs have IPs
   local all_fqdns
@@ -1322,7 +1948,22 @@ print_host_info() {
   if has_bbrv3; then
     bbrv3_note=" (BBRv3 available - preferred)"
   fi
-  echo "  TCP Congestion Control: $tcp_cc_current (available: $tcp_cc_available)$bbrv3_note"
+  local tcp_cc_display
+  if [[ "$tcp_cc_current" == "bbr" ]]; then
+    tcp_cc_display="$(colorize green "$tcp_cc_current")"
+  else
+    tcp_cc_display="$(colorize yellow "$tcp_cc_current")"
+  fi
+  echo "  TCP Congestion Control: $tcp_cc_display (available: $tcp_cc_available)$bbrv3_note"
+  
+  # Check IPv6 configuration
+  local ipv6_status
+  if [[ $(check_ipv6_config) -eq 1 ]]; then
+    ipv6_status=$(colorize green "configured")
+  else
+    ipv6_status=$(colorize yellow "not configured (consider enabling dual-stack IPv4/IPv6)")
+  fi
+  echo "  IPv6: $ipv6_status"
 }
 
 check_smt() {
@@ -1334,8 +1975,15 @@ check_smt() {
   smt_status=$(cat /sys/devices/system/cpu/smt/control)
   log_detail "SMT status: $smt_status"
   
-  if [[ "$smt_status" != "on" ]]; then
-    log_warn "SMT is currently $smt_status (recommendation: on for measurement hosts; off for low-latency/isolated workloads)"
+  local recommended_smt
+  if [[ "$TARGET_TYPE" == "dtn" ]]; then
+    recommended_smt="on"
+  else
+    # default to measurement behavior
+    recommended_smt="off"
+  fi
+  if [[ "$smt_status" != "$recommended_smt" ]]; then
+    log_warn "SMT is currently $smt_status (recommendation: $recommended_smt for $TARGET_TYPE hosts)"
     echo "SMT control: to enable, run: echo on | sudo tee /sys/devices/system/cpu/smt/control"
     echo "SMT control: to disable, run: echo off | sudo tee /sys/devices/system/cpu/smt/control"
   fi
@@ -1375,7 +2023,11 @@ check_drivers() {
     pkg=$(rpm -q --whatprovides "$modpath" 2>/dev/null | head -n1 || true)
 
     log_detail "Driver $iface: driver=$drv version=${version:-unknown} firmware=${fw:-unknown} vendor=${vendor:-unknown} pkg=${pkg:-unknown} bus=${bus:-unknown}"
-    echo "  $iface: driver=$drv version=${version:-unknown} firmware=${fw:-unknown} vendor=${vendor:-unknown} pkg=${pkg:-unknown}"
+    local version_disp fw_disp
+    version_disp=$(colorize cyan "${version:-unknown}")
+    fw_disp=$(colorize cyan "${fw:-unknown}")
+    driver_disp=$(colorize cyan "${drv:-unknown}")
+    echo "  $iface: driver=${driver_disp} version=${version_disp} firmware=${fw_disp} vendor=${vendor:-unknown} pkg=${pkg:-unknown}"
 
     local kernel_hint=""
     if [[ -n "$LATEST_KERNEL" && -n "$RUNNING_KERNEL" ]]; then
@@ -1416,14 +2068,22 @@ print_summary() {
       echo "  Recommended pacing rate: $PACKET_PACING_RATE (adjustable via --packet-pacing-rate)"
     fi
   fi
-  echo "- Sysctl mismatches: $SYSCTL_MISMATCHES"
+  local sysctl_mismatches_disp
+  if (( SYSCTL_MISMATCHES > 0 )); then
+    sysctl_mismatches_disp="$(colorize yellow "$SYSCTL_MISMATCHES")"
+  else
+    sysctl_mismatches_disp="$(colorize green "$SYSCTL_MISMATCHES")"
+  fi
+  echo "- Sysctl mismatches: $sysctl_mismatches_disp"
   if (( ${#IF_ISSUES[@]} > 0 )); then
-    echo "- Interfaces needing attention (${#IF_ISSUES[@]}):"
+    local if_issues_disp
+    if_issues_disp="$(colorize yellow "${#IF_ISSUES[@]}")"
+    echo "- Interfaces needing attention ($if_issues_disp):"
     for item in "${IF_ISSUES[@]}"; do
       echo "  * $item"
     done
   else
-    echo "- Interfaces needing attention: none"
+    echo "- Interfaces needing attention: $(colorize green "0")"
   fi
 
   if (( ${#DRIVER_UPDATES[@]} > 0 )); then
@@ -1458,7 +2118,7 @@ print_summary() {
       echo "  * $t"
     done
   else
-    echo "- Required tools: present"
+    echo "- Required tools: $(colorize green "present")"
   fi
 
   if [[ -n "$LOGFILE" ]]; then
@@ -1475,6 +2135,7 @@ main() {
       --packet-pacing-rate) PACKET_PACING_RATE="$2"; shift 2;;
       --apply-packet-pacing) APPLY_PACKET_PACING=1; shift;;
       --color) USE_COLOR=1; shift;;
+      --nocolor) USE_COLOR=0; shift;;
       --apply-iommu) APPLY_IOMMU=1; shift;;
       --apply-smt) APPLY_SMT="$2"; shift 2;;
       --persist-smt) PERSIST_SMT=1; shift;;
@@ -1482,6 +2143,7 @@ main() {
       --apply-jumbo) APPLY_JUMBO=1; shift;;
       --yes) AUTO_YES=1; shift;;
       --dry-run) DRY_RUN=1; shift;;
+          --json) OUTPUT_JSON=1; shift;;
       -h|--help) usage; exit 0;;
       *) echo "Unknown arg: $1" >&2; usage; exit 1;;
     esac
@@ -1545,9 +2207,16 @@ main() {
     fi
   fi
 
+  if [[ "$OUTPUT_JSON" -eq 1 && "$MODE" != "audit" ]]; then
+    echo "ERROR: --json is only supported with --mode audit" >&2; exit 1
+  fi
+
   if [[ "$MODE" == "audit" ]]; then
     print_host_info
     print_sysctl_diff
+    # add spacing for readability before tuned-adm and NIC checks
+    echo
+    # (no immediate JSON output here; we'll emit JSON after completing interface checks)
   else
     if ! has_bbr; then
       log_warn "bbr not available; will set cubic live but leave bbr in config"
@@ -1574,10 +2243,22 @@ main() {
 
   # Extra host checks
   if [[ "$MODE" == "audit" ]]; then
+    # Blank line to separate NIC info from cpufreq/cpupower checks
+    echo
     check_cpu_governor
+    echo
+    # spacing after NICs before cpufreq/cpupower checks
+    echo
     check_iommu
+    # spacing between IOMMU output and driver info
+    echo
     check_smt
     check_drivers
+    # If JSON output requested, print machine-readable JSON and exit after gathering all data
+    if [[ "$OUTPUT_JSON" -eq 1 ]]; then
+      print_json
+      exit 0
+    fi
   fi
 
   if [[ "$MODE" == "apply" ]]; then
@@ -1597,6 +2278,8 @@ main() {
     fi
     log_info "Apply complete. Consider rebooting or rerunning audit to confirm settings."
   else
+    # spacing after driver info before audit completion line
+    echo
     log_info "Audit complete. Entries marked with '*' differ from recommended values."
   fi
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.0.0
+# Version: 1.1.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -10,24 +10,38 @@
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
+# What this script does:
+#   - Audits sysctl network parameters (TCP buffers, congestion control, qdisc, MTU probing)
+#   - Checks tuned profile (recommends network-throughput)
+#   - Per-NIC checks: GRO/TSO/GSO on, LRO off, checksums on, ring buffers at max,
+#     txqueuelen scaled by link speed, qdisc fq
+#   - TCP congestion control: detects available algorithms, prefers BBR, applies if requested
+#   - Jumbo frames: checks MTU 9000 capability, applies if requested
+#   - Reverse DNS: validates forward/reverse DNS matches for all NICs, displays all FQDNs
+#   - IPv6: checks for dual-stack configuration (IPv4 + IPv6)
+#   - Driver updates: checks kernel version, suggests updates for NIC drivers
+#   - Speed-specific recommendations: tuning values scaled by NIC speed (10G/25G/40G/100G/200G/400G)
+#
 # Modes:
 #   --mode audit   (default)  -> read current settings, show differences
 #   --mode apply               -> apply recommended values (requires root)
 #
-# Scope:
-#   - Sysctl networking parameters (buffers, congestion control, qdisc)
-#   - Tuned profile suggestion (network-throughput)
-#   - Per-interface checks: GRO/TSO/GSO/checksums, LRO off, ring buffers to max,
-#     txqueuelen, qdisc fq
-#   - DTN-specific: Packet pacing via tc tbf qdisc (optional, configurable rate)
+# Apply mode actions:
+#   - Writes sysctl settings to /etc/sysctl.d/90-fasterdata.conf
+#   - Applies live sysctl changes
+#   - Generates /etc/systemd/system/ethtool-persist.service for NIC settings persistence
+#   - Optional: --apply-tcp-cc ALGORITHM  -> sets TCP congestion control
+#   - Optional: --apply-jumbo              -> sets MTU 9000 on capable NICs
+#   - Optional: --apply-iommu              -> adds iommu=pt to GRUB config
+#   - Optional: --apply-smt on|off         -> enables/disables SMT
+#   - Optional: --persist-smt              -> makes SMT setting persistent in GRUB
 #
 # Notes:
-#   - Uses conservative recommendations suitable for perfSONAR/DTN-style hosts on EL9.
-#   - Apply mode updates /etc/sysctl.conf with recommended parameters and applies live settings.
-#   - Packet pacing for DTN nodes: Uses token bucket filter (tbf) to pace outgoing traffic.
-#     Default rate: 2 Gbps (adjust via --packet-pacing-rate). Enable with --apply-packet-pacing.
-#   - ethtool changes are immediate but not persisted across reboots; consider
-#     running this script from a boot-time unit if persistence is required.
+#   - Ethtool settings persist via systemd service created in apply mode
+#   - Sysctl settings persist via /etc/sysctl.d/90-fasterdata.conf
+#   - Color output available with --color flag
+#   - Dry-run available with --dry-run flag
+#   - Detailed logs written to /tmp/fasterdata-tuning-<timestamp>.log
 
 set -euo pipefail
 # Ignore SIGPIPE to avoid non-zero exits when output is piped/truncated
@@ -49,6 +63,108 @@ USE_COLOR=0
 APPLY_TCP_CC=""
 APPLY_JUMBO=0
 
+# Speed-specific tuning recommendations from ESnet fasterdata.es.net
+# Values indexed by link speed in Mbps: [rmem_max, wmem_max, tcp_rmem_max, tcp_wmem_max, netdev_max_backlog]
+# For measurement hosts (perfSONAR): optimized for moderate RTT (50-100ms) paths
+# For DTN hosts: optimized for data transfer efficiency
+# shellcheck disable=SC2034
+declare -A TUNING_10G_MEASUREMENT=(
+  [rmem_max]=268435456      # 256 MB for 100ms RTT paths
+  [wmem_max]=268435456      # 256 MB
+  [tcp_rmem]="4096 87380 134217728"    # min default max (128 MB)
+  [tcp_wmem]="4096 65536 134217728"    # min default max (128 MB)
+  [netdev_max_backlog]=250000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_10G_DTN=(
+  [rmem_max]=67108864       # 64 MB for general DTN use
+  [wmem_max]=67108864       # 64 MB
+  [tcp_rmem]="4096 87380 33554432"     # min default max (32 MB)
+  [tcp_wmem]="4096 65536 33554432"     # min default max (32 MB)
+  [netdev_max_backlog]=250000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_25G_MEASUREMENT=(
+  [rmem_max]=402653184      # 384 MB (interpolated between 10G and 40G)
+  [wmem_max]=402653184      # 384 MB
+  [tcp_rmem]="4096 87380 201326592"    # min default max (192 MB)
+  [tcp_wmem]="4096 65536 201326592"    # min default max (192 MB)
+  [netdev_max_backlog]=300000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_25G_DTN=(
+  [rmem_max]=100663296      # 96 MB (interpolated)
+  [wmem_max]=100663296      # 96 MB
+  [tcp_rmem]="4096 87380 50331648"     # min default max (48 MB)
+  [tcp_wmem]="4096 65536 50331648"     # min default max (48 MB)
+  [netdev_max_backlog]=300000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_40G_MEASUREMENT=(
+  [rmem_max]=536870912      # 512 MB for 100ms RTT paths
+  [wmem_max]=536870912      # 512 MB
+  [tcp_rmem]="4096 87380 268435456"    # min default max (256 MB)
+  [tcp_wmem]="4096 65536 268435456"    # min default max (256 MB)
+  [netdev_max_backlog]=400000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_40G_DTN=(
+  [rmem_max]=134217728      # 128 MB for general DTN use
+  [wmem_max]=134217728      # 128 MB
+  [tcp_rmem]="4096 87380 67108864"     # min default max (64 MB)
+  [tcp_wmem]="4096 65536 67108864"     # min default max (64 MB)
+  [netdev_max_backlog]=400000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_100G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB for high RTT/100G paths
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=500000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_100G_DTN=(
+  [rmem_max]=2147483647     # 2 GB for 100G+ DTN
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=500000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_200G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB (same as 100G)
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=750000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_200G_DTN=(
+  [rmem_max]=2147483647     # 2 GB
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=750000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_400G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB (kernel max)
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=1000000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_400G_DTN=(
+  [rmem_max]=2147483647     # 2 GB
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=1000000
+)
+
+
 # Color codes for terminal output
 readonly C_GREEN='\033[0;32m'
 readonly C_YELLOW='\033[0;33m'
@@ -65,36 +181,174 @@ DRY_RUN=0
 PACKET_PACING_RATE="2000mbps"
 APPLY_PACKET_PACING=0
 
-usage() {
-  cat <<'EOF'
-Usage: fasterdata-tuning.sh [--mode audit|apply] [--ifaces "eth0,eth1"] [--target measurement|dtn] [--color] [--verbose]
+get_host_fqdns() {
+  local iface ip ip_cidr fqdn
+  declare -A fq_ifaces=()
+  declare -A fq_sources=()
+  declare -A fq_mismatch=()
+  declare -A fq_ips=()
+  declare -A fq_verified=()
 
-Modes:
-  audit   (default) Show current values vs. Fasterdata recommendations
-  apply             Apply recommended values (requires root)
+  for iface in $(get_ifaces); do
+    # Use ip -o addr and treat the 4th column as addr/prefix
+    local ips
+    ips=$(ip -o addr show "$iface" 2>/dev/null | awk '{print $4}')
+    while IFS= read -r ip_cidr; do
+      [[ -z "$ip_cidr" ]] && continue
+      ip="${ip_cidr%/*}"
+      # Skip link-local and loopback
+      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
 
-Options:
-  --ifaces LIST              Comma-separated interfaces to check/tune. Default: all up, non-loopback
-  --target TYPE              Host type: measurement (default) or dtn (data transfer node)
-  --packet-pacing-rate RATE  Packet pacing rate for DTN nodes (default: 2000mbps)
-                             Units: kbps, mbps, gbps (e.g., 2gbps, 10gbps, 10000mbps)
-  --apply-packet-pacing      (apply only) Apply packet pacing via tc tbf qdisc (DTN only)
-  --color                    Use color codes (green=ok, yellow=warning, red=critical)
-  --apply-iommu              (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
-                             Note: Optimized for EL9; will warn on other systems
-  --apply-smt STATE          Apply runtime SMT change (on|off). Requires --mode apply
-  --persist-smt              (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
-                             Note: Optimized for EL9; will warn on other systems
-  --apply-tcp-cc ALGORITHM   (apply only) Set TCP congestion control algorithm (e.g., bbr, cubic, reno)
-  --apply-jumbo              (apply only) Apply 9000 MTU jumbo frames to all NICs (if supported)
-  --yes                      Skip interactive confirmations (use with caution)
-  --dry-run                  Preview the exact GRUB/sysfs changes without applying them (safe)
-  --verbose                  More detail in audit output
-  -h, --help                 Show this help
+      fqdn=$(reverse_dns_lookup "$ip")
+      if [[ -n "$fqdn" ]]; then
+        # We have a reverse DNS name. Check forward DNS for a match
+        if verify_dns_match "$fqdn" "$ip"; then
+          # Confirmed DNS mapping
+          fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+          fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}dns"
+          fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+          fq_verified[$fqdn]=1
+          fq_mismatch[$fqdn]=0
+        else
+          local hostline
+          hostline=$(getent hosts "$ip" 2>/dev/null || true)
+          if [[ -n "$hostline" ]] && echo "$hostline" | awk '{for (i=2;i<=NF;i++) print $i}' | grep -qw "${fqdn}"; then
+            # The /etc/hosts name matches the reverse name; treat as hosts-sourced
+            fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+          
+            fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+            fq_verified[$fqdn]=1
+            fq_mismatch[$fqdn]=0
+          else
+            # Genuine DNS mismatch
+            fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
+            fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}dns"
+            fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
+            fq_verified[$fqdn]=0
+            fq_mismatch[$fqdn]=1
+          fi
+        fi
+      else
+        # No reverse DNS; check getent hosts for names mapping to this IP
+        local hostline
+        hostline=$(getent hosts "$ip" 2>/dev/null || true)
+        if [[ -n "$hostline" ]]; then
+          # add all names from getent (NSS), treat as hosts-sourced
+          local names
+          names=$(echo "$hostline" | awk '{$1=""; print $0}' | xargs)
+          for name in $names; do
+            [[ -z "$name" ]] && continue
+            fq_ifaces[$name]="${fq_ifaces[$name]:+${fq_ifaces[$name]},}$iface"
+            fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}hosts"
+            fq_ips[$name]="${fq_ips[$name]:+${fq_ips[$name]},}$ip"
+            fq_verified[$name]=1
+            fq_mismatch[$name]=0
+          done
+        else
+          # No name available; add a placeholder with IP
+          local placeholder="(no reverse DNS for ${ip})"
+          fq_ifaces["$placeholder"]="${fq_ifaces["$placeholder"]:+${fq_ifaces["$placeholder"]},}$iface"
+          fq_sources["$placeholder"]="none"
+          fq_ips["$placeholder"]="${fq_ips["$placeholder"]:+${fq_ips["$placeholder"]},}$ip"
+          fq_mismatch["$placeholder"]=0
+          fq_verified["$placeholder"]=0
+        fi
+      fi
+    done <<<"$ips"
+  done
 
-Note: This script is optimized for Enterprise Linux 9 (RHEL/Rocky/AlmaLinux).
-      GRUB/BLS operations will work on other systems but may require adjustments.
-EOF
+  # Also include aliases returned by hostname -A (all names) so local names are visible
+  local alias_names
+  alias_names=$(hostname -A 2>/dev/null || true)
+  if [[ -n "$alias_names" ]]; then
+    for name in $alias_names; do
+      [[ -z "$name" ]] && continue
+      # If not already known, just add with empty iface/source
+      if [[ -z "${fq_ifaces[$name]:-}" ]]; then
+        fq_ifaces[$name]=""
+        fq_sources[$name]="alias"
+        fq_ips[$name]=""
+        fq_mismatch[$name]=0
+      fi
+      # Try to resolve the name to IPs and map to a local iface if possible
+      local resolved_ips
+      resolved_ips=$(getent hosts "$name" 2>/dev/null | awk '{print $1}' || true)
+      if [[ -z "$resolved_ips" ]] && command -v dig >/dev/null 2>&1; then
+        resolved_ips=$(dig +short "$name" | sed -n '1,100p' || true)
+      fi
+      if [[ -n "$resolved_ips" ]]; then
+        for rip in $resolved_ips; do
+          local mapped_iface
+          mapped_iface=$(ip_to_iface "$rip" || true)
+          if [[ -n "$mapped_iface" ]]; then
+            # Mark as mapped to a local interface and mark source as hosts/dns appropriately
+            fq_ifaces[$name]="${fq_ifaces[$name]:+${fq_ifaces[$name]},}$mapped_iface"
+            # If the resolved IP came from getent, use hosts, otherwise dig -> dns
+            if getent hosts "$name" >/dev/null 2>&1; then
+              fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}hosts"
+            else
+              fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}dns"
+            fi
+            fq_ips[$name]="${fq_ips[$name]:+${fq_ips[$name]},}$rip"
+            fq_verified[$name]=1
+            fq_mismatch[$name]=0
+          fi
+        done
+      fi
+    done
+  fi
+
+  # Build output lines: fqdn [iface1,iface2] (source) (DNS mismatch!)
+  local out=()
+  local f s ifs ips mismatch srcstr
+  for f in "${!fq_ifaces[@]}"; do
+    ifs=${fq_ifaces[$f]:-}
+    # Convert comma list into bracketed list
+    if [[ -n "$ifs" ]]; then
+      # Deduplicate comma-separated iface list while preserving order
+      IFS=',' read -r -a __arr <<<"$ifs"
+      declare -A __seen=()
+      __uniq=""
+      for __v in "${__arr[@]}"; do
+        if [[ -z "${__seen[$__v]:-}" ]]; then
+          __seen[$__v]=1
+          __uniq+="${__uniq:+,}${__v}"
+        fi
+      done
+      ifs="[${__uniq}]"
+    else
+      ifs=""
+    fi
+    mismatch=${fq_mismatch[$f]:-0}
+    # If we've verified any address for this name, consider it not mismatch
+    if [[ ${fq_verified[$f]:-0} -eq 1 ]]; then
+      mismatch=0
+    fi
+    srcstr=${fq_sources[$f]:-}
+    # Colorization / tags
+    local tag=""
+    if [[ "$mismatch" -eq 1 ]]; then
+      tag="(DNS mismatch!)"
+      f="$(colorize red "$f")"
+    elif [[ "$srcstr" =~ hosts ]]; then
+      tag="(via /etc/hosts)"
+      f="$(colorize yellow "$f")"
+    elif [[ "$srcstr" =~ alias ]]; then
+      tag="(alias)"
+      f="$(colorize yellow "$f")"
+    else
+      # default: dns or none
+      f="$(colorize green "$f")"
+    fi
+    if [[ -n "$ifs" ]]; then
+      out+=("$f $ifs $tag")
+    else
+      out+=("$f $tag")
+    fi
+  done
+
+  # Print deduplicated sorted lines
+  printf '%s\n' "${out[@]}" | sort -u
 }
 
 init_log() {
@@ -169,6 +423,39 @@ warn_if_not_el9() {
   return 0
 }
 
+# Get tuning parameters for a specific link speed and target type
+# Usage: get_tuning_for_speed <speed_mbps> <target_type> <param_name>
+# Returns: the specific parameter value for the speed/type combination
+get_tuning_for_speed() {
+  local speed="$1"
+  local target="$2"
+  local param="$3"
+  local -n tuning_table
+  
+  # Determine which tuning table to use based on speed and target type
+  if [[ $speed -ge 400000 ]]; then
+    # 400G+
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_400G_MEASUREMENT || tuning_table=TUNING_400G_DTN
+  elif [[ $speed -ge 200000 ]]; then
+    # 200G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_200G_MEASUREMENT || tuning_table=TUNING_200G_DTN
+  elif [[ $speed -ge 100000 ]]; then
+    # 100G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_100G_MEASUREMENT || tuning_table=TUNING_100G_DTN
+  elif [[ $speed -ge 40000 ]]; then
+    # 40G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_40G_MEASUREMENT || tuning_table=TUNING_40G_DTN
+  elif [[ $speed -ge 25000 ]]; then
+    # 25G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_25G_MEASUREMENT || tuning_table=TUNING_25G_DTN
+  else
+    # 10G and below
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_10G_MEASUREMENT || tuning_table=TUNING_10G_DTN
+  fi
+  
+  echo "${tuning_table[$param]}"
+}
+
 # Recommended sysctl values (Fasterdata-inspired, EL9 context)
 declare -A SYSCTL_RECS=(
   [net.core.rmem_max]=536870912
@@ -222,11 +509,20 @@ get_ifaces() {
       fi
     fi
   done
+  # Nothing else to add for get_ifaces; return list of candidates
 
   # De-duplicate and print
   if [[ ${#candidates[@]} -gt 0 ]]; then
     printf "%s\n" "${candidates[@]}" | sort -u
   fi
+}
+
+# Given an IP address, return the interface name that has that address configured
+ip_to_iface() {
+  local ip="$1"
+  # Match the address portion before slash
+  # ip -o addr prints: <idx>: <iface> <family> <addr>/<prefix> ...
+  ip -o addr 2>/dev/null | awk -v ip="$ip" '$4 ~ ip"/" {print $2; exit}' || true
 }
 
 desired_txqlen_for_speed() {
@@ -287,41 +583,51 @@ reverse_dns_lookup() {
 # Forward DNS lookup to verify match
 verify_dns_match() {
   local fqdn="$1" ip="$2"
+  # Query both A and AAAA records and match whichever corresponds to the local IP
+  local answers a mapped_iface local_iface
+  answers=""
   if command -v dig >/dev/null 2>&1; then
-    dig +short "$fqdn" A 2>/dev/null | grep -q "^${ip}$"
+    answers=$( (dig +short A "$fqdn" 2>/dev/null || true; dig +short AAAA "$fqdn" 2>/dev/null || true) | tr '\n' ' ' )
   elif command -v host >/dev/null 2>&1; then
-    host "$fqdn" 2>/dev/null | grep -q "$ip"
+    answers=$(host "$fqdn" 2>/dev/null | awk '/has address|has IPv6 address/ {print $NF}' | tr '\n' ' ')
   else
     return 1
   fi
+
+  # If the explicit IP is present among resolved answers, it is an exact match
+  for a in $answers; do
+    [[ "$a" == "$ip" ]] && return 0
+  done
+
+  # Otherwise, attempt to treat a match if any resolved address belongs to the same
+  # local interface as the supplied IP (i.e., aliasing or IPv4/IPv6 pair on same iface)
+  local_iface=$(ip_to_iface "$ip" || true)
+  if [[ -z "$local_iface" ]]; then
+    return 1
+  fi
+  for a in $answers; do
+    mapped_iface=$(ip_to_iface "$a" || true)
+    if [[ -n "$mapped_iface" ]] && [[ "$mapped_iface" == "$local_iface" ]]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 # Get all FQDNs for the host
-get_host_fqdns() {
-  local iface ip fqdn fqdns=()
+ 
+
+# Check if IPv6 is configured on any non-loopback interface
+check_ipv6_config() {
+  local iface ipv6_found=0
   for iface in $(get_ifaces); do
-    # Try to get IPs from both IPv4 and IPv6
-    local ips
-    ips=$(ip addr show "$iface" 2>/dev/null | grep -oP '(?<=inet[6]?\s)\S+(?=/)')
-    while IFS= read -r ip; do
-      [[ -z "$ip" ]] && continue
-      # Remove CIDR notation if present
-      ip="${ip%/*}"
-      # Skip link-local and loopback
-      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
-      fqdn=$(reverse_dns_lookup "$ip")
-      if [[ -n "$fqdn" ]]; then
-        if verify_dns_match "$fqdn" "$ip"; then
-          fqdns+=("$fqdn")
-        else
-          fqdns+=("$fqdn (DNS mismatch!)")
-        fi
-      else
-        fqdns+=("(no reverse DNS for $ip)")
-      fi
-    done <<<"$ips"
+    # Check for global unicast IPv6 addresses (exclude link-local fe80:: and loopback ::1)
+    if ip -6 addr show "$iface" 2>/dev/null | grep -q 'scope global'; then
+      ipv6_found=1
+      break
+    fi
   done
-  printf '%s\n' "${fqdns[@]}" | sort -u
+  echo "$ipv6_found"
 }
 
 print_sysctl_diff() {
@@ -347,7 +653,14 @@ print_sysctl_diff() {
     else
       log_detail "SYSCTL ok: $key=$current"
     fi
-    printf "%-35s %-35s %-35s %s\n" "$key" "$current" "$wanted" "$status"
+    # Colorize current value - green when equal, yellow otherwise
+    local current_print
+    if [[ "$current_normalized" == "$wanted_normalized" ]]; then
+      current_print="$(colorize green "$current")"
+    else
+      current_print="$(colorize yellow "$current")"
+    fi
+    printf "%-35s %-35s %-35s %s\n" "$key" "$current_print" "$wanted" "$status"
   done
 }
 
@@ -395,28 +708,25 @@ get_iface_speed() {
 
 set_speed_scaled_recs() {
   MAX_LINK_SPEED=$(get_max_link_speed)
-  SCALED_RMEM_MAX=536870912
-  SCALED_WMEM_MAX=536870912
-  SCALED_BACKLOG=250000
-  if (( MAX_LINK_SPEED >= 100000 )); then
-    SCALED_RMEM_MAX=1073741824
-    SCALED_WMEM_MAX=1073741824
-    SCALED_BACKLOG=500000
-  elif (( MAX_LINK_SPEED >= 40000 )); then
-    SCALED_RMEM_MAX=536870912
-    SCALED_WMEM_MAX=536870912
-    SCALED_BACKLOG=350000
-  fi
-  if [[ "$TARGET_TYPE" == "dtn" ]]; then
-    if (( MAX_LINK_SPEED >= 100000 )); then
-      SCALED_BACKLOG=600000
-    elif (( MAX_LINK_SPEED >= 40000 )); then
-      SCALED_BACKLOG=400000
-    fi
-  fi
+  
+  # Use speed-specific tuning tables from fasterdata.es.net recommendations
+  SCALED_RMEM_MAX=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "rmem_max")
+  SCALED_WMEM_MAX=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "wmem_max")
+  SCALED_BACKLOG=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "netdev_max_backlog")
+  local tcp_rmem tcp_wmem
+  tcp_rmem=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "tcp_rmem")
+  tcp_wmem=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "tcp_wmem")
+  
+  # Update SYSCTL_RECS with speed-specific values
   SYSCTL_RECS[net.core.rmem_max]=$SCALED_RMEM_MAX
   SYSCTL_RECS[net.core.wmem_max]=$SCALED_WMEM_MAX
   SYSCTL_RECS[net.core.netdev_max_backlog]=$SCALED_BACKLOG
+  SYSCTL_RECS[net.ipv4.tcp_rmem]="$tcp_rmem"
+  SYSCTL_RECS[net.ipv4.tcp_wmem]="$tcp_wmem"
+  
+  # Set defaults to 1/4 of max (common practice)
+  SYSCTL_RECS[net.core.rmem_default]=$((SCALED_RMEM_MAX / 4))
+  SYSCTL_RECS[net.core.wmem_default]=$((SCALED_WMEM_MAX / 4))
 }
 
 cache_kernel_versions() {
@@ -529,7 +839,14 @@ iface_audit() {
   fi
 
   local short_line
-  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen" "$desired_txqlen" "${qdisc:-?}" "$driver")
+  # Colorize txqlen: green if it meets/exceeds desired txqlen, yellow otherwise
+  local txqlen_display="$txqlen"
+  if [[ "$txqlen" =~ ^[0-9]+$ ]] && [[ "$desired_txqlen" =~ ^[0-9]+$ ]] && (( txqlen >= desired_txqlen )); then
+    txqlen_display="$(colorize green "$txqlen")"
+  else
+    txqlen_display="$(colorize yellow "$txqlen")"
+  fi
+  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen_display" "$desired_txqlen" "${qdisc:-?}" "$driver")
   printf "\n%s" "$short_line"
   local offload_str="offload=${offload_issue}"
   [[ -n "$rings_note" ]] && offload_str+=" $rings_note"
@@ -539,10 +856,23 @@ iface_audit() {
   local current_mtu max_mtu mtu_status=""
   current_mtu=$(get_nic_mtu "$iface")
   max_mtu=$(get_nic_max_mtu "$iface")
+  # Colorize current MTU (>=9000 = green, otherwise yellow)
+  local mtu_color="yellow" current_mtu_disp
+  if [[ "$current_mtu" =~ ^[0-9]+$ ]] && [[ "$current_mtu" -ge 9000 ]]; then
+    mtu_color="green"
+  fi
+  current_mtu_disp=$(colorize "$mtu_color" "$current_mtu")
+  # Only show max if known
+  local max_mtu_disp
+  if [[ "$max_mtu" != "unknown" ]]; then
+    max_mtu_disp=" max=$max_mtu"
+  else
+    max_mtu_disp=""
+  fi
+  printf "  MTU: current=%s%s\n" "$current_mtu_disp" "$max_mtu_disp"
   if [[ "$current_mtu" == "unknown" || "$current_mtu" -lt 9000 ]]; then
     mtu_status="mtu=$current_mtu (recomm: 9000)"
   fi
-  [[ -n "$mtu_status" ]] && printf "  MTU: current=%s max=%s\n" "$current_mtu" "$max_mtu"
 
   # Track issues for summary
   local issues=()
@@ -831,9 +1161,17 @@ ensure_tuned_profile() {
     return
   fi
   local active
-  active=$(tuned-adm active 2>/dev/null | awk '{print $3}' || true)
+  active=$(tuned-adm active 2>/dev/null | awk '{print $4}' || true)
   if [[ "$MODE" == "audit" ]]; then
-    echo "tuned-adm active: ${active:-unknown} (rec: network-throughput)"
+    local tuned_display
+    if [[ -z "$active" ]] || [[ "$active" == "unknown" ]]; then
+      tuned_display="$(colorize red "unknown")"
+    elif [[ "$active" == "network-throughput" ]]; then
+      tuned_display="$(colorize green "$active")"
+    else
+      tuned_display="$(colorize yellow "$active")"
+    fi
+    echo "tuned-adm active: ${tuned_display} (rec: network-throughput)"
   else
     if [[ "$active" != "network-throughput" ]]; then
       log_info "Setting tuned profile to network-throughput"
@@ -1219,6 +1557,31 @@ apply_jumbo() {
         log_info "Setting $iface MTU to $target_mtu (was $current_mtu)"
         if ip link set dev "$iface" mtu "$target_mtu" >/dev/null 2>&1; then
           log_info "$iface MTU set to $target_mtu"
+          # Persist MTU across reboots: try NetworkManager (nmcli) first
+          if command -v nmcli >/dev/null 2>&1; then
+            local conn_names
+            conn_names=$(nmcli -t -f NAME,DEVICE connection show | awk -F: -v dev="$iface" '$2==dev {print $1}')
+            for conn in $conn_names; do
+              log_info "Persisting MTU to $conn via nmcli"
+              if nmcli connection modify "$conn" 802-3-ethernet.mtu "$target_mtu" >/dev/null 2>&1; then
+                nmcli connection up "$conn" >/dev/null 2>&1 || log_warn "Failed to bring connection $conn back up after MTU change"
+              else
+                log_warn "Failed to persist MTU for $conn via nmcli"
+              fi
+            done
+          else
+            # Try interface config file for classic ifcfg (RHEL-style) and set MTU
+            local ifcfg_file="/etc/sysconfig/network-scripts/ifcfg-$iface"
+            if [[ -f "$ifcfg_file" ]]; then
+              if grep -q '^MTU=' "$ifcfg_file"; then
+                sed -i "s/^MTU=.*/MTU=$target_mtu/" "$ifcfg_file" || log_warn "Failed to update $ifcfg_file MTU"
+              else
+                echo "MTU=$target_mtu" >> "$ifcfg_file" || log_warn "Failed to append MTU to $ifcfg_file"
+              fi
+            else
+              log_info "No NM or ifcfg file found; MTU will not be persisted for $iface (please configure NM or ifcfg to persist)"
+            fi
+          fi
         else
           log_warn "Failed to set $iface MTU to $target_mtu"
         fi
@@ -1245,6 +1608,27 @@ print_host_info() {
   if [[ -n "$mem_total_kb" ]]; then
     local mem_gb=$((mem_total_kb / 1024 / 1024))
     mem_info_str="${mem_gb} GiB"
+    # Colorize memory based on host target type
+    local mem_color="green"
+    if [[ "$TARGET_TYPE" == "measurement" ]]; then
+      if (( mem_gb >= 16 )); then
+        mem_color="green"
+      elif (( mem_gb >= 8 )); then
+        mem_color="yellow"
+      else
+        mem_color="red"
+      fi
+    else
+      # DTN thresholds
+      if (( mem_gb >= 128 )); then
+        mem_color="green"
+      elif (( mem_gb >= 32 )); then
+        mem_color="yellow"
+      else
+        mem_color="red"
+      fi
+    fi
+    mem_info_str="$(colorize "$mem_color" "${mem_info_str}")"
   else
     mem_info_str="unknown"
   fi
@@ -1287,16 +1671,16 @@ print_host_info() {
   if [[ -r /sys/devices/system/cpu/smt/control ]]; then
     smt_status=$(cat /sys/devices/system/cpu/smt/control)
     if [[ "$smt_status" == "on" ]]; then
-      smt_status="$(colorize green "on")"
+      smt_status="$(colorize yellow "on")"
     else
-      smt_status="$(colorize yellow "$smt_status")"
+      smt_status="$(colorize green "$smt_status")"
     fi
   else
     smt_status="not available"
   fi
   
   echo "Host Info:"
-  echo "  FQDN: $fqdn"
+  echo "  Hostname: $fqdn"
   
   # Show all FQDNs if multiple NICs have IPs
   local all_fqdns
@@ -1322,7 +1706,22 @@ print_host_info() {
   if has_bbrv3; then
     bbrv3_note=" (BBRv3 available - preferred)"
   fi
-  echo "  TCP Congestion Control: $tcp_cc_current (available: $tcp_cc_available)$bbrv3_note"
+  local tcp_cc_display
+  if [[ "$tcp_cc_current" == "bbr" ]]; then
+    tcp_cc_display="$(colorize green "$tcp_cc_current")"
+  else
+    tcp_cc_display="$(colorize yellow "$tcp_cc_current")"
+  fi
+  echo "  TCP Congestion Control: $tcp_cc_display (available: $tcp_cc_available)$bbrv3_note"
+  
+  # Check IPv6 configuration
+  local ipv6_status
+  if [[ $(check_ipv6_config) -eq 1 ]]; then
+    ipv6_status=$(colorize green "configured")
+  else
+    ipv6_status=$(colorize yellow "not configured (consider enabling dual-stack IPv4/IPv6)")
+  fi
+  echo "  IPv6: $ipv6_status"
 }
 
 check_smt() {
