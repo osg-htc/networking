@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.0.0
+# Version: 1.1.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -10,24 +10,38 @@
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
+# What this script does:
+#   - Audits sysctl network parameters (TCP buffers, congestion control, qdisc, MTU probing)
+#   - Checks tuned profile (recommends network-throughput)
+#   - Per-NIC checks: GRO/TSO/GSO on, LRO off, checksums on, ring buffers at max,
+#     txqueuelen scaled by link speed, qdisc fq
+#   - TCP congestion control: detects available algorithms, prefers BBR, applies if requested
+#   - Jumbo frames: checks MTU 9000 capability, applies if requested
+#   - Reverse DNS: validates forward/reverse DNS matches for all NICs, displays all FQDNs
+#   - IPv6: checks for dual-stack configuration (IPv4 + IPv6)
+#   - Driver updates: checks kernel version, suggests updates for NIC drivers
+#   - Speed-specific recommendations: tuning values scaled by NIC speed (10G/25G/40G/100G/200G/400G)
+#
 # Modes:
 #   --mode audit   (default)  -> read current settings, show differences
 #   --mode apply               -> apply recommended values (requires root)
 #
-# Scope:
-#   - Sysctl networking parameters (buffers, congestion control, qdisc)
-#   - Tuned profile suggestion (network-throughput)
-#   - Per-interface checks: GRO/TSO/GSO/checksums, LRO off, ring buffers to max,
-#     txqueuelen, qdisc fq
-#   - DTN-specific: Packet pacing via tc tbf qdisc (optional, configurable rate)
+# Apply mode actions:
+#   - Writes sysctl settings to /etc/sysctl.d/90-fasterdata.conf
+#   - Applies live sysctl changes
+#   - Generates /etc/systemd/system/ethtool-persist.service for NIC settings persistence
+#   - Optional: --apply-tcp-cc ALGORITHM  -> sets TCP congestion control
+#   - Optional: --apply-jumbo              -> sets MTU 9000 on capable NICs
+#   - Optional: --apply-iommu              -> adds iommu=pt to GRUB config
+#   - Optional: --apply-smt on|off         -> enables/disables SMT
+#   - Optional: --persist-smt              -> makes SMT setting persistent in GRUB
 #
 # Notes:
-#   - Uses conservative recommendations suitable for perfSONAR/DTN-style hosts on EL9.
-#   - Apply mode updates /etc/sysctl.conf with recommended parameters and applies live settings.
-#   - Packet pacing for DTN nodes: Uses token bucket filter (tbf) to pace outgoing traffic.
-#     Default rate: 2 Gbps (adjust via --packet-pacing-rate). Enable with --apply-packet-pacing.
-#   - ethtool changes are immediate but not persisted across reboots; consider
-#     running this script from a boot-time unit if persistence is required.
+#   - Ethtool settings persist via systemd service created in apply mode
+#   - Sysctl settings persist via /etc/sysctl.d/90-fasterdata.conf
+#   - Color output available with --color flag
+#   - Dry-run available with --dry-run flag
+#   - Detailed logs written to /tmp/fasterdata-tuning-<timestamp>.log
 
 set -euo pipefail
 # Ignore SIGPIPE to avoid non-zero exits when output is piped/truncated
@@ -48,6 +62,108 @@ LATEST_KERNEL=""
 USE_COLOR=0
 APPLY_TCP_CC=""
 APPLY_JUMBO=0
+
+# Speed-specific tuning recommendations from ESnet fasterdata.es.net
+# Values indexed by link speed in Mbps: [rmem_max, wmem_max, tcp_rmem_max, tcp_wmem_max, netdev_max_backlog]
+# For measurement hosts (perfSONAR): optimized for moderate RTT (50-100ms) paths
+# For DTN hosts: optimized for data transfer efficiency
+# shellcheck disable=SC2034
+declare -A TUNING_10G_MEASUREMENT=(
+  [rmem_max]=268435456      # 256 MB for 100ms RTT paths
+  [wmem_max]=268435456      # 256 MB
+  [tcp_rmem]="4096 87380 134217728"    # min default max (128 MB)
+  [tcp_wmem]="4096 65536 134217728"    # min default max (128 MB)
+  [netdev_max_backlog]=250000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_10G_DTN=(
+  [rmem_max]=67108864       # 64 MB for general DTN use
+  [wmem_max]=67108864       # 64 MB
+  [tcp_rmem]="4096 87380 33554432"     # min default max (32 MB)
+  [tcp_wmem]="4096 65536 33554432"     # min default max (32 MB)
+  [netdev_max_backlog]=250000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_25G_MEASUREMENT=(
+  [rmem_max]=402653184      # 384 MB (interpolated between 10G and 40G)
+  [wmem_max]=402653184      # 384 MB
+  [tcp_rmem]="4096 87380 201326592"    # min default max (192 MB)
+  [tcp_wmem]="4096 65536 201326592"    # min default max (192 MB)
+  [netdev_max_backlog]=300000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_25G_DTN=(
+  [rmem_max]=100663296      # 96 MB (interpolated)
+  [wmem_max]=100663296      # 96 MB
+  [tcp_rmem]="4096 87380 50331648"     # min default max (48 MB)
+  [tcp_wmem]="4096 65536 50331648"     # min default max (48 MB)
+  [netdev_max_backlog]=300000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_40G_MEASUREMENT=(
+  [rmem_max]=536870912      # 512 MB for 100ms RTT paths
+  [wmem_max]=536870912      # 512 MB
+  [tcp_rmem]="4096 87380 268435456"    # min default max (256 MB)
+  [tcp_wmem]="4096 65536 268435456"    # min default max (256 MB)
+  [netdev_max_backlog]=400000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_40G_DTN=(
+  [rmem_max]=134217728      # 128 MB for general DTN use
+  [wmem_max]=134217728      # 128 MB
+  [tcp_rmem]="4096 87380 67108864"     # min default max (64 MB)
+  [tcp_wmem]="4096 65536 67108864"     # min default max (64 MB)
+  [netdev_max_backlog]=400000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_100G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB for high RTT/100G paths
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=500000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_100G_DTN=(
+  [rmem_max]=2147483647     # 2 GB for 100G+ DTN
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=500000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_200G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB (same as 100G)
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=750000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_200G_DTN=(
+  [rmem_max]=2147483647     # 2 GB
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=750000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_400G_MEASUREMENT=(
+  [rmem_max]=2147483647     # 2 GB (kernel max)
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=1000000
+)
+# shellcheck disable=SC2034
+declare -A TUNING_400G_DTN=(
+  [rmem_max]=2147483647     # 2 GB
+  [wmem_max]=2147483647     # 2 GB
+  [tcp_rmem]="4096 131072 1073741824"  # min default max (1 GB)
+  [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
+  [netdev_max_backlog]=1000000
+)
+
 
 # Color codes for terminal output
 readonly C_GREEN='\033[0;32m'
@@ -167,6 +283,39 @@ warn_if_not_el9() {
     fi
   fi
   return 0
+}
+
+# Get tuning parameters for a specific link speed and target type
+# Usage: get_tuning_for_speed <speed_mbps> <target_type> <param_name>
+# Returns: the specific parameter value for the speed/type combination
+get_tuning_for_speed() {
+  local speed="$1"
+  local target="$2"
+  local param="$3"
+  local -n tuning_table
+  
+  # Determine which tuning table to use based on speed and target type
+  if [[ $speed -ge 400000 ]]; then
+    # 400G+
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_400G_MEASUREMENT || tuning_table=TUNING_400G_DTN
+  elif [[ $speed -ge 200000 ]]; then
+    # 200G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_200G_MEASUREMENT || tuning_table=TUNING_200G_DTN
+  elif [[ $speed -ge 100000 ]]; then
+    # 100G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_100G_MEASUREMENT || tuning_table=TUNING_100G_DTN
+  elif [[ $speed -ge 40000 ]]; then
+    # 40G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_40G_MEASUREMENT || tuning_table=TUNING_40G_DTN
+  elif [[ $speed -ge 25000 ]]; then
+    # 25G
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_25G_MEASUREMENT || tuning_table=TUNING_25G_DTN
+  else
+    # 10G and below
+    [[ "$target" == "measurement" ]] && tuning_table=TUNING_10G_MEASUREMENT || tuning_table=TUNING_10G_DTN
+  fi
+  
+  echo "${tuning_table[$param]}"
 }
 
 # Recommended sysctl values (Fasterdata-inspired, EL9 context)
@@ -324,6 +473,19 @@ get_host_fqdns() {
   printf '%s\n' "${fqdns[@]}" | sort -u
 }
 
+# Check if IPv6 is configured on any non-loopback interface
+check_ipv6_config() {
+  local iface ipv6_found=0
+  for iface in $(get_ifaces); do
+    # Check for global unicast IPv6 addresses (exclude link-local fe80:: and loopback ::1)
+    if ip -6 addr show "$iface" 2>/dev/null | grep -q 'scope global'; then
+      ipv6_found=1
+      break
+    fi
+  done
+  echo "$ipv6_found"
+}
+
 print_sysctl_diff() {
   local key wanted current status
   log_detail "Sysctl audit (current vs recommended)"
@@ -395,28 +557,25 @@ get_iface_speed() {
 
 set_speed_scaled_recs() {
   MAX_LINK_SPEED=$(get_max_link_speed)
-  SCALED_RMEM_MAX=536870912
-  SCALED_WMEM_MAX=536870912
-  SCALED_BACKLOG=250000
-  if (( MAX_LINK_SPEED >= 100000 )); then
-    SCALED_RMEM_MAX=1073741824
-    SCALED_WMEM_MAX=1073741824
-    SCALED_BACKLOG=500000
-  elif (( MAX_LINK_SPEED >= 40000 )); then
-    SCALED_RMEM_MAX=536870912
-    SCALED_WMEM_MAX=536870912
-    SCALED_BACKLOG=350000
-  fi
-  if [[ "$TARGET_TYPE" == "dtn" ]]; then
-    if (( MAX_LINK_SPEED >= 100000 )); then
-      SCALED_BACKLOG=600000
-    elif (( MAX_LINK_SPEED >= 40000 )); then
-      SCALED_BACKLOG=400000
-    fi
-  fi
+  
+  # Use speed-specific tuning tables from fasterdata.es.net recommendations
+  SCALED_RMEM_MAX=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "rmem_max")
+  SCALED_WMEM_MAX=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "wmem_max")
+  SCALED_BACKLOG=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "netdev_max_backlog")
+  local tcp_rmem tcp_wmem
+  tcp_rmem=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "tcp_rmem")
+  tcp_wmem=$(get_tuning_for_speed "$MAX_LINK_SPEED" "$TARGET_TYPE" "tcp_wmem")
+  
+  # Update SYSCTL_RECS with speed-specific values
   SYSCTL_RECS[net.core.rmem_max]=$SCALED_RMEM_MAX
   SYSCTL_RECS[net.core.wmem_max]=$SCALED_WMEM_MAX
   SYSCTL_RECS[net.core.netdev_max_backlog]=$SCALED_BACKLOG
+  SYSCTL_RECS[net.ipv4.tcp_rmem]="$tcp_rmem"
+  SYSCTL_RECS[net.ipv4.tcp_wmem]="$tcp_wmem"
+  
+  # Set defaults to 1/4 of max (common practice)
+  SYSCTL_RECS[net.core.rmem_default]=$((SCALED_RMEM_MAX / 4))
+  SYSCTL_RECS[net.core.wmem_default]=$((SCALED_WMEM_MAX / 4))
 }
 
 cache_kernel_versions() {
@@ -1323,6 +1482,15 @@ print_host_info() {
     bbrv3_note=" (BBRv3 available - preferred)"
   fi
   echo "  TCP Congestion Control: $tcp_cc_current (available: $tcp_cc_available)$bbrv3_note"
+  
+  # Check IPv6 configuration
+  local ipv6_status
+  if [[ $(check_ipv6_config) -eq 1 ]]; then
+    ipv6_status=$(colorize green "configured")
+  else
+    ipv6_status=$(colorize yellow "not configured (consider enabling dual-stack IPv4/IPv6)")
+  fi
+  echo "  IPv6: $ipv6_status"
 }
 
 check_smt() {
