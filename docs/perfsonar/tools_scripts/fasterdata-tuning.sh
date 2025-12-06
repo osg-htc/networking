@@ -938,7 +938,8 @@ cache_kernel_versions() {
 }
 
 apply_sysctl() {
-  local sysctl_file="/etc/sysctl.conf"
+  # Write tuned sysctls to a sysctl.d file to avoid clobbering /etc/sysctl.conf
+  local sysctl_file="/etc/sysctl.d/90-fasterdata.conf"
   if [[ $DRY_RUN -ne 1 ]]; then
     require_root
   fi
@@ -952,27 +953,14 @@ apply_sysctl() {
   fi
   log_info "Detected max link speed (Mbps): ${MAX_LINK_SPEED:-0}"
 
-  # Update or add each sysctl parameter in /etc/sysctl.conf
-  local updates=(
-    "net.core.rmem_max=${SCALED_RMEM_MAX}"
-    "net.core.wmem_max=${SCALED_WMEM_MAX}"
-    "net.core.rmem_default=134217728"
-    "net.core.wmem_default=134217728"
-    "net.core.netdev_max_backlog=${SCALED_BACKLOG}"
-    "net.core.default_qdisc=fq"
-    "net.ipv4.tcp_rmem=4096 87380 536870912"
-    "net.ipv4.tcp_wmem=4096 65536 536870912"
-    "net.ipv4.tcp_congestion_control=bbr"
-    "net.ipv4.tcp_mtu_probing=1"
-    "net.ipv4.tcp_window_scaling=1"
-    "net.ipv4.tcp_timestamps=1"
-    "net.ipv4.tcp_sack=1"
-    "net.ipv4.tcp_low_latency=0"
-  )
-  
-  for update in "${updates[@]}"; do
-    local key="${update%%=*}"
-    local escaped_key="${key//./\\.}"
+  # Iterate all recommendations from SYSCTL_RECS so we apply the scaled values.
+  for key in $(printf '%s\n' "${!SYSCTL_RECS[@]}" | sort); do
+    local value
+    value=${SYSCTL_RECS[$key]}
+    local update
+    update="$key=$value"
+    local escaped_key
+    escaped_key="${key//./\.}"
     if grep -q "^${escaped_key}=" "$sysctl_file" 2>/dev/null; then
       sed -i "s|^${escaped_key}=.*|${update}|" "$sysctl_file"
     else
@@ -984,7 +972,8 @@ apply_sysctl() {
     log_warn "bbr not available; falling back to cubic at runtime (file still sets bbr)"
   fi
   log_info "Applying sysctl settings"
-  sysctl -p "$sysctl_file" >/dev/null 2>&1 || sysctl --system >/dev/null
+  # Use --system to make sure sysctl.d files are read in the correct order
+  sysctl --system >/dev/null 2>&1 || sysctl -p "$sysctl_file" >/dev/null 2>&1 || true
   # If bbr missing, set congestion control to cubic live to avoid failure
   if ! has_bbr; then
     sysctl -w net.ipv4.tcp_congestion_control=cubic >/dev/null
@@ -1086,6 +1075,8 @@ iface_audit() {
   printf "  MTU: current=%s%s\n" "$current_mtu_disp" "$max_mtu_disp"
   if [[ "$current_mtu" == "unknown" || "$current_mtu" -lt 9000 ]]; then
     mtu_status="mtu=$current_mtu (recomm: 9000)"
+    # Add to issues so it shows up in the interface summary
+    issues+=("$mtu_status")
   fi
 
   # Track issues for summary
