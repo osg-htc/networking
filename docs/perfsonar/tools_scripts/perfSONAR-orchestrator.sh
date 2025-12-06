@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 # perfSONAR-orchestrator.sh
 # Guided installer with interactive pauses for deploying a containerized perfSONAR Testpoint

@@ -23,6 +23,7 @@
 #
 # Author: Shawn McKee - University of Michigan <smckee@umich.edu>
 # Version: 1.0.0 - Oct 30 2025
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 # -------- BEGIN CONFIGURATION --------
 # Location of the external config file describing NIC arrays used below.
@@ -102,6 +103,7 @@ detect_ssh_iface() {
     # Prefer SSH_CONNECTION env var
     if [ -n "${SSH_CONNECTION:-}" ]; then
         # SSH_CONNECTION format: client_ip client_port server_ip server_port
+        # shellcheck disable=SC2086
         set -- $SSH_CONNECTION || true
         local client_ip="$1"
         if [ -n "$client_ip" ]; then
@@ -1431,6 +1433,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 # shellcheck source=/etc/perfSONAR-multi-nic-config.conf
+## shellcheck source=/etc/perfSONAR-multi-nic-config.conf
 source "$CONFIG_FILE"
 
 # Sanitize config after sourcing and then validate its contents
