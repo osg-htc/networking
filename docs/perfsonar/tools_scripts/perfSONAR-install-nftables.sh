@@ -1,5 +1,11 @@
 #!/bin/bash
+# Version: 1.0.0
+# Author: Shank McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # perfSONAR nftables installer and helper
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # --------------------------------------
 # Purpose:
 #   Configure nftables for a perfSONAR testpoint host (no package installation).

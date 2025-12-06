@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # DEPRECATED: perfSONAR-extract-lsregistration.sh
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # This extractor script has been deprecated and removed from active
 # maintenance. The preferred approach is to use

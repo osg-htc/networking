@@ -6,6 +6,8 @@ set -euo pipefail
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
 #
 # Version: 1.0.0 - 2025-11-09
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 VERSION="1.0.0"
 PROG_NAME="$(basename "$0")"

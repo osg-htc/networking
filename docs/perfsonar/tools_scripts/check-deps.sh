@@ -7,6 +7,8 @@ IFS=$'\n\t'
 # Prints missing commands and suggests package install commands for apt/dnf.
 #
 # Version: 1.0.0 - 2025-11-09
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 VERSION="1.0.0"
 PROG_NAME="$(basename "$0")"
@@ -33,6 +35,8 @@ EOF
     exit 0
 fi
 
+# PKG_DNF and PKG_APT are kept for documentation and future use; they may not be referenced directly
+# shellcheck disable=SC2034
 PKG_DNF=(bash coreutils iproute NetworkManager rsync curl openssl)
 PKG_APT=(bash coreutils iproute2 network-manager rsync curl openssl)
 

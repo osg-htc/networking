@@ -22,6 +22,7 @@
 #
 # Author: OSG perfSONAR deployment tools
 # Version: 1.0.0
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 set -euo pipefail
 

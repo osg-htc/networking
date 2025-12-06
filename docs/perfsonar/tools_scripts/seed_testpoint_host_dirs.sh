@@ -6,6 +6,8 @@ set -euo pipefail
 # Intended to be run on the host as root (or with sudo) BEFORE first compose up.
 #
 # Version: 1.0.0 - 2025-11-09
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp] [--version|--help]
 
 VERSION="1.0.0"
