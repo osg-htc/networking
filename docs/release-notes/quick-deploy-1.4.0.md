@@ -32,6 +32,7 @@ The legacy dependency checking script is deprecated. Its responsibilities are re
 - Updated Quick Deploy Steps 1–3 to surface orchestrator early and remove `sudo` prefixes.
 - Improved documentation spacing and markdownlint compliance.
 - Introduced non-disruptive default mode for PBR script, reducing need for console access.
+ - Auto-gen: `perfSONAR-pbr-nm.sh` generator now skips NICs with no IPv4/IPv6 gateway (management-only NICs) to avoid producing non-functional NetworkManager profiles; `DEFAULT_ROUTE_NIC` is preserved (see PR #28).
 - Added dedicated deprecation tracking file `DEPRECATION.md`.
 - Updated CHANGELOG with new version entry and deprecation notice.
 
