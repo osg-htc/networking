@@ -67,6 +67,7 @@ APPLY_JUMBO=0
 # Values indexed by link speed in Mbps: [rmem_max, wmem_max, tcp_rmem_max, tcp_wmem_max, netdev_max_backlog]
 # For measurement hosts (perfSONAR): optimized for moderate RTT (50-100ms) paths
 # For DTN hosts: optimized for data transfer efficiency
+# shellcheck disable=SC2034
 declare -A TUNING_10G_MEASUREMENT=(
   [rmem_max]=268435456      # 256 MB for 100ms RTT paths
   [wmem_max]=268435456      # 256 MB
@@ -74,6 +75,7 @@ declare -A TUNING_10G_MEASUREMENT=(
   [tcp_wmem]="4096 65536 134217728"    # min default max (128 MB)
   [netdev_max_backlog]=250000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_10G_DTN=(
   [rmem_max]=67108864       # 64 MB for general DTN use
   [wmem_max]=67108864       # 64 MB
@@ -81,6 +83,7 @@ declare -A TUNING_10G_DTN=(
   [tcp_wmem]="4096 65536 33554432"     # min default max (32 MB)
   [netdev_max_backlog]=250000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_25G_MEASUREMENT=(
   [rmem_max]=402653184      # 384 MB (interpolated between 10G and 40G)
   [wmem_max]=402653184      # 384 MB
@@ -88,6 +91,7 @@ declare -A TUNING_25G_MEASUREMENT=(
   [tcp_wmem]="4096 65536 201326592"    # min default max (192 MB)
   [netdev_max_backlog]=300000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_25G_DTN=(
   [rmem_max]=100663296      # 96 MB (interpolated)
   [wmem_max]=100663296      # 96 MB
@@ -95,6 +99,7 @@ declare -A TUNING_25G_DTN=(
   [tcp_wmem]="4096 65536 50331648"     # min default max (48 MB)
   [netdev_max_backlog]=300000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_40G_MEASUREMENT=(
   [rmem_max]=536870912      # 512 MB for 100ms RTT paths
   [wmem_max]=536870912      # 512 MB
@@ -102,6 +107,7 @@ declare -A TUNING_40G_MEASUREMENT=(
   [tcp_wmem]="4096 65536 268435456"    # min default max (256 MB)
   [netdev_max_backlog]=400000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_40G_DTN=(
   [rmem_max]=134217728      # 128 MB for general DTN use
   [wmem_max]=134217728      # 128 MB
@@ -109,6 +115,7 @@ declare -A TUNING_40G_DTN=(
   [tcp_wmem]="4096 65536 67108864"     # min default max (64 MB)
   [netdev_max_backlog]=400000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_100G_MEASUREMENT=(
   [rmem_max]=2147483647     # 2 GB for high RTT/100G paths
   [wmem_max]=2147483647     # 2 GB
@@ -116,6 +123,7 @@ declare -A TUNING_100G_MEASUREMENT=(
   [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
   [netdev_max_backlog]=500000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_100G_DTN=(
   [rmem_max]=2147483647     # 2 GB for 100G+ DTN
   [wmem_max]=2147483647     # 2 GB
@@ -123,6 +131,7 @@ declare -A TUNING_100G_DTN=(
   [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
   [netdev_max_backlog]=500000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_200G_MEASUREMENT=(
   [rmem_max]=2147483647     # 2 GB (same as 100G)
   [wmem_max]=2147483647     # 2 GB
@@ -130,6 +139,7 @@ declare -A TUNING_200G_MEASUREMENT=(
   [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
   [netdev_max_backlog]=750000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_200G_DTN=(
   [rmem_max]=2147483647     # 2 GB
   [wmem_max]=2147483647     # 2 GB
@@ -137,6 +147,7 @@ declare -A TUNING_200G_DTN=(
   [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
   [netdev_max_backlog]=750000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_400G_MEASUREMENT=(
   [rmem_max]=2147483647     # 2 GB (kernel max)
   [wmem_max]=2147483647     # 2 GB
@@ -144,6 +155,7 @@ declare -A TUNING_400G_MEASUREMENT=(
   [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
   [netdev_max_backlog]=1000000
 )
+# shellcheck disable=SC2034
 declare -A TUNING_400G_DTN=(
   [rmem_max]=2147483647     # 2 GB
   [wmem_max]=2147483647     # 2 GB
@@ -151,6 +163,7 @@ declare -A TUNING_400G_DTN=(
   [tcp_wmem]="4096 16384 1073741824"   # min default max (1 GB)
   [netdev_max_backlog]=1000000
 )
+
 
 # Color codes for terminal output
 readonly C_GREEN='\033[0;32m'
@@ -358,6 +371,7 @@ get_ifaces() {
       fi
     fi
   done
+  # Nothing else to add for get_ifaces; return list of candidates
 
   # De-duplicate and print
   if [[ ${#candidates[@]} -gt 0 ]]; then
@@ -436,9 +450,10 @@ verify_dns_match() {
 get_host_fqdns() {
   local iface ip fqdn fqdns=()
   for iface in $(get_ifaces); do
-    # Try to get IPs from both IPv4 and IPv6
+    # Try to get IPs from both IPv4 and IPv6 using a stable ip/awk approach
+    # `ip -o addr` prints a single-line per address; the 4th field is <addr>/<prefix>
     local ips
-    ips=$(ip addr show "$iface" 2>/dev/null | grep -oP '(?<=inet[6]?\s)\S+(?=/)')
+    ips=$(ip -o addr show "$iface" 2>/dev/null | awk '{print $4}')
     while IFS= read -r ip; do
       [[ -z "$ip" ]] && continue
       # Remove CIDR notation if present
@@ -453,10 +468,31 @@ get_host_fqdns() {
           fqdns+=("$fqdn (DNS mismatch!)")
         fi
       else
-        fqdns+=("(no reverse DNS for $ip)")
+        # Try to get names from /etc/hosts or NSS (getent hosts) before giving up
+        local hostline
+        hostline=$(getent hosts "$ip" 2>/dev/null || true)
+        if [[ -n "$hostline" ]]; then
+          # getent hosts returns: IP cname alias1 alias2...
+          local hostnames
+          hostnames=$(echo "$hostline" | awk '{$1=""; print $0}' | xargs)
+          for name in $hostnames; do
+            fqdns+=("$name")
+          done
+        else
+          fqdns+=("(no reverse DNS for $ip)")
+        fi
       fi
     done <<<"$ips"
   done
+  # Also include hostnames returned by 'hostname -A' (all aliases)
+  local alias_names
+  alias_names=$(hostname -A 2>/dev/null || true)
+  if [[ -n "$alias_names" ]]; then
+    for name in $alias_names; do
+      [[ -z "$name" ]] && continue
+      fqdns+=("$name")
+    done
+  fi
   printf '%s\n' "${fqdns[@]}" | sort -u
 }
 
@@ -1471,15 +1507,12 @@ print_host_info() {
   echo "  TCP Congestion Control: $tcp_cc_current (available: $tcp_cc_available)$bbrv3_note"
   
   # Check IPv6 configuration
-  local ipv6_status ipv6_color=""
+  local ipv6_status
   if [[ $(check_ipv6_config) -eq 1 ]]; then
-    ipv6_status="configured"
-    [[ "$USE_COLOR" == "1" ]] && ipv6_color="${GREEN}"
+    ipv6_status=$(colorize green "configured")
   else
-    ipv6_status="not configured (consider enabling dual-stack IPv4/IPv6)"
-    [[ "$USE_COLOR" == "1" ]] && ipv6_color="${YELLOW}"
+    ipv6_status=$(colorize yellow "not configured (consider enabling dual-stack IPv4/IPv6)")
   fi
-  [[ "$USE_COLOR" == "1" ]] && ipv6_status="${ipv6_color}${ipv6_status}${RESET}"
   echo "  IPv6: $ipv6_status"
 }
 
