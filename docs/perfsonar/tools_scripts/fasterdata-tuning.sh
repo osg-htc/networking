@@ -190,7 +190,7 @@ declare -A TUNING_400G_DTN=(
 readonly C_GREEN='\033[0;32m'
 readonly C_YELLOW='\033[0;33m'
 readonly C_RED='\033[0;31m'
-readonly C_BLUE='\033[1;34m'
+readonly C_CYAN='\033[1;36m'
 readonly C_RESET='\033[0m'
 
 MODE="audit"
@@ -354,10 +354,10 @@ get_host_fqdns() {
       f="$(colorize red "$f")"
     elif [[ "$srcstr" =~ hosts ]]; then
       tag="(via /etc/hosts)"
-      f="$(colorize blue "$f")"
+      f="$(colorize cyan "$f")"
     elif [[ "$srcstr" =~ alias ]]; then
       tag="(alias)"
-      f="$(colorize blue "$f")"
+      f="$(colorize cyan "$f")"
     else
       # default: dns or none
       f="$(colorize green "$f")"
@@ -573,7 +573,7 @@ colorize() {
   case "$level" in
     green) echo -e "${C_GREEN}${text}${C_RESET}";;
     yellow) echo -e "${C_YELLOW}${text}${C_RESET}";;
-    blue) echo -e "${C_BLUE}${text}${C_RESET}";;
+    cyan) echo -e "${C_CYAN}${text}${C_RESET}";;
     red) echo -e "${C_RED}${text}${C_RESET}";;
     *) echo "$text";;
   esac
@@ -1990,9 +1990,10 @@ check_drivers() {
 
     log_detail "Driver $iface: driver=$drv version=${version:-unknown} firmware=${fw:-unknown} vendor=${vendor:-unknown} pkg=${pkg:-unknown} bus=${bus:-unknown}"
     local version_disp fw_disp
-    version_disp=$(colorize blue "${version:-unknown}")
-    fw_disp=$(colorize blue "${fw:-unknown}")
-    echo "  $iface: driver=$drv version=${version_disp} firmware=${fw_disp} vendor=${vendor:-unknown} pkg=${pkg:-unknown}"
+    version_disp=$(colorize cyan "${version:-unknown}")
+    fw_disp=$(colorize cyan "${fw:-unknown}")
+    driver_disp=$(colorize cyan "${drv:-unknown}")
+    echo "  $iface: driver=${driver_disp} version=${version_disp} firmware=${fw_disp} vendor=${vendor:-unknown} pkg=${pkg:-unknown}"
 
     local kernel_hint=""
     if [[ -n "$LATEST_KERNEL" && -n "$RUNNING_KERNEL" ]]; then
