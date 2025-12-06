@@ -585,27 +585,35 @@ reverse_dns_lookup() {
 # Forward DNS lookup to verify match
 verify_dns_match() {
   local fqdn="$1" ip="$2"
-  local is_ipv6=0
-  if [[ "$ip" == *":"* ]]; then
-    is_ipv6=1
-  fi
+  # Query both A and AAAA records and match whichever corresponds to the local IP
+  local answers a mapped_iface local_iface
+  answers=""
   if command -v dig >/dev/null 2>&1; then
-    if (( is_ipv6 )); then
-      dig +short "$fqdn" AAAA 2>/dev/null | grep -q "^${ip}$"
-    else
-      dig +short "$fqdn" A 2>/dev/null | grep -q "^${ip}$"
-    fi
-    return $?
+    answers=$( (dig +short A "$fqdn" 2>/dev/null || true; dig +short AAAA "$fqdn" 2>/dev/null || true) | tr '\n' ' ' )
   elif command -v host >/dev/null 2>&1; then
-    if (( is_ipv6 )); then
-      host "$fqdn" 2>/dev/null | grep -q "has IPv6 address $ip"
-    else
-      host "$fqdn" 2>/dev/null | grep -q "has address $ip"
-    fi
-    return $?
+    answers=$(host "$fqdn" 2>/dev/null | awk '/has address|has IPv6 address/ {print $NF}' | tr '\n' ' ')
   else
     return 1
   fi
+
+  # If the explicit IP is present among resolved answers, it is an exact match
+  for a in $answers; do
+    [[ "$a" == "$ip" ]] && return 0
+  done
+
+  # Otherwise, attempt to treat a match if any resolved address belongs to the same
+  # local interface as the supplied IP (i.e., aliasing or IPv4/IPv6 pair on same iface)
+  local_iface=$(ip_to_iface "$ip" || true)
+  if [[ -z "$local_iface" ]]; then
+    return 1
+  fi
+  for a in $answers; do
+    mapped_iface=$(ip_to_iface "$a" || true)
+    if [[ -n "$mapped_iface" ]] && [[ "$mapped_iface" == "$local_iface" ]]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 # Get all FQDNs for the host
