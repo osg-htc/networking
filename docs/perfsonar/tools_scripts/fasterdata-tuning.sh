@@ -39,7 +39,8 @@
 # Notes:
 #   - Ethtool settings persist via systemd service created in apply mode
 #   - Sysctl settings persist via /etc/sysctl.d/90-fasterdata.conf
-#   - Color output available with --color flag
+#   - Color output is enabled by default; use --nocolor to disable
+#   - JSON machine-readable output available with --json flag (audit mode only)
 #   - Dry-run available with --dry-run flag
 #   - Detailed logs written to /tmp/fasterdata-tuning-<timestamp>.log
 
@@ -59,9 +60,29 @@ SCALED_WMEM_MAX=536870912
 SCALED_BACKLOG=250000
 RUNNING_KERNEL=""
 LATEST_KERNEL=""
-USE_COLOR=0
+USE_COLOR=1
 APPLY_TCP_CC=""
 APPLY_JUMBO=0
+OUTPUT_JSON=0
+
+usage() {
+  cat <<'EOF'
+Usage: fasterdata-tuning.sh [OPTIONS]
+
+Options:
+  --mode audit|apply      Mode to run (default: audit)
+  --ifaces IFACE[,IFACE]  Comma-separated list of interfaces to check
+  --target measurement|dtn  Target type for tuning (default: measurement)
+  --apply-jumbo           Apply jumbo MTU when --mode apply
+  --apply-tcp-cc ALGO     Apply TCP congestion control ALGO in --mode apply
+  --apply-smt on|off      Enable or disable SMT (requires root)
+  --json                  Print JSON machine-readable audit (audit mode only)
+  --color                 Enable colorized output (default)
+  --nocolor               Disable colorized output
+  --dry-run               Do not make changes when in apply mode; show actions only
+  --help                  Show this help
+EOF
+}
 
 # Speed-specific tuning recommendations from ESnet fasterdata.es.net
 # Values indexed by link speed in Mbps: [rmem_max, wmem_max, tcp_rmem_max, tcp_wmem_max, netdev_max_backlog]
@@ -362,6 +383,183 @@ init_log() {
     log_warn "Cannot write log file $LOGFILE; disabling detailed log"
     LOGFILE=""
   fi
+}
+
+json_quote() {
+  # Quote and escape a string for JSON. Prefer python3 if available for reliable JSON encoding.
+  local s
+  s="$1"
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s' "$s" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+  elif command -v python >/dev/null 2>&1; then
+    printf '%s' "$s" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+  else
+    # Fallback minimal escaping
+    printf '%s' "$s" | sed -e 's/\\/\\\\/g' -e 's/"/\\\"/g' -e ':a;N;$!ba;s/\n/\\n/g' | awk '{printf "\"%s\"", $0}'
+  fi
+}
+
+print_json() {
+  # Disable color in json mode
+  local old_color="$USE_COLOR"
+  USE_COLOR=0
+
+  local hostname os kernel mem_kb mem_gb cpu_count smt ipv6 tcp_cc_current tcp_cc_available
+  hostname=$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo "unknown")
+  os=$(awk -F'=' '/^PRETTY_NAME/ {print $2}' /etc/os-release 2>/dev/null | tr -d '"' || echo "unknown")
+  kernel=$(uname -r)
+  mem_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)
+  mem_gb=$((mem_kb / 1024 / 1024))
+  cpu_count=$(grep -c '^processor' /proc/cpuinfo 2>/dev/null || echo 0)
+  smt=$(cat /sys/devices/system/cpu/smt/control 2>/dev/null || echo "unknown")
+  ipv6=$(check_ipv6_config)
+  local ipv6_json=false
+  if [[ "$ipv6" -eq 1 ]]; then ipv6_json=true; fi
+  tcp_cc_current=$(get_tcp_cc_current)
+  tcp_cc_available=$(get_tcp_cc_available)
+
+  # FQDNs
+  local fqdns_json="[]"
+  local all_fqdns
+  all_fqdns=$(get_host_fqdns)
+  if [[ -n "$all_fqdns" ]]; then
+    local arr=()
+    while IFS= read -r line; do arr+=("$line"); done <<<"$all_fqdns"
+    fqdns_json="["
+    local first=1
+    for name in "${arr[@]}"; do
+      if (( first )); then
+        first=0
+      else
+        fqdns_json+=",";
+      fi
+      fqdns_json+=$(json_quote "$name")
+    done
+    fqdns_json+="]"
+  fi
+
+  # Sysctl recs
+  local sysctl_entries="["
+  local first_entry=1
+  for key in "${!SYSCTL_RECS[@]}"; do
+    local wanted current
+    wanted=${SYSCTL_RECS[$key]}
+    current=$(sysctl -n "$key" 2>/dev/null || echo "(unset)")
+    # normalize whitespace
+    local current_normalized wanted_normalized
+    current_normalized=$(echo "$current" | awk '{$1=$1; print}')
+    wanted_normalized=$(echo "$wanted" | awk '{$1=$1; print}')
+    local match=false
+    if [[ "$current_normalized" == "$wanted_normalized" ]]; then match=true; fi
+    if (( first_entry )); then first_entry=0; else sysctl_entries+=","; fi
+    sysctl_entries+="{\"key\":$(json_quote "$key"),\"current\":$(json_quote "$current"),\"recommended\":$(json_quote "$wanted"),\"match\":$match}"
+  done
+  sysctl_entries+="]"
+
+  # Interfaces
+  # Read interface list into array to avoid word-splitting issues
+  local ifs=()
+  readarray -t ifs <<<"$(get_ifaces)"
+  local if_entries="["
+  local first_if=1
+  for iface in "${ifs[@]}"; do
+    # Gather data similar to iface_audit
+    local state txqlen if_speed desired_txqlen qdisc driver offload_issue current_mtu max_mtu rings_cur rings_max
+    state=$(ip -o link show "$iface" 2>/dev/null | awk '{print $9}' || echo "unknown")
+    txqlen=$(cat "/sys/class/net/$iface/tx_queue_len" 2>/dev/null || echo "?" )
+    if_speed=$(get_iface_speed "$iface")
+    desired_txqlen=$(desired_txqlen_for_speed "$if_speed")
+    qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 | awk '{print $2,$3,$4}' || echo "unknown")
+    driver=$(ethtool -i "$iface" 2>/dev/null | awk -F': ' '/driver/ {print $2}' || echo "unknown")
+    offload_issue="ok"
+    if command -v ethtool >/dev/null 2>&1; then
+      local offload_devs
+      offload_devs=$(ethtool -k "$iface" 2>/dev/null | grep -E 'gro:|gso:|tso:|rx-checksumming:|tx-checksumming:|lro:' || true)
+      if [[ "$offload_devs" =~ lro:[[:space:]]*on ]]; then offload_issue="lro on"; fi
+      if ! echo "$offload_devs" | grep -q 'rx-checksumming:.*on'; then offload_issue="rx csum off"; fi
+      if ! echo "$offload_devs" | grep -q 'tx-checksumming:.*on'; then offload_issue="tx csum off"; fi
+    else
+      offload_issue="missing ethtool"
+    fi
+    rings_cur=$(ethtool -g "$iface" 2>/dev/null | awk '/RX:/ {rx=$2} /TX:/ {tx=$2} END {print rx"/"tx}' || true)
+    rings_max=$(ethtool -g "$iface" 2>/dev/null | awk '/RX max:/ {rx=$3} /TX max:/ {tx=$3} END {print rx"/"tx}' || true)
+    current_mtu=$(get_nic_mtu "$iface")
+    max_mtu=$(get_nic_max_mtu "$iface")
+    # compute issues array
+    local issues_arr=()
+    if [[ "$txqlen" != "?" && "$txqlen" -lt "$desired_txqlen" ]]; then issues_arr+=("txqlen $txqlen<${desired_txqlen}"); fi
+    local qdisc_type="${qdisc%% *}"
+    if [[ "$qdisc_type" != "fq" ]]; then issues_arr+=("qdisc=${qdisc:-unknown}"); fi
+    if [[ "$offload_issue" != "ok" ]]; then issues_arr+=("$offload_issue"); fi
+    if [[ -n "$rings_cur" && -n "$rings_max" && "$rings_cur" != "$rings_max" ]]; then issues_arr+=("rings $rings_cur (max $rings_max)"); fi
+    # JSON entry for this iface
+    if (( first_if )); then first_if=0; else if_entries+=","; fi
+    if_entries+="{\"iface\":$(json_quote "$iface"),\"state\":$(json_quote "$state"),\"speed_mbps\":$(json_quote "$if_speed"),\"txqlen\":$(json_quote "$txqlen"),\"desired_txqlen\":$(json_quote "$desired_txqlen"),\"qdisc\":$(json_quote "$qdisc"),\"driver\":$(json_quote "$driver"),\"current_mtu\":$(json_quote "$current_mtu"),\"max_mtu\":$(json_quote "$max_mtu"),\"offload_issue\":$(json_quote "$offload_issue"),\"issues\":["
+    local first_j=1
+    for j in "${issues_arr[@]}"; do
+      if (( first_j )); then first_j=0; else if_entries+=','; fi
+      if_entries+=$(json_quote "$j")
+    done
+    if_entries+="]}"
+  done
+  if_entries+="]"
+
+  # Missing tools
+  local missing_json="[]"
+  if (( ${#MISSING_TOOLS[@]} > 0 )); then
+    missing_json="["
+    local mi=1
+    for t in "${MISSING_TOOLS[@]}"; do
+      if [[ $mi -eq 1 ]]; then mi=0; else missing_json+=","; fi
+      missing_json+=$(json_quote "$t")
+    done
+    missing_json+="]"
+  fi
+
+  # driver updates unique
+  local driver_json="[]"
+  if (( ${#DRIVER_UPDATES[@]} > 0 )); then
+    driver_json="["
+    local di=1
+    for d in "${DRIVER_UPDATES[@]}"; do
+      if [[ $di -eq 1 ]]; then di=0; else driver_json+=","; fi
+      driver_json+=$(json_quote "$d")
+    done
+    driver_json+="]"
+  fi
+
+  # Build top-level JSON
+  printf "{\n"
+  printf "  \"hostname\": %s,\n" "$(json_quote "$hostname")"
+  printf "  \"os\": %s,\n" "$(json_quote "$os")"
+  printf "  \"kernel\": %s,\n" "$(json_quote "$kernel")"
+  printf "  \"memory_gib\": %s,\n" "$mem_gb"
+  printf "  \"cpus\": %s,\n" "$cpu_count"
+  printf "  \"smt\": %s,\n" "$(json_quote "$smt")"
+  printf "  \"ipv6_present\": %s,\n" "$ipv6_json"
+  printf "  \"tcp_cc_current\": %s,\n" "$(json_quote "$tcp_cc_current")"
+  printf "  \"tcp_cc_available\": %s,\n" "$(json_quote "$tcp_cc_available")"
+  printf "  \"fqdns\": %s,\n" "$fqdns_json"
+  printf "  \"sysctl_recs\": %s,\n" "$sysctl_entries"
+  printf "  \"interfaces\": %s,\n" "$if_entries"
+  printf "  \"missing_tools\": %s,\n" "$missing_json"
+  printf "  \"driver_updates\": %s,\n" "$driver_json"
+  # Interface-specific issues
+  local if_issues_json="[]"
+  if (( ${#IF_ISSUES[@]} > 0 )); then
+    if_issues_json="["
+    local ii=1
+    for t in "${IF_ISSUES[@]}"; do
+      if [[ $ii -eq 1 ]]; then ii=0; else if_issues_json+=","; fi
+      if_issues_json+=$(json_quote "$t")
+    done
+    if_issues_json+="]"
+  fi
+  printf "  \"iface_issues\": %s,\n" "$if_issues_json"
+  printf "  \"sysctl_mismatches\": %s\n" "$SYSCTL_MISMATCHES"
+  printf "}\n"
+
+  USE_COLOR=$old_color
 }
 
 log() { echo "$*"; }
@@ -846,7 +1044,21 @@ iface_audit() {
   else
     txqlen_display="$(colorize yellow "$txqlen")"
   fi
-  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen_display" "$desired_txqlen" "${qdisc:-?}" "$driver")
+  # Prepare qdisc display, color only the qdisc 'value' (first word)
+  local qdisc_val qdisc_rest qdisc_display
+  if [[ -n "$qdisc" ]]; then
+    qdisc_val="${qdisc%% *}"
+    qdisc_rest="${qdisc#${qdisc_val}}"
+  else
+    qdisc_val="?"
+    qdisc_rest=""
+  fi
+  if [[ "$qdisc_val" == "fq" ]]; then
+    qdisc_display="$(colorize green "$qdisc_val")${qdisc_rest}"
+  else
+    qdisc_display="$(colorize yellow "$qdisc_val")${qdisc_rest}"
+  fi
+  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen_display" "$desired_txqlen" "$qdisc_display" "$driver")
   printf "\n%s" "$short_line"
   local offload_str="offload=${offload_issue}"
   [[ -n "$rings_note" ]] && offload_str+=" $rings_note"
@@ -1230,7 +1442,7 @@ check_iommu() {
   fi
   
   if echo "$cmdline" | grep -q -E 'intel_iommu=on|amd_iommu=on|iommu=pt|iommu=on'; then
-    echo "IOMMU enabled via kernel command-line: $(colorize green enabled)" | sed 's/^/  /'
+    echo "IOMMU enabled via kernel command-line: $(colorize green enabled)"
   else
     log_warn "IOMMU not enabled in kernel command-line (CPU: $cpu_vendor, rec: $iommu_cmd for SR-IOV/perf tuning)"
     echo "IOMMU: $(colorize yellow disabled)"
@@ -1883,6 +2095,7 @@ main() {
       --packet-pacing-rate) PACKET_PACING_RATE="$2"; shift 2;;
       --apply-packet-pacing) APPLY_PACKET_PACING=1; shift;;
       --color) USE_COLOR=1; shift;;
+      --nocolor) USE_COLOR=0; shift;;
       --apply-iommu) APPLY_IOMMU=1; shift;;
       --apply-smt) APPLY_SMT="$2"; shift 2;;
       --persist-smt) PERSIST_SMT=1; shift;;
@@ -1890,6 +2103,7 @@ main() {
       --apply-jumbo) APPLY_JUMBO=1; shift;;
       --yes) AUTO_YES=1; shift;;
       --dry-run) DRY_RUN=1; shift;;
+          --json) OUTPUT_JSON=1; shift;;
       -h|--help) usage; exit 0;;
       *) echo "Unknown arg: $1" >&2; usage; exit 1;;
     esac
@@ -1953,11 +2167,16 @@ main() {
     fi
   fi
 
+  if [[ "$OUTPUT_JSON" -eq 1 && "$MODE" != "audit" ]]; then
+    echo "ERROR: --json is only supported with --mode audit" >&2; exit 1
+  fi
+
   if [[ "$MODE" == "audit" ]]; then
     print_host_info
     print_sysctl_diff
     # add spacing for readability before tuned-adm and NIC checks
     echo
+    # (no immediate JSON output here; we'll emit JSON after completing interface checks)
   else
     if ! has_bbr; then
       log_warn "bbr not available; will set cubic live but leave bbr in config"
@@ -1984,6 +2203,8 @@ main() {
 
   # Extra host checks
   if [[ "$MODE" == "audit" ]]; then
+    # Blank line to separate NIC info from cpufreq/cpupower checks
+    echo
     check_cpu_governor
     echo
     # spacing after NICs before cpufreq/cpupower checks
@@ -1993,6 +2214,11 @@ main() {
     echo
     check_smt
     check_drivers
+    # If JSON output requested, print machine-readable JSON and exit after gathering all data
+    if [[ "$OUTPUT_JSON" -eq 1 ]]; then
+      print_json
+      exit 0
+    fi
   fi
 
   if [[ "$MODE" == "apply" ]]; then
@@ -2012,6 +2238,8 @@ main() {
     fi
     log_info "Apply complete. Consider rebooting or rerunning audit to confirm settings."
   else
+    # spacing after driver info before audit completion line
+    echo
     log_info "Audit complete. Entries marked with '*' differ from recommended values."
   fi
 
