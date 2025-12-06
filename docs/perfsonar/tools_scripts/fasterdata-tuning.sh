@@ -272,6 +272,31 @@ get_host_fqdns() {
         fq_ips[$name]=""
         fq_mismatch[$name]=0
       fi
+      # Try to resolve the name to IPs and map to a local iface if possible
+      local resolved_ips
+      resolved_ips=$(getent hosts "$name" 2>/dev/null | awk '{print $1}' || true)
+      if [[ -z "$resolved_ips" ]] && command -v dig >/dev/null 2>&1; then
+        resolved_ips=$(dig +short "$name" | sed -n '1,100p' || true)
+      fi
+      if [[ -n "$resolved_ips" ]]; then
+        for rip in $resolved_ips; do
+          local mapped_iface
+          mapped_iface=$(ip_to_iface "$rip" || true)
+          if [[ -n "$mapped_iface" ]]; then
+            # Mark as mapped to a local interface and mark source as hosts/dns appropriately
+            fq_ifaces[$name]="${fq_ifaces[$name]:+${fq_ifaces[$name]},}$mapped_iface"
+            # If the resolved IP came from getent, use hosts, otherwise dig -> dns
+            if getent hosts "$name" >/dev/null 2>&1; then
+              fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}hosts"
+            else
+              fq_sources[$name]="${fq_sources[$name]:+${fq_sources[$name]},}dns"
+            fi
+            fq_ips[$name]="${fq_ips[$name]:+${fq_ips[$name]},}$rip"
+            fq_verified[$name]=1
+            fq_mismatch[$name]=0
+          fi
+        done
+      fi
     done
   fi
 
@@ -492,6 +517,14 @@ get_ifaces() {
   if [[ ${#candidates[@]} -gt 0 ]]; then
     printf "%s\n" "${candidates[@]}" | sort -u
   fi
+}
+
+# Given an IP address, return the interface name that has that address configured
+ip_to_iface() {
+  local ip="$1"
+  # Match the address portion before slash
+  # ip -o addr prints: <idx>: <iface> <family> <addr>/<prefix> ...
+  ip -o addr 2>/dev/null | awk -v ip="$ip" '$4 ~ ip"/" {print $2; exit}' || true
 }
 
 desired_txqlen_for_speed() {
