@@ -210,14 +210,12 @@ get_host_fqdns() {
           fq_verified[$fqdn]=1
           fq_mismatch[$fqdn]=0
         else
-          # Reverse returns a name but forward DNS doesn't match
-          # Check /etc/hosts (NSS) for an authoritative hosts entry for this IP
           local hostline
           hostline=$(getent hosts "$ip" 2>/dev/null || true)
           if [[ -n "$hostline" ]] && echo "$hostline" | awk '{for (i=2;i<=NF;i++) print $i}' | grep -qw "${fqdn}"; then
             # The /etc/hosts name matches the reverse name; treat as hosts-sourced
             fq_ifaces[$fqdn]="${fq_ifaces[$fqdn]:+${fq_ifaces[$fqdn]},}$iface"
-            fq_sources[$fqdn]="${fq_sources[$fqdn]:+${fq_sources[$fqdn]},}hosts"
+          
             fq_ips[$fqdn]="${fq_ips[$fqdn]:+${fq_ips[$fqdn]},}$ip"
             fq_verified[$fqdn]=1
             fq_mismatch[$fqdn]=0
@@ -655,7 +653,14 @@ print_sysctl_diff() {
     else
       log_detail "SYSCTL ok: $key=$current"
     fi
-    printf "%-35s %-35s %-35s %s\n" "$key" "$current" "$wanted" "$status"
+    # Colorize current value - green when equal, yellow otherwise
+    local current_print
+    if [[ "$current_normalized" == "$wanted_normalized" ]]; then
+      current_print="$(colorize green "$current")"
+    else
+      current_print="$(colorize yellow "$current")"
+    fi
+    printf "%-35s %-35s %-35s %s\n" "$key" "$current_print" "$wanted" "$status"
   done
 }
 
@@ -834,7 +839,14 @@ iface_audit() {
   fi
 
   local short_line
-  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen" "$desired_txqlen" "${qdisc:-?}" "$driver")
+  # Colorize txqlen: green if it meets/exceeds desired txqlen, yellow otherwise
+  local txqlen_display="$txqlen"
+  if [[ "$txqlen" =~ ^[0-9]+$ ]] && [[ "$desired_txqlen" =~ ^[0-9]+$ ]] && (( txqlen >= desired_txqlen )); then
+    txqlen_display="$(colorize green "$txqlen")"
+  else
+    txqlen_display="$(colorize yellow "$txqlen")"
+  fi
+  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen_display" "$desired_txqlen" "${qdisc:-?}" "$driver")
   printf "\n%s" "$short_line"
   local offload_str="offload=${offload_issue}"
   [[ -n "$rings_note" ]] && offload_str+=" $rings_note"
@@ -844,10 +856,23 @@ iface_audit() {
   local current_mtu max_mtu mtu_status=""
   current_mtu=$(get_nic_mtu "$iface")
   max_mtu=$(get_nic_max_mtu "$iface")
+  # Colorize current MTU (>=9000 = green, otherwise yellow)
+  local mtu_color="yellow" current_mtu_disp
+  if [[ "$current_mtu" =~ ^[0-9]+$ ]] && [[ "$current_mtu" -ge 9000 ]]; then
+    mtu_color="green"
+  fi
+  current_mtu_disp=$(colorize "$mtu_color" "$current_mtu")
+  # Only show max if known
+  local max_mtu_disp
+  if [[ "$max_mtu" != "unknown" ]]; then
+    max_mtu_disp=" max=$max_mtu"
+  else
+    max_mtu_disp=""
+  fi
+  printf "  MTU: current=%s%s\n" "$current_mtu_disp" "$max_mtu_disp"
   if [[ "$current_mtu" == "unknown" || "$current_mtu" -lt 9000 ]]; then
     mtu_status="mtu=$current_mtu (recomm: 9000)"
   fi
-  [[ -n "$mtu_status" ]] && printf "  MTU: current=%s max=%s\n" "$current_mtu" "$max_mtu"
 
   # Track issues for summary
   local issues=()
@@ -1136,9 +1161,17 @@ ensure_tuned_profile() {
     return
   fi
   local active
-  active=$(tuned-adm active 2>/dev/null | awk '{print $3}' || true)
+  active=$(tuned-adm active 2>/dev/null | awk '{print $4}' || true)
   if [[ "$MODE" == "audit" ]]; then
-    echo "tuned-adm active: ${active:-unknown} (rec: network-throughput)"
+    local tuned_display
+    if [[ -z "$active" ]] || [[ "$active" == "unknown" ]]; then
+      tuned_display="$(colorize red "unknown")"
+    elif [[ "$active" == "network-throughput" ]]; then
+      tuned_display="$(colorize green "$active")"
+    else
+      tuned_display="$(colorize yellow "$active")"
+    fi
+    echo "tuned-adm active: ${tuned_display} (rec: network-throughput)"
   else
     if [[ "$active" != "network-throughput" ]]; then
       log_info "Setting tuned profile to network-throughput"
@@ -1524,6 +1557,31 @@ apply_jumbo() {
         log_info "Setting $iface MTU to $target_mtu (was $current_mtu)"
         if ip link set dev "$iface" mtu "$target_mtu" >/dev/null 2>&1; then
           log_info "$iface MTU set to $target_mtu"
+          # Persist MTU across reboots: try NetworkManager (nmcli) first
+          if command -v nmcli >/dev/null 2>&1; then
+            local conn_names
+            conn_names=$(nmcli -t -f NAME,DEVICE connection show | awk -F: -v dev="$iface" '$2==dev {print $1}')
+            for conn in $conn_names; do
+              log_info "Persisting MTU to $conn via nmcli"
+              if nmcli connection modify "$conn" 802-3-ethernet.mtu "$target_mtu" >/dev/null 2>&1; then
+                nmcli connection up "$conn" >/dev/null 2>&1 || log_warn "Failed to bring connection $conn back up after MTU change"
+              else
+                log_warn "Failed to persist MTU for $conn via nmcli"
+              fi
+            done
+          else
+            # Try interface config file for classic ifcfg (RHEL-style) and set MTU
+            local ifcfg_file="/etc/sysconfig/network-scripts/ifcfg-$iface"
+            if [[ -f "$ifcfg_file" ]]; then
+              if grep -q '^MTU=' "$ifcfg_file"; then
+                sed -i "s/^MTU=.*/MTU=$target_mtu/" "$ifcfg_file" || log_warn "Failed to update $ifcfg_file MTU"
+              else
+                echo "MTU=$target_mtu" >> "$ifcfg_file" || log_warn "Failed to append MTU to $ifcfg_file"
+              fi
+            else
+              log_info "No NM or ifcfg file found; MTU will not be persisted for $iface (please configure NM or ifcfg to persist)"
+            fi
+          fi
         else
           log_warn "Failed to set $iface MTU to $target_mtu"
         fi
@@ -1550,6 +1608,27 @@ print_host_info() {
   if [[ -n "$mem_total_kb" ]]; then
     local mem_gb=$((mem_total_kb / 1024 / 1024))
     mem_info_str="${mem_gb} GiB"
+    # Colorize memory based on host target type
+    local mem_color="green"
+    if [[ "$TARGET_TYPE" == "measurement" ]]; then
+      if (( mem_gb >= 16 )); then
+        mem_color="green"
+      elif (( mem_gb >= 8 )); then
+        mem_color="yellow"
+      else
+        mem_color="red"
+      fi
+    else
+      # DTN thresholds
+      if (( mem_gb >= 128 )); then
+        mem_color="green"
+      elif (( mem_gb >= 32 )); then
+        mem_color="yellow"
+      else
+        mem_color="red"
+      fi
+    fi
+    mem_info_str="$(colorize "$mem_color" "${mem_info_str}")"
   else
     mem_info_str="unknown"
   fi
@@ -1592,16 +1671,16 @@ print_host_info() {
   if [[ -r /sys/devices/system/cpu/smt/control ]]; then
     smt_status=$(cat /sys/devices/system/cpu/smt/control)
     if [[ "$smt_status" == "on" ]]; then
-      smt_status="$(colorize green "on")"
+      smt_status="$(colorize yellow "on")"
     else
-      smt_status="$(colorize yellow "$smt_status")"
+      smt_status="$(colorize green "$smt_status")"
     fi
   else
     smt_status="not available"
   fi
   
   echo "Host Info:"
-  echo "  FQDN: $fqdn"
+  echo "  Hostname: $fqdn"
   
   # Show all FQDNs if multiple NICs have IPs
   local all_fqdns
@@ -1627,7 +1706,13 @@ print_host_info() {
   if has_bbrv3; then
     bbrv3_note=" (BBRv3 available - preferred)"
   fi
-  echo "  TCP Congestion Control: $tcp_cc_current (available: $tcp_cc_available)$bbrv3_note"
+  local tcp_cc_display
+  if [[ "$tcp_cc_current" == "bbr" ]]; then
+    tcp_cc_display="$(colorize green "$tcp_cc_current")"
+  else
+    tcp_cc_display="$(colorize yellow "$tcp_cc_current")"
+  fi
+  echo "  TCP Congestion Control: $tcp_cc_display (available: $tcp_cc_available)$bbrv3_note"
   
   # Check IPv6 configuration
   local ipv6_status
