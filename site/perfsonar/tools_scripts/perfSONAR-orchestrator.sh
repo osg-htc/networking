@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 # perfSONAR-orchestrator.sh
 # Guided installer with interactive pauses for deploying a containerized perfSONAR Testpoint
@@ -389,6 +392,11 @@ step_validate() {
   if [ -n "$LE_FQDN" ]; then
     run bash -c "openssl s_client -connect $LE_FQDN:443 -servername $LE_FQDN -showcerts </dev/null 2>/dev/null | openssl x509 -noout -issuer -subject -dates" || true
   fi
+
+  # Recommend installing the systemd service for reboot persistence
+  log "Tip: Enable auto-restart on reboot by installing the systemd service:"
+  log "  /opt/perfsonar-tp/tools_scripts/install-systemd-service.sh /opt/perfsonar-tp"
+  log "  systemctl enable --now perfsonar-testpoint.service"
 }
 
 main() {

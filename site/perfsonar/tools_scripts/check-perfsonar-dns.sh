@@ -7,6 +7,8 @@ IFS=$'\n\t'
 # /etc/perfSONAR-multi-nic-config.conf
 #
 # Version: 1.0.0 - 2025-11-09
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Usage: ./check-perfsonar-dns.sh [--version|--help]
 # Depends on: dig (bind-utils on EL, dnsutils on Debian/Ubuntu)
 
@@ -35,7 +37,9 @@ EOF
     exit 0
 fi
 
+[ -f "/etc/perfSONAR-multi-nic-config.conf" ] || { echo "Config not found: /etc/perfSONAR-multi-nic-config.conf" >&2; exit 2; }
 CONFIG=/etc/perfSONAR-multi-nic-config.conf
+# shellcheck source=/etc/perfSONAR-multi-nic-config.conf
 [ -f "$CONFIG" ] || { echo "Config not found: $CONFIG" >&2; exit 2; }
 
 # Prefer dig but fall back to host if dig is not present
@@ -48,6 +52,8 @@ else
   exit 3
 fi
 
+# shellcheck source=/etc/perfSONAR-multi-nic-config.conf
+# shellcheck disable=SC1091
 source "$CONFIG"
 
 check_ip() {

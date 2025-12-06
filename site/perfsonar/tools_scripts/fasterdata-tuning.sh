@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
+# Version: 1.0.0
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
+#
 # Audit and optionally apply host/network tuning recommended by ESnet Fasterdata
 # for high-throughput hosts (EL9 focus). Defaults to audit-only.
 #
@@ -15,10 +19,13 @@
 #   - Tuned profile suggestion (network-throughput)
 #   - Per-interface checks: GRO/TSO/GSO/checksums, LRO off, ring buffers to max,
 #     txqueuelen, qdisc fq
+#   - DTN-specific: Packet pacing via tc tbf qdisc (optional, configurable rate)
 #
 # Notes:
 #   - Uses conservative recommendations suitable for perfSONAR/DTN-style hosts on EL9.
-#   - Apply mode writes /etc/sysctl.d/90-fasterdata.conf and applies live settings.
+#   - Apply mode updates /etc/sysctl.conf with recommended parameters and applies live settings.
+#   - Packet pacing for DTN nodes: Uses token bucket filter (tbf) to pace outgoing traffic.
+#     Default rate: 2 Gbps (adjust via --packet-pacing-rate). Enable with --apply-packet-pacing.
 #   - ethtool changes are immediate but not persisted across reboots; consider
 #     running this script from a boot-time unit if persistence is required.
 
@@ -39,6 +46,8 @@ SCALED_BACKLOG=250000
 RUNNING_KERNEL=""
 LATEST_KERNEL=""
 USE_COLOR=0
+APPLY_TCP_CC=""
+APPLY_JUMBO=0
 
 # Color codes for terminal output
 readonly C_GREEN='\033[0;32m'
@@ -52,6 +61,9 @@ APPLY_IOMMU=0
 APPLY_SMT=""
 PERSIST_SMT=0
 AUTO_YES=0
+DRY_RUN=0
+PACKET_PACING_RATE="2000mbps"
+APPLY_PACKET_PACING=0
 
 usage() {
   cat <<'EOF'
@@ -62,15 +74,26 @@ Modes:
   apply             Apply recommended values (requires root)
 
 Options:
-  --ifaces LIST     Comma-separated interfaces to check/tune. Default: all up, non-loopback
-  --target TYPE     Host type: measurement (default) or dtn (data transfer node)
-  --color           Use color codes (green=ok, yellow=warning, red=critical)
-  --apply-iommu     (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
-  --apply-smt STATE Apply runtime SMT change (on|off). Requires --mode apply
-  --persist-smt     (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
-  --yes             Skip interactive confirmations (use with caution)
-  --verbose         More detail in audit output
-  -h, --help        Show this help
+  --ifaces LIST              Comma-separated interfaces to check/tune. Default: all up, non-loopback
+  --target TYPE              Host type: measurement (default) or dtn (data transfer node)
+  --packet-pacing-rate RATE  Packet pacing rate for DTN nodes (default: 2000mbps)
+                             Units: kbps, mbps, gbps (e.g., 2gbps, 10gbps, 10000mbps)
+  --apply-packet-pacing      (apply only) Apply packet pacing via tc tbf qdisc (DTN only)
+  --color                    Use color codes (green=ok, yellow=warning, red=critical)
+  --apply-iommu              (apply only) Edit GRUB to enable IOMMU (intel/amd flags + iommu=pt)
+                             Note: Optimized for EL9; will warn on other systems
+  --apply-smt STATE          Apply runtime SMT change (on|off). Requires --mode apply
+  --persist-smt              (apply only) Also persist SMT choice via GRUB changes (adds/removes 'nosmt')
+                             Note: Optimized for EL9; will warn on other systems
+  --apply-tcp-cc ALGORITHM   (apply only) Set TCP congestion control algorithm (e.g., bbr, cubic, reno)
+  --apply-jumbo              (apply only) Apply 9000 MTU jumbo frames to all NICs (if supported)
+  --yes                      Skip interactive confirmations (use with caution)
+  --dry-run                  Preview the exact GRUB/sysfs changes without applying them (safe)
+  --verbose                  More detail in audit output
+  -h, --help                 Show this help
+
+Note: This script is optimized for Enterprise Linux 9 (RHEL/Rocky/AlmaLinux).
+      GRUB/BLS operations will work on other systems but may require adjustments.
 EOF
 }
 
@@ -112,6 +135,38 @@ require_root() {
     echo "ERROR: --mode apply requires root" >&2
     exit 1
   fi
+}
+
+# Detect if running on EL9
+is_el9() {
+  if [[ -f /etc/os-release ]]; then
+    local version_id
+    version_id=$(awk -F= '/^VERSION_ID=/ {print $2}' /etc/os-release | tr -d '"')
+    if [[ "$version_id" =~ ^9\. ]]; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+# Warn if not on EL9 (for GRUB/BLS operations)
+warn_if_not_el9() {
+  local operation="$1"
+  if ! is_el9; then
+    local os_name
+    os_name=$(awk -F= '/^PRETTY_NAME=/ {print $2}' /etc/os-release 2>/dev/null | tr -d '"' || echo "unknown")
+    log_warn "Detected OS: $os_name (not EL9)"
+    log_warn "The $operation operation is optimized for Enterprise Linux 9"
+    log_warn "On non-EL9 systems, GRUB configuration may differ - proceed with caution"
+    if [[ $DRY_RUN -ne 1 ]] && [[ $AUTO_YES -ne 1 ]]; then
+      read -r -p "Continue anyway? [y/N] " resp
+      if [[ ! "$resp" =~ ^[Yy]$ ]]; then
+        log_info "$operation cancelled by user"
+        return 1
+      fi
+    fi
+  fi
+  return 0
 }
 
 # Recommended sysctl values (Fasterdata-inspired, EL9 context)
@@ -186,6 +241,89 @@ desired_txqlen_for_speed() {
   echo "$base"
 }
 
+# Get available TCP congestion control algorithms
+get_tcp_cc_available() {
+  sysctl -n net.ipv4.tcp_available_congestion_control 2>/dev/null || echo ""
+}
+
+# Get current TCP congestion control algorithm
+get_tcp_cc_current() {
+  sysctl -n net.ipv4.tcp_congestion_control 2>/dev/null || echo "unknown"
+}
+
+# Check if BBRv3 is available
+has_bbrv3() {
+  get_tcp_cc_available | grep -qw "bbr"
+}
+
+# Get NIC max MTU capability
+get_nic_max_mtu() {
+  local iface="$1"
+  if command -v ethtool >/dev/null 2>&1; then
+    ethtool "$iface" 2>/dev/null | grep -i "max mtu" | awk '{print $NF}' || echo "unknown"
+  else
+    echo "unknown"
+  fi
+}
+
+# Get current MTU for NIC
+get_nic_mtu() {
+  local iface="$1"
+  ip link show "$iface" 2>/dev/null | grep -oP 'mtu \K\d+' || echo "unknown"
+}
+
+# Reverse DNS lookup for IP
+reverse_dns_lookup() {
+  local ip="$1"
+  if command -v dig >/dev/null 2>&1; then
+    dig +short -x "$ip" 2>/dev/null | sed 's/\.$//' || echo ""
+  elif command -v host >/dev/null 2>&1; then
+    host "$ip" 2>/dev/null | awk '{print $NF}' | sed 's/\.$//' || echo ""
+  else
+    echo ""
+  fi
+}
+
+# Forward DNS lookup to verify match
+verify_dns_match() {
+  local fqdn="$1" ip="$2"
+  if command -v dig >/dev/null 2>&1; then
+    dig +short "$fqdn" A 2>/dev/null | grep -q "^${ip}$"
+  elif command -v host >/dev/null 2>&1; then
+    host "$fqdn" 2>/dev/null | grep -q "$ip"
+  else
+    return 1
+  fi
+}
+
+# Get all FQDNs for the host
+get_host_fqdns() {
+  local iface ip fqdn fqdns=()
+  for iface in $(get_ifaces); do
+    # Try to get IPs from both IPv4 and IPv6
+    local ips
+    ips=$(ip addr show "$iface" 2>/dev/null | grep -oP '(?<=inet[6]?\s)\S+(?=/)')
+    while IFS= read -r ip; do
+      [[ -z "$ip" ]] && continue
+      # Remove CIDR notation if present
+      ip="${ip%/*}"
+      # Skip link-local and loopback
+      [[ "$ip" =~ ^127\.|^::1$|^fe80: ]] && continue
+      fqdn=$(reverse_dns_lookup "$ip")
+      if [[ -n "$fqdn" ]]; then
+        if verify_dns_match "$fqdn" "$ip"; then
+          fqdns+=("$fqdn")
+        else
+          fqdns+=("$fqdn (DNS mismatch!)")
+        fi
+      else
+        fqdns+=("(no reverse DNS for $ip)")
+      fi
+    done <<<"$ips"
+  done
+  printf '%s\n' "${fqdns[@]}" | sort -u
+}
+
 print_sysctl_diff() {
   local key wanted current status
   log_detail "Sysctl audit (current vs recommended)"
@@ -196,7 +334,13 @@ print_sysctl_diff() {
     wanted=${SYSCTL_RECS[$key]}
     current=$(sysctl -n "$key" 2>/dev/null || echo "(unset)")
     status=""
-    if [[ "$current" != "$wanted" ]]; then
+    # Normalize whitespace (tabs and multiple spaces) into single spaces for comparison
+    # using awk's field re-assignment which converts all whitespace to single spaces
+    local current_normalized
+    current_normalized=$(echo "$current" | awk '{$1=$1; print}')
+    local wanted_normalized
+    wanted_normalized=$(echo "$wanted" | awk '{$1=$1; print}')
+    if [[ "$current_normalized" != "$wanted_normalized" ]]; then
       status="*"
       ((SYSCTL_MISMATCHES+=1))
       log_detail "SYSCTL mismatch: $key current='$current' recommended='$wanted'"
@@ -284,41 +428,53 @@ cache_kernel_versions() {
 }
 
 apply_sysctl() {
-  local outfile="/etc/sysctl.d/90-fasterdata.conf"
-  require_root
-  log_info "Writing $outfile"
+  local sysctl_file="/etc/sysctl.conf"
+  if [[ $DRY_RUN -ne 1 ]]; then
+    require_root
+  fi
+  log_info "Updating $sysctl_file with fasterdata tuning parameters"
   # backup existing file
-  if [[ -f "$outfile" ]]; then
+  if [[ -f "$sysctl_file" ]]; then
     local timestamp
     timestamp=$(date -u +%Y%m%dT%H%M%SZ)
-    cp -a "$outfile" "${outfile}.${timestamp}.bak" 2>/dev/null || true
-    log_info "Backed up existing $outfile to ${outfile}.${timestamp}.bak"
+    cp -a "$sysctl_file" "${sysctl_file}.${timestamp}.bak" 2>/dev/null || true
+    log_info "Backed up existing $sysctl_file to ${sysctl_file}.${timestamp}.bak"
   fi
   log_info "Detected max link speed (Mbps): ${MAX_LINK_SPEED:-0}"
 
-  cat > "$outfile" <<EOF
-# Fasterdata-inspired tuning (https://fasterdata.es.net/)
-# Applied by fasterdata-tuning.sh
-net.core.rmem_max = ${SCALED_RMEM_MAX}
-net.core.wmem_max = ${SCALED_WMEM_MAX}
-net.core.rmem_default = 134217728
-net.core.wmem_default = 134217728
-net.core.netdev_max_backlog = ${SCALED_BACKLOG}
-net.core.default_qdisc = fq
-net.ipv4.tcp_rmem = 4096 87380 536870912
-net.ipv4.tcp_wmem = 4096 65536 536870912
-net.ipv4.tcp_congestion_control = bbr
-net.ipv4.tcp_mtu_probing = 1
-net.ipv4.tcp_window_scaling = 1
-net.ipv4.tcp_timestamps = 1
-net.ipv4.tcp_sack = 1
-net.ipv4.tcp_low_latency = 0
-EOF
+  # Update or add each sysctl parameter in /etc/sysctl.conf
+  local updates=(
+    "net.core.rmem_max=${SCALED_RMEM_MAX}"
+    "net.core.wmem_max=${SCALED_WMEM_MAX}"
+    "net.core.rmem_default=134217728"
+    "net.core.wmem_default=134217728"
+    "net.core.netdev_max_backlog=${SCALED_BACKLOG}"
+    "net.core.default_qdisc=fq"
+    "net.ipv4.tcp_rmem=4096 87380 536870912"
+    "net.ipv4.tcp_wmem=4096 65536 536870912"
+    "net.ipv4.tcp_congestion_control=bbr"
+    "net.ipv4.tcp_mtu_probing=1"
+    "net.ipv4.tcp_window_scaling=1"
+    "net.ipv4.tcp_timestamps=1"
+    "net.ipv4.tcp_sack=1"
+    "net.ipv4.tcp_low_latency=0"
+  )
+  
+  for update in "${updates[@]}"; do
+    local key="${update%%=*}"
+    local escaped_key="${key//./\\.}"
+    if grep -q "^${escaped_key}=" "$sysctl_file" 2>/dev/null; then
+      sed -i "s|^${escaped_key}=.*|${update}|" "$sysctl_file"
+    else
+      echo "$update" >> "$sysctl_file"
+    fi
+  done
+  
   if ! has_bbr; then
     log_warn "bbr not available; falling back to cubic at runtime (file still sets bbr)"
   fi
   log_info "Applying sysctl settings"
-  sysctl --system >/dev/null
+  sysctl -p "$sysctl_file" >/dev/null 2>&1 || sysctl --system >/dev/null
   # If bbr missing, set congestion control to cubic live to avoid failure
   if ! has_bbr; then
     sysctl -w net.ipv4.tcp_congestion_control=cubic >/dev/null
@@ -372,18 +528,30 @@ iface_audit() {
     fi
   fi
 
-  local short_line="$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen" "$desired_txqlen" "${qdisc:-?}" "$driver")"
+  local short_line
+  short_line=$(printf "%-12s state=%-7s speed=%-9s txqlen=%-6s(rec>=%-5s) qdisc=%-6s driver=%s" "$iface" "${state:-?}" "$speed_str" "$txqlen" "$desired_txqlen" "${qdisc:-?}" "$driver")
   printf "\n%s" "$short_line"
   local offload_str="offload=${offload_issue}"
   [[ -n "$rings_note" ]] && offload_str+=" $rings_note"
   printf " %s\n" "$offload_str"
+
+  # Jumbo frame (MTU) audit
+  local current_mtu max_mtu mtu_status=""
+  current_mtu=$(get_nic_mtu "$iface")
+  max_mtu=$(get_nic_max_mtu "$iface")
+  if [[ "$current_mtu" == "unknown" || "$current_mtu" -lt 9000 ]]; then
+    mtu_status="mtu=$current_mtu (recomm: 9000)"
+  fi
+  [[ -n "$mtu_status" ]] && printf "  MTU: current=%s max=%s\n" "$current_mtu" "$max_mtu"
 
   # Track issues for summary
   local issues=()
   if [[ "$txqlen" != "?" && "$txqlen" -lt "$desired_txqlen" ]]; then
     issues+=("txqlen $txqlen<${desired_txqlen}")
   fi
-  if [[ "${qdisc:-}" != "fq" ]]; then
+  # Extract just the first word of qdisc (e.g., "fq" from "fq 8005: root")
+  local qdisc_type="${qdisc%% *}"
+  if [[ "${qdisc_type:-}" != "fq" ]]; then
     issues+=("qdisc=${qdisc:-unknown}")
   fi
   if [[ "$offload_issue" != "ok" ]]; then
@@ -454,13 +622,104 @@ iface_apply() {
   tc qdisc replace dev "$iface" root fq >/dev/null 2>&1 || true
 }
 
+iface_packet_pacing_audit() {
+  local iface="$1"
+  local pacing_rate="$2"
+  
+  # Only audit packet pacing for DTN nodes
+  if [[ "$TARGET_TYPE" != "dtn" ]]; then
+    return 0
+  fi
+  
+  # Check current qdisc - should be tbf (token bucket filter) for pacing
+  local current_qdisc
+  current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1)
+  
+  # If we're not applying pacing, just report current state
+  if [[ $APPLY_PACKET_PACING -eq 0 ]]; then
+    if [[ "$current_qdisc" != *"tbf"* ]]; then
+      return 1  # Not using tbf; would need packet pacing applied
+    fi
+    return 0  # Already using tbf
+  fi
+  
+  return 0
+}
+
+iface_apply_packet_pacing() {
+  local iface="$1"
+  local pacing_rate="$2"
+  
+  if [[ "$TARGET_TYPE" != "dtn" ]] || [[ $APPLY_PACKET_PACING -eq 0 ]]; then
+    return
+  fi
+  
+  log_info "Applying packet pacing ($pacing_rate) to $iface via tc tbf qdisc"
+  
+  # Parse rate and convert to bits per second for tc
+  # tc expects rate in: bit, kbit, mbit, gbit, tbit, or bps, kbps, mbps, gbps, tbps
+  local rate_normalized="$pacing_rate"
+  
+  # Normalize case if needed (tc accepts both cases)
+  rate_normalized="${rate_normalized,,}"  # lowercase
+  
+  # Verify rate is in acceptable format
+  if ! [[ "$rate_normalized" =~ ^[0-9]+(kbps|mbps|gbps|tbps|kbit|mbit|gbit|tbit|bit|bps)$ ]]; then
+    log_warn "Invalid packet pacing rate format: $pacing_rate (use e.g., 2gbps, 10000mbps)"
+    return 1
+  fi
+  
+  # Get interface speed to validate pacing rate doesn't exceed link speed
+  local if_speed
+  if_speed=$(get_iface_speed "$iface")
+  
+  # Set up tbf (token bucket filter) qdisc
+  # tbf parameters: rate=limit latency=burst
+  # burst size calculation: typical is rate * 0.001 (1ms worth of packets)
+  # For example: 2gbps with 1ms latency = 2000000000 bits/sec * 0.001 = 2000000 bits = 250000 bytes
+  
+  # Calculate burst size in bytes (assuming 1ms worth of packets at the specified rate)
+  # Formula: (rate in bps) * 0.001 seconds / 8 bits per byte
+  local burst_bytes
+  case "$rate_normalized" in
+    *gbps)
+      local gbps_val="${rate_normalized%gbps}"
+      burst_bytes=$((gbps_val * 125000))  # (gbps * 1e9 bits/s * 0.001s) / 8 bits/byte
+      ;;
+    *mbps)
+      local mbps_val="${rate_normalized%mbps}"
+      burst_bytes=$((mbps_val * 125))  # (mbps * 1e6 bits/s * 0.001s) / 8 bits/byte
+      ;;
+    *kbps)
+      local kbps_val="${rate_normalized%kbps}"
+      burst_bytes=$((kbps_val / 8))  # (kbps * 1e3 bits/s * 0.001s) / 8 bits/byte
+      ;;
+    *)
+      # Default burst size: 1 MB for very high rates, smaller for others
+      burst_bytes=1000000
+      ;;
+  esac
+  
+  # Ensure burst size is reasonable (minimum 1500 bytes for MTU, maximum 10 MB)
+  [[ $burst_bytes -lt 1500 ]] && burst_bytes=1500
+  [[ $burst_bytes -gt 10485760 ]] && burst_bytes=10485760
+  
+  # Apply tbf qdisc with the specified rate and calculated burst
+  tc qdisc replace dev "$iface" root tbf rate "$rate_normalized" burst "$burst_bytes" latency 100ms >/dev/null 2>&1 || \
+    log_warn "Failed to apply packet pacing qdisc to $iface"
+  
+  log_info "Packet pacing qdisc set on $iface: rate=$rate_normalized burst=$burst_bytes"
+}
+
 create_ethtool_persist_service() {
-  # Generates systemd service to persist ethtool settings across reboots
+  # Generates systemd service to persist ethtool settings and qdisc across reboots
   local svcfile="/etc/systemd/system/ethtool-persist.service"
   local dry_run=${1:-0}
-  require_root
+  if [[ $DRY_RUN -ne 1 ]]; then
+    require_root
+  fi
   
-  log_info "Generating $svcfile to persist ethtool settings"
+  log_info "Generating $svcfile to persist ethtool settings and qdisc"
   
   # Build list of ExecStart commands from applied ethtool changes
   local exec_cmds=()
@@ -487,12 +746,43 @@ create_ethtool_persist_service() {
     if [[ -n "$txqlen" && "$txqlen" != "?" ]]; then
       exec_cmds+=("ExecStart=/sbin/ip link set dev $iface txqueuelen $txqlen")
     fi
+    
+    # Capture qdisc settings (fq for normal mode, tbf for packet pacing)
+    if [[ "$TARGET_TYPE" == "dtn" ]] && [[ $APPLY_PACKET_PACING -eq 1 ]]; then
+      # DTN with packet pacing: use tbf qdisc
+      local pacing_rate="$PACKET_PACING_RATE"
+      local rate_normalized="${pacing_rate,,}"
+      local burst_bytes
+      case "$rate_normalized" in
+        *gbps)
+          local gbps_val="${rate_normalized%gbps}"
+          burst_bytes=$((gbps_val * 125000))
+          ;;
+        *mbps)
+          local mbps_val="${rate_normalized%mbps}"
+          burst_bytes=$((mbps_val * 125))
+          ;;
+        *kbps)
+          local kbps_val="${rate_normalized%kbps}"
+          burst_bytes=$((kbps_val / 8))
+          ;;
+        *)
+          burst_bytes=1000000
+          ;;
+      esac
+      [[ $burst_bytes -lt 1500 ]] && burst_bytes=1500
+      [[ $burst_bytes -gt 10485760 ]] && burst_bytes=10485760
+      exec_cmds+=("ExecStart=/sbin/tc qdisc replace dev $iface root tbf rate $rate_normalized burst $burst_bytes latency 100ms")
+    else
+      # Default: use fq qdisc for fair queuing
+      exec_cmds+=("ExecStart=/sbin/tc qdisc replace dev $iface root fq")
+    fi
   done
   
   # Show what would be written (always to log; to stdout if requested)
   {
     echo "[Unit]"
-    echo "Description=Persist ethtool settings (Fasterdata)"
+    echo "Description=Persist ethtool settings and qdisc (Fasterdata)"
     echo "After=network.target"
     echo "Wants=network.target"
     echo ""
@@ -511,7 +801,7 @@ create_ethtool_persist_service() {
   if [[ $dry_run -eq 0 ]]; then
     {
       echo "[Unit]"
-      echo "Description=Persist ethtool settings (Fasterdata)"
+      echo "Description=Persist ethtool settings and qdisc (Fasterdata)"
       echo "After=network.target"
       echo "Wants=network.target"
       echo ""
@@ -621,6 +911,10 @@ apply_iommu() {
     return
   fi
   require_root
+  
+  # Warn if not on EL9
+  warn_if_not_el9 "IOMMU configuration" || return
+  
   local cmdline
   cmdline=$(cat /proc/cmdline 2>/dev/null || true)
   local cpu_vendor iommu_cmd
@@ -639,6 +933,16 @@ apply_iommu() {
     return
   fi
   log_warn "IOMMU not in kernel cmdline (CPU: $cpu_vendor). Will add: $iommu_cmd"
+  local backup
+  backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo
+    echo "=== IOMMU change PREVIEW ==="
+    echo "Current kernel cmdline: $cmdline"
+    echo "Would ensure GRUB_CMDLINE_LINUX contains: $iommu_cmd"
+    echo "The script would backup /etc/default/grub to $backup and run grub2-mkconfig -o /boot/grub2/grub.cfg (or update-grub)"
+    return
+  fi
   if [[ $AUTO_YES -ne 1 ]]; then
     read -r -p "Update /etc/default/grub and regenerate GRUB to add '$iommu_cmd'? [y/N] " resp
     if [[ ! "$resp" =~ ^[Yy]$ ]]; then
@@ -647,32 +951,72 @@ apply_iommu() {
     fi
   fi
   # Backup grub config
-  local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
-  cp -a /etc/default/grub "$backup"
-  log_info "Backed up /etc/default/grub to $backup"
+  local backup
+  backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "Dry-run: would copy /etc/default/grub -> $backup"
+  else
+    cp -a /etc/default/grub "$backup"
+    log_info "Backed up /etc/default/grub to $backup"
+  fi
   # Read existing value and ensure we append without duplicates
   local existing
-  existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
-  if [[ -z "$existing" ]]; then
-    echo "GRUB_CMDLINE_LINUX=\"$iommu_cmd\"" >> /etc/default/grub
-  else
-    if echo "$existing" | grep -qF "$iommu_cmd"; then
-      log_info "GRUB already contains required IOMMU flags"
+  existing=$(grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | head -1 | sed 's/^GRUB_CMDLINE_LINUX="\(.*\)"$/\1/' || true)
+  if [[ $DRY_RUN -eq 1 ]]; then
+    if [[ -z "$existing" ]]; then
+      echo "Dry-run: would set GRUB_CMDLINE_LINUX=\"$iommu_cmd\""
     else
-      # Append flags
-      local newval="$existing $iommu_cmd"
-      # Replace the line
-      sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+      if echo "$existing" | grep -qF "$iommu_cmd"; then
+        echo "Dry-run: GRUB already contains required IOMMU flags"
+      else
+        local newval
+        newval="$existing $iommu_cmd"
+        echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
+      fi
+    fi
+  else
+    if [[ -z "$existing" ]]; then
+      echo "GRUB_CMDLINE_LINUX=\"$iommu_cmd\"" >> /etc/default/grub
+    else
+      if echo "$existing" | grep -qF "$iommu_cmd"; then
+        log_info "GRUB already contains required IOMMU flags"
+      else
+        # Append flags
+        local newval
+        newval="$existing $iommu_cmd"
+        # Replace the line
+        sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+      fi
     fi
   fi
-  # Regenerate grub
-  if command -v grub2-mkconfig >/dev/null 2>&1; then
-    grub2-mkconfig -o /boot/grub2/grub.cfg
-  elif command -v update-grub >/dev/null 2>&1; then
-    update-grub || true
-  else
-    log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+  # Regenerate grub - on RHEL/Rocky 9+ with BLS, use grubby instead
+  if [[ $DRY_RUN -eq 1 ]]; then
+    if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+      echo "Dry-run: would run grubby --update-kernel=ALL --args=\"$iommu_cmd\""
+    else
+      echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+    fi
     return
+  fi
+  
+  # Check if system uses BLS (Boot Loader Specification) - RHEL/Rocky 9+
+  if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+    log_info "Detected BLS boot system, using grubby to update kernel entries"
+    if ! grubby --update-kernel=ALL --args="$iommu_cmd" 2>&1; then
+      log_warn "grubby failed to update kernel entries"
+      return
+    fi
+    log_info "Updated all kernel entries with IOMMU parameters using grubby"
+  else
+    # Traditional GRUB2 system
+    if command -v grub2-mkconfig >/dev/null 2>&1; then
+      grub2-mkconfig -o /boot/grub2/grub.cfg
+    elif command -v update-grub >/dev/null 2>&1; then
+      update-grub || true
+    else
+      log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+      return
+    fi
   fi
   log_info "GRUB config updated; please reboot to apply IOMMU settings"
 }
@@ -688,7 +1032,8 @@ apply_smt() {
     log_warn "SMT control not available on this system"
     return
   fi
-  local cur=$(cat /sys/devices/system/cpu/smt/control)
+  local cur
+  cur=$(cat /sys/devices/system/cpu/smt/control)
   if [[ "$APPLY_SMT" != "on" && "$APPLY_SMT" != "off" ]]; then
     log_warn "Invalid or missing --apply-smt STATE (expected 'on' or 'off')"
     return
@@ -697,6 +1042,14 @@ apply_smt() {
     log_info "SMT already set to $cur"
   else
     log_warn "Changing SMT from $cur to $APPLY_SMT"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo
+      echo "=== SMT change PREVIEW ==="
+      echo "Current SMT: $cur"
+      echo "Would run: echo $APPLY_SMT | sudo tee /sys/devices/system/cpu/smt/control"
+      echo "Dry-run: SMT will not be changed. Use --mode apply without --dry-run to apply."
+      return
+    fi
     if [[ $AUTO_YES -ne 1 ]]; then
       read -r -p "Apply SMT change now (writes to /sys/devices/system/cpu/smt/control)? [y/N] " resp
       if [[ ! "$resp" =~ ^[Yy]$ ]]; then
@@ -709,6 +1062,9 @@ apply_smt() {
   fi
   # If persist requested, update grub kernel cmdline
   if [[ $PERSIST_SMT -eq 1 ]]; then
+    # Warn if not on EL9
+    warn_if_not_el9 "SMT persistence (GRUB)" || return
+    
     local grubnosmt
     if [[ "$APPLY_SMT" == "off" ]]; then
       grubnosmt="nosmt"
@@ -716,39 +1072,166 @@ apply_smt() {
       grubnosmt=""
     fi
     # Edit GRUB similar to apply_iommu (backup/append/remove nosmt)
-    local backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
-    cp -a /etc/default/grub "$backup"
-    log_info "Backed up /etc/default/grub to $backup"
-    local existing
-    existing=$(awk -F= '/^GRUB_CMDLINE_LINUX=/ { match($0,/=(\"|\")(.*)\1/,m); print m[2]; exit }' /etc/default/grub || true)
-    if [[ -z "$existing" ]]; then
-      if [[ -n "$grubnosmt" ]]; then
-        echo "GRUB_CMDLINE_LINUX=\"$grubnosmt\"" >> /etc/default/grub
-      fi
+    local backup
+    backup="/etc/default/grub.bak.$(date +%Y%m%d%H%M%S)"
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "Dry-run: would copy /etc/default/grub -> $backup"
     else
-      if [[ -n "$grubnosmt" ]]; then
-        if echo "$existing" | grep -qF "$grubnosmt"; then
-          log_info "GRUB already contains $grubnosmt"
+      cp -a /etc/default/grub "$backup"
+      log_info "Backed up /etc/default/grub to $backup"
+    fi
+    local existing
+    existing=$(grep '^GRUB_CMDLINE_LINUX=' /etc/default/grub | head -1 | sed 's/^GRUB_CMDLINE_LINUX="\(.*\)"$/\1/' || true)
+    if [[ $DRY_RUN -eq 1 ]]; then
+      if [[ -z "$existing" ]]; then
+        if [[ -n "$grubnosmt" ]]; then
+          echo "Dry-run: would set GRUB_CMDLINE_LINUX=\"$grubnosmt\""
         else
-          local newval="$existing $grubnosmt"
-          sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+          echo "Dry-run: would not change GRUB_CMDLINE_LINUX (no nosmt present)"
         fi
       else
-        # Remove nosmt bit if present
-        local newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
-        sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+        if [[ -n "$grubnosmt" ]]; then
+          if echo "$existing" | grep -qF "$grubnosmt"; then
+            echo "Dry-run: GRUB already contains $grubnosmt"
+          else
+            local newval
+            newval="$existing $grubnosmt"
+            echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
+          fi
+        else
+          # Remove nosmt bit if present (preview)
+          local newval
+          newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+          echo "Dry-run: would update GRUB_CMDLINE_LINUX to: $newval"
+        fi
+      fi
+    else
+      if [[ -z "$existing" ]]; then
+        if [[ -n "$grubnosmt" ]]; then
+          echo "GRUB_CMDLINE_LINUX=\"$grubnosmt\"" >> /etc/default/grub
+        fi
+      else
+        if [[ -n "$grubnosmt" ]]; then
+          if echo "$existing" | grep -qF "$grubnosmt"; then
+            log_info "GRUB already contains $grubnosmt"
+          else
+            local newval
+            newval="$existing $grubnosmt"
+            sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+          fi
+        else
+          # Remove nosmt bit if present
+          local newval
+          newval=$(echo "$existing" | sed 's/\bnosmt\b//g' | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+          sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$newval\"|" /etc/default/grub
+        fi
       fi
     fi
-    if command -v grub2-mkconfig >/dev/null 2>&1; then
-      grub2-mkconfig -o /boot/grub2/grub.cfg
-    elif command -v update-grub >/dev/null 2>&1; then
-      update-grub || true
-    else
-      log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+    # Regenerate grub - on RHEL/Rocky 9+ with BLS, use grubby instead
+    if [[ $DRY_RUN -eq 1 ]]; then
+      if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+        if [[ -n "$grubnosmt" ]]; then
+          echo "Dry-run: would run grubby --update-kernel=ALL --args=\"$grubnosmt\""
+        else
+          echo "Dry-run: would run grubby --update-kernel=ALL --remove-args=\"nosmt\""
+        fi
+      else
+        echo "Dry-run: would run grub2-mkconfig -o /boot/grub2/grub.cfg or update-grub"
+      fi
       return
+    fi
+    
+    # Check if system uses BLS (Boot Loader Specification) - RHEL/Rocky 9+
+    if command -v grubby >/dev/null 2>&1 && [[ -d /boot/loader/entries ]]; then
+      log_info "Detected BLS boot system, using grubby to update kernel entries"
+      if [[ -n "$grubnosmt" ]]; then
+        if ! grubby --update-kernel=ALL --args="$grubnosmt" 2>&1; then
+          log_warn "grubby failed to update kernel entries"
+          return
+        fi
+        log_info "Updated all kernel entries with nosmt parameter using grubby"
+      else
+        # Remove nosmt from all kernels
+        if ! grubby --update-kernel=ALL --remove-args="nosmt" 2>&1; then
+          log_warn "grubby failed to remove nosmt from kernel entries"
+          return
+        fi
+        log_info "Removed nosmt parameter from all kernel entries using grubby"
+      fi
+    else
+      # Traditional GRUB2 system
+      if command -v grub2-mkconfig >/dev/null 2>&1; then
+        grub2-mkconfig -o /boot/grub2/grub.cfg
+      elif command -v update-grub >/dev/null 2>&1; then
+        update-grub || true
+      else
+        log_warn "No grub2-mkconfig or update-grub found; edit /etc/default/grub manually"
+        return
+      fi
     fi
     log_info "GRUB updated to persist SMT change; reboot to apply"
   fi
+}
+
+apply_tcp_cc() {
+  # Apply TCP congestion control algorithm
+  if [[ -z "$APPLY_TCP_CC" ]]; then
+    return
+  fi
+  require_root
+  
+  if [[ $DRY_RUN -eq 1 ]]; then
+    local current
+    current=$(get_tcp_cc_current)
+    echo "Dry-run: would change TCP congestion control from $current to $APPLY_TCP_CC"
+    return
+  fi
+  
+  log_info "Setting TCP congestion control to $APPLY_TCP_CC"
+  if sysctl -w "net.ipv4.tcp_congestion_control=$APPLY_TCP_CC" >/dev/null 2>&1; then
+    log_info "TCP congestion control set to $APPLY_TCP_CC"
+  else
+    log_warn "Failed to set TCP congestion control to $APPLY_TCP_CC"
+  fi
+}
+
+apply_jumbo() {
+  # Apply 9000 MTU jumbo frames to all NICs
+  if [[ $APPLY_JUMBO -ne 1 ]]; then
+    return
+  fi
+  require_root
+  
+  local iface current_mtu max_mtu target_mtu=9000
+  for iface in $(get_ifaces); do
+    current_mtu=$(get_nic_mtu "$iface")
+    max_mtu=$(get_nic_max_mtu "$iface")
+    
+    if [[ $DRY_RUN -eq 1 ]]; then
+      echo "Dry-run: would set $iface MTU to $target_mtu (current=$current_mtu, max=$max_mtu)"
+      continue
+    fi
+    
+    # Check if NIC supports jumbo frames
+    if [[ "$max_mtu" != "unknown" && "$max_mtu" -ge "$target_mtu" ]]; then
+      if [[ "$current_mtu" != "$target_mtu" ]]; then
+        log_info "Setting $iface MTU to $target_mtu (was $current_mtu)"
+        if ip link set dev "$iface" mtu "$target_mtu" >/dev/null 2>&1; then
+          log_info "$iface MTU set to $target_mtu"
+        else
+          log_warn "Failed to set $iface MTU to $target_mtu"
+        fi
+      else
+        log_info "$iface MTU already at $target_mtu"
+      fi
+    else
+      if [[ "$max_mtu" == "unknown" ]]; then
+        log_warn "$iface max MTU unknown; skipping (may not support jumbo frames)"
+      else
+        log_warn "$iface max MTU is $max_mtu; cannot set to $target_mtu"
+      fi
+    fi
+  done
 }
 
 print_host_info() {
@@ -813,11 +1296,32 @@ print_host_info() {
   
   echo "Host Info:"
   echo "  FQDN: $fqdn"
+  
+  # Show all FQDNs if multiple NICs have IPs
+  local all_fqdns
+  all_fqdns=$(get_host_fqdns)
+  if [[ -n "$all_fqdns" ]]; then
+    echo "  All FQDNs:"
+    while IFS= read -r fq; do
+      echo "    - $fq"
+    done <<<"$all_fqdns"
+  fi
+  
   echo "  OS: ${os_release:-unknown}"
   echo "  Kernel: $kernel_ver"
   echo "  Memory: $mem_info_str"
   echo "  CPUs: $cpu_info"
   echo "  SMT: $smt_status"
+  
+  # Show TCP congestion control info
+  local tcp_cc_current tcp_cc_available bbrv3_note
+  tcp_cc_current=$(get_tcp_cc_current)
+  tcp_cc_available=$(get_tcp_cc_available)
+  bbrv3_note=""
+  if has_bbrv3; then
+    bbrv3_note=" (BBRv3 available - preferred)"
+  fi
+  echo "  TCP Congestion Control: $tcp_cc_current (available: $tcp_cc_available)$bbrv3_note"
 }
 
 check_smt() {
@@ -865,7 +1369,7 @@ check_drivers() {
     bus=$(awk -F': ' '/bus-info:/ {print $2}' <<<"$info")
     local vendor
     vendor=$(driver_vendor_hint "$drv")
-    local modpath pkg pkgver
+    local modpath pkg
     modpath=$(modinfo -n "$drv" 2>/dev/null || true)
     pkg=$(rpm -q --whatprovides "$modpath" 2>/dev/null | head -n1 || true)
 
@@ -903,6 +1407,14 @@ check_drivers() {
 print_summary() {
   printf "\nSummary:\n"
   echo "- Target type: $TARGET_TYPE"
+  if [[ "$TARGET_TYPE" == "dtn" ]]; then
+    if [[ $APPLY_PACKET_PACING -eq 1 ]]; then
+      echo "- Packet pacing: ENABLED (rate=$PACKET_PACING_RATE, qdisc=tbf)"
+    else
+      echo "- Packet pacing: not applied (use --apply-packet-pacing with --mode apply to enable)"
+      echo "  Recommended pacing rate: $PACKET_PACING_RATE (adjustable via --packet-pacing-rate)"
+    fi
+  fi
   echo "- Sysctl mismatches: $SYSCTL_MISMATCHES"
   if (( ${#IF_ISSUES[@]} > 0 )); then
     echo "- Interfaces needing attention (${#IF_ISSUES[@]}):"
@@ -959,11 +1471,16 @@ main() {
       --mode) MODE="$2"; shift 2;;
       --ifaces) IFACES="$2"; shift 2;;
       --target) TARGET_TYPE="$2"; shift 2;;
+      --packet-pacing-rate) PACKET_PACING_RATE="$2"; shift 2;;
+      --apply-packet-pacing) APPLY_PACKET_PACING=1; shift;;
       --color) USE_COLOR=1; shift;;
       --apply-iommu) APPLY_IOMMU=1; shift;;
       --apply-smt) APPLY_SMT="$2"; shift 2;;
       --persist-smt) PERSIST_SMT=1; shift;;
+      --apply-tcp-cc) APPLY_TCP_CC="$2"; shift 2;;
+      --apply-jumbo) APPLY_JUMBO=1; shift;;
       --yes) AUTO_YES=1; shift;;
+      --dry-run) DRY_RUN=1; shift;;
       -h|--help) usage; exit 0;;
       *) echo "Unknown arg: $1" >&2; usage; exit 1;;
     esac
@@ -994,6 +1511,38 @@ main() {
     echo "ERROR: --persist-smt requires --apply-smt to be set" >&2
     exit 1
   fi
+  
+  # Validate TCP CC flags
+  if [[ -n "$APPLY_TCP_CC" ]]; then
+    if [[ "$MODE" != "apply" ]]; then
+      echo "ERROR: --apply-tcp-cc requires --mode apply" >&2
+      exit 1
+    fi
+    local available_cc
+    available_cc=$(get_tcp_cc_available)
+    if ! echo "$available_cc" | grep -qw "$APPLY_TCP_CC"; then
+      echo "ERROR: TCP congestion control '$APPLY_TCP_CC' not available. Available: $available_cc" >&2
+      exit 1
+    fi
+  fi
+  
+  # Validate jumbo flag
+  if [[ $APPLY_JUMBO -eq 1 && "$MODE" != "apply" ]]; then
+    echo "ERROR: --apply-jumbo requires --mode apply" >&2
+    exit 1
+  fi
+
+  # Validate packet pacing flags
+  if [[ $APPLY_PACKET_PACING -eq 1 ]]; then
+    if [[ "$MODE" != "apply" ]]; then
+      log_warn "--apply-packet-pacing ignored unless --mode apply"
+      APPLY_PACKET_PACING=0
+    fi
+    if [[ "$TARGET_TYPE" != "dtn" ]]; then
+      log_warn "--apply-packet-pacing is for DTN targets only (--target dtn); ignoring"
+      APPLY_PACKET_PACING=0
+    fi
+  fi
 
   if [[ "$MODE" == "audit" ]]; then
     print_host_info
@@ -1013,8 +1562,12 @@ main() {
   for iface in $ifs; do
     if [[ "$MODE" == "audit" ]]; then
       iface_audit "$iface"
+      if ! iface_packet_pacing_audit "$iface" "$PACKET_PACING_RATE"; then
+        IF_ISSUES+=("$iface: needs packet pacing (DTN target with non-tbf qdisc)")
+      fi
     else
       iface_apply "$iface"
+      iface_apply_packet_pacing "$iface" "$PACKET_PACING_RATE"
     fi
   done
 
@@ -1034,6 +1587,12 @@ main() {
     fi
     if [[ -n "$APPLY_SMT" ]]; then
       apply_smt
+    fi
+    if [[ -n "$APPLY_TCP_CC" ]]; then
+      apply_tcp_cc
+    fi
+    if [[ $APPLY_JUMBO -eq 1 ]]; then
+      apply_jumbo
     fi
     log_info "Apply complete. Consider rebooting or rerunning audit to confirm settings."
   else

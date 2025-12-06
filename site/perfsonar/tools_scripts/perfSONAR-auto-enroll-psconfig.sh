@@ -5,6 +5,8 @@
 # and adding the corresponding auto URLs via `psconfig remote --configure-archives add`.
 #
 # Version: 1.0.0 - 2025-11-09
+# Author: Shawn McKee, University of Michigan
+# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Usage:
 #   perfSONAR-auto-enroll-psconfig.sh [OPTIONS]
 #
