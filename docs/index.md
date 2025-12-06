@@ -12,7 +12,8 @@ and experiments/VOs.
 
 This documentation is divided into several sub-sections, each covering a specific area of activities.
 
-## Network Monitoring in WLCG and OSG (perfSONAR)
+Network Monitoring in WLCG and OSG (perfSONAR)
+-----------------------------------------------
 
 WLCG and OSG jointly operate a network of `perfSONAR` agents deployed world-wide, which provides an
 open platform that can be used to baseline network performance and debug any potential issues. The
@@ -24,7 +25,8 @@ in WLCG/OSG:
 - [Installation and Administration Guide](perfsonar/installation.md) - installation, configuration and maintanance
 - [Frequently Asked Questions](perfsonar/faq.md)
 
-## Network Troubleshooting
+Network Troubleshooting
+-----------------------
 
 Users with network issues should check the [troubleshooting link](network-troubleshooting.md) below
 for initial guidance on how best to get their issue resolved. In addition, you can refer to the
@@ -52,11 +54,25 @@ University of Chicago has set up an [**analytics platform**](<https://twiki.cern
 
 Support and Feedback
 --------------------
-If you suspect a network problem and wish to follow up on it, we have a number of tools available.   We have a [ToolkitInfo](https://toolkitinfo.opensciencegrid.org/) page that can help you find resources to identify and explore problems.   In general, networks problems are best resolved by opening a ticket with your site's network provider (see <https://osg-htc.org/networking/network-troubleshooting/>).  If you want WLCG/OSG specific support, please open a ticket with the appropriate support unit: For `OSG` sites please open a ticket with [GOC](https://support.opensciencegrid.org/support/home); For `WLCG` sites please open a [GGUS](https://ggus.eu/) ticket to `WLCG Network Throughput` support unit. If you'd like to get help in setting up a WLCG/OSG perfSONAR instance please open a ticket with [GOC](https://support.opensciencegrid.org/support/home) or via [GGUS](https://ggus.eu/) to WLCG perfSONAR support.  If you have problems or questions specific to perfSONAR, please email the perfSONAR user [mailing list](https://lists.internet2.edu/sympa/info/perfsonar-user).  For any other requests or to provide feedback, please open a ticket at [GGUS](https://ggus.eu/) and mention OSG networking.
 
+If you suspect a network problem and wish to follow up on it, we have a number of tools
+available. We have a [ToolkitInfo](https://toolkitinfo.opensciencegrid.org/) page that can
+help you find resources to identify and explore problems. In general, networks problems are
+best resolved by opening a ticket with your site's network provider (see
+<https://osg-htc.org/networking/network-troubleshooting/>). If you want WLCG/OSG specific
+support, please open a ticket with the appropriate support unit: For `OSG` sites please open
+a ticket with [GOC](https://support.opensciencegrid.org/support/home); For `WLCG` sites
+please open a [GGUS](https://ggus.eu/) ticket to `WLCG Network Throughput` support unit. If
+you'd like to get help in setting up a WLCG/OSG perfSONAR instance please open a ticket with
+[GOC](https://support.opensciencegrid.org/support/home) or via [GGUS](https://ggus.eu/) to
+WLCG perfSONAR support. If you have problems or questions specific to perfSONAR, please email
+the perfSONAR user [mailing list](https://lists.internet2.edu/sympa/info/perfsonar-user). For
+any other requests or to provide feedback, please open a ticket at [GGUS](https://ggus.eu/)
+and mention OSG networking.
 
 References
 ----------
+
 - ESNet network performance tuning and debugging <https://fasterdata.es.net/>
 - [perfSONAR](http://docs.perfsonar.net/) toolkit is part of the [perfSONAR](https://www.perfsonar.net/) project.
 - **OSG/WLCG mesh configuration interface** is available at <https://psconfig.opensciencegrid.org>

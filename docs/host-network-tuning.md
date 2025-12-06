@@ -84,6 +84,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 ### Output and logs
 
 The script outputs a **Host Info** section at the top showing:
+
 - Hostname (FQDN)
 - OS name/version (from `/etc/os-release`)
 - Running kernel version
@@ -91,6 +92,7 @@ The script outputs a **Host Info** section at the top showing:
 - SMT status (on/off/unavailable); yellow warning if SMT is off (off-topic: helps isolate jitter in measurement contexts, but should be on by default for throughput)
 
 Then it displays sysctl audit and per-NIC summaries, followed by a summary block showing:
+
 - Target type (measurement/dtn)
 - Sysctl mismatches (count)
 - Per-interface issues (tx queue, qdisc, offloads, rings)
@@ -118,7 +120,7 @@ sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 
 Then run an audit before applying changes:
 
-```bash
+```bashbash
 bash /usr/local/bin/fasterdata-tuning.sh --mode audit --target measurement
 ```
 
@@ -145,7 +147,7 @@ If a kernel update is available, the summary will recommend: `dnf update kernel 
 - **Apply mode changes the running system** and writes sysctl to `/etc/sysctl.d/90-fasterdata.conf`.
 - **Persistence of ethtool settings**: In apply mode, the script automatically creates or updates `/etc/systemd/system/ethtool-persist.service` to persist NIC tunings (ring buffers, offloads, txqueuelen) across reboots. The service is enabled automatically.
 - **Sysctl settings** in `/etc/sysctl.d/90-fasterdata.conf` persist across reboots.
-- **SMT control** (if changed) requires GRUB config to persist; see [SMT section](#smt-simultaneous-multi-threading-1) below.
+- **SMT control** (if changed) requires GRUB config to persist; see [SMT section](#smt-simultaneous-multi-threading) below.
 - **Tuned profile** changes persist if tuned-adm writes to its default config.
 - The script assumes EL9 userland (`sysctl`, `ethtool`, `tc`, `tuned-adm`). It skips steps if tools are missing.
 - If `bbr` is not available, it falls back to `cubic` live but keeps `bbr` in the config for future kernels.

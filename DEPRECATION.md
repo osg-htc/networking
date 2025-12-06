@@ -25,7 +25,7 @@ The unified prerequisite installation and the guided orchestrator now cover depe
 
 - If you previously called `check-deps.sh` as a first step, replace it with:
     1. Running the one-shot package installation from the guide.
-    2. Running the orchestrator in guided or non-interactive mode.
+    1. Running the orchestrator in guided or non-interactive mode.
 
 - If automation still references `check-deps.sh`, pin to a known commit while you migrate. The file will remain read-only until removal and may not receive updates.
 

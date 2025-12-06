@@ -90,8 +90,7 @@ parse_cli() {
       --help|-h)
         sed -n '1,80p' "$0" | sed -n '1,80p'
         exit 0;;
-      # shellcheck disable=SC2034
-      --auto-update) AUTO_UPDATE=true; shift;;
+      --auto-update) AUTO_UPDATE=true; shift;;  # shellcheck disable=SC2034
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
   done
