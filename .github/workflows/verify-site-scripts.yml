@@ -1,0 +1,27 @@
+name: Verify docs -> site script sync
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ master ]
+
+jobs:
+  verify-site-scripts:
+    name: Verify docs/site scripts and SHA integrity
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Setup environment
+      run: |
+        sudo apt-get update -y && sudo apt-get install -y shellcheck
+    - name: Run verification script
+      run: |
+        ./.github/scripts/verify-site-scripts.sh
+    - name: Show mismatches (for debugging if failures occur)
+      if: failure()
+      run: |
+        echo "Files that differ or have SHA mismatches detected. See job logs above for details."
