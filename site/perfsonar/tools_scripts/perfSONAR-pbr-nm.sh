@@ -1476,6 +1476,7 @@ fi
 _n_names=${#NIC_NAMES[@]}
 _n_v4=${#NIC_IPV4_ADDRS[@]}
 _n_p4=${#NIC_IPV4_PREFIXES[@]}
+# shellcheck disable=SC2056
 if (( _n_names != _n_v4 || _n_names != _n_p4 )); then
     handle_error "Configuration arrays have inconsistent lengths."
 fi

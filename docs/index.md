@@ -1,23 +1,35 @@
 OSG Networking Area
 ===================
 
-*Welcome to OSG Networking !* This is an entry point for those interested in Networking in OSG/WLCG or for those OSG/WLCG users experiencing network problems. It provides an overview of the networking goals, plans and various activities and subtopics underway regarding networking in the *Open Science Grid (OSG)* and *World-wide LHC Computing Grid (WLCG)*, operated as a joint project. This area started in June 2012 with initial focus on the network monitoring as monitoring is critical to provide needed visibility into existing networks and site connectivity. OSG is working to provide needed networking information and tools for users, sites and experiments/VOs.
+*Welcome to OSG Networking !* This is an entry point for those interested in Networking
+in OSG/WLCG or for those OSG/WLCG users experiencing network problems. It provides an
+overview of the networking goals, plans and various activities and subtopics underway
+regarding networking in the *Open Science Grid (OSG)* and *World-wide LHC Computing Grid (WLCG)*,
+operated as a joint project. This area started in June 2012 with initial focus on the network
+monitoring as monitoring is critical to provide needed visibility into existing networks and site
+connectivity. OSG is working to provide needed networking information and tools for users, sites
+and experiments/VOs.
 
 This documentation is divided into several sub-sections, each covering a specific area of activities.
 
-Network Monitoring in WLCG and OSG (perfSONAR)
-----------------------------------------------
+## Network Monitoring in WLCG and OSG (perfSONAR)
 
-WLCG and OSG jointly operate a network of `perfSONAR` agents deployed world-wide, which provides an open platform that can be used to baseline network performance and debug any potential issues. The following subsections provide details on the motivation, deployment and operations of the perfSONARs in WLCG/OSG:
+WLCG and OSG jointly operate a network of `perfSONAR` agents deployed world-wide, which provides an
+open platform that can be used to baseline network performance and debug any potential issues. The
+following subsections provide details on the motivation, deployment and operations of the perfSONARs
+in WLCG/OSG:
 
 - [Motivation](perfsonar-in-osg.md) - overview, core concepts, motivation
 - [Deployment Guide](perfsonar/deployment-models.md) - deployment models and options, hardware requirements
 - [Installation and Administration Guide](perfsonar/installation.md) - installation, configuration and maintanance
 - [Frequently Asked Questions](perfsonar/faq.md)
 
-Network Troubleshooting
------------------------
-Users with network issues should check the [troubleshooting link](network-troubleshooting.md) below for initial guidance on how best to get their issue resolved. In addition, you can refer to the [ESNet network performance guide](https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/) for a detailed instructions on how to identify and isolate network performance issues using perfSONAR.
+## Network Troubleshooting
+
+Users with network issues should check the [troubleshooting link](network-troubleshooting.md) below
+for initial guidance on how best to get their issue resolved. In addition, you can refer to the
+[ESNet network performance guide](https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/)
+for a detailed instructions on how to identify and isolate network performance issues using perfSONAR.
 
 Host and Network Tuning
 -----------------------

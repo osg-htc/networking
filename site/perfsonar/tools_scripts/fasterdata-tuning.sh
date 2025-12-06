@@ -711,6 +711,7 @@ iface_apply_packet_pacing() {
   log_info "Packet pacing qdisc set on $iface: rate=$rate_normalized burst=$burst_bytes"
 }
 
+# shellcheck disable=SC2120
 create_ethtool_persist_service() {
   # Generates systemd service to persist ethtool settings and qdisc across reboots
   local svcfile="/etc/systemd/system/ethtool-persist.service"
