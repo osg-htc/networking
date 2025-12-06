@@ -35,6 +35,8 @@
 #   - Optional: --apply-iommu              -> adds iommu=pt to GRUB config
 #   - Optional: --apply-smt on|off         -> enables/disables SMT
 #   - Optional: --persist-smt              -> makes SMT setting persistent in GRUB
+#   - Optional: --apply-packet-pacing       -> enables packet pacing (DTN targets only)
+#   - Optional: --packet-pacing-rate RATE   -> set packet pacing rate (e.g., 2000mbps)
 #
 # Notes:
 #   - Ethtool settings persist via systemd service created in apply mode
@@ -76,6 +78,10 @@ Options:
   --apply-jumbo           Apply jumbo MTU when --mode apply
   --apply-tcp-cc ALGO     Apply TCP congestion control ALGO in --mode apply
   --apply-smt on|off      Enable or disable SMT (requires root)
+  --persist-smt           Make SMT configuration persistent in GRUB (requires --apply-smt)
+  --apply-packet-pacing   Enable packet pacing (DTN targets only); sets qdisc=tbf when applied
+  --packet-pacing-rate RATE  Set the packet pacing rate (default: 2000mbps)
+  --yes                   Skip interactive prompts and accept defaults
   --json                  Print JSON machine-readable audit (audit mode only)
   --color                 Enable colorized output (default)
   --nocolor               Disable colorized output
