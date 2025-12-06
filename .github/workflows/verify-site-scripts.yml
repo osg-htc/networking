@@ -1,0 +1,50 @@
+name: Verify docs -> site script sync
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ master ]
+
+jobs:
+  verify-site-scripts:
+    name: Verify docs/site scripts and SHA integrity
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Setup environment
+      run: |
+        sudo apt-get update -y && sudo apt-get install -y shellcheck
+    - name: Compute changed script files
+      id: changed
+      run: |
+        # For PRs: compute diff against base ref; for pushes, diff the last commit range
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          base_ref=${{ github.event.pull_request.base.ref }}
+          echo "Fetching base ref: $base_ref"
+          git fetch origin "$base_ref":"refs/remotes/origin/$base_ref" || true
+          CHANGED=$(git diff --name-only origin/$base_ref...HEAD | grep "^docs/perfsonar/tools_scripts/.*\.sh$" || true)
+        else
+          # Push event: list changed files in the last commit range
+          CHANGED=$(git diff --name-only HEAD~1..HEAD | grep "^docs/perfsonar/tools_scripts/.*\.sh$" || true)
+        fi
+        echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGED" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Run verification script (changed files only)
+      if: always()
+      run: |
+        if [ -n "${{ steps.changed.outputs.changed_files }}" ]; then
+          files=$(echo "${{ steps.changed.outputs.changed_files }}" | tr '\n' ' ')
+          ./.github/scripts/verify-site-scripts.sh $files
+        else
+          echo "No changed script files found; skipping verification"
+        fi
+    - name: Show mismatches (for debugging if failures occur)
+      if: failure()
+      run: |
+        echo "Files that differ or have SHA mismatches detected. See job logs above for details."
