@@ -1230,9 +1230,10 @@ check_iommu() {
   fi
   
   if echo "$cmdline" | grep -q -E 'intel_iommu=on|amd_iommu=on|iommu=pt|iommu=on'; then
-    echo "IOMMU enabled via kernel command-line: $cmdline" | sed 's/^/  /'
+    echo "IOMMU enabled via kernel command-line: $(colorize green enabled)" | sed 's/^/  /'
   else
     log_warn "IOMMU not enabled in kernel command-line (CPU: $cpu_vendor, rec: $iommu_cmd for SR-IOV/perf tuning)"
+    echo "IOMMU: $(colorize yellow disabled)"
     echo "IOMMU setup: Edit GRUB configuration to enable IOMMU (per Fasterdata):"
     echo "  1. Edit /etc/default/grub"
     echo "  2. Add to GRUB_CMDLINE_LINUX: $iommu_cmd"
@@ -1815,14 +1816,22 @@ print_summary() {
       echo "  Recommended pacing rate: $PACKET_PACING_RATE (adjustable via --packet-pacing-rate)"
     fi
   fi
-  echo "- Sysctl mismatches: $SYSCTL_MISMATCHES"
+  local sysctl_mismatches_disp
+  if (( SYSCTL_MISMATCHES > 0 )); then
+    sysctl_mismatches_disp="$(colorize yellow "$SYSCTL_MISMATCHES")"
+  else
+    sysctl_mismatches_disp="$(colorize green "$SYSCTL_MISMATCHES")"
+  fi
+  echo "- Sysctl mismatches: $sysctl_mismatches_disp"
   if (( ${#IF_ISSUES[@]} > 0 )); then
-    echo "- Interfaces needing attention (${#IF_ISSUES[@]}):"
+    local if_issues_disp
+    if_issues_disp="$(colorize yellow "${#IF_ISSUES[@]}")"
+    echo "- Interfaces needing attention ($if_issues_disp):"
     for item in "${IF_ISSUES[@]}"; do
       echo "  * $item"
     done
   else
-    echo "- Interfaces needing attention: none"
+    echo "- Interfaces needing attention: $(colorize green "0")"
   fi
 
   if (( ${#DRIVER_UPDATES[@]} > 0 )); then
@@ -1857,7 +1866,7 @@ print_summary() {
       echo "  * $t"
     done
   else
-    echo "- Required tools: present"
+    echo "- Required tools: $(colorize green "present")"
   fi
 
   if [[ -n "$LOGFILE" ]]; then
@@ -1947,6 +1956,8 @@ main() {
   if [[ "$MODE" == "audit" ]]; then
     print_host_info
     print_sysctl_diff
+    # add spacing for readability before tuned-adm and NIC checks
+    echo
   else
     if ! has_bbr; then
       log_warn "bbr not available; will set cubic live but leave bbr in config"
@@ -1974,7 +1985,12 @@ main() {
   # Extra host checks
   if [[ "$MODE" == "audit" ]]; then
     check_cpu_governor
+    echo
+    # spacing after NICs before cpufreq/cpupower checks
+    echo
     check_iommu
+    # spacing between IOMMU output and driver info
+    echo
     check_smt
     check_drivers
   fi
