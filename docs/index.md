@@ -35,6 +35,7 @@ for a detailed instructions on how to identify and isolate network performance i
 
 Host and Network Tuning
 -----------------------
+
 - [Fasterdata-aligned host/network tuning (EL9)](host-network-tuning.md) — summarizes ESnet guidance and includes an audit/apply script.
 
 Network Services
@@ -50,6 +51,7 @@ OSG operates an advanced platform to collect, store, publish and analyse the net
 
 Network Analytics
 -----------------
+
 University of Chicago has set up an [**analytics platform**](<https://twiki.cern.ch/twiki/bin/view/AtlasComputing/ATLASAnalytics>) using `ElasticSearch` and `Kibana4` as well as `Jupyter` that can be used to access and analyse all the existing network measurements.
 
 Support and Feedback
@@ -80,5 +82,3 @@ References
 - **OSG perfSONAR infrastructure monitoring** <https://psetf.aglt2.org/etf/check_mk/>
 - **OSG Analytics platform** <https://atlas-kibana.mwt2.org/s/networking/app/kibana>
 - **WLCG dashboards** <https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network?var-bin=1h&orgId=16>
-
-
