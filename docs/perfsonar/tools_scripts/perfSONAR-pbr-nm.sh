@@ -451,6 +451,14 @@ generate_config_from_system() {
             continue
         fi
 
+        # If a NIC lacks both IPv4 and IPv6 gateways (i.e., management-only NIC without a gateway),
+        # ignore it by default (skip). Keep the device if it is the DEFAULT_ROUTE_NIC so the system
+        # default route device remains considered.
+        if [ "$dev" != "$DEFAULT_ROUTE_NIC" ] && [ "${gw4:-}" = "-" ] && [ "${gw6:-}" = "-" ]; then
+            log "Skipping device $dev: no IPv4/IPv6 gateway detected"
+            continue
+        fi
+
         NIC_NAMES+=("$dev")
         NIC_IPV4_ADDRS+=("$ipv4_addr")
         NIC_IPV4_PREFIXES+=("$ipv4_prefix")
