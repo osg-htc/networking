@@ -269,7 +269,7 @@ bash perfSONAR-pbr-nm.sh --yes
 Gateway requirement, inference, and generator warnings
 -----------------------------------------------------
 
-- Any NIC with an IPv4 address must have a corresponding IPv4 gateway; likewise for IPv6.
+- Any NIC with an IPv4 address should have a corresponding IPv4 gateway; likewise for IPv6. If a NIC lacks a gateway, the generator will attempt conservative inference (below). If a device has no IPv4 or IPv6 gateway (e.g., a management-only NIC), the generator will intentionally skip that NIC when creating an _auto-generated_ config to avoid generating unusable NetworkManager profiles unless you explicitly set the device as `DEFAULT_ROUTE_NIC`.
 - Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.
     - IPv4: subnets are checked in bash; one unambiguous match is required.
     - IPv6: requires `python3` (`ipaddress` module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.

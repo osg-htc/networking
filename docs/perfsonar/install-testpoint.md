@@ -132,6 +132,8 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
     ```
 
+    Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an explicit gateway or mark it as `DEFAULT_ROUTE_NIC` in `/etc/perfSONAR-multi-nic-config.conf`.
+
 Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
 
 1. Dry run the apply step:

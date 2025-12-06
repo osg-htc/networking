@@ -143,6 +143,7 @@ step_generate_config() {
   [ "$AUTO_YES" = true ] && gen_cmd+=(--yes)
   run "${gen_cmd[@]}"
   echo "Edit /etc/perfSONAR-multi-nic-config.conf if needed (gateways, DEFAULT_ROUTE_NIC)."
+  echo "Note: The auto-generator will skip NICs that have neither an IPv4 nor an IPv6 gateway (management-only NICs) unless they are set as DEFAULT_ROUTE_NIC."
   if [ "$NON_INTERACTIVE" != true ]; then
     ${EDITOR:-vi} /etc/perfSONAR-multi-nic-config.conf || true
   fi
