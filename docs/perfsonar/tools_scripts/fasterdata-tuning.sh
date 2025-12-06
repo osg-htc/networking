@@ -944,6 +944,13 @@ apply_sysctl() {
     require_root
   fi
   log_info "Updating $sysctl_file with fasterdata tuning parameters"
+  
+  # Skip all actual changes if dry-run
+  if [[ $DRY_RUN -eq 1 ]]; then
+    log_info "Dry-run: would update $sysctl_file and apply sysctl settings (skipped)"
+    return
+  fi
+  
   # backup existing file
   if [[ -f "$sysctl_file" ]]; then
     local timestamp
@@ -1149,6 +1156,12 @@ iface_audit() {
 
 iface_apply() {
   local iface="$1"
+  
+  # Skip if dry-run
+  if [[ $DRY_RUN -eq 1 ]]; then
+    return
+  fi
+  
   log_info "Tuning interface $iface"
 
   # txqueuelen
@@ -1279,7 +1292,6 @@ iface_apply_packet_pacing() {
 create_ethtool_persist_service() {
   # Generates systemd service to persist ethtool settings and qdisc across reboots
   local svcfile="/etc/systemd/system/ethtool-persist.service"
-  local dry_run=${1:-0}
   if [[ $DRY_RUN -ne 1 ]]; then
     require_root
   fi
@@ -1362,30 +1374,33 @@ create_ethtool_persist_service() {
     echo "WantedBy=multi-user.target"
   } | tee >(cat >>"$LOGFILE" 2>/dev/null)
   
-  # Only write file if dry_run is 0
-  if [[ $dry_run -eq 0 ]]; then
-    {
-      echo "[Unit]"
-      echo "Description=Persist ethtool settings and qdisc (Fasterdata)"
-      echo "After=network.target"
-      echo "Wants=network.target"
-      echo ""
-      echo "[Service]"
-      echo "Type=oneshot"
-      for cmd in "${exec_cmds[@]}"; do
-        echo "$cmd"
-      done
-      echo "RemainAfterExit=yes"
-      echo ""
-      echo "[Install]"
-      echo "WantedBy=multi-user.target"
-    } > "$svcfile"
-    
-    # Reload systemd and enable service
-    systemctl daemon-reload
-    systemctl enable ethtool-persist.service
-    log_info "Enabled ethtool-persist.service; to verify, run: systemctl status ethtool-persist"
+  # Only write file if not dry-run
+  if [[ $DRY_RUN -eq 1 ]]; then
+    log_info "Dry-run: would write $svcfile and enable ethtool-persist.service (skipped)"
+    return
   fi
+  
+  {
+    echo "[Unit]"
+    echo "Description=Persist ethtool settings and qdisc (Fasterdata)"
+    echo "After=network.target"
+    echo "Wants=network.target"
+    echo ""
+    echo "[Service]"
+    echo "Type=oneshot"
+    for cmd in "${exec_cmds[@]}"; do
+      echo "$cmd"
+    done
+    echo "RemainAfterExit=yes"
+    echo ""
+    echo "[Install]"
+    echo "WantedBy=multi-user.target"
+  } > "$svcfile"
+  
+  # Reload systemd and enable service
+  systemctl daemon-reload
+  systemctl enable ethtool-persist.service
+  log_info "Enabled ethtool-persist.service; to verify, run: systemctl status ethtool-persist"
 }
 
 ensure_tuned_profile() {
@@ -1417,6 +1432,12 @@ ensure_tuned_profile() {
 apply_cpu_governor() {
   if [[ ! -d /sys/devices/system/cpu/cpu0/cpufreq ]]; then
     log_warn "Cannot set CPU governor: cpufreq not supported on this host"
+    return
+  fi
+  
+  # Skip if dry-run
+  if [[ $DRY_RUN -eq 1 ]]; then
+    log_info "Dry-run: would set CPU governor to 'performance' (skipped)"
     return
   fi
   if command -v cpupower >/dev/null 2>&1; then
@@ -1484,6 +1505,13 @@ apply_iommu() {
     log_warn "--apply-iommu ignored unless --mode apply"
     return
   fi
+  
+  # Skip if dry-run
+  if [[ $DRY_RUN -eq 1 ]]; then
+    log_info "Dry-run: would setup IOMMU (skipped)"
+    return
+  fi
+  
   require_root
   
   # Warn if not on EL9
@@ -1601,6 +1629,13 @@ apply_smt() {
     log_warn "--apply-smt ignored unless --mode apply"
     return
   fi
+  
+  # Skip if dry-run
+  if [[ $DRY_RUN -eq 1 ]]; then
+    log_info "Dry-run: would apply SMT setting to $APPLY_SMT (skipped)"
+    return
+  fi
+  
   require_root
   if [[ ! -r /sys/devices/system/cpu/smt/control ]]; then
     log_warn "SMT control not available on this system"
@@ -1752,15 +1787,14 @@ apply_tcp_cc() {
   if [[ -z "$APPLY_TCP_CC" ]]; then
     return
   fi
-  require_root
   
+  # Skip if dry-run
   if [[ $DRY_RUN -eq 1 ]]; then
-    local current
-    current=$(get_tcp_cc_current)
-    echo "Dry-run: would change TCP congestion control from $current to $APPLY_TCP_CC"
+    log_info "Dry-run: would apply TCP congestion control to $APPLY_TCP_CC (skipped)"
     return
   fi
   
+  require_root
   log_info "Setting TCP congestion control to $APPLY_TCP_CC"
   if sysctl -w "net.ipv4.tcp_congestion_control=$APPLY_TCP_CC" >/dev/null 2>&1; then
     log_info "TCP congestion control set to $APPLY_TCP_CC"
@@ -1774,6 +1808,13 @@ apply_jumbo() {
   if [[ $APPLY_JUMBO -ne 1 ]]; then
     return
   fi
+  
+  # Skip if dry-run
+  if [[ $DRY_RUN -eq 1 ]]; then
+    log_info "Dry-run: would apply jumbo MTU settings (skipped)"
+    return
+  fi
+  
   require_root
   
   local iface current_mtu max_mtu target_mtu=9000
