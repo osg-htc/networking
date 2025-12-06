@@ -968,6 +968,13 @@ apply_sysctl() {
       echo "$update" >> "$sysctl_file"
     fi
   done
+  # Show the file we wrote for debugging visibility
+  log_info "Wrote sysctl file: $sysctl_file"
+  log_detail "--- BEGIN $sysctl_file ---"
+  if [[ -r "$sysctl_file" ]]; then
+    while IFS= read -r line; do log_detail "$line"; done <"$sysctl_file"
+  fi
+  log_detail "--- END $sysctl_file ---"
   
   if ! has_bbr; then
     log_warn "bbr not available; falling back to cubic at runtime (file still sets bbr)"
