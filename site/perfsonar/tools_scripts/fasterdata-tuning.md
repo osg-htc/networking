@@ -99,7 +99,7 @@ bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn
 
 Notes
 -----
-- IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present. It only recommends GRUB edits (requires reboot) — it does not modify GRUB automatically unless you explicitly opt-in via a future apply flag.
+ - IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present. When you run with `--apply-iommu` and `--mode apply`, the script will optionally back up `/etc/default/grub`, append the appropriate IOMMU flags (or use values provided via `--iommu-args`) and regenerate GRUB (using `grubby` or `grub2-mkconfig` where available). Use `--dry-run` to preview the GRUB changes. You may also set `--iommu-args "intel_iommu=on iommu=pt"` to provide custom boot args.
 - SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.
 - Apply mode writes to `/etc/sysctl.conf` and creates `/etc/systemd/system/ethtool-persist.service` when necessary.
 - **Packet Pacing (DTN only):** For Data Transfer Node targets, the script can apply token bucket filter (tbf) qdisc to pace outgoing traffic. This is recommended when a DTN node handles multiple simultaneous transfers where the effective transfer rate is limited by the minimum of: source read rate, network bandwidth, and destination write rate. See the `--apply-packet-pacing` and `--packet-pacing-rate` flags below. For detailed information on why packet pacing is important and how it works, see the separate [Packet Pacing guide](../packet-pacing.md).
@@ -109,6 +109,8 @@ Optional apply flags (use with `--mode apply`):
 - `--apply-packet-pacing`: Apply packet pacing to DTN interfaces via tc token bucket filter. Only works with `--target dtn`. Default pacing rate is 2 Gbps (adjustable with `--packet-pacing-rate`).
 - `--packet-pacing-rate RATE`: Set the packet pacing rate for DTN nodes. Accepts units: kbps, mbps, gbps, tbps (e.g., `2gbps`, `10gbps`, `10000mbps`). Default: 2000mbps. Burst size is automatically calculated as 1 millisecond worth of packets at the specified rate.
 - `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate grub. Requires confirmation or `--yes` to skip interactive prompt.
+ - `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate grub. Requires confirmation or `--yes` to skip interactive prompt.
+ - `--iommu-args ARGS`: Provide custom kernel cmdline arguments to apply for IOMMU (e.g., `intel_iommu=on iommu=pt`). When set, these args override vendor-appropriate defaults.
 - `--apply-smt on|off`: Toggle SMT state at runtime. Requires `--mode apply`. Example: `--apply-smt off`.
 - `--persist-smt`: If set along with `--apply-smt`, also persist the change via GRUB edits (`nosmt` applied/removed).
 - `--yes`: Skip interactive confirmations; use with caution.
@@ -117,6 +119,12 @@ Example (preview only):
 
 ```bash
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
+```
+
+To actually apply and pass specific IOMMU args:
+
+```bash
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on iommu=pt" --yes
 ```
 
 Reference and source
