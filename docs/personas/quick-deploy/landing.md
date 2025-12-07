@@ -14,6 +14,10 @@ tags: [quickstart, perfSONAR, testpoint]
 ---
 
 # Quick Deploy — perfSONAR Testpoint
+<div class="persona-banner persona-quick-deploy">
+	<p class="title">Quick Deploy</p>
+	<p class="meta">Owners: networking-team@osg-htc.org</p>
+</div>
 
 This landing page links to minimal, tested instructions and automation to get a perfSONAR testpoint running quickly.
 
