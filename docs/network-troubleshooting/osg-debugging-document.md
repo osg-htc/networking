@@ -1,6 +1,6 @@
 # OSG Debugging Documentation
 
-### Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan
+## Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan
 
 ### February 4th 2013
 
@@ -364,8 +364,7 @@ and updates.  The following steps can be taken to install these tools:
 
 The following command will import the key.
 
-rpm --import [http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2](http://software.internet2.edu/rpms/RPM-GPG-
-KEYInternet2)
+rpm --import [http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2](http://software.internet2.edu/rpms/RPM-GPGKEYInternet2)
 
 - **Download RPM Software**
 

@@ -97,8 +97,7 @@ systemctl stop perfsonar-certbot.service
 
 # Download the updated script
 
-curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-
-units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemdunits.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
 
 # Reinstall with the fix
 

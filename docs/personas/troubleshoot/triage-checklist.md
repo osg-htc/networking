@@ -2,7 +2,7 @@
 title: "Triage checklist (minimal)"
 description: "Short checklist to quickly gather the information needed to troubleshoot network and perfSONAR problems."
 persona: troubleshoot
-owners: ["<networking-team@osg-htc.org>"]
+owners: ["<networking-<team@osg-htc.org>>"]
 status: draft
 tags: [troubleshoot, checklist]
 ---

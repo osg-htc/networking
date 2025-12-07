@@ -4,8 +4,7 @@ Here we will provide details on troubleshooting perfSONAR installations for OSG 
 additionalconfiguration options and a FAQ.
 
 A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and
-isolatenetwork problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-
-troubleshooting-quick-reference-guide/>
+isolatenetwork problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/networktroubleshooting-quick-reference-guide/>
 
 We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) page to guide users in identifying
 andfollowing up on network problems.

@@ -39,8 +39,7 @@ support" | | **perfSONAR Questions** | [User Mailing List](https://lists.interne
 
 # Download and run
 
-curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-
-orchestrator.sh \ -o /tmp/perfSONAR-orchestrator.sh chmod 0755 /tmp/perfSONAR-orchestrator.sh
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONARorchestrator.sh \ -o /tmp/perfSONAR-orchestrator.sh chmod 0755 /tmp/perfSONAR-orchestrator.sh
 
 # Interactive (pauses at each step)
 
@@ -170,8 +169,7 @@ ss -ltnp | grep -E '(443|5001)'
 
 # Download tuning script
 
-curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-
-tuning.sh \ -o /tmp/fasterdata-tuning.sh chmod 0755 /tmp/fasterdata-tuning.sh
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdatatuning.sh \ -o /tmp/fasterdata-tuning.sh chmod 0755 /tmp/fasterdata-tuning.sh
 
 # Audit (no changes)
 

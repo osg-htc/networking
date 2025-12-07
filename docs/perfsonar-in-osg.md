@@ -6,7 +6,7 @@ deployment at OSG and WLCG sites.
 OSG is working to support the scientific networking needs of it's constituents and collaborators. To do this, we are
 recommending all sites deploy perfSONAR so we can measure, monitor and diagnose the OSG (and WLCG) networks.
 
-### Motivation
+## Motivation
 
 Distributed scientific computing relies upon networks to interconnect resources and make them usable for scientific
 workflows. This dependency upon the network means that issues in our networks can significantly impact the behavior of
@@ -64,7 +64,7 @@ For anyone maintaining/using perfSONAR we suggest to join either/both of the fol
 
 - **Announcement Mailing List** The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <https://lists.internet2.edu/sympa/subscribe/perfsonar-announce>
 
-#### Changes for perfSONAR 5.0
+### Changes for perfSONAR 5.0
 
 The first release of [perfSONAR 5.0.0](https://www.perfsonar.net/releasenotes-2023-04-17-5-0-0.html) was available on
 April 17, 2023, followed by a version supporting EL8/EL9 on June 21, 2023 ([version

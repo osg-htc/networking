@@ -26,8 +26,7 @@ extract/save/restore registration config that you may want to use.
 
 Download temporarily:
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-
-update-lsregistration.sh \ -o /tmp/update-lsreg.sh chmod 0755 /tmp/update-lsreg.sh
+```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONARupdate-lsregistration.sh \ -o /tmp/update-lsreg.sh chmod 0755 /tmp/update-lsreg.sh
 
 ```text
 
@@ -88,8 +87,7 @@ deployment, certificate issuance, and pSConfig enrollment with interactive pause
 
 **Download and run the orchestrator:**
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-
-orchestrator.sh \ -o /tmp/perfSONAR-orchestrator.sh chmod 0755 /tmp/perfSONAR-orchestrator.sh /tmp/perfSONAR-
+```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONARorchestrator.sh \ -o /tmp/perfSONAR-orchestrator.sh chmod 0755 /tmp/perfSONAR-orchestrator.sh /tmp/perfSONAR-
 orchestrator.sh
 ```text
 
@@ -150,8 +148,7 @@ dependencies available.
 
 Use the bootstrap script to install helper scripts under `/opt/perfsonar-tp/tools_scripts`:
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-
-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ -o /tmp/install_tools_scripts.sh chmod
+```bash curl -fsSL \ https://raw.githubusercontent.com/osghtc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ -o /tmp/install_tools_scripts.sh chmod
 0755 /tmp/install_tools_scripts.sh /tmp/install_tools_scripts.sh /opt/perfsonar-tp
 ```
 
@@ -410,8 +407,7 @@ Prepare the pSConfig directory and a minimal compose file. No other host bind-mo
 Download a ready-made compose file (or copy it manually): Browse: [repo
 view](https://github.com/osghtc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-
-compose.testpoint.yml \ -o /opt/perfsonar-tp/docker-compose.yml
+```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/dockercompose.testpoint.yml \ -o /opt/perfsonar-tp/docker-compose.yml
 ```
 
 Edit the `docker-compose.yml` as desired.
@@ -442,8 +438,7 @@ You **must** use the systemd unit approach below instead of relying on compose a
 
 Install the provided systemd units to manage containers with proper systemd support:
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-
-systemd-units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
+```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/installsystemd-units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
 
 # Install testpoint-only systemd unit
 
@@ -472,7 +467,7 @@ Notes:
 
 ---
 
-### Option B — Testpoint + Let's Encrypt (shared Apache and certs)
+## Option B — Testpoint + Let's Encrypt (shared Apache and certs)
 
 This mode runs two containers (`perfsonar-testpoint` and `certbot`) and bind-mounts the following host paths so Apache
 content and certificates persist on the host and are shared between containers:
@@ -485,7 +480,7 @@ content and certificates persist on the host and are shared between containers:
 
 - `/etc/letsencrypt` → `/etc/letsencrypt` — Let's Encrypt certificates and state
 
-#### 1) Seed required host directories (REQUIRED before first compose up)
+### 1) Seed required host directories (REQUIRED before first compose up)
  **Why seed?** The perfsonar-testpoint container requires baseline configuration files from the image to be present on
 the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services
 to fail.
@@ -557,7 +552,7 @@ In our compose files:
 
 - `/etc/apache2:/etc/apache2:Z` - Exclusive to testpoint container
 
-#### 2) Deploy the testpoint with automatic SSL patching (recommended)
+## 2) Deploy the testpoint with automatic SSL patching (recommended)
 
 **Prerequisites:** Ensure `/opt/perfsonar-tp/tools_scripts` exists from Step 2 (bootstrap):
 
@@ -566,8 +561,7 @@ In our compose files:
 
 If the file is missing, run the Step 2 bootstrap first:
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-
-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ | bash -s -- /opt/perfsonar-tp
+```bash curl -fsSL \ https://raw.githubusercontent.com/osghtc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ | bash -s -- /opt/perfsonar-tp
 ```
 
  Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses an entrypoint wrapper
@@ -575,8 +569,7 @@ that auto-discovers Let's Encrypt certificates on container startup and automati
 
 Download the auto-patching compose file:
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-
-compose.testpoint-le-auto.yml \ -o /opt/perfsonar-tp/docker-compose.yml
+```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/dockercompose.testpoint-le-auto.yml \ -o /opt/perfsonar-tp/docker-compose.yml
 ```text
 
  **Note:** The `SERVER_FQDN` environment variable is **optional**. The entrypoint wrapper will auto-discover
@@ -601,7 +594,7 @@ Start the containers:
 At this point, the testpoint is running with self-signed certificates. The certbot container is also running but won't
 renew anything until you obtain the initial certificates.
 
-#### Ensure containers restart automatically on reboot (systemd units for testpoint & certbot - REQUIRED)
+## Ensure containers restart automatically on reboot (systemd units for testpoint & certbot - REQUIRED)
 
 !!! warning "podman-compose limitation with systemd containers"
  The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always` flag to function
@@ -612,8 +605,7 @@ You **must** use the systemd unit approach below instead of relying on compose a
 
 Install and enable the systemd units so containers start on boot with proper systemd support:
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-
-systemd-units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
+```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/installsystemd-units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
 
 # Install both testpoint and certbot systemd units
 
@@ -628,7 +620,7 @@ systemctl enable --now perfsonar-testpoint.service perfsonar-certbot.service
 systemctl status perfsonar-testpoint.service perfsonar-certbot.service --no-pager podman ps
 ``` text
 
-#### 3) Obtain your first Let's Encrypt certificate (one-time)
+## 3) Obtain your first Let's Encrypt certificate (one-time)
 
 Use Certbot in standalone mode to obtain the initial certificates. The perfsonar-testpoint image is patched to NOT
 listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.
@@ -691,7 +683,7 @@ Check the logs to verify the SSL config was patched:
 
 You should see output confirming the certificate paths were updated.
 
-#### 4) Restart the certbot sidecar for automatic renewals
+### 4) Restart the certbot sidecar for automatic renewals
 
 Now that certificates are in place, restart the certbot sidecar to enable automatic renewals:
 
@@ -749,8 +741,7 @@ entrypoint-wrapper.sh not found`
 
 **Fix:** Run the Step 2 bootstrap script to fetch all helper scripts:
 
-```bash curl -fsSL \ https://raw.githubusercontent.com/osg-
-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ | bash -s -- /opt/perfsonar-tp
+```bash curl -fsSL \ https://raw.githubusercontent.com/osghtc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ | bash -s -- /opt/perfsonar-tp
 ``` text
 
 Then verify the entrypoint wrapper exists:
@@ -1189,8 +1180,7 @@ systemctl stop perfsonar-testpoint.service systemctl disable perfsonar-testpoint
 
 # Install new systemd units
 
-curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-
-units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemdunits.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
 
 # For testpoint only:
 
@@ -1271,8 +1261,7 @@ systemctl stop perfsonar-certbot.service
 
 # Download and install updated systemd units
 
-curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-
-units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemdunits.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
 
 # Install with certbot support
 
@@ -1319,7 +1308,7 @@ ausearch -m avc -ts recent > /tmp/selinux-denials.txt
 
 - If persistent issues, consider creating custom SELinux policy or running in permissive mode
 
-### Networking Issues
+## Networking Issues
 
 ??? failure "Policy-based routing not working correctly"
 
@@ -1389,7 +1378,7 @@ podman exec -it perfsonar-testpoint cat /etc/resolv.conf
 
 - Verify forward A/AAAA records match reverse PTR records
 
-### Certificate Issues
+## Certificate Issues
 
 ??? failure "Let's Encrypt certificate issuance fails"
 
@@ -1466,7 +1455,7 @@ podman restart perfsonar-testpoint
   automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are renewed. Do not use
   `--deploy-hook` parameter with full paths ending in `.sh` as certbot will append `-hook` to the filename.
 
-### perfSONAR Service Issues
+## perfSONAR Service Issues
 
 ??? failure "perfSONAR services not running"
 
@@ -1497,7 +1486,7 @@ ticker -n 50
 
 - Restart container: `podman restart perfsonar-testpoint`
 
-### Auto-Update Issues
+## Auto-Update Issues
 
 ??? failure "Auto-update not working"
 
@@ -1534,7 +1523,7 @@ systemctl start perfsonar-auto-update.service
 
 - Review script for errors and update if needed
 
-### General Debugging Tips
+## General Debugging Tips
 
 ??? tip "Useful debugging commands"
 

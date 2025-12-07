@@ -144,8 +144,7 @@ https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 
 Install quickly as follows:
 
-```bash sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-
-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh sudo chmod +x /usr/local/bin/fasterdata-
+```bash sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osghtc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh sudo chmod +x /usr/local/bin/fasterdata-
 tuning.sh
 ```text
 
