@@ -361,5 +361,5 @@ systemctl restart perfsonar-testpoint
 
 ---
 
-**Last Updated:** December 2025  
+**Last Updated:** December 2025
 **For issues:** [troubleshooter landing](personas/troubleshoot/landing.md) or [support contacts](#essential-contacts)

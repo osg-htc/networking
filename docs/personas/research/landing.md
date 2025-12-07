@@ -84,7 +84,7 @@ The perfSONAR network consists of:
 - JSON endpoints for direct queries
 - Available at: University of Chicago and University of Nebraska instances
 
-#### Example query:
+#### Example query
 
 ```bash
 curl -X GET "elasticsearch-server:9200/perfsonar-testpoint/_search" \

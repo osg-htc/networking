@@ -2,14 +2,12 @@
 title: Quick Deploy 1.1.0
 ---
 
-Release 1.1.0 — 2025-11-08
-===========================
+# Release 1.1.0 — 2025-11-08
 
 This release collects small documentation/tooling updates to the Quick Deploy
 guide and the perfSONAR tools bundle.
 
-Highlights
----------
+## Highlights
 
 - Deprecation: `perfSONAR-extract-lsregistration.sh` has been deprecated and
   removed from active maintenance. A short DEPRECATION.md explains the rationale
@@ -25,8 +23,7 @@ Highlights
 - Container image references in the Quick Deploy examples continue to point
   at `hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production`.
 
-Notes for maintainers
----------------------
+## Notes for maintainers
 
 - The repository now contains a `DEPRECATION.md` alongside the deprecated
   script (which is replaced by a stub that emits the warning). If you want to
@@ -38,8 +35,7 @@ Notes for maintainers
   directory, create a SHA256 (and optionally a GPG detached signature), and
   upload the assets to the release.
 
-How to publish this release (suggested sequence)
------------------------------------------------
+## How to publish this release (suggested sequence)
 
 1. Review the unstaged changes locally. If you accept them, commit them:
 

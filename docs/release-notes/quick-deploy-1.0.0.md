@@ -2,8 +2,7 @@
 
 Release date: 2025-11-08
 
-Summary
--------
+## Summary
 
 This release packages the Quick Deploy documentation for perfSONAR Testpoint into a
 formal v1.0.0 release. It contains the following user-facing changes and quality-of-life
@@ -17,19 +16,16 @@ improvements:
 - Add site versions metadata (`docs/versions.json`) and make this release available as `1.00` in the version selector.
 - Minor doc fixes and mkdocs rebuild to ensure consistent rendering.
 
-Testing and verification
-------------------------
+## Testing and verification
 
 - The site was rebuilt locally with `mkdocs build` and previewed to verify the Quick Deploy page renders and the helper script is linked.
 - The helper script was tested for basic execution path (no destructive operations) by ensuring it can be created and marked executable.
 
-Notes for reviewers
--------------------
+## Notes for reviewers
 
 - The release touches documentation only; there are no code or runtime behavior changes beyond helper scripts intended for operator convenience.
 - Reviewers should confirm the image reference change and the helper script usage are correct for site deployment processes.
 
-How to roll back
-----------------
+## How to roll back
 
 If you need to revert to the prior doc state, checkout the `master` commit prior to this branch and reapply changes selectively. The previous documented build is available as version `0.9` in `docs/versions.json`.

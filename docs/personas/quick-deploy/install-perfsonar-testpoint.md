@@ -28,7 +28,7 @@ If replacing an existing instance, you may want to back up `/etc/perfsonar/` fil
     chmod 0755 /tmp/update-lsreg.sh
 
     ```
-    
+
     Use the downloaded tool to extract a restore script:
 
     ```bash
@@ -242,7 +242,7 @@ An optional destructive mode `--rebuild-all` performs the original full workflow
         When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script invocation.
 
         **If SSH connection drops during network reconfiguration:**
-        
+
         1. Access via BMC/iLO/iDRAC console or physical console
         2. Review `/var/log/perfSONAR-multi-nic-config.log` for errors
         3. Check network state with `nmcli connection show` and `ip addr`
@@ -345,7 +345,7 @@ If any prerequisite is missing, the script skips that component and continues.
 
     ??? tip "Preview nftables rules before applying"
         You can preview the fully rendered nftables rules (no changes are made):
-    
+
         ```bash
         /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
         ```
@@ -421,7 +421,7 @@ Prepare the pSConfig directory and a minimal compose file. No other host bind-mo
 mkdir -p /opt/perfsonar-tp/psconfig
 ```
 
-Download a ready-made compose file (or copy it manually):  
+Download a ready-made compose file (or copy it manually):
 Browse: [repo view](https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
 
 ```bash
@@ -435,7 +435,7 @@ Edit the `docker-compose.yml` as desired.
 Bring it up:
 
 ```bash
-(cd /opt/perfsonar-tp; podman-compose up -d) 
+(cd /opt/perfsonar-tp; podman-compose up -d)
 ```
 
 Verify the container is running and healthy:
@@ -448,14 +448,14 @@ The container should show `healthy` status. The healthcheck monitors Apache HTTP
 
 That's it for the testpoint-only mode. Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
 
-#### Ensure containers restart automatically on reboot (systemd units - REQUIRED)
+#### Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)
 
 !!! warning "podman-compose limitation with systemd containers"
 
     The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always`
     flag to function correctly. **podman-compose does not support this flag**, which causes
     containers to crash-loop after reboot with exit code 255.
-    
+
     You **must** use the systemd unit approach below instead of relying on compose alone.
 
 Install the provided systemd units to manage containers with proper systemd support:
@@ -532,7 +532,7 @@ Verify seeding succeeded:
 
 ls -la /opt/perfsonar-tp/psconfig
 
-# Should show index.html and perfsonar/ directory  
+# Should show index.html and perfsonar/ directory
 
 ls -la /var/www/html
 
@@ -545,14 +545,14 @@ ls -la /etc/apache2
 
     If SELinux is enforcing, the `:Z` and `:z` options in the compose files will cause Podman to
     relabel the host paths when containers start. No manual `chcon` commands are required.
-    
+
     **SELinux Volume Labels:**
-    
+
     - `:Z` (uppercase) - Exclusive access. Podman creates a unique SELinux label for this volume that only this specific container can access. Use for volumes that should not be shared between containers.
     - `:z` (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.
-    
+
     In our compose files:
-    
+
     - `/etc/letsencrypt:/etc/letsencrypt:Z` - Exclusive to testpoint container
     - `/var/www/html:/var/www/html:z` - Shared between testpoint and certbot containers
     - `/etc/apache2:/etc/apache2:Z` - Exclusive to testpoint container
@@ -607,14 +607,14 @@ podman-compose up -d
 At this point, the testpoint is running with self-signed certificates. The certbot container is also
 running but won't renew anything until you obtain the initial certificates.
 
-#### Ensure containers restart automatically on reboot (systemd units - REQUIRED)
+#### Ensure containers restart automatically on reboot (systemd units for testpoint & certbot - REQUIRED)
 
 !!! warning "podman-compose limitation with systemd containers"
 
     The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always`
     flag to function correctly. **podman-compose does not support this flag**, which causes
     containers to crash-loop after reboot with exit code 255.
-    
+
     You **must** use the systemd unit approach below instead of relying on compose alone.
 
 Install and enable the systemd units so containers start on boot with proper systemd support:
@@ -665,14 +665,14 @@ podman run --rm --net=host \
 ??? info "Certbot command explained"
 
     **Podman options:**
-    
+
     - `--rm` - Remove container after it exits
     - `--net=host` - Use host network (allows binding port 80)
     - `-v /etc/letsencrypt:/etc/letsencrypt:Z` - Mount certificate storage with exclusive SELinux label
     - `-v /var/www/html:/var/www/html:Z` - Mount webroot for HTTP-01 challenge
-    
+
     **Certbot options:**
-    
+
     - `certonly` - Obtain certificate only, don't install it
     - `--standalone` - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge
     - `--agree-tos` - Agree to Let's Encrypt Terms of Service
@@ -891,20 +891,20 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
             cat > /usr/local/bin/perfsonar-auto-update.sh << 'EOF'
             #!/bin/bash
             # perfsonar-auto-update.sh - Check for and apply container image updates
-            
+
             set -e
-            
+
             COMPOSE_DIR="/opt/perfsonar-tp"
             LOGFILE="/var/log/perfsonar-auto-update.log"
-            
+
             log() {
                 echo "$(date -Iseconds) $*" | tee -a "$LOGFILE"
             }
-            
+
             cd "$COMPOSE_DIR"
-            
+
             log "Checking for image updates..."
-            
+
             # Pull latest images
             if podman-compose pull 2>&1 | tee -a "$LOGFILE" | grep -q "Downloaded newer image"; then
                 log "New images found - recreating containers..."
@@ -914,7 +914,7 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
                 log "No updates available"
             fi
             EOF
-            
+
             chmod +x /usr/local/bin/perfsonar-auto-update.sh
             ```
 
@@ -925,11 +925,11 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
             [Unit]
             Description=perfSONAR Container Auto-Update
             After=network-online.target
-            
+
             [Service]
             Type=oneshot
             ExecStart=/usr/local/bin/perfsonar-auto-update.sh
-            
+
             [Install]
             WantedBy=multi-user.target
             EOF
@@ -941,12 +941,12 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
             cat > /etc/systemd/system/perfsonar-auto-update.timer << 'EOF'
             [Unit]
             Description=perfSONAR Container Auto-Update Timer
-            
+
             [Timer]
             OnCalendar=daily
             RandomizedDelaySec=1h
             Persistent=true
-            
+
             [Install]
             WantedBy=timers.target
             EOF
@@ -994,10 +994,10 @@ Perform these checks before handing the host over to operations:
         ```bash
         # Check Podman service is available
         systemctl status podman
-        
+
         # Verify containers are managed by compose
         cd /opt/perfsonar-tp && podman-compose ps
-        
+
         # Alternative: check containers directly
         podman ps --filter name=perfsonar
         ```
@@ -1011,13 +1011,13 @@ Perform these checks before handing the host over to operations:
         ```bash
         # Check all containers are running and healthy
         podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-        
+
         # Check perfsonar-testpoint logs for errors
         podman logs perfsonar-testpoint --tail 50
-        
+
         # If using Let's Encrypt, check certbot logs
         podman logs certbot --tail 20 2>/dev/null || echo "Certbot container not present (testpoint-only mode)"
-        
+
         # Verify services inside container are running
         podman exec perfsonar-testpoint systemctl status apache2 psconfig-pscheduler-agent --no-pager
         ```
@@ -1048,14 +1048,14 @@ Perform these checks before handing the host over to operations:
         ```bash
         # Check nftables firewall rules
         nft list ruleset | grep perfsonar
-        
+
         # Check fail2ban status (if installed in Step 4)
         if command -v fail2ban-client >/dev/null 2>&1; then
             fail2ban-client status
         else
             echo "fail2ban not installed (optional)"
         fi
-        
+
         # Check for recent SELinux denials
         if command -v ausearch >/dev/null 2>&1; then
             ausearch --message AVC --just-one
@@ -1075,7 +1075,7 @@ Perform these checks before handing the host over to operations:
         ```bash
         # Check certificate via HTTPS connection
         echo | openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> 2>/dev/null | openssl x509 -noout -dates -issuer
-        
+
         # Alternative: Check certificate files directly
         sudo openssl x509 -in /etc/letsencrypt/live/<SERVER_FQDN>/cert.pem -noout -dates -issuer
         ```
@@ -1111,23 +1111,23 @@ Perform these checks before handing the host over to operations:
 ??? failure "Container won't start or exits immediately"
 
     **Symptoms:** `podman ps` shows no running containers, or container exits shortly after starting.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check container logs
     podman logs perfsonar-testpoint
-    
+
     # Check for systemd initialization errors
     podman logs perfsonar-testpoint 2>&1 | grep -i "failed\|error"
-    
+
     # Verify compose file syntax
     cd /opt/perfsonar-tp
     podman-compose config
     ```
-    
+
     **Common causes:**
-    
+
     - Missing entrypoint wrapper: Ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
     - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
     - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
@@ -1136,23 +1136,23 @@ Perform these checks before handing the host over to operations:
 ??? failure "Container won't start or exits immediately"
 
     **Symptoms:** `podman ps` shows no running containers, or container exits shortly after starting.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check container logs
     podman logs perfsonar-testpoint
-    
+
     # Check for systemd initialization errors
     podman logs perfsonar-testpoint 2>&1 | grep -i "failed\|error"
-    
+
     # Verify compose file syntax
     cd /opt/perfsonar-tp
     podman-compose config
     ```
-    
+
     **Common causes:**
-    
+
     - Missing entrypoint wrapper: Ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
     - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
     - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
@@ -1161,59 +1161,59 @@ Perform these checks before handing the host over to operations:
 ??? failure "Container crashes after reboot with exit code 255"
 
     **Symptoms:** Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts with exit code 255.
-    
+
     **Cause:** The perfSONAR testpoint image runs systemd internally but podman-compose doesn't support the `--systemd=always` flag required for proper systemd operation in containers.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check container status
     podman ps -a
-    
+
     # Check systemd service status
     systemctl status perfsonar-testpoint.service
-    
+
     # View recent container logs
     podman logs perfsonar-testpoint --tail 100
-    
+
     # Check if using compose-based service (BAD)
     grep -A5 "ExecStart" /etc/systemd/system/perfsonar-testpoint.service
     ```
-    
+
     **Solution:**
-    
+
     Replace the compose-based systemd service with proper systemd units that use `podman run --systemd=always`:
-    
+
     ```bash
     # Stop and disable old service
     systemctl stop perfsonar-testpoint.service
     systemctl disable perfsonar-testpoint.service
-    
+
     # Install new systemd units
     curl -fsSL \
         https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
         -o /tmp/install-systemd-units.sh
     chmod 0755 /tmp/install-systemd-units.sh
-    
+
     # For testpoint only:
     /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp
-    
+
     # For testpoint + certbot:
     /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
-    
+
     # Enable and start
     systemctl enable --now perfsonar-testpoint.service
-    
+
     # If using certbot:
     systemctl enable --now perfsonar-certbot.service
-    
+
     # Verify containers are running
     podman ps
     curl -kI https://127.0.0.1/
     ```
-    
+
     **Verification:**
-    
+
     After installing the new units, the testpoint should:
     - Start successfully on boot
     - Run systemd properly inside the container
@@ -1223,76 +1223,76 @@ Perform these checks before handing the host over to operations:
 ??? failure "Certbot service fails with 'Unable to open config file' error"
 
     **Symptoms:** `perfsonar-certbot.service` fails immediately after starting with exit code 2. Logs show: `certbot: error: Unable to open config file: trap exit TERM; while...`
-    
+
     **Cause:** The certbot container image has a built-in entrypoint that expects certbot commands directly. When using a shell loop for renewal, the entrypoint tries to parse the shell command as a certbot config file, causing this error.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check certbot service status
     systemctl status perfsonar-certbot.service
-    
+
     # View detailed logs
     journalctl -u perfsonar-certbot.service -n 50
-    
+
     # Check for the error in logs
     journalctl -u perfsonar-certbot.service | grep "Unable to open config file"
-    
+
     # Verify service file configuration
     grep -A5 "ExecStart" /etc/systemd/system/perfsonar-certbot.service
     ```
-    
+
     **Solution:**
-    
+
     The certbot service needs two flags:
     - `--systemd=always` for proper systemd integration and reboot persistence
     - `--entrypoint=/bin/sh` to override the built-in entrypoint
-    
+
     Re-run the installation script to get the fixed version:
-    
+
     ```bash
     # Stop current service
     systemctl stop perfsonar-certbot.service
-    
+
     # Download and install updated systemd units
     curl -fsSL \
         https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
         -o /tmp/install-systemd-units.sh
     chmod 0755 /tmp/install-systemd-units.sh
-    
+
     # Install with certbot support
     /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
-    
+
     # Start the fixed service
     systemctl daemon-reload
     systemctl start perfsonar-certbot.service
-    
+
     # Verify it's running
     systemctl status perfsonar-certbot.service
     podman ps | grep certbot
     ```
-    
+
     **Expected result:** The certbot container should be running (not exiting) and the service should be in "active (running)" state.
 
 ??? failure "SELinux denials blocking container operations"
 
     **Symptoms:** Container starts but services fail, permission denied errors in logs.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check for recent SELinux denials
     ausearch -m avc -ts recent
-    
+
     # Temporarily set to permissive for testing
     setenforce 0
-    
+
     # Test if issue resolves, then check audit log
     ausearch -m avc -ts recent > /tmp/selinux-denials.txt
     ```
-    
+
     **Solutions:**
-    
+
     - Verify volume labels are correct (`:Z` for exclusive, `:z` for shared)
     - Recreate containers to reapply SELinux labels: `podman-compose down && podman-compose up -d`
     - If persistent issues, consider creating custom SELinux policy or running in permissive mode
@@ -1302,28 +1302,28 @@ Perform these checks before handing the host over to operations:
 ??? failure "Policy-based routing not working correctly"
 
     **Symptoms:** Traffic not using expected interfaces, routing to wrong gateway.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check routing rules
     ip rule show
-    
+
     # Check routing tables
     ip route show table all
-    
+
     # Test specific route lookup
     ip route get <destination-ip>
-    
+
     # Check NetworkManager connections
     nmcli connection show
-    
+
     # Review PBR script log
     tail -100 /var/log/perfSONAR-multi-nic-config.log
     ```
-    
+
     **Solutions:**
-    
+
     - Verify `/etc/perfSONAR-multi-nic-config.conf` has correct IPs and gateways
     - Reapply configuration: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
     - Reboot if rules are not being applied correctly
@@ -1332,22 +1332,22 @@ Perform these checks before handing the host over to operations:
 ??? failure "DNS resolution failing for test endpoints"
 
     **Symptoms:** perfSONAR tests fail with "unknown host" or DNS errors.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Test DNS resolution from container
     podman exec -it perfsonar-testpoint dig <remote-testpoint>
-    
+
     # Check container's resolv.conf
     podman exec -it perfsonar-testpoint cat /etc/resolv.conf
-    
+
     # Verify forward and reverse DNS
     /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
     ```
-    
+
     **Solutions:**
-    
+
     - Ensure DNS servers are correctly configured on host
     - Fix missing PTR records in DNS zones
     - Verify forward A/AAAA records match reverse PTR records
@@ -1357,19 +1357,19 @@ Perform these checks before handing the host over to operations:
 ??? failure "Let's Encrypt certificate issuance fails"
 
     **Symptoms:** Certbot fails with "Failed to authenticate" or "Connection refused" errors.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check if port 80 is open
     nft list ruleset | grep "80"
-    
+
     # Verify Apache is NOT listening on port 80 in container
     podman exec perfsonar-testpoint netstat -tlnp | grep :80
-    
+
     # Test port 80 accessibility from external host
     curl -v http://<your-fqdn>/
-    
+
     # Run certbot in verbose mode
     podman run --rm --net=host \
         -v /etc/letsencrypt:/etc/letsencrypt:Z \
@@ -1377,9 +1377,9 @@ Perform these checks before handing the host over to operations:
         docker.io/certbot/certbot:latest certonly \
         --standalone -d <SERVER_FQDN> -m <EMAIL> --dry-run -vvv
     ```
-    
+
     **Common causes:**
-    
+
     - Port 80 blocked by firewall: Add with `perfSONAR-install-nftables.sh --ports=80,443`
     - Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly
     - DNS not propagated: Wait for DNS changes to propagate globally
@@ -1388,31 +1388,31 @@ Perform these checks before handing the host over to operations:
 ??? failure "Certificate not loaded after renewal"
 
     **Symptoms:** Old certificate still in use after automatic renewal.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check certificate files
     ls -la /etc/letsencrypt/live/<fqdn>/
-    
+
     # Verify deploy hook is configured
     podman logs certbot 2>&1 | grep "deploy hook"
-    
+
     # Check if container restarted
     podman ps --format 'table {{.Names}}\t{{.Status}}'
-    
+
     # Manually restart testpoint
     podman restart perfsonar-testpoint
     ```
-    
+
     **Solutions:**
-    
+
     - Verify deploy hook script exists and is executable: `/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh`
     - Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
     - Verify Podman socket is mounted in certbot container: `/run/podman/podman.sock`
     - Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
     - Manually restart testpoint after renewals if deploy hook fails: `podman restart perfsonar-testpoint`
-    
+
     **Note:** Certbot automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are renewed. Do not use `--deploy-hook` parameter with full paths ending in `.sh` as certbot will append `-hook` to the filename.
 
 ### perfSONAR Service Issues
@@ -1420,22 +1420,22 @@ Perform these checks before handing the host over to operations:
 ??? failure "perfSONAR services not running"
 
     **Symptoms:** Web interface not accessible, tests not running.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check service status inside container
     podman exec perfsonar-testpoint systemctl status apache2
     podman exec perfsonar-testpoint systemctl status pscheduler-ticker
     podman exec perfsonar-testpoint systemctl status owamp-server
-    
+
     # Check for errors in service logs
     podman exec perfsonar-testpoint journalctl -u apache2 -n 50
     podman exec perfsonar-testpoint journalctl -u pscheduler-ticker -n 50
     ```
-    
+
     **Solutions:**
-    
+
     - Restart services inside container: `podman exec perfsonar-testpoint systemctl restart apache2`
     - Check Apache SSL configuration was patched correctly
     - Verify certificates are in place: `ls -la /etc/letsencrypt/live/`
@@ -1446,26 +1446,26 @@ Perform these checks before handing the host over to operations:
 ??? failure "Auto-update not working"
 
     **Symptoms:** Containers not updating despite new images available.
-    
+
     **Diagnostic steps:**
-    
+
     ```bash
     # Check timer status
     systemctl status perfsonar-auto-update.timer
     systemctl list-timers perfsonar-auto-update.timer
-    
+
     # Check service logs
     journalctl -u perfsonar-auto-update.service -n 100
-    
+
     # Check update log
     tail -50 /var/log/perfsonar-auto-update.log
-    
+
     # Manually test update
     systemctl start perfsonar-auto-update.service
     ```
-    
+
     **Solutions:**
-    
+
     - Enable timer if not active: `systemctl enable --now perfsonar-auto-update.timer`
     - Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
     - Check podman-compose is installed and working
@@ -1476,44 +1476,44 @@ Perform these checks before handing the host over to operations:
 ??? tip "Useful debugging commands"
 
     **Container management:**
-    
+
     ```bash
     # View all containers (running and stopped)
     podman ps -a
-    
+
     # View container resource usage
     podman stats
-    
+
     # Enter container for interactive debugging
     podman exec -it perfsonar-testpoint /bin/bash
-    
+
     # View compose configuration
     cd /opt/perfsonar-tp && podman-compose config
     ```
-    
+
     **Networking:**
-    
+
     ```bash
     # Check which process is listening on a port
     ss -tlnp | grep <port>
-    
+
     # Test connectivity to remote testpoint
     ping <remote-ip>
     traceroute <remote-ip>
-    
+
     # Check nftables rules
     nft list ruleset
     ```
-    
+
     **Logs:**
-    
+
     ```bash
     # System journal for container runtime
     journalctl -u podman -n 100
-    
+
     # All logs from a container
     podman logs perfsonar-testpoint --tail=100
-    
+
     # Follow logs in real-time
     podman logs -f perfsonar-testpoint
     ```

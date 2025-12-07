@@ -1,20 +1,17 @@
-perfSONAR multi-NIC NetworkManager configuration
-===============================================
+# perfSONAR multi-NIC NetworkManager configuration
 
 This directory contains `perfSONAR-pbr-nm.sh`, a Bash script to configure
 static IPv4/IPv6 addressing and per-NIC source-based routing via NetworkManager
 (nmcli).
 
-Quick overview
---------------
+## Quick overview
 
 - Script: `perfSONAR-pbr-nm.sh`
 - Script: `fasterdata-tuning.sh` (Fasterdata audit/apply host tuning script)
 - Config file: `/etc/perfSONAR-multi-nic-config.conf`
 - Log file: `/var/log/perfSONAR-multi-nic-config.log`
 
-Install helper
---------------
+## Install helper
 
 A small helper is provided to populate `/opt/perfsonar-tp/tools_scripts` from
 this repository using a shallow sparse checkout. It copies only the
@@ -24,8 +21,7 @@ this repository using a shallow sparse checkout. It copies only the
 - Purpose: idempotent installer for `/opt/perfsonar-tp/tools_scripts`
 - Options: `--dry-run` (preview), `--skip-testpoint` (don't clone testpoint repo)
 
-Systemd service installer
---------------------------
+## Systemd service installer
 
 A helper script is provided to install and enable a systemd service for
 automatic container restart on boot. This ensures perfSONAR testpoint containers
@@ -52,8 +48,7 @@ After installation:
 - Use `systemctl start|stop|restart|status perfsonar-testpoint` to manage
 - View logs with `journalctl -u perfsonar-testpoint -f`
 
-Integration tips
-----------------
+## Integration tips
 
 - Orchestrated installs: If you use `perfSONAR-orchestrator.sh`, you can run the systemd installer after the compose stack is up so containers start on boot. Example:
 
@@ -66,8 +61,7 @@ Integration tips
 
 - Updating compose files: Edit `/opt/perfsonar-tp/docker-compose.yml` and run `systemctl restart perfsonar-testpoint.service` to apply changes cleanly.
 
-Usage examples
---------------
+## Usage examples
 
 Preview what would happen (safe):
 
@@ -88,13 +82,11 @@ skip cloning with:
 bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
 ```
 
-Fasterdata host tuning script
------------------------------
+## Fasterdata host tuning script
 - Script: `fasterdata-tuning.sh` — audit/apply host & NIC tuning (ESnet Fasterdata-aligned) for EL9 systems
 - Path: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
-Download
---------
+## Download
 You can download the raw script from the GitHub repo (master branch):
 
 ```
@@ -107,16 +99,14 @@ Or once the site is built, from the site URL:
 https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 ```
 
-Quick install
--------------
+## Quick install
 ```bash
 # Download and install in /usr/local/bin
 sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
 sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 ```
 
-Verify checksum
----------------
+## Verify checksum
 You can verify the script integrity with the provided SHA256 file:
 
 ```bash
@@ -124,16 +114,14 @@ curl -L -o /tmp/fasterdata-tuning.sh.sha256 https://raw.githubusercontent.com/os
 sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
 ```
 
-Optional flags (apply mode only)
---------------------------------
+## Optional flags (apply mode only)
 - `--apply-iommu`: Update GRUB `GRUB_CMDLINE_LINUX` to add vendor + `iommu=pt` and regenerate grub (requires `--mode apply` and root).
 - `--apply-smt on|off`: Change SMT state at runtime; use `--persist-smt` to also persist via GRUB edits.
 - `--persist-smt`: Persist SMT change by adding/removing `nosmt` in the kernel cmdline.
 - `--yes`: Non-interactive confirmation for apply flags.
 - `--dry-run`: Preview the changes that would be made (GRUB edits and sysfs writes) without applying them. Use for validation and audits.
 
-Usage examples
---------------
+## Usage examples
 
 Audit (default) a measurement host:
 ```bash
@@ -145,13 +133,11 @@ Apply tuning (requires root):
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
 ```
 
-Notes
------
+## Notes
 - Shows a `Host Info` summary and performs various checks (sysctl, ethtool, drivers, SMT, IOMMU). IOMMU changes require GRUB edits and reboot; SMT toggles can be done via `/sys/devices/system/cpu/smt/control`.
 - In apply mode the script writes `/etc/sysctl.d/90-fasterdata.conf` and writes/enables a systemd `ethtool-persist.service` to persist NIC settings.
 
-Requirements
-------------
+## Requirements
 
 - Must be run as root. The script now enforces running as root early in
   execution and will exit if run as a non-privileged user. Run it with sudo
@@ -160,8 +146,7 @@ Requirements
   `nmcli` and will abort if it is not installed. Install NetworkManager via
   your distribution's package manager before running.
 
-Dependencies and package install hints
--------------------------------------
+## Dependencies and package install hints
 
 The scripts in this directory call a number of external commands. Install
 these packages (or their distro equivalents) before using the tools below.
@@ -215,16 +200,14 @@ containers (e.g., `podman ps` or `docker ps` works as root).
 If `rsync` is not available the scripts will attempt a `cp -a` fallback, but
 installing `rsync` provides safer, more robust backups.
 
-Safety first
-------------
+## Safety first
 
 This script will REMOVE ALL existing NetworkManager connections when run.
 Always test in a VM or console-attached host and use `--dry-run` to preview
 changes. The script creates a timestamped backup of existing connections before
 modifying anything.
 
-Compatibility and fallbacks
----------------------------
+## Compatibility and fallbacks
 
 - The script prefers to configure routing and policy rules via NetworkManager
   (`nmcli`). However, `nmcli` support for advanced `routes` entries and
@@ -236,8 +219,7 @@ Compatibility and fallbacks
   (the caller should run it with root privileges). This makes behavior
   deterministic in automation and avoids interactive sudo prompts.
 
-How to run (dry-run / debug)
-----------------------------
+## How to run (dry-run / debug)
 
 Preview what the script would do without changing the system:
 
@@ -266,8 +248,7 @@ bash perfSONAR-pbr-nm.sh --yes
 
 ```
 
-Gateway requirement, inference, and generator warnings
------------------------------------------------------
+## Gateway requirement, inference, and generator warnings
 
 - Any NIC with an IPv4 address should have a corresponding IPv4 gateway; likewise for IPv6. If a NIC lacks a gateway, the generator will attempt conservative inference (below). If a device has no IPv4 or IPv6 gateway (e.g., a management-only NIC), the generator will intentionally skip that NIC when creating an _auto-generated_ config to avoid generating unusable NetworkManager profiles unless you explicitly set the device as `DEFAULT_ROUTE_NIC`.
 - Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.
@@ -317,13 +298,11 @@ When gateways are inferred, a NOTE section is added near the bottom of the gener
 
 If gateways remain missing after inference, the generator writes a WARNING block listing the affected NICs and the script will refuse to proceed until you set the gateways.
 
-Backups and safety
-------------------
+## Backups and safety
 
 - Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers `rsync` when available and falls back to `cp -a`. If the backup fails, the script aborts without removing existing configurations.
 
-Tests
------
+## Tests
 
 A small set of unit-style tests is provided under `tests/`. These are designed
 to exercise pure validation and sanitization helpers without modifying system
@@ -337,15 +316,13 @@ cd docs/perfsonar
 ./tests/run_tests.sh
 ```
 
-Notes
------
+## Notes
 
 - The script requires Bash (uses `local -n` namerefs). Run tests on a system
   with Bash 4.3+.
 - For more extensive validation, run `shellcheck -x perfSONAR-pbr-nm.sh` and
   address any issues reported.
 
-Contact
--------
+## Contact
 
 Shawn McKee (script author) — [smckee@umich.edu](mailto:smckee@umich.edu)

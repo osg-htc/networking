@@ -15,8 +15,7 @@ We have a (older) draft version of the OSG [network debugging document](network-
 
 If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at https server learn.nsrc.org/perfsonar.
 
-Information on Contacting Network Support
------------------------------------------
+## Information on Contacting Network Support
 
 There are numerous regional and campus network operations centers that have their own ticketing systems for reporting problems. I encourage you to identify how to contact your local campus network support personnel. Suggestion: try using Google with "YourUniversity network trouble ticket" as the search terms (of course substitute your university name for *YourUniversity*).
 

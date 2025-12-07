@@ -333,7 +333,7 @@ If you need finer control than host-level pacing, applications can set pacing ra
 
 // In your application code:
 int pacing_rate = 2000000000;  // 2 Gbps in bytes per second
-setsockopt(sockfd, SOL_SOCKET, SO_MAX_PACING_RATE, 
+setsockopt(sockfd, SOL_SOCKET, SO_MAX_PACING_RATE,
            &pacing_rate, sizeof(pacing_rate));
 ```
 

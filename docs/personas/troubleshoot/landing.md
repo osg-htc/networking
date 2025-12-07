@@ -5,8 +5,7 @@ description: "Triage checklist, diagnostics, and playbooks for network troublesh
 persona: troubleshoot
 owners: ["<networking-team@osg-htc.org>"]
 status: active
-tags: [troubleshoot, playbook, diagnostics]
----
+## tags: [troubleshoot, playbook, diagnostics]
 
 # 🔧 Troubleshooter — Diagnose & Fix Network Issues
 

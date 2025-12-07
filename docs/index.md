@@ -1,5 +1,4 @@
-OSG Networking Area
-===================
+# OSG Networking Area
 
 *Welcome to OSG Networking!* This is your entry point for networking in the *Open Science Grid (OSG)* and *World-wide LHC Computing Grid (WLCG)*. Whether you're deploying perfSONAR, troubleshooting network issues, or exploring our monitoring infrastructure, we've organized the documentation around common user journeys.
 
