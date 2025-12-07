@@ -378,6 +378,7 @@ TMPFILE=$(mktemp)
 cat > "$TMPFILE" <<'CONF_CONTENT'
 SCRIPT_EOF
 	# append the conf, escaping EOF delimiting
+	# shellcheck disable=SC2129
 	sed 's/^/ /' "$tmp" >> "$out"
 	cat >> "$out" <<'SCRIPT_EOF'
 CONF_CONTENT
