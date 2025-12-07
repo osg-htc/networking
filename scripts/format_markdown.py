@@ -19,7 +19,7 @@ import re
 
 
 def is_heading(line):
-    return bool(re.match(r"^#{1,6}\s+", line))
+    return bool(re.match(r"^\s*#{1,6}\s+", line))
 
 
 def is_fence(line):
