@@ -271,13 +271,13 @@ invocation.
 
 1. Access via BMC/iLO/iDRAC console or physical console
 
-  1. Review `/var/log/perfSONAR-multi-nic-config.log` for errors
+1. Review `/var/log/perfSONAR-multi-nic-config.log` for errors
 
-  1. Check network state with `nmcli connection show` and `ip addr`
+1. Check network state with `nmcli connection show` and `ip addr`
 
-  1. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
+1. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
 
-  1. Reapply config after corrections: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
+1. Reapply config after corrections: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
 
     In-place apply (recommended):
 
@@ -307,9 +307,9 @@ host, and because some measurement infrastructure and registration systems perfo
 
 - For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.
 
-  - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
+- For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
 
-  - For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
+- For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
 
 ??? example "Run the DNS checker" Validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
 
@@ -324,7 +324,7 @@ host, and because some measurement infrastructure and registration systems perfo
 
 - Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
 
-  - For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
+- For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
       script that leverages `dns.resolver` for async checks.
 
 - If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
@@ -383,9 +383,9 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
 
 - Derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf` (CIDR prefixes and addresses).
 
-  - Validates nftables rules before writing.
+- Validates nftables rules before writing.
 
-  - Outputs: rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
+- Outputs: rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
 
 ??? tip "Preview nftables rules before applying" You can preview the fully rendered nftables rules (no changes are
 made):
@@ -613,15 +613,15 @@ containers start. No manual `chcon` commands are required.
 
 - `:Z` (uppercase) - Exclusive access. Podman creates a unique SELinux label for this volume that only this specific container can access. Use for volumes that should not be shared between containers.
 
-  - `:z` (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.
+- `:z` (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.
 
     In our compose files:
 
 - `/etc/letsencrypt:/etc/letsencrypt:Z` - Exclusive to testpoint container
 
-  - `/var/www/html:/var/www/html:z` - Shared between testpoint and certbot containers
+- `/var/www/html:/var/www/html:z` - Shared between testpoint and certbot containers
 
-  - `/etc/apache2:/etc/apache2:Z` - Exclusive to testpoint container
+- `/etc/apache2:/etc/apache2:Z` - Exclusive to testpoint container
 
 #### 2) Deploy the testpoint with automatic SSL patching (recommended)
 
@@ -733,25 +733,25 @@ podman run --rm --net=host \
 
 - `--rm` - Remove container after it exits
 
-  - `--net=host` - Use host network (allows binding port 80)
+- `--net=host` - Use host network (allows binding port 80)
 
-  - `-v /etc/letsencrypt:/etc/letsencrypt:Z` - Mount certificate storage with exclusive SELinux label
+- `-v /etc/letsencrypt:/etc/letsencrypt:Z` - Mount certificate storage with exclusive SELinux label
 
-  - `-v /var/www/html:/var/www/html:Z` - Mount webroot for HTTP-01 challenge
+- `-v /var/www/html:/var/www/html:Z` - Mount webroot for HTTP-01 challenge
 
     **Certbot options:**
 
 - `certonly` - Obtain certificate only, don't install it
 
-  - `--standalone` - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge
+- `--standalone` - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge
 
-  - `--agree-tos` - Agree to Let's Encrypt Terms of Service
+- `--agree-tos` - Agree to Let's Encrypt Terms of Service
 
-  - `--non-interactive` - Don't prompt for input (required for automation)
+- `--non-interactive` - Don't prompt for input (required for automation)
 
-  - `-d <FQDN>` - Domain name(s) for the certificate (repeat for each domain/SAN)
+- `-d <FQDN>` - Domain name(s) for the certificate (repeat for each domain/SAN)
 
-  - `-m <EMAIL>` - Email for renewal notifications and account recovery
+- `-m <EMAIL>` - Email for renewal notifications and account recovery
 
 Replace:
 
@@ -816,7 +816,7 @@ patch the Apache SSL configuration after obtaining certificates.
 
 1. Use `docker-compose.testpoint-le.yml` instead of `docker-compose.testpoint-le-auto.yml`
 
-  1. After obtaining Let's Encrypt certificates, run:
+1. After obtaining Let's Encrypt certificates, run:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/patch_apache_ssl_for_letsencrypt.sh <SERVER_FQDN>
@@ -908,13 +908,13 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
 - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf`  (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
 
-  - Performs reverse DNS lookups (getent/dig) to derive FQDNs.
+- Performs reverse DNS lookups (getent/dig) to derive FQDNs.
 
-  - Deduplicates while preserving discovery order.
+- Deduplicates while preserving discovery order.
 
-  - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
+- Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
 
-  - Lists configured remotes and returns non-zero if any enrollment fails.
+- Lists configured remotes and returns non-zero if any enrollment fails.
 
 Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
 
@@ -928,9 +928,9 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
 
 - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
 
-  - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+- Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
 
-  - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
+- In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
                 `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
 
 1. **Document memberships:** update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.
@@ -1220,11 +1220,11 @@ outputs to operations:
 
 - Missing entrypoint wrapper: Ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
 
-  - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
+- SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
 
-  - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
+- Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
 
-  - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
+- Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
 
 ??? failure "Container won't start or exits immediately"
 
@@ -1248,11 +1248,11 @@ outputs to operations:
 
 - Missing entrypoint wrapper: Ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
 
-  - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
+- SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
 
-  - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
+- Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
 
-  - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
+- Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
 
 ??? failure "Container crashes after reboot with exit code 255"
 
@@ -1316,11 +1316,11 @@ with exit code 255.
 
 - Start successfully on boot
 
-  - Run systemd properly inside the container
+- Run systemd properly inside the container
 
-  - Maintain state across reboots
+- Maintain state across reboots
 
-  - Show "Up" status in `podman ps` (not "Exited" or crash-looping)
+- Show "Up" status in `podman ps` (not "Exited" or crash-looping)
 
 ??? failure "Certbot service fails with 'Unable to open config file' error"
 
@@ -1352,7 +1352,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 - `--systemd=always` for proper systemd integration and reboot persistence
 
-  - `--entrypoint=/bin/sh` to override the built-in entrypoint
+- `--entrypoint=/bin/sh` to override the built-in entrypoint
 
     Re-run the installation script to get the fixed version:
 
@@ -1402,9 +1402,9 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 - Verify volume labels are correct (`:Z` for exclusive, `:z` for shared)
 
-  - Recreate containers to reapply SELinux labels: `podman-compose down && podman-compose up -d`
+- Recreate containers to reapply SELinux labels: `podman-compose down && podman-compose up -d`
 
-  - If persistent issues, consider creating custom SELinux policy or running in permissive mode
+- If persistent issues, consider creating custom SELinux policy or running in permissive mode
 
 ### Networking Issues
 
@@ -1435,11 +1435,11 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 - Verify `/etc/perfSONAR-multi-nic-config.conf` has correct IPs and gateways
 
-  - Reapply configuration: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
+- Reapply configuration: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
 
-  - Reboot if rules are not being applied correctly
+- Reboot if rules are not being applied correctly
 
-  - Check for conflicting NetworkManager or systemd-networkd rules
+- Check for conflicting NetworkManager or systemd-networkd rules
 
 ??? failure "DNS resolution failing for test endpoints"
 
@@ -1462,9 +1462,9 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 - Ensure DNS servers are correctly configured on host
 
-  - Fix missing PTR records in DNS zones
+- Fix missing PTR records in DNS zones
 
-  - Verify forward A/AAAA records match reverse PTR records
+- Verify forward A/AAAA records match reverse PTR records
 
 ### Certificate Issues
 
@@ -1496,11 +1496,11 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 - Port 80 blocked by firewall: Add with `perfSONAR-install-nftables.sh --ports=80,443`
 
-  - Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly
+- Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly
 
-  - DNS not propagated: Wait for DNS changes to propagate globally
+- DNS not propagated: Wait for DNS changes to propagate globally
 
-  - Rate limiting: Let's Encrypt has rate limits; wait if you've hit them
+- Rate limiting: Let's Encrypt has rate limits; wait if you've hit them
 
 ??? failure "Certificate not loaded after renewal"
 
@@ -1526,13 +1526,13 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 - Verify deploy hook script exists and is executable: `/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh`
 
-  - Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
+- Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
 
-  - Verify Podman socket is mounted in certbot container: `/run/podman/podman.sock`
+- Verify Podman socket is mounted in certbot container: `/run/podman/podman.sock`
 
-  - Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
+- Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
 
-  - Manually restart testpoint after renewals if deploy hook fails: `podman restart perfsonar-testpoint`
+- Manually restart testpoint after renewals if deploy hook fails: `podman restart perfsonar-testpoint`
 
 **Note:** Certbot automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are
 renewed. Do not use `--deploy-hook` parameter with full paths ending in `.sh` as certbot will append `-hook` to the
@@ -1561,11 +1561,11 @@ filename.
 
 - Restart services inside container: `podman exec perfsonar-testpoint systemctl restart apache2`
 
-  - Check Apache SSL configuration was patched correctly
+- Check Apache SSL configuration was patched correctly
 
-  - Verify certificates are in place: `ls -la /etc/letsencrypt/live/`
+- Verify certificates are in place: `ls -la /etc/letsencrypt/live/`
 
-  - Restart container: `podman restart perfsonar-testpoint`
+- Restart container: `podman restart perfsonar-testpoint`
 
 ### Auto-Update Issues
 
@@ -1594,11 +1594,11 @@ filename.
 
 - Enable timer if not active: `systemctl enable --now perfsonar-auto-update.timer`
 
-  - Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
+- Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
 
-  - Check podman-compose is installed and working
+- Check podman-compose is installed and working
 
-  - Review script for errors and update if needed
+- Review script for errors and update if needed
 
 ### General Debugging Tips
 

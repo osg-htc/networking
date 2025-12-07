@@ -66,41 +66,41 @@ Added extensive troubleshooting appendix covering:
 
 - **Container Issues**
 
-  - Container won't start or exits immediately
+- Container won't start or exits immediately
 
-  - SELinux denials blocking operations
+- SELinux denials blocking operations
 
 - **Networking Issues**
 
-  - Policy-based routing not working
+- Policy-based routing not working
 
-  - DNS resolution failures
+- DNS resolution failures
 
 - **Certificate Issues**
 
-  - Let's Encrypt issuance failures
+- Let's Encrypt issuance failures
 
-  - Certificate not loaded after renewal
+- Certificate not loaded after renewal
 
 - **perfSONAR Service Issues**
 
-  - Services not running
+- Services not running
 
-  - Apache/pScheduler/OWAMP errors
+- Apache/pScheduler/OWAMP errors
 
 - **Auto-Update Issues**
 
-  - Timer not running
+- Timer not running
 
-  - Images not updating
+- Images not updating
 
 - **General Debugging Tips**
 
-  - Container management commands
+- Container management commands
 
-  - Networking diagnostic commands
+- Networking diagnostic commands
 
-  - Log inspection commands
+- Log inspection commands
 
 ### Recovery Instructions
 

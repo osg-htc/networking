@@ -35,25 +35,25 @@ command as a config file path.
 
 - `docs/perfsonar/tools_scripts/install-systemd-units.sh`
 
-  - Added `--systemd=always` flag to certbot service
+- Added `--systemd=always` flag to certbot service
 
-  - Added `--entrypoint=/bin/sh` to override certbot container entrypoint
+- Added `--entrypoint=/bin/sh` to override certbot container entrypoint
 
-  - Changed trap handling from `trap exit TERM` to `trap 'exit 0' TERM` for cleaner shutdown
+- Changed trap handling from `trap exit TERM` to `trap 'exit 0' TERM` for cleaner shutdown
 
-  - Fixed command syntax to use `-c` flag properly with entrypoint override
+- Fixed command syntax to use `-c` flag properly with entrypoint override
 
-  - Removed `--deploy-hook` parameter from `certbot renew` command to use automatic hook discovery
+- Removed `--deploy-hook` parameter from `certbot renew` command to use automatic hook discovery
 
 ### Documentation Updates
 
 - `docs/personas/quick-deploy/install-perfsonar-testpoint.md`
 
-  - Added new troubleshooting section: "Certbot service fails with 'Unable to open config file' error"
+- Added new troubleshooting section: "Certbot service fails with 'Unable to open config file' error"
 
-  - Includes diagnostic steps, root cause explanation, and solution
+- Includes diagnostic steps, root cause explanation, and solution
 
-  - Provides verification commands to confirm the fix
+- Provides verification commands to confirm the fix
 
 ## Impact
 

@@ -37,33 +37,33 @@ The perfSONAR network consists of:
 
 1. **Measurement** (2-minute intervals)
 
-  - perfSONAR testpoints run periodic latency, bandwidth, traceroute tests
+- perfSONAR testpoints run periodic latency, bandwidth, traceroute tests
 
-    - Tests configured by central mesh at `psconfig.opensciencegrid.org`
+- Tests configured by central mesh at `psconfig.opensciencegrid.org`
 
 1. **Collection** (near real-time)
 
-  - Results sent to central Elasticsearch via HTTP-Archiver
+- Results sent to central Elasticsearch via HTTP-Archiver
 
-    - Logstash processes and enriches measurement metadata
+- Logstash processes and enriches measurement metadata
 
 1. **Storage** (permanent)
 
-  - **[OSG Network Datastore](../../osg-network-services.md)** — distributed Elasticsearch storage
+- **[OSG Network Datastore](../../osg-network-services.md)** — distributed Elasticsearch storage
 
-    - JSON API for direct programmatic access
+- JSON API for direct programmatic access
 
 1. **Analysis** (on-demand)
 
-  - **[OSG Analytics Platform](../../osg-network-analytics.md)** — Kibana dashboards + Jupyter notebooks
+- **[OSG Analytics Platform](../../osg-network-analytics.md)** — Kibana dashboards + Jupyter notebooks
 
-    - Custom queries, time-series analysis, anomaly detection
+- Custom queries, time-series analysis, anomaly detection
 
 1. **Visualization** (real-time dashboards)
 
-  - **[WLCG Dashboards](https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network)** — performance monitoring
+- **[WLCG Dashboards](https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network)** — performance monitoring
 
-    - Site-to-site path performance, latency trends, bandwidth utilization
+- Site-to-site path performance, latency trends, bandwidth utilization
 
 ---
 

@@ -44,11 +44,11 @@ mkdocs build --clean -d site
 
 1. CI should run the following steps on PRs and pushes to `master`:
 
-  - `mkdocs build --clean` (fail on build errors)
+- `mkdocs build --clean` (fail on build errors)
 
-    - Run link checks and the `verify-site-scripts.sh` script to assert docs/site parity for changed files (optional if not keeping `site/` in repo)
+- Run link checks and the `verify-site-scripts.sh` script to assert docs/site parity for changed files (optional if not keeping `site/` in repo)
 
-   - Run `autoupdate-scripts-sha.sh` to update `*.sha256` files when scripts change in docs.
+- Run `autoupdate-scripts-sha.sh` to update `*.sha256` files when scripts change in docs.
 
 1. CI publish step (if you want to auto-deploy): use `peaceiris/actions-gh-pages` or `JamesIves/github-pages-deploy-action` to publish the `site/` directory to the `gh-pages` branch or a host.
 

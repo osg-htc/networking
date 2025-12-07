@@ -20,9 +20,9 @@ inside the container.
 
 - Local mode: operates directly on the host filesystem without a container.
 
-  - Key flags: `--local`, `--conf PATH` (default: `/etc/perfsonar/lsregistrationdaemon.conf`).
+- Key flags: `--local`, `--conf PATH` (default: `/etc/perfsonar/lsregistrationdaemon.conf`).
 
-  - Attempts a best-effort restart of `lsregistrationdaemon` on the host.
+- Attempts a best-effort restart of `lsregistrationdaemon` on the host.
 
 Examples:
 

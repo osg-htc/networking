@@ -39,8 +39,14 @@ def normalize_list_marker(line):
     m2 = re.match(r"^(\s*)([-*+])(\s+)(.*)$", line)
     if m2:
         indent, marker, spaces, rest = m2.groups()
+        # normalize to a single space after the marker
         return f"{indent}{marker} {rest.rstrip()}\n"
     return line
+
+
+def enforce_list_marker_spacing(line):
+    # Convert instances of '-   ' or '*   ' to single space after marker
+    return re.sub(r"^(\s*[-*+])(\s{2,})(.*)$", r"\1 \3", line)
 
 
 def add_fence_language(fence_line, inner_lines):
@@ -76,7 +82,11 @@ def wrap_paragraph(text, width=120):
             buf.append(line)
     if buf:
         para = ' '.join(l.strip() for l in buf)
-        out_lines.append(textwrap.fill(para, width=width))
+        # Skip wrapping if a paragraph contains a URL or an email address to avoid breaking links
+        if re.search(r"https?://|mailto:|@\w+\.", para):
+            out_lines.append(para)
+        else:
+            out_lines.append(textwrap.fill(para, width=width))
     return '\n'.join(out_lines)
 
 
@@ -179,6 +189,9 @@ def format_file(path):
         if is_heading(line):
             # strip leading whitespace before a heading so it starts on column 0
             line = line.lstrip()
+            # remove trailing punctuation like '.' from headings (MD026)
+            # Be conservative: only remove a trailing '.' at the end of heading line
+            line = re.sub(r"\s+[\.]+$", '', line)
             if new_lines and new_lines[-1].strip() != '':
                 new_lines.append('')
             new_lines.append(line.rstrip())
@@ -200,6 +213,8 @@ def format_file(path):
             if new_lines and new_lines[-1].strip() != '':
                 new_lines.append('')
             # normalize the list marker spacing and ordered list prefix
+            # first ensure spacing after marker is normalized
+            line = enforce_list_marker_spacing(line)
             normalized = normalize_list_marker(line + '\n')
             # reduce excessive top-level indentation: if indent >= 4 and previous non-blank is a heading or blank, set to 2 spaces
             m = re.match(r"^(\s*)([-*+]|\d+\.)\s+(.*)$", normalized)
@@ -226,16 +241,23 @@ def format_file(path):
                 elif indent_len > prev_indent and indent_len != prev_indent + 2:
                     new_indent = ' ' * (prev_indent + 2)
                     normalized = f"{new_indent}{marker} {rest}"
-                # Align the indentation to the file's base indent if this is a top-level list under a heading
-                # If the previous non-empty element is a heading, align to base_indent
-                if prev_non_empty and (is_heading(prev_non_empty) or prev_non_empty.strip() == '' or not is_list_item(prev_non_empty)):
-                    desired_indent = base_indent
-                    if indent_len != desired_indent:
-                        normalized = f"{' ' * desired_indent}{marker} {rest}"
                 elif indent_len == 1:
                     # adjust 1-space indent to 0
                     new_indent = ''
                     normalized = f"{new_indent}{marker} {rest}"
+                # Align the indentation to the file's base indent if this is a top-level list under a heading
+                # If the previous non-empty element is a heading, align to base_indent
+                if prev_non_empty and is_heading(prev_non_empty):
+                    # When a list immediately follows a heading, prefer a top-level list (0 indent)
+                    desired_indent = 0
+                elif prev_non_empty and prev_non_empty.strip() == '':
+                    desired_indent = base_indent
+                elif prev_non_empty and not is_list_item(prev_non_empty):
+                    desired_indent = 0
+                else:
+                    desired_indent = base_indent
+                    if indent_len != desired_indent:
+                        normalized = f"{' ' * desired_indent}{marker} {rest}"
             new_lines.append(normalized.rstrip())
             i += 1
             continue
@@ -249,6 +271,14 @@ def format_file(path):
                     s = email_pat.sub(r'<\1>', s)
                     return s
         line = wrap_bare_urls(line)
+
+        # Replace common inline HTML break tags with markdown line breaks (two spaces + newline)
+        # We intentionally do this only for explicit <br> tags to avoid altering inline spans or layout
+        line = re.sub(r"<br\s*/?>", "  ", line, flags=re.IGNORECASE)
+
+        # reduce multiple spaces after list markers globally
+        if re.match(r"^\s*([-*+]\s{2,})", line) or re.match(r"^\s*\d+\.\s{2,}", line):
+            line = re.sub(r"^(\s*([-*+]|\d+\.))\s{2,}", r"\1 ", line)
 
         # for normal paragraph lines, collect contiguous lines and wrap them
         # gather lines until blank or heading or list or fence

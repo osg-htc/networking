@@ -486,13 +486,13 @@ BWCTL is invoked from the command line with a number of options.  Of these the f
 
 - **-f**  - Sets the format, supply either a byte based metric (K, M, G) or a bit based metric (k, m, g).
 
-  - **–t** – Sets the length of the test in seconds
+- **–t** – Sets the length of the test in seconds
 
-  - **–i** – Specifies the reporting interval (e.g. how often instantaneous bandwidth results are available) in seconds
+- **–i** – Specifies the reporting interval (e.g. how often instantaneous bandwidth results are available) in seconds
 
-  - **–c** – Specifics the host that will receive the flow of data, e.g. the &quot;catcher&quot;
+- **–c** – Specifics the host that will receive the flow of data, e.g. the &quot;catcher&quot;
 
-  - **–s** – Specifics the host that will send the flow of data, e.g. the &quot;sender&quot;
+- **–s** – Specifics the host that will send the flow of data, e.g. the &quot;sender&quot;
 
 An example of invoking BWCTL can be seen below.  In this example we are sending data from the host we are on to another
 located in Kansas City MO, on the Internet2 network:
@@ -653,11 +653,11 @@ The following procedure should be followed:
 
 - Perform end-to-end testing with:
 
-  - NDT
+- NDT
 
-  - BWCTL
+- BWCTL
 
-  - OWAMP
+- OWAMP
 
 - Perform several tests and always record the results.  It&#39;s a good idea to run at different times during the day, and note when you ran the tests
 
@@ -677,11 +677,11 @@ path is no different.  The following steps should be followed:
 
 - Perform end-to-middle testing from the source and desgination with:
 
-  - NDT
+- NDT
 
-  - BWCTL
+- BWCTL
 
-  - OWAMP
+- OWAMP
 
 - Perform several tests and always record the results.  It&#39;s a good idea to run at different times during the day, and note when you ran the tests
 

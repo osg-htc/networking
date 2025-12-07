@@ -12,7 +12,7 @@ the following user-facing changes and quality-of-life improvements:
 
 - Add `seed_testpoint_host_dirs.sh` helper to seed host directories from temporary containers
 
-  - Installed at `docs/perfsonar/tools_scripts/seed_testpoint_host_dirs.sh` (also referenced in the Quick Deploy doc)
+- Installed at `docs/perfsonar/tools_scripts/seed_testpoint_host_dirs.sh` (also referenced in the Quick Deploy doc)
 
 - Replace the inline host-directory seeding snippet in Step 5 (Option B) with a reference and usage examples for the helper script.
 
