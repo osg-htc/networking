@@ -1,0 +1,8 @@
+# Ignore built site
+site/
+
+# Python env
+.venv/
+
+# Editor backups
+*~
