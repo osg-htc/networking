@@ -441,6 +441,52 @@ def format_file(path):
         collapsed.append(l)
         prev_blank = False
     final = '\n'.join(collapsed) + '\n'
+
+    # Post-process: ensure fenced code blocks and lists are surrounded by single blank lines
+    def ensure_surrounded_final(s):
+        lines_local = s.split('\n')
+        out_lines_local = []
+        i = 0
+        while i < len(lines_local):
+            l = lines_local[i]
+            # handle fenced blocks
+            if re.match(r"^\s*(`{3,}|~{3,})", l):
+                # ensure previous line in out_lines_local is blank
+                if out_lines_local and out_lines_local[-1].strip() != '':
+                    out_lines_local.append('')
+                out_lines_local.append(l)
+                i += 1
+                # copy inner lines until the closing fence
+                while i < len(lines_local) and not re.match(r"^\s*(`{3,}|~{3,})\s*$", lines_local[i]):
+                    out_lines_local.append(lines_local[i])
+                    i += 1
+                # copy closing fence if exists
+                if i < len(lines_local):
+                    out_lines_local.append(lines_local[i])
+                    i += 1
+                # ensure one blank line after closing fence (if not already blank or EOF)
+                if i < len(lines_local) and lines_local[i].strip() != '':
+                    out_lines_local.append('')
+                continue
+
+            # ensure a blank line before a list item if previous non-empty isn't a list
+            if re.match(r"^\s*([-*+]|\d+\.)\s+", l):
+                if out_lines_local and out_lines_local[-1].strip() != '':
+                    out_lines_local.append('')
+                out_lines_local.append(l)
+                i += 1
+                continue
+
+            out_lines_local.append(l)
+            i += 1
+        # remove any leading/trailing blank lines
+        while out_lines_local and out_lines_local[0].strip() == '':
+            out_lines_local.pop(0)
+        while out_lines_local and out_lines_local[-1].strip() == '':
+            out_lines_local.pop()
+        return '\n'.join(out_lines_local) + '\n'
+
+    final = ensure_surrounded_final(final)
     final = re.sub(r"\n{3,}", "\n\n", final)
     final = re.sub(r"\n\s*\n{1,}", "\n\n", final)
     # Extra perfsonar-specific whitespace fixes: ensure blank lines between list items and code fences

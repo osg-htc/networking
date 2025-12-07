@@ -74,6 +74,7 @@ ethtool -k <iface> # offload features ethtool -g <iface> # ring buffer sizes tc 
 # Verify IOMMU in kernel cmdline
 
 cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
+
 ``` text
 
 ## Security & Safety

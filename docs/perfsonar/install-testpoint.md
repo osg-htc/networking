@@ -69,6 +69,7 @@ curl -fsSL \ <https://raw.githubusercontent.com/osg-htc/networking/master/docs/p
 service.sh \ -o /tmp/install-systemd-service.sh
 
 chmod +x /tmp/install-systemd-service.sh sudo /tmp/install-systemd-service.sh /opt/perfsonar-tp
+
 ``` text
 
 Or manually create the service file:

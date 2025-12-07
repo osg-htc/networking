@@ -160,6 +160,7 @@ curl -kSfI <https://localhost/>
 # View service logs
 
 journalctl -u perfsonar-testpoint -f
+
 ``` text
 
 ## Next Steps for Deployment
