@@ -1,7 +1,6 @@
 # perfSONAR multi-NIC NetworkManager configuration
 
-This directory contains `perfSONAR-pbr-nm.sh`, a Bash script to configure static IPv4/IPv6 addressing and per-NIC
-source-based routing via NetworkManager (nmcli).
+This directory contains `perfSONAR-pbr-nm.sh`, a Bash script to configure static IPv4/IPv6 addressing and per-NICsource-based routing via NetworkManager (nmcli).
 
 ## Quick overview
 
@@ -15,8 +14,7 @@ source-based routing via NetworkManager (nmcli).
 
 ## Install helper
 
-A small helper is provided to populate `/opt/perfsonar-tp/tools_scripts` from this repository using a shallow sparse
-checkout. It copies only the `docs/perfsonar/tools_scripts` directory and preserves executable bits.
+A small helper is provided to populate `/opt/perfsonar-tp/tools_scripts` from this repository using a shallow sparsecheckout. It copies only the `docs/perfsonar/tools_scripts` directory and preserves executable bits.
 
 * Script: `install_tools_scripts.sh` (path: `docs/perfsonar/tools_scripts/install_tools_scripts.sh`)
 
@@ -26,8 +24,7 @@ checkout. It copies only the `docs/perfsonar/tools_scripts` directory and preser
 
 ## Systemd service installer
 
-A helper script is provided to install and enable a systemd service for automatic container restart on boot. This
-ensures perfSONAR testpoint containers managed by podman-compose restart automatically after a host reboot.
+A helper script is provided to install and enable a systemd service for automatic container restart on boot. Thisensures perfSONAR testpoint containers managed by podman-compose restart automatically after a host reboot.
 
 * Script: `install-systemd-service.sh`
 
@@ -163,8 +160,7 @@ execution and will exit if run as a non-privileged user. Run it with sudo or fro
 
 * NetworkManager (`nmcli`) is required. The script checks for the presence of
 
-`nmcli` and will abort if it is not installed. Install NetworkManager via your distribution's package manager before
-running.
+`nmcli` and will abort if it is not installed. Install NetworkManager via your distribution's package manager beforerunning.
 
 ## Dependencies and package install hints
 
@@ -205,8 +201,7 @@ updater/extractor when operating against the running testpoint container
 
 compose bundle locally
 
-Note: the `check-deps.sh` helper accepts `podman-compose` as an alternative provider to `docker-compose` and will report
-the dependency as satisfied if either binary is present.
+Note: the `check-deps.sh` helper accepts `podman-compose` as an alternative provider to `docker-compose` and will reportthe dependency as satisfied if either binary is present.
 
 Example install commands
 
@@ -224,30 +219,25 @@ Debian / Ubuntu (apt):
 podman-compose docker.io docker-compose fail2ban policycoreutils
 ``` text
 
-If you intend to use the lsregistration container helpers, ensure either `podman` or `docker` is installed and that the
-service can list and access containers (e.g., `podman ps` or `docker ps` works as root).
+If you intend to use the lsregistration container helpers, ensure either `podman` or `docker` is installed and that theservice can list and access containers (e.g., `podman ps` or `docker ps` works as root).
 
-If `rsync` is not available the scripts will attempt a `cp -a` fallback, but installing `rsync` provides safer, more
-robust backups.
+If `rsync` is not available the scripts will attempt a `cp -a` fallback, but installing `rsync` provides safer, morerobust backups.
 
 ## Safety first
 
-This script will REMOVE ALL existing NetworkManager connections when run. Always test in a VM or console-attached host
-and use `--dry-run` to preview changes. The script creates a timestamped backup of existing connections before modifying
+This script will REMOVE ALL existing NetworkManager connections when run. Always test in a VM or console-attached hostand use `--dry-run` to preview changes. The script creates a timestamped backup of existing connections before modifying
 anything.
 
 ## Compatibility and fallbacks
 
 * The script prefers to configure routing and policy rules via NetworkManager
 
-(`nmcli`). However, `nmcli` support for advanced `routes` entries and `routing-rules` varies across versions and
-distributions. If `nmcli` cannot apply a given route or routing-rule, the script will attempt a compatibility fallback
+(`nmcli`). However, `nmcli` support for advanced `routes` entries and `routing-rules` varies across versions anddistributions. If `nmcli` cannot apply a given route or routing-rule, the script will attempt a compatibility fallback
 using the `ip route` and `ip rule` commands directly.
 
 * Because the script now requires root, it no longer invokes `sudo` internally
 
-(the caller should run it with root privileges). This makes behavior deterministic in automation and avoids interactive
-sudo prompts.
+(the caller should run it with root privileges). This makes behavior deterministic in automation and avoids interactivesudo prompts.
 
 ## How to run (dry-run / debug)
 
@@ -305,11 +295,9 @@ NIC_IPV6_ADDRS=( "2001:db8::10" "2001:db8::20" ) NIC_IPV6_PREFIXES=( "/64" "/64"
 guessed from eth0 "2001:db8::1"  # guessed (reused gateway) )
 ```
 
-When gateways are inferred, a NOTE section is added near the bottom of the generated file listing each guess. The script
-will also print a NOTICE to the console/log. Review and edit the guessed values if needed before applying changes.
+When gateways are inferred, a NOTE section is added near the bottom of the generated file listing each guess. The scriptwill also print a NOTICE to the console/log. Review and edit the guessed values if needed before applying changes.
 
-If gateways remain missing after inference, the generator writes a WARNING block listing the affected NICs and the
-script will refuse to proceed until you set the gateways.
+If gateways remain missing after inference, the generator writes a WARNING block listing the affected NICs and thescript will refuse to proceed until you set the gateways.
 
 ## Backups and safety
 
@@ -317,8 +305,7 @@ script will refuse to proceed until you set the gateways.
 
 ## Tests
 
-A small set of unit-style tests is provided under `tests/`. These are designed to exercise pure validation and
-sanitization helpers without modifying system configuration. They source the script (functions only) and run checks in a
+A small set of unit-style tests is provided under `tests/`. These are designed to exercise pure validation andsanitization helpers without modifying system configuration. They source the script (functions only) and run checks in a
 non-destructive way.
 
 Run the tests:

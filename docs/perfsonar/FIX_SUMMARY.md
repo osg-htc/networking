@@ -2,8 +2,7 @@
 
 ## Problem
 
-After a host reboot, podman-compose containers for perfSONAR testpoint did not restart automatically because there was
-no systemd service to manage them. Additionally, the deployed docker-compose.yml configuration had issues that caused
+After a host reboot, podman-compose containers for perfSONAR testpoint did not restart automatically because there wasno systemd service to manage them. Additionally, the deployed docker-compose.yml configuration had issues that caused
 the testpoint container to enter a restart loop.
 
 ## Solutions Implemented
@@ -189,11 +188,9 @@ sudo bash /tmp/install-systemd-service.sh /opt/perfsonar-tp
 
 ✅ **Automatic restart after reboot** - Containers will always start when the host boots ✅ **Service management** -
 Standard systemctl commands for start/stop/restart ✅ **Logging** - Centralized logs via journalctl ✅ **Reliability** -
-Automatic restart on failure ✅ **Automation** - Ansible playbook for consistent deployments ✅ **Documentation** - Clear
-instructions for users
+Automatic restart on failure ✅ **Automation** - Ansible playbook for consistent deployments ✅ **Documentation** - Clearinstructions for users
 
 ## Conclusion
 
-The perfSONAR testpoint container restart issue has been fully resolved. The systemd service is now managing the
-containers, ensuring they restart automatically after host reboots. Documentation and automation scripts have been
+The perfSONAR testpoint container restart issue has been fully resolved. The systemd service is now managing thecontainers, ensuring they restart automatically after host reboots. Documentation and automation scripts have been
 updated to help others implement this fix easily.

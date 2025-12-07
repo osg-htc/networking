@@ -113,8 +113,7 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 ``` bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
 ```
 
-Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only
-NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an
+Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-onlyNICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an
 explicit gateway or mark it as `DEFAULT_ROUTE_NIC` in `/etc/perfSONAR-multi-nic-config.conf`.
 
 Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
@@ -151,24 +150,20 @@ Edit /etc/iproute2/rt\_tables and add:
 
 \# Add rules for eth0 (latency) ip rule add from 192.168.10.10/32 table eth0table
 
-ip route add 192.168.10.0/24 dev eth0 scope link table eth0table ip route add default via 192.168.10.1 dev eth0 table
-eth0table
+ip route add 192.168.10.0/24 dev eth0 scope link table eth0table ip route add default via 192.168.10.1 dev eth0 tableeth0table
 
 \# Add rules for eth1 (throughput) ip rule add from 10.20.30.10/32 table eth1table
 
-ip route add 10.20.30.0/24 dev eth1 scope link table eth1table ip route add default via 10.20.30.1 dev eth1 table
-eth1table
+ip route add 10.20.30.0/24 dev eth1 scope link table eth1table ip route add default via 10.20.30.1 dev eth1 tableeth1table
 
 #### c) Make persistent
 
-For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your
-working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use
+For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in yourworking directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use
 NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.
 
 Example systemd unit:
 
-\# /etc/systemd/system/perfsonar-policy-routing.service **\[Unit\]** Description\=PerfSONAR Policy Routing
-After\=network.target
+\# /etc/systemd/system/perfsonar-policy-routing.service **\[Unit\]** Description\=PerfSONAR Policy RoutingAfter\=network.target
 
 **\[Service\]** Type\=oneshot ExecStart\=/path/to/your/working/dir/perfsonar-policy-routing.sh
 
@@ -212,14 +207,10 @@ flush ruleset
 
 table inet perfsonar {
 
-`\n\nset allowed\_protocols { type inet\_proto elements \= { icmp, icmpv6 } } set allowed\_interfaces { type ifname
-elements \= { "lo" } } set allowed\_tcp\_dports { type inet\_service elements \= { 22, 443, 861, 862, 9090, 123, 5201,
-5001, 5000, 5101 } } set allowed\_udp\_ports { type inet\_service elements \= { 123, 5201, 5001, 5000, 5101 } } chain
-allow { ct state established,related accept ct state invalid drop meta l4proto @allowed\_protocols accept iifname
-@allowed\_interfaces accept tcp dport @allowed\_tcp\_dports ct state new accept udp dport @allowed\_udp\_ports ct state
-new accept \# traceroute and test ranges udp dport 33434-33634 ct state new accept udp dport 18760-19960 ct state new
-accept udp dport 8760-9960 ct state new accept tcp dport 5890-5900 ct state new accept \# SSH controls (add your trusted
-IPs/subnets) tcp dport 22 ip saddr 192.168.10.0/24 accept tcp dport 22 ip saddr 10.20.30.0/24 accept } chain input {
+`\n\nset allowed\_protocols { type inet\_proto elements \= { icmp, icmpv6 } } set allowed\_interfaces { type ifnameelements \= { "lo" } } set allowed\_tcp\_dports { type inet\_service elements \= { 22, 443, 861, 862, 9090, 123, 5201,
+5001, 5000, 5101 } } set allowed\_udp\_ports { type inet\_service elements \= { 123, 5201, 5001, 5000, 5101 } } chainallow { ct state established,related accept ct state invalid drop meta l4proto @allowed\_protocols accept iifname
+@allowed\_interfaces accept tcp dport @allowed\_tcp\_dports ct state new accept udp dport @allowed\_udp\_ports ct statenew accept \# traceroute and test ranges udp dport 33434-33634 ct state new accept udp dport 18760-19960 ct state new
+accept udp dport 8760-9960 ct state new accept tcp dport 5890-5900 ct state new accept \# SSH controls (add your trustedIPs/subnets) tcp dport 22 ip saddr 192.168.10.0/24 accept tcp dport 22 ip saddr 10.20.30.0/24 accept } chain input {
 type filter hook input priority 0; policy drop; jump allow reject with icmpx admin-prohibited }
 
 ```text
