@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# shellcheck disable=SC2004
+
 #
 # Multi-NIC perfSONAR NetworkManager Configuration Script
 # ------------------------------------------------------
@@ -1293,6 +1295,7 @@ configure_nic() {
             echo "  - ${nic} adding static route to table $table_id for $ipv4_addroute" | tee -a "$LOG_FILE"
             if ! run_cmd nmcli con mod "$conn" +ipv4.routes "$ipv4_addroute table=$table_id"; then
                 log "nmcli failed to add custom IPv4 route for $conn; falling back to ip route"
+                # shellcheck disable=SC2086
                 run_cmd ip route replace $ipv4_addroute table "$table_id" || log "Fallback: failed to add custom IPv4 route for $nic (may need manual intervention)"
             fi
         fi
