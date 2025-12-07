@@ -659,6 +659,7 @@ EXAMPLE
         echo ""
 
         # Helper: print a commented, multiline bash array for readability
+        # shellcheck disable=SC2317
         _print_array_multiline() {
             local name="$1"; shift
             printf "%s=(\n" "$name" >> "$TMPFILE"
