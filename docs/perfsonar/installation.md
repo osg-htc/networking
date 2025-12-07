@@ -1,10 +1,12 @@
 # perfSONAR Installation Guide
 
-!!! note
+!!! warning "Legacy Documentation - Modern Approach Available"
 
-    ```text
-This page has older instructions for non-containerized perfSONAR deployments which are, as of October 2025, no longer the recommended best practice.
-    ```
+    This page contains **legacy instructions** for traditional Toolkit installations. As of October 2025, the **recommended approach** is containerized testpoint deployment.
+
+    **👉 For new installations, use the [Quick Deploy Guide](../personas/quick-deploy/install-perfsonar-testpoint.md) instead.**
+
+    This legacy guide is maintained for existing Toolkit installations and special cases requiring the full web interface.
 
 This page documents installing/upgrading **perfSONAR** for OSG and WLCG sites. In case this is the first time you're trying to install and integrate your perfSONAR into WLCG or OSG, please consult our [overview](../perfsonar-in-osg.md) and possible [deployment options](deployment-models.md) before installing. For troubleshooting an existing installation please consult official [Troubleshooting Guide](http://docs.perfsonar.net/troubleshooting_overview.html), [FAQ](http://docs.perfsonar.net/FAQ.html) as well as WLCG/OSG specific [FAQ](faq.md).
 

@@ -8,47 +8,63 @@ extra:
 theme: 
   name: material
   custom_dir: osgthedocs
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - toc.follow
+    - toc.integrate
+    - content.code.copy
 
 extra_css:
   - css/extra.css
 
 nav:
-  - OSG Networking Area: 'index.md'
-  - Network Monitoring (perfSONAR):
-    - 'Motivation': 'perfsonar-in-osg.md'
-    - 'Deployment': 'perfsonar/deployment-models.md'
-    - 'Installation and Maintenance': 'perfsonar/installation.md'
-    - 'Frequently Asked Questions': 'perfsonar/faq.md'
-  - Network Troubleshooting: 
-    - 'Network Troubleshooting': 'network-troubleshooting.md'
-    - 'OSG Network Debugging Document': 'network-troubleshooting/osg-debugging-document.md'
-  - Network Services: 
-    - 'Infrastructure Monitoring': 'perfsonar/psetf.md'
-    - 'Network Datastore and Streaming': 'osg-network-services.md'
-    - 'Network Analytics': 'osg-network-analytics.md'
-  - Personas:
-    - Quick Deploy:
-      - 'Landing': 'personas/quick-deploy/landing.md'
-      - 'Quickstart: perfSONAR Testpoint': 'personas/quick-deploy/install-perfsonar-testpoint.md'
-      - 'Automated setup': 'personas/quick-deploy/automated-setup/README.md'
-    - Troubleshooter:
-      - 'Landing': 'personas/troubleshoot/landing.md'
-      - 'Triage checklist': 'personas/troubleshoot/triage-checklist.md'
-    - Researcher:
-      - 'Landing': 'personas/research/landing.md'
-      - 'Architecture': 'personas/research/architecture.md'
-  - Features:
-    - 'fail2ban': 'features/fail2ban.md'
-    - 'SELinux': 'features/selinux.md'
-    - 'nftables': 'features/nftables.md'
+  - Home: 'index.md'
+  - Get Started:
+    - 'Deploy perfSONAR': 'personas/quick-deploy/landing.md'
+    - 'Troubleshoot Issues': 'personas/troubleshoot/landing.md'
+    - 'Understand the System': 'personas/research/landing.md'
+  - perfSONAR Guides:
+    - 'Why perfSONAR in OSG/WLCG': 'perfsonar-in-osg.md'
+    - 'Deployment Models': 'perfsonar/deployment-models.md'
+    - 'Quick Deploy (Testpoint)': 'personas/quick-deploy/install-perfsonar-testpoint.md'
+    - 'Automated Setup': 'personas/quick-deploy/automated-setup/README.md'
+    - 'Legacy Installation (Archive)': 'perfsonar/installation.md'
+    - 'FAQ': 'perfsonar/faq.md'
+  - Host Tuning:
+    - 'Fasterdata Host Tuning': 'host-network-tuning.md'
+    - 'Multiple NIC Guidance': 'perfsonar/multiple-nic-guidance.md'
+  - Troubleshooting:
+    - 'Triage Checklist': 'personas/troubleshoot/triage-checklist.md'
+    - 'Network Troubleshooting Guide': 'network-troubleshooting.md'
+    - 'OSG Debugging Document': 'network-troubleshooting/osg-debugging-document.md'
+  - Network Services & Data:
+    - 'Infrastructure Monitoring (PSETF)': 'perfsonar/psetf.md'
+    - 'Network Datastore': 'osg-network-services.md'
+    - 'Analytics Platform': 'osg-network-analytics.md'
   - Tools & Scripts:
-    - 'Scripts and tools': 'perfsonar/tools_scripts/README.md'
-    - 'Fasterdata host tuning (EL9)': 'perfsonar/tools_scripts/fasterdata-tuning.md'
-    - 'Compose bundle (docker-compose.yml)': 'perfsonar/tools_scripts/docker-compose.yml'
-    - 'LS registration updater (script)': 'perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh'
-    - 'LS registration helpers (README)': 'perfsonar/tools_scripts/README-lsregistration.md'
-    - 'Link-check tools': 'tools/README.md'
-    - 'Site management': 'web-site-management.md'
+    - 'Overview': 'perfsonar/tools_scripts/README.md'
+    - 'Fasterdata Tuning Script': 'perfsonar/tools_scripts/fasterdata-tuning.md'
+    - 'LS Registration Tools': 'perfsonar/tools_scripts/README-lsregistration.md'
+    - 'LS Registration Updater': 'perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh'
+    - 'Compose Bundles': 'perfsonar/tools_scripts/docker-compose.yml'
+    - 'Link-Check Tools': 'tools/README.md'
+  - Advanced:
+    - Security Features:
+      - 'fail2ban': 'features/fail2ban.md'
+      - 'SELinux': 'features/selinux.md'
+      - 'nftables': 'features/nftables.md'
+    - 'Architecture': 'personas/research/architecture.md'
+    - Release Notes:
+      - 'v1.4.0': 'release-notes/quick-deploy-1.4.0.md'
+      - 'v1.3.0': 'release-notes/quick-deploy-1.3.0.md'
+      - 'v1.1.0': 'release-notes/quick-deploy-1.1.0.md'
+      - 'v1.0.1': 'release-notes/quick-deploy-1.0.1.md'
+      - 'v1.0.0': 'release-notes/quick-deploy-1.0.0.md'
+    - 'Site Management': 'web-site-management.md'
 
 markdown_extensions:
   - admonition
