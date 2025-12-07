@@ -9,6 +9,11 @@ tags: [architecture, research]
 
 # Research — Architecture & Rationale
 
+<div class="persona-banner persona-research">
+	<p class="title">Researcher</p>
+	<p class="meta">Owners: networking-team@osg-htc.org</p>
+</div>
+
 This area is for readers who want to understand system architecture, data pipelines, and development notes. See `architecture.md` and `data-pipeline.md` for diagrams and ingestion details.
 
 Key pages:

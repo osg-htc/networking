@@ -1,0 +1,9 @@
+{# Persona banner partial - Displays if page.meta.persona exists #}
+{% if page.meta.persona %}
+  <div class="persona-banner persona-{{ page.meta.persona | lower | replace(' ', '-') }}">
+    <p class="title">Persona: {{ page.meta.title or page.meta.persona }}</p>
+    {% if page.meta.owners %}
+    <p class="meta">Owners: {{ page.meta.owners | join(', ') }}</p>
+    {% endif %}
+  </div>
+{% endif %}

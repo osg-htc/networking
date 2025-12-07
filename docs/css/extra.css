@@ -102,3 +102,24 @@ background-color: #1f2326;
 .md-nav__source {
 background-color: #1f2326;
 }
+
+/* Persona banner styles */
+.persona-banner {
+  border-left: 4px solid #2E86AB;
+  background-color: #f4f8fb;
+  padding: 12px 16px;
+  margin: 12px 0 18px 0;
+  border-radius: 4px;
+}
+.persona-banner .title {
+  font-weight: 600;
+  color: #1b3765;
+  margin: 0 0 4px 0;
+}
+.persona-banner .meta {
+  font-size: 0.9rem;
+  color: #244358;
+}
+.persona-quick-deploy { border-left-color: #2E86AB; }
+.persona-troubleshoot { border-left-color: #E07A5F; }
+.persona-research { border-left-color: #9B59B6; }
