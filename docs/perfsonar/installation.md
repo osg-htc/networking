@@ -66,9 +66,11 @@ described in the official guide:
 
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
 
+
 ```
 
 * For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` replacing `<FQDN>` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
+
 
 ``` text
 
@@ -161,6 +163,7 @@ filling the information please follow those simple guidelines:
 
 * For each form (service type) fill at least:
 
+
 ```
 
 * Hosting Site
@@ -172,6 +175,7 @@ filling the information please follow those simple guidelines:
 * Host IP (optional)
 
 * Description (optional label used in MaDDash; keep short and unique)
+
 
 ``` text
 

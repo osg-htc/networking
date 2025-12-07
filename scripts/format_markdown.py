@@ -59,11 +59,23 @@ def add_fence_language(fence_line, inner_lines):
     if re.match(r"^\s*(`{3,}|~{3,})\s*\w+", fence_line):
         return fence_line
     # If inner lines look like shell commands, use 'bash'
-    shell_sig = re.compile(r"^(\s*[$#]|\s*(sudo|curl|systemctl|podman|dnf|ls|ip|nmcli|pscheduler|psconfig|sed|awk|grep|cat)\b)")
-    for l in inner_lines[:6]:
+    shell_sig = re.compile(r"^(\s*[$#]|\s*(sudo|curl|systemctl|podman|dnf|ls|ip|nmcli|docker|ps|psaux|pscheduler|psconfig|sed|awk|grep|cat|bash|chmod|chown|tee|su|docker-compose)\b)")
+    # If inner lines look like YAML (key: value) use 'yaml'
+    yaml_sig = re.compile(r"^\s*([\w\-]+)\s*:\s+.*")
+    # If inner lines look like JSON (start with { or [), use 'json'
+    json_sig = re.compile(r"^\s*[\[{]\s*")
+    # If inner lines look like XML (start with <tag), use 'xml'
+    xml_sig = re.compile(r"^\s*<\w+")
+    for l in inner_lines[:8]:
         if shell_sig.search(l):
             # include a single space before the language if missing
             return fence_line.rstrip() + ' bash'
+        if json_sig.search(l):
+            return fence_line.rstrip() + ' json'
+        if yaml_sig.search(l):
+            return fence_line.rstrip() + ' yaml'
+        if xml_sig.search(l):
+            return fence_line.rstrip() + ' xml'
     # default to 'text' to satisfy markdownlint
     return fence_line.rstrip() + ' text'
 
