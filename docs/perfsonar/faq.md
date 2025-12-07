@@ -12,7 +12,7 @@ following up on network problems.
 
 #### Installing a certificate
 
-**What is the recommended way to install a certificate on my perfSONAR host?**
+### What is the recommended way to install a certificate on my perfSONAR host?
 
 We recommend using Lets Encrypt (see <https://letsencrypt.org).>    There is a tutorial that users may find helpful at
 [Secure Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-
@@ -47,13 +47,13 @@ Network Throughput support unit.
 
 #### Service Registration
 
-**I got an email after registering with lots of information in it...what do I do?**
+### I got an email after registering with lots of information in it...what do I do?
 
 This is part of the process. If you are a new site you will need to attend the next OSG operations meeting. If you are
 an existing site and have just registered perfSONAR instances you don't have to do anything but feel free to attend the
 next operations meeting if you have questions or concerns.
 
-**Once I registered, new tickets were opened concerning perfSONAR...What do I do?**
+### Once I registered, new tickets were opened concerning perfSONAR...What do I do?
 
 This is standard operating procedure and the tickets are to ensure that OSG operations properly gets your new perfSONAR
 instances registered. You don't have to do anything and the tickets will be closed by OSG operations staff.

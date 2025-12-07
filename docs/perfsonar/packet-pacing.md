@@ -25,7 +25,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 ### Common Bottleneck Scenarios
 
-**Scenario 1: Fast Source, Slower Network Path**
+### Scenario 1: Fast Source, Slower Network Path
 
 * A 10G DTN sends to a 1G receiver or via a 1G network path
 
@@ -35,7 +35,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 * TCP backs off, causing dramatic throughput drops
 
-**Scenario 2: Multiple Parallel Streams**
+### Scenario 2: Multiple Parallel Streams
 
 * A 10G DTN with 4-8 parallel GridFTP streams to a 10G receiver
 
@@ -45,7 +45,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 * Packet loss and TCP backing off reduce overall throughput
 
-**Scenario 3: Unbalanced CPU/Network Performance**
+### Scenario 3: Unbalanced CPU/Network Performance
 
 * A fast 40G/100G host with a slower CPU
 
@@ -55,7 +55,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 * Packet loss and retransmission overhead
 
-**Scenario 4: Long-Distance Paths (50-80ms RTT)**
+### Scenario 4: Long-Distance Paths (50-80ms RTT)
 
 * Network paths with high latency across continents
 
@@ -466,4 +466,4 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 
 ---
 
-*Last Updated: December 2025* *References: ESnet Fasterdata, Linux kernel tc documentation*
+### Last Updated: December 2025* *References: ESnet Fasterdata, Linux kernel tc documentation
