@@ -6,26 +6,30 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
+        <meta name="description" content="Guidance for maintaining the OSG networking site and personae workflow">
       
       
-        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/perfSONAR-sysctl-info/">
       
+        <link rel="canonical" href="https://osg-htc.org/networking/web-site-management/">
+      
+      
+        <link rel="prev" href="../tools/">
       
       
       
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
-        <title>Key sysctl settings for perfSONAR - OSG Networking Area</title>
+        <title>Website Management & Ops - OSG Networking Area</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
       
       
 
@@ -44,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../css/extra.css">
+      <link rel="stylesheet" href="../css/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#key-sysctl-settings-for-perfsonar" class="md-skip">
+        <a href="#website-management-operations" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href=".." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Key sysctl settings for perfSONAR
+              Website Management & Ops
             
           </span>
         </div>
@@ -200,7 +204,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href=".." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -230,7 +234,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -304,7 +308,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../perfsonar-in-osg/" class="md-nav__link">
+      <a href="../perfsonar-in-osg/" class="md-nav__link">
         
   
   
@@ -332,7 +336,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment-models/" class="md-nav__link">
+      <a href="../perfsonar/deployment-models/" class="md-nav__link">
         
   
   
@@ -360,7 +364,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../installation/" class="md-nav__link">
+      <a href="../perfsonar/installation/" class="md-nav__link">
         
   
   
@@ -388,7 +392,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/" class="md-nav__link">
+      <a href="../perfsonar/faq/" class="md-nav__link">
         
   
   
@@ -470,7 +474,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../network-troubleshooting/" class="md-nav__link">
+      <a href="../network-troubleshooting/" class="md-nav__link">
         
   
   
@@ -498,7 +502,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
+      <a href="../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
         
   
   
@@ -580,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../psetf/" class="md-nav__link">
+      <a href="../perfsonar/psetf/" class="md-nav__link">
         
   
   
@@ -608,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../osg-network-services/" class="md-nav__link">
+      <a href="../osg-network-services/" class="md-nav__link">
         
   
   
@@ -636,7 +640,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../osg-network-analytics/" class="md-nav__link">
+      <a href="../osg-network-analytics/" class="md-nav__link">
         
   
   
@@ -765,7 +769,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/quick-deploy/landing/" class="md-nav__link">
+      <a href="../personas/quick-deploy/landing/" class="md-nav__link">
         
   
   
@@ -800,7 +804,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
+      <a href="../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
         
   
   
@@ -828,7 +832,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/quick-deploy/automated-setup/" class="md-nav__link">
+      <a href="../personas/quick-deploy/automated-setup/" class="md-nav__link">
         
   
   
@@ -918,7 +922,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/troubleshoot/landing/" class="md-nav__link">
+      <a href="../personas/troubleshoot/landing/" class="md-nav__link">
         
   
   
@@ -946,7 +950,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/troubleshoot/triage-checklist/" class="md-nav__link">
+      <a href="../personas/troubleshoot/triage-checklist/" class="md-nav__link">
         
   
   
@@ -1036,7 +1040,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/research/landing/" class="md-nav__link">
+      <a href="../personas/research/landing/" class="md-nav__link">
         
   
   
@@ -1071,7 +1075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../personas/research/architecture/" class="md-nav__link">
+      <a href="../personas/research/architecture/" class="md-nav__link">
         
   
   
@@ -1168,7 +1172,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../features/fail2ban/" class="md-nav__link">
+      <a href="../features/fail2ban/" class="md-nav__link">
         
   
   
@@ -1196,7 +1200,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../features/selinux/" class="md-nav__link">
+      <a href="../features/selinux/" class="md-nav__link">
         
   
   
@@ -1224,7 +1228,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../features/nftables/" class="md-nav__link">
+      <a href="../features/nftables/" class="md-nav__link">
         
   
   
@@ -1256,18 +1260,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -1288,7 +1294,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1306,7 +1312,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools_scripts/" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/" class="md-nav__link">
         
   
   
@@ -1334,7 +1340,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools_scripts/fasterdata-tuning/" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
         
   
   
@@ -1362,7 +1368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools_scripts/docker-compose.yml" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/docker-compose.yml" class="md-nav__link">
         
   
   
@@ -1390,7 +1396,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
         
   
   
@@ -1418,7 +1424,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tools_scripts/README-lsregistration/" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/README-lsregistration/" class="md-nav__link">
         
   
   
@@ -1446,7 +1452,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tools/" class="md-nav__link">
+      <a href="../tools/" class="md-nav__link">
         
   
   
@@ -1471,10 +1477,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../web-site-management/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Site management
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1490,6 +1523,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-development-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local development &amp; testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ci-publishing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI &amp; Publishing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keep-docs-canonical" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep docs/ canonical
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#persona-content-operational-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Persona content &amp; operational workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-we-automated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions we automated
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration / Next steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1529,10 +1659,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#tcp-buffer-sizing" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TCP buffer sizing
+        Overview
       
     </span>
   </a>
@@ -1540,10 +1670,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#queue-management-and-packet-processing" class="md-nav__link">
+  <a href="#local-development-testing" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Queue management and packet processing
+        Local development &amp; testing
       
     </span>
   </a>
@@ -1551,10 +1681,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#multipath-and-routing" class="md-nav__link">
+  <a href="#ci-publishing" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Multipath and routing
+        CI &amp; Publishing
       
     </span>
   </a>
@@ -1562,10 +1692,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tcp-optimizations" class="md-nav__link">
+  <a href="#keep-docs-canonical" class="md-nav__link">
     <span class="md-ellipsis">
       
-        TCP optimizations
+        Keep docs/ canonical
       
     </span>
   </a>
@@ -1573,10 +1703,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-apply-the-settings" class="md-nav__link">
+  <a href="#persona-content-operational-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How to apply the settings
+        Persona content &amp; operational workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions-we-automated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actions we automated
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration / Next steps
       
     </span>
   </a>
@@ -1603,54 +1755,69 @@
   
 
 
-<h1 id="key-sysctl-settings-for-perfsonar">Key sysctl settings for perfSONAR<a class="headerlink" href="#key-sysctl-settings-for-perfsonar" title="Permanent link">&para;</a></h1>
-<p>For optimal performance, the perfSONAR Toolkit applies system tuning settings by default upon installation by using the <code>perfsonar-toolkit-sysctl</code> package. These settings are based on the ESnet "fasterdata" knowledge base for high-performance test and measurement hosts and are sufficient for most use cases. However, you can manually verify or adjust the settings in <code>/etc/sysctl.conf</code> for specific needs.</p>
-<h2 id="tcp-buffer-sizing">TCP buffer sizing<a class="headerlink" href="#tcp-buffer-sizing" title="Permanent link">&para;</a></h2>
-<p>These settings increase the maximum TCP buffer sizes to support high throughput, especially on high-speed (e.g., 10 Gbps and faster) networks over long distances.</p>
+<h1 id="website-management-operations">Website Management &amp; Operations<a class="headerlink" href="#website-management-operations" title="Permanent link">&para;</a></h1>
+<p>This page outlines recommended processes for building, publishing and managing the OSG Networking site (MkDocs) with a focus on persona-based documentation. The goal is to maintain <code>docs/</code> as the single source of truth and manage generated <code>site/</code> through CI.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>net.core.rmem_max</code>: The maximum receive socket buffer size in bytes.</li>
-<li><code>net.core.wmem_max</code>: The maximum send socket buffer size in bytes.</li>
-<li><code>net.ipv4.tcp_rmem</code>: The minimum, default, and maximum receive buffer sizes for TCP.</li>
-<li><code>net.ipv4.tcp_wmem</code>: The minimum, default, and maximum send buffer sizes for TCP.</li>
+<li>Use <code>docs/</code> as canonical source of content.</li>
+<li>Build &amp; verify with <code>mkdocs build</code> locally or via CI.</li>
+<li>Use CI to deploy to <code>gh-pages</code> or a hosted platform; avoid committing generated <code>site/</code> to the repo when possible.</li>
 </ul>
-<p>Example settings for a 10G or 40G host with up to 100ms round-trip time (RTT):</p>
-<p>net.core.rmem_max \= 67108864
-net.core.wmem_max \= 67108864
-net.ipv4.tcp_rmem \= 4096 87380 33554432
-net.ipv4.tcp_wmem \= 4096 65536 33554432</p>
-<p>For 100G or higher speeds, you may need to increase these values even further.</p>
-<h2 id="queue-management-and-packet-processing">Queue management and packet processing<a class="headerlink" href="#queue-management-and-packet-processing" title="Permanent link">&para;</a></h2>
-<p>These settings help prevent packet loss and improve network efficiency.</p>
-<ul>
-<li><code>net.core.netdev_max_backlog</code>: Increases the maximum length of the input packet queue for the network device. A higher value can prevent dropped packets during bursts of traffic.</li>
-<li><code>net.core.default_qdisc</code>: Sets the default queuing discipline. Fair Queuing (fq) or Fair Queuing with CoDel (fq_codel) is recommended for its "fairness" in distributing bandwidth and kernel-level packet pacing.</li>
-</ul>
-<h2 id="multipath-and-routing">Multipath and routing<a class="headerlink" href="#multipath-and-routing" title="Permanent link">&para;</a></h2>
-<p>If you are running perfSONAR on a host with multiple network interfaces on the same subnet, specific <code>sysctl</code> settings are needed to prevent Address Resolution Protocol (ARP) conflicts.</p>
-<p>net.ipv4.conf.all.arp_ignore=1
-net.ipv4.conf.all.arp_announce=2
-net.ipv4.conf.default.arp_filter=1
-net.ipv4.conf.all.arp_filter=1</p>
-<h2 id="tcp-optimizations">TCP optimizations<a class="headerlink" href="#tcp-optimizations" title="Permanent link">&para;</a></h2>
-<p>For specific use cases, you might adjust other TCP settings:</p>
-<ul>
-<li><code>net.ipv4.tcp_timestamps</code>: While often suggested for improving CPU utilization, be aware of the implications. The <code>fasterdata</code> guide suggests disabling it for older kernels, but modern kernels handle timestamps more efficiently.</li>
-</ul>
-<h2 id="how-to-apply-the-settings">How to apply the settings<a class="headerlink" href="#how-to-apply-the-settings" title="Permanent link">&para;</a></h2>
+<h2 id="local-development-testing">Local development &amp; testing<a class="headerlink" href="#local-development-testing" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Edit the configuration file: Add the desired settings to <code>/etc/sysctl.conf</code> or a new file in <code>/etc/sysctl.d/</code> (e.g., <code>/etc/sysctl.d/99-perfsonar.conf</code>).</li>
-<li>Load the settings: Run <code>sysctl -p</code> to load the changes from the configuration file.</li>
-<li>Verify the settings: Use <code>sysctl [parameter]</code> to confirm the new values are in effect.</li>
+<li>Create a Python virtualenv and install dependencies:
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pip
+pip<span class="w"> </span>install<span class="w"> </span>mkdocs<span class="w"> </span>mkdocs-material<span class="w"> </span>pymdown-extensions
+</code></pre></div></li>
+<li>Run a local preview server:
+<div class="highlight"><pre><span></span><code>mkdocs<span class="w"> </span>serve<span class="w"> </span>-a<span class="w"> </span><span class="m">0</span>.0.0.0:8000
+</code></pre></div></li>
+<li>Build the site for local verification:
+<div class="highlight"><pre><span></span><code>mkdocs<span class="w"> </span>build<span class="w"> </span>--clean<span class="w"> </span>-d<span class="w"> </span>site
+</code></pre></div></li>
 </ol>
-<p>Automatic tuning with the perfSONAR Toolkit</p>
-<p>For installations using the perfSONAR Toolkit, the included <code>perfsonar-toolkit-sysctl</code> package handles most tuning automatically. If you change an interface speed, you can re-run the tuning script to apply appropriate settings:</p>
-<p>/usr/lib/perfsonar/scripts/configure_sysctl</p>
+<h2 id="ci-publishing">CI &amp; Publishing<a class="headerlink" href="#ci-publishing" title="Permanent link">&para;</a></h2>
+<ol>
+<li>CI should run the following steps on PRs and pushes to <code>master</code>:</li>
+<li><code>mkdocs build --clean</code> (fail on build errors)</li>
+<li>Run link checks and the <code>verify-site-scripts.sh</code> script to assert docs/site parity for changed files (optional if not keeping <code>site/</code> in repo)</li>
+<li>Run <code>autoupdate-scripts-sha.sh</code> to update <code>*.sha256</code> files when scripts change in docs.</li>
+<li>CI publish step (if you want to auto-deploy): use <code>peaceiris/actions-gh-pages</code> or <code>JamesIves/github-pages-deploy-action</code> to publish the <code>site/</code> directory to the <code>gh-pages</code> branch or a host.</li>
+</ol>
+<h2 id="keep-docs-canonical">Keep <code>docs/</code> canonical<a class="headerlink" href="#keep-docs-canonical" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Prefer editing and reviewing changes to files under <code>docs/</code>.</li>
+<li>If you must edit <code>site/</code> (e.g., for manual content patches), follow the same review process and back-propagate changes into <code>docs/</code>.</li>
+</ul>
+<h2 id="persona-content-operational-workflow">Persona content &amp; operational workflow<a class="headerlink" href="#persona-content-operational-workflow" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Persona pages live under <code>docs/personas/&lt;persona&gt;/</code> and should include the canonical <code>landing.md</code>, <code>intro.md</code>, and other materials.</li>
+<li>Owners and status metadata should be included in frontmatter (owner email or team, status: proposed/draft/stable). This helps review and governance.</li>
+</ul>
+<h2 id="actions-we-automated">Actions we automated<a class="headerlink" href="#actions-we-automated" title="Permanent link">&para;</a></h2>
+<ul>
+<li>CI verification: <code>.github/scripts/verify-site-scripts.sh</code> — verifies <code>docs/</code> script copies and <code>site/</code> parity for changed scripts.</li>
+<li>Autoupdate: <code>.github/scripts/autoupdate-scripts-sha.sh</code> — updates per script <code>*.sha256</code> and <code>scripts.sha256</code> when a script in <code>docs/</code> changes in a PR.</li>
+</ul>
+<h2 id="migration-next-steps">Migration / Next steps<a class="headerlink" href="#migration-next-steps" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Consider removing <code>site/</code> from the repo if CI deployment is configured and stable; commit <code>site/</code> removal with a PR that updates CI to publish built site to <code>gh-pages</code>.</li>
+<li>Add a <code>web-site-management.md</code> page (this page) with step-by-step instructions for maintainers.</li>
+<li>Add code owners for <code>docs/</code> and <code>personas</code> to ensure consistent review.</li>
+</ol>
+<hr />
+<p>If anything in this workflow should be changed (e.g., we continue to check in site), we can adapt the CI accordingly to keep both the ease of <code>site/</code> updates and code reviewing safeguards.</p>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -1696,10 +1863,10 @@ net.ipv4.conf.all.arp_filter=1</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
     
   </body>
