@@ -69,20 +69,18 @@ Differences:
 
 Audit a measurement host:
 
-```bash
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
+```bash bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
 ```text
 
 Apply tuning for a DTN (100Gbps links):
 
-```bash
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
+```bash sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
 ```
 
 Limit to specific NICs:
 
-```bash
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces "ens1f0np0,ens1f1np1"
+```bash sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces
+"ens1f0np0,ens1f1np1"
 ```text
 
 ### What the script does
@@ -140,22 +138,20 @@ Detailed log with full ethtool/sysctl/tc output is written to `/tmp/fasterdata-t
 
 You can download the script directly from the GitHub repo (raw) or the site after it is published:
 
-```text
-https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+```text https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
 https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 ```
 
 Install quickly as follows:
 
-```bash
-sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
-sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
+```bash sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-
+htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh sudo chmod +x /usr/local/bin/fasterdata-
+tuning.sh
 ```text
 
 Then run an audit before applying changes:
 
-```bashbash
-bash /usr/local/bin/fasterdata-tuning.sh --mode audit --target measurement
+```bashbash bash /usr/local/bin/fasterdata-tuning.sh --mode audit --target measurement
 ```
 
 ### Color Output
@@ -206,20 +202,17 @@ The script supports a few additional opt-in apply flags when run with `--mode ap
 
 - `--apply-iommu`: Edit GRUB to add recommended `iommu=pt` plus vendor-specific flags (Intel/AMD) and regenerate grub. Requires root and careful review before committing. Example:
 
-```bash
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --yes
+```bash sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --yes
 ```text
 
 - `--apply-smt on|off`: Apply SMT change at runtime. Use `--persist-smt` to make the choice persistent in GRUB. Example:
 
-```bash
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-smt off --persist-smt --yes
+```bash sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-smt off --persist-smt --yes
 ```
 
 Preview (dry-run) example:
 
-```bash
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
+```bash sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 ```text
 
 ## Manual checklist (summary of recommendations)
@@ -266,9 +259,8 @@ Values shown below are baseline (1Gbps). The script scales them by fastest NIC s
 
 ## Verification after tuning
 
-```bash
-sysctl -a | egrep "(rmem|wmem|max_backlog|default_qdisc|tcp_congestion_control|tcp_mtu_probing)"
-tuned-adm active
+```bash sysctl -a | egrep "(rmem|wmem|max_backlog|default_qdisc|tcp_congestion_control|tcp_mtu_probing)" tuned-adm
+active
 ```
 
 For each NIC: `ethtool -k <iface>`, `ethtool -g <iface>`, `tc qdisc show dev <iface>`, `cat
@@ -285,20 +277,17 @@ throughput. However, for isolated low-latency workloads, SMT off may reduce jitt
 
 **To check SMT status:**
 
-```bash
-cat /sys/devices/system/cpu/smt/control
+```bash cat /sys/devices/system/cpu/smt/control
 ```text
 
 **To enable SMT:**
 
-```bash
-echo on | sudo tee /sys/devices/system/cpu/smt/control
+```bash echo on | sudo tee /sys/devices/system/cpu/smt/control
 ```
 
 **To disable SMT:**
 
-```bash
-echo off | sudo tee /sys/devices/system/cpu/smt/control
+```bash echo off | sudo tee /sys/devices/system/cpu/smt/control
 ```text
 
 Note: SMT changes take effect immediately but are not persisted across reboots. To persist, add to kernel command line
@@ -309,8 +298,7 @@ Note: SMT changes take effect immediately but are not persisted across reboots. 
 The script checks for available kernel and driver updates via `dnf list --showduplicates kernel`. If an update is
 available, the summary recommends:
 
-```bash
-dnf update kernel && reboot
+```bash dnf update kernel && reboot
 ```
 
 For vendor-specific drivers (Mellanox OFED, Broadcom firmware tools), the script provides URLs and guidance. Always
@@ -334,28 +322,17 @@ If the script fails to detect certain hardware or settings:
 
 When running with `--mode apply`, the script generates `/etc/systemd/system/ethtool-persist.service` containing:
 
-```systemd
-[Unit]
-Description=Persist ethtool settings (Fasterdata)
-After=network.target
-Wants=network.target
+```systemd [Unit] Description=Persist ethtool settings (Fasterdata) After=network.target Wants=network.target
 
-[Service]
-Type=oneshot
-ExecStart=/sbin/ethtool -G <iface> rx <max> tx <max>
-ExecStart=/sbin/ethtool -K <iface> gro on gso on tso on rx on tx on lro off
-ExecStart=/sbin/ip link set dev <iface> txqueuelen <value>
-RemainAfterExit=yes
+[Service] Type=oneshot ExecStart=/sbin/ethtool -G <iface> rx <max> tx <max> ExecStart=/sbin/ethtool -K <iface> gro on
+gso on tso on rx on tx on lro off ExecStart=/sbin/ip link set dev <iface> txqueuelen <value> RemainAfterExit=yes
 
-[Install]
-WantedBy=multi-user.target
+[Install] WantedBy=multi-user.target
 ```text
 
 The service is automatically enabled. To verify:
 
-```bash
-systemctl status ethtool-persist.service
-systemctl cat ethtool-persist.service
+```bash systemctl status ethtool-persist.service systemctl cat ethtool-persist.service
 ```
 
 To manually update this service, re-run the script with `--mode apply` to regenerate it with current NIC settings.

@@ -28,7 +28,7 @@ psconfig remote list
 
 # https://psconfig.opensciencegrid.org/pub/auto/<YOUR_HOSTNAME>
 
-```text
+```
 
 If empty or missing:
 
@@ -36,7 +36,7 @@ If empty or missing:
 
 - Run: `/opt/perfsonar-tp/tools_scripts/
 
-  perfSONAR-auto-enroll-psconfig.sh`
+perfSONAR-auto-enroll-psconfig.sh`
 
 ### Step 2: Check pScheduler Status
 
@@ -61,14 +61,12 @@ podman logs perfsonar-testpoint | grep -i scheduler
 
 # Can reach pSConfig server?
 
-ping psconfig.opensciencegrid.org
-curl -I https://psconfig.opensciencegrid.org/pub/auto
+ping psconfig.opensciencegrid.org curl -I https://psconfig.opensciencegrid.org/pub/auto
 
 # Can reach remote perfSONAR instances?
 
-ping <remote_testpoint_hostname>
-telnet <remote_testpoint_hostname> 443
-```text
+ping <remote_testpoint_hostname> telnet <remote_testpoint_hostname> 443
+```
 
 ### Step 4: Check Firewall & Ports
 
@@ -98,7 +96,7 @@ podman logs perfsonar-testpoint | grep -i error | tail -20
 # Look for HTTP errors
 
 podman logs perfsonar-testpoint | grep -i "http\|connection\|refused"
-```text
+```
 
 ### Step 6: Escalate
 
@@ -134,14 +132,11 @@ Then contact:
 
 # Enroll automatically
 
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh \
-  --fqdn <YOUR_HOSTNAME> \
-  --profile latency
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh \ --fqdn <YOUR_HOSTNAME> \ --profile latency
 
 # Verify enrollment
 
-psconfig remote list
-pscheduler tasks --host localhost
+psconfig remote list pscheduler tasks --host localhost
 ```
 
 ### Firewall Blocking Remote Tests
@@ -154,7 +149,7 @@ pscheduler tasks --host localhost
 
 # Test connectivity
 
-curl -v https://<remote_testpoint>:443/
+curl -v <https://<remote_testpoint>>:443/
 
 # Check if 443 is open
 
@@ -164,7 +159,7 @@ nft add rule inet filter input tcp dport 443 accept
 
 # (varies by site configuration)
 
-```text
+```
 
 ### Wrong FQDN in pSConfig
 
@@ -180,9 +175,7 @@ hostname -f
 
 # Re-enroll with correct hostname
 
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh \
-  --fqdn $(hostname -f) \
-  --profile latency
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh \ --fqdn $(hostname -f) \ --profile latency
 ```
 
 ---

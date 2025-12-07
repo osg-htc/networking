@@ -63,22 +63,20 @@ From v1.3.0:
 
 1. Refresh helper scripts:
 
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh | bash -s -- /opt/perfsonar-tp
+```bash curl -fsSL https://raw.githubusercontent.com/osg-
+htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh | bash -s -- /opt/perfsonar-tp
 ```text
 
 1. Review `DEPRECATION.md` and remove any automation references to `check-deps.sh`.
 
 1. Use orchestrator for new hosts or when revalidating configuration:
 
-   ```bash
-   /opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh --option A --fqdn <FQDN> --email <EMAIL>
+```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh --option A --fqdn <FQDN> --email <EMAIL>
 ```
 
 1. (Optional) Reapply PBR in non-disruptive mode:
 
-   ```bash
-   /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --apply-inplace
+```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --apply-inplace
 ```text
 
 ## Validation

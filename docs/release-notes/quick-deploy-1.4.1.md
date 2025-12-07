@@ -83,52 +83,60 @@ command as a config file path.
 
 No action needed - the fixed script is automatically used when running:
 
-```bash
-/opt/perfsonar-tp/tools_scripts/install-systemd-units.sh --with-certbot
+```bash /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh --with-certbot
 ```text
 
 ### For Existing Deployments with Failing Certbot Service
 
 If you're experiencing the certbot service failure, update to the fixed version:
 
-```bash
+```
+
 # Stop the failing service
+
 systemctl stop perfsonar-certbot.service
 
 # Download the updated script
-curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
-    -o /tmp/install-systemd-units.sh
-chmod 0755 /tmp/install-systemd-units.sh
+
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-
+units.sh \ -o /tmp/install-systemd-units.sh chmod 0755 /tmp/install-systemd-units.sh
 
 # Reinstall with the fix
+
 /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
 
 # Reload and start
-systemctl daemon-reload
-systemctl start perfsonar-certbot.service
+
+systemctl daemon-reload systemctl start perfsonar-certbot.service
 
 # Verify success
-systemctl status perfsonar-certbot.service
-podman ps | grep certbot
-```
+
+systemctl status perfsonar-certbot.service podman ps | grep certbot
+
+``` text
 
 ## Verification
 
 After applying the fix, verify both services are working correctly:
 
-```bash
+```
+
 # Check service status
+
 systemctl status perfsonar-testpoint.service perfsonar-certbot.service
 
 # Verify containers are running
+
 podman ps --format 'table {{.Names}}\t{{.Status}}'
 
 # Test HTTPS endpoint
-curl -kI https://127.0.0.1/
+
+curl -kI <https://127.0.0.1/>
 
 # Check certbot logs for renewal messages
+
 journalctl -u perfsonar-certbot.service -n 20
+
 ```text
 
 **Expected Results:**
@@ -145,18 +153,21 @@ journalctl -u perfsonar-certbot.service -n 20
 
 To confirm the fix resolves the reboot persistence issue:
 
-```bash
+```
+
 # Verify services are enabled
+
 systemctl is-enabled perfsonar-testpoint.service perfsonar-certbot.service
 
 # Reboot the system
+
 reboot
 
 # After reboot, verify everything started automatically
-systemctl status perfsonar-testpoint.service perfsonar-certbot.service
-podman ps
-curl -kI https://127.0.0.1/
-```
+
+systemctl status perfsonar-testpoint.service perfsonar-certbot.service podman ps curl -kI https://127.0.0.1/
+
+``` text
 
 ## Breaking Changes
 

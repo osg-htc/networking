@@ -12,14 +12,12 @@ find_and_remove_broken_links.py
 
 - Example (dry run, just report):
 
-```bash
-python docs/tools/find_and_remove_broken_links.py
+```bash python docs/tools/find_and_remove_broken_links.py
 ```text
 
 - Example (backup and remove broken links):
 
-```bash
-python docs/tools/find_and_remove_broken_links.py --remove --backup-dir docs/.link_check_backups
+```bash python docs/tools/find_and_remove_broken_links.py --remove --backup-dir docs/.link_check_backups
 ```
 
 Notes:

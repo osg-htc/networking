@@ -15,11 +15,11 @@ Systematic approach to identifying and resolving network and perfSONAR problems.
 
 1. **Gather facts:** Run the **[Quick Triage Checklist](triage-checklist.md)** —
 
-   collects system info, connectivity, services, logs
+collects system info, connectivity, services, logs
 
 1. **Basic diagnostics:** Follow **[Network Troubleshooting Guide](
 
-   ../../network-troubleshooting.md)** — contact procedures, support escalation
+../../network-troubleshooting.md)** — contact procedures, support escalation
 
 1. **Learn more:** **[ESnet Troubleshooting Guide](
 

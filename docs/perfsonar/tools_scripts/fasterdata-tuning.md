@@ -1,6 +1,7 @@
 # Fasterdata Host & Network Tuning (EL9)
 
-This page documents `fasterdata-tuning.sh`, a script that audits and optionally applies ESnet Fasterdata-inspired hostand NIC tuning recommendations for Enterprise Linux 9.
+This page documents `fasterdata-tuning.sh`, a script that audits and optionally applies ESnet Fasterdata-inspired
+hostand NIC tuning recommendations for Enterprise Linux 9.
 
 Script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
@@ -20,8 +21,9 @@ chmod +x /usr/local/bin/fasterdata- tuning.sh
 
 # Or download directly from the site (if published):
 
-sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh <https://osg-
-htc.org/networking/perfsonar/tools_scripts/fasterdatatuning.sh> sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
+sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh
+<https://osghtc.org/networking/perfsonar/tools_scripts/fasterdatatuning.sh> sudo chmod +x /usr/local/bin/fasterdata-
+tuning.sh
 ```
 
 ## Verify the checksum
@@ -39,15 +41,19 @@ sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Che
 This script packages ESnet Fasterdata best practices into an audit/apply helper that:
 
 * Provides a non-invasive audit mode to compare current host settings against Fasterdata recommendations tailored by NIC
+
   speed and host role (measurement vs DTN).
 
 * Centralizes recommended sysctl tuning for high-throughput, long-distance transfers (buffer sizing, qdisc, congestion
+
   control), reducing guesswork and manual errors.
 
 * Applies and persists sysctl settings in `/etc/sysctl.conf` and helps persist per-NIC settings (ethtool) via a
+
   `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
 
 * For DTN nodes: Supports packet pacing via traffic control (tc) token bucket filter (tbf) to limit outgoing traffic to
+
   a specified rate, important for multi-stream transfer scenarios.
 
 ## Who should use it?
@@ -55,6 +61,7 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
 * perfSONAR testpoints, dedicated DTNs and other throughput-focused hosts on EL9 where you control the host configuration.
 
 * NOT for multi-tenant or general-purpose interactive servers without prior review — these sysctl changes can affect
+
   other services.
 
 ## Verification & Basic checks
@@ -86,9 +93,11 @@ cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 * Always test in a staging environment first. Use `--mode audit` to review before applying.
 
 * The `iommu` and `SMT` settings are environment-sensitive: IOMMU changes require GRUB kernel cmdline edits and a
+
   reboot. The script only suggests GRUB edits and does not automatically change the bootloader.
 
 * If you require automated GRUB edits or SMT toggles, those should be opt-in with thorough confirmation prompts and
+
   recovery steps.
 
 ## Usage
@@ -135,16 +144,23 @@ Notes -----
 
 * IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present.
 
-  When you run with `--apply-iommu` and `--mode apply`, the script will optionally back up `/etc/default/grub`, append the appropriate IOMMU flags (or use values provided via `--iommu-args`) and regenerate GRUB (using `grubby` or `grub2-mkconfig` where available). Use `--dry-run` to preview the GRUB changes. You may also set `--iommu-args "intel_iommu=on iommu=pt"` to provide custom boot args.
+When you run with `--apply-iommu` and `--mode apply`, the script will optionally back up `/etc/default/grub`, append the
+appropriate IOMMU flags (or use values provided via `--iommu-args`) and regenerate GRUB (using `grubby` or
+`grub2-mkconfig` where available). Use `--dry-run` to preview the GRUB changes. You may also set `--iommu-args
+"intel_iommu=on iommu=pt"` to provide custom boot args.
+
 * SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.
 
 * Apply mode writes to `/etc/sysctl.conf` and creates `/etc/systemd/system/ethtool-persist.service` when necessary.
 
 * **Packet Pacing (DTN only):** For Data Transfer Node targets, the script can apply token bucket filter (tbf) qdisc to pace outgoing traffic. This is recommended when a DTN
-  node handles multiple simultaneous transfers where the effective transfer rate is limited by the minimum of: source read rate, network bandwidth, and destination write rate.
 
-  See the `--apply-packet-pacing` and `--packet-pacing-rate` flags below. For detailed information on why packet pacing is important and how it works, see the separate [Packet Pacing guide](../packet-pacing.md).
-Optional apply flags (use with `--mode apply`):
+node handles multiple simultaneous transfers where the effective transfer rate is limited by the minimum of: source read
+rate, network bandwidth, and destination write rate.
+
+See the `--apply-packet-pacing` and `--packet-pacing-rate` flags below. For detailed information on why packet pacing is
+important and how it works, see the separate [Packet Pacing guide](../packet-pacing.md). Optional apply flags (use with
+`--mode apply`):
 
 * `--apply-packet-pacing`: Apply packet pacing to DTN interfaces via tc token bucket filter. Only works with `--target dtn`. Default pacing rate is 2 Gbps (adjustable with `--packet-pacing-rate`).
 
@@ -174,7 +190,8 @@ To actually apply and pass specific IOMMU args:
 
 ``` text
 
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=oniommu=pt" --yes
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args
+"intel_iommu=oniommu=pt" --yes
 
 ```
 

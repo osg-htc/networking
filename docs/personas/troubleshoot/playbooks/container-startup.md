@@ -24,7 +24,7 @@ podman ps -a | grep perfsonar
 # For Docker
 
 docker ps -a | grep perfsonar
-```text
+```
 
 Look for:
 
@@ -103,9 +103,8 @@ ss -ltnp | grep 443
 
 # Kill the process or change container port mapping
 
-podman stop conflicting-container
-podman rm conflicting-container
-```text
+podman stop conflicting-container podman rm conflicting-container
+```
 
 ### Volume Permission Denied
 
@@ -144,7 +143,7 @@ podman system prune -a
 
 # (varies by host setup)
 
-```text
+```
 
 ---
 

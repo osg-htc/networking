@@ -19,9 +19,8 @@ diagnostics coming soon.
 
 # Download and run audit
 
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/main/docs/perfsonar/tools_scripts/fasterdata-tuning.sh \
-  -o /tmp/fasterdata-tuning.sh
-chmod 0755 /tmp/fasterdata-tuning.sh
+curl -fsSL <https://raw.githubusercontent.com/osg-htc/networking/main/docs/perfsonar/tools_scripts/fasterdata-tuning.sh>
+\ -o /tmp/fasterdata-tuning.sh chmod 0755 /tmp/fasterdata-tuning.sh
 
 # Run audit (no changes)
 
@@ -29,7 +28,7 @@ chmod 0755 /tmp/fasterdata-tuning.sh
 
 # Look for yellow (warnings) and red (critical) items
 
-```text
+```
 
 ### Step 2: Check NIC Settings
 
@@ -41,8 +40,7 @@ ip -s link show
 
 # Check ring buffers
 
-ethtool -g eth0
-ethtool -g eth1
+ethtool -g eth0 ethtool -g eth1
 
 # Check offload settings (should be ON)
 
@@ -68,7 +66,7 @@ iftop -i eth0
 # Check for packet loss/errors
 
 watch -n 1 'ip -s link show eth0'
-```text
+```
 
 ### Step 4: Identify Bottlenecks
 
@@ -103,7 +101,7 @@ ping -M do -s 1472 <remote_testpoint>
 # Check for ECMP load balancing
 
 mtr -r -c 100 <remote_testpoint>
-```text
+```
 
 **Is it contention?**
 
@@ -161,7 +159,7 @@ sudo /tmp/fasterdata-tuning.sh apply
 # Reboot to apply qdisc changes
 
 sudo reboot
-```text
+```
 
 ### NIC Ring Buffers Too Small
 
@@ -207,7 +205,7 @@ sudo ip link set dev eth0 mtu 9000
 
 # (varies by OS/network manager)
 
-```text
+```
 
 ### Competing Tests
 

@@ -2,7 +2,8 @@
 
 ## Problem Description
 
-The perfSONAR testpoint container enters a restart loop when using certain docker-compose.yml configurations. Thecontainer continuously restarts and fails to initialize systemd properly.
+The perfSONAR testpoint container enters a restart loop when using certain docker-compose.yml configurations.
+Thecontainer continuously restarts and fails to initialize systemd properly.
 
 ## Root Cause
 
@@ -63,16 +64,20 @@ If you have an existing deployment with the restart loop issue:
 
 1. Stop the containers:
 
+
 ``` bash cd /opt/perfsonar-tp podman-compose down
 ```
 
 1. Update the docker-compose.yml file to use the recommended configuration from:
 
-``` bash curl -fsSL \ <https://raw.githubusercontent.com/osg-
-htc/networking/master/docs/perfsonar/tools_scripts/dockercompose.yml> \ -o /opt/perfsonar-tp/docker-compose.yml
+
+``` bash curl -fsSL \
+<https://raw.githubusercontent.com/osghtc/networking/master/docs/perfsonar/tools_scripts/dockercompose.yml> \ -o
+/opt/perfsonar-tp/docker-compose.yml
 ``` text
 
 1. Restart the service:
+
 
 ``` bash systemctl restart perfsonar-testpoint
 ```

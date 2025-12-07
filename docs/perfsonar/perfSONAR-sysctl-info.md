@@ -2,11 +2,13 @@
 
 For optimal performance, the perfSONAR Toolkit applies system tuning settings by default upon installation by using the
 `perfsonar-toolkit-sysctl` package. These settings are based on the ESnet "fasterdata" knowledge base for high-
-performance test and measurement hosts and are sufficient for most use cases. However, you can manually verify or adjustthe settings in `/etc/sysctl.conf` for specific needs.
+performance test and measurement hosts and are sufficient for most use cases. However, you can manually verify or
+adjustthe settings in `/etc/sysctl.conf` for specific needs.
 
 ## TCP buffer sizing
 
-These settings increase the maximum TCP buffer sizes to support high throughput, especially on high-speed (e.g., 10 Gbpsand faster) networks over long distances.
+These settings increase the maximum TCP buffer sizes to support high throughput, especially on high-speed (e.g., 10
+Gbpsand faster) networks over long distances.
 
 * `net.core.rmem_max`: The maximum receive socket buffer size in bytes.
 
@@ -33,7 +35,8 @@ These settings help prevent packet loss and improve network efficiency.
 
 ## Multipath and routing
 
-If you are running perfSONAR on a host with multiple network interfaces on the same subnet, specific `sysctl` settingsare needed to prevent Address Resolution Protocol (ARP) conflicts.
+If you are running perfSONAR on a host with multiple network interfaces on the same subnet, specific `sysctl`
+settingsare needed to prevent Address Resolution Protocol (ARP) conflicts.
 
 net.ipv4.conf.all.arp\_ignore=1 net.ipv4.conf.all.arp\_announce=2 net.ipv4.conf.default.arp\_filter=1
 net.ipv4.conf.all.arp\_filter=1
@@ -54,6 +57,7 @@ For specific use cases, you might adjust other TCP settings:
 
 Automatic tuning with the perfSONAR Toolkit
 
-For installations using the perfSONAR Toolkit, the included `perfsonar-toolkit-sysctl` package handles most tuningautomatically. If you change an interface speed, you can re-run the tuning script to apply appropriate settings:
+For installations using the perfSONAR Toolkit, the included `perfsonar-toolkit-sysctl` package handles most
+tuningautomatically. If you change an interface speed, you can re-run the tuning script to apply appropriate settings:
 
 /usr/lib/perfsonar/scripts/configure\_sysctl

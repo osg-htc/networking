@@ -4,10 +4,12 @@
 
 **Packet pacing** is a critical tuning technique for high-performance Data Transfer Nodes (DTNs) and other hosts that
 
-need to move large amounts of data reliably across wide-area networks. By controlling the rate at which packets are sentfrom the host, packet pacing can dramatically reduce packet loss, prevent receiver buffer overflows, and improve overall
-throughput — sometimes by **2-4x on long paths**.
+need to move large amounts of data reliably across wide-area networks. By controlling the rate at which packets are
+sentfrom the host, packet pacing can dramatically reduce packet loss, prevent receiver buffer overflows, and improve
+overall throughput — sometimes by **2-4x on long paths**.
 
-This document explains why packet pacing matters, how it works, and how to implement it on DTN nodes using Linux trafficcontrol (`tc`).
+This document explains why packet pacing matters, how it works, and how to implement it on DTN nodes using Linux
+trafficcontrol (`tc`).
 
 ---
 
@@ -67,7 +69,8 @@ When transferring data across a network, the effective throughput is limited by 
 
 ## How Packet Pacing Works
 
-Packet pacing solves this problem by **controlling the rate at which packets leave the source host**, ensuring thereceiver is never overwhelmed and can process packets at a sustainable rate.
+Packet pacing solves this problem by **controlling the rate at which packets leave the source host**, ensuring
+thereceiver is never overwhelmed and can process packets at a sustainable rate.
 
 ### Mechanism: Fair Queuing (FQ) Qdisc
 
@@ -102,7 +105,8 @@ The **Token Bucket Filter (TBF)** qdisc enforces a maximum rate limit by:
 
 * **Smoothing traffic** into a predictable, controlled rate
 
-The burst size determines how many back-to-back packets can be sent before rate limiting kicks in. Typically, wecalculate burst as 1-2ms worth of packets at the target rate.
+The burst size determines how many back-to-back packets can be sent before rate limiting kicks in. Typically,
+wecalculate burst as 1-2ms worth of packets at the target rate.
 
 ---
 
@@ -156,10 +160,11 @@ ESnet's performance testing with Berkeley Lab and others has demonstrated signif
 
 For a DTN with **N parallel streams**, divide available bandwidth accordingly:
 
-| Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Command | |---|---|---|---| | 10G | 4 | 2 Gbps | `tcqdisc add dev eth0 root fq maxrate 2gbit` | | 10G | 8 | 1 Gbps | `tc qdisc add dev eth0 root fq maxrate 1gbit` | | 40G |
-4 | 8 Gbps | `tc qdisc add dev eth0 root fq maxrate 8gbit` | | 40G | 8 | 5 Gbps | `tc qdisc add dev eth0 root fq maxrate
-5gbit` | | 100G | 8 | 10-12 Gbps | `tc qdisc add dev eth0 root fq maxrate 10gbit` | | 100G (to 10G paths) | Any | 2 Gbps
-| `tc qdisc add dev eth0 root fq maxrate 2gbit` |
+| Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Command | |---|---|---|---| | 10G | 4 | 2 Gbps |
+`tcqdisc add dev eth0 root fq maxrate 2gbit` | | 10G | 8 | 1 Gbps | `tc qdisc add dev eth0 root fq maxrate 1gbit` | |
+40G | 4 | 8 Gbps | `tc qdisc add dev eth0 root fq maxrate 8gbit` | | 40G | 8 | 5 Gbps | `tc qdisc add dev eth0 root fq
+maxrate 5gbit` | | 100G | 8 | 10-12 Gbps | `tc qdisc add dev eth0 root fq maxrate 10gbit` | | 100G (to 10G paths) | Any
+| 2 Gbps | `tc qdisc add dev eth0 root fq maxrate 2gbit` |
 
 ### Rationale
 
@@ -327,6 +332,7 @@ perfSONAR's pscheduler also supports pacing. Check your perfSONAR configuration 
 
 **Solution**: Ensure `/etc/sysctl.conf` contains:
 
+
 ``` bash net.core.default_qdisc = fq sysctl -p
 ``` text
 
@@ -353,6 +359,7 @@ Then reapply pacing with `fasterdata-tuning.sh` or `tc` command.
 ### Issue: Pacing Configuration Lost After Reboot
 
 **Solution**: The `fasterdata-tuning.sh` apply mode creates a systemd service for persistence. Enable it:
+
 
 ``` bash sudo systemctl enable ethtool-persist.service sudo systemctl start ethtool-persist.service
 ```
@@ -450,6 +457,7 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 1. ✅ **Easy to implement** — Single command or script invocation
 
 **Recommended Configuration for 10G DTN with 4 parallel streams**:
+
 
 ``` bash sudo fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 2gbps
 ``` text

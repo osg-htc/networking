@@ -36,35 +36,43 @@ support" | | **perfSONAR Questions** | [User Mailing List](https://lists.interne
 ### Orchestrated Deploy (Recommended)
 
 ```bash
+
 # Download and run
-curl -fsSL \
-  https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh \
-  -o /tmp/perfSONAR-orchestrator.sh
-chmod 0755 /tmp/perfSONAR-orchestrator.sh
+
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-
+orchestrator.sh \ -o /tmp/perfSONAR-orchestrator.sh chmod 0755 /tmp/perfSONAR-orchestrator.sh
 
 # Interactive (pauses at each step)
+
 /tmp/perfSONAR-orchestrator.sh
 
 # Non-interactive (auto-confirm all)
+
 /tmp/perfSONAR-orchestrator.sh --non-interactive --option A
 
 # With Let's Encrypt
+
 /tmp/perfSONAR-orchestrator.sh --option B --fqdn <FQDN> --email <EMAIL>
-```text
+```
 
 ### Post-Deploy Validation
 
 ```bash
+
 # Verify services running
+
 systemctl status perfsonar-testpoint
 
 # Check container
+
 podman ps | grep perfsonar
 
 # Verify pSConfig enrollment
+
 psconfig remote list
 
 # List scheduled tests
+
 pscheduler tasks --host localhost
 ```
 
@@ -79,12 +87,15 @@ All (or 443) | | 9000 | TCP | Logging | Central server |
 ### Open Firewall (nftables)
 
 ```bash
+
 # Add rule to allow 443
+
 sudo nft add rule inet filter input tcp dport 443 accept
 
 # Verify
+
 nft list table filter
-```text
+```
 
 ---
 
@@ -93,86 +104,99 @@ nft list table filter
 ### Container Management
 
 ```bash
+
 # Status
-podman ps -a | grep perfsonar
-systemctl status perfsonar-testpoint
+
+podman ps -a | grep perfsonar systemctl status perfsonar-testpoint
 
 # View logs
-podman logs perfsonar-testpoint
-podman logs -f perfsonar-testpoint          # follow
+
+podman logs perfsonar-testpoint podman logs -f perfsonar-testpoint          # follow
 
 # Restart
+
 systemctl restart perfsonar-testpoint
 
 # Stop/Start
-systemctl stop perfsonar-testpoint
-systemctl start perfsonar-testpoint
+
+systemctl stop perfsonar-testpoint systemctl start perfsonar-testpoint
 ```
 
 ### pScheduler & Tests
 
 ```bash
+
 # List all tasks
+
 pscheduler tasks --host localhost
 
 # View scheduled tests (JSON format)
+
 pscheduler tasks --host localhost --format json
 
 # Run manual test
-pscheduler task add --host <local> --dest <remote> \
-  --test-type latencybg
+
+pscheduler task add --host <local> --dest <remote> \ --test-type latencybg
 
 # Check pScheduler status
+
 systemctl status perfsonar-pscheduler-agent
-```text
+```
 
 ### Network Configuration
 
 ```bash
+
 # View interfaces
-nmcli device status
-ip -br addr
+
+nmcli device status ip -br addr
 
 # Check routing
-ip route show
-ip rule show
+
+ip route show ip rule show
 
 # View firewall rules
+
 nft list ruleset
 
 # Check listening ports
+
 ss -ltnp | grep -E '(443|5001)'
 ```
 
 ### Host Tuning
 
 ```bash
+
 # Download tuning script
-curl -fsSL \
-  https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh \
-  -o /tmp/fasterdata-tuning.sh
-chmod 0755 /tmp/fasterdata-tuning.sh
+
+curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-
+tuning.sh \ -o /tmp/fasterdata-tuning.sh chmod 0755 /tmp/fasterdata-tuning.sh
 
 # Audit (no changes)
+
 /tmp/fasterdata-tuning.sh audit
 
 # Apply tuning
+
 sudo /tmp/fasterdata-tuning.sh apply
 
 # For DTN (large buffers)
+
 sudo /tmp/fasterdata-tuning.sh apply --target dtn
-```text
+```
 
 ### LS Registration
 
 ```bash
+
 # Update registration
+
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update
 
 # Auto-enroll in mesh
-/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh \
-  --fqdn $(hostname -f) \
-  --profile latency
+
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh \ --fqdn $(hostname -f) \ --profile latency
 ```
 
 ---
@@ -180,40 +204,39 @@ sudo /tmp/fasterdata-tuning.sh apply --target dtn
 ## Troubleshooting Quick Checklist
 
 ```bash
+
 # 1. System info
-hostnamectl
-cat /etc/os-release
-uname -a
+
+hostnamectl cat /etc/os-release uname -a
 
 # 2. Connectivity
-ping -c 3 8.8.8.8
-ping -c 3 psconfig.opensciencegrid.org
+
+ping -c 3 8.8.8.8 ping -c 3 psconfig.opensciencegrid.org
 
 # 3. Container status
-podman ps -a
-podman logs perfsonar-testpoint | head -50
+
+podman ps -a podman logs perfsonar-testpoint | head -50
 
 # 4. Services
-systemctl status perfsonar-*
-systemctl status podman
+
+systemctl status perfsonar-* systemctl status podman
 
 # 5. Network
-ip -br addr
-netstat -ltnp | grep -E '(443|5001|8080)'
-nft list ruleset | head -20
+
+ip -br addr netstat -ltnp | grep -E '(443|5001|8080)' nft list ruleset | head -20
 
 # 6. pScheduler
-psconfig remote list
-pscheduler tasks --host localhost
+
+psconfig remote list pscheduler tasks --host localhost
 
 # 7. DNS
-dig psconfig.opensciencegrid.org
-nslookup $(hostname -f)
+
+dig psconfig.opensciencegrid.org nslookup $(hostname -f)
 
 # 8. Firewall test
-curl -v https://psconfig.opensciencegrid.org/
-nc -zv <remote_testpoint> 443
-```text
+
+curl -v <https://psconfig.opensciencegrid.org/> nc -zv <remote_testpoint> 443
+```
 
 ---
 
@@ -270,57 +293,73 @@ Docs** | [docs.perfsonar.net](https://docs.perfsonar.net/) |
 ### Container Won't Start
 
 ```bash
+
 # 1. Check logs
+
 podman logs perfsonar-testpoint
 
 # 2. Verify image
+
 podman images | grep perfsonar
 
 # 3. Free disk space
+
 podman system prune -a
 
 # 4. Restart service
+
 systemctl restart perfsonar-testpoint
 
 # 5. Check ports
+
 ss -ltnp | grep -E '(443|5001)'
 ```
 
 ### Container Lost Network
 
 ```bash
+
 # 1. Check network
-ip link show
-nmcli device status
+
+ip link show nmcli device status
 
 # 2. Restart network
+
 systemctl restart NetworkManager
 
 # 3. Restart container
+
 systemctl restart perfsonar-testpoint
 
 # 4. Verify routes
+
 ip route show
-```text
+```
 
 ### Tests Not Running
 
 ```bash
+
 # 1. Check enrollment
+
 psconfig remote list
 
 # 2. Verify connectivity
-curl -v https://psconfig.opensciencegrid.org/
+
+curl -v <https://psconfig.opensciencegrid.org/>
 
 # 3. Check pScheduler
-systemctl status perfsonar-pscheduler-agent
-pscheduler tasks --host localhost
+
+systemctl status perfsonar-pscheduler-agent pscheduler tasks --host localhost
 
 # 4. Restart all services
+
 systemctl restart perfsonar-testpoint
 
 # 5. Escalate
+
 # Contact: [Troubleshooter Guide](personas/troubleshoot/landing.md)
+
 ```
 
 ---

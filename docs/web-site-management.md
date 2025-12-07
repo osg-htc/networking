@@ -21,24 +21,19 @@ focus on persona-based documentation. The goal is to maintain `docs/` as the sin
 
 1. Create a Python virtualenv and install dependencies:
 
-~~~bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -U pip
-pip install mkdocs mkdocs-material pymdown-extensions
-~~~
+~~~bash python3 -m venv .venv source .venv/bin/activate pip install -U pip pip install mkdocs mkdocs-material pymdown-
+extensions
+~~~ text
 
 1. Run a local preview server:
 
-~~~bash
-mkdocs serve -a 0.0.0.0:8000
+~~~bash mkdocs serve -a 0.0.0.0:8000
 ~~~
 
 1. Build the site for local verification:
 
-~~~bash
-mkdocs build --clean -d site
-~~~
+~~~bash mkdocs build --clean -d site
+~~~ text
 
 ## CI & Publishing
 

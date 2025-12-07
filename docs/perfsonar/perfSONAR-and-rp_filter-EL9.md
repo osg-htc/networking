@@ -1,13 +1,16 @@
 # perfSONAR use of Policy Based Routing and rp\_filter on EL9
 
-In a multihome setup on EL9, `sysctl rp_filter` and policy-based routing (PBR) address two different layers of networktraffic handling and can conflict with each other. PBR determines the outbound path for traffic based on criteria, while
-`rp_filter` is a security feature that validates the source address of inbound traffic. If not configured properly,
-strict `rp_filter` can block legitimate traffic in a PBR setup.
+In a multihome setup on EL9, `sysctl rp_filter` and policy-based routing (PBR) address two different layers of
+networktraffic handling and can conflict with each other. PBR determines the outbound path for traffic based on
+criteria, while `rp_filter` is a security feature that validates the source address of inbound traffic. If not
+configured properly, strict `rp_filter` can block legitimate traffic in a PBR setup.
 
 ## `sysctl rp_filter` overview
 
-The Reverse Path Filtering (`rp_filter`) kernel parameter is a security measure designed to prevent IP spoofing, oftenassociated with Denial of Service (DoS) attacks. When enabled, it checks the source IP address of an incoming packet to
-ensure the return path for a response would exit through the same interface that received the packet. It can beconfigured with three values:
+The Reverse Path Filtering (`rp_filter`) kernel parameter is a security measure designed to prevent IP spoofing,
+oftenassociated with Denial of Service (DoS) attacks. When enabled, it checks the source IP address of an incoming
+packet to ensure the return path for a response would exit through the same interface that received the packet. It can
+beconfigured with three values:
 
 * `0`: **Disabled.** No source validation is performed. This is required for asymmetric routing setups.
 
@@ -17,8 +20,9 @@ ensure the return path for a response would exit through the same interface that
 
 ### Policy-based routing (PBR) overview
 
-PBR is a technique for overriding the standard Linux routing behavior, which is typically based solely on thedestination IP address. It allows administrators to route traffic based on other criteria, such as the source IP
-address, application, protocol, or firewall marks (`fwmark`). A PBR setup involves these key steps:
+PBR is a technique for overriding the standard Linux routing behavior, which is typically based solely on thedestination
+IP address. It allows administrators to route traffic based on other criteria, such as the source IP address,
+application, protocol, or firewall marks (`fwmark`). A PBR setup involves these key steps:
 
 1. **Create custom routing tables.** Additional tables beyond the main routing table are defined, often in `/etc/iproute2/rt_tables`.
 
@@ -44,9 +48,11 @@ The conflict arises when using **strict `rp_filter` (value 1\)** in a multihomed
 
 ### **Solution for EL9 multihome:**
 
-To enable asymmetric routing with PBR, you must relax the `rp_filter` setting, as strict mode will cause legitimatepackets to be dropped.
+To enable asymmetric routing with PBR, you must relax the `rp_filter` setting, as strict mode will cause
+legitimatepackets to be dropped.
 
-The best practice is to use a value of `2` (loose mode) or `0` (disabled). The loose mode is safer as it still providessome protection against spoofing, while `0` completely disables the check.
+The best practice is to use a value of `2` (loose mode) or `0` (disabled). The loose mode is safer as it still
+providessome protection against spoofing, while `0` completely disables the check.
 
 You can configure this persistently by editing a file in `/etc/sysctl.d/`, for example `/etc/sysctl.d/99-network.conf`:
 
@@ -56,7 +62,10 @@ After saving the file, apply the changes with `sysctl -p`.
 
 ### Summary of differences
 
-| Feature  | `sysctl rp_filter` | Policy-Based Routing (PBR) | | ----- | ----- | ----- | | **Purpose** | Securitymechanism to prevent IP spoofing by checking inbound packet source addresses. | Advanced routing method to control
-outbound traffic path based on policies. | | **Traffic direction** | Checks incoming traffic. | Explicitly directsoutgoing traffic. | | **Mechanism** | A single kernel parameter with three states (`0`, `1`, `2`) that applies globally
-or per-interface. | Uses multiple routing tables and rules (`ip rule`) to select the appropriate table for a givenpacket. | | **Compatibility** | Strict mode (`1`) conflicts with multihome setups involving asymmetric routing. | Is
-designed for multihome setups but requires loosening or disabling `rp_filter` to function correctly |
+| Feature  | `sysctl rp_filter` | Policy-Based Routing (PBR) | | ----- | ----- | ----- | | **Purpose** |
+Securitymechanism to prevent IP spoofing by checking inbound packet source addresses. | Advanced routing method to
+control outbound traffic path based on policies. | | **Traffic direction** | Checks incoming traffic. | Explicitly
+directsoutgoing traffic. | | **Mechanism** | A single kernel parameter with three states (`0`, `1`, `2`) that applies
+globally or per-interface. | Uses multiple routing tables and rules (`ip rule`) to select the appropriate table for a
+givenpacket. | | **Compatibility** | Strict mode (`1`) conflicts with multihome setups involving asymmetric routing. |
+Is designed for multihome setups but requires loosening or disabling `rp_filter` to function correctly |

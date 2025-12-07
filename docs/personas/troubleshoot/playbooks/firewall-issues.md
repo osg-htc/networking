@@ -27,10 +27,8 @@ ss -ltnp | grep -E '(443|5001|8080|9000)'
 
 # Test remote connectivity
 
-for port in $PORTS; do
-  nc -zv <remote_testpoint> $port
-done
-```text
+for port in $PORTS; do nc -zv <remote_testpoint> $port done
+```
 
 Expected results:
 
@@ -65,8 +63,7 @@ nft list table filter | grep -E '(443|5001|8080|9000|DROP|REJECT)'
 
 # DNS resolution
 
-dig +short <remote_testpoint_hostname>
-nslookup <remote_testpoint_hostname>
+dig +short <remote_testpoint_hostname> nslookup <remote_testpoint_hostname>
 
 # Basic ping
 
@@ -78,12 +75,12 @@ traceroute -n <remote_testpoint_ip>
 
 # Test port connectivity
 
-curl -v https://<remote_testpoint_hostname>:443/
+curl -v <https://<remote_testpoint_hostname>>:443/
 
 # Test from remote back (may need to ask admin)
 
-ssh <remote_admin> "curl -v https://<YOUR_TESTPOINT>:443/"
-```text
+ssh <remote_admin> "curl -v <https://<YOUR_TESTPOINT>>:443/"
+```
 
 ### Step 4: Check Campus/Upstream Firewall
 
@@ -102,7 +99,9 @@ ssh <remote_admin> "curl -v https://<YOUR_TESTPOINT>:443/"
 # Provide them:
 
 - Your testpoint IP
+
 - Remote testpoint IPs you need to reach
+
 - Required ports (443 primary, 5001/8080 secondary)
 
 ```
@@ -122,7 +121,7 @@ journalctl -n 100 | grep -i "firewall\|dropped\|rejected"
 # nftables audit logs (if enabled)
 
 dmesg | grep -i nft
-```text
+```
 
 ### Step 6: Escalate
 
@@ -199,7 +198,7 @@ nft list table filter
 
 # Usually in /etc/nftables.conf or similar
 
-```text
+```
 
 ### Campus Firewall Blocking
 
@@ -221,10 +220,8 @@ nft list table filter
 
 1. **Verify after firewall changes:**
 
-   ```bash
-   curl -v https://<remote_testpoint>:443/
-   pscheduler tasks --host localhost
-```
+```bash curl -v https://<remote_testpoint>:443/ pscheduler tasks --host localhost
+``` text
 
 ### DNS Resolution Failing
 
@@ -232,7 +229,7 @@ nft list table filter
 
 **Solution:**
 
-```bash
+```
 
 # Check local resolver
 
@@ -240,12 +237,12 @@ cat /etc/resolv.conf
 
 # Test with Google's DNS
 
-ping 8.8.8.8
-dig @8.8.8.8 <remote_testpoint_hostname>
+ping 8.8.8.8 dig @8.8.8.8 <remote_testpoint_hostname>
 
 # Verify DNS server is reachable
 
 nc -zv <dns_server> 53
+
 ```text
 
 ---

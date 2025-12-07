@@ -11,33 +11,22 @@ tags: [troubleshoot, checklist]
 
 1. Gather host information
 
-```bash
-hostnamectl
-cat /etc/os-release
-uname -a
-ip -c a
+```bash hostnamectl cat /etc/os-release uname -a ip -c a
 ```text
 
 1. Check basic connectivity
 
-```bash
-ping -c 4 <remote-ip-or-host>
-traceroute -n <remote-ip-or-host>
+```bash ping -c 4 <remote-ip-or-host> traceroute -n <remote-ip-or-host>
 ```
 
 1. Verify perfSONAR services and containers
 
-```bash
-systemctl status perfsonar-*
-ps aux | grep perfsonar
-podman ps || docker ps
+```bash systemctl status perfsonar-* ps aux | grep perfsonar podman ps || docker ps
 ```text
 
 1. Check firewall and ports
 
-```bash
-nft list ruleset
-ss -ltnp
+```bash nft list ruleset ss -ltnp
 ```
 
 1. Collect logs and measurements

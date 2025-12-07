@@ -27,7 +27,7 @@ The perfSONAR network consists of:
 
 - **Data Storage** — Central Elasticsearch instances (distributed for
 
-  resilience)
+resilience)
 
 - **Configuration Services** — pSConfig for centralized test mesh management
 
@@ -107,10 +107,8 @@ The perfSONAR network consists of:
 
 #### Example query
 
-```bash
-curl -X GET "elasticsearch-server:9200/perfsonar-testpoint/_search" \
-  -H 'Content-Type: application/json' \
-  -d '{"query": {"match": {"agent": "testpoint.example.com"}}}'
+```bash curl -X GET "elasticsearch-server:9200/perfsonar-testpoint/_search" \ -H 'Content-Type: application/json' \ -d
+'{"query": {"match": {"agent": "testpoint.example.com"}}}'
 ```text
 
 ### Jupyter Notebooks

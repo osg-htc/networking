@@ -40,8 +40,7 @@ Each modified file has a timestamped backup under `docs/.link_check_backups/` wi
 
 1. Run the docs link-check tool in dry-run to find remaining issues:
 
-```bash
-python docs/tools/find_and_remove_broken_links.py --check-externals
+```bash python docs/tools/find_and_remove_broken_links.py --check-externals
 ```text
 
 ### Notes / Next steps

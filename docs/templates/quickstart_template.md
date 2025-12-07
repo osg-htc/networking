@@ -15,8 +15,10 @@ tags: [template, quickstart]
 ## Install (minimal)
 
 ```bash
+
 # minimal commands
-```text
+
+```
 
 ## Verify
 

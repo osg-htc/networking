@@ -6,8 +6,8 @@ _February 4th 2013_
 
 !!! note
 
-  ```text
-This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
+```text This document is old but still may have useful information.  Many tools it references may no longer be supported
+or available.
 
 ```text
 
@@ -386,8 +386,8 @@ and updates.  The following steps can be taken to install these tools:
 
 The following command will import the key.
 
-rpm --import [http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2](http://software.internet2.edu/rpms/RPM-GPG-KEY-
-Internet2)
+rpm --import [http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2](http://software.internet2.edu/rpms/RPM-GPG-
+KEYInternet2)
 
 - **Download RPM Software**
 
@@ -445,8 +445,7 @@ The following are some examples of how to use the tools from the command line:
 NDT uses a command line client called **web100clt**.  There are many options available, but in general you must supply a
 server name, and some debugging flags to get additional output.  Here is a simple invocation:
 
-```text
-[user@host ~]$ web100clt -n ndt.chic.net.internet2.edu
+```text [user@host ~]$ web100clt -n ndt.chic.net.internet2.edu
 
 Testing network path for configuration and performance problems  --  Using IPv6 address
 
@@ -497,66 +496,33 @@ BWCTL is invoked from the command line with a number of options.  Of these the f
 An example of invoking BWCTL can be seen below.  In this example we are sending data from the host we are on to another
 located in Kansas City MO, on the Internet2 network:
 
-```text
-[user@host ~]$ bwctl -f m -t 10 -i 1 -c nms-rthr.kans.net.internet2.edu
-bwctl: Using tool: iperf
-bwctl: 93 seconds until test results available
-RECEIVER START
-bwctl: exec\_line: /usr/bin/iperf -B 64.57.16.210 -s -f m -m -p 5011 -t 10 -i 1
-bwctl: start\_tool: 3568979157.239050
-------------------------------------------------------------
-Server listening on TCP port 5011
-Binding to local address 64.57.16.210
-TCP window size: 0.08 MByte (default)
-------------------------------------------------------------
-[14] local 64.57.16.210 port 5011 connected with 64.57.17.18 port 5011
-[14]  0.0- 1.0 sec    105 MBytes    879 Mbits/sec
-[14]  1.0- 2.0 sec    118 MBytes    990 Mbits/sec
-[14]  2.0- 3.0 sec    118 MBytes    990 Mbits/sec
-[14]  3.0- 4.0 sec    118 MBytes    990 Mbits/sec
-[14]  4.0- 5.0 sec    118 MBytes    990 Mbits/sec
-[14]  5.0- 6.0 sec    118 MBytes    990 Mbits/sec
-[14]  6.0- 7.0 sec    118 MBytes    990 Mbits/sec
-[14]  7.0- 8.0 sec    118 MBytes    990 Mbits/sec
-[14]  8.0- 9.0 sec    118 MBytes    990 Mbits/sec
-[14]  9.0-10.0 sec    118 MBytes    990 Mbits/sec
-[14]  0.0-10.1 sec  1178 MBytes    979 Mbits/sec
-[14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
-bwctl: stop\_exec: 3568979172.016198
-RECEIVER END
+```text [user@host ~]$ bwctl -f m -t 10 -i 1 -c nms-rthr.kans.net.internet2.edu bwctl: Using tool: iperf bwctl: 93
+seconds until test results available RECEIVER START bwctl: exec\_line: /usr/bin/iperf -B 64.57.16.210 -s -f m -m -p 5011
+-t 10 -i 1 bwctl: start\_tool: 3568979157.239050 ------------------------------------------------------------ Server
+listening on TCP port 5011 Binding to local address 64.57.16.210 TCP window size: 0.08 MByte (default)
+------------------------------------------------------------ [14] local 64.57.16.210 port 5011 connected with
+64.57.17.18 port 5011 [14]  0.0- 1.0 sec    105 MBytes    879 Mbits/sec [14]  1.0- 2.0 sec    118 MBytes    990
+Mbits/sec [14]  2.0- 3.0 sec    118 MBytes    990 Mbits/sec [14]  3.0- 4.0 sec    118 MBytes    990 Mbits/sec [14]  4.0-
+5.0 sec    118 MBytes    990 Mbits/sec [14]  5.0- 6.0 sec    118 MBytes    990 Mbits/sec [14]  6.0- 7.0 sec    118
+MBytes    990 Mbits/sec [14]  7.0- 8.0 sec    118 MBytes    990 Mbits/sec [14]  8.0- 9.0 sec    118 MBytes    990
+Mbits/sec [14]  9.0-10.0 sec    118 MBytes    990 Mbits/sec [14]  0.0-10.1 sec  1178 MBytes    979 Mbits/sec [14] MSS
+size 8948 bytes (MTU 8988 bytes, unknown interface) bwctl: stop\_exec: 3568979172.016198 RECEIVER END
 ```text
 
 This test reveals that over the course of 10 seconds we achieved an average bandwidth of 979Mbps and sent a total of
 1178MB of data.  We can reverse the direction of this test in the next example:
 
-```text
-[user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu
-bwctl: Using tool: iperf
-bwctl: 75 seconds until test results available
-RECEIVER START
-bwctl: exec\_line: /usr/bin/iperf -B 64.57.17.18 -s -f m -m -p 5011 -t 10 -i 1
-bwctl: start\_tool: 3568979241.960327
-------------------------------------------------------------
-Server listening on TCP port 5011
-Binding to local address 64.57.17.18
-TCP window size: 16.0 MByte (default)
-------------------------------------------------------------
-[14] local 64.57.17.18 port 5011 connected with 64.57.16.210 port 5011
-[ID] Interval       Transfer     Bandwidth
-[14]  0.0- 1.0 sec   111 MBytes   929 Mbits/sec
-[14]  1.0- 2.0 sec   118 MBytes   990 Mbits/sec
-[14]  2.0- 3.0 sec   118 MBytes   990 Mbits/sec
-[14]  3.0- 4.0 sec   118 MBytes   990 Mbits/sec
-[14]  4.0- 5.0 sec   118 MBytes   990 Mbits/sec
-[14]  5.0- 6.0 sec   118 MBytes   990 Mbits/sec
-[14]  6.0- 7.0 sec   118 MBytes   990 Mbits/sec
-[14]  7.0- 8.0 sec   118 MBytes   990 Mbits/sec
-[14]  8.0- 9.0 sec   118 MBytes   990 Mbits/sec
-[14]  9.0-10.0 sec   118 MBytes   990 Mbits/sec
-[14]  0.0-10.2 sec  1193 MBytes   984 Mbits/sec
-[14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
-bwctl: stop\_exec: 3568979256.889493
-RECEIVER END
+```text [user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu bwctl: Using tool: iperf bwctl: 75
+seconds until test results available RECEIVER START bwctl: exec\_line: /usr/bin/iperf -B 64.57.17.18 -s -f m -m -p 5011
+-t 10 -i 1 bwctl: start\_tool: 3568979241.960327 ------------------------------------------------------------ Server
+listening on TCP port 5011 Binding to local address 64.57.17.18 TCP window size: 16.0 MByte (default)
+------------------------------------------------------------ [14] local 64.57.17.18 port 5011 connected with
+64.57.16.210 port 5011 [ID] Interval       Transfer     Bandwidth [14]  0.0- 1.0 sec   111 MBytes   929 Mbits/sec [14]
+1.0- 2.0 sec   118 MBytes   990 Mbits/sec [14]  2.0- 3.0 sec   118 MBytes   990 Mbits/sec [14]  3.0- 4.0 sec   118
+MBytes   990 Mbits/sec [14]  4.0- 5.0 sec   118 MBytes   990 Mbits/sec [14]  5.0- 6.0 sec   118 MBytes   990 Mbits/sec
+[14]  6.0- 7.0 sec   118 MBytes   990 Mbits/sec [14]  7.0- 8.0 sec   118 MBytes   990 Mbits/sec [14]  8.0- 9.0 sec   118
+MBytes   990 Mbits/sec [14]  9.0-10.0 sec   118 MBytes   990 Mbits/sec [14]  0.0-10.2 sec  1193 MBytes   984 Mbits/sec
+[14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface) bwctl: stop\_exec: 3568979256.889493 RECEIVER END
 ```
 
 A similar result is seen in that we achieve near 1Gbps bandwidth (e.g. the hosts are only connected at 1Gbps).
@@ -566,35 +532,19 @@ end) then test to resources in the middle.  Note that BWCTL supports a 3 mode op
 for both the &#39;-c&#39; and &#39;-s&#39; and perform tests between these two hosts without being physically logged
 into either:
 
-```text
-[user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu -c nms-rthr1.hous.net.internet2.edu
-bwctl: Using tool: iperf
-bwctl: 82 seconds until test results available
-RECEIVER START
-bwctl: exec\_line: /usr/bin/iperf -B 64.57.16.130 -s -f m -m -p 5001 -t 10 -i 1
-bwctl: start\_tool: 3568979772.344387
+```text [user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu -c nms-rthr1.hous.net.internet2.edu
+bwctl: Using tool: iperf bwctl: 82 seconds until test results available RECEIVER START bwctl: exec\_line: /usr/bin/iperf
+-B 64.57.16.130 -s -f m -m -p 5001 -t 10 -i 1 bwctl: start\_tool: 3568979772.344387
 
-------------------------------------------------------------
-Server listening on TCP port 5001
-Binding to local address 64.57.16.130
-TCP window size: 0.08 MByte (default)
-------------------------------------------------------------
-[14] local 64.57.16.130 port 5001 connected with 64.57.16.210 port 5001
-[ID] Interval       Transfer     Bandwidth
-[14]  0.0- 1.0 sec   103 MBytes   861 Mbits/sec
-[14]  1.0- 2.0 sec   118 MBytes   990 Mbits/sec
-[14]  2.0- 3.0 sec   118 MBytes   990 Mbits/sec
-[14]  3.0- 4.0 sec   118 MBytes   990 Mbits/sec
-[14]  4.0- 5.0 sec   118 MBytes   990 Mbits/sec
-[14]  5.0- 6.0 sec   118 MBytes   990 Mbits/sec
-[14]  6.0- 7.0 sec   118 MBytes   990 Mbits/sec
-[14]  7.0- 8.0 sec   118 MBytes   990 Mbits/sec
-[14]  8.0- 9.0 sec   118 MBytes   990 Mbits/sec
-[14]  9.0-10.0 sec   118 MBytes   990 Mbits/sec
-[14]  0.0-10.2 sec  1183 MBytes   977 Mbits/sec
-[14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
-bwctl: stop\_exec: 3568979785.230833
-RECEIVER END
+------------------------------------------------------------ Server listening on TCP port 5001 Binding to local address
+64.57.16.130 TCP window size: 0.08 MByte (default) ------------------------------------------------------------ [14]
+local 64.57.16.130 port 5001 connected with 64.57.16.210 port 5001 [ID] Interval       Transfer     Bandwidth [14]  0.0-
+1.0 sec   103 MBytes   861 Mbits/sec [14]  1.0- 2.0 sec   118 MBytes   990 Mbits/sec [14]  2.0- 3.0 sec   118 MBytes
+990 Mbits/sec [14]  3.0- 4.0 sec   118 MBytes   990 Mbits/sec [14]  4.0- 5.0 sec   118 MBytes   990 Mbits/sec [14]  5.0-
+6.0 sec   118 MBytes   990 Mbits/sec [14]  6.0- 7.0 sec   118 MBytes   990 Mbits/sec [14]  7.0- 8.0 sec   118 MBytes
+990 Mbits/sec [14]  8.0- 9.0 sec   118 MBytes   990 Mbits/sec [14]  9.0-10.0 sec   118 MBytes   990 Mbits/sec [14]
+0.0-10.2 sec  1183 MBytes   977 Mbits/sec [14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface) bwctl:
+stop\_exec: 3568979785.230833 RECEIVER END
 ```text
 
 BWCTL requires a stable NTP clock to work properly, be sure that NTP is configured before using this tool.
@@ -605,28 +555,16 @@ OWAMP is a tool that measures latency, loss, out of orderness, and duplication o
 destination.  Note that this test measures each direction **independently** versus that of the traditional round trip
 tool **ping**.  Below is an example of a test:
 
-```text
-[user@host ~]$ owping owamp.wash.net.internet2.edu
-Approximately 12.6 seconds until results available
---- owping statistics from [eth-1.nms-rlat.newy32aoa.net.internet2.edu]:60455 to [owamp.wash.net.internet2.edu]:47148 ---
-SID:        00160034d4ba4cad4e8c0485546b4ebf
-first:        2013-02-04T15:05:18.240
-last:        2013-02-04T15:05:27.254
-100 sent, 0 lost (0.000%), 0 duplicates
-one-way delay min/median/max = 2.02/2.1/2.06 ms, (err=0.218 ms)
-one-way jitter = 0 ms (P95-P50)
-Hops = 2 (consistently)
-no reordering
+```text [user@host ~]$ owping owamp.wash.net.internet2.edu Approximately 12.6 seconds until results available --- owping
+statistics from [eth-1.nms-rlat.newy32aoa.net.internet2.edu]:60455 to [owamp.wash.net.internet2.edu]:47148 --- SID:
+00160034d4ba4cad4e8c0485546b4ebf first:        2013-02-04T15:05:18.240 last:        2013-02-04T15:05:27.254 100 sent, 0
+lost (0.000%), 0 duplicates one-way delay min/median/max = 2.02/2.1/2.06 ms, (err=0.218 ms) one-way jitter = 0 ms
+(P95-P50) Hops = 2 (consistently) no reordering
 
---- owping statistics from [owamp.wash.net.internet2.edu]:47149 to [eth-1.nms-rlat.newy32aoa.net.internet2.edu]:33562 ---
-SID:        00170098d4ba4cad8eb45282697d2cc2
-first:        2013-02-04T15:05:18.259
-last:        2013-02-04T15:05:27.175
-100 sent, 0 lost (0.000%), 0 duplicates
-one-way delay min/median/max = 3.19/3.3/3.27 ms, (err=0.218 ms)
-one-way jitter = 0 ms (P95-P50)
-Hops = 2 (consistently)
-no reordering
+--- owping statistics from [owamp.wash.net.internet2.edu]:47149 to [eth-1.nms-rlat.newy32aoa.net.internet2.edu]:33562
+--- SID:        00170098d4ba4cad8eb45282697d2cc2 first:        2013-02-04T15:05:18.259 last:
+2013-02-04T15:05:27.175 100 sent, 0 lost (0.000%), 0 duplicates one-way delay min/median/max = 3.19/3.3/3.27 ms,
+(err=0.218 ms) one-way jitter = 0 ms (P95-P50) Hops = 2 (consistently) no reordering
 ```
 
 The results clearly state each direction of operation, and any problems that were found.  As in the BWCTL case the tool

@@ -150,18 +150,15 @@ None. All changes are backward compatible.
 
 1. Pull latest changes:
 
-   ```bash
-   cd /opt/perfsonar-tp/tools_scripts
-   curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh | bash -s -- /opt/perfsonar-tp
+```bash cd /opt/perfsonar-tp/tools_scripts curl -fsSL https://raw.githubusercontent.com/osg-
+htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh | bash -s -- /opt/perfsonar-tp
 ```text
 
 1. Review new troubleshooting guide for common issues
 
 1. Test new script features:
 
-   ```bash
-   /opt/perfsonar-tp/tools_scripts/check-deps.sh --version
-   /opt/perfsonar-tp/tools_scripts/check-deps.sh --help
+```bash /opt/perfsonar-tp/tools_scripts/check-deps.sh --version /opt/perfsonar-tp/tools_scripts/check-deps.sh --help
 ```
 
 ## Validation

@@ -45,7 +45,7 @@ CHANGELOG.md git commit -m "chore(release): prepare Quick Deploy v1.1.0; depreca
 
 1. Create an annotated tag for the release (replace DATE and notes as desired):
 
-   git tag -a v1.1.0 -m "Quick Deploy v1.1.0 — 2025-11-08"
+git tag -a v1.1.0 -m "Quick Deploy v1.1.0 — 2025-11-08"
 
 1. Push commits and tags:
 
