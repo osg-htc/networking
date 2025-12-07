@@ -10,6 +10,7 @@ each focused on specific set of tests. The following deployment options are curr
 
 * **Bare metal** - preffered option in one of two possible configurations:
 
+
 ```text
 
 * Two bare metal servers, one for latency node, one for bandwidth node
@@ -20,6 +21,7 @@ each focused on specific set of tests. The following deployment options are curr
 ```
 
 * **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:
+
 
 ```text
 
@@ -33,6 +35,7 @@ each focused on specific set of tests. The following deployment options are curr
 ```
 
 * **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
+
 
 ```text
 
@@ -49,6 +52,7 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 
 * Pros
 
+
 ```text
 
 * Simpler deployment when a local web interface is not needed and a central measurement archive is available.
@@ -59,6 +63,7 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 ```
 
 * Cons
+
 
 ```text
 
@@ -110,6 +115,7 @@ required in order to configure the node with multiple network cards:
 * You'll need to register two hostnames in [OIM](installation.md)/[GOCDB](installation.md) (and have two reverse DNS entries) as you would normally for two separate nodes.
 
 * Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:
+
 
 ``` bash psconfig remote add "<https://psconfig.opensciencegrid.org/pub/auto/<FQDN_latency>"> psconfig remote add
 "https://psconfig.opensciencegrid.org/pub/auto/<FQDN_throughput>" ...

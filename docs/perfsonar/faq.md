@@ -4,8 +4,8 @@ Here we will provide details on troubleshooting perfSONAR installations for OSG 
 configuration options and a FAQ.
 
 A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and isolate
-network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-
-troubleshootingquick-reference-guide/>
+network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-
+quick-reference-guide/>
 
 We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) page to guide users in identifying and
 following up on network problems.
@@ -107,6 +107,7 @@ This means that your measurement archive is not accessible or failing, there can
 httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS ticket to WLCG perfSONAR support.
 
 * **perfSONAR json summary** is failing
+
 
 ``` text
 
