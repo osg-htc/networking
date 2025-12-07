@@ -105,8 +105,7 @@ In case you'd like to manually update the node please follow the official
 [guide](http://docs.perfsonar.net/manage_update.html).
 
 Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but
-there are some community driven projects that could be helpful, such as [HEP-Puppet](http://github.com/HEP-
-Puppet/perfsonar). As perfSONAR manages most of its configuration automatically via packages and there is very little
+there are some community driven projects that could be helpful, such as [HEP-Puppet](<http://github.com/HEP-Puppet/perfsonar>). As perfSONAR manages most of its configuration automatically via packages and there is very little
 initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary
 interventions after auto-updates.
 
