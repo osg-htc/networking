@@ -30,7 +30,8 @@ LOG_FILE="/var/log/perfsonar-orchestrator.log"
 DRY_RUN=false
 AUTO_YES=false
 NON_INTERACTIVE=false
-AUTO_UPDATE=false
+  # shellcheck disable=SC2034
+  AUTO_UPDATE=false
 DEPLOY_OPTION="A"         # A or B
 LE_FQDN=""
 LE_EMAIL=""
@@ -90,7 +91,7 @@ parse_cli() {
       --help|-h)
         sed -n '1,80p' "$0" | sed -n '1,80p'
         exit 0;;
-      --auto-update) AUTO_UPDATE=true; shift;;  # shellcheck disable=SC2034
+      --auto-update) AUTO_UPDATE=true; shift;;
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
   done
