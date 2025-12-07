@@ -178,7 +178,7 @@ pscheduler tasks --host localhost --format json
 
 ## See Also
 
-- [Host Tuning Guide](../../host-network-tuning.md)
-- [Multiple NIC Setup](../../perfsonar/multiple-nic-guidance.md)
+- [Host Tuning Guide](../../../host-network-tuning.md)
+- [Multiple NIC Setup](../../../perfsonar/multiple-nic-guidance.md)
 - [Installation Guide](../../quick-deploy/install-perfsonar-testpoint.md)
 - [Troubleshooter Landing](../landing.md)

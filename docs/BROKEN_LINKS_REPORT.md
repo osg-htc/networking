@@ -1,31 +1,35 @@
 # Broken Links Report
 
-Generated: 2025-11-03T18:02:40.531421Z
+Generated: 2025-12-07T16:18:50.881095Z
 
 ## index.md
 
-- Link text: `*OSG Dashboards*` — href: `https://maddash.aglt2.org external check failed: <urlopen error [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1032)>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+- Link text: `perfSONAR Infrastructure Monitoring` — href: `https://psetf.aglt2.org/etf/check_mk/ (external check failed: HTTP Error 401: Unauthorized)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
 
-## network-troubleshooting\osg-debugging-document.md
+## osg-network-services.md
 
-- Link text: `rs@internet2.edu` — href: `mailto:rs@internet2.edu (external check failed: <urlopen error unknown url type: mailto>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+- Link text: `SAND project` — href: `http://sand-ci.org/ (external check failed: HTTP Error 503: Service Temporarily Unavailable)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
 
-- Link text: `trouble@es.net` — href: `mailto:trouble@es.net (external check failed: <urlopen error unknown url type: mailto>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+## perfsonar/installation.md
 
-- Link text: `rs@internet2.edu` — href: `mailto:rs@internet2.edu (external check failed: <urlopen error unknown url type: mailto>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+- Link text: `GGUS` — href: `https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ (external check failed: HTTP Error 403: Forbidden)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
 
-- Link text: `trouble@es.net` — href: `mailto:trouble@es.net (external check failed: <urlopen error unknown url type: mailto>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+## perfsonar/tools_scripts/README.md
 
-- Link text: `noc@nlr.net` — href: `mailto:noc@nlr.net (external check failed: <urlopen error unknown url type: mailto>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+- Link text: `smckee@umich.edu` — href: `mailto:smckee@umich.edu (external check failed: <urlopen error unknown url type: mailto>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
 
-- Link text: `goc@opensciencegrid.org` — href: `mailto:goc@opensciencegrid.org (external check failed: <urlopen error unknown url type: mailto>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+## personas/quick-deploy/install-perfsonar-testpoint.md
 
-## perfsonar\install-testpoint.md
+- Link text: `OSG topology` — href: `https://topology.opensciencegrid.org/host (external check failed: HTTP Error 404: NOT FOUND)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
 
-- Link text: `Red Hat Policy Routing` — href: `https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html/configuring_and_managing_networking/assembly_configuring-policy-based-routing_configuring-and-managing-networking (external check failed: HTTP Error 403: Forbidden)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+## personas/research/landing.md
 
-## perfsonar\psetf.md
+- Link text: `OSG PSETF Monitoring` — href: `https://psetf.aglt2.org/etf/check_mk/ (external check failed: HTTP Error 401: Unauthorized)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
 
-- Link text: `perfSONAR monitoring instance` — href: `https://psetf.aglt2.org/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py (external check failed: HTTP Error 401: Unauthorized)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+- Link text: `WLCG Mesh Configuration` — href: `https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics (external check failed: <urlopen error _ssl.c:1130: The handshake operation timed out>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
 
-- Link text: `ETF` — href: `http://etf.cern.ch/docs/latest/ (external check failed: <urlopen error [Errno 11001] getaddrinfo failed>)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+- Link text: `GitHub: perfsonar/perfsonar` — href: `https://github.com/perfsonar/perfsonar (external check failed: HTTP Error 404: Not Found)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.
+
+## personas/troubleshoot/landing.md
+
+- Link text: `GitHub Issues` — href: `https://github.com/perfsonar/perfsonar/issues (external check failed: HTTP Error 404: Not Found)` — Check target path or update to correct URL. If external, run script with --check-externals to test HTTP status.

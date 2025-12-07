@@ -203,7 +203,7 @@ nc -zv <dns_server> 53
 
 ## See Also
 
-- [Security & Firewall Guide](../../perfsonar/installation.md#security-considerations)
-- [Network Troubleshooting Guide](../../network-troubleshooting.md)
+- [Security & Firewall Guide](../../../perfsonar/installation.md#security-considerations)
+- [Network Troubleshooting Guide](../../../network-troubleshooting.md)
 - [Troubleshooter Landing](../landing.md)
 - [Quick Triage Checklist](../triage-checklist.md)

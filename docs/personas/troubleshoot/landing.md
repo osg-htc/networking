@@ -141,7 +141,7 @@ Quick checks:
 ### Configuration & Optimization
 - **[Host Tuning](../../host-network-tuning.md)** — performance optimization
 - **[Multiple NIC Setup](../../perfsonar/multiple-nic-guidance.md)** — multi-interface configuration
-- **[Security Features](../../features/)** — fail2ban, nftables, SELinux
+- **[fail2ban](../../features/fail2ban.md)**, **[nftables](../../features/nftables.md)**, **[SELinux](../../features/selinux.md)**
 
 ### Understanding the System
 - **[perfSONAR in OSG/WLCG](../../perfsonar-in-osg.md)** — why perfSONAR matters
