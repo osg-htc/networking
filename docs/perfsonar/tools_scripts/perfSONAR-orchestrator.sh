@@ -30,6 +30,7 @@ LOG_FILE="/var/log/perfsonar-orchestrator.log"
 DRY_RUN=false
 AUTO_YES=false
 NON_INTERACTIVE=false
+# shellcheck disable=SC2034
 AUTO_UPDATE=false
 DEPLOY_OPTION="A"         # A or B
 LE_FQDN=""
@@ -45,7 +46,7 @@ RECOMMENDED_PACKAGES=(
 
 log() {
   local ts; ts="$(date +'%Y-%m-%d %H:%M:%S')"
-  echo "$ts $*" | tee -a "$LOG_FILE"
+    echo "$ts $*" | tee -a "$LOG_FILE" # Ensure consistent use of LOG_FILE
 }
 
 confirm() {
@@ -90,7 +91,7 @@ parse_cli() {
       --help|-h)
         sed -n '1,80p' "$0" | sed -n '1,80p'
         exit 0;;
-      --auto-update) AUTO_UPDATE=true; shift;;  # shellcheck disable=SC2034
+      --auto-update) AUTO_UPDATE=true; shift;;
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
   done
@@ -193,14 +194,15 @@ step_security() {
   fi
 }
 
+# shellcheck disable=SC2120
 step_auto_update_compose() {
   # Create update script, systemd service and timer to run daily
-  # shellcheck disable=SC2120
   if ! confirm "Create /usr/local/bin/perfsonar-auto-update.sh and enable systemd timer?"; then
     log "User skipped creating auto-update artifacts."
     return
   fi
 
+    # shellcheck disable=SC2153
   run bash -c "cat > /usr/local/bin/perfsonar-auto-update.sh <<'EOF'
 #!/bin/bash
 set -e
@@ -405,6 +407,11 @@ main() {
   need_root
   parse_cli "$@"
   preflight
+  if [ "$AUTO_UPDATE" = true ]; then
+    log "AUTO_UPDATE flag detected: enabling auto-update setup."
+    AUTO_YES=true
+    step_auto_update_compose
+  fi
   step_packages
   step_disable_conflicts
   step_bootstrap_tools

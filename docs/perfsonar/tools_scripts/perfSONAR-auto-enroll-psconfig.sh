@@ -42,7 +42,7 @@ USE_DOCKER=0
 
 log() { echo "[INFO] $*"; }
 err() { echo "[ERROR] $*" >&2; }
-dbg() { [ "$VERBOSE" -eq 1 ] && echo "[DEBUG] $*" >&2 || true; }
+dbg() { if [[ "$VERBOSE" -eq 1 ]]; then echo "[DEBUG] $*" >&2; fi; }
 
 # Persistent logging: try to write to /var/log, fall back to /tmp
 LOGFILE="/var/log/perfsonar-auto-enroll-psconfig.log"

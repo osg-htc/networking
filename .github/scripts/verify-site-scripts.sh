@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -45,10 +44,19 @@ for f in "${files_to_check[@]}"; do
   fi
 
   sitef="$SITE_DIR/$base"
-  if [[ ! -f "$sitef" ]]; then
-    echo "MISSING site copy for $base"
-    EXIT_CODE=1
-    continue
+  if [[ ! -d "$SITE_DIR" ]]; then
+    echo "NOTE: site directory not found; skipping docs->site diff checks for $base"
+  else
+    if [[ ! -f "$sitef" ]]; then
+      echo "MISSING site copy for $base"
+      EXIT_CODE=1
+      continue
+    fi
+    # Compare content with site copy
+    if ! cmp -s "$docf" "$sitef"; then
+      echo "DIFF: $base differs between docs and site"
+      EXIT_CODE=1
+    fi
   fi
   if [[ ! -f "$docf" ]]; then
     echo "MISSING docs copy for $base"

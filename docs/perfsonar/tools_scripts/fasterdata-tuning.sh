@@ -1084,7 +1084,7 @@ iface_audit() {
   local qdisc_val qdisc_rest qdisc_display
   if [[ -n "$qdisc" ]]; then
     qdisc_val="${qdisc%% *}"
-    qdisc_rest="${qdisc#${qdisc_val}}"
+    qdisc_rest="${qdisc#"${qdisc_val}"}"
   else
     qdisc_val="?"
     qdisc_rest=""
