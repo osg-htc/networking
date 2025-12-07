@@ -16,13 +16,22 @@ A sample initial dashboard is shown below:
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided
 into four categories:
 
-1. *Configuration tests* (`perfSONAR configuration:`) tests if the contact, organisation and meshes were set following our [installation guide](installation.md).
+1. *Configuration tests* (`perfSONAR configuration:`) tests if the contact, organisation and meshes were set following
+   our [installation guide](installation.md).
 
-1. *Service tests* (`perfSONAR services:`) check if different perfSONAR toolkit services are up and running correctly as well as if ports are reachable from OSG subnets.
+1. *Service tests* (`perfSONAR services:`) check if different perfSONAR toolkit services are up and running correctly as
+   well as if ports are reachable from OSG subnets.
 
-1. *Hardware test* (`perfSONAR hardware`) checks if the node conforms to the minimal hardware requirements (see [Requirements](deployment-models.md) for details)
+1. *Hardware test* (`perfSONAR hardware`) checks if the node conforms to the minimal hardware requirements (see
+   [Requirements](deployment-models.md) for details)
 
-1. *Freshness tests* (`perfSONAR freshness`) is a high level test that checks what tests are available in the local measurement archive and compares this with the tests configured. There can be many different reasons why certain tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with measurement archive or scheduling, therefore this test is informative and never reaches critical state. A special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results are stored centrally as compared to local measurement archive. It mainly reflects on the efficiency of the central OSG collector and doesn't provide any information on the on the local services.
+1. *Freshness tests* (`perfSONAR freshness`) is a high level test that checks what tests are available in the local
+   measurement archive and compares this with the tests configured. There can be many different reasons why certain
+   tests are stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues
+   with measurement archive or scheduling, therefore this test is informative and never reaches critical state. A
+   special kind of freshness tests are OSG datastore freshness tests, which account for what fraction of tests results
+   are stored centrally as compared to local measurement archive. It mainly reflects on the efficiency of the central
+   OSG collector and doesn't provide any information on the on the local services.
 
 This is sample snapshost showing all metrics for particular perfSONAR instance (latency node in this case): ![Sample
 Snapshot of all metrics for a perfSONAR instance](../../img/etf_page.png)
