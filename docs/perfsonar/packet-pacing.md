@@ -301,7 +301,7 @@ tc qdisc show dev eth0
 
 ```
 
-### Test with iperf3
+## Test with iperf3
 
 iperf3 supports FQ-based pacing via the `--fq-rate` option:
 
@@ -318,7 +318,7 @@ iperf3 -c <receiver> -P 4 --time 60
 
 Expected improvement: 10-50% higher throughput with pacing on long paths.
 
-### Test with perfSONAR pscheduler
+## Test with perfSONAR pscheduler
 
 perfSONAR's pscheduler also supports pacing. Check your perfSONAR configuration for pacing-aware tests.
 

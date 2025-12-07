@@ -5,7 +5,7 @@ traffic handling and can conflict with each other. PBR determines the outbound p
 `rp_filter` is a security feature that validates the source address of inbound traffic. If not configured properly,
 strict `rp_filter` can block legitimate traffic in a PBR setup.
 
-### `sysctl rp_filter` overview
+## `sysctl rp_filter` overview
 
 The Reverse Path Filtering (`rp_filter`) kernel parameter is a security measure designed to prevent IP spoofing, often
 associated with Denial of Service (DoS) attacks. When enabled, it checks the source IP address of an incoming packet to

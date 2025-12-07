@@ -51,14 +51,14 @@ certbot renew --dry-run
 
 Thanks to Raul Lopes for these details!
 
-#### Network Troubleshooting
+## Network Troubleshooting
 
 * I suspect there is a network performance issue impacting my site
 
 For OSG sites, please open a ticket with GOC. Otherwise please open a GGUS ticket (or assign an existing) one to WLCG
 Network Throughput support unit.
 
-#### Service Registration
+### Service Registration
 
 ### I got an email after registering with lots of information in it...what do I do?
 

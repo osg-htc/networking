@@ -23,7 +23,7 @@ For any questions or help with WLCG perfSONAR setup, please contact
 user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-
 announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
-### Installation or Upgrade
+## Installation or Upgrade
 
 Prior to installing please consult the [release notes](https://www.perfsonar.net/docs_releasenotes.html)) for the latest
 available release. In case you have already an instance running and wish to re-install/update it then please follow our
