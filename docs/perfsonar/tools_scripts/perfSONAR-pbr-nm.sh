@@ -1,7 +1,6 @@
-# shellcheck disable=SC2004
 #!/usr/bin/env bash
+# shellcheck disable=SC2004
 
-#!/bin/bash
 #
 # Multi-NIC perfSONAR NetworkManager Configuration Script
 # ------------------------------------------------------
