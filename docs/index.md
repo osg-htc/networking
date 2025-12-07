@@ -7,42 +7,38 @@ OSG Networking Area
 
 Choose the path that matches your goal:
 
-<div class="grid cards" markdown>
+### :rocket: Deploy perfSONAR
 
-- :rocket: **Deploy perfSONAR**
+Quick, tested steps to deploy a perfSONAR testpoint for OSG/WLCG monitoring.
 
-    ---
+- **Time:** 30-60 minutes
+- **Skill level:** Systems administrator
 
-    Quick, tested steps to deploy a perfSONAR testpoint for OSG/WLCG monitoring.
+**→ [Quick Deploy Guide](personas/quick-deploy/landing.md)**
 
-    **Time:** 30-60 minutes  
-    **Skill level:** Systems administrator
+---
 
-    [:octicons-arrow-right-24: Quick Deploy Guide](personas/quick-deploy/landing.md)
+### :wrench: Troubleshoot Network Issues
 
-- :wrench: **Troubleshoot Network Issues**
+Triage checklist and playbooks for diagnosing network problems.
 
-    ---
+- **Time:** Variable
+- **Skill level:** Network operator/admin
 
-    Triage checklist and playbooks for diagnosing network problems.
+**→ [Troubleshooting Guide](personas/troubleshoot/landing.md)**
 
-    **Time:** Variable  
-    **Skill level:** Network operator/admin
+---
 
-    [:octicons-arrow-right-24: Troubleshooting Guide](personas/troubleshoot/landing.md)
+### :telescope: Understand the System
 
-- :telescope: **Understand the System**
+Architecture, data pipelines, and research documentation.
 
-    ---
+- **Time:** Reading/reference
+- **Skill level:** Developer/researcher
 
-    Architecture, data pipelines, and research documentation.
+**→ [Architecture & Research](personas/research/landing.md)**
 
-    **Time:** Reading/reference  
-    **Skill level:** Developer/researcher
-
-    [:octicons-arrow-right-24: Architecture & Research](personas/research/landing.md)
-
-</div>
+---
 
 ## About OSG/WLCG Network Monitoring
 
@@ -55,7 +51,7 @@ WLCG and OSG jointly operate a worldwide network of `perfSONAR` agents that prov
 - Integration with WLCG/OSG dashboards and alerting
 - Community-maintained test meshes
 
-[Learn more about perfSONAR in OSG/WLCG](perfsonar-in-osg.md){ .md-button }
+**[Learn more about perfSONAR in OSG/WLCG →](perfsonar-in-osg.md)**
 
 ## Network Services & Data
 
