@@ -61,10 +61,11 @@ def convert_file(path):
         if i + 1 < len(lines):
             next_line = lines[i+1]
             # match a line of === or --- (three or more chars) and no other content
+            # Normalize common special-case underlines: sometimes the underline contains trailing spaces or tabs
             if re.match(r"^\s*={2,}\s*$", next_line):
                 # Convert to H1 (ATX)
                 # Ensure the current line is not empty and not a list or blockquote
-                if line.strip() and not re.match(r"^[>\-\*\d].*", line):
+                if line.strip() and not re.match(r"^[>\-\*\d]\s.*", line):
                     new_line = '# ' + line.lstrip('#').rstrip('\n') + '\n'
                     out.append(new_line)
                     i += 2
@@ -73,7 +74,16 @@ def convert_file(path):
             elif re.match(r"^\s*-{2,}\s*$", next_line):
                 # Ensure not a horizontal rule intentionally at top of file or blank line
                 # Skip if previous line is empty (horizontal rule), or prev char is '\n' alone
-                if line.strip() and not re.match(r"^[>\-\*\d].*", line):
+                # (We check the previous non-empty line; if it's empty then skip.)
+                prev_idx = i-1
+                while prev_idx >= 0 and lines[prev_idx].strip() == '':
+                    prev_idx -= 1
+                if prev_idx >= 0 and prev_idx != i-1:
+                    # there's a blank line right before the underline; treat it as a horizontal rule -> skip
+                    out.append(line)
+                    i += 1
+                    continue
+                if line.strip() and not re.match(r"^[>\-\*\d]\s.*", line):
                     new_line = '## ' + line.lstrip('#').rstrip('\n') + '\n'
                     out.append(new_line)
                     i += 2

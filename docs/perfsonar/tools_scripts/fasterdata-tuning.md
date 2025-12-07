@@ -118,8 +118,8 @@ To actually apply and pass specific IOMMU args:
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on iommu=pt" --yes
 ```
 
-Reference and source
---------------------
+## Reference and source
+
 - Source script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 - Fasterdata docs: https://fasterdata.es.net/host-tuning/
 - DTN tuning and packet pacing guidance: https://fasterdata.es.net/DTN/tuning/
