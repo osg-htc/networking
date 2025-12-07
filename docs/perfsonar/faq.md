@@ -20,21 +20,19 @@ centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
 
 <details>
 
-    ```text
-<summary>A quick set of steps is shown here:</summary>
-<p>0. Install certbot with yum, dnf, or snap:  **yum install certbot python3-certbot-apache**</p>
-<p>1. Certbot needs port 80/443 so stop anything blocking it or using it:  **systemctl stop firewalld  systemctl stop httpd**</p>
-<p>2. Test with dry-run:  **certbot certonly --standalone --preferred-challenges http --dry-run**</p>
-<p>3. Get the certificate:  **certbot certonly --standalone --preferred-challenges http**</p>
-<p>4. Restart httpd:  **systemctl start firewalld  systemctl start httpd**</p>
-<p>5. Note certificate is installed under  /etc/letsencrypt/</p>
-<p>6. Tell http where your certificate is:  Edit /etc/httpd/conf.d/ssl.conf</p>
-    <p>1. Set **SSLCertificateFile** to /etc/letsencrypt/live/FQDN/cert.pem</p>
-    <p>2. Set **SSLCertificateKeyFile** to /etc/letsencrypt/live/FQDN/privkey.pem</p>
-    <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>
-<p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
+```text <summary>A quick set of steps is shown here:</summary> <p>0. Install certbot with yum, dnf, or snap:  **yum
+install certbot python3-certbot-apache**</p> <p>1. Certbot needs port 80/443 so stop anything blocking it or using it:
+**systemctl stop firewalld  systemctl stop httpd**</p> <p>2. Test with dry-run:  **certbot certonly --standalone
+--preferred-challenges http --dry-run**</p> <p>3. Get the certificate:  **certbot certonly --standalone --preferred-
+
+challenges http**</p> <p>4. Restart httpd:  **systemctl start firewalld  systemctl start httpd**</p> <p>5. Note
+certificate is installed under  /etc/letsencrypt/</p> <p>6. Tell http where your certificate is:  Edit
+/etc/httpd/conf.d/ssl.conf</p> <p>1. Set **SSLCertificateFile** to /etc/letsencrypt/live/FQDN/cert.pem</p> <p>2. Set
+**SSLCertificateKeyFile** to /etc/letsencrypt/live/FQDN/privkey.pem</p> <p>3. Set **SSLCertificateChainFile** to
+
+/etc/letsencrypt/live/FQDN/fullchain.pem</p> <p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
 <p>8. Make a donation :)</p>
-```text
+``` text
 
 </details>
 
@@ -87,10 +85,13 @@ httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS
 
 * **perfSONAR json summary** is failing
 
-    ```text
--   This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
 
-```
+   ```
+
+* This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
+
+
+``` text
 
 * **perfSONAR configuration: meshes** metric is failing
 

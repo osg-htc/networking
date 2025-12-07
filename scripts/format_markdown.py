@@ -30,7 +30,7 @@ def is_list_item(line):
     return bool(re.match(r"^\s*([-*+]\s+|\d+\.\s+)", line))
 
 
-def normalize_list_marker(line):
+def normalize_list_marker(line, is_perfsonar=False):
     m = re.match(r"^(\s*)(\d+)\.(\s+)(.*)$", line)
     if m:
         indent, _num, spaces, rest = m.groups()
@@ -40,7 +40,11 @@ def normalize_list_marker(line):
     if m2:
         indent, marker, spaces, rest = m2.groups()
         # normalize to a single space after the marker
-        return f"{indent}{marker} {rest.rstrip()}\n"
+        marker_to_use = marker
+        # convert dash lists to asterisk lists for perfsonar files
+        if is_perfsonar and marker == '-':
+            marker_to_use = '*'
+        return f"{indent}{marker_to_use} {rest.rstrip()}\n"
     return line
 
 
@@ -141,27 +145,41 @@ def format_file(path):
             continue
 
         # fenced code block toggle
-        if is_fence(line):
-            if not in_fence:
-                # ensure blank line before fence
-                if new_lines and new_lines[-1].strip() != '':
-                    new_lines.append('')
-                in_fence = True
-                fence_tag = re.match(r"^\s*(`{3,}|~{3,})(.*)$", line).groups()[0]
-                # collect inner lines to analyze and decide if language should be appended
-                inner_lines = []
-                # look ahead but don't pass beyond the end; we'll add language after collecting
-                k = i + 1
-                while k < len(lines) and not is_fence(lines[k]):
-                    inner_lines.append(lines[k])
-                    k += 1
-                append_lang = add_fence_language(line, inner_lines)
-                new_lines.append(append_lang.rstrip())
+            if is_fence(line):
+                if not in_fence:
+                    # ensure blank line before fence
+                    if new_lines and new_lines[-1].strip() != '':
+                        new_lines.append('')
+                    in_fence = True
+                    fence_tag = re.match(r"^\s*(`{3,}|~{3,})(.*)$", line).groups()[0]
+                    # collect inner lines to analyze and decide if language should be appended
+                    inner_lines = []
+                    k = i + 1
+                    while k < len(lines) and not is_fence(lines[k]):
+                        inner_lines.append(lines[k])
+                        k += 1
+                    # add fence language only once after collecting inner lines
+                    append_lang = add_fence_language(line, inner_lines)
+                    if ("/perfsonar/" in path) and not re.match(r"^\s*(`{3,}|~{3,})\s*\w+", append_lang):
+                        append_lang = append_lang.rstrip() + ' text'
+                    new_lines.append(append_lang.rstrip())
             else:
                 in_fence = False
                 new_lines.append(line.rstrip())
-                # add a blank line after fence
-                new_lines.append('')
+                # add a single blank line after fence (avoid adding duplicate blanks)
+                if not (new_lines and new_lines[-1].strip() == ''):
+                    new_lines.append('')
+                # If next non-empty line in original file is a list item, ensure we have a blank line after the fence
+                next_non_empty = None
+                j = i + 1
+                while j < len(lines):
+                    if lines[j].strip() != '':
+                        next_non_empty = lines[j].rstrip('\n')
+                        break
+                    j += 1
+                if next_non_empty and is_list_item(next_non_empty):
+                    if not (new_lines and new_lines[-1].strip() == ''):
+                        new_lines.append('')
             i += 1
             continue
 
@@ -215,7 +233,7 @@ def format_file(path):
             # normalize the list marker spacing and ordered list prefix
             # first ensure spacing after marker is normalized
             line = enforce_list_marker_spacing(line)
-            normalized = normalize_list_marker(line + '\n')
+            normalized = normalize_list_marker(line + '\n', is_perfsonar=("/perfsonar/" in path))
             # reduce excessive top-level indentation: if indent >= 4 and previous non-blank is a heading or blank, set to 2 spaces
             m = re.match(r"^(\s*)([-*+]|\d+\.)\s+(.*)$", normalized)
             if m:
@@ -358,21 +376,38 @@ def format_file(path):
         out = []
         in_f = False
         for l in lines_local:
-            if re.match(r"^\s{0,3}`{3,}\s*$", l):
+            if re.match(r"^\s{0,6}`{3,}\s*(\w+)?\s*$", l):
                 if not in_f:
-                    out.append(re.sub(r"^\s{0,3}`{3,}\s*$", "```text", l))
+                    # opening fence with optional language: ensure language present
+                    if re.search(r"\S`{3,}\s*$", l):
+                        # if a language exists already, keep it
+                        out.append(l)
+                    else:
+                        out.append(re.sub(r"^\s{0,6}`{3,}\s*$", "```text", l))
                     in_f = True
                     continue
                 else:
-                    out.append(re.sub(r"^\s{0,3}`{3,}\s*$", "```", l))
+                    # closing fence: remove any trailing language tokens
+                    indent = re.match(r"^(\s{0,6})`{3,}", l).groups()[0]
+                    out.append(indent + "```")
                     in_f = False
                     continue
             out.append(l)
         return '\n'.join(out)
 
     final = ensure_fence_languages_simple(final)
-    # Collapse multiple blank lines to a single blank line
+    # Collapse multiple blank lines (2 or more) to a single blank line
+    final = re.sub(r"\n\s*\n+", "\n\n", final)
     final = re.sub(r"\n{3,}", "\n\n", final)
+    final = re.sub(r"\n\s*\n{1,}", "\n\n", final)
+    # Extra perfsonar-specific whitespace fixes: ensure blank lines between list items and code fences
+    if "/perfsonar/" in path:
+        # Insert a blank line between a list item and an opening fence (allow more leading spaces on the fence)
+        final = re.sub(r"(^\s*(?:[-*+]|\d+\.)[^\n]*?)\n(\s{0,6}`{3,}.*)", r"\1\n\n\2", final, flags=re.M)
+        # Insert a blank line after a closing fence if followed by a list item (allow fence to have trailing language)
+        final = re.sub(r"(\s{0,6}`{3,}.*)\s*\n(\s*(?:[-*+]|\d+\.)\s)", r"\1\n\n\2", final, flags=re.M)
+        # Ensure a blank line after the end of a list block if the following line is not a list or blank
+        final = re.sub(r"(^\s*(?:[-*+]|\d+\.)[^\n]*?)\n(?!\s*(?:[-*+]|\d+\.)|\s*$)([^\n])", r"\1\n\n\2", final, flags=re.M)
     with open(path, 'r', encoding='utf-8') as fh:
         original = fh.read()
     if final != original:
