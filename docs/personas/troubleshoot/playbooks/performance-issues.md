@@ -7,7 +7,8 @@ tags: [troubleshoot, performance, tuning]
 # Playbook: Performance Issues
 
 !!! info "Status"
-    This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+    This playbook is a placeholder for the [troubleshooter
+    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
 
 ## Quick Diagnosis
 
@@ -17,7 +18,7 @@ tags: [troubleshoot, performance, tuning]
 
 ```bash
 # Download and run audit
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh \
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/main/docs/perfsonar/tools_scripts/fasterdata-tuning.sh \
   -o /tmp/fasterdata-tuning.sh
 chmod 0755 /tmp/fasterdata-tuning.sh
 

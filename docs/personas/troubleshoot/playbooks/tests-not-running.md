@@ -7,11 +7,13 @@ tags: [troubleshoot, pscheduler, psconfig, tests]
 # Playbook: Tests Not Running
 
 !!! info "Status"
-    This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+    This playbook is a placeholder for the [troubleshooter
+    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
 
 ## Quick Diagnosis
 
-**When to use this playbook:** Tests configured in pSConfig don't execute, or no results appear in the measurement archive.
+**When to use this playbook:** Tests configured in pSConfig don't execute, or
+no results appear in the measurement archive.
 
 ### Step 1: Verify pSConfig Enrollment
 
@@ -26,7 +28,8 @@ psconfig remote list
 
 If empty or missing:
 - Testpoint not enrolled in mesh
-- Run: `/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh`
+- Run: `/opt/perfsonar-tp/tools_scripts/
+  perfSONAR-auto-enroll-psconfig.sh`
 
 ### Step 2: Check pScheduler Status
 

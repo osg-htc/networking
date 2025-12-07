@@ -22,7 +22,8 @@ Understand the OSG/WLCG network monitoring system, access data, and explore insi
 The perfSONAR network consists of:
 - **Testpoints** — distributed measurement agents at OSG/WLCG sites
 - **Collection Pipeline** — HTTP-Archiver ingestion and Logstash processing
-- **Data Storage** — Central Elasticsearch instances (distributed for resilience)
+- **Data Storage** — Central Elasticsearch instances (distributed for
+  resilience)
 - **Configuration Services** — pSConfig for centralized test mesh management
 - **Monitoring** — PSETF for infrastructure health and visibility
 
@@ -37,7 +38,7 @@ The perfSONAR network consists of:
    - Logstash processes and enriches measurement metadata
 
 3. **Storage** (permanent)
-   - **[OSG Network Datastore](../../osg-network-services.md)** — distributed Elasticsearch (University of Chicago, University of Nebraska)
+   - **[OSG Network Datastore](../../osg-network-services.md)** — distributed Elasticsearch storage
    - JSON API for direct programmatic access
 
 4. **Analysis** (on-demand)
@@ -45,7 +46,7 @@ The perfSONAR network consists of:
    - Custom queries, time-series analysis, anomaly detection
 
 5. **Visualization** (real-time dashboards)
-   - **[WLCG Grafana Dashboards](https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network)** — comprehensive performance views
+   - **[WLCG Dashboards](https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network)** — performance monitoring
    - Site-to-site path performance, latency trends, bandwidth utilization
 
 ---
@@ -129,7 +130,7 @@ curl -X GET "elasticsearch-server:9200/perfsonar-testpoint/_search" \
 
 **Community Resources:**
 - **[perfSONAR Mailing List](https://lists.internet2.edu/sympa/info/perfsonar-user)** — research collaborations
-- **[WLCG Network WG](https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics)** — mesh governance and test definitions
+- **[WLCG Network WG](https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics)** — mesh governance
 
 ---
 

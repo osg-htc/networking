@@ -7,7 +7,8 @@ tags: [troubleshoot, firewall, networking, nftables]
 # Playbook: Firewall & Network Access Issues
 
 !!! info "Status"
-    This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+    This playbook is a placeholder for the [troubleshooter
+    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
 
 ## Quick Diagnosis
 

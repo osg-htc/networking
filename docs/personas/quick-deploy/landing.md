@@ -23,9 +23,12 @@ Get a perfSONAR testpoint running on OSG/WLCG in **1-2 hours** with guided autom
 
 Understand the deployment landscape and requirements:
 
-- **[Why perfSONAR in OSG/WLCG?](../../perfsonar-in-osg.md)** — motivation, importance, and what you're joining
-- **[Deployment Models & Options](../../perfsonar/deployment-models.md)** — hardware requirements, testpoint vs. toolkit, containerized vs. bare metal
-- **[Multiple NIC Guidance](../../perfsonar/multiple-nic-guidance.md)** — if deploying on a host with dual NICs
+- **[Why perfSONAR in OSG/WLCG?](../../perfsonar-in-osg.md)** — motivation,
+  importance, and what you're joining
+- **[Deployment Models & Options](../../perfsonar/deployment-models.md)** —
+  hardware requirements, testpoint vs. toolkit, containerized vs. bare metal
+- **[Multiple NIC Guidance](../../perfsonar/multiple-nic-guidance.md)** — if
+  deploying on a host with dual NICs
 
 ---
 
@@ -34,7 +37,8 @@ Understand the deployment landscape and requirements:
 ### ⚡ Fast Track — Orchestrated Deploy (Recommended)
 **Time:** 30-60 minutes | **Skill level:** System administrator
 
-Follow the **[Full Installation Guide](install-perfsonar-testpoint.md)** which uses the orchestrator for guided, interactive or non-interactive deploys.
+Follow the **[Full Installation Guide](install-perfsonar-testpoint.md)** which
+uses the orchestrator for guided, interactive or non-interactive deploys.
 
 - `perfSONAR-orchestrator.sh` — automates package install, PBR, security, containers, certificates, and mesh enrollment
 - Interactive mode: pause at each step to confirm/skip
@@ -43,7 +47,7 @@ Follow the **[Full Installation Guide](install-perfsonar-testpoint.md)** which u
 ### 🔧 Custom Deploy — Manual Step-by-Step Control
 **Time:** 60-90 minutes | **Skill level:** System administrator + networking knowledge
 
-For complex multi-NIC setups or site-specific customization, follow **[Installation Guide - Manual Steps](install-perfsonar-testpoint.md#path-b-manual-step-by-step)**.
+For multi-NIC setups or customization, follow **[Manual Steps](../../perfsonar/install-testpoint.md)**.
 
 Covers: package install, PBR configuration, container deployment, certificate handling, mesh enrollment.
 
@@ -61,7 +65,7 @@ Reference: Ansible playbooks, orchestrator `--non-interactive` mode, containeriz
 ### Host Tuning (Optional but Recommended)
 Optimize kernel and NIC settings for network throughput:
 
-- **[Fasterdata Host Tuning Guide (EL9)](../../host-network-tuning.md)** — ESnet recommendations for high-performance hosts
+- **[Fasterdata Tuning](../../network-troubleshooting.md)** — ESnet recommendations for high-performance hosts
 - Tool: `fasterdata-tuning.sh` (audit and apply modes, ~15 minutes)
 
 ### Network Configuration (Multi-NIC)
@@ -109,7 +113,7 @@ Once deployed, verify everything is working:
 
 ## Related Tools & Scripts
 
-All tools referenced above are available in the [Tools & Scripts](../../perfsonar/tools_scripts/README.md) section, including:
+All tools and scripts are available in the [Tools section](../../perfsonar/tools_scripts/README.md), including:
 
 - Orchestrator (`perfSONAR-orchestrator.sh`)
 - PBR setup (`perfSONAR-pbr-nm.sh`)

@@ -18,14 +18,18 @@ Systematic approach to identifying and resolving network and perfSONAR problems.
 
 ### Is it a Network Problem?
 
-1. **Gather facts:** Run the **[Quick Triage Checklist](triage-checklist.md)** — collects system info, connectivity, services, logs
-2. **Basic diagnostics:** Follow **[Network Troubleshooting Guide](../../network-troubleshooting.md)** — contact procedures, support escalation
-3. **Learn more:** **[ESnet Troubleshooting Guide](https://fasterdata.es.net/performance-testing/troubleshooting/)** — detailed network investigation
+1. **Gather facts:** Run the **[Quick Triage Checklist](triage-checklist.md)** —
+   collects system info, connectivity, services, logs
+2. **Basic diagnostics:** Follow **[Network Troubleshooting Guide](
+   ../../network-troubleshooting.md)** — contact procedures, support escalation
+3. **Learn more:** **[ESnet Troubleshooting Guide](
+   https://fasterdata.es.net/performance-testing/troubleshooting/)** — detailed
+   network investigation
 
 ### Is it a perfSONAR Problem?
 
 - **[perfSONAR FAQ](../../perfsonar/faq.md)** — quick answers to common issues
-- **[OSG Network Debugging Document](../../network-troubleshooting/osg-debugging-document.md)** — deep investigation steps
+- **[OSG Debugging Guide](../../network-troubleshooting/osg-debugging-document.md)** — investigation steps
 - **[perfSONAR Official Docs](https://docs.perfsonar.net/troubleshooting_overview.html)** — comprehensive reference
 
 ---
@@ -51,7 +55,7 @@ Systematic approach to identifying and resolving network and perfSONAR problems.
 
 ### Network Path Analysis
 
-**ESnet tools:** [fasterdata.es.net/performance-testing/troubleshooting](https://fasterdata.es.net/performance-testing/troubleshooting/)
+**ESnet tools:** [ESnet Troubleshooting Guide](https://fasterdata.es.net/performance-testing/troubleshooting/)
 
 **perfSONAR tools:**
 - pScheduler: [pScheduler documentation](https://docs.perfsonar.net/pscheduler_intro.html)
@@ -121,7 +125,7 @@ Quick checks:
 - **WLCG sites:** [GGUS Ticket](https://ggus.eu/) → "WLCG Network Throughput" or "WLCG perfSONAR support"
 
 ### Level 4: perfSONAR Community
-- **[perfSONAR User Mailing List](https://lists.internet2.edu/sympa/info/perfsonar-user)** — active, responsive community
+- **[perfSONAR Community](https://lists.internet2.edu/sympa/info/perfsonar-user)** — active support
 - **[perfSONAR Documentation](https://docs.perfsonar.net/)** — comprehensive reference
 - **[GitHub Issues](https://github.com/perfsonar/perfsonar/issues)** — report bugs
 

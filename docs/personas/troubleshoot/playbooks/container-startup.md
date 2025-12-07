@@ -7,7 +7,8 @@ tags: [troubleshoot, container, docker, podman]
 # Playbook: Container Won't Start
 
 !!! info "Status"
-    This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+    This playbook is a placeholder for the [troubleshooter
+    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
 
 ## Quick Diagnosis
 
