@@ -10,7 +10,6 @@ each focused on specific set of tests. The following deployment options are curr
 
 * **Bare metal** - preffered option in one of two possible configurations:
 
-
 ```text
 
 * Two bare metal servers, one for latency node, one for bandwidth node
@@ -21,7 +20,6 @@ each focused on specific set of tests. The following deployment options are curr
 ```
 
 * **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:
-
 
 ```text
 
@@ -36,7 +34,6 @@ each focused on specific set of tests. The following deployment options are curr
 
 * **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
 
-
 ```text
 
 * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
@@ -44,14 +41,13 @@ each focused on specific set of tests. The following deployment options are curr
 
 ```
 
-### perfSONAR Toolkit vs Testpoint
+## perfSONAR Toolkit vs Testpoint
 
 The perfSONAR team has documented the types of installations supported at
 <https://docs.perfsonar.net/install_options.html>.   With the release of version 5, OSG/WLCG sites have a new option:
 instead of installing the full Toolkit sites can choose to install the Testpoint bundle.
 
 * Pros
-
 
 ```text
 
@@ -63,7 +59,6 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 ```
 
 * Cons
-
 
 ```text
 
@@ -80,7 +75,7 @@ While sites are free to choose whatever deployment method they want, we would li
 perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced
 resource constraints, less components and easier management.
 
-### perfSONAR Hardware Requirements
+## perfSONAR Hardware Requirements
 
 There are two different nodes participating in the network testing, latency node and bandwidth node, while both are
 running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available
@@ -103,7 +98,7 @@ taking into account the amount of testing that we perform, we recommend at least
 
 * NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.
 
-### Multiple NIC (Network Interface Card) Guidance
+## Multiple NIC (Network Interface Card) Guidance
 
 Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5+
 there is a way to install both latency and bandwidth measurement services on a single node, as long as it has at least
@@ -115,7 +110,6 @@ required in order to configure the node with multiple network cards:
 * You'll need to register two hostnames in [OIM](installation.md)/[GOCDB](installation.md) (and have two reverse DNS entries) as you would normally for two separate nodes.
 
 * Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:
-
 
 ```bash psconfig remote add "<https://psconfig.opensciencegrid.org/pub/auto/<FQDN_latency>"> psconfig remote add
 "https://psconfig.opensciencegrid.org/pub/auto/<FQDN_throughput>" ...
