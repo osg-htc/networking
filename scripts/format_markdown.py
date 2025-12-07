@@ -167,9 +167,13 @@ def format_file(path):
                         extra = m_f.groups()[3]
                         if extra.strip():
                             # push extra content into the inner lines as the first line
-                            inner_lines.insert(0, extra)
-                            # regenerate the opening fence line without the extra content
-                            line = m_f.groups()[0] + (m_f.groups()[2] or '')
+                            inner_lines.insert(0, extra.strip())
+                            # regenerate the opening fence line: include language if present (strip whitespace)
+                            lang = m_f.group(3).strip() if m_f.group(3) else ''
+                            if lang:
+                                line = f"{m_f.group(1)} {lang}"
+                            else:
+                                line = m_f.group(1)
                     append_lang = add_fence_language(line, inner_lines)
                     if ("/perfsonar/" in path) and not re.match(r"^\s*(`{3,}|~{3,})\s*\w+", append_lang):
                         append_lang = append_lang.rstrip() + ' text'
