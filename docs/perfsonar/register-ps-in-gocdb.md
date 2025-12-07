@@ -1,6 +1,6 @@
-# <span class="twiki-macro SPACEOUT">Register perfSONAR Service in GOCDB</span>
+# Register perfSONAR Service in GOCDB
 
-## This section describes how to register the perfSONAR service in GOCDB.
+## This section describes how to register the perfSONAR service in GOCDB
 
 In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service
 Endpoint

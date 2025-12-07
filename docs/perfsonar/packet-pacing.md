@@ -463,4 +463,6 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 
 ---
 
-### Last Updated: December 2025* *References: ESnet Fasterdata, Linux kernel tc documentation
+### Last Updated: December 2025
+
+References: ESnet Fasterdata, Linux kernel tc documentation
