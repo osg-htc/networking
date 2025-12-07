@@ -416,6 +416,19 @@ def format_file(path):
     # Ensure there are no triple newlines left due to any odd edge cases; collapse iteratively
     while '\n\n\n' in final:
         final = final.replace('\n\n\n', '\n\n')
+    # Final robust pass: collapse any sequences of blank lines down to a single blank line
+    parts = final.splitlines()
+    collapsed = []
+    prev_blank = False
+    for l in parts:
+        if l.strip() == '':
+            if not prev_blank:
+                collapsed.append('')
+            prev_blank = True
+            continue
+        collapsed.append(l)
+        prev_blank = False
+    final = '\n'.join(collapsed) + '\n'
     final = re.sub(r"\n{3,}", "\n\n", final)
     final = re.sub(r"\n\s*\n{1,}", "\n\n", final)
     # Extra perfsonar-specific whitespace fixes: ensure blank lines between list items and code fences
