@@ -174,9 +174,9 @@ iommu=pt" --yes
 
 * Source script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
-* Fasterdata docs: https://fasterdata.es.net/host-tuning/
+* Fasterdata docs: <https://fasterdata.es.net/host-tuning/>
 
-* DTN tuning and packet pacing guidance: https://fasterdata.es.net/DTN/tuning/
+* DTN tuning and packet pacing guidance: <https://fasterdata.es.net/DTN/tuning/>
 
 If you use this script as part of a host onboarding flow, ensure you test it in a VM or staging host before applying to
 production hosts.
