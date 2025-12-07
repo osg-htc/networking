@@ -18,14 +18,14 @@ uname -a
 ip -c a
 ```
 
-2. Check basic connectivity
+1. Check basic connectivity
 
 ```bash
 ping -c 4 <remote-ip-or-host>
 traceroute -n <remote-ip-or-host>
 ```
 
-3. Verify perfSONAR services and containers
+1. Verify perfSONAR services and containers
 
 ```bash
 systemctl status perfsonar-*
@@ -33,14 +33,14 @@ ps aux | grep perfsonar
 podman ps || docker ps
 ```
 
-4. Check firewall and ports
+1. Check firewall and ports
 
 ```bash
 nft list ruleset
 ss -ltnp
 ```
 
-5. Collect logs and measurements
+1. Collect logs and measurements
 
 - Container logs: `podman logs perfsonar-testpoint`
 - perfSONAR checks: `pscheduler tasks --host localhost`

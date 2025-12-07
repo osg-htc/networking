@@ -13,11 +13,9 @@ Before you begin, it may be helpful to gather the following information:
   information.
 - **Operational contacts:** site admin email, OSG facility/site name, latitude/longitude.
 
-
 ## Existing perfSONAR configuration
 
 If replacing an existing instance, you may want to back up `/etc/perfsonar/` files, especially `lsregistrationdaemon.conf`, and any container volumes. We have a script named`perfSONAR-update-lsregistration.sh` to extract/save/restore registration config that you may want to use.
-
 
 ??? info "Quick capture of existing lsregistration config (if you have a src)"
 
@@ -36,8 +34,6 @@ If replacing an existing instance, you may want to back up `/etc/perfsonar/` fil
     ```bash
     /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
     ```
-
-
 
 Note: Repository clone instructions are in Step 2.
 
@@ -174,10 +170,12 @@ chmod 0755 /tmp/install_tools_scripts.sh
 
 ```bash
 # Check that all helper scripts were downloaded
+
 ls -1 /opt/perfsonar-tp/tools_scripts/*.sh | wc -l
 # Should show 11 shell scripts
 
 # Verify key scripts are present and executable
+
 ls -l /opt/perfsonar-tp/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,perfSONAR-orchestrator.sh}
 ```
 
@@ -208,7 +206,6 @@ An optional destructive mode `--rebuild-all` performs the original full workflow
 - Prompts are still skipped with `--yes`.
 - Dry-run preview supported via `--dry-run` (combine with `--debug` for verbose output).
 - Reboot is **no longer generally required**; only consider one if NetworkManager fails to apply the new rules cleanly.
-
 
 1. **Generate config file automatically (or preview):**
 
@@ -435,7 +432,6 @@ curl -fsSL \
 
 Edit the `docker-compose.yml` as desired.
 
-
 Bring it up:
 
 ```bash
@@ -471,12 +467,15 @@ curl -fsSL \
 chmod 0755 /tmp/install-systemd-units.sh
 
 # Install testpoint-only systemd unit
+
 /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp
 
 # Enable and start now
+
 systemctl enable --now perfsonar-testpoint.service
 
 # Verify service and containers
+
 systemctl status perfsonar-testpoint.service --no-pager
 podman ps
 ```
@@ -530,12 +529,15 @@ Verify seeding succeeded:
 
 ```bash
 # Should show config files
+
 ls -la /opt/perfsonar-tp/psconfig
 
 # Should show index.html and perfsonar/ directory  
+
 ls -la /var/www/html
 
 # Should show sites-available/, sites-enabled/, etc.
+
 ls -la /etc/apache2
 ```
 
@@ -554,7 +556,6 @@ ls -la /etc/apache2
     - `/etc/letsencrypt:/etc/letsencrypt:Z` - Exclusive to testpoint container
     - `/var/www/html:/var/www/html:z` - Shared between testpoint and certbot containers
     - `/etc/apache2:/etc/apache2:Z` - Exclusive to testpoint container
-
 
 #### 2) Deploy the testpoint with automatic SSL patching (recommended)
 
@@ -592,6 +593,7 @@ If you want to explicitly set the FQDN (optional):
 
 ```bash
 # Optional: only needed if you have multiple certificates
+
 sed -i 's/# - SERVER_FQDN=.*/- SERVER_FQDN=<YOUR_FQDN>/' /opt/perfsonar-tp/docker-compose.yml
 ```
 
@@ -624,12 +626,15 @@ curl -fsSL \
 chmod 0755 /tmp/install-systemd-units.sh
 
 # Install both testpoint and certbot systemd units
+
 /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
 
 # Enable and start services
+
 systemctl enable --now perfsonar-testpoint.service perfsonar-certbot.service
 
 # Verify services
+
 systemctl status perfsonar-testpoint.service perfsonar-certbot.service --no-pager
 podman ps
 ```
@@ -781,7 +786,6 @@ podman logs certbot 2>&1 | grep -A5 "deploy hook"
     podman-compose up -d
     ```
 
-
 ---
 
 ## Step 6 – Configure and Enroll in pSConfig
@@ -796,6 +800,7 @@ Basic enroll (interactive root on the host; runs inside the container) if you ha
 
 ```bash
 # Add auto URLs (configures archives too) and show configured remotes
+
 podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
     "https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"
 
@@ -812,9 +817,11 @@ Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll au
 
 ```bash
 # Dry run only (show planned URLs):
+
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
 
 # Typical usage (podman):
+
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
 
 podman exec -it perfsonar-testpoint psconfig remote list
@@ -973,7 +980,6 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
 
         This approach ensures containers are updated only when new images are available, minimizing
         unnecessary restarts while keeping your deployment current.
-
 
 ---
 
@@ -1513,7 +1519,4 @@ Perform these checks before handing the host over to operations:
     ```
 
 ---
-
-
-
 

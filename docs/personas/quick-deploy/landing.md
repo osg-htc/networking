@@ -35,6 +35,7 @@ Understand the deployment landscape and requirements:
 ## Installation Paths
 
 ### ⚡ Fast Track — Orchestrated Deploy (Recommended)
+
 **Time:** 30-60 minutes | **Skill level:** System administrator
 
 Follow the **[Full Installation Guide](install-perfsonar-testpoint.md)** which
@@ -45,6 +46,7 @@ uses the orchestrator for guided, interactive or non-interactive deploys.
 - Non-interactive mode: `--non-interactive` flag for automated deployment
 
 ### 🔧 Custom Deploy — Manual Step-by-Step Control
+
 **Time:** 60-90 minutes | **Skill level:** System administrator + networking knowledge
 
 For multi-NIC setups or customization, follow **[Manual Steps](../../perfsonar/install-testpoint.md)**.
@@ -52,6 +54,7 @@ For multi-NIC setups or customization, follow **[Manual Steps](../../perfsonar/i
 Covers: package install, PBR configuration, container deployment, certificate handling, mesh enrollment.
 
 ### 🤖 Automated/Repeatable Deploy
+
 **Time:** Varies | **Skill level:** DevOps/automation engineer
 
 For deploying multiple testpoints or CI/CD pipelines, see **[Automated Setup Examples](automated-setup/README.md)**.
@@ -63,18 +66,21 @@ Reference: Ansible playbooks, orchestrator `--non-interactive` mode, containeriz
 ## Post-Deploy Configuration
 
 ### Host Tuning (Optional but Recommended)
+
 Optimize kernel and NIC settings for network throughput:
 
 - **[Fasterdata Tuning](../../network-troubleshooting.md)** — ESnet recommendations for high-performance hosts
 - Tool: `fasterdata-tuning.sh` (audit and apply modes, ~15 minutes)
 
 ### Network Configuration (Multi-NIC)
+
 Set up policy-based routing and static IP addressing:
 
 - **[Multi-NIC Setup Guide](../../perfsonar/multiple-nic-guidance.md)** — when using multiple interfaces
 - Tool: `perfSONAR-pbr-nm.sh` (automatic NetworkManager configuration)
 
 ### LS Registration & Enrollment
+
 Register your testpoint globally and enroll in test meshes:
 
 - **[LS Registration Setup](../../perfsonar/tools_scripts/README-lsregistration.md)** — register for discovery
@@ -82,6 +88,7 @@ Register your testpoint globally and enroll in test meshes:
 - Tool: `perfSONAR-update-lsregistration.sh` and `perfSONAR-auto-enroll-psconfig.sh`
 
 ### Security Hardening (Optional)
+
 Harden your testpoint with security features:
 
 - **[fail2ban](../../features/fail2ban.md)** — prevent brute-force attacks
