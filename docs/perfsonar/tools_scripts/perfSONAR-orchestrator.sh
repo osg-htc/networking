@@ -202,6 +202,7 @@ step_auto_update_compose() {
     return
   fi
 
+    # shellcheck disable=SC2153
   run bash -c "cat > /usr/local/bin/perfsonar-auto-update.sh <<'EOF'
 #!/bin/bash
 set -e
