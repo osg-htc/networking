@@ -11,7 +11,7 @@ tp/tools_scripts.
 htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ -o /tmp/install_tools_scripts.sh
 
 chmod 0755 /tmp/install_tools_scripts.sh /tmp/install_tools_scripts.sh /opt/perfsonar-tp
-``` text
+```
 
 ### Ensure the host is up to date
 
@@ -21,7 +21,7 @@ chmod 0755 /tmp/install_tools_scripts.sh /tmp/install_tools_scripts.sh /opt/perf
 ### Install required packages
 
 ```bash dnf install -y git podman podman-compose nftables iproute
-``` text
+```
 
 Note: Podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.
 
@@ -41,7 +41,7 @@ htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \ -o /opt/
 ### Prepare configuration storage
 
 ```bash mkdir -p /opt/perfsonar-tp/psconfig
-``` text
+```
 
 ### Edit the compose file as needed
 
@@ -55,13 +55,13 @@ Edit /opt/perfsonar-tp/docker-compose.yml if you need to customize resource limi
 Or, if using Docker:
 
 ```bash (cd /opt/perfsonar-tp; docker-compose up -d)
-``` text
+```
 
 ### Enable automatic container restart on boot
 
 To ensure containers restart automatically after a host reboot, install and enable the systemd service:
 
-```
+``` text
 
 # Using the helper script (recommended)
 
@@ -70,7 +70,7 @@ service.sh \ -o /tmp/install-systemd-service.sh
 
 chmod +x /tmp/install-systemd-service.sh sudo /tmp/install-systemd-service.sh /opt/perfsonar-tp
 
-``` text
+```
 
 Or manually create the service file:
 
@@ -105,12 +105,10 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 
 1. Preview generation (no changes):
 
-
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
-``` text
+```
 
 1. Generate the config file automatically:
-
 
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
 ```
@@ -123,12 +121,10 @@ Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
 
 1. Dry run the apply step:
 
-
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
-``` text
+```
 
 1. Apply changes:
-
 
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
 ```
@@ -190,12 +186,10 @@ Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the 
 
 1. Run with options:
 
-
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
-``` text
+```
 
 1. Preview rules only:
-
 
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
 ```
@@ -279,8 +273,7 @@ To register your testpoint with a central config:
 ```
 
 podman exec -it perfsonar-testpoint psconfig remote list podman exec -it perfsonar-testpoint psconfig remote
---configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
-
+--configure-archives add "<https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch">
 
 ```bash
 

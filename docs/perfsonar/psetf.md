@@ -5,9 +5,9 @@ need to function correctly for the the system to work.  As we scale-up to many p
 it can be difficult to verify everything is working correctly.
 
 perfSONAR monitoring instance [BROKEN-LINK:
-https://psetf.opensciencegrid.org/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py] actively monitors
+<https://psetf.opensciencegrid.org/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py>] actively monitors
 the state of the infrastructure for both remote perfSONAR installation as well as central services. The instance is
-based on ETF [BROKEN-LINK: http://etf.cern.ch/docs/latest/], which is an open source measurement middleware for
+based on ETF [BROKEN-LINK: <http://etf.cern.ch/docs/latest/>], which is an open source measurement middleware for
 functional/availability testing of the resources. In order to access the page you'll need to have x509 grid certificate
 loaded in the browser.
 

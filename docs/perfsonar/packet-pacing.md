@@ -187,7 +187,7 @@ The `fasterdata-tuning.sh` script includes automated packet pacing configuration
 Check what pacing rates are recommended for your DTN:
 
 ```bash fasterdata-tuning.sh --mode audit --target dtn
-``` text
+```
 
 Output shows:
 
@@ -205,7 +205,7 @@ Apply packet pacing with default 2 Gbps rate:
 Apply with custom rate (e.g., for 100G host with 8 streams):
 
 ```bash sudo fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 10gbps
-``` text
+```
 
 Supported rate units: `kbps`, `mbps`, `gbps`, `tbps`
 
@@ -251,7 +251,7 @@ If you prefer to configure packet pacing manually, use the `tc` command directly
 ### Check Current Qdisc
 
 ```bash tc qdisc show dev eth0
-``` text
+```
 
 ### Set Fair Queuing with Pacing
 
@@ -263,7 +263,7 @@ Replace `eth0` with your actual interface name:
 ### Verify Configuration
 
 ```bash tc qdisc show dev eth0 tc qdisc stat dev eth0
-``` text
+```
 
 ### Delete Pacing (Revert to Default)
 
@@ -275,7 +275,7 @@ Replace `eth0` with your actual interface name:
 For more granular control, use TBF instead of FQ:
 
 ```bash sudo tc qdisc replace dev eth0 root tbf rate 2gbit burst 250000 latency 100ms
-``` text
+```
 
 Where:
 
@@ -332,9 +332,8 @@ perfSONAR's pscheduler also supports pacing. Check your perfSONAR configuration 
 
 **Solution**: Ensure `/etc/sysctl.conf` contains:
 
-
 ```bash net.core.default_qdisc = fq sysctl -p
-``` text
+```
 
 Then reapply pacing with `fasterdata-tuning.sh` or `tc` command.
 
@@ -360,14 +359,13 @@ Then reapply pacing with `fasterdata-tuning.sh` or `tc` command.
 
 **Solution**: The `fasterdata-tuning.sh` apply mode creates a systemd service for persistence. Enable it:
 
-
 ```bash sudo systemctl enable ethtool-persist.service sudo systemctl start ethtool-persist.service
 ```
 
 Verify:
 
 ```bash sudo systemctl status ethtool-persist.service tc qdisc show dev eth0
-``` text
+```
 
 ---
 
@@ -408,11 +406,11 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 
 ### ESnet Fasterdata Documentation
 
-* **DTN Tuning Guide**: https://fasterdata.es.net/DTN/tuning/
+* **DTN Tuning Guide**: <https://fasterdata.es.net/DTN/tuning/>
 
-* **Packet Pacing Guide**: https://fasterdata.es.net/host-tuning/linux/packet-pacing/
+* **Packet Pacing Guide**: <https://fasterdata.es.net/host-tuning/linux/packet-pacing/>
 
-* **FQ Pacing Research Results**: https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf
+* **FQ Pacing Research Results**: <https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf>
 
 ### Linux Kernel Documentation
 
@@ -422,13 +420,13 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 
 * **tc man page**: `man 8 tc`
 
-* **LWN Article on FQ**: https://lwn.net/Articles/564978/
+* **LWN Article on FQ**: <https://lwn.net/Articles/564978/>
 
 ### Tools and Testing
 
-* **iperf3**: https://iperf.fr/ (with `--fq-rate` support)
+* **iperf3**: <https://iperf.fr/> (with `--fq-rate` support)
 
-* **perfSONAR**: https://www.perfsonar.net/ (pscheduler with pacing)
+* **perfSONAR**: <https://www.perfsonar.net/> (pscheduler with pacing)
 
 * **mtr** (traceroute tool): `mtr <destination>`
 
@@ -436,9 +434,9 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 
 * **SYSCTL Tuning**: See `fasterdata-tuning.sh` for buffer sizing recommendations
 
-* **100G+ Tuning**: https://fasterdata.es.net/host-tuning/linux/100g-tuning/
+* **100G+ Tuning**: <https://fasterdata.es.net/host-tuning/linux/100g-tuning/>
 
-* **BBR Congestion Control**: https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/
+* **BBR Congestion Control**: <https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/>
 
 ---
 
@@ -458,9 +456,8 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 
 **Recommended Configuration for 10G DTN with 4 parallel streams**:
 
-
 ```bash sudo fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 2gbps
-``` text
+```
 
 **Expected Result**: Near-line-rate throughput with minimal packet loss.
 

@@ -14,7 +14,6 @@ filling the information please follow those simple guidelines:
 
 * For each form (i.e. for each service type) fill at least the important informations:
 
-
 ```text
 
 * Hosting Site (drop-down menu, mandatory)
@@ -33,11 +32,10 @@ filling the information please follow those simple guidelines:
 
 * Check "Y" when asked "Is this service monitored"
 
-
 ```
 
 <!-- -->
 
-* GOCDB screen shot for creating a Service Endpoint: <br /> ![Screenshot](../img/Screen_shot_2013-02-19_at_15.26.52.png)
+* GOCDB screen shot for creating a Service Endpoint:    ![Screenshot](../img/Screen_shot_2013-02-19_at_15.26.52.png)
 
 -- Main.ShawnMcKee - 21 Oct 2014

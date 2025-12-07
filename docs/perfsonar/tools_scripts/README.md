@@ -62,10 +62,9 @@ After installation:
 
 * Orchestrated installs: If you use `perfSONAR-orchestrator.sh`, you can run the systemd installer after the compose stack is up so containers start on boot. Example:
 
-
 ```bash /opt/perfsonar-tp/tools_scripts/install-systemd-service.sh /opt/perfsonar-tp systemctl enable --now perfsonar-
 testpoint.service
-``` text
+```
 
 * Manual installs: After `podman-compose up -d`, install and enable the service as shown above.
 
@@ -81,7 +80,7 @@ Preview what would happen (safe):
 Install into `/opt/perfsonar-tp/tools_scripts` (creates the directory if missing):
 
 ```bash bash docs/perfsonar/tools_scripts/install_tools_scripts.sh
-``` text
+```
 
 If you already have the perfSONAR testpoint repo checked out in `/opt/perfsonar-tp`, skip cloning with:
 
@@ -99,7 +98,7 @@ If you already have the perfSONAR testpoint repo checked out in `/opt/perfsonar-
 You can download the raw script from the GitHub repo (master branch):
 
 ```text <https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh>
-``` text
+```
 
 Or once the site is built, from the site URL:
 
@@ -124,7 +123,7 @@ You can verify the script integrity with the provided SHA256 file:
 ```bash curl -L -o /tmp/fasterdata-tuning.sh.sha256 <https://raw.githubusercontent.com/osg->
 htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256 sha256sum -c /tmp/fasterdata-
 tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
-``` text
+```
 
 ## Optional flags (apply mode only)
 
@@ -148,7 +147,7 @@ Audit (default) a measurement host:
 Apply tuning (requires root):
 
 ```bash sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
-``` text
+```
 
 ## Notes
 
@@ -223,7 +222,7 @@ Debian / Ubuntu (apt):
 
 ```bash apt-get update apt-get install -y bash coreutils iproute2 network-manager rsync curl openssl nftables podman
 podman-compose docker.io docker-compose fail2ban policycoreutils
-``` text
+```
 
 If you intend to use the lsregistration container helpers, ensure either `podman` or `docker` is installed and that the
 service can list and access containers (e.g., `podman ps` or `docker ps` works as root).
@@ -260,7 +259,7 @@ Preview what the script would do without changing the system:
 Generate an example or auto-detected config (preview, dry-run only):
 
 ```bash bash perfSONAR-pbr-nm.sh --generate-config-debug
-``` text
+```
 
 Write the auto-detected config to /etc (does not apply changes):
 
@@ -275,7 +274,7 @@ Run for real (be careful):
 
 bash perfSONAR-pbr-nm.sh --yes
 
-``` text
+```
 
 ## Gateway requirement, inference, and generator warnings
 
@@ -325,7 +324,7 @@ non-destructive way.
 Run the tests:
 
 ```bash cd docs/perfsonar ./tests/run_tests.sh
-``` text
+```
 
 ## Notes
 
