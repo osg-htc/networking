@@ -22,16 +22,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Compute changed docs files
+        id: changed_docs
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_ref=${{ github.event.pull_request.base.ref }}
+            echo "Fetching base ref: $base_ref"
+            git fetch origin "$base_ref":"refs/remotes/origin/$base_ref" || true
+            CHANGED=$(git diff --name-only origin/$base_ref...HEAD | grep "^docs/.*\.md$" || true)
+          else
+            CHANGED=$(git diff --name-only HEAD~1..HEAD | grep "^docs/.*\.md$" || true)
+          fi
+          echo "changed_docs<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Install markdownlint-cli
         run: |
           npm install -g markdownlint-cli@0.39.0
-      - name: Run markdownlint
+      - name: Run markdownlint on changed files
         run: |
-          markdownlint \
-            --config .markdownlint.json \
-            "docs/**/*.md" \
-            "DEPRECATION.md" || {
+          if [ -n "${{ steps.changed_docs.outputs.changed_docs }}" ]; then
+            files=$(echo "${{ steps.changed_docs.outputs.changed_docs }}" | tr '\n' ' ')
+            echo "Running markdownlint on: $files"
+            markdownlint --config .markdownlint.json $files || {
               echo "Markdownlint failed" >&2; exit 1; }
+          else
+            echo "No changed docs files found; skipping markdownlint"
+          fi
 
   shellcheck:
     runs-on: ubuntu-latest

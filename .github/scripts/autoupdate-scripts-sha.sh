@@ -35,7 +35,9 @@ for base in "${changed[@]}"; do
   fi
   sha=$(sha256sum "$docf" | awk '{print $1}')
   echo "$sha  $docf" > "$DOCS_DIR/$base.sha256"
-  echo "$sha  $docf" > "$sitef.sha256"
+  if [[ -d "$SITE_DIR" ]]; then
+    echo "$sha  $docf" > "$sitef.sha256"
+  fi
   modified=1
   echo "Updated sha for $base -> $sha"
   # Replace line in scripts.sha256
