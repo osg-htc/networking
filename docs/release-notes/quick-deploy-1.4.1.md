@@ -3,12 +3,14 @@
 **Release Date:** December 3, 2025
 
 ## Overview
+
  Version 1.4.1 is a bug-fix release that resolves critical container lifecycle issues with the certbot systemd service,
 ensuring both perfSONAR testpoint and certbot containers survive system reboots and maintain proper systemd integration.
 
 ## Highlights
 
 ### Fixed Certbot Service Restart After Reboot
+
  The `perfsonar-certbot.service` systemd unit has been fixed to properly manage the certbot container lifecycle.
 Previously, the certbot service would fail immediately after starting with exit code 2 and the error: `certbot: error:
 Unable to open config file`.
@@ -78,12 +80,14 @@ command as a config file path.
 
 ### For New Installations
 
+
 No action needed - the fixed script is automatically used when running:
 
 ```bash /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh --with-certbot
 ```text
 
 ### For Existing Deployments with Failing Certbot Service
+
 
 If you're experiencing the certbot service failure, update to the fixed version:
 
@@ -113,6 +117,7 @@ systemctl status perfsonar-certbot.service podman ps | grep certbot
 ``` text
 
 ## Verification
+
 
 After applying the fix, verify both services are working correctly:
 
@@ -148,6 +153,7 @@ journalctl -u perfsonar-certbot.service -n 20
 
 ## Reboot Persistence Test
 
+
 To confirm the fix resolves the reboot persistence issue:
 
 ```
@@ -168,9 +174,11 @@ systemctl status perfsonar-testpoint.service perfsonar-certbot.service podman ps
 
 ## Breaking Changes
 
+
 None. This is a backward-compatible bug fix.
 
 ## Known Issues
+
 
 None at this time.
 

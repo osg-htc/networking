@@ -1,5 +1,6 @@
 ### Multiple NIC (Network Interface Card) Guidance
 
+
 The OSG and WLCG recommendation is to deploy two flavors of perfSONAR measurement nodes: 1) a latency instance
 whichcontinuously measures packet delay and lost and 2) a bandwidth instance measuring the achievable bandwidth.  That
 implies sites must purchase, deploy and maintain two systems.  **Why can't we just run both latency and

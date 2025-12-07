@@ -1,5 +1,6 @@
 # perfSONAR Deployment Options
 
+
 The primary motivation for perfSONAR deployment is to test isolation, i.e. only one end-to-end test should run on a
 hostat a time. This ensures that the test results are not impacted by the other tests. Otherwise it is much more
 difficult to interpret test results, which may vary due to host effects rather then network effects. Taking this into
@@ -46,6 +47,7 @@ nodes, each focused on specific set of tests. The following deployment options a
 
 ## perfSONAR Toolkit vs Testpoint
 
+
 The perfSONAR team has documented the types of installations supported at
 <https://docs.perfsonar.net/install_options.html>.   With the release of version 5, OSG/WLCG sites have a new option:
 instead of installing the full Toolkit sites can choose to install the Testpoint bundle.
@@ -82,6 +84,7 @@ resource constraints, less components and easier management.
 
 ## perfSONAR Hardware Requirements
 
+
 There are two different nodes participating in the network testing, latency node and bandwidth node, while both
 arerunning on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available
 (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported)
@@ -104,6 +107,7 @@ and taking into account the amount of testing that we perform, we recommend at l
 * NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.
 
 ## Multiple NIC (Network Interface Card) Guidance
+
 
 Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5+
 there is a way to install both latency and bandwidth measurement services on a single node, as long as it has at

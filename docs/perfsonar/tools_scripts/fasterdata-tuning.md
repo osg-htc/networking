@@ -1,5 +1,6 @@
 # Fasterdata Host & Network Tuning (EL9)
 
+
 This page documents `fasterdata-tuning.sh`, a script that audits and optionally applies ESnet Fasterdata-inspired
 hostand NIC tuning recommendations for Enterprise Linux 9.
 
@@ -8,6 +9,7 @@ Script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 ## Purpose
 
 ## Download & Install
+
 
 You can download the script directly from the website or GitHub raw URL and install it locally for repeated use:
 
@@ -28,6 +30,7 @@ tuning.sh
 
 ## Verify the checksum
 
+
 To verify the script integrity, compare the downloaded script with the provided SHA256 checksum file in this repo:
 
 ``` bash curl -L -o /tmp/fasterdata-tuning.sh <https://raw.githubusercontent.com/osg->
@@ -37,6 +40,7 @@ sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Che
 ``` text
 
 ## Why use this script?
+
 
 This script packages ESnet Fasterdata best practices into an audit/apply helper that:
 
@@ -65,6 +69,7 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
   other services.
 
 ## Verification & Basic checks
+
 
 After running the script (audit or apply), verify key settings:
 
@@ -101,6 +106,7 @@ cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
   recovery steps.
 
 ## Usage
+
 
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
 

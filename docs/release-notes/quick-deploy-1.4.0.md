@@ -4,6 +4,7 @@
 
 ## Overview
 
+
 Version 1.4.0 focuses on reliability, guided automation, and simplifying the earliest steps of a perfSONAR testpoint
 deployment. It introduces a new orchestrator, improves policy-based routing safety, and deprecates an older dependency-
 checker script in favor of a unified package install workflow.
@@ -11,6 +12,7 @@ checker script in favor of a unified package install workflow.
 ## Highlights
 
 ### Guided Orchestrator (New)
+
 
 `perfSONAR-orchestrator.sh` provides a step-by-step (or non-interactive) path through prerequisites, bootstrap, network
 configuration (PBR), security hardening, container deployment (Option A/B), certificate issuance, and pSConfig
@@ -28,15 +30,18 @@ Key features:
 
 ### Non-Disruptive PBR Mode (Improved)
 
+
 `perfSONAR-pbr-nm.sh` now defaults to an in-place apply mode that preserves existing NetworkManager connections and
 minimizes SSH disruption. A full rebuild can still be invoked with `--rebuild-all` when a clean slate is needed.
 
 ### Unified Prerequisite Installation (Simplified)
 
+
 The guide now uses a single one-shot `dnf` command (on EL9 derivatives) early in Step 1 to install all required packages
 (including DNS tools). This replaces iterative dependency checks and removes friction on minimal hosts.
 
 ### Deprecation: `check-deps.sh`
+
 
 The legacy dependency checking script is deprecated. Its responsibilities are replaced by the unified package install
 and orchestrator validation steps. See `DEPRECATION.md` for migration guidance and the planned removal timeline.
@@ -58,6 +63,7 @@ and orchestrator validation steps. See `DEPRECATION.md` for migration guidance a
 - Updated CHANGELOG with new version entry and deprecation notice.
 
 ## Upgrade Path
+
 
 From v1.3.0:
 
@@ -92,6 +98,7 @@ htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh | ba
 - `check-deps.sh` (planned removal: 2026-03-01) — replace with unified install + orchestrator.
 
 ## Breaking Changes
+
 
 None. All enhancements are backward compatible; deprecated script is still present for transition.
 

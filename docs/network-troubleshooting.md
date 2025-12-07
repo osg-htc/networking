@@ -1,5 +1,6 @@
 # Network and Network Troubleshooting Documentation
 
+
 This page will eventually include pointers to various network troubleshooting resources. In general, when users suspect
 a network problem the procedure is:
 
@@ -22,6 +23,7 @@ If you want to learn more about perfSONAR and its various components, the Networ
 list of training videos at https server learn.nsrc.org/perfsonar.
 
 ## Information on Contacting Network Support
+
 
 There are numerous regional and campus network operations centers that have their own ticketing systems for reporting
 problems. I encourage you to identify how to contact your local campus network support personnel. Suggestion: try using

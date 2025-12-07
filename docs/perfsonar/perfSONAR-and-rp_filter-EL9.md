@@ -1,11 +1,13 @@
 # perfSONAR use of Policy Based Routing and rp\_filter on EL9
 
+
 In a multihome setup on EL9, `sysctl rp_filter` and policy-based routing (PBR) address two different layers of
 networktraffic handling and can conflict with each other. PBR determines the outbound path for traffic based on
 criteria, while `rp_filter` is a security feature that validates the source address of inbound traffic. If not
 configured properly, strict `rp_filter` can block legitimate traffic in a PBR setup.
 
 ## `sysctl rp_filter` overview
+
 
 The Reverse Path Filtering (`rp_filter`) kernel parameter is a security measure designed to prevent IP spoofing,
 oftenassociated with Denial of Service (DoS) attacks. When enabled, it checks the source IP address of an incoming
@@ -20,6 +22,7 @@ beconfigured with three values:
 
 ### Policy-based routing (PBR) overview
 
+
 PBR is a technique for overriding the standard Linux routing behavior, which is typically based solely on thedestination
 IP address. It allows administrators to route traffic based on other criteria, such as the source IP address,
 application, protocol, or firewall marks (`fwmark`). A PBR setup involves these key steps:
@@ -31,6 +34,7 @@ application, protocol, or firewall marks (`fwmark`). A PBR setup involves these 
 1. **Add routes to custom tables.** Use the `ip route` command to add routes to the new tables.
 
 ### The conflict and solution
+
 
 The conflict arises when using **strict `rp_filter` (value 1\)** in a multihomed network configured with PBR.
 
@@ -48,6 +52,7 @@ The conflict arises when using **strict `rp_filter` (value 1\)** in a multihomed
 
 ### **Solution for EL9 multihome:**
 
+
 To enable asymmetric routing with PBR, you must relax the `rp_filter` setting, as strict mode will cause
 legitimatepackets to be dropped.
 
@@ -61,6 +66,7 @@ You can configure this persistently by editing a file in `/etc/sysctl.d/`, for e
 After saving the file, apply the changes with `sysctl -p`.
 
 ### Summary of differences
+
 
 | Feature  | `sysctl rp_filter` | Policy-Based Routing (PBR) | | ----- | ----- | ----- | | **Purpose** |
 Securitymechanism to prevent IP spoofing by checking inbound packet source addresses. | Advanced routing method to

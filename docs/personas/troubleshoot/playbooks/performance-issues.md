@@ -6,6 +6,7 @@ tags: [troubleshoot, performance, tuning]
 
 ## Playbook: Performance Issues
 
+
 !!! info "Status" This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step
 diagnostics coming soon.
 
@@ -121,6 +122,7 @@ watch -n 1 'cat /proc/net/dev | head -5'
 ```
 
 ### Step 5: Escalate
+
 
 If still slow, collect:
 

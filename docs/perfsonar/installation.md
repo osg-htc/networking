@@ -1,5 +1,6 @@
 # perfSONAR Installation Guide
 
+
 !!! warning "Legacy Documentation - Modern Approach Available"
 
 This page contains **legacy instructions** for traditional Toolkit installations. As of October 2025, the
@@ -21,6 +22,7 @@ OSG [GOC](http://support.opensciencegrid.org). We strongly recommend anyone main
 announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
 ## Installation or Upgrade
+
 
 Prior to installing please consult the [release notes](https://www.perfsonar.net/docs_releasenotes.html)) for the
 latestavailable release. In case you have already an instance running and wish to re-install/update it then please
@@ -78,6 +80,7 @@ information](http://docs.perfsonar.net/manage_admin_info.html)
 === pScheduler Agent ===
 
 ``` json [ { "url": "<https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org>", "configure-archives": true } ]
+
 ``` text
 
 ```
@@ -126,6 +129,7 @@ perfSONAR support units.
 
 ### Maintenance
 
+
 Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security
 issuesand either patch the node as soon as possible or reboot once the patched kernel is released.
 
@@ -137,6 +141,7 @@ configurationautomatically via packages and there is very little initial configu
 automated configuration to the minimum necessary to avoid unncessary interventions after auto-updates.
 
 ### Security Considerations
+
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official
 documentationprovides a lot of information on what security software is available and what firewall ports need to be
@@ -150,6 +155,7 @@ functionality by site or host firewalls.   An overview of perfSONAR security is 
 ``` text All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by
 pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
 ``` For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which
+
 the tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would needto
 be done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to
 emphasize that port 443 provides access to the perfSONAR web interface as well, which is very useful to users andnetwork
@@ -162,12 +168,14 @@ administrators to debug network issues.
 
 ### Enabling SNMP plugins
 
+
 Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to
 becaptured and stored in the local measurement archive. This is currently a [beta
 feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking
 forvolunteers willing to test, please let us know in case you would be interested.
 
 ### Register perfSONAR Service in GOCDB
+
 
 This section describes how to register the perfSONAR service in GOCDB.
 
@@ -217,6 +225,7 @@ hardware for the proposed setup, it can install a unique perfSONAR box, but stil
 ![GOCDB screen shot for creating a Service Endpoint](../../img/Screen_shot_2013-02-19_at_15.26.52.png)
 
 ### Register perfSONAR in OSG Topology
+
 
 Each *OSG site* should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable
 networkmonitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage.

@@ -6,9 +6,11 @@ monitoring infrastructure, we've organized the documentation around common user 
 
 ## Get Started
 
+
 Choose the path that matches your goal:
 
 ### :rocket: Deploy perfSONAR
+
 
 Quick, tested steps to deploy a perfSONAR testpoint for OSG/WLCG monitoring.
 
@@ -22,6 +24,7 @@ Quick, tested steps to deploy a perfSONAR testpoint for OSG/WLCG monitoring.
 
 ### :wrench: Troubleshoot Network Issues
 
+
 Triage checklist and playbooks for diagnosing network problems.
 
 - **Time:** Variable
@@ -34,6 +37,7 @@ Triage checklist and playbooks for diagnosing network problems.
 
 ### :telescope: Understand the System
 
+
 Architecture, data pipelines, and research documentation.
 
 - **Time:** Reading/reference
@@ -45,6 +49,7 @@ Architecture, data pipelines, and research documentation.
 ---
 
 ## About OSG/WLCG Network Monitoring
+
 
 WLCG and OSG jointly operate a worldwide network of `perfSONAR` agents that provide an open platform for baselining
 network performance and debugging issues. This monitoring infrastructure is critical for providing visibility into
@@ -63,6 +68,7 @@ networks and site connectivity.
 **[Learn more about perfSONAR in OSG/WLCG →](perfsonar-in-osg.md)**
 
 ## Network Services & Data
+
 
 OSG operates an advanced platform to collect, store, publish and analyze network monitoring data from perfSONAR and
 other sources. All measurements are available via streaming APIs and dashboards:

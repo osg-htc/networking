@@ -1,5 +1,6 @@
 # perfSONAR lsregistration helpers
 
+
 This directory includes a helper for managing the perfSONAR Lookup Service (LS) registration configuration in
 `lsregistrationdaemon.conf`.
 
@@ -9,6 +10,7 @@ save, restore, create, and extract a `lsregistrationdaemon.conf`. Use the comman
 `create`, and `extract` (see examples below).
 
 ## Update existing configuration (container or local)
+
 
 Script: `perfSONAR-update-lsregistration.sh`
 
@@ -44,6 +46,7 @@ Co." --domain example.org \ --project WLCG --project OSG \ --admin-name "pS Admi
 ```
 
 ## Generate a restore script from an existing conf
+
 
 Script: `perfSONAR-update-lsregistration.sh` (see above)
 

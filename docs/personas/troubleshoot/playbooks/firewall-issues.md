@@ -6,6 +6,7 @@ tags: [troubleshoot, firewall, networking, nftables]
 
 ## Playbook: Firewall & Network Access Issues
 
+
 !!! info "Status" This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step
 diagnostics coming soon.
 
@@ -124,6 +125,7 @@ dmesg | grep -i nft
 ```
 
 ### Step 6: Escalate
+
 
 If still blocked, collect:
 
@@ -248,6 +250,7 @@ nc -zv <dns_server> 53
 ---
 
 ## Reference: Required Ports
+
 
 | Port | Protocol | Purpose | Required | |------|----------|---------|----------| | 443 | HTTPS | pScheduler (test
 scheduling) | **YES** | | 5001 | TCP/UDP | iperf (bandwidth tests) | No (bandwidth only) | | 8080 | HTTP | pSConfig

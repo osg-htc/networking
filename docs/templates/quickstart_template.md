@@ -22,8 +22,10 @@ tags: [template, quickstart]
 
 ## Verify
 
+
 Commands to confirm successful deployment.
 
 ## Troubleshooting
+
 
 Pointers to common failures and where to look.

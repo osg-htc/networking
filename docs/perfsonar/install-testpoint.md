@@ -4,6 +4,7 @@
 
 ### Bootstrap the perfSONAR testpoint and tools (recommended)
 
+
 Use the bootstrap script to clone the perfSONAR testpoint repo and install helper scripts under /opt/perfsonar-
 tp/tools_scripts.
 
@@ -31,6 +32,7 @@ Note: Podman is the default container engine on EL9. If you wish to use Docker i
 
 ### Obtain a compose file
 
+
 You can use a ready-to-run compose file maintained in the osg-htc/networking repository:
 
 ``` bash mkdir -p /opt/perfsonar-tp curl -fsSL \ <https://raw.githubusercontent.com/osg->
@@ -45,6 +47,7 @@ htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \ -o /opt/
 
 ### Edit the compose file as needed
 
+
 Edit /opt/perfsonar-tp/docker-compose.yml if you need to customize resource limits or volumes.
 
 ### Launch the container
@@ -58,6 +61,7 @@ Or, if using Docker:
 ``` text
 
 ### Enable automatic container restart on boot
+
 
 To ensure containers restart automatically after a host reboot, install and enable the systemd service:
 
@@ -101,6 +105,7 @@ Useful commands:
 
 ## 3. Configure Policy-Based Routing for Multi-Homed NICs
 
+
 Recommended: use the helper script to generate and apply NetworkManager profiles and routing rules for multi-NIC hosts.
 
 1. Preview generation (no changes):
@@ -139,6 +144,7 @@ If you prefer to configure rules manually, see the example below.
 
 ### Manual example
 
+
 Suppose:
 
 * eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1
@@ -147,11 +153,13 @@ Suppose:
 
 #### a) Add custom routing tables
 
+
 Edit /etc/iproute2/rt\_tables and add:
 
 200  eth0table 201  eth1table
 
 #### b) Add routes and rules (replace IPs as appropriate)
+
 
 \# Add rules for eth0 (latency) ip rule add from 192.168.10.10/32 table eth0table
 
@@ -164,6 +172,7 @@ ip route add 10.20.30.0/24 dev eth1 scope link table eth1table ip route add defa
 tableeth1table
 
 #### c) Make persistent
+
 
 For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in yourworking
 directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use
@@ -186,6 +195,7 @@ systemctl enable \--now perfsonar-policy-routing
 
 ## 4. Firewall and security
 
+
 Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the helper script.
 
 1. Run with options:
@@ -203,6 +213,7 @@ Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the 
 The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/perfSONAR-install-nftables.log.
 
 ### Manual nftables example (optional)
+
 
 Below is a sample NFTables rule set that
 
@@ -255,6 +266,7 @@ Check containers:
 podman ps
 
 # or
+
 
 docker ps
 

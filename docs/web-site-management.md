@@ -5,6 +5,7 @@ description: Guidance for maintaining the OSG networking site and personae workf
 
 # Website Management & Operations
 
+
 This page outlines recommended processes for building, publishing and managing the OSG Networking site (MkDocs) with a
 focus on persona-based documentation. The goal is to maintain `docs/` as the single source of truth and manage generated
 `site/` through CI.

@@ -1,5 +1,6 @@
 # Host and Network Tuning (EL9)
 
+
 This guide distills ESnet Fasterdata recommendations for high-throughput hosts (perfSONAR/DTN-style) on Enterprise Linux
 
 1. Primary sources:
@@ -33,6 +34,7 @@ the cautions before applying.
 
 ## Script: `fasterdata-tuning.sh`
 
+
 Path: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
 Modes:
@@ -53,6 +55,7 @@ Options:
 
 ### Host Types
 
+
 The script tailors recommendations by host type:
 
 - **measurement**: perfSONAR testpoints, measurement nodes (primary focus)
@@ -66,6 +69,7 @@ Differences:
 - `txqueuelen`: measurement targets 10k/15k/20k; dtn targets 12k/18k/25k (per link speed)
 
 ### Examples
+
 
 Audit a measurement host:
 
@@ -105,6 +109,7 @@ Limit to specific NICs:
 
 ### Output and logs
 
+
 The script outputs a **Host Info** section at the top showing:
 
 - Hostname (FQDN)
@@ -136,6 +141,7 @@ Detailed log with full ethtool/sysctl/tc output is written to `/tmp/fasterdata-t
 
 ## Getting the Fasterdata script
 
+
 You can download the script directly from the GitHub repo (raw) or the site after it is published:
 
 ```text https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
@@ -156,6 +162,7 @@ Then run an audit before applying changes:
 
 ### Color Output
 
+
 Use `--color` flag to enable ANSI color codes:
 
 - Green: settings comply with recommendations
@@ -165,6 +172,7 @@ Use `--color` flag to enable ANSI color codes:
 - Red: critical issues requiring immediate attention (not currently used, reserved for future severity levels)
 
 ### Driver Guidance
+
 
 The script identifies your NIC drivers and provides upgrade paths:
 
@@ -198,6 +206,7 @@ If a kernel update is available, the summary will recommend: `dnf update kernel 
 
 ## Optional apply flags
 
+
 The script supports a few additional opt-in apply flags when run with `--mode apply`:
 
 - `--apply-iommu`: Edit GRUB to add recommended `iommu=pt` plus vendor-specific flags (Intel/AMD) and regenerate grub. Requires root and careful review before committing. Example:
@@ -216,6 +225,7 @@ Preview (dry-run) example:
 ```text
 
 ## Manual checklist (summary of recommendations)
+
 
 Values shown below are baseline (1Gbps). The script scales them by fastest NIC speed and target type.
 
@@ -272,6 +282,7 @@ Run a representative throughput test (e.g., `iperf3`) end-to-end.
 
 ### SMT (Simultaneous Multi-Threading)
 
+
 The script detects and reports SMT status. For most measurement hosts (perfSONAR), **SMT should be on** to maximize CPU
 throughput. However, for isolated low-latency workloads, SMT off may reduce jitter.
 
@@ -295,6 +306,7 @@ Note: SMT changes take effect immediately but are not persisted across reboots. 
 
 ### Driver Updates
 
+
 The script checks for available kernel and driver updates via `dnf list --showduplicates kernel`. If an update is
 available, the summary recommends:
 
@@ -305,6 +317,7 @@ For vendor-specific drivers (Mellanox OFED, Broadcom firmware tools), the script
 validate driver compatibility before updating in production.
 
 ### Troubleshooting
+
 
 If the script fails to detect certain hardware or settings:
 
@@ -319,6 +332,7 @@ If the script fails to detect certain hardware or settings:
 - **ethtool-persist.service fails to start**: Check `/var/log/messages` or `journalctl -u ethtool-persist` for errors; ensure ethtool and ip commands exist at `/sbin/` paths
 
 ### Persistence Service Details
+
 
 When running with `--mode apply`, the script generates `/etc/systemd/system/ethtool-persist.service` containing:
 

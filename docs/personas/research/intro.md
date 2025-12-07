@@ -9,5 +9,6 @@ tags: [architecture, research]
 
 # Research — Overview
 
+
 This area is for readers who want to understand system architecture, data pipelines, and development notes. See
 `architecture.md` for component diagrams and `data-pipeline.md` for ingestion/processing details.
