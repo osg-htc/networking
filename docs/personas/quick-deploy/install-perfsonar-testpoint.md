@@ -18,7 +18,7 @@ Before you begin, it may be helpful to gather the following information:
 
 ## Existing perfSONAR configuration
 
- If replacing an existing instance, you may want to back up `/etc/perfsonar/` files, especially
+If replacing an existing instance, you may want to back up `/etc/perfsonar/` files, especially
 `lsregistrationdaemon.conf`, and any container volumes. We have a script named`perfSONAR-update-lsregistration.sh` to
 extract/save/restore registration config that you may want to use.
 
@@ -82,7 +82,7 @@ After completing Step 1 (minimal OS hardening), you can proceed in one of two wa
 
 ### Path A: Orchestrated Guided Install (Recommended for New Deployments)
 
- The orchestrator automates package installation, bootstrap, PBR configuration, security hardening, container
+The orchestrator automates package installation, bootstrap, PBR configuration, security hardening, container
 deployment, certificate issuance, and pSConfig enrollment with interactive pauses (or non-interactive batch mode).
 
 **Download and run the orchestrator:**
@@ -180,7 +180,7 @@ setup. It fills out and consumes the network configuration in `/etc/perfSONAR-mu
 
 ### Modes
 
- By default the script now performs an **in-place apply** that adjusts routes, rules, and NetworkManager connection
+By default the script now performs an **in-place apply** that adjusts routes, rules, and NetworkManager connection
 properties **without deleting existing connections or flushing all system routes**. This minimizes disruption and
 usually avoids the need for a reboot.
  An optional destructive mode `--rebuild-all` performs the original full workflow: backup existing profiles, flush all
@@ -223,7 +223,7 @@ Generate and write the config file:
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
 ```
 
- The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
+The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
 confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
 changes...
 
@@ -256,7 +256,7 @@ Full rebuild (destructive – removes all NM connections first):
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
 ```
 
- The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically
+The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically
 unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual
 NetworkManager restart:
 
@@ -564,7 +564,7 @@ If the file is missing, run the Step 2 bootstrap first:
 ```bash curl -fsSL \ https://raw.githubusercontent.com/osghtc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \ | bash -s -- /opt/perfsonar-tp
 ```
 
- Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses an entrypoint wrapper
+Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses an entrypoint wrapper
 that auto-discovers Let's Encrypt certificates on container startup and automatically patches the Apache configuration.
 
 Download the auto-patching compose file:
@@ -572,7 +572,7 @@ Download the auto-patching compose file:
 ```bash curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/dockercompose.testpoint-le-auto.yml \ -o /opt/perfsonar-tp/docker-compose.yml
 ```text
 
- **Note:** The `SERVER_FQDN` environment variable is **optional**. The entrypoint wrapper will auto-discover
+**Note:** The `SERVER_FQDN` environment variable is **optional**. The entrypoint wrapper will auto-discover
 certificates in `/etc/letsencrypt/live` and use the first one found. Only set `SERVER_FQDN` if you have multiple
 certificates and need to specify which one to use.
 
@@ -704,7 +704,7 @@ Test renewal with a dry-run:
 ```bash podman exec certbot certbot renew --dry-run
 ``` text
 
- If successful, certificates will auto-renew before expiry, and the testpoint will be automatically restarted to load
+If successful, certificates will auto-renew before expiry, and the testpoint will be automatically restarted to load
 the new certificates. You can verify this behavior by checking the certbot logs after a renewal:
 
 ```bash podman logs certbot 2>&1 | grep -A5 "deploy hook"
@@ -729,7 +729,7 @@ patch the Apache SSL configuration after obtaining certificates.
 ```bash podman exec perfsonar-testpoint apachectl -k graceful
 ```
 
- This approach requires manual intervention after initial certificate issuance and any time the container is recreated.
+This approach requires manual intervention after initial certificate issuance and any time the container is recreated.
 The automatic approach (using the entrypoint wrapper) eliminates this manual step.
 
 ??? warning "Troubleshooting: Container fails with 'executable file not found' error"

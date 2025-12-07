@@ -4,14 +4,14 @@
 
 ## Overview
 
- Version 1.4.1 is a bug-fix release that resolves critical container lifecycle issues with the certbot systemd service,
+Version 1.4.1 is a bug-fix release that resolves critical container lifecycle issues with the certbot systemd service,
 ensuring both perfSONAR testpoint and certbot containers survive system reboots and maintain proper systemd integration.
 
 ## Highlights
 
 ### Fixed Certbot Service Restart After Reboot
 
- The `perfsonar-certbot.service` systemd unit has been fixed to properly manage the certbot container lifecycle.
+The `perfsonar-certbot.service` systemd unit has been fixed to properly manage the certbot container lifecycle.
 Previously, the certbot service would fail immediately after starting with exit code 2 and the error: `certbot: error:
 Unable to open config file`.
  **Root Cause:** The certbot container image has a built-in entrypoint that expects direct certbot commands. When the

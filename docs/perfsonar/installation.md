@@ -201,7 +201,6 @@ hardware for the proposed setup, it can install a unique perfSONAR box, but stil
 
 * Description (optional label used in MaDDash; keep short and unique)
 
-
 ``` text
 
 * Check "N" when asked "Is it a beta service"

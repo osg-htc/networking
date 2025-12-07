@@ -13,7 +13,7 @@ or available.
 
 # Abstract
 
- Scientific progress relies on intricate systems of computers and the networks that connect them.  Often it is the case
+Scientific progress relies on intricate systems of computers and the networks that connect them.  Often it is the case
 that scientific data is gathered via a well defined process, information is digitized, stored, transmitted, and
 processed by members of large and distributed collaborations.  The Open Science Grid advances science through the
 concept of distributed computing – the process for sharing resources through a unified software framework focused on the
@@ -30,7 +30,7 @@ the scientific process.
 
 # Introduction
 
- The process of science is often complicated when viewed as a complete system.  At the core of any project, there is a
+The process of science is often complicated when viewed as a complete system.  At the core of any project, there is a
 mechanism to observe or simulate some system, and produce meaningful results that will be interpreted and scrutinized
 between experimentation runs.   The machinery that surrounds this process can be as benign as simple cameras, or as
 complex as the Large Hadron Collider and its associated experiments.  Other common components include ways to digitize,
@@ -88,14 +88,14 @@ resources beyond a simple introduction to these topics can be found.
 
 # The Scientific Networking Process
 
- There is a rich ecosystem of components available for monitoring and managing the scientific networking process.  This
+There is a rich ecosystem of components available for monitoring and managing the scientific networking process.  This
 myriad of hardware and software must work together to complete the overall goal of interpreting gathered or simulated
 observations.  Each component we will discuss has the ability to be installed, operated, and maintained in different
 ways.  Individual brands or versions are not important, but the overall idea of each will be explored.
 
 ## Hosts
 
- Server or &quot;host&quot; hardware and software can be used in many different ways.  Often it is the case that these
+Server or &quot;host&quot; hardware and software can be used in many different ways.  Often it is the case that these
 components serve as computational resources for processing data, or provide access to underlying data stored on physical
 media.  It may also be the case that software designed to &quot;glue&quot; components of a framework together (e.g.
 processing mail, authenticating users, providing mappings between names and addresses) is installed on a dedicated or
@@ -111,7 +111,7 @@ this discussion.
 
 ## Protocols
 
- Protocols are software algorithms implemented on hosts and networking components, and are used to facilitate
+Protocols are software algorithms implemented on hosts and networking components, and are used to facilitate
 communication strategies.  Protocols are constructed in a &quot;layered&quot; fashion, and are designed to handle
 certain aspects of the overall communication plan.  For instance a protocol may be used to communicate between two
 network devices, and may involve the use of different patterns of electrical or optical signal.  On top of this basic
@@ -129,7 +129,7 @@ an automated fashion.
 
 ## Applications
 
- Applications are specific use cases, programmed as software, and made available to end users via a host&#39;s operating
+Applications are specific use cases, programmed as software, and made available to end users via a host&#39;s operating
 environment.  There are numerous applications we use on a daily basis – web browsers to fetch remote content, word
 processing applications to type papers, mail and instant messaging clients to exchange information in near real time.
 Scientific applications normally focus on performing a single task (e.g. end-to-end data movement, visualization, data
@@ -146,7 +146,7 @@ of components that are required for operation.  This will be discussed in the re
 
 ## Lab Local Area Network
 
- The first step in the networking tree is often the interconnections between components local to the user.  This may
+The first step in the networking tree is often the interconnections between components local to the user.  This may
 consist of the storage and processing nodes in a single rack or data center used for scientific processing, connected
 via technology consistent with the tasks they are performing.  Cluster nodes may use a high speed interconnect such as
 InfiniBand; servers may also just use typical Ethernet at 1Gbps or 10Gbps.
@@ -157,7 +157,7 @@ that check the health of transfers on a local basis.
 
 ## Campus Local Area Network
 
- The first hop beyond a laboratory environment is a network maintained by campus/local support staff.  It is often the
+The first hop beyond a laboratory environment is a network maintained by campus/local support staff.  It is often the
 case that this group is maintaining the infrastructure for the use of **all** end users, and as such will design and
 maintain things to preserve uniform functionality and performance.
  Campus networks are an even larger ecosystem of devices given the area they may cover.  It may be the case that the
@@ -170,7 +170,7 @@ backbone support staff as needed.
 
 ## Regional Network
 
- A regional network provider aggregates the networks of numerous campuses in a state, country, or pre-defined region.
+A regional network provider aggregates the networks of numerous campuses in a state, country, or pre-defined region.
 Examples include provider for states of the US (e.g. KanREN), countries (SWITCH, the network of Switzerland), or
 collaboration between parties without a political boundary (the SOX regional network in the United States).  Regional
 networks may cover a large geographical area, but often have less equipment than a campus.  The role of a regional
@@ -186,7 +186,7 @@ discuss options with their local staff first before engaging with these groups.
 
 ## R&amp;E Backbone
 
- An R&amp;E backbone consists of an aggregation of numerous regional providers.  Capacity must reflect the number and
+An R&amp;E backbone consists of an aggregation of numerous regional providers.  Capacity must reflect the number and
 expectations of this group of customers, and often is orders of magnitude higher than other networks that are
 downstream.
  As an aggregation point, normally spread over a very large geographical area, traffic flows will be numerous, of
@@ -201,7 +201,7 @@ those that are local, when debugging a problem impacting scientific work.
 
 ## Exchange Point
 
- An exchange point is normally a location where multiple backbone networks and international transit links (e.g. trans-
+An exchange point is normally a location where multiple backbone networks and international transit links (e.g. trans-
 oceanic links) combine and transit to other domains.  An exchange point is a special case of an aggregation network like
 a regional in that policies may be different depending on the membership structure.
  International exchange points suffer from the aforementioned problems of traffic aggregation wherein congestion or
@@ -209,12 +209,12 @@ equipment failure will have a severe impact on all traffic.  Monitoring these de
 
 # Actor &amp; Agent Definitions
 
- There are many actors involved in the process of network management and debugging.  We will highlight three here, as
+There are many actors involved in the process of network management and debugging.  We will highlight three here, as
 they represent the most critical members of the support team that OSG has available when problems are discovered.
 
 ## End User
 
- The end user is understood to be the primary user and beneficiary of OSG software to process and operate on scientific
+The end user is understood to be the primary user and beneficiary of OSG software to process and operate on scientific
 data sets.  The sophistication of this end user is assumed to be beginner to average in matters related to system and
 network administration.  In general we assume they are knowledgeable enough to install and maintain OSG software, and
 connect devices to the networking infrastructure.
@@ -224,7 +224,7 @@ network.
 
 ## Local Administrator
 
- The local administrator can be campus support staff responsible for the health of servers or network devices across the
+The local administrator can be campus support staff responsible for the health of servers or network devices across the
 greater campus ecosystem.  Their primary responsibility it to ensure uptime of the network for all users, as well as
 assist in debugging specific problems caused by performance impacting problems on a local basis.
 
@@ -233,7 +233,7 @@ a liaison with individuals within those stewardship organizations.
 
 ## Remote Administrator
 
- A remote administrator can be regional, backbone, or exchange point staff responsible for the health of remote
+A remote administrator can be regional, backbone, or exchange point staff responsible for the health of remote
 networking resources.  It is often the case that these individuals may not be aware of a specific use case between
 remote campuses, but could answer questions about the current health and status of the network they control.
 
@@ -242,7 +242,7 @@ make test points available to assist in debugging.
 
 # Local Preparations
 
- A first step to any OSG software installation to support scientific activity is preparation of the local environment.
+A first step to any OSG software installation to support scientific activity is preparation of the local environment.
 Given the considerations denoted in the previous sections, we will discuss 3 specific preparation activities:
 
 - End System Operating System and Protocol Tuning
@@ -255,7 +255,7 @@ Given the considerations denoted in the previous sections, we will discuss 3 spe
 
 ## End System Tuning
 
- Computer systems are similar to automobiles in that its possible to &quot;tune&quot; certain internal aspects and
+Computer systems are similar to automobiles in that its possible to &quot;tune&quot; certain internal aspects and
 achieve higher performance when using the network.  The operating system and associated protocols like TCP make these
 changes rather simple to implement.  In general there are several options worth considering:
 
@@ -295,7 +295,7 @@ interested reader is encouraged to read the following resource provided by ESnet
 
 ## Network Configuration Tuning
 
- Much like end hosts, network devices have the ability to be &quot;tuned&quot; for specific use cases.  This tuning
+Much like end hosts, network devices have the ability to be &quot;tuned&quot; for specific use cases.  This tuning
 normally centers on enabling or disabling certain features on a router or switch (e.g. policy maps) or adjusting the
 available memory available to account for a specific use case (e.g. less memory for a video application, more for a
 throughput intensive tool).
@@ -306,7 +306,7 @@ in this document.  The interested reader is encouraged to read this guide provid
 
 ## Measurement Software
 
- The available span of network measurement software is vast.  A simple web search will reveal 10s of names, some still
+The available span of network measurement software is vast.  A simple web search will reveal 10s of names, some still
 active and others long dead.  The R&amp;E community began to standardize on available tools in the later part of the
 2000s with an effort to unify measurement tools and infrastructure to support them: perfSONAR.
  perfSONAR is a framework to simplify end to end network debugging.  It consists of a layer of middleware, designed to
@@ -342,7 +342,7 @@ perfSONAR focuses on several key metrics:
 
 # Debugging Process
 
- The following sections will discuss the process to install, use, and interpret measurement tools in an OSG software
+The following sections will discuss the process to install, use, and interpret measurement tools in an OSG software
 environment.  End users are encouraged to try these steps first, but also contact their local support staff at the
 earliest possible moment.  Involving support staff will ensure that expert eyes are available to assist with problems,
 and funnel the requests for help to the proper area (e.g. GOC, other networks, etc.).
@@ -397,7 +397,7 @@ Note that some other tools may be pulled in automatically.  Note that iperf and 
 
 ## Tool Selection
 
- Debugging network problems involves running several tools, and gathering results both an end-to-end basis as well as to
+Debugging network problems involves running several tools, and gathering results both an end-to-end basis as well as to
 points in the middle.  Initial tool selection can depend on a couple of factors:
 
 - What servers are available on the other end, as well as in the middle
@@ -450,7 +450,7 @@ Server IP addresses are preserved End-to-End
 Client IP addresses are preserved End-to-End
 ```
 
- To get additional data, try adding the **-ll** flag, it will produce a more in depth analysis.  NDT is useful as the
+To get additional data, try adding the **-ll** flag, it will produce a more in depth analysis.  NDT is useful as the
 first step of debugging to gather information about the end host, as well as the basic network configuration.
 
 - **BWCTL**
@@ -540,7 +540,7 @@ lost (0.000%), 0 duplicates one-way delay min/median/max = 2.02/2.1/2.06 ms, (er
 (err=0.218 ms) one-way jitter = 0 ms (P95-P50) Hops = 2 (consistently) no reordering
 ```
 
- The results clearly state each direction of operation, and any problems that were found.  As in the BWCTL case the tool
+The results clearly state each direction of operation, and any problems that were found.  As in the BWCTL case the tool
 is highly reliant on stable NTP numbers, so be sure your server is synchronized against an NTP server.
  OWAMP is a lightweight test and can be used to show minor amounts of packet loss between hosts.  Perform the test on
 the full end-to-end path, and then bisect the path by testing to points in the middle.  Often low throughput observed
@@ -548,7 +548,7 @@ via BWTL will show up as packet loss in OWAMP.
 
 ## End-to-end Testing
 
- The concept of end-to-end testing is required as a first step in debugging network problems.  Via the OSG tools it is
+The concept of end-to-end testing is required as a first step in debugging network problems.  Via the OSG tools it is
 possible to use &quot;client&quot; tools as discussed in Section 7.2 to gauge the total end-to-end path.  These client
 tools can be pointed at a pS Performance Toolkit instance installed on the remote end, or via stand-alone daemon
 applications started on OSG systems.  In either case, a daemon and client will be needed.
@@ -612,7 +612,7 @@ path is no different.  The following steps should be followed:
 
 ## Interpreting Results
 
- Interpretation of results can be tricky due to the nature of protocols on the network, including TCP.  In general the
+Interpretation of results can be tricky due to the nature of protocols on the network, including TCP.  In general the
 only symptom that is given off to a problem with TCP is &quot;low throughput&quot;.  The following are some tips on
 interpreting results:
 

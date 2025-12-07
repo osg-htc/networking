@@ -42,19 +42,19 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
 
 * Provides a non-invasive audit mode to compare current host settings against Fasterdata recommendations tailored by NIC
 
-  speed and host role (measurement vs DTN).
+speed and host role (measurement vs DTN).
 
 * Centralizes recommended sysctl tuning for high-throughput, long-distance transfers (buffer sizing, qdisc, congestion
 
-  control), reducing guesswork and manual errors.
+control), reducing guesswork and manual errors.
 
 * Applies and persists sysctl settings in `/etc/sysctl.conf` and helps persist per-NIC settings (ethtool) via a
 
-  `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
+`systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
 
 * For DTN nodes: Supports packet pacing via traffic control (tc) token bucket filter (tbf) to limit outgoing traffic to
 
-  a specified rate, important for multi-stream transfer scenarios.
+a specified rate, important for multi-stream transfer scenarios.
 
 ## Who should use it?
 
@@ -62,7 +62,7 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
 
 * NOT for multi-tenant or general-purpose interactive servers without prior review — these sysctl changes can affect
 
-  other services.
+other services.
 
 ## Verification & Basic checks
 
@@ -94,11 +94,11 @@ cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 
 * The `iommu` and `SMT` settings are environment-sensitive: IOMMU changes require GRUB kernel cmdline edits and a
 
-  reboot. The script only suggests GRUB edits and does not automatically change the bootloader.
+reboot. The script only suggests GRUB edits and does not automatically change the bootloader.
 
 * If you require automated GRUB edits or SMT toggles, those should be opt-in with thorough confirmation prompts and
 
-  recovery steps.
+recovery steps.
 
 ## Usage
 

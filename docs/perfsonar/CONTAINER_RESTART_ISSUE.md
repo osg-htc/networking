@@ -55,7 +55,6 @@ labels:
 
 * io.containers.autoupdate=registry
 
-
 ``` text
 
 ## Fixing Existing Deployments
