@@ -63,10 +63,12 @@ for f in "${files_to_check[@]}"; do
     EXIT_CODE=1
     continue
   fi
-  # Compare content
-  if ! cmp -s "$docf" "$sitef"; then
-    echo "DIFF: $base differs between docs and site"
-    EXIT_CODE=1
+  # Compare content (only if site copied files exist)
+  if [[ -d "$SITE_DIR" ]]; then
+    if ! cmp -s "$docf" "$sitef"; then
+      echo "DIFF: $base differs between docs and site"
+      EXIT_CODE=1
+    fi
   fi
   # Verify sha file entry
   sha_expected=$(sha256sum "$docf" | awk '{print $1}')
