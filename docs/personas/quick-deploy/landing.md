@@ -19,8 +19,10 @@ Understand the deployment landscape and requirements:
 
 - **[Why perfSONAR in OSG/WLCG?](../../perfsonar-in-osg.md)** — motivation,
   importance, and what you're joining
+
 - **[Deployment Models & Options](../../perfsonar/deployment-models.md)** —
   hardware requirements, testpoint vs. toolkit, containerized vs. bare metal
+
 - **[Multiple NIC Guidance](../../perfsonar/multiple-nic-guidance.md)** — if
   deploying on a host with dual NICs
 
@@ -32,11 +34,13 @@ Understand the deployment landscape and requirements:
 
 **Time:** 30-60 minutes | **Skill level:** System administrator
 
-Follow the **[Full Installation Guide](install-perfsonar-testpoint.md)** which
-uses the orchestrator for guided, interactive or non-interactive deploys.
+Follow the **[Full Installation Guide](install-perfsonar-testpoint.md)** which uses the orchestrator for guided,
+interactive or non-interactive deploys.
 
 - `perfSONAR-orchestrator.sh` — automates package install, PBR, security, containers, certificates, and mesh enrollment
+
 - Interactive mode: pause at each step to confirm/skip
+
 - Non-interactive mode: `--non-interactive` flag for automated deployment
 
 ### 🔧 Custom Deploy — Manual Step-by-Step Control
@@ -64,6 +68,7 @@ Reference: Ansible playbooks, orchestrator `--non-interactive` mode, containeriz
 Optimize kernel and NIC settings for network throughput:
 
 - **[Fasterdata Tuning](../../network-troubleshooting.md)** — ESnet recommendations for high-performance hosts
+
 - Tool: `fasterdata-tuning.sh` (audit and apply modes, ~15 minutes)
 
 ### Network Configuration (Multi-NIC)
@@ -71,6 +76,7 @@ Optimize kernel and NIC settings for network throughput:
 Set up policy-based routing and static IP addressing:
 
 - **[Multi-NIC Setup Guide](../../perfsonar/multiple-nic-guidance.md)** — when using multiple interfaces
+
 - Tool: `perfSONAR-pbr-nm.sh` (automatic NetworkManager configuration)
 
 ### LS Registration & Enrollment
@@ -78,7 +84,9 @@ Set up policy-based routing and static IP addressing:
 Register your testpoint globally and enroll in test meshes:
 
 - **[LS Registration Setup](../../perfsonar/tools_scripts/README-lsregistration.md)** — register for discovery
+
 - **[Auto-Enrollment in Meshes](../../perfsonar/tools_scripts/README.md)** — join WLCG/OSG test meshes
+
 - Tool: `perfSONAR-update-lsregistration.sh` and `perfSONAR-auto-enroll-psconfig.sh`
 
 ### Security Hardening (Optional)
@@ -86,7 +94,9 @@ Register your testpoint globally and enroll in test meshes:
 Harden your testpoint with security features:
 
 - **[fail2ban](../../features/fail2ban.md)** — prevent brute-force attacks
+
 - **[nftables](../../features/nftables.md)** — firewall and rate limiting
+
 - **[SELinux](../../features/selinux.md)** — mandatory access control
 
 ---
@@ -96,7 +106,9 @@ Harden your testpoint with security features:
 Once deployed, verify everything is working:
 
 - **[Quick Triage Checklist](../troubleshoot/triage-checklist.md)** — 5-minute verification steps
+
 - **[perfSONAR FAQ](../../perfsonar/faq.md)** — answers to common questions
+
 - **[Troubleshooter Guide](../troubleshoot/landing.md)** — detailed diagnostics if something isn't working
 
 ---
@@ -106,8 +118,11 @@ Once deployed, verify everything is working:
 **Questions or issues?**
 
 - **perfSONAR user community:** [Mailing list](https://lists.internet2.edu/sympa/info/perfsonar-user)
+
 - **OSG-specific help:** [GOC support](https://support.opensciencegrid.org/)
+
 - **WLCG-specific help:** [GGUS ticket](https://ggus.eu/) → "WLCG perfSONAR support"
+
 - **General troubleshooting:** [Network Troubleshooting Guide](../../network-troubleshooting.md)
 
 ---
@@ -117,8 +132,11 @@ Once deployed, verify everything is working:
 All tools and scripts are available in the [Tools section](../../perfsonar/tools_scripts/README.md), including:
 
 - Orchestrator (`perfSONAR-orchestrator.sh`)
-- PBR setup (`perfSONAR-pbr-nm.sh`)
-- LS registration (`perfSONAR-update-lsregistration.sh`)
-- Host tuning (`fasterdata-tuning.sh`)
-- Auto-enrollment (`perfSONAR-auto-enroll-psconfig.sh`)
 
+- PBR setup (`perfSONAR-pbr-nm.sh`)
+
+- LS registration (`perfSONAR-update-lsregistration.sh`)
+
+- Host tuning (`fasterdata-tuning.sh`)
+
+- Auto-enrollment (`perfSONAR-auto-enroll-psconfig.sh`)

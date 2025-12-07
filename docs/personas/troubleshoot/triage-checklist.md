@@ -43,6 +43,7 @@ ss -ltnp
 1. Collect logs and measurements
 
 - Container logs: `podman logs perfsonar-testpoint`
+
 - perfSONAR checks: `pscheduler tasks --host localhost`
 
 Use the scenario playbooks in `playbooks/` for step-by-step remediation instructions.

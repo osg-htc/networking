@@ -9,6 +9,7 @@ tags: [template, quickstart]
 ## Requirements
 
 - OS / versions
+
 - Hardware/network
 
 ## Install (minimal)

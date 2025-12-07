@@ -6,4 +6,5 @@ status: draft
 tags: [fail2ban, security]
 ---
 
-When to enable fail2ban: when exposed services accept external credentials (ssh, web admin). Example configuration and a sample jail are provided.
+When to enable fail2ban: when exposed services accept external credentials (ssh, web admin). Example configuration and a
+sample jail are provided.

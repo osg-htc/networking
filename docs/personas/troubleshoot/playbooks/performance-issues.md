@@ -6,9 +6,8 @@ tags: [troubleshoot, performance, tuning]
 
 ## Playbook: Performance Issues
 
-!!! info "Status"
-    This playbook is a placeholder for the [troubleshooter
-    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+!!! info "Status" This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step
+diagnostics coming soon.
 
 ## Quick Diagnosis
 
@@ -128,14 +127,19 @@ watch -n 1 'cat /proc/net/dev | head -5'
 If still slow, collect:
 
 - Tuning audit: `/tmp/fasterdata-tuning.sh audit > /tmp/audit.txt`
+
 - NIC stats: `ethtool -i eth0` and `ethtool -g eth0`
+
 - Local iperf results
+
 - Test results from measurement archive
+
 - perfSONAR logs: `podman logs perfsonar-testpoint | tail -100 > /tmp/logs.txt`
 
 Then contact:
 
 - [OSG GOC](https://support.opensciencegrid.org/) (OSG sites)
+
 - [WLCG GGUS](https://ggus.eu/) (WLCG sites)
 
 ---
@@ -232,6 +236,9 @@ pscheduler tasks --host localhost --format json
 ## See Also
 
 - [Host Tuning Guide](../../../host-network-tuning.md)
+
 - [Multiple NIC Setup](../../../perfsonar/multiple-nic-guidance.md)
+
 - [Installation Guide](../../quick-deploy/install-perfsonar-testpoint.md)
+
 - [Troubleshooter Landing](../landing.md)

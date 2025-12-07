@@ -12,12 +12,10 @@ One-page cheat sheet for perfSONAR deployment, configuration, and troubleshootin
 
 ## Essential Contacts
 
-| Scenario | Contact |
-|----------|---------|
-| **OSG Site Issues** | [GOC Support](https://support.opensciencegrid.org/) |
-| **WLCG Issues** | [GGUS Ticket](https://ggus.eu/) → "WLCG perfSONAR support" |
-| **perfSONAR Questions** | [User Mailing List](https://lists.internet2.edu/sympa/info/perfsonar-user) |
-| **Local Network** | Your site's network administrator |
+| Scenario | Contact | |----------|---------| | **OSG Site Issues** | [GOC
+Support](https://support.opensciencegrid.org/) | | **WLCG Issues** | [GGUS Ticket](https://ggus.eu/) → "WLCG perfSONAR
+support" | | **perfSONAR Questions** | [User Mailing List](https://lists.internet2.edu/sympa/info/perfsonar-user) | |
+**Local Network** | Your site's network administrator |
 
 ---
 
@@ -26,9 +24,13 @@ One-page cheat sheet for perfSONAR deployment, configuration, and troubleshootin
 ### Pre-Deployment Checklist
 
 - [ ] EL9 OS installed (AlmaLinux, Rocky, RHEL)
+
 - [ ] Hostname set: `hostnamectl set-hostname <name>`
+
 - [ ] Time sync enabled: `systemctl enable --now chronyd`
+
 - [ ] Network interfaces documented: `nmcli device status`
+
 - [ ] Required packages: `dnf install -y podman podman-compose git curl dig nft`
 
 ### Orchestrated Deploy (Recommended)
@@ -70,12 +72,9 @@ pscheduler tasks --host localhost
 
 ## Required Ports & Firewall
 
-| Port | Protocol | Purpose | Allow From |
-|------|----------|---------|-----------|
-| **443** | HTTPS | pScheduler (required) | All perfSONAR nodes |
-| 5001 | TCP/UDP | iperf (bandwidth) | Mesh nodes |
-| 8080 | HTTP | pSConfig config | All (or 443) |
-| 9000 | TCP | Logging | Central server |
+| Port | Protocol | Purpose | Allow From | |------|----------|---------|-----------| | **443** | HTTPS | pScheduler
+(required) | All perfSONAR nodes | | 5001 | TCP/UDP | iperf (bandwidth) | Mesh nodes | | 8080 | HTTP | pSConfig config |
+All (or 443) | | 9000 | TCP | Logging | Central server |
 
 ### Open Firewall (nftables)
 
@@ -220,40 +219,28 @@ nc -zv <remote_testpoint> 443
 
 ## Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `/etc/perfsonar/` | Config backups (from legacy toolkit) |
-| `/opt/perfsonar-tp/docker-compose.yml` | Container definition |
-| `/opt/perfsonar-tp/tools_scripts/` | Helper scripts |
-| `/etc/NetworkManager/conf.d/` | NIC configuration (if using PBR) |
-| `/etc/nftables.conf` | Firewall rules |
-| `~/.ssh/authorized_keys` | SSH keys |
+| File | Purpose | |------|---------| | `/etc/perfsonar/` | Config backups (from legacy toolkit) | | `/opt/perfsonar-
+tp/docker-compose.yml` | Container definition | | `/opt/perfsonar-tp/tools_scripts/` | Helper scripts | |
+`/etc/NetworkManager/conf.d/` | NIC configuration (if using PBR) | | `/etc/nftables.conf` | Firewall rules | |
+`~/.ssh/authorized_keys` | SSH keys |
 
 ---
 
 ## Log Locations
 
-| Source | Location |
-|--------|----------|
-| **Container** | `podman logs perfsonar-testpoint` |
-| **Systemd** | `journalctl -u perfsonar-testpoint -f` |
-| **Host** | `/var/log/messages` (EL9) |
-| **Kernel** | `dmesg` |
-| **Firewall** | `dmesg \| grep -i nft` |
+| Source | Location | |--------|----------| | **Container** | `podman logs perfsonar-testpoint` | | **Systemd** |
+`journalctl -u perfsonar-testpoint -f` | | **Host** | `/var/log/messages` (EL9) | | **Kernel** | `dmesg` | |
+**Firewall** | `dmesg \| grep -i nft` |
 
 ---
 
 ## Documentation Links
 
-| Topic | Link |
-|-------|------|
-| **Installation** | [Quick Deploy Guide](personas/quick-deploy/landing.md) |
-| **Troubleshooting** | [Troubleshooter Guide](personas/troubleshoot/landing.md) |
-| **Host Tuning** | [Fasterdata Tuning](host-network-tuning.md) |
-| **Architecture** | [System Overview](personas/research/landing.md) |
-| **Tools** | [Tools & Scripts](perfsonar/tools_scripts/README.md) |
-| **FAQ** | [perfSONAR FAQ](perfsonar/faq.md) |
-| **Official Docs** | [docs.perfsonar.net](https://docs.perfsonar.net/) |
+| Topic | Link | |-------|------| | **Installation** | [Quick Deploy Guide](personas/quick-deploy/landing.md) | |
+**Troubleshooting** | [Troubleshooter Guide](personas/troubleshoot/landing.md) | | **Host Tuning** | [Fasterdata
+Tuning](host-network-tuning.md) | | **Architecture** | [System Overview](personas/research/landing.md) | | **Tools** |
+[Tools & Scripts](perfsonar/tools_scripts/README.md) | | **FAQ** | [perfSONAR FAQ](perfsonar/faq.md) | | **Official
+Docs** | [docs.perfsonar.net](https://docs.perfsonar.net/) |
 
 ---
 
@@ -261,19 +248,19 @@ nc -zv <remote_testpoint> 443
 
 ### Expected Bandwidth
 
-| Link Speed | Expected Throughput |
-|------------|-------------------|
-| 1 Gbps | 900+ Mbps |
-| 10 Gbps | 9+ Gbps |
-| 100 Gbps | 90+ Gbps |
+| Link Speed | Expected Throughput | |------------|-------------------| | 1 Gbps | 900+ Mbps | | 10 Gbps | 9+ Gbps | |
+100 Gbps | 90+ Gbps |
 
 *Depends on testpoint tuning, network conditions, and competing tests.*
 
 ### Normal Latency
 
 - **Local campus network:** < 5 ms
+
 - **Same region:** 10-50 ms
+
 - **Cross-country:** 50-150 ms
+
 - **Transatlantic:** 100-200 ms
 
 ---
@@ -340,26 +327,25 @@ systemctl restart perfsonar-testpoint
 
 ## Common Issues & Solutions
 
-| Issue | Quick Fix |
-|-------|-----------|
-| Port 443 in use | `ss -ltnp \| grep 443` → kill process |
-| Volume permission denied | `sudo chown 65534:65534 /volume/path` |
-| DNS not resolving | `systemctl restart systemd-resolved` |
-| firewall blocking | `sudo nft add rule inet filter input tcp dport 443 accept` |
-| High latency | Run: `/tmp/fasterdata-tuning.sh apply` |
-| Tests scheduled but not running | `pscheduler tasks` → check network connectivity |
-| Cannot reach remote testpoint | Check firewall on both ends, verify 443 is open |
+| Issue | Quick Fix | |-------|-----------| | Port 443 in use | `ss -ltnp \| grep 443` → kill process | | Volume
+permission denied | `sudo chown 65534:65534 /volume/path` | | DNS not resolving | `systemctl restart systemd-resolved` |
+| firewall blocking | `sudo nft add rule inet filter input tcp dport 443 accept` | | High latency | Run:
+`/tmp/fasterdata-tuning.sh apply` | | Tests scheduled but not running | `pscheduler tasks` → check network connectivity
+| | Cannot reach remote testpoint | Check firewall on both ends, verify 443 is open |
 
 ---
 
 ## Version Information
 
 - **Quick Deploy**: v1.4.0+
+
 - **perfSONAR**: 5.0.3+
+
 - **OS**: EL9 (AlmaLinux, Rocky, RHEL)
+
 - **Container**: Podman/Docker
 
 ---
 
-**Last Updated:** December 2025
-**For issues:** [troubleshooter landing](personas/troubleshoot/landing.md) or [support contacts](#essential-contacts)
+**Last Updated:** December 2025 **For issues:** [troubleshooter landing](personas/troubleshoot/landing.md) or [support
+contacts](#essential-contacts)

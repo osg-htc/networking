@@ -6,4 +6,5 @@ status: draft
 tags: [selinux, security]
 ---
 
-Short guidance: prefer permissive mode for initial deployment only; then create minimal allow rules and move to enforcing mode.
+Short guidance: prefer permissive mode for initial deployment only; then create minimal allow rules and move to
+enforcing mode.

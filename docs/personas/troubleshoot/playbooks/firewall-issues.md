@@ -6,9 +6,8 @@ tags: [troubleshoot, firewall, networking, nftables]
 
 ## Playbook: Firewall & Network Access Issues
 
-!!! info "Status"
-    This playbook is a placeholder for the [troubleshooter
-    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+!!! info "Status" This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step
+diagnostics coming soon.
 
 ## Quick Diagnosis
 
@@ -36,8 +35,11 @@ done
 Expected results:
 
 - **443** (pScheduler) — REQUIRED, must be open
+
 - **5001** (iperf) — bandwidth tests only
+
 - **8080** (pSConfig) — configuration/discovery
+
 - **9000** (logging) — optional
 
 ### Step 2: Check Local Firewall
@@ -127,15 +129,21 @@ dmesg | grep -i nft
 If still blocked, collect:
 
 - Firewall rules: `nft list ruleset > /tmp/firewall.txt`
+
 - Listening ports: `ss -ltnp > /tmp/ports.txt`
+
 - Test connectivity results
+
 - Container logs: `podman logs perfsonar-testpoint > /tmp/logs.txt`
+
 - Traceroute output: `traceroute -n <remote> > /tmp/traceroute.txt`
 
 Then contact:
 
 - **Local network team** — for campus firewall checks
+
 - [OSG GOC](https://support.opensciencegrid.org/) (OSG sites)
+
 - [WLCG GGUS](https://ggus.eu/) (WLCG sites)
 
 ---
@@ -200,11 +208,15 @@ nft list table filter
 **Solution:**
 
 1. **Contact your campus network team** with:
+
    - Your testpoint IP address
+
    - List of remote perfSONAR testpoints you need to reach
+
    - Required ports: 443 (primary), 5001/8080 (secondary)
 
 1. **Provide them:** OSG/WLCG mesh documentation
+
    - List available at: `psconfig.opensciencegrid.org`
 
 1. **Verify after firewall changes:**
@@ -240,18 +252,18 @@ nc -zv <dns_server> 53
 
 ## Reference: Required Ports
 
-| Port | Protocol | Purpose | Required |
-|------|----------|---------|----------|
-| 443 | HTTPS | pScheduler (test scheduling) | **YES** |
-| 5001 | TCP/UDP | iperf (bandwidth tests) | No (bandwidth only) |
-| 8080 | HTTP | pSConfig (configuration) | No (can use 443) |
-| 9000 | TCP | Logging (optional) | No |
+| Port | Protocol | Purpose | Required | |------|----------|---------|----------| | 443 | HTTPS | pScheduler (test
+scheduling) | **YES** | | 5001 | TCP/UDP | iperf (bandwidth tests) | No (bandwidth only) | | 8080 | HTTP | pSConfig
+(configuration) | No (can use 443) | | 9000 | TCP | Logging (optional) | No |
 
 ---
 
 ## See Also
 
 - [Security & Firewall Guide](../../../perfsonar/installation.md#security-considerations)
+
 - [Network Troubleshooting Guide](../../../network-troubleshooting.md)
+
 - [Troubleshooter Landing](../landing.md)
+
 - [Quick Triage Checklist](../triage-checklist.md)

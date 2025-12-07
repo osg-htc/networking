@@ -6,14 +6,13 @@ tags: [troubleshoot, pscheduler, psconfig, tests]
 
 ## Playbook: Tests Not Running
 
-!!! info "Status"
-    This playbook is a placeholder for the [troubleshooter
-    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+!!! info "Status" This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step
+diagnostics coming soon.
 
 ## Quick Diagnosis
 
-**When to use this playbook:** Tests configured in pSConfig don't execute, or
-no results appear in the measurement archive.
+**When to use this playbook:** Tests configured in pSConfig don't execute, or no results appear in the measurement
+archive.
 
 ### Step 1: Verify pSConfig Enrollment
 
@@ -34,6 +33,7 @@ psconfig remote list
 If empty or missing:
 
 - Testpoint not enrolled in mesh
+
 - Run: `/opt/perfsonar-tp/tools_scripts/
 
   perfSONAR-auto-enroll-psconfig.sh`
@@ -105,14 +105,19 @@ podman logs perfsonar-testpoint | grep -i "http\|connection\|refused"
 If still not running, collect:
 
 - pSConfig status: `psconfig remote list`
+
 - pScheduler tasks: `pscheduler tasks --host localhost > /tmp/tasks.txt`
+
 - Container logs: `podman logs perfsonar-testpoint > /tmp/logs.txt`
+
 - Firewall rules: `nft list ruleset > /tmp/firewall.txt`
 
 Then contact:
 
 - [OSG GOC](https://support.opensciencegrid.org/) (OSG sites)
+
 - [WLCG GGUS](https://ggus.eu/) (WLCG sites)
+
 - [perfSONAR Mailing List](https://lists.internet2.edu/sympa/info/perfsonar-user)
 
 ---
@@ -185,6 +190,9 @@ hostname -f
 ## See Also
 
 - [Installation Guide](../../quick-deploy/install-perfsonar-testpoint.md)
+
 - [pSConfig Documentation](https://docs.perfsonar.net/psconfig_intro.html)
+
 - [Troubleshooter Landing](../landing.md)
+
 - [Quick Triage Checklist](../triage-checklist.md)

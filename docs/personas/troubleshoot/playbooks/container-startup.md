@@ -6,9 +6,8 @@ tags: [troubleshoot, container, docker, podman]
 
 ## Playbook: Container Won't Start
 
-!!! info "Status"
-    This playbook is a placeholder for the [troubleshooter
-    persona](../landing.md). Detailed step-by-step diagnostics coming soon.
+!!! info "Status" This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step
+diagnostics coming soon.
 
 ## Quick Diagnosis
 
@@ -30,7 +29,9 @@ docker ps -a | grep perfsonar
 Look for:
 
 - Exit code (non-zero = failure)
+
 - Last restart time
+
 - Error messages
 
 ### Step 2: View Container Logs
@@ -49,15 +50,21 @@ docker logs perfsonar-testpoint
 Common errors:
 
 - `OCI runtime error` — host kernel/runtime issue
+
 - `Failed to bind port` — port already in use
+
 - `No such file or directory` — missing volume/mount
+
 - `permission denied` — volume permission issue
 
 ### Step 3: Check Prerequisites
 
 - **Image available:** `podman images | grep perfsonar`
+
 - **Volumes exist:** `podman volume ls | grep perfsonar`
+
 - **Ports available:** `ss -ltnp | grep -E '(443|5001|9000|8080)'`
+
 - **Disk space:** `df -h /var/lib/podman` or `/var/lib/docker`
 
 ### Step 4: Escalate
@@ -65,13 +72,17 @@ Common errors:
 If the above doesn't resolve the issue, collect:
 
 - Container logs: `podman logs perfsonar-testpoint > /tmp/logs.txt`
+
 - Systemd logs: `journalctl -u perfsonar-testpoint -n 50 > /tmp/systemd.txt`
+
 - Host info: `uname -a`, `cat /etc/os-release`
 
 Then contact:
 
 - [OSG GOC](https://support.opensciencegrid.org/) (OSG sites)
+
 - [WLCG GGUS](https://ggus.eu/) (WLCG sites)
+
 - [perfSONAR Mailing List](https://lists.internet2.edu/sympa/info/perfsonar-user)
 
 ---
@@ -140,5 +151,7 @@ podman system prune -a
 ## See Also
 
 - [Installation Guide](../../quick-deploy/install-perfsonar-testpoint.md)
+
 - [Troubleshooter Landing](../landing.md)
+
 - [Quick Triage Checklist](../triage-checklist.md)
