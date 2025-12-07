@@ -85,11 +85,9 @@ httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS
 
 * **perfSONAR json summary** is failing
 
-
 ```
 
 * This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
-
 
 ``` text
 

@@ -104,12 +104,10 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 
 1. Preview generation (no changes):
 
-
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
 ``` text
 
 1. Generate the config file automatically:
-
 
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
 ```
@@ -122,12 +120,10 @@ Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
 
 1. Dry run the apply step:
 
-
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
 ``` text
 
 1. Apply changes:
-
 
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
 ```
@@ -189,12 +185,10 @@ Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the 
 
 1. Run with options:
 
-
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
 ``` text
 
 1. Preview rules only:
-
 
 ```bash /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
 ```
@@ -279,7 +273,6 @@ To register your testpoint with a central config:
 
 podman exec -it perfsonar-testpoint psconfig remote list podman exec -it perfsonar-testpoint psconfig remote
 --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
-
 
 ```bash
 

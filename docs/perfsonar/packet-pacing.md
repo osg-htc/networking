@@ -332,7 +332,6 @@ perfSONAR's pscheduler also supports pacing. Check your perfSONAR configuration 
 
 **Solution**: Ensure `/etc/sysctl.conf` contains:
 
-
 ```bash net.core.default_qdisc = fq sysctl -p
 ``` text
 
@@ -359,7 +358,6 @@ Then reapply pacing with `fasterdata-tuning.sh` or `tc` command.
 ### Issue: Pacing Configuration Lost After Reboot
 
 **Solution**: The `fasterdata-tuning.sh` apply mode creates a systemd service for persistence. Enable it:
-
 
 ```bash sudo systemctl enable ethtool-persist.service sudo systemctl start ethtool-persist.service
 ```
@@ -457,7 +455,6 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 1. ✅ **Easy to implement** — Single command or script invocation
 
 **Recommended Configuration for 10G DTN with 4 parallel streams**:
-
 
 ```bash sudo fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 2gbps
 ``` text
