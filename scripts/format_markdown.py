@@ -309,12 +309,13 @@ def format_file(path):
         # Replace bare URLs in a safe way: wrap with angle brackets if not in a markdown link
         # Use a simple regex to detect http(s):// patterns not immediately prefixed by '(' or '['.
         def wrap_bare_urls(s):
-                    pattern = re.compile(r'(?<![\(<\[])(https?://[^\s,);]+)')
-                    s = pattern.sub(r'<\1>', s)
-                    # wrap email addresses too (basic detection)
-                    email_pat = re.compile(r'(?<![<\w/])([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})')
-                    s = email_pat.sub(r'<\1>', s)
-                    return s
+            # Match typical bare URLs not already wrapped or in markdown links
+            pattern = re.compile(r'(?<![\(<\[])(https?://[^\s\)\]\>,]+)')
+            s = pattern.sub(r'<\1>', s)
+            # wrap email addresses too (basic detection)
+            email_pat = re.compile(r'(?<![<\w/])([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})')
+            s = email_pat.sub(r'<\1>', s)
+            return s
         line = wrap_bare_urls(line)
 
         # Replace common inline HTML break tags with markdown line breaks (two spaces + newline)
