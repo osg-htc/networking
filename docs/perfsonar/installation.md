@@ -52,7 +52,7 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
 
     ```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
-    ```
+```text
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:
@@ -65,7 +65,7 @@ described in the official guide:
 
     ```text
 * For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` replacing `<FQDN>` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
-    ```
+```
 
  ```json
 === pScheduler Agent ===
@@ -75,7 +75,7 @@ described in the official guide:
       "configure-archives" : true
    }
 ]
- ```
+```text
 
 * Please remove any old/stale URLs using `psconfig remote delete <URL>`
 
@@ -85,7 +85,7 @@ described in the official guide:
 
     ```text
 Until your host is added on https://psconfig.opensciencegrid.org to one or more meshes by an administrator the automesh configuration above will not return any tests.
-    ```
+```
 
 * We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
 
@@ -126,7 +126,7 @@ site or host firewalls.   An overview of perfSONAR security is available at
 
     ```text
 All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
-    ```
+```text
 
 For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the
 tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be
@@ -138,7 +138,7 @@ network administrators to debug network issues.
 
     ```text
 If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
-    ```
+```
 
 ### Enabling SNMP plugins
 
@@ -169,7 +169,7 @@ filling the information please follow those simple guidelines:
 * Host Name
 * Host IP (optional)
 * Description (optional label used in MaDDash; keep short and unique)
-    ```
+```text
 
 * Check "N" when asked "Is it a beta service"
 

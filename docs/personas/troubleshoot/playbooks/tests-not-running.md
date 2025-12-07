@@ -28,7 +28,7 @@ psconfig remote list
 
 # https://psconfig.opensciencegrid.org/pub/auto/<YOUR_HOSTNAME>
 
-```
+```text
 
 If empty or missing:
 
@@ -68,7 +68,7 @@ curl -I https://psconfig.opensciencegrid.org/pub/auto
 
 ping <remote_testpoint_hostname>
 telnet <remote_testpoint_hostname> 443
-```
+```text
 
 ### Step 4: Check Firewall & Ports
 
@@ -98,7 +98,7 @@ podman logs perfsonar-testpoint | grep -i error | tail -20
 # Look for HTTP errors
 
 podman logs perfsonar-testpoint | grep -i "http\|connection\|refused"
-```
+```text
 
 ### Step 6: Escalate
 
@@ -164,7 +164,7 @@ nft add rule inet filter input tcp dport 443 accept
 
 # (varies by site configuration)
 
-```
+```text
 
 ### Wrong FQDN in pSConfig
 

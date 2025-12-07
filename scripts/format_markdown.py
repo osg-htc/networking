@@ -276,6 +276,24 @@ def format_file(path):
         # We intentionally do this only for explicit <br> tags to avoid altering inline spans or layout
         line = re.sub(r"<br\s*/?>", "  ", line, flags=re.IGNORECASE)
 
+        # Remove twiki 'span' macro tags and other empty 'span' wrappers used by imported twiki content
+        # This handles patterns like: <span class="twiki-macro LINKCSS"></span>
+        line = re.sub(r"<span\s+class=\"twiki-macro[^\"]*\">", "", line)
+        line = re.sub(r"</span>", "", line)
+
+        # Convert simple <img src="..."> to markdown images if possible
+        img_match = re.search(r"<img\s+[^>]*src=\"([^\"]+)\"[^>]*alt=\"([^\"]*)\"[^>]*>", line)
+        if img_match:
+            src, alt = img_match.groups()
+            mdimg = f"![{alt}]({src})"
+            line = re.sub(r"<img\s+[^>]*src=\"[^\"]+\"[^>]*alt=\"[^\"]*\"[^>]*>", mdimg, line)
+        else:
+            # fallback: if only src is present
+            img_match2 = re.search(r"<img\s+[^>]*src=\"([^\"]+)\"[^>]*>", line)
+            if img_match2:
+                src = img_match2.groups()[0]
+                line = re.sub(r"<img\s+[^>]*src=\"[^\"]+\"[^>]*>", f"![]({src})", line)
+
         # reduce multiple spaces after list markers globally
         if re.match(r"^\s*([-*+]\s{2,})", line) or re.match(r"^\s*\d+\.\s{2,}", line):
             line = re.sub(r"^(\s*([-*+]|\d+\.))\s{2,}", r"\1 ", line)
@@ -318,6 +336,9 @@ def format_file(path):
             m = fence_open_re.match(l)
             if m:
                 indent, fence_chars, lang = m.groups()
+                # normalize fence indentation: reduce leading indent to a maximum of 3 spaces
+                if len(indent) > 3:
+                    indent = indent[:3]
                 if not in_f:
                     # opening fence; ensure a language is present
                     if not lang:
@@ -331,6 +352,27 @@ def format_file(path):
         return '\n'.join(out_lines_local)
 
     final = ensure_fence_languages(final)
+    # Extra pass: some backticks may be present with up to 3 leading spaces - ensure we attach a default language on opens
+    def ensure_fence_languages_simple(s):
+        lines_local = s.split('\n')
+        out = []
+        in_f = False
+        for l in lines_local:
+            if re.match(r"^\s{0,3}`{3,}\s*$", l):
+                if not in_f:
+                    out.append(re.sub(r"^\s{0,3}`{3,}\s*$", "```text", l))
+                    in_f = True
+                    continue
+                else:
+                    out.append(re.sub(r"^\s{0,3}`{3,}\s*$", "```", l))
+                    in_f = False
+                    continue
+            out.append(l)
+        return '\n'.join(out)
+
+    final = ensure_fence_languages_simple(final)
+    # Collapse multiple blank lines to a single blank line
+    final = re.sub(r"\n{3,}", "\n\n", final)
     with open(path, 'r', encoding='utf-8') as fh:
         original = fh.read()
     if final != original:

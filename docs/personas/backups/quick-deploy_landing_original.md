@@ -1,7 +1,7 @@
 The original `docs/personas/quick-deploy/landing.md` as read before replacement.
 
 ````text
-```
+```text
 
 title: Quick Deploy — perfSONAR Testpoint (Quick Deploy) description: Quick, minimal steps to deploy a perfSONAR
 testpoint for WLCG/OSG monitoring. persona: quick-deploy owners: [networking-team@osg-htc.org] status: draft tags:
@@ -20,4 +20,4 @@ linked pages.
 Follow the quickstart if you need a working testpoint in a single admin session.
 
 ```text
-````
+```

@@ -13,7 +13,7 @@ loaded in the browser.
 
 A sample initial dashboard is shown below:
 
-<img src="../../img/etf.png" alt="Initial perfSONAR dashboard" width="1024">
+![Initial perfSONAR dashboard](../../img/etf.png)
 
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided
 into four categories:

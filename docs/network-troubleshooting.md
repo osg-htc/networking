@@ -1,7 +1,5 @@
 # Network and Network Troubleshooting Documentation
 
-<span class="twiki-macro STARTINCLUDE"></span>
-
 This page will eventually include pointers to various network troubleshooting resources. In general, when users suspect
 a network problem the procedure is:
 

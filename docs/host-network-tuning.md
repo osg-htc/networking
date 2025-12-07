@@ -71,7 +71,7 @@ Audit a measurement host:
 
 ```bash
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
-```
+```text
 
 Apply tuning for a DTN (100Gbps links):
 
@@ -83,7 +83,7 @@ Limit to specific NICs:
 
 ```bash
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces "ens1f0np0,ens1f1np1"
-```
+```text
 
 ### What the script does
 
@@ -150,7 +150,7 @@ Install quickly as follows:
 ```bash
 sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
 sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
-```
+```text
 
 Then run an audit before applying changes:
 
@@ -208,7 +208,7 @@ The script supports a few additional opt-in apply flags when run with `--mode ap
 
 ```bash
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --yes
-```
+```text
 
 - `--apply-smt on|off`: Apply SMT change at runtime. Use `--persist-smt` to make the choice persistent in GRUB. Example:
 
@@ -220,7 +220,7 @@ Preview (dry-run) example:
 
 ```bash
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
-```
+```text
 
 ## Manual checklist (summary of recommendations)
 
@@ -287,7 +287,7 @@ throughput. However, for isolated low-latency workloads, SMT off may reduce jitt
 
 ```bash
 cat /sys/devices/system/cpu/smt/control
-```
+```text
 
 **To enable SMT:**
 
@@ -299,7 +299,7 @@ echo on | sudo tee /sys/devices/system/cpu/smt/control
 
 ```bash
 echo off | sudo tee /sys/devices/system/cpu/smt/control
-```
+```text
 
 Note: SMT changes take effect immediately but are not persisted across reboots. To persist, add to kernel command line
 (GRUB): `nosmt` (to disable) or remove it (to enable).
@@ -349,7 +349,7 @@ RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
-```
+```text
 
 The service is automatically enabled. To verify:
 

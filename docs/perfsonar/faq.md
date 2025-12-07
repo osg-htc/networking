@@ -34,7 +34,7 @@ centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
     <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>
 <p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
 <p>8. Make a donation :)</p>
-    ```
+```text
 
 </details>
 
@@ -90,7 +90,7 @@ httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS
     ```text
 -   This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
 
-    ```
+```
 
 * **perfSONAR configuration: meshes** metric is failing
 

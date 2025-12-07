@@ -1,8 +1,4 @@
-<span class="twiki-macro LINKCSS"></span>
-
 # <span class="twiki-macro SPACEOUT">Register perfSONAR Service in GOCDB</span>
-
-<span class="twiki-macro STARTINCLUDE"></span>
 
 ## This section describes how to register the perfSONAR service in GOCDB.
 
@@ -28,14 +24,10 @@ filling the information please follow those simple guidelines:
 -   Check "Y" when asked "Is this service in production"
 -   Check "Y" when asked "Is this service monitored"
 
-    ```
+```text
 
 <!-- -->
 
 - GOCDB screen shot for creating a Service Endpoint: <br /> ![Screenshot](../img/Screen_shot_2013-02-19_at_15.26.52.png)
-
-<span class="twiki-macro STOPINCLUDE"></span>
-
-<span class="twiki-macro BOTTOMMATTER"></span>
 
 -- Main.ShawnMcKee - 21 Oct 2014

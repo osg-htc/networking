@@ -16,7 +16,7 @@ hostnamectl
 cat /etc/os-release
 uname -a
 ip -c a
-```
+```text
 
 1. Check basic connectivity
 
@@ -31,7 +31,7 @@ traceroute -n <remote-ip-or-host>
 systemctl status perfsonar-*
 ps aux | grep perfsonar
 podman ps || docker ps
-```
+```text
 
 1. Check firewall and ports
 
