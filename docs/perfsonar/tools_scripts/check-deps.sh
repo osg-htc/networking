@@ -38,6 +38,7 @@ fi
 # PKG_DNF and PKG_APT are kept for documentation and future use; they may not be referenced directly
 # shellcheck disable=SC2034
 PKG_DNF=(bash coreutils iproute NetworkManager rsync curl openssl)
+# shellcheck disable=SC2034
 PKG_APT=(bash coreutils iproute2 network-manager rsync curl openssl)
 
 declare -A CMD_TO_PKG_DNF=(
