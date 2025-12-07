@@ -227,7 +227,7 @@ accept udp dport 8760-9960 ct state new accept tcp dport 5890-5900 ct state new 
 IPs/subnets) tcp dport 22 ip saddr 192.168.10.0/24 accept tcp dport 22 ip saddr 10.20.30.0/24 accept } chain input {
 type filter hook input priority 0; policy drop; jump allow reject with icmpx admin-prohibited }
 
-    ```text
+```text
 
 }
 

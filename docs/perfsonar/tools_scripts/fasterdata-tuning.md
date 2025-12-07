@@ -126,7 +126,7 @@ bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn
 
 Notes -----
 
-  * IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present. When you run with `--apply-iommu` and `--mode apply`, the script will optionally back up `/etc/default/grub`, append the appropriate IOMMU flags (or use values provided via `--iommu-args`) and regenerate GRUB (using `grubby` or `grub2-mkconfig` where available). Use `--dry-run` to preview the GRUB changes. You may also set `--iommu-args "intel_iommu=on iommu=pt"` to provide custom boot args.
+* IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present. When you run with `--apply-iommu` and `--mode apply`, the script will optionally back up `/etc/default/grub`, append the appropriate IOMMU flags (or use values provided via `--iommu-args`) and regenerate GRUB (using `grubby` or `grub2-mkconfig` where available). Use `--dry-run` to preview the GRUB changes. You may also set `--iommu-args "intel_iommu=on iommu=pt"` to provide custom boot args.
 
 * SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.
 

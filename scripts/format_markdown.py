@@ -397,7 +397,7 @@ def format_file(path):
 
     final = ensure_fence_languages_simple(final)
     # Collapse multiple blank lines (2 or more) to a single blank line
-    final = re.sub(r"\n\s*\n+", "\n\n", final)
+    final = re.sub(r"(\n\s*){2,}", "\n\n", final)
     final = re.sub(r"\n{3,}", "\n\n", final)
     final = re.sub(r"\n\s*\n{1,}", "\n\n", final)
     # Extra perfsonar-specific whitespace fixes: ensure blank lines between list items and code fences

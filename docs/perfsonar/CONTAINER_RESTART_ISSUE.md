@@ -25,19 +25,19 @@ Use the recommended docker-compose.yml configuration from the repository which i
 ```yaml services: testpoint: container_name: perfsonar-testpoint image: hub.opensciencegrid.org/osg-htc/perfsonar-
 testpoint:production network_mode: "host" cgroup: host  # Use cgroup: host instead of cgroupns: private environment:
 
-  * TZ=UTC
+* TZ=UTC
 
 restart: unless-stopped tmpfs:
 
-  * /run
+* /run
 
 * /run/lock
 
 * /tmp
 
-    volumes:
+volumes:
 
-  * /sys/fs/cgroup:/sys/fs/cgroup:rw  # REQUIRED for systemd
+* /sys/fs/cgroup:/sys/fs/cgroup:rw  # REQUIRED for systemd
 
 * /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
 
@@ -49,11 +49,11 @@ restart: unless-stopped tmpfs:
 
 tty: true pids_limit: 8192 cap_add:
 
-  * CAP_NET_RAW
+* CAP_NET_RAW
 
-    labels:
+labels:
 
-  * io.containers.autoupdate=registry
+* io.containers.autoupdate=registry
 
 
 ``` text

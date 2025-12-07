@@ -196,15 +196,15 @@ Optional / feature packages
 
 * SELinux user tools (provides `getenforce`, `setenforce`, `restorecon`) —
 
-  used by SELinux-related operations
+used by SELinux-related operations
 
 * A container engine: `podman` or `docker` — required for the lsregistration
 
-  updater/extractor when operating against the running testpoint container
+updater/extractor when operating against the running testpoint container
 
 * podman-compose or docker-compose — useful for running the testpoint
 
-  compose bundle locally
+compose bundle locally
 
 Note: the `check-deps.sh` helper accepts `podman-compose` as an alternative provider to `docker-compose` and will report
 the dependency as satisfied if either binary is present.
@@ -331,11 +331,11 @@ Run the tests:
 
 * The script requires Bash (uses `local -n` namerefs). Run tests on a system
 
-  with Bash 4.3+.
+with Bash 4.3+.
 
 * For more extensive validation, run `shellcheck -x perfSONAR-pbr-nm.sh` and
 
-  address any issues reported.
+address any issues reported.
 
 ## Contact
 

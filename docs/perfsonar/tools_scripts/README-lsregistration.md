@@ -19,7 +19,7 @@ inside the container.
 
 * Key flags: `--container NAME` (default: `perfsonar-testpoint`),
 
-      `--engine auto|docker|podman` (default: `auto`).
+`--engine auto|docker|podman` (default: `auto`).
 
 * Local mode: operates directly on the host filesystem without a container.
 
@@ -62,8 +62,8 @@ lsreg.sh
 
 * Both scripts are Bash and require a modern Bash (4+). Use `shellcheck` for
 
-  linting if making changes.
+linting if making changes.
 
 * In container mode, the updater restarts services inside the container; in
 
-  local mode, it attempts to restart the host service.
+local mode, it attempts to restart the host service.

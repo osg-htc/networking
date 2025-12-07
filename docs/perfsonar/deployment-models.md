@@ -11,7 +11,7 @@ each focused on specific set of tests. The following deployment options are curr
 * **Bare metal** - preffered option in one of two possible configurations:
 
 
-    ```text
+```text
 
 * Two bare metal servers, one for latency node, one for bandwidth node
 
@@ -23,7 +23,7 @@ each focused on specific set of tests. The following deployment options are curr
 * **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:
 
 
-    ```text
+```text
 
 * Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
 
@@ -37,7 +37,7 @@ each focused on specific set of tests. The following deployment options are curr
 * **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
 
 
-    ```text
+```text
 
 * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
 
@@ -52,7 +52,8 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 
 * Pros
 
-        ```text
+
+```text
 
 * Simpler deployment when a local web interface is not needed and a central measurement archive is available.
 
@@ -63,7 +64,8 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 
 * Cons
 
-        ```text
+
+```text
 
 * Measurements are not stored locally
 
