@@ -70,7 +70,6 @@ described in the official guide:
 
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
 
-
 ```
 
 * For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` replacing `<FQDN>` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
@@ -186,7 +185,6 @@ hardware for the proposed setup, it can install a unique perfSONAR box, but stil
 (with the same host in the "host name" field of the form).
 
 * For each form (service type) fill at least:
-
 
 ```
 
