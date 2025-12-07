@@ -361,6 +361,20 @@ def format_file(path):
             new_lines.append(line)
             i += 1
 
+    # Convert lines that are emphasis-only (e.g., '*Scenario 1: ...*') into a heading to satisfy MD036
+    def convert_emphasis_to_heading(s):
+        out = []
+        for l in s.split('\n'):
+            m = re.match(r"^\s*([*_]{1,2})([^*_].*?)\1\s*$", l)
+            if m:
+                # Convert to level-3 heading by default
+                out.append('### ' + m.groups()[1].strip())
+            else:
+                out.append(l)
+        return '\n'.join(out)
+
+    final = convert_emphasis_to_heading('\n'.join(new_lines))
+
     # Post-processing: ensure no blank at start or end
     while new_lines and new_lines[0].strip() == '':
         new_lines.pop(0)
