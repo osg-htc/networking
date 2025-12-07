@@ -60,7 +60,7 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 * Less resource intensive for both memory and I/O capacity.
 
 
-```text
+```
 
 * Cons
 

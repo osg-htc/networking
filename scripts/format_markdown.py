@@ -159,6 +159,17 @@ def format_file(path):
                         inner_lines.append(lines[k])
                         k += 1
                     # add fence language only once after collecting inner lines
+                    # If the opening fence has content after the language (e.g., "```bash cd /opt/..."),
+                    # move the extra content to the first inner line so we don't lose commands.
+                    m_f = re.match(r"^(\s*(`{3,}|~{3,}))(\s*\w+)?\s*(.*)$", line)
+                    extra = ''
+                    if m_f:
+                        extra = m_f.groups()[3]
+                        if extra.strip():
+                            # push extra content into the inner lines as the first line
+                            inner_lines.insert(0, extra)
+                            # regenerate the opening fence line without the extra content
+                            line = m_f.groups()[0] + (m_f.groups()[2] or '')
                     append_lang = add_fence_language(line, inner_lines)
                     if ("/perfsonar/" in path) and not re.match(r"^\s*(`{3,}|~{3,})\s*\w+", append_lang):
                         append_lang = append_lang.rstrip() + ' text'
