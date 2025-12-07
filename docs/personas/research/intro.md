@@ -2,7 +2,7 @@
 title: "Research — Overview"
 description: "Background, architecture, and data pipeline information for OSG perfSONAR monitoring."
 persona: research
-owners: ["networking-team@osg-htc.org"]
+owners: ["<networking-team@osg-htc.org>"]
 status: draft
 tags: [architecture, research]
 ---

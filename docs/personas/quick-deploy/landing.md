@@ -2,7 +2,7 @@
 title: "Quick Deploy — perfSONAR Testpoint"
 description: "Concise, verified quickstart to deploy a perfSONAR testpoint for OSG/WLCG monitoring."
 persona: quick-deploy
-owners: ["networking-team@osg-htc.org"]
+owners: ["<networking-team@osg-htc.org>"]
 status: active
 tags: [quickstart, perfSONAR, testpoint, deployment]
 ---

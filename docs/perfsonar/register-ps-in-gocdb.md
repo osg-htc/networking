@@ -11,11 +11,10 @@ You might not be able to access the page if you are not properly registered in G
 Infilling the information please follow those simple guidelines:
 
 * There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we
-
-suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and thereforetwo
-distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient
-hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish bothservices types
-(with the same host in the "host name" field of the form).
+  suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and thereforetwo
+  distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient
+  hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish bothservices types
+  (with the same host in the "host name" field of the form).
 
 * For each form (i.e. for each service type) fill at least the important informations:
 

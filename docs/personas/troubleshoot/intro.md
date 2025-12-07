@@ -2,7 +2,7 @@
 title: "Troubleshooter — Overview"
 description: "Triage checklist and short playbooks to diagnose and resolve networking and perfSONAR issues quickly."
 persona: troubleshoot
-owners: ["networking-team@osg-htc.org"]
+owners: ["<networking-team@osg-htc.org>"]
 status: draft
 tags: [troubleshoot, playbook]
 ---

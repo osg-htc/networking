@@ -2,7 +2,7 @@
 title: "Quick Deploy — Overview"
 description: "Jump-start guide for Quick Deployers: concise steps and pointers to minimal, verified deployments."
 persona: quick-deploy
-owners: ["networking-team@osg-htc.org"]
+owners: ["<networking-team@osg-htc.org>"]
 status: draft
 tags: [quickstart, quick-deploy]
 ---

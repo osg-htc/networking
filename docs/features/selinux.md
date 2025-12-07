@@ -1,7 +1,7 @@
 ---
 title: Feature: SELinux guidance
 description: SELinux considerations and recommended policy for perfSONAR testpoints.
-owners: [networking-team@osg-htc.org]
+owners: [<networking-team@osg-htc.org>]
 status: draft
 tags: [selinux, security]
 ---

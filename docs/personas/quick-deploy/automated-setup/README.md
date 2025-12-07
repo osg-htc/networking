@@ -2,7 +2,7 @@
 title: Automated setup — perfSONAR Testpoint
 description: Examples for automating setup using Ansible and container-based examples.
 persona: quick-deploy
-owners: [networking-team@osg-htc.org]
+owners: [<networking-team@osg-htc.org>]
 status: draft
 tags: [automation, ansible]
 ---

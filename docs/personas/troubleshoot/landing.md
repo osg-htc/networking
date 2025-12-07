@@ -1,5 +1,5 @@
 --- title: "Troubleshooter — Diagnose & Fix Network Issues" description: "Triage checklist, diagnostics, and playbooks
-for network troubleshooting in OSG/WLCG." persona: troubleshoot owners: ["<networking-team@osg-htc.org>"] status: active
+for network troubleshooting in OSG/WLCG." persona: troubleshoot owners: ["<networking-<team@osg-htc.org>>"] status: active
 
 ## tags: [troubleshoot, playbook, diagnostics]
 

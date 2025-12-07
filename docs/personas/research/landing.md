@@ -2,7 +2,7 @@
 title: "Researcher — Architecture & Analytics"
 description: "Background, architecture, data pipeline, and analytics for OSG perfSONAR monitoring."
 persona: research
-owners: ["<networking-team@osg-htc.org>"]
+owners: ["<networking-<team@osg-htc.org>>"]
 status: active
 tags: [architecture, research, analytics, data-pipeline]
 ---
@@ -219,7 +219,7 @@ Propose new tests to the **[WLCG Mesh Configuration](https://twiki.cern.ch/twiki
 
 - Report issues and propose enhancements
 
-- Email: <networking-team@osg-htc.org>
+- Email: <networking-<team@osg-htc.org>>
 
 ### Architecture & Documentation
 
@@ -227,7 +227,7 @@ Propose new tests to the **[WLCG Mesh Configuration](https://twiki.cern.ch/twiki
 
 - Add diagrams or notes to `personas/research/`
 
-- Submit via GitHub PR or email <networking-team@osg-htc.org>
+- Submit via GitHub PR or email <networking-<team@osg-htc.org>>
 
 - All contributions welcome and attributed
 

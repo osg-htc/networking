@@ -1,6 +1,5 @@
 # Infrastructure Monitoring
-
-WLCG/OSG is operating more than 200 perfSONAR agents world-wide. A typical perfSONAR deployment has many services
+ WLCG/OSG is operating more than 200 perfSONAR agents world-wide. A typical perfSONAR deployment has many services
 thatneed to function correctly for the the system to work.  As we scale-up to many perfSONAR deployments across many
 sites it can be difficult to verify everything is working correctly. perfSONAR monitoring instance [BROKEN-LINK:
 <https://psetf.opensciencegrid.org/etf/check_mk/index.py?start_url=%2Fetf%2Fcheck_mk%2Fdashboard.py>] actively
@@ -29,18 +28,16 @@ well as if ports are reachable from OSG subnets.
 [Requirements](deployment-models.md) for details)
 
 1. *Freshness tests* (`perfSONAR freshness`) is a high level test that checks what tests are available in the local
-
-measurement archive and compares this with the tests configured. There can be many different reasons why certain
-testsare stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues with
-measurement archive or scheduling, therefore this test is informative and never reaches critical state. A special kindof
-freshness tests are OSG datastore freshness tests, which account for what fraction of tests results are stored centrally
-as compared to local measurement archive. It mainly reflects on the efficiency of the central OSG collectorand doesn't
-provide any information on the on the local services.
+   measurement archive and compares this with the tests configured. There can be many different reasons why certain
+   testsare stale, such as disfunctional remote perfSONAR nodes, network connectivity issues as well as local issues
+   with measurement archive or scheduling, therefore this test is informative and never reaches critical state. A
+   special kindof freshness tests are OSG datastore freshness tests, which account for what fraction of tests results
+   are stored centrally as compared to local measurement archive. It mainly reflects on the efficiency of the central
+   OSG collectorand doesn't provide any information on the on the local services.
 
 This is sample snapshost showing all metrics for particular perfSONAR instance (latency node in this case):
 ![SampleSnapshot of all metrics for a perfSONAR instance](../../img/etf_page.png)
-
-For any issues/questions concerning the monitoring pages and tests, please consult the [FAQ](faq.md) Central servicesare
-also monitored with the same tool and their status can be seen by following Business Intelligence/All Aggregations on
-the left pane. It shows the aggregated status of both production and pre-production services including meshconfiguration
-interface, central datastore and infrastructure monitoring.
+ For any issues/questions concerning the monitoring pages and tests, please consult the [FAQ](faq.md) Central
+servicesare also monitored with the same tool and their status can be seen by following Business Intelligence/All
+Aggregations on the left pane. It shows the aggregated status of both production and pre-production services including
+meshconfiguration interface, central datastore and infrastructure monitoring.
