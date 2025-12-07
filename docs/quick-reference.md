@@ -6,13 +6,11 @@ tags: [reference, cheat-sheet, commands]
 
 # 🚀 Quick Reference Card
 
-
 One-page cheat sheet for perfSONAR deployment, configuration, and troubleshooting.
 
 ---
 
 ## Essential Contacts
-
 
 | Scenario | Contact | |----------|---------| | **OSG Site Issues** | [GOC
 Support](https://support.opensciencegrid.org/) | | **WLCG Issues** | [GGUS Ticket](https://ggus.eu/) → "WLCG perfSONAR
@@ -81,7 +79,6 @@ pscheduler tasks --host localhost
 ---
 
 ## Required Ports & Firewall
-
 
 | Port | Protocol | Purpose | Allow From | |------|----------|---------|-----------| | **443** | HTTPS | pScheduler
 (required) | All perfSONAR nodes | | 5001 | TCP/UDP | iperf (bandwidth) | Mesh nodes | | 8080 | HTTP | pSConfig config |
@@ -245,7 +242,6 @@ curl -v <https://psconfig.opensciencegrid.org/> nc -zv <remote_testpoint> 443
 
 ## Configuration Files
 
-
 | File | Purpose | |------|---------| | `/etc/perfsonar/` | Config backups (from legacy toolkit) | | `/opt/perfsonar-
 tp/docker-compose.yml` | Container definition | | `/opt/perfsonar-tp/tools_scripts/` | Helper scripts | |
 `/etc/NetworkManager/conf.d/` | NIC configuration (if using PBR) | | `/etc/nftables.conf` | Firewall rules | |
@@ -255,7 +251,6 @@ tp/docker-compose.yml` | Container definition | | `/opt/perfsonar-tp/tools_scrip
 
 ## Log Locations
 
-
 | Source | Location | |--------|----------| | **Container** | `podman logs perfsonar-testpoint` | | **Systemd** |
 `journalctl -u perfsonar-testpoint -f` | | **Host** | `/var/log/messages` (EL9) | | **Kernel** | `dmesg` | |
 **Firewall** | `dmesg \| grep -i nft` |
@@ -263,7 +258,6 @@ tp/docker-compose.yml` | Container definition | | `/opt/perfsonar-tp/tools_scrip
 ---
 
 ## Documentation Links
-
 
 | Topic | Link | |-------|------| | **Installation** | [Quick Deploy Guide](personas/quick-deploy/landing.md) | |
 **Troubleshooting** | [Troubleshooter Guide](personas/troubleshoot/landing.md) | | **Host Tuning** | [Fasterdata
@@ -276,7 +270,6 @@ Docs** | [docs.perfsonar.net](https://docs.perfsonar.net/) |
 ## Performance Benchmarks
 
 ### Expected Bandwidth
-
 
 | Link Speed | Expected Throughput | |------------|-------------------| | 1 Gbps | 900+ Mbps | | 10 Gbps | 9+ Gbps | |
 100 Gbps | 90+ Gbps |
@@ -372,7 +365,6 @@ systemctl restart perfsonar-testpoint
 ---
 
 ## Common Issues & Solutions
-
 
 | Issue | Quick Fix | |-------|-----------| | Port 443 in use | `ss -ltnp \| grep 443` → kill process | | Volume
 permission denied | `sudo chown 65534:65534 /volume/path` | | DNS not resolving | `systemctl restart systemd-resolved` |

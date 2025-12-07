@@ -1,6 +1,5 @@
 # perfSONAR multi-NIC NetworkManager configuration
 
-
 This directory contains `perfSONAR-pbr-nm.sh`, a Bash script to configure static IPv4/IPv6 addressing and per-NICsource-
 based routing via NetworkManager (nmcli).
 
@@ -16,7 +15,6 @@ based routing via NetworkManager (nmcli).
 
 ## Install helper
 
-
 A small helper is provided to populate `/opt/perfsonar-tp/tools_scripts` from this repository using a shallow
 sparsecheckout. It copies only the `docs/perfsonar/tools_scripts` directory and preserves executable bits.
 
@@ -27,7 +25,6 @@ sparsecheckout. It copies only the `docs/perfsonar/tools_scripts` directory and 
 * Options: `--dry-run` (preview), `--skip-testpoint` (don't clone testpoint repo)
 
 ## Systemd service installer
-
 
 A helper script is provided to install and enable a systemd service for automatic container restart on boot. Thisensures
 perfSONAR testpoint containers managed by podman-compose restart automatically after a host reboot.
@@ -65,7 +62,6 @@ After installation:
 
 * Orchestrated installs: If you use `perfSONAR-orchestrator.sh`, you can run the systemd installer after the compose stack is up so containers start on boot. Example:
 
-
 ``` bash /opt/perfsonar-tp/tools_scripts/install-systemd-service.sh /opt/perfsonar-tp systemctl enable --now perfsonar-
 testpoint.service
 ``` text
@@ -75,7 +71,6 @@ testpoint.service
 * Updating compose files: Edit `/opt/perfsonar-tp/docker-compose.yml` and run `systemctl restart perfsonar-testpoint.service` to apply changes cleanly.
 
 ## Usage examples
-
 
 Preview what would happen (safe):
 
@@ -100,7 +95,6 @@ If you already have the perfSONAR testpoint repo checked out in `/opt/perfsonar-
 
 ## Download
 
-
 You can download the raw script from the GitHub repo (master branch):
 
 ``` text <https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh>
@@ -124,7 +118,6 @@ chmod +x /usr/local/bin/fasterdata- tuning.sh
 
 ## Verify checksum
 
-
 You can verify the script integrity with the provided SHA256 file:
 
 ``` bash curl -L -o /tmp/fasterdata-tuning.sh.sha256 <https://raw.githubusercontent.com/osg->
@@ -145,7 +138,6 @@ tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
 * `--dry-run`: Preview the changes that would be made (GRUB edits and sysfs writes) without applying them. Use for validation and audits.
 
 ## Usage examples
-
 
 Audit (default) a measurement host:
 
@@ -175,7 +167,6 @@ execution and will exit if run as a non-privileged user. Run it with sudo or fro
 beforerunning.
 
 ## Dependencies and package install hints
-
 
 The scripts in this directory call a number of external commands. Install these packages (or their distro equivalents)
 before using the tools below.
@@ -241,7 +232,6 @@ morerobust backups.
 
 ## Safety first
 
-
 This script will REMOVE ALL existing NetworkManager connections when run. Always test in a VM or console-attached
 hostand use `--dry-run` to preview changes. The script creates a timestamped backup of existing connections before
 modifying anything.
@@ -260,7 +250,6 @@ fallback using the `ip route` and `ip rule` commands directly.
 interactivesudo prompts.
 
 ## How to run (dry-run / debug)
-
 
 Preview what the script would do without changing the system:
 
@@ -328,7 +317,6 @@ will refuse to proceed until you set the gateways.
 
 ## Tests
 
-
 A small set of unit-style tests is provided under `tests/`. These are designed to exercise pure validation
 andsanitization helpers without modifying system configuration. They source the script (functions only) and run checks
 in a non-destructive way.
@@ -349,6 +337,5 @@ with Bash 4.3+.
 address any issues reported.
 
 ## Contact
-
 
 Shawn McKee (script author) — [<smckee@umich.edu>](mailto:<smckee@umich.edu>)

@@ -1,6 +1,5 @@
 # OSG Debugging Documentation
 
-
 ### Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan
 
 ### February 4th 2013
@@ -272,7 +271,6 @@ ESnet has made a web based resource available to assist with the task of host tu
 
 ## Network Architecture
 
-
 Architectural decisions are often involved and will involve the input of local support staff.  In general laboratory
 architecture should be robust in the following manner:
 
@@ -351,16 +349,13 @@ and funnel the requests for help to the proper area (e.g. GOC, other networks, e
 
 ## Software Installation
 
-
 Client software can be installed in one of two ways, either though the OSG VDT or via RPMs from the perfSONAR web site.
 
 ## OSG Software
 
-
 [INSERT INSTRUCTIONS ON HOW TO INSTALL VDT HERE]
 
 ## perfSONAR-PS Software
-
 
 All perfSONAR software is available through an RPM (Red Hat Package Manager) repository to make for easy installation
 and updates.  The following steps can be taken to install these tools:
@@ -588,7 +583,6 @@ a larger debugging exercise with partial path decomposition.
 
 ## Partial Path Decomposition
 
-
 As we saw in Section 7.4, it is necessary to use all tools in a structured and scripted manner.  Deciding to divide the
 path is no different.  The following steps should be followed:
 
@@ -647,7 +641,6 @@ they are unable to help, consult the resources listed in Section 8.
 
 # Additional Help
 
-
 The following locations can be consulted for more help in debugging network problems:
 
 - Internet2 Research Support Center – <rs@internet2.edu> [BROKEN-LINK: mailto:<rs@internet2.edu>]
@@ -660,7 +653,6 @@ The following locations can be consulted for more help in debugging network prob
 
 # Acknowledgements
 
-
 The authors would like to acknowledge and thank the OSG community for their support and feedback into network
 performance problems and tools that would be useful for end users.
 
@@ -668,6 +660,5 @@ The perfSONAR-PS community has been invaluable, and the authors would like to th
 contributions of software, expertise, and time.
 
 # References
-
 
 TBD

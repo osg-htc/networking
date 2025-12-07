@@ -2,7 +2,6 @@
 
 ## This section describes how to register the perfSONAR service in GOCDB
 
-
 In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a
 ServiceEndpoint
 
@@ -18,7 +17,6 @@ Infilling the information please follow those simple guidelines:
   (with the same host in the "host name" field of the form).
 
 * For each form (i.e. for each service type) fill at least the important informations:
-
 
 ```text
 

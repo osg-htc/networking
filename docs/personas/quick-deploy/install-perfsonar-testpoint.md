@@ -7,7 +7,6 @@ process while accommodating site-specific requirements.
 
 ## Prerequisites and Planning
 
-
 Before you begin, it may be helpful to gather the following information:
 
 - **Hardware details:** hostname, BMC/iLO/iDRAC credentials (if used), interface names, available storage locations.
@@ -80,7 +79,6 @@ container networking.
 
 ## Step 2 – Choose Your Deployment Path
 
-
 After completing Step 1 (minimal OS hardening), you can proceed in one of two ways:
 
 ### Path A: Orchestrated Guided Install (Recommended for New Deployments)
@@ -133,12 +131,10 @@ orchestrator.sh
 
 ### Path B: Manual Step-by-Step
 
-
 For users who prefer granular control or need to customize each stage, continue with manual package installation,
 bootstrap, and configuration.
 
 #### Step 2.1 – Install Base Packages
-
 
 On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) are missing. Install all recommended
 prerequisites in one command:
@@ -151,7 +147,6 @@ This ensures all subsequent steps (PBR generation, DNS checks, firewall hardenin
 dependencies available.
 
 #### Step 2.2 – Bootstrap Helper Scripts
-
 
 Use the bootstrap script to install helper scripts under `/opt/perfsonar-tp/tools_scripts`:
 
@@ -178,7 +173,6 @@ ls -l /opt/perfsonar-tp/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nft
 ---
 
 ## Step 3 – Configure Policy-Based Routing (PBR)
-
 
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
@@ -316,7 +310,6 @@ route.
 
 ## Step 4 – Configure nftables, SELinux, and Fail2Ban
 
-
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
 The orchestrator automates security hardening. If you ran it in Step 2, skip to [Step 5](#step-5-deploy-the-
@@ -394,7 +387,6 @@ You may want to document any site-specific exceptions (e.g., additional allowed 
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
 
-
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
 The orchestrator automates container deployment and certificate issuance. If you ran it in Step 2, skip to [Step
@@ -409,7 +401,6 @@ Run the official testpoint image using Podman (or Docker). Choose one of the two
 Use `podman-compose` (or `docker-compose`) in the examples below.
 
 ### Option A — Testpoint only (simplest)
-
 
 Prepare the pSConfig directory and a minimal compose file. No other host bind-mounts are required.
 
@@ -441,7 +432,6 @@ That's it for the testpoint-only mode. Manage pSConfig files under `/opt/perfson
 consumed by the container at `/etc/perfsonar/psconfig`. Jump to Step 6 below.
 
 #### Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)
-
 
 !!! warning "podman-compose limitation with systemd containers"
  The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always` flag to function
@@ -483,7 +473,6 @@ Notes:
 ---
 
 ### Option B — Testpoint + Let's Encrypt (shared Apache and certs)
-
 
 This mode runs two containers (`perfsonar-testpoint` and `certbot`) and bind-mounts the following host paths so Apache
 content and certificates persist on the host and are shared between containers:
@@ -614,7 +603,6 @@ renew anything until you obtain the initial certificates.
 
 #### Ensure containers restart automatically on reboot (systemd units for testpoint & certbot - REQUIRED)
 
-
 !!! warning "podman-compose limitation with systemd containers"
  The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always` flag to function
 correctly. **podman-compose does not support this flag**, which causes containers to crash-loop after reboot with exit
@@ -641,7 +629,6 @@ systemctl status perfsonar-testpoint.service perfsonar-certbot.service --no-page
 ``` text
 
 #### 3) Obtain your first Let's Encrypt certificate (one-time)
-
 
 Use Certbot in standalone mode to obtain the initial certificates. The perfsonar-testpoint image is patched to NOT
 listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.
@@ -705,7 +692,6 @@ Check the logs to verify the SSL config was patched:
 You should see output confirming the certificate paths were updated.
 
 #### 4) Restart the certbot sidecar for automatic renewals
-
 
 Now that certificates are in place, restart the certbot sidecar to enable automatic renewals:
 
@@ -780,7 +766,6 @@ If you've already started the container and it failed, remove it before retrying
 ---
 
 ## Step 6 – Configure and Enroll in pSConfig
-
 
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
@@ -962,7 +947,6 @@ keeping your deployment current.
 
 ## Step 8 – Post-Install Validation
 
-
 Perform these checks before handing the host over to operations:
 
 1. **System services:**
@@ -1101,7 +1085,6 @@ outputs to operations:
 ## Troubleshooting
 
 ### Container Issues
-
 
 ??? failure "Container won't start or exits immediately"
 
@@ -1338,7 +1321,6 @@ ausearch -m avc -ts recent > /tmp/selinux-denials.txt
 
 ### Networking Issues
 
-
 ??? failure "Policy-based routing not working correctly"
 
 **Symptoms:** Traffic not using expected interfaces, routing to wrong gateway.
@@ -1408,7 +1390,6 @@ podman exec -it perfsonar-testpoint cat /etc/resolv.conf
 - Verify forward A/AAAA records match reverse PTR records
 
 ### Certificate Issues
-
 
 ??? failure "Let's Encrypt certificate issuance fails"
 
@@ -1487,7 +1468,6 @@ podman restart perfsonar-testpoint
 
 ### perfSONAR Service Issues
 
-
 ??? failure "perfSONAR services not running"
 
 **Symptoms:** Web interface not accessible, tests not running.
@@ -1518,7 +1498,6 @@ ticker -n 50
 - Restart container: `podman restart perfsonar-testpoint`
 
 ### Auto-Update Issues
-
 
 ??? failure "Auto-update not working"
 
@@ -1556,7 +1535,6 @@ systemctl start perfsonar-auto-update.service
 - Review script for errors and update if needed
 
 ### General Debugging Tips
-
 
 ??? tip "Useful debugging commands"
 

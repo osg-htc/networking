@@ -1,6 +1,5 @@
 # DEPRECATED: perfSONAR-extract-lsregistration.sh
 
-
 This helper script, `perfSONAR-extract-lsregistration.sh`, is deprecated and has been removed from active maintenance
 asof the quick-deploy docs release v1.0.1.
 
@@ -26,7 +25,6 @@ If you still depend on the old extractor script, please migrate to the updater-b
 therepository to discuss use cases that aren't covered.
 
 ## Contact
-
 
 If you need assistance migrating, open an issue on the repository or contact the maintainers listed in the project's
 `CHANGELOG.md` and release notes.

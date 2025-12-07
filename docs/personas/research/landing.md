@@ -9,7 +9,6 @@ tags: [architecture, research, analytics, data-pipeline]
 
 # 🔭 Researcher — Architecture & Analytics
 
-
 Understand the OSG/WLCG network monitoring system, access data, and explore insights.
 
 ---
@@ -189,7 +188,6 @@ resilience)
 ## Contributing & Development
 
 ### Adding New Measurements or Tests
-
 
 Propose new tests to the **[WLCG Mesh Configuration](https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics)**:
 

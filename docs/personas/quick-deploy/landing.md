@@ -9,13 +9,11 @@ tags: [quickstart, perfSONAR, testpoint, deployment]
 
 # 🚀 Quick Deploy — perfSONAR Testpoint
 
-
 Get a perfSONAR testpoint running on OSG/WLCG in **1-2 hours** with guided automation.
 
 ---
 
 ## Before You Start
-
 
 Understand the deployment landscape and requirements:
 
@@ -67,7 +65,6 @@ Reference: Ansible playbooks, orchestrator `--non-interactive` mode, containeriz
 
 ### Host Tuning (Optional but Recommended)
 
-
 Optimize kernel and NIC settings for network throughput:
 
 - **[Fasterdata Tuning](../../network-troubleshooting.md)** — ESnet recommendations for high-performance hosts
@@ -76,7 +73,6 @@ Optimize kernel and NIC settings for network throughput:
 
 ### Network Configuration (Multi-NIC)
 
-
 Set up policy-based routing and static IP addressing:
 
 - **[Multi-NIC Setup Guide](../../perfsonar/multiple-nic-guidance.md)** — when using multiple interfaces
@@ -84,7 +80,6 @@ Set up policy-based routing and static IP addressing:
 - Tool: `perfSONAR-pbr-nm.sh` (automatic NetworkManager configuration)
 
 ### LS Registration & Enrollment
-
 
 Register your testpoint globally and enroll in test meshes:
 
@@ -95,7 +90,6 @@ Register your testpoint globally and enroll in test meshes:
 - Tool: `perfSONAR-update-lsregistration.sh` and `perfSONAR-auto-enroll-psconfig.sh`
 
 ### Security Hardening (Optional)
-
 
 Harden your testpoint with security features:
 
@@ -108,7 +102,6 @@ Harden your testpoint with security features:
 ---
 
 ## Validation & Troubleshooting
-
 
 Once deployed, verify everything is working:
 
@@ -135,7 +128,6 @@ Once deployed, verify everything is working:
 ---
 
 ## Related Tools & Scripts
-
 
 All tools and scripts are available in the [Tools section](../../perfsonar/tools_scripts/README.md), including:
 

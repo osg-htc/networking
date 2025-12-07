@@ -80,14 +80,12 @@ command as a config file path.
 
 ### For New Installations
 
-
 No action needed - the fixed script is automatically used when running:
 
 ```bash /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh --with-certbot
 ```text
 
 ### For Existing Deployments with Failing Certbot Service
-
 
 If you're experiencing the certbot service failure, update to the fixed version:
 
@@ -117,7 +115,6 @@ systemctl status perfsonar-certbot.service podman ps | grep certbot
 ``` text
 
 ## Verification
-
 
 After applying the fix, verify both services are working correctly:
 
@@ -153,7 +150,6 @@ journalctl -u perfsonar-certbot.service -n 20
 
 ## Reboot Persistence Test
 
-
 To confirm the fix resolves the reboot persistence issue:
 
 ```
@@ -174,11 +170,9 @@ systemctl status perfsonar-testpoint.service perfsonar-certbot.service podman ps
 
 ## Breaking Changes
 
-
 None. This is a backward-compatible bug fix.
 
 ## Known Issues
-
 
 None at this time.
 

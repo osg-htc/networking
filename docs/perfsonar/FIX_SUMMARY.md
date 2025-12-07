@@ -2,7 +2,6 @@
 
 ## Problem
 
-
 After a host reboot, podman-compose containers for perfSONAR testpoint did not restart automatically because there wasno
 systemd service to manage them. Additionally, the deployed docker-compose.yml configuration had issues that caused the
 testpoint container to enter a restart loop.
@@ -71,7 +70,6 @@ A new helper script automates the installation and configuration of the systemd 
 
 **Usage**:
 
-
 ``` bash sudo bash install-systemd-service.sh [/opt/perfsonar-tp]
 ``` text
 
@@ -139,7 +137,6 @@ A complete Ansible playbook for automated deployment of perfSONAR testpoint cont
 
 ### Local System (/opt/perfsonar-tp)
 
-
 ✅ Systemd service created and enabled ✅ Containers starting successfully ✅ perfSONAR testpoint responding on
 <https://localhost/> ✅ Service will survive reboots (enabled in systemd)
 
@@ -167,11 +164,9 @@ journalctl -u perfsonar-testpoint -f
 
 ## Next Steps for Deployment
 
-
 To apply these fixes to other perfSONAR testpoint deployments:
 
 1. **Manual deployment**:
-
 
 ``` bash curl -fsSL <https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install->
 systemd-service.sh \ -o /tmp/install-systemd-service.sh
@@ -180,7 +175,6 @@ sudo bash /tmp/install-systemd-service.sh /opt/perfsonar-tp
 ```
 
 1. **Automated deployment with Ansible**:
-
 
 ``` bash ansible-playbook -i inventory ansible/playbooks/deploy-testpoint-container.yml
 ``` text
@@ -193,14 +187,12 @@ sudo bash /tmp/install-systemd-service.sh /opt/perfsonar-tp
 
 ## Benefits
 
-
 ✅ **Automatic restart after reboot** - Containers will always start when the host boots ✅ **Service management** -
 Standard systemctl commands for start/stop/restart ✅ **Logging** - Centralized logs via journalctl ✅ **Reliability** -
 Automatic restart on failure ✅ **Automation** - Ansible playbook for consistent deployments ✅ **Documentation** -
 Clearinstructions for users
 
 ## Conclusion
-
 
 The perfSONAR testpoint container restart issue has been fully resolved. The systemd service is now managing
 thecontainers, ensuring they restart automatically after host reboots. Documentation and automation scripts have been

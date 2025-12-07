@@ -15,7 +15,6 @@ trafficcontrol (`tc`).
 
 ## The Problem: Data Rate Bottlenecks and Packet Loss
 
-
 When transferring data across a network, the effective throughput is limited by the **minimum of three factors**:
 
 1. **Source host read rate** — How fast the sending host can read data from storage/memory
@@ -70,12 +69,10 @@ When transferring data across a network, the effective throughput is limited by 
 
 ## How Packet Pacing Works
 
-
 Packet pacing solves this problem by **controlling the rate at which packets leave the source host**, ensuring
 thereceiver is never overwhelmed and can process packets at a sustainable rate.
 
 ### Mechanism: Fair Queuing (FQ) Qdisc
-
 
 Modern Linux (kernel 3.11+) includes the **Fair Queuing (FQ)** scheduler, which implements sophisticated packet pacing.
 The FQ qdisc:
@@ -98,7 +95,6 @@ For DTN and high-speed data transfer, **FQ is recommended over FQ_CODEL**.
 
 ### Rate Limiting with Token Bucket Filter (TBF)
 
-
 The **Token Bucket Filter (TBF)** qdisc enforces a maximum rate limit by:
 
 * **Accumulating tokens** at a configured rate (e.g., 2 Gbps)
@@ -115,7 +111,6 @@ wecalculate burst as 1-2ms worth of packets at the target rate.
 ---
 
 ## Why Packet Pacing Works: ESnet Research Results
-
 
 ESnet's performance testing with Berkeley Lab and others has demonstrated significant improvements from packet pacing:
 
@@ -163,7 +158,6 @@ ESnet's performance testing with Berkeley Lab and others has demonstrated signif
 
 ### Rule of Thumb: 80-90% of NIC Speed
 
-
 For a DTN with **N parallel streams**, divide available bandwidth accordingly:
 
 | Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Command | |---|---|---|---| | 10G | 4 | 2 Gbps |
@@ -186,11 +180,9 @@ maxrate 5gbit` | | 100G | 8 | 10-12 Gbps | `tc qdisc add dev eth0 root fq maxrat
 
 ## Implementation: Using fasterdata-tuning.sh
 
-
 The `fasterdata-tuning.sh` script includes automated packet pacing configuration for DTN nodes.
 
 ### Audit Current State
-
 
 Check what pacing rates are recommended for your DTN:
 
@@ -204,7 +196,6 @@ Output shows:
 * Recommended default rate: 2 Gbps (2000mbps)
 
 ### Apply Packet Pacing
-
 
 Apply packet pacing with default 2 Gbps rate:
 
@@ -228,7 +219,6 @@ Examples:
 
 ### Dry-Run Preview
 
-
 Preview what would be applied without making changes:
 
 ``` bash sudo fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --dry-run
@@ -237,7 +227,6 @@ Preview what would be applied without making changes:
 Output shows the exact `tc` commands that would be executed on each interface.
 
 ### Burst Size Calculation
-
 
 The script automatically calculates burst size as 1 millisecond worth of packets:
 
@@ -257,7 +246,6 @@ Burst is clamped to safe bounds:
 
 ## Manual Configuration with `tc` Command
 
-
 If you prefer to configure packet pacing manually, use the `tc` command directly:
 
 ### Check Current Qdisc
@@ -266,7 +254,6 @@ If you prefer to configure packet pacing manually, use the `tc` command directly
 ``` text
 
 ### Set Fair Queuing with Pacing
-
 
 Replace `eth0` with your actual interface name:
 
@@ -284,7 +271,6 @@ Replace `eth0` with your actual interface name:
 ```
 
 ### Using Token Bucket Filter (TBF) Instead
-
 
 For more granular control, use TBF instead of FQ:
 
@@ -317,7 +303,6 @@ tc qdisc show dev eth0
 
 ## Test with iperf3
 
-
 iperf3 supports FQ-based pacing via the `--fq-rate` option:
 
 ```bash
@@ -335,7 +320,6 @@ Expected improvement: 10-50% higher throughput with pacing on long paths.
 
 ## Test with perfSONAR pscheduler
 
-
 perfSONAR's pscheduler also supports pacing. Check your perfSONAR configuration for pacing-aware tests.
 
 ---
@@ -347,7 +331,6 @@ perfSONAR's pscheduler also supports pacing. Check your perfSONAR configuration 
 **Symptom**: `tc qdisc show` shows `qdisc mq` instead of `qdisc fq`
 
 **Solution**: Ensure `/etc/sysctl.conf` contains:
-
 
 ``` bash net.core.default_qdisc = fq sysctl -p
 ``` text
@@ -376,7 +359,6 @@ Then reapply pacing with `fasterdata-tuning.sh` or `tc` command.
 
 **Solution**: The `fasterdata-tuning.sh` apply mode creates a systemd service for persistence. Enable it:
 
-
 ``` bash sudo systemctl enable ethtool-persist.service sudo systemctl start ethtool-persist.service
 ```
 
@@ -400,7 +382,6 @@ Verify:
 ---
 
 ## Advanced: Per-Application Pacing
-
 
 If you need finer control than host-level pacing, applications can set pacing rates using the `SO_MAX_PACING_RATE`
 socket option:
@@ -475,7 +456,6 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 
 **Recommended Configuration for 10G DTN with 4 parallel streams**:
 
-
 ``` bash sudo fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 2gbps
 ``` text
 
@@ -484,6 +464,5 @@ SO_MAX_PACING_RATE, &pacing_rate, sizeof(pacing_rate));
 ---
 
 ### Last Updated: December 2025
-
 
 References: ESnet Fasterdata, Linux kernel tc documentation

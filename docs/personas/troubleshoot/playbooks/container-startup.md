@@ -6,7 +6,6 @@ tags: [troubleshoot, container, docker, podman]
 
 ## Playbook: Container Won't Start
 
-
 !!! info "Status" This playbook is a placeholder for the [troubleshooter persona](../landing.md). Detailed step-by-step
 diagnostics coming soon.
 
@@ -69,7 +68,6 @@ Common errors:
 - **Disk space:** `df -h /var/lib/podman` or `/var/lib/docker`
 
 ### Step 4: Escalate
-
 
 If the above doesn't resolve the issue, collect:
 

@@ -4,7 +4,6 @@
 
 ### Summary
 
-
 Applied `docs/tools/link_mapping.json` to replace BROKEN-LINK markers with updated targets. Backups were created under
 `docs/.link_check_backups/`. This branch contains changes to documentation where broken links were replaced with mapped
 targets or annotated when the resource requires authentication.
@@ -32,7 +31,6 @@ targets or annotated when the resource requires authentication.
 - Mailto entries were handled according to the mapping; the applier was run with `--remove-mailto` earlier to remove leftover mailto links, and mapping can re-add them if desired.
 
 ### Backups
-
 
 Each modified file has a timestamped backup under `docs/.link_check_backups/` with suffix `.bak.YYYYMMDDTHHMMSSZ`.
 

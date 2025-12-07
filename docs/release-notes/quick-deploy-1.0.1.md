@@ -1,6 +1,5 @@
 # Quick Deploy documentation — v1.0.1
 
-
 Release date: 2025-11-08
 
 This release contains small but important documentation fixes and housekeeping for the Quick Deploy guide.

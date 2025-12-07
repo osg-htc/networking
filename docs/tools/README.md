@@ -1,6 +1,5 @@
 # Link-check tools
 
-
 This folder contains utilities to check and optionally clean up broken links in the `docs/` tree.
 
 find_and_remove_broken_links.py
