@@ -42,13 +42,11 @@ First, install your chosen EL9 operating system on your host after saving you lo
 The following options are then recommended to install perfSONAR for OSG/WLCG:
 
 | Installation method              | Link |
-|----------------------------------|----------------------------------------------------------------------------------
--------| | Toolkit bundle installation | [Toolkit Installation Quick
+|----------------------------------|----------------------------------------------------------------------------------|
+| Toolkit bundle installation      | [Toolkit Installation Quick Start](https://docs.perfsonar.net/install_quick_start.html) |
+| Testpoint bundle installation    | Follow quick start above but do `dnf install perfsonar-testpoint` instead of toolkit |
 
-Start](https://docs.perfsonar.net/install_quick_start.html)      | | Testpoint bundle installation | Follow quick start
-above but do 'dnf install perfsonar-testpoint' instead of toolkit       |
-
-You can see more details about EL supported installs at <<https://docs.perfsonar.net/install_el.html>>
+You can see more details about EL supported installs at <https://docs.perfsonar.net/install_el.html>
 
 !!! note
 
@@ -185,8 +183,7 @@ filling the information please follow those simple guidelines:
 
 * GOCDB screen shot for creating a Service Endpoint:
 
-<img src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" alt="GOCDB screen shot for creating a Service Endpoint"
-width="1024">
+![GOCDB screen shot for creating a Service Endpoint](../../img/Screen_shot_2013-02-19_at_15.26.52.png)
 
 ### Register perfSONAR in OSG Topology
 
