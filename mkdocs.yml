@@ -41,6 +41,11 @@ nav:
     - 'Triage Checklist': 'personas/troubleshoot/triage-checklist.md'
     - 'Network Troubleshooting Guide': 'network-troubleshooting.md'
     - 'OSG Debugging Document': 'network-troubleshooting/osg-debugging-document.md'
+    - Playbooks:
+      - 'Container Startup Issues': 'personas/troubleshoot/playbooks/container-startup.md'
+      - 'Tests Not Running': 'personas/troubleshoot/playbooks/tests-not-running.md'
+      - 'Performance Issues': 'personas/troubleshoot/playbooks/performance-issues.md'
+      - 'Firewall & Network Access': 'personas/troubleshoot/playbooks/firewall-issues.md'
   - Network Services & Data:
     - 'Infrastructure Monitoring (PSETF)': 'perfsonar/psetf.md'
     - 'Network Datastore': 'osg-network-services.md'
@@ -58,6 +63,7 @@ nav:
       - 'SELinux': 'features/selinux.md'
       - 'nftables': 'features/nftables.md'
     - 'Architecture': 'personas/research/architecture.md'
+    - 'Quick Reference': 'quick-reference.md'
     - Release Notes:
       - 'v1.4.0': 'release-notes/quick-deploy-1.4.0.md'
       - 'v1.3.0': 'release-notes/quick-deploy-1.3.0.md'
