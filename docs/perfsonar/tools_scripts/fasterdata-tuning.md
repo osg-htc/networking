@@ -33,7 +33,7 @@ To verify the script integrity, compare the downloaded script with the provided 
 htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh curl -L -o /tmp/fasterdata-tuning.sh.sha256
 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
 sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
-```
+``` text
 
 ## Why use this script?
 
@@ -57,7 +57,7 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
 
 After running the script (audit or apply), verify key settings:
 
-``` text
+```
 
 # Sysctl
 
@@ -75,7 +75,7 @@ ethtool -k <iface> # offload features ethtool -g <iface> # ring buffer sizes tc 
 
 cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 
-```
+``` text
 
 ## Security & Safety
 
@@ -89,41 +89,41 @@ cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
 
-``` text
+```
 
 Apply tuning (requires root):
 
-```
+``` text
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
 
-``` text
+```
 
 Limit apply to specific NICs (comma-separated):
 
-```
+``` text
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces
 "ens1f0np0,ens1f1np1"
 
-``` text
+```
 
 Apply packet pacing to DTN nodes (limit traffic to 5 Gbps):
 
-```
+``` text
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-
 pacing-rate 5gbps
 
-``` text
+```
 
 Audit without applying changes (DTN target with custom pacing rate):
 
-```
+``` text
 
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
 
-``` text
+```
 
 Notes -----
 
@@ -155,20 +155,20 @@ Optional apply flags (use with `--mode apply`):
 
 Example (preview only):
 
-```
+``` text
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 
-``` text
+```
 
 To actually apply and pass specific IOMMU args:
 
-```
+``` text
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on
 iommu=pt" --yes
 
-``` text
+```
 
 ## Reference and source
 

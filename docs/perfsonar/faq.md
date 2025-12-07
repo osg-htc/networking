@@ -4,7 +4,8 @@ Here we will provide details on troubleshooting perfSONAR installations for OSG 
 configuration options and a FAQ.
 
 A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and isolate
-network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/>
+network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-
+quick-reference-guide/>
 
 We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) page to guide users in identifying and
 following up on network problems.
@@ -19,34 +20,43 @@ We recommend using Let's Encrypt (see <https://letsencrypt.org>). There is a tut
 #### A quick set of steps
 
 ```bash
+
 # 0. Install certbot with yum/dnf/snap
+
 yum install certbot python3-certbot-apache
 
 # 1. Ensure port 80/443 is available
-systemctl stop firewalld
-systemctl stop httpd
+
+systemctl stop firewalld systemctl stop httpd
 
 # 2. Dry-run test
+
 certbot certonly --standalone --preferred-challenges http --dry-run
 
 # 3. Obtain the certificate
+
 certbot certonly --standalone --preferred-challenges http
 
 # 4. Restart services
-systemctl start firewalld
-systemctl start httpd
+
+systemctl start firewalld systemctl start httpd
 
 # 5. Note: Certificates are under /etc/letsencrypt/
 
 # 6. Update Apache SSL config (e.g., /etc/httpd/conf.d/ssl.conf):
+
 #    SSLCertificateFile /etc/letsencrypt/live/FQDN/cert.pem
+
 #    SSLCertificateKeyFile /etc/letsencrypt/live/FQDN/privkey.pem
+
 #    SSLCertificateChainFile /etc/letsencrypt/live/FQDN/fullchain.pem
 
 # 7. Renew certificates
+
 certbot renew --dry-run
 
 # 8. Optional: Consider donating to Let's Encrypt for support
+
 ```
 
 Thanks to Raul Lopes for these details!
@@ -98,9 +108,11 @@ httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS
 
 * **perfSONAR json summary** is failing
 
+
 ``` text
 
 * This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
+
 
 ```
 

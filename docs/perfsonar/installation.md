@@ -43,8 +43,9 @@ The following options are then recommended to install perfSONAR for OSG/WLCG:
 
 | Installation method              | Link |
 |----------------------------------|----------------------------------------------------------------------------------|
-| Toolkit bundle installation      | [Toolkit Installation Quick Start](https://docs.perfsonar.net/install_quick_start.html) |
-| Testpoint bundle installation    | Follow quick start above but do `dnf install perfsonar-testpoint` instead of toolkit |
+| Toolkit bundle installation      | [Toolkit Installation Quick
+Start](https://docs.perfsonar.net/install_quick_start.html) | | Testpoint bundle installation    | Follow quick start
+above but do `dnf install perfsonar-testpoint` instead of toolkit |
 
 You can see more details about EL supported installs at <https://docs.perfsonar.net/install_el.html>
 
@@ -53,7 +54,7 @@ You can see more details about EL supported installs at <https://docs.perfsonar.
 ```text In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility
 that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates
 quickly applied.
-```
+``` text
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:
@@ -64,11 +65,13 @@ described in the official guide:
 
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
 
-``` text
+
+```
 
 * For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` replacing `<FQDN>` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
 
-```
+
+``` text
 
 ```json === pScheduler Agent === [ { "url" : "<https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org">
 "configure-archives" : true } ]
@@ -82,7 +85,7 @@ described in the official guide:
 
 ```text Until your host is added on <https://psconfig.opensciencegrid.org> to one or more meshes by an administrator the
 automesh configuration above will not return any tests.
-```
+``` text
 
 * We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
 
@@ -105,7 +108,8 @@ In case you'd like to manually update the node please follow the official
 [guide](http://docs.perfsonar.net/manage_update.html).
 
 Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but
-there are some community driven projects that could be helpful, such as [HEP-Puppet](<http://github.com/HEP-Puppet/perfsonar>). As perfSONAR manages most of its configuration automatically via packages and there is very little
+there are some community driven projects that could be helpful, such as [HEP-Puppet](<http://github.com/HEP-
+Puppet/perfsonar>). As perfSONAR manages most of its configuration automatically via packages and there is very little
 initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary
 interventions after auto-updates.
 
@@ -133,7 +137,7 @@ network administrators to debug network issues.
 !!! warning
 
 ```text If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
-```
+``` text
 
 ### Enabling SNMP plugins
 
@@ -158,7 +162,8 @@ filling the information please follow those simple guidelines:
 
 * For each form (service type) fill at least:
 
-``` text
+
+```
 
 * Hosting Site
 
@@ -170,7 +175,8 @@ filling the information please follow those simple guidelines:
 
 * Description (optional label used in MaDDash; keep short and unique)
 
-```
+
+``` text
 
 * Check "N" when asked "Is it a beta service"
 
