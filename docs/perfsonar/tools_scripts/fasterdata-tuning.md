@@ -15,14 +15,14 @@ You can download the script directly from the website or GitHub raw URL and inst
 
 # Download via curl to a system location and make it executable
 
-sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh <https://raw.githubusercontent.com/osg-
-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh> sudo chmod +x /usr/local/bin/fasterdata-
-tuning.sh
+sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh
+<https://raw.githubusercontent.com/osghtc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh> sudo
+chmod +x /usr/local/bin/fasterdata- tuning.sh
 
 # Or download directly from the site (if published):
 
-sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh <https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-
-tuning.sh> sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
+sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh <https://osg-
+htc.org/networking/perfsonar/tools_scripts/fasterdatatuning.sh> sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 ```
 
 ## Verify the checksum
@@ -69,7 +69,7 @@ tuned-adm active || echo "tuned-adm not present"
 
 # Per NIC checks
 
-ethtool -k  # offload features ethtool -g  # ring buffer sizes tc qdisc show dev 
+ethtool -k  # offload features ethtool -g  # ring buffer sizes tc qdisc show dev
 
 # Verify IOMMU in kernel cmdline
 

@@ -51,7 +51,7 @@ You can see more details about EL supported installs at <https://docs.perfsonar.
 
 !!! note
 
-```text In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility
+``` text In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility
 that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates
 quickly applied.
 ``` text
@@ -65,7 +65,6 @@ described in the official guide:
 
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
 
-
 ```
 
 * For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` replacing `<FQDN>` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
@@ -73,7 +72,7 @@ described in the official guide:
 
 ``` text
 
-```json === pScheduler Agent === [ { "url" : "<https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org">
+``` json === pScheduler Agent === [ { "url" : "<https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org">
 "configure-archives" : true } ]
 ```
 
@@ -83,8 +82,8 @@ described in the official guide:
 
 !!! note
 
-```text Until your host is added on <https://psconfig.opensciencegrid.org> to one or more meshes by an administrator the
-automesh configuration above will not return any tests.
+``` text Until your host is added on <https://psconfig.opensciencegrid.org> to one or more meshes by an administrator
+the automesh configuration above will not return any tests.
 ``` text
 
 * We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
@@ -108,10 +107,10 @@ In case you'd like to manually update the node please follow the official
 [guide](http://docs.perfsonar.net/manage_update.html).
 
 Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but
-there are some community driven projects that could be helpful, such as [HEP-Puppet](<http://github.com/HEP-
-Puppet/perfsonar>). As perfSONAR manages most of its configuration automatically via packages and there is very little
-initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary
-interventions after auto-updates.
+there are some community driven projects that could be helpful, such as [HEP-
+Puppet](<http://github.com/HEPPuppet/perfsonar>). As perfSONAR manages most of its configuration automatically via
+packages and there is very little initial configuration needed, we suggest to keep automated configuration to the
+minimum necessary to avoid unncessary interventions after auto-updates.
 
 ### Security Considerations
 
@@ -124,7 +123,7 @@ site or host firewalls.   An overview of perfSONAR security is available at
 
 !!! warning
 
-```text All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by
+``` text All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by
 pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
 ```
 
@@ -136,7 +135,7 @@ network administrators to debug network issues.
 
 !!! warning
 
-```text If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
+``` text If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
 ``` text
 
 ### Enabling SNMP plugins
@@ -161,7 +160,6 @@ filling the information please follow those simple guidelines:
 * There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).
 
 * For each form (service type) fill at least:
-
 
 ```
 
