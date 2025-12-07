@@ -1,7 +1,6 @@
 # Fasterdata Host & Network Tuning (EL9)
 
-This page documents `fasterdata-tuning.sh`, a script that audits and optionally applies ESnet Fasterdata-inspired host
-and NIC tuning recommendations for Enterprise Linux 9.
+This page documents `fasterdata-tuning.sh`, a script that audits and optionally applies ESnet Fasterdata-inspired hostand NIC tuning recommendations for Enterprise Linux 9.
 
 Script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
@@ -172,8 +171,7 @@ To actually apply and pass specific IOMMU args:
 
 ``` text
 
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on
-iommu=pt" --yes
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=oniommu=pt" --yes
 
 ```
 
