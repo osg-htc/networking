@@ -97,13 +97,13 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 
 - **Interfaces** (per NIC, scaled by link speed):
 
-    - Set `txqueuelen` to ≥ 10k (measurement) or ≥ 12k (dtn); 20k/25k for 100Gbps
+  - Set `txqueuelen` to ≥ 10k (measurement) or ≥ 12k (dtn); 20k/25k for 100Gbps
 
-    - Set RX/TX rings to driver max (if reported)
+  - Set RX/TX rings to driver max (if reported)
 
-    - Enable GRO/GSO/TSO and checksums; disable LRO
+  - Enable GRO/GSO/TSO and checksums; disable LRO
 
-    - Replace qdisc with `fq`
+  - Replace qdisc with `fq`
 
 ### Output and logs
 
@@ -228,41 +228,41 @@ Values shown below are baseline (1Gbps). The script scales them by fastest NIC s
 
 - Sysctl
 
-    - `net.core.rmem_max`/`wmem_max`: 536M–1G (measurement); 1G (dtn at 100Gbps)s)
+  - `net.core.rmem_max`/`wmem_max`: 536M–1G (measurement); 1G (dtn at 100Gbps)s)
 
-    - `net.core.rmem_default`/`wmem_default`: 128M
+  - `net.core.rmem_default`/`wmem_default`: 128M
 
-    - `net.core.netdev_max_backlog`: 250k–500k (measurement); 250k–600k (dtn)
+  - `net.core.netdev_max_backlog`: 250k–500k (measurement); 250k–600k (dtn)
 
-    - `net.core.default_qdisc`: `fq`
+  - `net.core.default_qdisc`: `fq`
 
-    - `net.ipv4.tcp_rmem`: `4096 87380 536870912`
+  - `net.ipv4.tcp_rmem`: `4096 87380 536870912`
 
-    - `net.ipv4.tcp_wmem`: `4096 65536 536870912`
+  - `net.ipv4.tcp_wmem`: `4096 65536 536870912`
 
-    - `net.ipv4.tcp_congestion_control`: `bbr` (or `cubic` if `bbr` absent)
+  - `net.ipv4.tcp_congestion_control`: `bbr` (or `cubic` if `bbr` absent)
 
-    - `net.ipv4.tcp_mtu_probing`: `1`
+  - `net.ipv4.tcp_mtu_probing`: `1`
 
-    - `net.ipv4.tcp_window_scaling`: `1`
+  - `net.ipv4.tcp_window_scaling`: `1`
 
-    - `net.ipv4.tcp_timestamps`: `1`
+  - `net.ipv4.tcp_timestamps`: `1`
 
-    - `net.ipv4.tcp_sack`: `1`
+  - `net.ipv4.tcp_sack`: `1`
 
-    - `net.ipv4.tcp_low_latency`: `0`
+  - `net.ipv4.tcp_low_latency`: `0`
 
 - Tuned: `tuned-adm profile network-throughput`
 
 - Interfaces
 
-    - `txqueuelen` ≥ 10000
+  - `txqueuelen` ≥ 10000
 
-    - RX/TX rings at driver max (`ethtool -g` / `-G`)
+  - RX/TX rings at driver max (`ethtool -g` / `-G`)
 
-    - GRO/GSO/TSO on; checksums on; LRO off
+  - GRO/GSO/TSO on; checksums on; LRO off
 
-    - qdisc `fq` (root)
+  - qdisc `fq` (root)
 
 ## Verification after tuning
 
@@ -366,6 +366,6 @@ To manually update this service, re-run the script with `--mode apply` to regene
 
 - NIC ethtool changes do not persist by default; consider:
 
-    - running this script from a boot-time systemd unit, or
+  - running this script from a boot-time systemd unit, or
 
-    - translating the settings into your network manager configuration
+  - translating the settings into your network manager configuration

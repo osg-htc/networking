@@ -177,9 +177,9 @@ To apply these fixes to other perfSONAR testpoint deployments:
 
 1. **Fix existing deployments with restart issues**:
 
-   - Update docker-compose.yml to recommended configuration
+  - Update docker-compose.yml to recommended configuration
 
-   - Restart the perfsonar-testpoint service
+    - Restart the perfsonar-testpoint service
 
 ## Benefits
 

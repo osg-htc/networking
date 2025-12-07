@@ -209,15 +209,15 @@ nft list table filter
 
 1. **Contact your campus network team** with:
 
-   - Your testpoint IP address
+  - Your testpoint IP address
 
-   - List of remote perfSONAR testpoints you need to reach
+    - List of remote perfSONAR testpoints you need to reach
 
    - Required ports: 443 (primary), 5001/8080 (secondary)
 
 1. **Provide them:** OSG/WLCG mesh documentation
 
-   - List available at: `psconfig.opensciencegrid.org`
+  - List available at: `psconfig.opensciencegrid.org`
 
 1. **Verify after firewall changes:**
 

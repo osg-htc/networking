@@ -82,7 +82,7 @@ bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target mea
 
 Apply tuning (requires root):
 
-```bash
+```
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
 
@@ -90,7 +90,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 
 Limit apply to specific NICs (comma-separated):
 
-```bash
+```
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces
 "ens1f0np0,ens1f1np1"
@@ -99,7 +99,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 
 Apply packet pacing to DTN nodes (limit traffic to 5 Gbps):
 
-```bash
+```
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-
 pacing-rate 5gbps
@@ -108,7 +108,7 @@ pacing-rate 5gbps
 
 Audit without applying changes (DTN target with custom pacing rate):
 
-```bash
+```
 
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
 
@@ -133,7 +133,7 @@ Optional apply flags (use with `--mode apply`):
 - `--dry-run`: Preview the exact GRUB, sysctl, tc, and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.
 Example (preview only):
 
-```bash
+```
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 
@@ -141,7 +141,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply
 
 To actually apply and pass specific IOMMU args:
 
-```bash
+```
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on
 iommu=pt" --yes

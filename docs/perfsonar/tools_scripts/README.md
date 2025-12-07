@@ -280,17 +280,17 @@ bash perfSONAR-pbr-nm.sh --yes
 
 - Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.
 
-    - IPv4: subnets are checked in bash; one unambiguous match is required.
+  - IPv4: subnets are checked in bash; one unambiguous match is required.
 
-    - IPv6: requires `python3` (`ipaddress` module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.
+  - IPv6: requires `python3` (`ipaddress` module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.
 
-    - If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.
+  - If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.
 
 - This inference runs in two places:
 
-    1. During auto-generation (`--generate-config-auto` or `--generate-config-debug`) so the written config can be immediately useful.
+  1. During auto-generation (`--generate-config-auto` or `--generate-config-debug`) so the written config can be immediately useful.
 
-    1. During normal execution after loading the config but before validation, so missing gateways may be filled automatically.
+  1. During normal execution after loading the config but before validation, so missing gateways may be filled automatically.
 
 Example: generated config with inferred gateways
 

@@ -36,14 +36,14 @@ The perfSONAR team has documented the types of installations supported at
 <https://docs.perfsonar.net/install_options.html>.   With the release of version 5, OSG/WLCG sites have a new option:
 instead of installing the full Toolkit sites can choose to install the Testpoint bundle.
 
-    * Pros
+* Pros
 
         ```text
 * Simpler deployment when a local web interface is not needed and a central measurement archive is available.
 * Less resource intensive for both memory and I/O capacity.
     ```
 
-    * Cons
+* Cons
 
         ```text
 * Measurements are not stored locally

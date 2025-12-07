@@ -45,15 +45,17 @@ def normalize_list_marker(line):
 
 def add_fence_language(fence_line, inner_lines):
     # If fence_line already has a language, keep it
-    if re.match(r"^\s*(`{3,}|~{3,})\w+", fence_line):
+    # allow optional whitespace between fence and language
+    if re.match(r"^\s*(`{3,}|~{3,})\s*\w+", fence_line):
         return fence_line
     # If inner lines look like shell commands, use 'bash'
     shell_sig = re.compile(r"^(\s*[$#]|\s*(sudo|curl|systemctl|podman|dnf|ls|ip|nmcli|pscheduler|psconfig|sed|awk|grep|cat)\b)")
     for l in inner_lines[:6]:
         if shell_sig.search(l):
-            return fence_line + 'bash'
+            # include a single space before the language if missing
+            return fence_line.rstrip() + ' bash'
     # default to 'text' to satisfy markdownlint
-    return fence_line + 'text'
+    return fence_line.rstrip() + ' text'
 
 
 def wrap_paragraph(text, width=120):
@@ -94,6 +96,27 @@ def format_file(path):
         fm_closed = False
 
     i = 0
+    # Pre-scan file to detect base list indentation used in this file (skip frontmatter and fenced blocks)
+    base_indent = None
+    scan_in_fence = False
+    for ln in lines:
+        l = ln.rstrip('\n')
+        if l.strip() == '---' and lines.index(ln) == 0:
+            # simplistic frontmatter skip: ignore first '---'
+            continue
+        if is_fence(l):
+            scan_in_fence = not scan_in_fence
+            continue
+        if scan_in_fence:
+            continue
+        if is_list_item(l):
+            mm = re.match(r"^(\s*)([-*+]|\d+\.)\s+", l)
+            if mm:
+                indent = len(mm.groups()[0])
+                if base_indent is None or indent < base_indent:
+                    base_indent = indent
+    if base_indent is None:
+        base_indent = 0
     # We'll produce new_lines with paragraph wrapping post-processing
     new_lines = []
     while i < len(lines):
@@ -154,6 +177,8 @@ def format_file(path):
 
         # headings: ensure blank line before; will ensure one blank after too by handling next iteration
         if is_heading(line):
+            # strip leading whitespace before a heading so it starts on column 0
+            line = line.lstrip()
             if new_lines and new_lines[-1].strip() != '':
                 new_lines.append('')
             new_lines.append(line.rstrip())
@@ -187,9 +212,26 @@ def format_file(path):
                     if ln.strip() != '':
                         prev_non_empty = ln
                         break
-                # If any indent >= 4, reduce to 2 (avoid excessive indent levels)
-                if indent_len >= 4:
-                    new_indent = ' ' * 2
+                # Determine the previous list indent to align this item with
+                prev_indent = 0
+                if prev_non_empty and is_list_item(prev_non_empty):
+                    pm = re.match(r"^(\s*)([-*+]|\d+\.)\s+(.*)$", prev_non_empty)
+                    if pm:
+                        prev_indent = len(pm.groups()[0])
+                # If indentation is too large, reduce to prev_indent + 2
+                if indent_len >= prev_indent + 4:
+                    new_indent = ' ' * (prev_indent + 2)
+                    normalized = f"{new_indent}{marker} {rest}"
+                # If indentation suggests nested list but not aligned, align to prev + 2
+                elif indent_len > prev_indent and indent_len != prev_indent + 2:
+                    new_indent = ' ' * (prev_indent + 2)
+                    normalized = f"{new_indent}{marker} {rest}"
+                # Align the indentation to the file's base indent if this is a top-level list under a heading
+                # If the previous non-empty element is a heading, align to base_indent
+                if prev_non_empty and (is_heading(prev_non_empty) or prev_non_empty.strip() == '' or not is_list_item(prev_non_empty)):
+                    desired_indent = base_indent
+                    if indent_len != desired_indent:
+                        normalized = f"{' ' * desired_indent}{marker} {rest}"
                 elif indent_len == 1:
                     # adjust 1-space indent to 0
                     new_indent = ''
@@ -233,6 +275,32 @@ def format_file(path):
         new_lines.pop()
 
     final = '\n'.join(new_lines) + '\n'
+    # Final pass: ensure opening fences have a language; this targets lines like '```' or '   ```' where no
+    # language is specified. We only set a language for opening fences (not closing ones) by examining the
+    # next non-empty line.
+    def ensure_fence_languages(s):
+        # Only add languages to opening fence lines (not closing ones) by toggling in_fence state.
+        out_lines_local = []
+        lines_local = s.split('\n')
+        in_f = False
+        fence_open_re = re.compile(r"^(\s*)(`{3,}|~{3,})\s*(\w+)?\s*$")
+        for l in lines_local:
+            m = fence_open_re.match(l)
+            if m:
+                indent, fence_chars, lang = m.groups()
+                if not in_f:
+                    # opening fence; ensure a language is present
+                    if not lang:
+                        l = f"{indent}{fence_chars} text"
+                    in_f = True
+                else:
+                    # closing fence; strip any language so it remains a bare fence
+                    l = f"{indent}{fence_chars}"
+                    in_f = False
+            out_lines_local.append(l)
+        return '\n'.join(out_lines_local)
+
+    final = ensure_fence_languages(final)
     with open(path, 'r', encoding='utf-8') as fh:
         original = fh.read()
     if final != original:

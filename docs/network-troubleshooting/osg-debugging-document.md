@@ -484,7 +484,7 @@ BWCTL is invoked from the command line with a number of options.  Of these the f
 
 -
 
-  - **-f**  - Sets the format, supply either a byte based metric (K, M, G) or a bit based metric (k, m, g).
+- **-f**  - Sets the format, supply either a byte based metric (K, M, G) or a bit based metric (k, m, g).
 
   - **–t** – Sets the length of the test in seconds
 

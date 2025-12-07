@@ -271,7 +271,7 @@ If you want the container to use a specific NIC, adjust the docker-compose.syste
 
 Check containers:
 
-```bash
+```
 
 podman ps
 
@@ -283,7 +283,7 @@ docker ps
 
 Check logs:
 
-```bash
+```
 
 podman logs perfsonar-testpoint
 
@@ -297,7 +297,7 @@ Test connectivity between testpoints.
 
 To register your testpoint with a central config:
 
-```bash
+```
 
 podman exec -it perfsonar-testpoint psconfig remote list podman exec -it perfsonar-testpoint psconfig remote
 --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"

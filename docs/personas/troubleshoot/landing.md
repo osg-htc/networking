@@ -163,7 +163,7 @@ Quick checks:
 
 - **OSG sites:** [GOC Support Ticket](https://support.opensciencegrid.org/support/home)
 
-    - Include: hostname, triage checklist results, error messages, logs
+  - Include: hostname, triage checklist results, error messages, logs
 
 - **WLCG sites:** [GGUS Ticket](https://ggus.eu/) → "WLCG Network Throughput" or "WLCG perfSONAR support"
 
