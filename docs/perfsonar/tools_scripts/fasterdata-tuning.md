@@ -29,7 +29,7 @@ tuning.sh> sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 
 To verify the script integrity, compare the downloaded script with the provided SHA256 checksum file in this repo:
 
-```bash curl -L -o /tmp/fasterdata-tuning.sh <https://raw.githubusercontent.com/osg->
+``` bash curl -L -o /tmp/fasterdata-tuning.sh <https://raw.githubusercontent.com/osg->
 htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh curl -L -o /tmp/fasterdata-tuning.sh.sha256
 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
 sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
@@ -69,7 +69,7 @@ tuned-adm active || echo "tuned-adm not present"
 
 # Per NIC checks
 
-ethtool -k <iface> # offload features ethtool -g <iface> # ring buffer sizes tc qdisc show dev <iface>
+ethtool -k  # offload features ethtool -g  # ring buffer sizes tc qdisc show dev 
 
 # Verify IOMMU in kernel cmdline
 
