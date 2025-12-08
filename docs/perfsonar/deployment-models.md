@@ -82,6 +82,8 @@ taking into account the amount of testing that we perform, we recommend at least
 
 * NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.
 
+<a id="multiple-nic-network-interface-card-guidance"></a>
+
 ### Multiple NIC (Network Interface Card) Guidance
 
 Many sites would prefer **not** to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5+
