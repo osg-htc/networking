@@ -4,19 +4,18 @@ Here we will provide details on troubleshooting perfSONAR installations for OSG 
 configuration options and a FAQ.
 
 A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and isolate
-network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-
-troubleshootingquick-reference-guide/>
+network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-
+quick-reference-guide/>
 
 We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) page to guide users in identifying and
 following up on network problems.
 
-#### Installing a certificate
+## Installing a certificate
 
 **What is the recommended way to install a certificate on my perfSONAR host?**
 
 [We recommend using Let's Encrypt](https://letsencrypt.org). There is a tutorial that users may find helpful at [Secure
-Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-
-oncentos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
+Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/).
 
 <!-- markdownlint-disable MD033 --> <details>
 
@@ -40,14 +39,14 @@ oncentos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
 
 Thanks to Raul Lopes for these details!
 
-#### Network Troubleshooting
+## Network Troubleshooting
 
 * I suspect there is a network performance issue impacting my site
 
 For OSG sites, please open a ticket with GOC. Otherwise please open a GGUS ticket (or assign an existing) one to WLCG
 Network Throughput support unit.
 
-#### Service Registration
+## Service Registration
 
 **I got an email after registering with lots of information in it...what do I do?**
 
@@ -60,7 +59,7 @@ next operations meeting if you have questions or concerns.
 This is standard operating procedure and the tickets are to ensure that OSG operations properly gets your new perfSONAR
 instances registered. You don't have to do anything and the tickets will be closed by OSG operations staff.
 
-#### Infrastructure Monitoring (check\_mk metrics)
+## Infrastructure Monitoring (check\_mk metrics)
 
 * **perfSONAR services: versions** metric is failing.
 
