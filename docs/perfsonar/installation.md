@@ -49,7 +49,8 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
 !!! note
 
 <!-- markdownlint-disable MD040 -->
-```text
+    <!-- markdownlint-disable MD040 -->
+     ```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
 
 ```
@@ -144,6 +145,7 @@ network administrators to debug network issues.
 If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
 
     ```
+    <!-- markdownlint-enable MD040 -->
 
 ## Enabling SNMP plugins
 
