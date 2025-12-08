@@ -1,8 +1,8 @@
 # OSG Debugging Documentation
 
-_Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan_
+### Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan
 
-_February 4th 2013_
+#### February 4th 2013
 
 !!! note
 
@@ -673,7 +673,7 @@ path is no different.  The following steps should be followed:
 
 - Using a tool like traceroute or tracepath, find the paths between you and the remote host.  If possible validate the path for the reverse direction as well.  It may be possible that these are different.
 
-- For one of the networks on the path, usually one in the direct middle (often a backbone network like Internet2, ESnet, or NLR), find a testing host.  If these are not posted on public we pages, send an email to the support teams (e.g. rs@internet2.edu [BROKEN-LINK: mailto:rs@internet2.edu], or trouble@es.net [BROKEN-LINK: mailto:trouble@es.net]).
+- For one of the networks on the path, usually one in the direct middle (often a backbone network like Internet2, ESnet, or NLR), find a testing host.  If these are not posted on public we pages, send an email to the support teams (e.g. <rs@internet2.edu> [BROKEN-LINK: mailto:<rs@internet2.edu>], or <trouble@es.net> [BROKEN-LINK: mailto:<trouble@es.net>]).
 
 - Perform end-to-middle testing from the source and desgination with:
 
@@ -714,13 +714,13 @@ they are unable to help, consult the resources listed in Section 8.
 
 The following locations can be consulted for more help in debugging network problems:
 
-- Internet2 Research Support Center – rs@internet2.edu [BROKEN-LINK: mailto:rs@internet2.edu]
+- Internet2 Research Support Center – <rs@internet2.edu> [BROKEN-LINK: mailto:<rs@internet2.edu>]
 
-- ESnet Trouble Reporting – trouble@es.net [BROKEN-LINK: mailto:trouble@es.net]
+- ESnet Trouble Reporting – <trouble@es.net> [BROKEN-LINK: mailto:<trouble@es.net>]
 
-- NLR NOC - noc@nlr.net [BROKEN-LINK: mailto:noc@nlr.net]
+- NLR NOC - <noc@nlr.net> [BROKEN-LINK: mailto:<noc@nlr.net>]
 
-- OSG GOC - goc@opensciencegrid.org [BROKEN-LINK: mailto:goc@opensciencegrid.org]
+- OSG GOC - <goc@opensciencegrid.org> [BROKEN-LINK: mailto:<goc@opensciencegrid.org>]
 
 # Acknowledgements
 
