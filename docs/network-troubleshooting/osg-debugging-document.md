@@ -698,7 +698,11 @@ interpreting results:
 
 - NDT will denote if your host does not have the proper amount of tuning.  If it doesn&#39;t, please considering following the host tuning steps discussed in Section 5.1
 
-- NDT will give the first indication of network problems as well, and may indicate the presence of packet loss, link bottlenecks, or congestion.  Since NDT is based on heuristics these results can turn out to be false positives, but are often worthy of following up on.  In the event of congestion, ask local networking staff to see if there are any heavily utilized links.  If packet loss is an issue, ask to see if any interface errors or discards are present.
+- NDT will give the first indication of network problems as well, and may indicate the presence of packet loss,
+  link bottlenecks, or congestion.  Since NDT is based on heuristics these results can turn out to be false
+  positives, but are often worthy of following up on.  In the event of congestion, ask local networking staff to
+  see if there are any heavily utilized links.  If packet loss is an issue, ask to see if any interface errors or
+  discards are present.
 
 - BWCTL, when used in TCP mode, is only useful at nothing high or low throughput.  This is normally good from a capability standpoint, but it cannot tell you anything else about a serious problem
 
