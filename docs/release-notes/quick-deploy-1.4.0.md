@@ -79,6 +79,7 @@ From v1.3.0:
 1. (Optional) Reapply PBR in non-disruptive mode:
 
    ```bash
+
    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --apply-inplace
 
 ```text

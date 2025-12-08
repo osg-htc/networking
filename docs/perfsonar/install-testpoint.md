@@ -135,6 +135,7 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 1. Generate the config file automatically:
 
     ```bash
+
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
 
 ```text

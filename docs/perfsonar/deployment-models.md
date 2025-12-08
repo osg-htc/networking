@@ -13,6 +13,7 @@ each focused on specific set of tests. The following deployment options are curr
     ```text
 
 * Two bare metal servers, one for latency node, one for bandwidth node
+
 * One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to dual NIC section for more details on this.
 
 ```text
