@@ -756,6 +756,9 @@ If you've already started the container and it failed, remove it before retrying
 
 ---
 
+<!-- markdownlint-disable MD033 -->
+<a id="step-6-configure-and-enroll-in-psconfig"></a>
+<!-- markdownlint-enable MD033 -->
 ## Step 6 - Configure and Enroll in pSConfig
 
 !!! note "Skip this step if you used the orchestrator (Path A)"
