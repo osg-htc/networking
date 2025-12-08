@@ -48,10 +48,10 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
 
 !!! note
 
-    ```text
+```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
 
-    ```
+```
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:
@@ -62,10 +62,10 @@ described in the official guide:
 
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
 
-    ```text
+```text
 
 * For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` replacing `<FQDN>` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
-    ```
+```
 
  ```json
 === pScheduler Agent ===

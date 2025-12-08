@@ -10,30 +10,30 @@ each focused on specific set of tests. The following deployment options are curr
 
 * **Bare metal** - preffered option in one of two possible configurations:
 
-    ```text
+```text
 
 * Two bare metal servers, one for latency node, one for bandwidth node
 
 * One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to dual NIC section for more details on this.
 
-    ```
+```
 
 * **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:
 
-    ```text
+```text
 
 * Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
 * VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
 * Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production
-    ```
+```
 
 * **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
 
-    ```text
+```text
 
 * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
 
-    ```
+```
 
 ### perfSONAR Toolkit vs Testpoint
 
