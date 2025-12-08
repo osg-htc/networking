@@ -388,7 +388,7 @@ You may want to document any site-specific exceptions (e.g., additional allowed 
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
 The orchestrator automates container deployment and certificate issuance. If you ran it in Step 2, skip to [Step
-6](#step-6-configure-and-enroll-in-psconfig).
+6](#step-6--configure-and-enroll-in-psconfig).
 
 Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:
 
