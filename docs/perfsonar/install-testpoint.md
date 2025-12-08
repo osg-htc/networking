@@ -304,7 +304,7 @@ To register your testpoint with a central config:
 ```
 
 podman exec -it perfsonar-testpoint psconfig remote list podman exec -it perfsonar-testpoint psconfig remote
---configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
+--configure-archives add "<https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch>"
 
 ```bash
 
