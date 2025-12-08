@@ -10,7 +10,7 @@ each focused on specific set of tests. The following deployment options are curr
 
 * **Bare metal** - preffered option in one of two possible configurations:
 
-    ```text
+```text
 
 * Two bare metal servers, one for latency node, one for bandwidth node
 
@@ -20,7 +20,8 @@ each focused on specific set of tests. The following deployment options are curr
 
 * **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:
 
-    ```text
+```text
+
 * Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
 * VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
 * Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production
@@ -28,13 +29,13 @@ each focused on specific set of tests. The following deployment options are curr
 
 * **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
 
-    ```text
+```text
 
 * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
 
 ```
 
-### perfSONAR Toolkit vs Testpoint
+## perfSONAR Toolkit vs Testpoint
 
 The perfSONAR team has documented the types of installations supported at
 <https://docs.perfsonar.net/install_options.html>.   With the release of version 5, OSG/WLCG sites have a new option:
@@ -45,7 +46,7 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
         ```text
 * Simpler deployment when a local web interface is not needed and a central measurement archive is available.
 * Less resource intensive for both memory and I/O capacity.
-```
+        ```
 
 * Cons
 
@@ -54,7 +55,7 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 * No web interface to use for configuration or adding local tests
 * Unable to show results in MaDDash
 
-```
+        ```
 
 While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of
 perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced
@@ -83,7 +84,7 @@ taking into account the amount of testing that we perform, we recommend at least
 
 * NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.
 
-<a id="multiple-nic-network-interface-card-guidance"></a>
+<!-- anchor removed; heading provides an automatic id -->
 
 ### Multiple NIC (Network Interface Card) Guidance
 

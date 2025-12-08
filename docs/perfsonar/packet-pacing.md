@@ -419,11 +419,11 @@ setsockopt(sockfd, SOL_SOCKET, SO_MAX_PACING_RATE,
 
 ### ESnet Fasterdata Documentation
 
-- **DTN Tuning Guide**: https://fasterdata.es.net/DTN/tuning/
+- **DTN Tuning Guide**: <https://fasterdata.es.net/DTN/tuning/>
 
-- **Packet Pacing Guide**: https://fasterdata.es.net/host-tuning/linux/packet-pacing/
+- **Packet Pacing Guide**: <https://fasterdata.es.net/host-tuning/linux/packet-pacing/>
 
-- **FQ Pacing Research Results**: https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf
+- **FQ Pacing Research Results**: <https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf>
 
 ### Linux Kernel Documentation
 
@@ -433,13 +433,13 @@ setsockopt(sockfd, SOL_SOCKET, SO_MAX_PACING_RATE,
 
 - **tc man page**: `man 8 tc`
 
-- **LWN Article on FQ**: https://lwn.net/Articles/564978/
+- **LWN Article on FQ**: <https://lwn.net/Articles/564978/>
 
 ### Tools and Testing
 
-- **iperf3**: https://iperf.fr/ (with `--fq-rate` support)
+- **iperf3**: <https://iperf.fr/> (with `--fq-rate` support)
 
-- **perfSONAR**: https://www.perfsonar.net/ (pscheduler with pacing)
+- **perfSONAR**: <https://www.perfsonar.net/> (pscheduler with pacing)
 
 - **mtr** (traceroute tool): `mtr <destination>`
 
@@ -447,9 +447,9 @@ setsockopt(sockfd, SOL_SOCKET, SO_MAX_PACING_RATE,
 
 - **SYSCTL Tuning**: See `fasterdata-tuning.sh` for buffer sizing recommendations
 
-- **100G+ Tuning**: https://fasterdata.es.net/host-tuning/linux/100g-tuning/
+- **100G+ Tuning**: <https://fasterdata.es.net/host-tuning/linux/100g-tuning/>
 
-- **BBR Congestion Control**: https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/
+- **BBR Congestion Control**: <https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/>
 
 ---
 

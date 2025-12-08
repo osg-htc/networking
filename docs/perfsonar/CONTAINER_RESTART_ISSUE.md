@@ -60,7 +60,7 @@ If you have an existing deployment with the restart loop issue:
    cd /opt/perfsonar-tp
    podman-compose down
 
-```
+   ```
 
 1. Update the docker-compose.yml file to use the recommended configuration from:
 
@@ -70,14 +70,14 @@ If you have an existing deployment with the restart loop issue:
 
        -o /opt/perfsonar-tp/docker-compose.yml
 
-```
+   ```
 
 1. Restart the service:
 
    ```bash
    systemctl restart perfsonar-testpoint
 
-```
+   ```
 
 ## Verification
 

@@ -18,7 +18,7 @@ both service types (use the same hostname in the "host name" field).
 
 - For each form (i.e. for each service type) fill at least the important informations:
 
-    ```text
+```text
 
 - Hosting Site (drop-down menu, mandatory)
 - Service Type (drop-down menu, mandatory)
