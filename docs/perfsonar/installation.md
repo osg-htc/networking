@@ -19,7 +19,8 @@ please consult official [Troubleshooting Guide](http://docs.perfsonar.net/troubl
 For any questions or help with WLCG perfSONAR setup, please contact
 [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG
 [GOC](http://support.opensciencegrid.org). We strongly recommend anyone maintaining/using perfSONAR to join
-[perfsonaruser](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
+[perfsonaruser](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-
+announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
 ## Installation or Upgrade
 
