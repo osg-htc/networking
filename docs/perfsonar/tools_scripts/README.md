@@ -63,7 +63,7 @@ After installation:
   /opt/perfsonar-tp/tools_scripts/install-systemd-service.sh /opt/perfsonar-tp
   systemctl enable --now perfsonar-testpoint.service
 
-```
+  ```
 
 - Manual installs: After `podman-compose up -d`, install and enable the service as shown above.
 
@@ -138,7 +138,7 @@ sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Che
 
 - `--dry-run`: Preview the changes that would be made (GRUB edits and sysfs writes) without applying them. Use for validation and audits.
 
-## Usage examples
+## Usage examples (fasterdata tuning)
 
 Audit (default) a measurement host:
 
@@ -277,7 +277,11 @@ bash perfSONAR-pbr-nm.sh --yes
 
 ## Gateway requirement, inference, and generator warnings
 
-- Any NIC with an IPv4 address should have a corresponding IPv4 gateway; likewise for IPv6. If a NIC lacks a gateway, the generator will attempt conservative inference (below). If a device has no IPv4 or IPv6 gateway (e.g., a management-only NIC), the generator will intentionally skip that NIC when creating an _auto-generated_ config to avoid generating unusable NetworkManager profiles unless you explicitly set the device as `DEFAULT_ROUTE_NIC`.
+- Any NIC with an IPv4 address should have a corresponding IPv4 gateway; likewise for IPv6. If a NIC lacks a
+  gateway, the generator will attempt conservative inference (below). If a device has no IPv4 or IPv6 gateway
+  (e.g., a management-only NIC), the generator will intentionally skip that NIC when creating an
+  _auto-generated_ config to avoid generating unusable NetworkManager profiles unless you explicitly set the
+  device as `DEFAULT_ROUTE_NIC`.
 
 - Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.
 
@@ -351,7 +355,7 @@ cd docs/perfsonar
 ./tests/run_tests.sh
 ```
 
-## Notes
+## Notes (script details)
 
 - The script requires Bash (uses `local -n` namerefs). Run tests on a system
   with Bash 4.3+.

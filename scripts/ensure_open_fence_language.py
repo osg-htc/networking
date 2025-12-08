@@ -12,7 +12,7 @@ import re
 from pathlib import Path
 
 
-def process_file(path: Path) -> bool:
+def process_file(path: Path, default_lang: str = 'text') -> bool:
     with path.open('r', encoding='utf-8') as fh:
         lines = fh.readlines()
     changed = False
@@ -26,7 +26,7 @@ def process_file(path: Path) -> bool:
             if not in_fence:
                 # opening fence
                 if not lang:
-                    out.append(f"{indent}{fence} text\n")
+                    out.append(f"{indent}{fence} {default_lang}\n")
                     changed = True
                 else:
                     out.append(line)
@@ -47,9 +47,12 @@ def process_file(path: Path) -> bool:
 
 def main():
     if len(sys.argv) < 2:
-        print('Usage: ensure_open_fence_language.py <docs-root>')
+        print('Usage: ensure_open_fence_language.py <docs-root> [default_lang]')
         sys.exit(1)
     root = sys.argv[1]
+    default_lang = 'text'
+    if len(sys.argv) > 2:
+        default_lang = sys.argv[2]
     changed_files = []
     for dirpath, _, filenames in os.walk(root):
         for f in filenames:
@@ -57,7 +60,7 @@ def main():
                 continue
             p = Path(dirpath) / f
             try:
-                if process_file(p):
+                if process_file(p, default_lang):
                     changed_files.append(str(p))
                     print('Patched fence opening language in', p)
             except Exception as e:
