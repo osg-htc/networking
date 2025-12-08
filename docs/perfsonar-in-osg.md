@@ -6,7 +6,7 @@ deployment at OSG and WLCG sites.
 OSG is working to support the scientific networking needs of it's constituents and collaborators. To do this, we are
 recommending all sites deploy perfSONAR so we can measure, monitor and diagnose the OSG (and WLCG) networks.
 
-### Motivation
+## Motivation
 
 Distributed scientific computing relies upon networks to interconnect resources and make them usable for scientific
 workflows. This dependency upon the network means that issues in our networks can significantly impact the behavior of
@@ -14,12 +14,12 @@ all the various cyber-infrastructure components that rely upon it. Compounding t
 nature, are distributed and typically involve many different "owners" and administrators. When a problem arises
 somewhere along a network path, it can be very difficult to identify and localize.
 
-This was the context for the formation of the [perfSONAR collaboration](https://www.perfsonar.net/about/mission-
-statement). This collaboration is focused on developing and deploying the `perfSONAR` software suite in support of
-network monitoring across the global set of research and education (R&E) networks. The **Open Science Grid** (**OSG**)
-has chosen to base the core of its network monitoring framework on `perfSONAR` because of both the capabilities of the
-toolkit for measuring our networks and its global acceptance as the defacto network monitoring infrastructure of first
-choice.
+This was the context for the formation of the [perfSONAR
+collaboration](https://www.perfsonar.net/about/missionstatement). This collaboration is focused on developing and
+deploying the `perfSONAR` software suite in support of network monitoring across the global set of research and
+education (R&E) networks. The **Open Science Grid** (**OSG**) has chosen to base the core of its network monitoring
+framework on `perfSONAR` because of both the capabilities of the toolkit for measuring our networks and its global
+acceptance as the defacto network monitoring infrastructure of first choice.
 
 The <<https://www.perfsonar.net/about/what-is-perfsonar/>> provides a succinct summary: *perfSONAR is a network
 measurement toolkit designed to provide federated coverage of paths, and help to establish end-to-end usage
@@ -64,7 +64,7 @@ For anyone maintaining/using perfSONAR we suggest to join either/both of the fol
 
 - **Announcement Mailing List** The perfSONAR project also maintains a low volume mailing list used for announcements related to software updates and vulnerabilities: <https://lists.internet2.edu/sympa/subscribe/perfsonar-announce>
 
-#### Changes for perfSONAR 5.0
+## Changes for perfSONAR 5.0
 
 The first release of [perfSONAR 5.0.0](https://www.perfsonar.net/releasenotes-2023-04-17-5-0-0.html) was available on
 April 17, 2023, followed by a version supporting EL8/EL9 on June 21, 2023 ([version

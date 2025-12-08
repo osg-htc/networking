@@ -1,15 +1,15 @@
 # OSG Debugging Documentation
 
-_Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan_
+## Edited By: J. Zurawski – Internet2, S. McKee – University of Michigan
 
-_February 4th 2013_
+### February 4th 2013
 
 !!! note
 
   ```text
 This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
 
-```text
+```
 
 # Abstract
 
@@ -386,8 +386,9 @@ and updates.  The following steps can be taken to install these tools:
 
 The following command will import the key.
 
-rpm --import [http://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2](http://software.internet2.edu/rpms/RPM-GPG-KEY-
-Internet2)
+```bash
+rpm --import https://software.internet2.edu/rpms/RPM-GPG-KEY-Internet2
+```
 
 - **Download RPM Software**
 
@@ -524,7 +525,7 @@ TCP window size: 0.08 MByte (default)
 [14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
 bwctl: stop\_exec: 3568979172.016198
 RECEIVER END
-```text
+```
 
 This test reveals that over the course of 10 seconds we achieved an average bandwidth of 979Mbps and sent a total of
 1178MB of data.  We can reverse the direction of this test in the next example:
@@ -595,7 +596,7 @@ TCP window size: 0.08 MByte (default)
 [14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
 bwctl: stop\_exec: 3568979785.230833
 RECEIVER END
-```text
+```
 
 BWCTL requires a stable NTP clock to work properly, be sure that NTP is configured before using this tool.
 
@@ -673,7 +674,7 @@ path is no different.  The following steps should be followed:
 
 - Using a tool like traceroute or tracepath, find the paths between you and the remote host.  If possible validate the path for the reverse direction as well.  It may be possible that these are different.
 
-- For one of the networks on the path, usually one in the direct middle (often a backbone network like Internet2, ESnet, or NLR), find a testing host.  If these are not posted on public we pages, send an email to the support teams (e.g. rs@internet2.edu [BROKEN-LINK: mailto:rs@internet2.edu], or trouble@es.net [BROKEN-LINK: mailto:trouble@es.net]).
+- For one of the networks on the path, usually one in the direct middle (often a backbone network like Internet2, ESnet, or NLR), find a testing host.  If these are not posted on public we pages, send an email to the support teams (e.g. <rs@internet2.edu> [BROKEN-LINK: mailto:<rs@internet2.edu>], or <trouble@es.net> [BROKEN-LINK: mailto:<trouble@es.net>]).
 
 - Perform end-to-middle testing from the source and desgination with:
 
@@ -697,7 +698,10 @@ interpreting results:
 
 - NDT will denote if your host does not have the proper amount of tuning.  If it doesn&#39;t, please considering following the host tuning steps discussed in Section 5.1
 
-- NDT will give the first indication of network problems as well, and may indicate the presence of packet loss, link bottlenecks, or congestion.  Since NDT is based on heuristics these results can turn out to be false positives, but are often worthy of following up on.  In the event of congestion, ask local networking staff to see if there are any heavily utilized links.  If packet loss is an issue, ask to see if any interface errors or discards are present.
+- NDT will give the first indication of network problems as well, and may indicate the presence of packet loss,
+link bottlenecks, or congestion.  Since NDT is based on heuristics these results can turn out to be false positives, but
+are often worthy of following up on.  In the event of congestion, ask local networking staff to see if there are any
+heavily utilized links.  If packet loss is an issue, ask to see if any interface errors or discards are present.
 
 - BWCTL, when used in TCP mode, is only useful at nothing high or low throughput.  This is normally good from a capability standpoint, but it cannot tell you anything else about a serious problem
 
@@ -714,13 +718,13 @@ they are unable to help, consult the resources listed in Section 8.
 
 The following locations can be consulted for more help in debugging network problems:
 
-- Internet2 Research Support Center – rs@internet2.edu [BROKEN-LINK: mailto:rs@internet2.edu]
+- Internet2 Research Support Center – <rs@internet2.edu> [BROKEN-LINK: mailto:<rs@internet2.edu>]
 
-- ESnet Trouble Reporting – trouble@es.net [BROKEN-LINK: mailto:trouble@es.net]
+- ESnet Trouble Reporting – <trouble@es.net> [BROKEN-LINK: mailto:<trouble@es.net>]
 
-- NLR NOC - noc@nlr.net [BROKEN-LINK: mailto:noc@nlr.net]
+- NLR NOC - <noc@nlr.net> [BROKEN-LINK: mailto:<noc@nlr.net>]
 
-- OSG GOC - goc@opensciencegrid.org [BROKEN-LINK: mailto:goc@opensciencegrid.org]
+- OSG GOC - <goc@opensciencegrid.org> [BROKEN-LINK: mailto:<goc@opensciencegrid.org>]
 
 # Acknowledgements
 

@@ -11,9 +11,12 @@ each focused on specific set of tests. The following deployment options are curr
 * **Bare metal** - preffered option in one of two possible configurations:
 
     ```text
+
 * Two bare metal servers, one for latency node, one for bandwidth node
-* One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to [dual NIC](#multiple-nic-network-interface-card-guidance) section for more details on this.
-```text
+
+* One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to dual NIC section for more details on this.
+
+```
 
 * **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:
 
@@ -26,9 +29,10 @@ each focused on specific set of tests. The following deployment options are curr
 * **Container** - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <https://docs.perfsonar.net/install_docker.html> but is not typically used in the same way as a full toolkit installation.
 
     ```text
+
 * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
 
-```text
+```
 
 ### perfSONAR Toolkit vs Testpoint
 
@@ -50,7 +54,7 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 * No web interface to use for configuration or adding local tests
 * Unable to show results in MaDDash
 
-```text
+```
 
 While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of
 perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced
@@ -78,6 +82,8 @@ taking into account the amount of testing that we perform, we recommend at least
 * High clock speede CPU (3.0 Ghz+), fwere cores OK, with at least 32GB+ of RAM (8GB+ if using a Testpoint install)
 
 * NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.
+
+<a id="multiple-nic-network-interface-card-guidance"></a>
 
 ### Multiple NIC (Network Interface Card) Guidance
 

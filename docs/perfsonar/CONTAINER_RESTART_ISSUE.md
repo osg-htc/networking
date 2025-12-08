@@ -48,7 +48,7 @@ services:
       - CAP_NET_RAW
     labels:
       - io.containers.autoupdate=registry
-```text
+```
 
 ## Fixing Existing Deployments
 
@@ -59,6 +59,7 @@ If you have an existing deployment with the restart loop issue:
    ```bash
    cd /opt/perfsonar-tp
    podman-compose down
+
 ```
 
 1. Update the docker-compose.yml file to use the recommended configuration from:
@@ -66,13 +67,16 @@ If you have an existing deployment with the restart loop issue:
    ```bash
    curl -fsSL \
        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
+
        -o /opt/perfsonar-tp/docker-compose.yml
-```text
+
+```
 
 1. Restart the service:
 
    ```bash
    systemctl restart perfsonar-testpoint
+
 ```
 
 ## Verification
@@ -82,7 +86,7 @@ Check that containers are running properly:
 ```bash
 podman ps
 systemctl status perfsonar-testpoint
-```text
+```
 
 The perfsonar-testpoint container should show status "Up" and not be restarting.
 

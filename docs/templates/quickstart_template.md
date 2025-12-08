@@ -16,7 +16,7 @@ tags: [template, quickstart]
 
 ```bash
 # minimal commands
-```text
+```
 
 ## Verify
 

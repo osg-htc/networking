@@ -50,7 +50,7 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 
 # With Let's Encrypt
 /tmp/perfSONAR-orchestrator.sh --option B --fqdn <FQDN> --email <EMAIL>
-```text
+```
 
 ### Post-Deploy Validation
 
@@ -84,7 +84,7 @@ sudo nft add rule inet filter input tcp dport 443 accept
 
 # Verify
 nft list table filter
-```text
+```
 
 ---
 
@@ -124,7 +124,7 @@ pscheduler task add --host <local> --dest <remote> \
 
 # Check pScheduler status
 systemctl status perfsonar-pscheduler-agent
-```text
+```
 
 ### Network Configuration
 
@@ -161,7 +161,7 @@ sudo /tmp/fasterdata-tuning.sh apply
 
 # For DTN (large buffers)
 sudo /tmp/fasterdata-tuning.sh apply --target dtn
-```text
+```
 
 ### LS Registration
 
@@ -213,7 +213,7 @@ nslookup $(hostname -f)
 # 8. Firewall test
 curl -v https://psconfig.opensciencegrid.org/
 nc -zv <remote_testpoint> 443
-```text
+```
 
 ---
 
@@ -301,7 +301,7 @@ systemctl restart perfsonar-testpoint
 
 # 4. Verify routes
 ip route show
-```text
+```
 
 ### Tests Not Running
 

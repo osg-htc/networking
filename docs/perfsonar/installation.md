@@ -18,11 +18,11 @@ please consult official [Troubleshooting Guide](http://docs.perfsonar.net/troubl
 
 For any questions or help with WLCG perfSONAR setup, please contact
 [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG
-[GOC](http://support.opensciencegrid.org). We strongly recommend anyone maintaining/using perfSONAR to join [perfsonar-
-user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-
+[GOC](http://support.opensciencegrid.org). We strongly recommend anyone maintaining/using perfSONAR to join
+[perfsonaruser](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-
 announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
-### Installation or Upgrade
+## Installation or Upgrade
 
 Prior to installing please consult the [release notes](https://www.perfsonar.net/docs_releasenotes.html)) for the latest
 available release. In case you have already an instance running and wish to re-install/update it then please follow our
@@ -40,11 +40,9 @@ First, install your chosen EL9 operating system on your host after saving you lo
 
 The following options are then recommended to install perfSONAR for OSG/WLCG:
 
-| Installation method              | Link |
-|----------------------------------|----------------------------------------------------------------------------------
--------| | Toolkit bundle installation | [Toolkit Installation Quick
-Start](https://docs.perfsonar.net/install_quick_start.html)      | | Testpoint bundle installation | Follow quick start
-above but do 'dnf install perfsonar-testpoint' instead of toolkit       |
+| Installation method | Link | |---------------------|------| | Toolkit bundle installation | [Toolkit Installation
+Quick Start](https://docs.perfsonar.net/install_quick_start.html) | | Testpoint bundle installation | Follow the Quick
+Start above but use `dnf install perfsonar-testpoint` instead of the toolkit |
 
 You can see more details about EL supported installs at <<https://docs.perfsonar.net/install_el.html>>
 
@@ -52,7 +50,8 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
 
     ```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
-```text
+
+```
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:
@@ -75,7 +74,7 @@ described in the official guide:
       "configure-archives" : true
    }
 ]
-```text
+```
 
 * Please remove any old/stale URLs using `psconfig remote delete <URL>`
 
@@ -85,6 +84,7 @@ described in the official guide:
 
     ```text
 Until your host is added on https://psconfig.opensciencegrid.org to one or more meshes by an administrator the automesh configuration above will not return any tests.
+
 ```
 
 * We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
@@ -99,7 +99,7 @@ For any further questions, please consult official [Troubleshooting
 Guide](http://docs.perfsonar.net/troubleshooting_overview.html), [FAQ](http://docs.perfsonar.net/FAQ.html) as well as
 WLCG/OSG specific [FAQ](faq.md) or contact directly WLCG or OSG perfSONAR support units.
 
-### Maintenance
+## Maintenance
 
 Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues
 and either patch the node as soon as possible or reboot once the patched kernel is released.
@@ -108,12 +108,12 @@ In case you'd like to manually update the node please follow the official
 [guide](http://docs.perfsonar.net/manage_update.html).
 
 Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but
-there are some community driven projects that could be helpful, such as [HEP-Puppet](http://github.com/HEP-
-Puppet/perfsonar). As perfSONAR manages most of its configuration automatically via packages and there is very little
-initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary
-interventions after auto-updates.
+there are some community driven projects that could be helpful, such as [HEP-
+Puppet](http://github.com/HEPPuppet/perfsonar). As perfSONAR manages most of its configuration automatically via
+packages and there is very little initial configuration needed, we suggest to keep automated configuration to the
+minimum necessary to avoid unncessary interventions after auto-updates.
 
-### Security Considerations
+## Security Considerations
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation
 provides a lot of information on what security software is available and what firewall ports need to be opened, please
@@ -126,7 +126,8 @@ site or host firewalls.   An overview of perfSONAR security is available at
 
     ```text
 All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
-```text
+
+```
 
 For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the
 tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be
@@ -138,16 +139,17 @@ network administrators to debug network issues.
 
     ```text
 If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
+
 ```
 
-### Enabling SNMP plugins
+## Enabling SNMP plugins
 
 Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be
 captured and stored in the local measurement archive. This is currently a [beta
 feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking for
 volunteers willing to test, please let us know in case you would be interested.
 
-### Register perfSONAR Service in GOCDB
+## Register perfSONAR Service in GOCDB
 
 This section describes how to register the perfSONAR service in GOCDB.
 
@@ -159,17 +161,21 @@ Endpoint
 You might not be able to access the page if you are not properly registered in GOC, so a snapshot can be found below. In
 filling the information please follow those simple guidelines:
 
-* There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest t install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site can not afford sufficient hardware for the proposed setup, it can install a unique perfSONAR box, but still should publish both services types (with the same host in the "host name" field of the form).
+* There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest to install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests).
+
+* Because we recommend separate boxes, two distinct service endpoints should be published with two distinct service types. If a site cannot afford additional hardware, it can install a single perfSONAR box but should still publish both service types (using the same host in the "host name" field of the form).
 
 * For each form (service type) fill at least:
 
     ```text
+
 * Hosting Site
 * Service Type
 * Host Name
 * Host IP (optional)
 * Description (optional label used in MaDDash; keep short and unique)
-```text
+
+```
 
 * Check "N" when asked "Is it a beta service"
 
@@ -183,7 +189,7 @@ filling the information please follow those simple guidelines:
 <img src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" alt="GOCDB screen shot for creating a Service Endpoint"
 width="1024">
 
-### Register perfSONAR in OSG Topology
+## Register perfSONAR in OSG Topology
 
 Each *OSG site* should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network
 monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a

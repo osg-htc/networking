@@ -1,26 +1,26 @@
- # Frequently Asked Questions
+# Frequently Asked Questions
 
 Here we will provide details on troubleshooting perfSONAR installations for OSG and WLCG as well as some additional
 configuration options and a FAQ.
 
 A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and isolate
-network problems can be found at https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-
-quick-reference-guide/
+network problems can be found at:
+
+<https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-quick-reference-guide/>
 
 We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) page to guide users in identifying and
 following up on network problems.
 
-#### Installing a certificate
+## Installing a certificate
 
 **What is the recommended way to install a certificate on my perfSONAR host?**
 
-We recommend using Lets Encrypt (see <https://letsencrypt.org).>    There is a tutorial that users may find helpful at
-[Secure Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-
-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
+[We recommend using Let's Encrypt](https://letsencrypt.org). There is a tutorial that users may find helpful at [Secure
+Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-centos-8/).
 
-<details>
+<!-- markdownlint-disable MD033 --> <details>
 
-    ```text
+```text
 <summary>A quick set of steps is shown here:</summary>
 <p>0. Install certbot with yum, dnf, or snap:  **yum install certbot python3-certbot-apache**</p>
 <p>1. Certbot needs port 80/443 so stop anything blocking it or using it:  **systemctl stop firewalld  systemctl stop httpd**</p>
@@ -34,20 +34,20 @@ centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
     <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>
 <p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
 <p>8. Make a donation :)</p>
-```text
+```
 
-</details>
+</details> <!-- markdownlint-enable MD033 -->
 
 Thanks to Raul Lopes for these details!
 
-#### Network Troubleshooting
+## Network Troubleshooting
 
 * I suspect there is a network performance issue impacting my site
 
 For OSG sites, please open a ticket with GOC. Otherwise please open a GGUS ticket (or assign an existing) one to WLCG
 Network Throughput support unit.
 
-#### Service Registration
+## Service Registration
 
 **I got an email after registering with lots of information in it...what do I do?**
 
@@ -60,7 +60,7 @@ next operations meeting if you have questions or concerns.
 This is standard operating procedure and the tickets are to ensure that OSG operations properly gets your new perfSONAR
 instances registered. You don't have to do anything and the tickets will be closed by OSG operations staff.
 
-#### Infrastructure Monitoring (check\_mk metrics)
+## Infrastructure Monitoring (check\_mk metrics)
 
 * **perfSONAR services: versions** metric is failing.
 
@@ -87,8 +87,9 @@ httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS
 
 * **perfSONAR json summary** is failing
 
-    ```text
--   This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
+```text
+
+* This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
 
 ```
 

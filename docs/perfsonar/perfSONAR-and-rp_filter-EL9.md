@@ -5,7 +5,7 @@ traffic handling and can conflict with each other. PBR determines the outbound p
 `rp_filter` is a security feature that validates the source address of inbound traffic. If not configured properly,
 strict `rp_filter` can block legitimate traffic in a PBR setup.
 
-### `sysctl rp_filter` overview
+## `sysctl rp_filter` overview
 
 The Reverse Path Filtering (`rp_filter`) kernel parameter is a security measure designed to prevent IP spoofing, often
 associated with Denial of Service (DoS) attacks. When enabled, it checks the source IP address of an incoming packet to
@@ -18,7 +18,7 @@ configured with three values:
 
 * `2`: **Loose mode.** The kernel only validates that the source IP is routable via *any* interface, not necessarily the one it arrived on.
 
-### Policy-based routing (PBR) overview
+## Policy-based routing (PBR) overview
 
 PBR is a technique for overriding the standard Linux routing behavior, which is typically based solely on the
 destination IP address. It allows administrators to route traffic based on other criteria, such as the source IP
@@ -30,7 +30,7 @@ address, application, protocol, or firewall marks (`fwmark`). A PBR setup involv
 
 1. **Add routes to custom tables.** Use the `ip route` command to add routes to the new tables.
 
-### The conflict and solution
+## The conflict and solution
 
 The conflict arises when using **strict `rp_filter` (value 1\)** in a multihomed network configured with PBR.
 
@@ -46,7 +46,7 @@ The conflict arises when using **strict `rp_filter` (value 1\)** in a multihomed
 
 1. The kernel drops the packet because of the `rp_filter` check, even though the PBR configuration would have correctly handled the outbound response.
 
-### **Solution for EL9 multihome:**
+## **Solution for EL9 multihome:**
 
 To enable asymmetric routing with PBR, you must relax the `rp_filter` setting, as strict mode will cause legitimate
 packets to be dropped.
@@ -60,7 +60,7 @@ You can configure this persistently by editing a file in `/etc/sysctl.d/`, for e
 
 After saving the file, apply the changes with `sysctl -p`.
 
-### Summary of differences
+## Summary of differences
 
 | Feature  | `sysctl rp_filter` | Policy-Based Routing (PBR) | | ----- | ----- | ----- | | **Purpose** | Security
 mechanism to prevent IP spoofing by checking inbound packet source addresses. | Advanced routing method to control
