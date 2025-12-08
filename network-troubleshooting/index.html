@@ -514,7 +514,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -577,7 +577,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1149,6 +1149,183 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1776,6 +1953,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1792,10 +1997,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1813,8 +2018,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2076,35 +2281,56 @@
 
 
 <h1 id="network-and-network-troubleshooting-documentation">Network and Network Troubleshooting Documentation<a class="headerlink" href="#network-and-network-troubleshooting-documentation" title="Permanent link">&para;</a></h1>
-<p><span class="twiki-macro STARTINCLUDE"></span></p>
-<p>This page will eventually include pointers to various network troubleshooting resources. In general, when users suspect a network problem the procedure is:</p>
+<p>This page will eventually include pointers to various network troubleshooting resources. In general, when users suspect
+a network problem the procedure is:</p>
 <ul>
-<li><strong>Document the problem</strong>: Basically you need to describe the problem you encountered. Provide any relevant details like the exact command you used, any errors or warning you got and any problems you observed. This can help you better understand the problem and will allow you to easily "hand-off" troubleshooting to an expert</li>
-<li><strong>Gather relevant data:</strong> Run tests (see Guide below) and capture the results.</li>
-<li><strong>Contact your local network support</strong> (this is sometimes where users don't know where to go). Google or your campus web-pages should be able to help you find the right contact.</li>
-<li><strong>Escalate</strong>, if the problem persists (See below)</li>
+<li>
+<p><strong>Document the problem</strong>: Basically you need to describe the problem you encountered. Provide any relevant details like the exact command you used, any errors or warning you got and any problems you observed. This can help you better understand the problem and will allow you to easily "hand-off" troubleshooting to an expert</p>
+</li>
+<li>
+<p><strong>Gather relevant data:</strong> Run tests (see Guide below) and capture the results.</p>
+</li>
+<li>
+<p><strong>Contact your local network support</strong> (this is sometimes where users don't know where to go). Google or your campus web-pages should be able to help you find the right contact.</p>
+</li>
+<li>
+<p><strong>Escalate</strong>, if the problem persists (See below)</p>
+</li>
 </ul>
-<p>ESnet maintains a very useful page on network troubleshooting at <a href="https://fasterdata.es.net/performance-testing/troubleshooting/">https://fasterdata.es.net/performance-testing/troubleshooting/</a></p>
-<p>We have a (older) draft version of the OSG <a href="osg-debugging-document/">network debugging document</a> that describes things in much more detail. If you have comments, questions or suggestions, please contact Shawn McKee.</p>
-<p>If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a list of training videos at https server learn.nsrc.org/perfsonar.</p>
+<p>ESnet maintains a very useful page on network troubleshooting at &lt;<a href="https://fasterdata.es.net/performance-">https://fasterdata.es.net/performance-</a>
+testing/troubleshooting/&gt;</p>
+<p>We have a (older) draft version of the OSG <a href="osg-debugging-document/">network debugging document</a> that describes things in much more detail. If you have comments, questions or suggestions, please contact
+Shawn McKee.</p>
+<p>If you want to learn more about perfSONAR and its various components, the Network Startup Resource Center maintains a
+list of training videos at https server learn.nsrc.org/perfsonar.</p>
 <h2 id="information-on-contacting-network-support">Information on Contacting Network Support<a class="headerlink" href="#information-on-contacting-network-support" title="Permanent link">&para;</a></h2>
-<p>There are numerous regional and campus network operations centers that have their own ticketing systems for reporting problems. I encourage you to identify how to contact your local campus network support personnel. Suggestion: try using Google with "YourUniversity network trouble ticket" as the search terms (of course substitute your university name for <em>YourUniversity</em>).</p>
-<p>Below are the links you can use to report problems to OSG or the major Research and Education networks. If you can't determine who your local contact should be or they are unable to help you resolve the issue, you should open a ticket with one of these entities:</p>
-<p><strong>INTERNET2</strong>: If you are located at a University in the United States you are likely connected to Internet2. You can find the details on opening a ticket with Internet2 at:</p>
+<p>There are numerous regional and campus network operations centers that have their own ticketing systems for reporting
+problems. I encourage you to identify how to contact your local campus network support personnel. Suggestion: try using
+Google with "YourUniversity network trouble ticket" as the search terms (of course substitute your university name for
+<em>YourUniversity</em>).</p>
+<p>Below are the links you can use to report problems to OSG or the major Research and Education networks. If you can't
+determine who your local contact should be or they are unable to help you resolve the issue, you should open a ticket
+with one of these entities:</p>
+<p><strong>INTERNET2</strong>: If you are located at a University in the United States you are likely connected to Internet2. You can
+find the details on opening a ticket with Internet2 at:</p>
 <ul>
 <li><a href="https://noc.net.internet2.edu/internet2/help/index.html">https://noc.net.internet2.edu/internet2/help/index.html</a></li>
 </ul>
 <p>This is typically a good choice for support beyond your campus.</p>
-<p><strong>ESNET</strong>: If your problem involves a national laboratory in the United States, a university connected to ESnet or a trans-Atlantic network problem, then you may want to contact ESnet:</p>
+<p><strong>ESNET</strong>: If your problem involves a national laboratory in the United States, a university connected to ESnet or a
+trans-Atlantic network problem, then you may want to contact ESnet:</p>
 <ul>
 <li><a href="http://es.net/about/contact-us/">http://es.net/about/contact-us/</a></li>
 </ul>
-<p>This page contains information on opening ticket and pointers to relevant tools and documentation. ESnet serves the Department of Energy national labs.</p>
-<p><strong>OSG</strong>: If you have questions or unusual problems you think are OSG related, feel free to contact the OSG GOC. You can also open network related tickets and OSG can help to 'triage' your request and get it to the right people:</p>
+<p>This page contains information on opening ticket and pointers to relevant tools and documentation. ESnet serves the
+Department of Energy national labs.</p>
+<p><strong>OSG</strong>: If you have questions or unusual problems you think are OSG related, feel free to contact the OSG GOC. You can
+also open network related tickets and OSG can help to 'triage' your request and get it to the right people:</p>
 <ul>
 <li><a href="https://support.opensciencegrid.org/support/home">https://support.opensciencegrid.org/support/home</a></li>
 </ul>
-<p><strong>WLCG</strong>: WLCG has a dedicated support unit, which will assist in debugging the problem and triaging the issue. More details can be found at:</p>
+<p><strong>WLCG</strong>: WLCG has a dedicated support unit, which will assist in debugging the problem and triaging the issue. More
+details can be found at:</p>
 <ul>
 <li><a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics#Network_Throughput_Support_Unit">https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics#Network_Throughput_Support_Unit</a></li>
 </ul>

@@ -508,7 +508,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -571,7 +571,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1082,6 +1082,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1709,6 +1883,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1725,10 +1927,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1746,8 +1948,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1971,41 +2173,75 @@
 <h1 id="title-docs-fix-broken-links-using-automated-mapping">Title: docs: fix broken links using automated mapping<a class="headerlink" href="#title-docs-fix-broken-links-using-automated-mapping" title="Permanent link">&para;</a></h1>
 <h2 id="body">Body<a class="headerlink" href="#body" title="Permanent link">&para;</a></h2>
 <h3 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h3>
-<p>Applied <code>docs/tools/link_mapping.json</code> to replace BROKEN-LINK markers with updated targets. Backups were created under <code>docs/.link_check_backups/</code>. This branch contains changes to documentation where broken links were replaced with mapped targets or annotated when the resource requires authentication.</p>
+<p>Applied <code>docs/tools/link_mapping.json</code> to replace BROKEN-LINK markers with updated targets. Backups were created under
+<code>docs/.link_check_backups/</code>. This branch contains changes to documentation where broken links were replaced with mapped
+targets or annotated when the resource requires authentication.</p>
 <h3 id="files-changed">Files changed<a class="headerlink" href="#files-changed" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>docs/index.md</code></li>
-<li><code>docs/network-troubleshooting/osg-debugging-document.md</code></li>
-<li><code>docs/perfsonar/install-testpoint.md</code></li>
-<li><code>docs/perfsonar/psetf.md</code></li>
-<li><code>docs/perfsonar/tools_scripts/README.md</code></li>
-<li><code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code></li>
+<li>
+<p><code>docs/index.md</code></p>
+</li>
+<li>
+<p><code>docs/network-troubleshooting/osg-debugging-document.md</code></p>
+</li>
+<li>
+<p><code>docs/perfsonar/install-testpoint.md</code></p>
+</li>
+<li>
+<p><code>docs/perfsonar/psetf.md</code></p>
+</li>
+<li>
+<p><code>docs/perfsonar/tools_scripts/README.md</code></p>
+</li>
+<li>
+<p><code>docs/perfsonar/tools_scripts/perfSONAR-pbr-nm.sh</code></p>
+</li>
 </ul>
 <h3 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Replaced internal placeholders and gated links with public or stable alternatives where possible using the mapping file <code>docs/tools/link_mapping.json</code>.</li>
-<li>For external links that returned 401/403 the script replaced them with plain text indicating "link requires authentication" rather than removing them.</li>
-<li>Mailto entries were handled according to the mapping; the applier was run with <code>--remove-mailto</code> earlier to remove leftover mailto links, and mapping can re-add them if desired.</li>
+<li>
+<p>Replaced internal placeholders and gated links with public or stable alternatives where possible using the mapping file <code>docs/tools/link_mapping.json</code>.</p>
+</li>
+<li>
+<p>For external links that returned 401/403 the script replaced them with plain text indicating "link requires authentication" rather than removing them.</p>
+</li>
+<li>
+<p>Mailto entries were handled according to the mapping; the applier was run with <code>--remove-mailto</code> earlier to remove leftover mailto links, and mapping can re-add them if desired.</p>
+</li>
 </ul>
 <h3 id="backups">Backups<a class="headerlink" href="#backups" title="Permanent link">&para;</a></h3>
 <p>Each modified file has a timestamped backup under <code>docs/.link_check_backups/</code> with suffix <code>.bak.YYYYMMDDTHHMMSSZ</code>.</p>
 <h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Preview the site locally (mkdocs) to ensure no rendering regressions.</li>
-<li>Run the docs link-check tool in dry-run to find remaining issues:</li>
+<li>
+<p>Preview the site locally (mkdocs) to ensure no rendering regressions.</p>
+</li>
+<li>
+<p>Run the docs link-check tool in dry-run to find remaining issues:</p>
+</li>
 </ol>
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>docs/tools/find_and_remove_broken_links.py<span class="w"> </span>--check-externals
 </code></pre></div>
 <h3 id="notes-next-steps">Notes / Next steps<a class="headerlink" href="#notes-next-steps" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Please review replaced URLs for accuracy; some mappings point to public equivalents (e.g., kernel docs) that may not be the preferred internal references.</li>
-<li>If any replacements are incorrect, they can be changed by editing <code>docs/tools/link_mapping.json</code> and re-running the applier.</li>
-<li>Consider adding a GitHub Actions workflow to run the link-checker on PRs to prevent regressions.</li>
+<li>
+<p>Please review replaced URLs for accuracy; some mappings point to public equivalents (e.g., kernel docs) that may not be the preferred internal references.</p>
+</li>
+<li>
+<p>If any replacements are incorrect, they can be changed by editing <code>docs/tools/link_mapping.json</code> and re-running the applier.</p>
+</li>
+<li>
+<p>Consider adding a GitHub Actions workflow to run the link-checker on PRs to prevent regressions.</p>
+</li>
 </ul>
 <h3 id="reviewer-suggestions">Reviewer suggestions<a class="headerlink" href="#reviewer-suggestions" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Confirm the chosen public replacements for gated resources (Red Hat docs, internal dashboards).</li>
-<li>Verify that the perfSONAR psetf and ETF references point to appropriate public pages or internal artifacts depending on access requirements.</li>
+<li>
+<p>Confirm the chosen public replacements for gated resources (Red Hat docs, internal dashboards).</p>
+</li>
+<li>
+<p>Verify that the perfSONAR psetf and ETF references point to appropriate public pages or internal artifacts depending on access requirements.</p>
+</li>
 </ul>
 
 

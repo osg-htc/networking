@@ -508,7 +508,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -571,7 +571,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1082,6 +1082,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1709,6 +1883,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1725,10 +1927,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1746,8 +1948,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1970,15 +2172,23 @@
 
 <h1 id="perfsonar-testpoint-container-restart-loop-issue">perfSONAR Testpoint Container Restart Loop Issue<a class="headerlink" href="#perfsonar-testpoint-container-restart-loop-issue" title="Permanent link">&para;</a></h1>
 <h2 id="problem-description">Problem Description<a class="headerlink" href="#problem-description" title="Permanent link">&para;</a></h2>
-<p>The perfSONAR testpoint container enters a restart loop when using certain docker-compose.yml configurations. The container continuously restarts and fails to initialize systemd properly.</p>
+<p>The perfSONAR testpoint container enters a restart loop when using certain docker-compose.yml configurations. The
+container continuously restarts and fails to initialize systemd properly.</p>
 <h2 id="root-cause">Root Cause<a class="headerlink" href="#root-cause" title="Permanent link">&para;</a></h2>
 <p>The issue occurs when the docker-compose.yml file is configured with:</p>
 <ul>
-<li><code>privileged: true</code></li>
-<li><code>cgroupns: private</code></li>
-<li><strong>Missing</strong> <code>/sys/fs/cgroup:/sys/fs/cgroup:rw</code> volume mount</li>
+<li>
+<p><code>privileged: true</code></p>
+</li>
+<li>
+<p><code>cgroupns: private</code></p>
+</li>
+<li>
+<p><strong>Missing</strong> <code>/sys/fs/cgroup:/sys/fs/cgroup:rw</code> volume mount</p>
+</li>
 </ul>
-<p>The systemd process inside the container requires proper cgroup access to function. Without the cgroup volume mount, systemd cannot initialize properly, causing the container to fail and restart repeatedly.</p>
+<p>The systemd process inside the container requires proper cgroup access to function. Without the cgroup volume mount,
+systemd cannot initialize properly, causing the container to fail and restart repeatedly.</p>
 <h2 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h2>
 <p>Use the recommended docker-compose.yml configuration from the repository which includes:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
@@ -2020,6 +2230,7 @@ podman-compose<span class="w"> </span>down
 </ol>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml<span class="w"> </span><span class="se">\</span>
+
 <span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
 </code></pre></div>
 <ol>
@@ -2035,9 +2246,15 @@ systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoi
 <p>The perfsonar-testpoint container should show status "Up" and not be restarting.</p>
 <h2 id="related-files">Related Files<a class="headerlink" href="#related-files" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Recommended compose file: <code>docs/perfsonar/tools_scripts/docker-compose.yml</code></li>
-<li>Systemd service installer: <code>docs/perfsonar/tools_scripts/install-systemd-service.sh</code></li>
-<li>Installation guide: <code>docs/perfsonar/install-testpoint.md</code></li>
+<li>
+<p>Recommended compose file: <code>docs/perfsonar/tools_scripts/docker-compose.yml</code></p>
+</li>
+<li>
+<p>Systemd service installer: <code>docs/perfsonar/tools_scripts/install-systemd-service.sh</code></p>
+</li>
+<li>
+<p>Installation guide: <code>docs/perfsonar/install-testpoint.md</code></p>
+</li>
 </ul>
 
 

@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Background, architecture, and data pipeline information for OSG perfSONAR monitoring.">
+        <meta name="description" content="Background, architecture, data pipeline, and analytics for OSG perfSONAR monitoring.">
       
       
       
@@ -27,7 +27,7 @@
     
     
       
-        <title>Research — Architecture & Rationale - OSG Networking Area</title>
+        <title>Researcher — Architecture & Analytics - OSG Networking Area</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#research-architecture-rationale" class="md-skip">
+        <a href="#researcher-architecture-analytics" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Research — Architecture & Rationale
+              Researcher — Architecture & Analytics
             
           </span>
         </div>
@@ -519,7 +519,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -574,6 +574,31 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understand the System
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -591,12 +616,298 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-level-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-flow-from-measurement-to-insight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Flow: From Measurement to Insight
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-analyzing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accessing &amp; Analyzing Data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Accessing &amp; Analyzing Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-time-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-Time Dashboards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#programmatic-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programmatic Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elasticsearch-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Elasticsearch API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Elasticsearch API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example query
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jupyter-notebooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jupyter Notebooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#psconfig-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pSConfig API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyzing-network-measurements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing Network Measurements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analyzing Network Measurements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#questions-you-can-answer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Questions You Can Answer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools &amp; Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing &amp; Development
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing &amp; Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adding-new-measurements-or-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding New Measurements or Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improving-the-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Improving the Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture &amp; Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Topics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Related Topics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure &amp; Services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#foundational-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Foundational Concepts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools-technical-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools &amp; Technical Details
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1103,6 +1414,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1730,6 +2215,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1746,10 +2259,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1767,8 +2280,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2029,20 +2542,341 @@
   
 
 
-<h1 id="research-architecture-rationale">Research — Architecture &amp; Rationale<a class="headerlink" href="#research-architecture-rationale" title="Permanent link">&para;</a></h1>
-<div class="persona-banner persona-research">
-    <p class="title">Researcher</p>
-    <p class="meta">Owners: networking-team@osg-htc.org</p>
-</div>
-
-<p>This area is for readers who want to understand system architecture, data pipelines, and development notes. See <code>architecture.md</code> and <code>data-pipeline.md</code> for diagrams and ingestion details.</p>
-<p>Key pages:</p>
+<h1 id="researcher-architecture-analytics">🔭 Researcher — Architecture &amp; Analytics<a class="headerlink" href="#researcher-architecture-analytics" title="Permanent link">&para;</a></h1>
+<p>Understand the OSG/WLCG network monitoring system, access data, and explore insights.</p>
+<hr />
+<h2 id="system-architecture">System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="high-level-overview">High-Level Overview<a class="headerlink" href="#high-level-overview" title="Permanent link">&para;</a></h3>
+<p><strong><a href="../architecture/">Architecture Overview</a></strong> — components, responsibilities, and system design</p>
+<p>The perfSONAR network consists of:</p>
 <ul>
-<li><code>architecture.md</code> — component diagrams and responsibilities</li>
-<li><code>data-pipeline.md</code> — how measurements are ingested, stored, and processed</li>
-<li><code>tools/</code> — scripts, notebooks, and data access helpers</li>
+<li>
+<p><strong>Testpoints</strong> — distributed measurement agents at OSG/WLCG sites</p>
+</li>
+<li>
+<p><strong>Collection Pipeline</strong> — HTTP-Archiver ingestion and Logstash processing</p>
+</li>
+<li>
+<p><strong>Data Storage</strong> — Central Elasticsearch instances (distributed for</p>
+</li>
 </ul>
-<p>If you want to contribute architecture notes or diagrams, add a short summary and attach a PNG/SVG in <code>docs/personas/research/assets/</code> and link it from the relevant page.</p>
+<p>resilience)</p>
+<ul>
+<li>
+<p><strong>Configuration Services</strong> — pSConfig for centralized test mesh management</p>
+</li>
+<li>
+<p><strong>Monitoring</strong> — PSETF for infrastructure health and visibility</p>
+</li>
+</ul>
+<h3 id="data-flow-from-measurement-to-insight">Data Flow: From Measurement to Insight<a class="headerlink" href="#data-flow-from-measurement-to-insight" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Measurement</strong> (2-minute intervals)</p>
+</li>
+<li>
+<p>perfSONAR testpoints run periodic latency, bandwidth, traceroute tests</p>
+</li>
+<li>
+<p>Tests configured by central mesh at <code>psconfig.opensciencegrid.org</code></p>
+</li>
+<li>
+<p><strong>Collection</strong> (near real-time)</p>
+</li>
+<li>
+<p>Results sent to central Elasticsearch via HTTP-Archiver</p>
+</li>
+<li>
+<p>Logstash processes and enriches measurement metadata</p>
+</li>
+<li>
+<p><strong>Storage</strong> (permanent)</p>
+</li>
+<li>
+<p><strong><a href="../../../osg-network-services/">OSG Network Datastore</a></strong> — distributed Elasticsearch storage</p>
+</li>
+<li>
+<p>JSON API for direct programmatic access</p>
+</li>
+<li>
+<p><strong>Analysis</strong> (on-demand)</p>
+</li>
+<li>
+<p><strong><a href="../../../osg-network-analytics/">OSG Analytics Platform</a></strong> — Kibana dashboards + Jupyter notebooks</p>
+</li>
+<li>
+<p>Custom queries, time-series analysis, anomaly detection</p>
+</li>
+<li>
+<p><strong>Visualization</strong> (real-time dashboards)</p>
+</li>
+<li>
+<p><strong><a href="https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network">WLCG Dashboards</a></strong> — performance monitoring</p>
+</li>
+<li>
+<p>Site-to-site path performance, latency trends, bandwidth utilization</p>
+</li>
+</ol>
+<hr />
+<h2 id="accessing-analyzing-data">Accessing &amp; Analyzing Data<a class="headerlink" href="#accessing-analyzing-data" title="Permanent link">&para;</a></h2>
+<h3 id="real-time-dashboards">Real-Time Dashboards<a class="headerlink" href="#real-time-dashboards" title="Permanent link">&para;</a></h3>
+<p><strong><a href="https://monit-grafana-open.cern.ch/d/MwuxgogIk/wlcg-site-network?var-bin=1h&amp;orgId=16">WLCG Grafana Dashboards</a></strong></p>
+<ul>
+<li>
+<p>Network performance by site and path</p>
+</li>
+<li>
+<p>Latency, bandwidth, packet loss trends</p>
+</li>
+<li>
+<p>Time-series filtering and drill-down</p>
+</li>
+</ul>
+<p><strong><a href="https://psetf.aglt2.org/etf/check_mk/">OSG PSETF Monitoring</a></strong></p>
+<ul>
+<li>
+<p>perfSONAR infrastructure health</p>
+</li>
+<li>
+<p>Testpoint availability and service status</p>
+</li>
+<li>
+<p>Test execution success rates</p>
+</li>
+</ul>
+<p><strong><a href="https://atlas-kibana.mwt2.org/s/networking/app/kibana">OSG Analytics Platform</a></strong></p>
+<ul>
+<li>
+<p>Custom Kibana queries</p>
+</li>
+<li>
+<p>Ad-hoc measurement exploration</p>
+</li>
+<li>
+<p>Jupyter notebooks for advanced analysis</p>
+</li>
+</ul>
+<h3 id="programmatic-access">Programmatic Access<a class="headerlink" href="#programmatic-access" title="Permanent link">&para;</a></h3>
+<h3 id="elasticsearch-api">Elasticsearch API<a class="headerlink" href="#elasticsearch-api" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong><a href="../../../osg-network-services/">OSG Network Datastore</a></strong> — detailed API documentation</p>
+</li>
+<li>
+<p>JSON endpoints for direct queries</p>
+</li>
+<li>
+<p>Available at: University of Chicago and University of Nebraska instances</p>
+</li>
+</ul>
+<h4 id="example-query">Example query<a class="headerlink" href="#example-query" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;elasticsearch-server:9200/perfsonar-testpoint/_search&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;query&quot;: {&quot;match&quot;: {&quot;agent&quot;: &quot;testpoint.example.com&quot;}}}&#39;</span>
+</code></pre></div>
+<h3 id="jupyter-notebooks">Jupyter Notebooks<a class="headerlink" href="#jupyter-notebooks" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p>Available on analytics platform</p>
+</li>
+<li>
+<p>Pre-built examples for common analysis tasks</p>
+</li>
+<li>
+<p>Python libraries: pandas, numpy, matplotlib for data science workflows</p>
+</li>
+</ul>
+<h3 id="psconfig-api">pSConfig API<a class="headerlink" href="#psconfig-api" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong><a href="https://psconfig.opensciencegrid.org">Central Mesh Configuration</a></strong> — test definitions and schedule</p>
+</li>
+<li>
+<p>JSON endpoints for retrieving test configurations</p>
+</li>
+<li>
+<p>Dynamic mesh membership and test parameters</p>
+</li>
+</ul>
+<hr />
+<h2 id="analyzing-network-measurements">Analyzing Network Measurements<a class="headerlink" href="#analyzing-network-measurements" title="Permanent link">&para;</a></h2>
+<h3 id="questions-you-can-answer">Questions You Can Answer<a class="headerlink" href="#questions-you-can-answer" title="Permanent link">&para;</a></h3>
+<p><strong>Performance Characterization:</strong></p>
+<ul>
+<li>
+<p>Which network paths have persistent latency issues?</p>
+</li>
+<li>
+<p>What's the peak and sustained bandwidth between sites?</p>
+</li>
+<li>
+<p>How has network performance trended over the past month/year?</p>
+</li>
+<li>
+<p>Are there time-of-day or day-of-week patterns?</p>
+</li>
+</ul>
+<p><strong>Infrastructure Health:</strong></p>
+<ul>
+<li>
+<p>Which perfSONAR testpoints are most active?</p>
+</li>
+<li>
+<p>What's the geographic distribution of measurement agents?</p>
+</li>
+<li>
+<p>Are there coverage gaps (missing paths)?</p>
+</li>
+</ul>
+<p><strong>Root Cause Analysis:</strong></p>
+<ul>
+<li>
+<p>Did network performance degrade after a specific event?</p>
+</li>
+<li>
+<p>Correlate measurements with known network changes</p>
+</li>
+<li>
+<p>Identify bottlenecks in multi-hop paths</p>
+</li>
+</ul>
+<h3 id="tools-resources">Tools &amp; Resources<a class="headerlink" href="#tools-resources" title="Permanent link">&para;</a></h3>
+<p><strong>Data Analysis:</strong></p>
+<ul>
+<li>
+<p><strong>Kibana</strong> — query, filter, and visualize Elasticsearch data</p>
+</li>
+<li>
+<p><strong>Jupyter</strong> — Python/pandas for advanced statistical analysis</p>
+</li>
+<li>
+<p><strong>Grafana</strong> — time-series visualization and alerting</p>
+</li>
+</ul>
+<p><strong>Measurement Understanding:</strong></p>
+<ul>
+<li>
+<p><strong><a href="https://docs.perfsonar.net/">perfSONAR Documentation</a></strong> — test definitions, data formats</p>
+</li>
+<li>
+<p><strong><a href="https://fasterdata.es.net/">ESnet Network Tools</a></strong> — methodology and best practices</p>
+</li>
+<li>
+<p><strong>Measurement Archive</strong> — historical data storage and retrieval</p>
+</li>
+</ul>
+<p><strong>Community Resources:</strong></p>
+<ul>
+<li>
+<p><strong><a href="https://lists.internet2.edu/sympa/info/perfsonar-user">perfSONAR Mailing List</a></strong> — research collaborations</p>
+</li>
+<li>
+<p><strong><a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics">WLCG Network WG</a></strong> — mesh governance</p>
+</li>
+</ul>
+<hr />
+<h2 id="contributing-development">Contributing &amp; Development<a class="headerlink" href="#contributing-development" title="Permanent link">&para;</a></h2>
+<h3 id="adding-new-measurements-or-tests">Adding New Measurements or Tests<a class="headerlink" href="#adding-new-measurements-or-tests" title="Permanent link">&para;</a></h3>
+<p>Propose new tests to the <strong><a href="https://twiki.cern.ch/twiki/bin/view/LCG/NetworkTransferMetrics">WLCG Mesh Configuration</a></strong>:</p>
+<ul>
+<li>
+<p>Define measurement parameters and schedule</p>
+</li>
+<li>
+<p>Request inclusion in production mesh</p>
+</li>
+<li>
+<p>Community review and approval</p>
+</li>
+</ul>
+<p><strong>Or deploy local tests:</strong></p>
+<ul>
+<li>
+<p>Add custom tests via your testpoint's pSConfig web interface</p>
+</li>
+<li>
+<p>Share configurations with the community</p>
+</li>
+</ul>
+<h3 id="improving-the-infrastructure">Improving the Infrastructure<a class="headerlink" href="#improving-the-infrastructure" title="Permanent link">&para;</a></h3>
+<p><strong>Source code and development:</strong></p>
+<ul>
+<li>
+<p><strong><a href="https://github.com/osg-htc/networking">GitHub: osg-htc/networking</a></strong> — documentation, scripts, and automation</p>
+</li>
+<li>
+<p><strong><a href="https://github.com/perfsonar">GitHub: perfsonar/perfsonar</a></strong> — core perfSONAR software</p>
+</li>
+<li>
+<p><strong><a href="https://github.com/osg-htc/networking/issues">Issues &amp; Discussions</a></strong> — feature requests and bug reports</p>
+</li>
+</ul>
+<p><strong>Contributing:</strong></p>
+<ul>
+<li>
+<p>Submit pull requests for improvements</p>
+</li>
+<li>
+<p>Report issues and propose enhancements</p>
+</li>
+<li>
+<p>Email: <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#110;&#101;&#116;&#119;&#111;&#114;&#107;&#105;&#110;&#103;&#45;&#116;&#101;&#97;&#109;&#64;&#111;&#115;&#103;&#45;&#104;&#116;&#99;&#46;&#111;&#114;&#103;">&#110;&#101;&#116;&#119;&#111;&#114;&#107;&#105;&#110;&#103;&#45;&#116;&#101;&#97;&#109;&#64;&#111;&#115;&#103;&#45;&#104;&#116;&#99;&#46;&#111;&#114;&#103;</a></p>
+</li>
+</ul>
+<h3 id="architecture-documentation">Architecture &amp; Documentation<a class="headerlink" href="#architecture-documentation" title="Permanent link">&para;</a></h3>
+<p><strong>Want to contribute diagrams, data pipeline notes, or architecture updates?</strong></p>
+<ul>
+<li>
+<p>Add diagrams or notes to <code>personas/research/</code></p>
+</li>
+<li>
+<p>Submit via GitHub PR or email <a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#110;&#101;&#116;&#119;&#111;&#114;&#107;&#105;&#110;&#103;&#45;&#116;&#101;&#97;&#109;&#64;&#111;&#115;&#103;&#45;&#104;&#116;&#99;&#46;&#111;&#114;&#103;">&#110;&#101;&#116;&#119;&#111;&#114;&#107;&#105;&#110;&#103;&#45;&#116;&#101;&#97;&#109;&#64;&#111;&#115;&#103;&#45;&#104;&#116;&#99;&#46;&#111;&#114;&#103;</a></p>
+</li>
+<li>
+<p>All contributions welcome and attributed</p>
+</li>
+</ul>
+<hr />
+<h2 id="related-topics">Related Topics<a class="headerlink" href="#related-topics" title="Permanent link">&para;</a></h2>
+<h3 id="infrastructure-services">Infrastructure &amp; Services<a class="headerlink" href="#infrastructure-services" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong><a href="../../../osg-network-services/">Network Services &amp; Data</a></strong> — datastore architecture and details</p>
+</li>
+<li>
+<p><strong><a href="../../../osg-network-analytics/">Network Analytics</a></strong> — analytics platform overview</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/psetf/">perfSONAR Infrastructure Monitoring</a></strong> — PSETF system and health checks</p>
+</li>
+<li>
+<p><strong><a href="https://psconfig.opensciencegrid.org">pSConfig Web Admin</a></strong> — centralized test configuration</p>
+</li>
+</ul>
+<h3 id="foundational-concepts">Foundational Concepts<a class="headerlink" href="#foundational-concepts" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong><a href="../../../perfsonar-in-osg/">perfSONAR in OSG/WLCG</a></strong> — motivation and importance</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/deployment-models/">Deployment Models</a></strong> — testpoint architecture</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/installation/">Installation Guide</a></strong> — for setting up your own measurement agent</p>
+</li>
+</ul>
+<h3 id="tools-technical-details">Tools &amp; Technical Details<a class="headerlink" href="#tools-technical-details" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong><a href="../../../perfsonar/tools_scripts/">Tools &amp; Scripts</a></strong> — orchestration and management tools</p>
+</li>
+<li>
+<p><strong><a href="../../../host-network-tuning/">Host Tuning</a></strong> — performance optimization for measurement hosts</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/faq/">perfSONAR FAQ</a></strong> — technical questions answered</p>
+</li>
+</ul>
 
 
 

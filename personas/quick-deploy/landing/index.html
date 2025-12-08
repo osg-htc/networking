@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Quick, minimal steps to deploy a perfSONAR testpoint for WLCG/OSG monitoring.">
+        <meta name="description" content="Concise, verified quickstart to deploy a perfSONAR testpoint for OSG/WLCG monitoring.">
       
       
       
@@ -27,7 +27,7 @@
     
     
       
-        <title>Quick Deploy — perfSONAR Testpoint (Quick Deploy) - OSG Networking Area</title>
+        <title>Quick Deploy — perfSONAR Testpoint - OSG Networking Area</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Quick Deploy — perfSONAR Testpoint (Quick Deploy)
+              Quick Deploy — perfSONAR Testpoint
             
           </span>
         </div>
@@ -511,6 +511,31 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy perfSONAR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -528,12 +553,186 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before You Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation Paths
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation Paths">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fast-track-orchestrated-deploy-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚡ Fast Track — Orchestrated Deploy (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-deploy-manual-step-by-step-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Custom Deploy — Manual Step-by-Step Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatedrepeatable-deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🤖 Automated/Repeatable Deploy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-deploy-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Deploy Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-Deploy Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#host-tuning-optional-but-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host Tuning (Optional but Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-configuration-multi-nic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Configuration (Multi-NIC)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ls-registration-enrollment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LS Registration &amp; Enrollment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-hardening-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Hardening (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation &amp; Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support &amp; Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-tools-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Tools &amp; Scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -592,7 +791,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1103,6 +1302,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1730,6 +2103,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1746,10 +2147,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1767,8 +2168,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2029,18 +2430,149 @@
   
 
 
-<h1 id="quick-deploy-perfsonar-testpoint">Quick Deploy — perfSONAR Testpoint<a class="headerlink" href="#quick-deploy-perfsonar-testpoint" title="Permanent link">&para;</a></h1>
-<div class="persona-banner persona-quick-deploy">
-    <p class="title">Quick Deploy</p>
-    <p class="meta">Owners: networking-team@osg-htc.org</p>
-</div>
-
-<p>This landing page links to minimal, tested instructions and automation to get a perfSONAR testpoint running quickly.</p>
+<h1 id="quick-deploy-perfsonar-testpoint">🚀 Quick Deploy — perfSONAR Testpoint<a class="headerlink" href="#quick-deploy-perfsonar-testpoint" title="Permanent link">&para;</a></h1>
+<p>Get a perfSONAR testpoint running on OSG/WLCG in <strong>1-2 hours</strong> with guided automation.</p>
+<hr />
+<h2 id="before-you-start">Before You Start<a class="headerlink" href="#before-you-start" title="Permanent link">&para;</a></h2>
+<p>Understand the deployment landscape and requirements:</p>
 <ul>
-<li>Quickstart (minimal): <code>quickstart-perfsonar-testpoint-v2.md</code></li>
-<li>Automated setups and optional features: <code>automated-setup/README.md</code></li>
+<li>
+<p><strong><a href="../../../perfsonar-in-osg/">Why perfSONAR in OSG/WLCG?</a></strong> — motivation,
+  importance, and what you're joining</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/deployment-models/">Deployment Models &amp; Options</a></strong> —
+  hardware requirements, testpoint vs. toolkit, containerized vs. bare metal</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/multiple-nic-guidance/">Multiple NIC Guidance</a></strong> — if
+  deploying on a host with dual NICs</p>
+</li>
 </ul>
-<p>If you need a working testpoint in a single admin session, follow the quickstart; if you plan repeated deploys, use the automation examples.</p>
+<hr />
+<h2 id="installation-paths">Installation Paths<a class="headerlink" href="#installation-paths" title="Permanent link">&para;</a></h2>
+<h3 id="fast-track-orchestrated-deploy-recommended">⚡ Fast Track — Orchestrated Deploy (Recommended)<a class="headerlink" href="#fast-track-orchestrated-deploy-recommended" title="Permanent link">&para;</a></h3>
+<p><strong>Time:</strong> 30-60 minutes | <strong>Skill level:</strong> System administrator</p>
+<p>Follow the <strong><a href="../install-perfsonar-testpoint/">Full Installation Guide</a></strong> which uses the orchestrator for guided,
+interactive or non-interactive deploys.</p>
+<ul>
+<li>
+<p><code>perfSONAR-orchestrator.sh</code> — automates package install, PBR, security, containers, certificates, and mesh enrollment</p>
+</li>
+<li>
+<p>Interactive mode: pause at each step to confirm/skip</p>
+</li>
+<li>
+<p>Non-interactive mode: <code>--non-interactive</code> flag for automated deployment</p>
+</li>
+</ul>
+<h3 id="custom-deploy-manual-step-by-step-control">🔧 Custom Deploy — Manual Step-by-Step Control<a class="headerlink" href="#custom-deploy-manual-step-by-step-control" title="Permanent link">&para;</a></h3>
+<p><strong>Time:</strong> 60-90 minutes | <strong>Skill level:</strong> System administrator + networking knowledge</p>
+<p>For multi-NIC setups or customization, follow <strong><a href="../../../perfsonar/install-testpoint/">Manual Steps</a></strong>.</p>
+<p>Covers: package install, PBR configuration, container deployment, certificate handling, mesh enrollment.</p>
+<h3 id="automatedrepeatable-deploy">🤖 Automated/Repeatable Deploy<a class="headerlink" href="#automatedrepeatable-deploy" title="Permanent link">&para;</a></h3>
+<p><strong>Time:</strong> Varies | <strong>Skill level:</strong> DevOps/automation engineer</p>
+<p>For deploying multiple testpoints or CI/CD pipelines, see <strong><a href="../automated-setup/">Automated Setup Examples</a></strong>.</p>
+<p>Reference: Ansible playbooks, orchestrator <code>--non-interactive</code> mode, containerized workflows.</p>
+<hr />
+<h2 id="post-deploy-configuration">Post-Deploy Configuration<a class="headerlink" href="#post-deploy-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="host-tuning-optional-but-recommended">Host Tuning (Optional but Recommended)<a class="headerlink" href="#host-tuning-optional-but-recommended" title="Permanent link">&para;</a></h3>
+<p>Optimize kernel and NIC settings for network throughput:</p>
+<ul>
+<li>
+<p><strong><a href="../../../network-troubleshooting/">Fasterdata Tuning</a></strong> — ESnet recommendations for high-performance hosts</p>
+</li>
+<li>
+<p>Tool: <code>fasterdata-tuning.sh</code> (audit and apply modes, ~15 minutes)</p>
+</li>
+</ul>
+<h3 id="network-configuration-multi-nic">Network Configuration (Multi-NIC)<a class="headerlink" href="#network-configuration-multi-nic" title="Permanent link">&para;</a></h3>
+<p>Set up policy-based routing and static IP addressing:</p>
+<ul>
+<li>
+<p><strong><a href="../../../perfsonar/multiple-nic-guidance/">Multi-NIC Setup Guide</a></strong> — when using multiple interfaces</p>
+</li>
+<li>
+<p>Tool: <code>perfSONAR-pbr-nm.sh</code> (automatic NetworkManager configuration)</p>
+</li>
+</ul>
+<h3 id="ls-registration-enrollment">LS Registration &amp; Enrollment<a class="headerlink" href="#ls-registration-enrollment" title="Permanent link">&para;</a></h3>
+<p>Register your testpoint globally and enroll in test meshes:</p>
+<ul>
+<li>
+<p><strong><a href="../../../perfsonar/tools_scripts/README-lsregistration/">LS Registration Setup</a></strong> — register for discovery</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/tools_scripts/">Auto-Enrollment in Meshes</a></strong> — join WLCG/OSG test meshes</p>
+</li>
+<li>
+<p>Tool: <code>perfSONAR-update-lsregistration.sh</code> and <code>perfSONAR-auto-enroll-psconfig.sh</code></p>
+</li>
+</ul>
+<h3 id="security-hardening-optional">Security Hardening (Optional)<a class="headerlink" href="#security-hardening-optional" title="Permanent link">&para;</a></h3>
+<p>Harden your testpoint with security features:</p>
+<ul>
+<li>
+<p><strong><a href="../../../features/fail2ban/">fail2ban</a></strong> — prevent brute-force attacks</p>
+</li>
+<li>
+<p><strong><a href="../../../features/nftables/">nftables</a></strong> — firewall and rate limiting</p>
+</li>
+<li>
+<p><strong><a href="../../../features/selinux/">SELinux</a></strong> — mandatory access control</p>
+</li>
+</ul>
+<hr />
+<h2 id="validation-troubleshooting">Validation &amp; Troubleshooting<a class="headerlink" href="#validation-troubleshooting" title="Permanent link">&para;</a></h2>
+<p>Once deployed, verify everything is working:</p>
+<ul>
+<li>
+<p><strong><a href="../../troubleshoot/triage-checklist/">Quick Triage Checklist</a></strong> — 5-minute verification steps</p>
+</li>
+<li>
+<p><strong><a href="../../../perfsonar/faq/">perfSONAR FAQ</a></strong> — answers to common questions</p>
+</li>
+<li>
+<p><strong><a href="../../troubleshoot/landing/">Troubleshooter Guide</a></strong> — detailed diagnostics if something isn't working</p>
+</li>
+</ul>
+<hr />
+<h2 id="support-resources">Support &amp; Resources<a class="headerlink" href="#support-resources" title="Permanent link">&para;</a></h2>
+<p><strong>Questions or issues?</strong></p>
+<ul>
+<li>
+<p><strong>perfSONAR user community:</strong> <a href="https://lists.internet2.edu/sympa/info/perfsonar-user">Mailing list</a></p>
+</li>
+<li>
+<p><strong>OSG-specific help:</strong> <a href="https://support.opensciencegrid.org/">GOC support</a></p>
+</li>
+<li>
+<p><strong>WLCG-specific help:</strong> <a href="https://ggus.eu/">GGUS ticket</a> → "WLCG perfSONAR support"</p>
+</li>
+<li>
+<p><strong>General troubleshooting:</strong> <a href="../../../network-troubleshooting/">Network Troubleshooting Guide</a></p>
+</li>
+</ul>
+<hr />
+<h2 id="related-tools-scripts">Related Tools &amp; Scripts<a class="headerlink" href="#related-tools-scripts" title="Permanent link">&para;</a></h2>
+<p>All tools and scripts are available in the <a href="../../../perfsonar/tools_scripts/">Tools section</a>, including:</p>
+<ul>
+<li>
+<p>Orchestrator (<code>perfSONAR-orchestrator.sh</code>)</p>
+</li>
+<li>
+<p>PBR setup (<code>perfSONAR-pbr-nm.sh</code>)</p>
+</li>
+<li>
+<p>LS registration (<code>perfSONAR-update-lsregistration.sh</code>)</p>
+</li>
+<li>
+<p>Host tuning (<code>fasterdata-tuning.sh</code>)</p>
+</li>
+<li>
+<p>Auto-enrollment (<code>perfSONAR-auto-enroll-psconfig.sh</code>)</p>
+</li>
+</ul>
 
 
 

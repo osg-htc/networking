@@ -514,7 +514,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -577,7 +577,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1093,6 +1093,180 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1479,10 +1653,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage-examples_1" class="md-nav__link">
+  <a href="#usage-examples-fasterdata-tuning" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Usage examples
+        Usage examples (fasterdata tuning)
       
     </span>
   </a>
@@ -1589,10 +1763,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#notes_1" class="md-nav__link">
+  <a href="#notes-script-details" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Notes
+        Notes (script details)
       
     </span>
   </a>
@@ -2007,6 +2181,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -2023,10 +2225,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -2044,8 +2246,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2307,34 +2509,53 @@
 
 
 <h1 id="perfsonar-multi-nic-networkmanager-configuration">perfSONAR multi-NIC NetworkManager configuration<a class="headerlink" href="#perfsonar-multi-nic-networkmanager-configuration" title="Permanent link">&para;</a></h1>
-<p>This directory contains <code>perfSONAR-pbr-nm.sh</code>, a Bash script to configure
-static IPv4/IPv6 addressing and per-NIC source-based routing via NetworkManager
-(nmcli).</p>
+<p>This directory contains <code>perfSONAR-pbr-nm.sh</code>, a Bash script to configure static IPv4/IPv6 addressing and per-NIC
+source-based routing via NetworkManager (nmcli).</p>
 <h2 id="quick-overview">Quick overview<a class="headerlink" href="#quick-overview" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Script: <code>perfSONAR-pbr-nm.sh</code></li>
-<li>Script: <code>fasterdata-tuning.sh</code> (Fasterdata audit/apply host tuning script)</li>
-<li>Config file: <code>/etc/perfSONAR-multi-nic-config.conf</code></li>
-<li>Log file: <code>/var/log/perfSONAR-multi-nic-config.log</code></li>
+<li>
+<p>Script: <code>perfSONAR-pbr-nm.sh</code></p>
+</li>
+<li>
+<p>Script: <code>fasterdata-tuning.sh</code> (Fasterdata audit/apply host tuning script)</p>
+</li>
+<li>
+<p>Config file: <code>/etc/perfSONAR-multi-nic-config.conf</code></p>
+</li>
+<li>
+<p>Log file: <code>/var/log/perfSONAR-multi-nic-config.log</code></p>
+</li>
 </ul>
 <h2 id="install-helper">Install helper<a class="headerlink" href="#install-helper" title="Permanent link">&para;</a></h2>
-<p>A small helper is provided to populate <code>/opt/perfsonar-tp/tools_scripts</code> from
-this repository using a shallow sparse checkout. It copies only the
-<code>docs/perfsonar/tools_scripts</code> directory and preserves executable bits.</p>
+<p>A small helper is provided to populate <code>/opt/perfsonar-tp/tools_scripts</code> from this repository using a shallow sparse
+checkout. It copies only the <code>docs/perfsonar/tools_scripts</code> directory and preserves executable bits.</p>
 <ul>
-<li>Script: <code>install_tools_scripts.sh</code> (path: <code>docs/perfsonar/tools_scripts/install_tools_scripts.sh</code>)</li>
-<li>Purpose: idempotent installer for <code>/opt/perfsonar-tp/tools_scripts</code></li>
-<li>Options: <code>--dry-run</code> (preview), <code>--skip-testpoint</code> (don't clone testpoint repo)</li>
+<li>
+<p>Script: <code>install_tools_scripts.sh</code> (path: <code>docs/perfsonar/tools_scripts/install_tools_scripts.sh</code>)</p>
+</li>
+<li>
+<p>Purpose: idempotent installer for <code>/opt/perfsonar-tp/tools_scripts</code></p>
+</li>
+<li>
+<p>Options: <code>--dry-run</code> (preview), <code>--skip-testpoint</code> (don't clone testpoint repo)</p>
+</li>
 </ul>
 <h2 id="systemd-service-installer">Systemd service installer<a class="headerlink" href="#systemd-service-installer" title="Permanent link">&para;</a></h2>
-<p>A helper script is provided to install and enable a systemd service for
-automatic container restart on boot. This ensures perfSONAR testpoint containers
-managed by podman-compose restart automatically after a host reboot.</p>
+<p>A helper script is provided to install and enable a systemd service for automatic container restart on boot. This
+ensures perfSONAR testpoint containers managed by podman-compose restart automatically after a host reboot.</p>
 <ul>
-<li>Script: <code>install-systemd-service.sh</code></li>
-<li>Purpose: Creates and enables systemd service for perfsonar-testpoint containers</li>
-<li>Service file: <code>/etc/systemd/system/perfsonar-testpoint.service</code></li>
-<li>Must be run as root</li>
+<li>
+<p>Script: <code>install-systemd-service.sh</code></p>
+</li>
+<li>
+<p>Purpose: Creates and enables systemd service for perfsonar-testpoint containers</p>
+</li>
+<li>
+<p>Service file: <code>/etc/systemd/system/perfsonar-testpoint.service</code></p>
+</li>
+<li>
+<p>Must be run as root</p>
+</li>
 </ul>
 <p>Usage:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Install with default path (/opt/perfsonar-tp)</span>
@@ -2345,9 +2566,15 @@ sudo<span class="w"> </span>bash<span class="w"> </span>install-systemd-service.
 </code></pre></div>
 <p>After installation:</p>
 <ul>
-<li>Containers will automatically start on boot</li>
-<li>Use <code>systemctl start|stop|restart|status perfsonar-testpoint</code> to manage</li>
-<li>View logs with <code>journalctl -u perfsonar-testpoint -f</code></li>
+<li>
+<p>Containers will automatically start on boot</p>
+</li>
+<li>
+<p>Use <code>systemctl start|stop|restart|status perfsonar-testpoint</code> to manage</p>
+</li>
+<li>
+<p>View logs with <code>journalctl -u perfsonar-testpoint -f</code></p>
+</li>
 </ul>
 <h2 id="integration-tips">Integration tips<a class="headerlink" href="#integration-tips" title="Permanent link">&para;</a></h2>
 <ul>
@@ -2371,14 +2598,17 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 <p>Install into <code>/opt/perfsonar-tp/tools_scripts</code> (creates the directory if missing):</p>
 <div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh
 </code></pre></div>
-<p>If you already have the perfSONAR testpoint repo checked out in <code>/opt/perfsonar-tp</code>,
-skip cloning with:</p>
+<p>If you already have the perfSONAR testpoint repo checked out in <code>/opt/perfsonar-tp</code>, skip cloning with:</p>
 <div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span>--skip-testpoint
 </code></pre></div>
 <h2 id="fasterdata-host-tuning-script">Fasterdata host tuning script<a class="headerlink" href="#fasterdata-host-tuning-script" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Script: <code>fasterdata-tuning.sh</code> — audit/apply host &amp; NIC tuning (ESnet Fasterdata-aligned) for EL9 systems</li>
-<li>Path: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></li>
+<li>
+<p>Script: <code>fasterdata-tuning.sh</code> — audit/apply host &amp; NIC tuning (ESnet Fasterdata-aligned) for EL9 systems</p>
+</li>
+<li>
+<p>Path: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></p>
+</li>
 </ul>
 <h2 id="download">Download<a class="headerlink" href="#download" title="Permanent link">&para;</a></h2>
 <p>You can download the raw script from the GitHub repo (master branch):</p>
@@ -2399,60 +2629,100 @@ sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tunin
 </code></pre></div>
 <h2 id="optional-flags-apply-mode-only">Optional flags (apply mode only)<a class="headerlink" href="#optional-flags-apply-mode-only" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>--apply-iommu</code>: Update GRUB <code>GRUB_CMDLINE_LINUX</code> to add vendor + <code>iommu=pt</code> and regenerate grub (requires <code>--mode apply</code> and root).</li>
-<li><code>--apply-smt on|off</code>: Change SMT state at runtime; use <code>--persist-smt</code> to also persist via GRUB edits.</li>
-<li><code>--persist-smt</code>: Persist SMT change by adding/removing <code>nosmt</code> in the kernel cmdline.</li>
-<li><code>--yes</code>: Non-interactive confirmation for apply flags.</li>
-<li><code>--dry-run</code>: Preview the changes that would be made (GRUB edits and sysfs writes) without applying them. Use for validation and audits.</li>
+<li>
+<p><code>--apply-iommu</code>: Update GRUB <code>GRUB_CMDLINE_LINUX</code> to add vendor + <code>iommu=pt</code> and regenerate grub (requires <code>--mode apply</code> and root).</p>
+</li>
+<li>
+<p><code>--apply-smt on|off</code>: Change SMT state at runtime; use <code>--persist-smt</code> to also persist via GRUB edits.</p>
+</li>
+<li>
+<p><code>--persist-smt</code>: Persist SMT change by adding/removing <code>nosmt</code> in the kernel cmdline.</p>
+</li>
+<li>
+<p><code>--yes</code>: Non-interactive confirmation for apply flags.</p>
+</li>
+<li>
+<p><code>--dry-run</code>: Preview the changes that would be made (GRUB edits and sysfs writes) without applying them. Use for validation and audits.</p>
+</li>
 </ul>
-<h2 id="usage-examples_1">Usage examples<a class="headerlink" href="#usage-examples_1" title="Permanent link">&para;</a></h2>
-<p>Audit (default) a measurement host:
+<h2 id="usage-examples-fasterdata-tuning">Usage examples (fasterdata tuning)<a class="headerlink" href="#usage-examples-fasterdata-tuning" title="Permanent link">&para;</a></h2>
+<p>Audit (default) a measurement host:</p>
 <div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
-</code></pre></div></p>
-<p>Apply tuning (requires root):
+</code></pre></div>
+<p>Apply tuning (requires root):</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Shows a <code>Host Info</code> summary and performs various checks (sysctl, ethtool, drivers, SMT, IOMMU). IOMMU changes require GRUB edits and reboot; SMT toggles can be done via <code>/sys/devices/system/cpu/smt/control</code>.</li>
-<li>In apply mode the script writes <code>/etc/sysctl.d/90-fasterdata.conf</code> and writes/enables a systemd <code>ethtool-persist.service</code> to persist NIC settings.</li>
+<li>
+<p>Shows a <code>Host Info</code> summary and performs various checks (sysctl, ethtool, drivers, SMT, IOMMU). IOMMU changes require GRUB edits and reboot; SMT toggles can be done via <code>/sys/devices/system/cpu/smt/control</code>.</p>
+</li>
+<li>
+<p>In apply mode the script writes <code>/etc/sysctl.d/90-fasterdata.conf</code> and writes/enables a systemd <code>ethtool-persist.service</code> to persist NIC settings.</p>
+</li>
 </ul>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Must be run as root. The script now enforces running as root early in
-  execution and will exit if run as a non-privileged user. Run it with sudo
-  or from a root shell.</li>
-<li>NetworkManager (<code>nmcli</code>) is required. The script checks for the presence of
-  <code>nmcli</code> and will abort if it is not installed. Install NetworkManager via
-  your distribution's package manager before running.</li>
+<li>
+<p>Must be run as root. The script now enforces running as root early in
+execution and will exit if run as a non-privileged user. Run it with sudo or from a root shell.</p>
+</li>
+<li>
+<p>NetworkManager (<code>nmcli</code>) is required. The script checks for the presence of
+<code>nmcli</code> and will abort if it is not installed. Install NetworkManager via your distribution's package manager before
+running.</p>
+</li>
 </ul>
 <h2 id="dependencies-and-package-install-hints">Dependencies and package install hints<a class="headerlink" href="#dependencies-and-package-install-hints" title="Permanent link">&para;</a></h2>
-<p>The scripts in this directory call a number of external commands. Install
-these packages (or their distro equivalents) before using the tools below.</p>
+<p>The scripts in this directory call a number of external commands. Install these packages (or their distro equivalents)
+before using the tools below.</p>
 <p>Essential packages</p>
 <ul>
-<li>bash (Bash 4.3+)</li>
-<li>coreutils (cp/mv/rm/mkdir/chmod/chown)</li>
-<li>iproute2 (provides <code>ip</code> and <code>ip route</code>)</li>
-<li>NetworkManager (provides <code>nmcli</code>)</li>
-<li>rsync (recommended for safe backups; scripts fall back to <code>cp</code>)</li>
-<li>curl</li>
-<li>openssl</li>
+<li>
+<p>bash (Bash 4.3+)</p>
+</li>
+<li>
+<p>coreutils (cp/mv/rm/mkdir/chmod/chown)</p>
+</li>
+<li>
+<p>iproute2 (provides <code>ip</code> and <code>ip route</code>)</p>
+</li>
+<li>
+<p>NetworkManager (provides <code>nmcli</code>)</p>
+</li>
+<li>
+<p>rsync (recommended for safe backups; scripts fall back to <code>cp</code>)</p>
+</li>
+<li>
+<p>curl</p>
+</li>
+<li>
+<p>openssl</p>
+</li>
 </ul>
 <p>Optional / feature packages</p>
 <ul>
-<li>nftables (provides <code>nft</code>) — required for <code>perfSONAR-install-nftables.sh</code></li>
-<li>fail2ban (provides <code>fail2ban-client</code>) — optional; only used if present</li>
-<li>SELinux user tools (provides <code>getenforce</code>, <code>setenforce</code>, <code>restorecon</code>) —
-  used by SELinux-related operations</li>
-<li>A container engine: <code>podman</code> or <code>docker</code> — required for the lsregistration
-  updater/extractor when operating against the running testpoint container</li>
-<li>podman-compose or docker-compose — useful for running the testpoint
-  compose bundle locally</li>
+<li>
+<p>nftables (provides <code>nft</code>) — required for <code>perfSONAR-install-nftables.sh</code></p>
+</li>
+<li>
+<p>fail2ban (provides <code>fail2ban-client</code>) — optional; only used if present</p>
+</li>
+<li>
+<p>SELinux user tools (provides <code>getenforce</code>, <code>setenforce</code>, <code>restorecon</code>) —
+  used by SELinux-related operations</p>
+</li>
+<li>
+<p>A container engine: <code>podman</code> or <code>docker</code> — required for the lsregistration
+  updater/extractor when operating against the running testpoint container</p>
+</li>
+<li>
+<p>podman-compose or docker-compose — useful for running the testpoint
+  compose bundle locally</p>
+</li>
 </ul>
-<p>Note: the <code>check-deps.sh</code> helper accepts <code>podman-compose</code> as an alternative
-provider to <code>docker-compose</code> and will report the dependency as satisfied if
-either binary is present.</p>
+<p>Note: the <code>check-deps.sh</code> helper accepts <code>podman-compose</code> as an alternative provider to <code>docker-compose</code> and will report
+the dependency as satisfied if either binary is present.</p>
 <p>Example install commands</p>
 <p>Note: package names vary slightly across distributions. Adapt as needed.</p>
 <p>Fedora / RHEL / CentOS (dnf):</p>
@@ -2462,29 +2732,26 @@ either binary is present.</p>
 <div class="highlight"><pre><span></span><code>apt-get<span class="w"> </span>update
 apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>bash<span class="w"> </span>coreutils<span class="w"> </span>iproute2<span class="w"> </span>network-manager<span class="w"> </span>rsync<span class="w"> </span>curl<span class="w"> </span>openssl<span class="w"> </span>nftables<span class="w"> </span>podman<span class="w"> </span>podman-compose<span class="w"> </span>docker.io<span class="w"> </span>docker-compose<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils
 </code></pre></div>
-<p>If you intend to use the lsregistration container helpers, ensure either
-<code>podman</code> or <code>docker</code> is installed and that the service can list and access
-containers (e.g., <code>podman ps</code> or <code>docker ps</code> works as root).</p>
-<p>If <code>rsync</code> is not available the scripts will attempt a <code>cp -a</code> fallback, but
-installing <code>rsync</code> provides safer, more robust backups.</p>
+<p>If you intend to use the lsregistration container helpers, ensure either <code>podman</code> or <code>docker</code> is installed and that the
+service can list and access containers (e.g., <code>podman ps</code> or <code>docker ps</code> works as root).</p>
+<p>If <code>rsync</code> is not available the scripts will attempt a <code>cp -a</code> fallback, but installing <code>rsync</code> provides safer, more
+robust backups.</p>
 <h2 id="safety-first">Safety first<a class="headerlink" href="#safety-first" title="Permanent link">&para;</a></h2>
-<p>This script will REMOVE ALL existing NetworkManager connections when run.
-Always test in a VM or console-attached host and use <code>--dry-run</code> to preview
-changes. The script creates a timestamped backup of existing connections before
-modifying anything.</p>
+<p>This script will REMOVE ALL existing NetworkManager connections when run. Always test in a VM or console-attached host
+and use <code>--dry-run</code> to preview changes. The script creates a timestamped backup of existing connections before modifying
+anything.</p>
 <h2 id="compatibility-and-fallbacks">Compatibility and fallbacks<a class="headerlink" href="#compatibility-and-fallbacks" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
 <p>The script prefers to configure routing and policy rules via NetworkManager
-  (<code>nmcli</code>). However, <code>nmcli</code> support for advanced <code>routes</code> entries and
-  <code>routing-rules</code> varies across versions and distributions. If <code>nmcli</code> cannot
-  apply a given route or routing-rule, the script will attempt a compatibility
-  fallback using the <code>ip route</code> and <code>ip rule</code> commands directly.</p>
+(<code>nmcli</code>). However, <code>nmcli</code> support for advanced <code>routes</code> entries and <code>routing-rules</code> varies across versions and
+distributions. If <code>nmcli</code> cannot apply a given route or routing-rule, the script will attempt a compatibility fallback
+using the <code>ip route</code> and <code>ip rule</code> commands directly.</p>
 </li>
 <li>
 <p>Because the script now requires root, it no longer invokes <code>sudo</code> internally
-  (the caller should run it with root privileges). This makes behavior
-  deterministic in automation and avoids interactive sudo prompts.</p>
+(the caller should run it with root privileges). This makes behavior deterministic in automation and avoids interactive
+sudo prompts.</p>
 </li>
 </ul>
 <h2 id="how-to-run-dry-run-debug">How to run (dry-run / debug)<a class="headerlink" href="#how-to-run-dry-run-debug" title="Permanent link">&para;</a></h2>
@@ -2504,17 +2771,33 @@ bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
 <h2 id="gateway-requirement-inference-and-generator-warnings">Gateway requirement, inference, and generator warnings<a class="headerlink" href="#gateway-requirement-inference-and-generator-warnings" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Any NIC with an IPv4 address should have a corresponding IPv4 gateway; likewise for IPv6. If a NIC lacks a gateway, the generator will attempt conservative inference (below). If a device has no IPv4 or IPv6 gateway (e.g., a management-only NIC), the generator will intentionally skip that NIC when creating an <em>auto-generated</em> config to avoid generating unusable NetworkManager profiles unless you explicitly set the device as <code>DEFAULT_ROUTE_NIC</code>.</li>
-<li>Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.<ul>
-<li>IPv4: subnets are checked in bash; one unambiguous match is required.</li>
-<li>IPv6: requires <code>python3</code> (<code>ipaddress</code> module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.</li>
-<li>If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.</li>
-</ul>
+<li>
+<p>Any NIC with an IPv4 address should have a corresponding IPv4 gateway; likewise for IPv6. If a NIC lacks a
+  gateway, the generator will attempt conservative inference (below). If a device has no IPv4 or IPv6 gateway
+  (e.g., a management-only NIC), the generator will intentionally skip that NIC when creating an
+  <em>auto-generated</em> config to avoid generating unusable NetworkManager profiles unless you explicitly set the
+  device as <code>DEFAULT_ROUTE_NIC</code>.</p>
 </li>
-<li>This inference runs in two places:<ol>
-<li>During auto-generation (<code>--generate-config-auto</code> or <code>--generate-config-debug</code>) so the written config can be immediately useful.</li>
-<li>During normal execution after loading the config but before validation, so missing gateways may be filled automatically.</li>
-</ol>
+<li>
+<p>Conservative gateway inference: if a NIC has an address/prefix but no gateway, the tool will try to reuse a gateway from another NIC on the SAME subnet.</p>
+</li>
+<li>
+<p>IPv4: subnets are checked in bash; one unambiguous match is required.</p>
+</li>
+<li>
+<p>IPv6: requires <code>python3</code> (<code>ipaddress</code> module) to verify the gateway is in the same prefix; link-local gateways (fe80::/10) are not reused; one unambiguous match is required.</p>
+</li>
+<li>
+<p>If multiple gateways match, no guess is made; a warning is logged and validation will require you to set it explicitly.</p>
+</li>
+<li>
+<p>This inference runs in two places:</p>
+</li>
+<li>
+<p>During auto-generation (<code>--generate-config-auto</code> or <code>--generate-config-debug</code>) so the written config can be immediately useful.</p>
+</li>
+<li>
+<p>During normal execution after loading the config but before validation, so missing gateways may be filled automatically.</p>
 </li>
 </ul>
 <p>Example: generated config with inferred gateways</p>
@@ -2549,30 +2832,35 @@ bash<span class="w"> </span>perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 <span class="w">  </span><span class="s2">&quot;2001:db8::1&quot;</span><span class="w">  </span><span class="c1"># guessed (reused gateway)</span>
 <span class="o">)</span>
 </code></pre></div>
-<p>When gateways are inferred, a NOTE section is added near the bottom of the generated file listing each guess. The script will also print a NOTICE to the console/log. Review and edit the guessed values if needed before applying changes.</p>
-<p>If gateways remain missing after inference, the generator writes a WARNING block listing the affected NICs and the script will refuse to proceed until you set the gateways.</p>
+<p>When gateways are inferred, a NOTE section is added near the bottom of the generated file listing each guess. The script
+will also print a NOTICE to the console/log. Review and edit the guessed values if needed before applying changes.</p>
+<p>If gateways remain missing after inference, the generator writes a WARNING block listing the affected NICs and the
+script will refuse to proceed until you set the gateways.</p>
 <h2 id="backups-and-safety">Backups and safety<a class="headerlink" href="#backups-and-safety" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Before applying changes, the script creates a timestamped backup of existing NetworkManager connections. It prefers <code>rsync</code> when available and falls back to <code>cp -a</code>. If the backup fails, the script aborts without removing existing configurations.</li>
 </ul>
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>
-<p>A small set of unit-style tests is provided under <code>tests/</code>. These are designed
-to exercise pure validation and sanitization helpers without modifying system
-configuration. They source the script (functions only) and run checks in a
+<p>A small set of unit-style tests is provided under <code>tests/</code>. These are designed to exercise pure validation and
+sanitization helpers without modifying system configuration. They source the script (functions only) and run checks in a
 non-destructive way.</p>
 <p>Run the tests:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>docs/perfsonar
 ./tests/run_tests.sh
 </code></pre></div>
-<h2 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h2>
+<h2 id="notes-script-details">Notes (script details)<a class="headerlink" href="#notes-script-details" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The script requires Bash (uses <code>local -n</code> namerefs). Run tests on a system
-  with Bash 4.3+.</li>
-<li>For more extensive validation, run <code>shellcheck -x perfSONAR-pbr-nm.sh</code> and
-  address any issues reported.</li>
+<li>
+<p>The script requires Bash (uses <code>local -n</code> namerefs). Run tests on a system
+  with Bash 4.3+.</p>
+</li>
+<li>
+<p>For more extensive validation, run <code>shellcheck -x perfSONAR-pbr-nm.sh</code> and
+  address any issues reported.</p>
+</li>
 </ul>
 <h2 id="contact">Contact<a class="headerlink" href="#contact" title="Permanent link">&para;</a></h2>
-<p>Shawn McKee (script author) — <a href="mailto:smckee@umich.edu">smckee@umich.edu</a></p>
+<p>Shawn McKee (script author) — <a href="mailto:&lt;smckee@umich.edu&gt;"><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#115;&#109;&#99;&#107;&#101;&#101;&#64;&#117;&#109;&#105;&#99;&#104;&#46;&#101;&#100;&#117;">&#115;&#109;&#99;&#107;&#101;&#101;&#64;&#117;&#109;&#105;&#99;&#104;&#46;&#101;&#100;&#117;</a></a></p>
 
 
 

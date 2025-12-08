@@ -514,7 +514,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -577,7 +577,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1088,6 +1088,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1798,6 +1972,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1814,10 +2016,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1835,8 +2037,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2098,36 +2300,33 @@
 
 
 <h1 id="perfsonar-lsregistration-helpers">perfSONAR lsregistration helpers<a class="headerlink" href="#perfsonar-lsregistration-helpers" title="Permanent link">&para;</a></h1>
-<p>This directory includes a helper for managing the perfSONAR Lookup Service (LS)
-registration configuration in <code>lsregistrationdaemon.conf</code>.</p>
+<p>This directory includes a helper for managing the perfSONAR Lookup Service (LS) registration configuration in
+<code>lsregistrationdaemon.conf</code>.</p>
 <ul>
 <li><code>perfSONAR-update-lsregistration.sh</code> — a combined helper that can update,
-  save, restore, create, and extract a <code>lsregistrationdaemon.conf</code>. Use the
-  commands <code>update</code>, <code>save</code>, <code>restore</code>, <code>create</code>, and <code>extract</code> (see examples
-  below).</li>
+save, restore, create, and extract a <code>lsregistrationdaemon.conf</code>. Use the commands <code>update</code>, <code>save</code>, <code>restore</code>,
+<code>create</code>, and <code>extract</code> (see examples below).</li>
 </ul>
 <h2 id="update-existing-configuration-container-or-local">Update existing configuration (container or local)<a class="headerlink" href="#update-existing-configuration-container-or-local" title="Permanent link">&para;</a></h2>
 <p>Script: <code>perfSONAR-update-lsregistration.sh</code></p>
 <ul>
 <li>
 <p>Container mode (default): copies <code>/etc/perfsonar/lsregistrationdaemon.conf</code>
-  into a temp area, applies requested changes, writes it back into the
-  container, and restarts <code>lsregistrationdaemon</code> inside the container.</p>
-<ul>
-<li>Key flags: <code>--container NAME</code> (default: <code>perfsonar-testpoint</code>),
-  <code>--engine auto|docker|podman</code> (default: <code>auto</code>).</li>
-</ul>
+into a temp area, applies requested changes, writes it back into the container, and restarts <code>lsregistrationdaemon</code>
+inside the container.</p>
+</li>
+<li>
+<p>Key flags: <code>--container NAME</code> (default: <code>perfsonar-testpoint</code>),
+      <code>--engine auto|docker|podman</code> (default: <code>auto</code>).</p>
 </li>
 <li>
 <p>Local mode: operates directly on the host filesystem without a container.</p>
-<ul>
+</li>
 <li>
 <p>Key flags: <code>--local</code>, <code>--conf PATH</code> (default: <code>/etc/perfsonar/lsregistrationdaemon.conf</code>).</p>
 </li>
 <li>
 <p>Attempts a best-effort restart of <code>lsregistrationdaemon</code> on the host.</p>
-</li>
-</ul>
 </li>
 </ul>
 <p>Examples:</p>
@@ -2145,18 +2344,22 @@ registration configuration in <code>lsregistrationdaemon.conf</code>.</p>
 </code></pre></div>
 <h2 id="generate-a-restore-script-from-an-existing-conf">Generate a restore script from an existing conf<a class="headerlink" href="#generate-a-restore-script-from-an-existing-conf" title="Permanent link">&para;</a></h2>
 <p>Script: <code>perfSONAR-update-lsregistration.sh</code> (see above)</p>
-<p>The combined helper contains an <code>extract</code> command that produces a
-self-contained restore script. Use <code>--output</code>/<code>--input</code> to control paths. Example:</p>
+<p>The combined helper contains an <code>extract</code> command that produces a self-contained restore script. Use
+<code>--output</code>/<code>--input</code> to control paths. Example:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Produce a self-contained restore script suitable for host restore</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
 /tmp/restore-lsreg.sh
 </code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Both scripts are Bash and require a modern Bash (4+). Use <code>shellcheck</code> for
-  linting if making changes.</li>
-<li>In container mode, the updater restarts services inside the container; in
-  local mode, it attempts to restart the host service.</li>
+<li>
+<p>Both scripts are Bash and require a modern Bash (4+). Use <code>shellcheck</code> for
+  linting if making changes.</p>
+</li>
+<li>
+<p>In container mode, the updater restarts services inside the container; in
+  local mode, it attempts to restart the host service.</p>
+</li>
 </ul>
 
 

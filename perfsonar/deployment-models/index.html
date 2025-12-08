@@ -514,7 +514,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -577,7 +577,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -755,9 +755,10 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="perfSONAR Toolkit vs Testpoint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#perfsonar-hardware-requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -767,8 +768,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#multiple-nic-network-interface-card-guidance" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -776,6 +777,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1171,6 +1177,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1798,6 +1978,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1814,10 +2022,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1835,8 +2043,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2098,66 +2306,109 @@
 
 
 <h1 id="perfsonar-deployment-options">perfSONAR Deployment Options<a class="headerlink" href="#perfsonar-deployment-options" title="Permanent link">&para;</a></h1>
-<p>The primary motivation for perfSONAR deployment is to test isolation, i.e. only one end-to-end test should run on a host at a time. This ensures that the test results are not impacted by the other tests. Otherwise it is much more difficult to interpret test results, which may vary due to host effects rather then network effects. Taking this into account it means that perfSONAR measurement tools are much more accurate running on a dedicated hardware and while it may be useful to run them on other hosts such as Data Transfer Nodes the current recommendation is to have specific measurement machine. In addition, as bandwidth testing could impact latency testing, we recommend to deploy two different nodes, each focused on specific set of tests. The following deployment options are currently available:</p>
+<p>The primary motivation for perfSONAR deployment is to test isolation, i.e. only one end-to-end test should run on a host
+at a time. This ensures that the test results are not impacted by the other tests. Otherwise it is much more difficult
+to interpret test results, which may vary due to host effects rather then network effects. Taking this into account it
+means that perfSONAR measurement tools are much more accurate running on a dedicated hardware and while it may be useful
+to run them on other hosts such as Data Transfer Nodes the current recommendation is to have specific measurement
+machine. In addition, as bandwidth testing could impact latency testing, we recommend to deploy two different nodes,
+each focused on specific set of tests. The following deployment options are currently available:</p>
+<ul>
+<li><strong>Bare metal</strong> - preffered option in one of two possible configurations:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>* Two bare metal servers, one for latency node, one for bandwidth node
+
+* One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to dual NIC section for more details on this.
+</code></pre></div>
+<ul>
+<li><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>* Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
+* VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
+* Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production
+</code></pre></div>
+<ul>
+<li><strong>Container</strong> - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <a href="https://docs.perfsonar.net/install_docker.html">https://docs.perfsonar.net/install_docker.html</a> but is not typically used in the same way as a full toolkit installation.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>* Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
+</code></pre></div>
+<h2 id="perfsonar-toolkit-vs-testpoint">perfSONAR Toolkit vs Testpoint<a class="headerlink" href="#perfsonar-toolkit-vs-testpoint" title="Permanent link">&para;</a></h2>
+<p>The perfSONAR team has documented the types of installations supported at
+<a href="https://docs.perfsonar.net/install_options.html">https://docs.perfsonar.net/install_options.html</a>.   With the release of version 5, OSG/WLCG sites have a new option:
+instead of installing the full Toolkit sites can choose to install the Testpoint bundle.</p>
 <ul>
 <li>
-<p><strong>Bare metal</strong> - preffered option in one of two possible configurations:</p>
-<p><code>text
-* Two bare metal servers, one for latency node, one for bandwidth node
-* One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to [dual NIC](#multiple-nic-network-interface-card-guidance) section for more details on this.</code></p>
-</li>
-<li>
-<p><strong>Virtual Machine</strong> - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:</p>
-<p><code>text
-* Full-node VM is strongly preferred, having 2 VMs (latency/bandwidth node) on a single bare metal. Mixing perfSONAR VM(s) with others might have an impact on the measurements and is therefore not recommended.
-* VM needs to be configured to have SR-IOV to NIC(s) as well as pinned CPUs to ensure bandwidth tests are not impacted (by hypervisor switching CPUs during the test)
-* Succesfull full speed local bandwidth test is highly recommended prior to putting the VM into production</code></p>
-</li>
-<li>
-<p><strong>Container</strong> - perfSONAR has supported containers from version 4.1 (Q1 2018) and is documented at <a href="https://docs.perfsonar.net/install_docker.html">https://docs.perfsonar.net/install_docker.html</a> but is not typically used in the same way as a full toolkit installation.</p>
-<p>```text
-* Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.</p>
-<p>```</p>
-</li>
-</ul>
-<h3 id="perfsonar-toolkit-vs-testpoint">perfSONAR Toolkit vs Testpoint<a class="headerlink" href="#perfsonar-toolkit-vs-testpoint" title="Permanent link">&para;</a></h3>
-<p>The perfSONAR team has documented the types of installations supported at <a href="https://docs.perfsonar.net/install_options.html">https://docs.perfsonar.net/install_options.html</a>.   With the release of version 5, OSG/WLCG sites have a new option: instead of installing the full Toolkit sites can choose to install the Testpoint bundle.</p>
-<div class="codehilite"><pre><span></span><code><span class="k">*</span> Pros
-
-    ```text
+<p>Pros</p>
+<div class="codehilite"><pre><span></span><code>```text
 </code></pre></div>
 
 <ul>
 <li>Simpler deployment when a local web interface is not needed and a central measurement archive is available.</li>
-<li>
-<p>Less resource intensive for both memory and I/O capacity.
-    ```</p>
-<ul>
+<li>Less resource intensive for both memory and I/O capacity.
+    ```</li>
+</ul>
+</li>
 <li>
 <p>Cons</p>
-<p>```text
-* Measurements are not stored locally
-* No web interface to use for configuration or adding local tests
-* Unable to show results in MaDDash</p>
-</li>
-</ul>
+<div class="codehilite"><pre><span></span><code>```text
+</code></pre></div>
+
+<ul>
+<li>Measurements are not stored locally</li>
+<li>No web interface to use for configuration or adding local tests</li>
+<li>
+<p>Unable to show results in MaDDash</p>
 <p>```</p>
 </li>
 </ul>
-<p>While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced resource constraints, less components and easier management.</p>
-<h3 id="perfsonar-hardware-requirements">perfSONAR Hardware Requirements<a class="headerlink" href="#perfsonar-hardware-requirements" title="Permanent link">&para;</a></h3>
-<p>There are two different nodes participating in the network testing, latency node and bandwidth node, while both are running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available (or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported) as well as enough memory and CPU to support high bandwidth testing. Our recommendation is to match bandwidth node NIC speed with the one installed on the storage nodes as this would provide us with the best match when there are issues to investigate. In case you'd like to deploy high speed (100G) bandwidth node, please consult <a href="https://fasterdata.es.net/host-tuning/100g-tuning/">ESNet tuning guide</a> and <a href="https://www.es.net/assets/Uploads/100G-Tuning-TechEx2016.tierney.pdf">100G tuning presentation</a>. Latency node on the other hand runs low bandwidth, but high frequency tests, sending a continuous stream of packets to measure delay and corresponding packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to continuously store its results into local measurement archive. The minimum hardware requirements to run perfSONAR toolkit are documented <a href="http://docs.perfsonar.net/install_hardware_details.html">here</a>. For WLCG/OSG deployment and taking into account the amount of testing that we perform, we recommend at least the following for perfSONAR 5.0+:</p>
-<ul>
-<li>NIC for bandwidth node matching the capacity of the site storage nodes(10/25/40/100G), 1G NIC for latency node (for higher NIC capacities, 40/100G, please check <a href="https://fasterdata.es.net/host-tuning/100g-tuning/">ESNet tuning guide</a>)</li>
-<li>High clock speede CPU (3.0 Ghz+), fwere cores OK, with at least 32GB+ of RAM (8GB+ if using a Testpoint install)</li>
-<li>NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.</li>
+</li>
 </ul>
-<h3 id="multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance<a class="headerlink" href="#multiple-nic-network-interface-card-guidance" title="Permanent link">&para;</a></h3>
-<p>Many sites would prefer <strong>not</strong> to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5+ there is a way to install both latency and bandwidth measurement services on a single node, as long as it has at least two NICs (one per 'flavor' of measurement) and sufficient processing power and memory. There are few additional steps required in order to configure the node with multiple network cards:</p>
+<p>While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of
+perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced
+resource constraints, less components and easier management.</p>
+<h3 id="perfsonar-hardware-requirements">perfSONAR Hardware Requirements<a class="headerlink" href="#perfsonar-hardware-requirements" title="Permanent link">&para;</a></h3>
+<p>There are two different nodes participating in the network testing, latency node and bandwidth node, while both are
+running on the exact same perfSONAR toolkit, they have very different requirements. Bandwidth node measures available
+(or peak) throughput with low test frequency and will thus require NIC with high capacity (1/10/40/100G are supported)
+as well as enough memory and CPU to support high bandwidth testing. Our recommendation is to match bandwidth node NIC
+speed with the one installed on the storage nodes as this would provide us with the best match when there are issues to
+investigate. In case you'd like to deploy high speed (100G) bandwidth node, please consult <a href="https://fasterdata.es.net/host-tuning/100g-tuning/">ESNet tuning
+guide</a> and <a href="https://www.es.net/assets/Uploads/100G-Tuning-TechEx2016.tierney.pdf">100G tuning
+presentation</a>. Latency node on the other hand runs
+low bandwidth, but high frequency tests, sending a continuous stream of packets to measure delay and corresponding
+packet loss, packet reordering, etc. This means that while it doesn't require high capacity NIC, 1G is usually
+sufficient, it can impose significant load on the IO to disk as well as CPU as many tests run in parallel and need to
+continuously store its results into local measurement archive. The minimum hardware requirements to run perfSONAR
+toolkit are documented <a href="http://docs.perfsonar.net/install_hardware_details.html">here</a>. For WLCG/OSG deployment and
+taking into account the amount of testing that we perform, we recommend at least the following for perfSONAR 5.0+:</p>
 <ul>
-<li>Please setup source routing as described in the <a href="http://docs.perfsonar.net/manage_dual_xface.html">official documentation</a>.</li>
-<li>You'll need to register two hostnames in <a href="../installation/">OIM</a>/<a href="../installation/">GOCDB</a> (and have two reverse DNS entries) as you would normally for two separate nodes.</li>
-<li>Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:</li>
+<li>
+<p>NIC for bandwidth node matching the capacity of the site storage nodes(10/25/40/100G), 1G NIC for latency node (for higher NIC capacities, 40/100G, please check <a href="https://fasterdata.es.net/host-tuning/100g-tuning/">ESNet tuning guide</a>)</p>
+</li>
+<li>
+<p>High clock speede CPU (3.0 Ghz+), fwere cores OK, with at least 32GB+ of RAM (8GB+ if using a Testpoint install)</p>
+</li>
+<li>
+<p>NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.</p>
+</li>
+</ul>
+<!-- anchor removed; heading provides an automatic id -->
+
+<h3 id="multiple-nic-network-interface-card-guidance">Multiple NIC (Network Interface Card) Guidance<a class="headerlink" href="#multiple-nic-network-interface-card-guidance" title="Permanent link">&para;</a></h3>
+<p>Many sites would prefer <strong>not</strong> to have to deploy two servers for cost, space and power reasons.  Since perfSONAR 3.5+
+there is a way to install both latency and bandwidth measurement services on a single node, as long as it has at least
+two NICs (one per 'flavor' of measurement) and sufficient processing power and memory. There are few additional steps
+required in order to configure the node with multiple network cards:</p>
+<ul>
+<li>
+<p>Please setup source routing as described in the <a href="http://docs.perfsonar.net/manage_dual_xface.html">official documentation</a>.</p>
+</li>
+<li>
+<p>You'll need to register two hostnames in <a href="../installation/">OIM</a>/<a href="../installation/">GOCDB</a> (and have two reverse DNS entries) as you would normally for two separate nodes.</p>
+</li>
+<li>
+<p>Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:</p>
+</li>
 </ul>
 <div class="highlight"><pre><span></span><code>psconfig<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN_latency&gt;&quot;</span>
 psconfig<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN_throughput&gt;&quot;</span>

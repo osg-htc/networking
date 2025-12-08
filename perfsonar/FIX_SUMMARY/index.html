@@ -508,7 +508,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -571,7 +571,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1082,6 +1082,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1709,6 +1883,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1725,10 +1927,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1746,8 +1948,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1970,29 +2172,51 @@
 
 <h1 id="perfsonar-testpoint-container-restart-fix-summary">perfSONAR Testpoint Container Restart Fix - Summary<a class="headerlink" href="#perfsonar-testpoint-container-restart-fix-summary" title="Permanent link">&para;</a></h1>
 <h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
-<p>After a host reboot, podman-compose containers for perfSONAR testpoint did not restart automatically because there was no systemd service to manage them. Additionally, the deployed docker-compose.yml configuration had issues that caused the testpoint container to enter a restart loop.</p>
+<p>After a host reboot, podman-compose containers for perfSONAR testpoint did not restart automatically because there was
+no systemd service to manage them. Additionally, the deployed docker-compose.yml configuration had issues that caused
+the testpoint container to enter a restart loop.</p>
 <h2 id="solutions-implemented">Solutions Implemented<a class="headerlink" href="#solutions-implemented" title="Permanent link">&para;</a></h2>
 <h3 id="1-created-systemd-service-for-automatic-restart">1. Created Systemd Service for Automatic Restart<a class="headerlink" href="#1-created-systemd-service-for-automatic-restart" title="Permanent link">&para;</a></h3>
 <p><strong>File</strong>: <code>/etc/systemd/system/perfsonar-testpoint.service</code></p>
 <p>A systemd service unit was created to manage the podman-compose containers and ensure they start automatically on boot.</p>
 <p><strong>Key features</strong>:</p>
 <ul>
-<li>Type: oneshot with RemainAfterExit</li>
-<li>Starts after network-online.target</li>
-<li>Runs <code>podman-compose up -d</code> on start</li>
-<li>Runs <code>podman-compose down</code> on stop</li>
-<li>Automatic restart on failure</li>
-<li>Enabled by default to start on boot</li>
+<li>
+<p>Type: oneshot with RemainAfterExit</p>
+</li>
+<li>
+<p>Starts after network-online.target</p>
+</li>
+<li>
+<p>Runs <code>podman-compose up -d</code> on start</p>
+</li>
+<li>
+<p>Runs <code>podman-compose down</code> on stop</p>
+</li>
+<li>
+<p>Automatic restart on failure</p>
+</li>
+<li>
+<p>Enabled by default to start on boot</p>
+</li>
 </ul>
 <p><strong>Status</strong>: Service is now installed, enabled, and running successfully on <code>/opt/perfsonar-tp</code>.</p>
 <h3 id="2-fixed-container-configuration-issue">2. Fixed Container Configuration Issue<a class="headerlink" href="#2-fixed-container-configuration-issue" title="Permanent link">&para;</a></h3>
 <p><strong>File</strong>: <code>/opt/perfsonar-tp/docker-compose.yml</code></p>
 <p>Updated the docker-compose.yml to use the recommended configuration:</p>
 <ul>
-<li>Changed from <code>cgroupns: private</code> to <code>cgroup: host</code></li>
-<li>Added required <code>/sys/fs/cgroup:/sys/fs/cgroup:rw</code> volume mount</li>
-<li>Added <code>tty: true</code> for proper terminal handling</li>
-<li>Removed custom entrypoint wrapper that was causing initialization issues</li>
+<li>
+<p>Changed from <code>cgroupns: private</code> to <code>cgroup: host</code></p>
+</li>
+<li>
+<p>Added required <code>/sys/fs/cgroup:/sys/fs/cgroup:rw</code> volume mount</p>
+</li>
+<li>
+<p>Added <code>tty: true</code> for proper terminal handling</p>
+</li>
+<li>
+<p>Removed custom entrypoint wrapper that was causing initialization issues</p>
+</li>
 </ul>
 <p><strong>Result</strong>: Containers now start properly without entering a restart loop.</p>
 <h3 id="3-created-helper-script">3. Created Helper Script<a class="headerlink" href="#3-created-helper-script" title="Permanent link">&para;</a></h3>
@@ -2000,13 +2224,27 @@
 <p>A new helper script automates the installation and configuration of the systemd service.</p>
 <p><strong>Features</strong>:</p>
 <ul>
-<li>Root privilege check</li>
-<li>Validates podman-compose is installed</li>
-<li>Validates installation directory exists</li>
-<li>Creates systemd service file</li>
-<li>Reloads systemd and enables service</li>
-<li>Supports custom installation paths</li>
-<li>Provides helpful usage examples</li>
+<li>
+<p>Root privilege check</p>
+</li>
+<li>
+<p>Validates podman-compose is installed</p>
+</li>
+<li>
+<p>Validates installation directory exists</p>
+</li>
+<li>
+<p>Creates systemd service file</p>
+</li>
+<li>
+<p>Reloads systemd and enables service</p>
+</li>
+<li>
+<p>Supports custom installation paths</p>
+</li>
+<li>
+<p>Provides helpful usage examples</p>
+</li>
 </ul>
 <p><strong>Usage</strong>:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>install-systemd-service.sh<span class="w"> </span><span class="o">[</span>/opt/perfsonar-tp<span class="o">]</span>
@@ -2014,49 +2252,85 @@
 <h3 id="4-updated-documentation">4. Updated Documentation<a class="headerlink" href="#4-updated-documentation" title="Permanent link">&para;</a></h3>
 <p><strong>Files Updated</strong>:</p>
 <ul>
-<li><code>docs/perfsonar/install-testpoint.md</code> - Added section on enabling automatic restart</li>
-<li><code>docs/perfsonar/tools_scripts/README.md</code> - Added systemd service installer documentation</li>
-<li><code>docs/perfsonar/CONTAINER_RESTART_ISSUE.md</code> - New troubleshooting guide for container restart issues</li>
+<li>
+<p><code>docs/perfsonar/install-testpoint.md</code> - Added section on enabling automatic restart</p>
+</li>
+<li>
+<p><code>docs/perfsonar/tools_scripts/README.md</code> - Added systemd service installer documentation</p>
+</li>
+<li>
+<p><code>docs/perfsonar/CONTAINER_RESTART_ISSUE.md</code> - New troubleshooting guide for container restart issues</p>
+</li>
 </ul>
 <p><strong>Key additions</strong>:</p>
 <ul>
-<li>Instructions for installing systemd service (manual and automated)</li>
-<li>Useful systemctl commands for managing the service</li>
-<li>Explanation of why systemd service is needed</li>
-<li>Troubleshooting guidance</li>
+<li>
+<p>Instructions for installing systemd service (manual and automated)</p>
+</li>
+<li>
+<p>Useful systemctl commands for managing the service</p>
+</li>
+<li>
+<p>Explanation of why systemd service is needed</p>
+</li>
+<li>
+<p>Troubleshooting guidance</p>
+</li>
 </ul>
 <h3 id="5-created-ansible-playbook">5. Created Ansible Playbook<a class="headerlink" href="#5-created-ansible-playbook" title="Permanent link">&para;</a></h3>
 <p><strong>File</strong>: <code>ansible/playbooks/deploy-testpoint-container.yml</code></p>
 <p>A complete Ansible playbook for automated deployment of perfSONAR testpoint containers.</p>
 <p><strong>Features</strong>:</p>
 <ul>
-<li>Installs required packages (podman, podman-compose, etc.)</li>
-<li>Downloads and installs tools_scripts</li>
-<li>Deploys docker-compose.yml</li>
-<li>Installs and enables systemd service</li>
-<li>Verifies containers are running</li>
-<li>Includes health checks</li>
+<li>
+<p>Installs required packages (podman, podman-compose, etc.)</p>
+</li>
+<li>
+<p>Downloads and installs tools_scripts</p>
+</li>
+<li>
+<p>Deploys docker-compose.yml</p>
+</li>
+<li>
+<p>Installs and enables systemd service</p>
+</li>
+<li>
+<p>Verifies containers are running</p>
+</li>
+<li>
+<p>Includes health checks</p>
+</li>
 </ul>
 <p><strong>Also updated</strong>: <code>ansible/README.md</code> with deployment options and usage examples.</p>
 <h2 id="files-modified-in-repository">Files Modified in Repository<a class="headerlink" href="#files-modified-in-repository" title="Permanent link">&para;</a></h2>
 <h3 id="new-files-created">New Files Created<a class="headerlink" href="#new-files-created" title="Permanent link">&para;</a></h3>
 <ol>
-<li><code>docs/perfsonar/tools_scripts/install-systemd-service.sh</code> - Systemd service installer</li>
-<li><code>ansible/playbooks/deploy-testpoint-container.yml</code> - Ansible deployment playbook</li>
-<li><code>docs/perfsonar/CONTAINER_RESTART_ISSUE.md</code> - Troubleshooting guide</li>
+<li>
+<p><code>docs/perfsonar/tools_scripts/install-systemd-service.sh</code> - Systemd service installer</p>
+</li>
+<li>
+<p><code>ansible/playbooks/deploy-testpoint-container.yml</code> - Ansible deployment playbook</p>
+</li>
+<li>
+<p><code>docs/perfsonar/CONTAINER_RESTART_ISSUE.md</code> - Troubleshooting guide</p>
+</li>
 </ol>
 <h3 id="files-updated">Files Updated<a class="headerlink" href="#files-updated" title="Permanent link">&para;</a></h3>
 <ol>
-<li><code>docs/perfsonar/install-testpoint.md</code> - Added automatic restart section</li>
-<li><code>docs/perfsonar/tools_scripts/README.md</code> - Added systemd service documentation</li>
-<li><code>ansible/README.md</code> - Added container deployment section</li>
+<li>
+<p><code>docs/perfsonar/install-testpoint.md</code> - Added automatic restart section</p>
+</li>
+<li>
+<p><code>docs/perfsonar/tools_scripts/README.md</code> - Added systemd service documentation</p>
+</li>
+<li>
+<p><code>ansible/README.md</code> - Added container deployment section</p>
+</li>
 </ol>
 <h2 id="testing-and-verification">Testing and Verification<a class="headerlink" href="#testing-and-verification" title="Permanent link">&para;</a></h2>
 <h3 id="local-system-optperfsonar-tp">Local System (/opt/perfsonar-tp)<a class="headerlink" href="#local-system-optperfsonar-tp" title="Permanent link">&para;</a></h3>
-<p>✅ Systemd service created and enabled
-✅ Containers starting successfully
-✅ perfSONAR testpoint responding on <a href="https://localhost/">https://localhost/</a>
-✅ Service will survive reboots (enabled in systemd)</p>
+<p>✅ Systemd service created and enabled ✅ Containers starting successfully ✅ perfSONAR testpoint responding on
+<a href="https://localhost/">https://localhost/</a> ✅ Service will survive reboots (enabled in systemd)</p>
 <h3 id="verification-commands">Verification Commands<a class="headerlink" href="#verification-commands" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check service status</span>
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint
@@ -2085,19 +2359,25 @@ sudo<span class="w"> </span>bash<span class="w"> </span>/tmp/install-systemd-ser
 <div class="highlight"><pre><span></span><code>ansible-playbook<span class="w"> </span>-i<span class="w"> </span>inventory<span class="w"> </span>ansible/playbooks/deploy-testpoint-container.yml
 </code></pre></div>
 <ol>
-<li><strong>Fix existing deployments with restart issues</strong>:</li>
-<li>Update docker-compose.yml to recommended configuration</li>
-<li>Restart the perfsonar-testpoint service</li>
+<li>
+<p><strong>Fix existing deployments with restart issues</strong>:</p>
+</li>
+<li>
+<p>Update docker-compose.yml to recommended configuration</p>
+</li>
+<li>
+<p>Restart the perfsonar-testpoint service</p>
+</li>
 </ol>
 <h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
-<p>✅ <strong>Automatic restart after reboot</strong> - Containers will always start when the host boots
-✅ <strong>Service management</strong> - Standard systemctl commands for start/stop/restart
-✅ <strong>Logging</strong> - Centralized logs via journalctl
-✅ <strong>Reliability</strong> - Automatic restart on failure
-✅ <strong>Automation</strong> - Ansible playbook for consistent deployments
-✅ <strong>Documentation</strong> - Clear instructions for users</p>
+<p>✅ <strong>Automatic restart after reboot</strong> - Containers will always start when the host boots ✅ <strong>Service management</strong> -
+Standard systemctl commands for start/stop/restart ✅ <strong>Logging</strong> - Centralized logs via journalctl ✅ <strong>Reliability</strong> -
+Automatic restart on failure ✅ <strong>Automation</strong> - Ansible playbook for consistent deployments ✅ <strong>Documentation</strong> - Clear
+instructions for users</p>
 <h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
-<p>The perfSONAR testpoint container restart issue has been fully resolved. The systemd service is now managing the containers, ensuring they restart automatically after host reboots. Documentation and automation scripts have been updated to help others implement this fix easily.</p>
+<p>The perfSONAR testpoint container restart issue has been fully resolved. The systemd service is now managing the
+containers, ensuring they restart automatically after host reboots. Documentation and automation scripts have been
+updated to help others implement this fix easily.</p>
 
 
 

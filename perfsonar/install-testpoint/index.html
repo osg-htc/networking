@@ -508,7 +508,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -571,7 +571,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1082,6 +1082,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1709,6 +1883,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1725,10 +1927,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1746,8 +1948,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1971,7 +2173,8 @@
 <h1 id="perfsonar-testpoint-installation-el9">perfSONAR Testpoint Installation (EL9)<a class="headerlink" href="#perfsonar-testpoint-installation-el9" title="Permanent link">&para;</a></h1>
 <h2 id="1-prerequisites">1. Prerequisites<a class="headerlink" href="#1-prerequisites" title="Permanent link">&para;</a></h2>
 <h3 id="bootstrap-the-perfsonar-testpoint-and-tools-recommended">Bootstrap the perfSONAR testpoint and tools (recommended)<a class="headerlink" href="#bootstrap-the-perfsonar-testpoint-and-tools-recommended" title="Permanent link">&para;</a></h3>
-<p>Use the bootstrap script to clone the perfSONAR testpoint repo and install helper scripts under /opt/perfsonar-tp/tools_scripts.</p>
+<p>Use the bootstrap script to clone the perfSONAR testpoint repo and install helper scripts under /opt/perfsonar-
+tp/tools_scripts.</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/tmp/install_tools_scripts.sh
@@ -2041,11 +2244,21 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 </code></pre></div>
 <p>Useful commands:</p>
 <ul>
-<li>Start service: <code>systemctl start perfsonar-testpoint</code></li>
-<li>Stop service: <code>systemctl stop perfsonar-testpoint</code></li>
-<li>Restart service: <code>systemctl restart perfsonar-testpoint</code></li>
-<li>Check status: <code>systemctl status perfsonar-testpoint</code></li>
-<li>View logs: <code>journalctl -u perfsonar-testpoint -f</code></li>
+<li>
+<p>Start service: <code>systemctl start perfsonar-testpoint</code></p>
+</li>
+<li>
+<p>Stop service: <code>systemctl stop perfsonar-testpoint</code></p>
+</li>
+<li>
+<p>Restart service: <code>systemctl restart perfsonar-testpoint</code></p>
+</li>
+<li>
+<p>Check status: <code>systemctl status perfsonar-testpoint</code></p>
+</li>
+<li>
+<p>View logs: <code>journalctl -u perfsonar-testpoint -f</code></p>
+</li>
 </ul>
 <hr />
 <h2 id="3-configure-policy-based-routing-for-multi-homed-nics">3. Configure Policy-Based Routing for Multi-Homed NICs<a class="headerlink" href="#3-configure-policy-based-routing-for-multi-homed-nics" title="Permanent link">&para;</a></h2>
@@ -2060,9 +2273,11 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 <p>Generate the config file automatically:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
 </code></pre></div>
-<p>Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an explicit gateway or mark it as <code>DEFAULT_ROUTE_NIC</code> in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
 </li>
 </ol>
+<p>Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only
+NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an
+explicit gateway or mark it as <code>DEFAULT_ROUTE_NIC</code> in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
 <p>Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.</p>
 <ol>
 <li>
@@ -2081,34 +2296,32 @@ sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">en
 <h3 id="manual-example">Manual example<a class="headerlink" href="#manual-example" title="Permanent link">&para;</a></h3>
 <p>Suppose:</p>
 <ul>
-<li>eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1</li>
-<li>eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1</li>
+<li>
+<p>eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1</p>
+</li>
+<li>
+<p>eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1</p>
+</li>
 </ul>
 <h4 id="a-add-custom-routing-tables">a) Add custom routing tables<a class="headerlink" href="#a-add-custom-routing-tables" title="Permanent link">&para;</a></h4>
 <p>Edit /etc/iproute2/rt_tables and add:</p>
-<p>200  eth0table
-201  eth1table</p>
+<p>200  eth0table 201  eth1table</p>
 <h4 id="b-add-routes-and-rules-replace-ips-as-appropriate">b) Add routes and rules (replace IPs as appropriate)<a class="headerlink" href="#b-add-routes-and-rules-replace-ips-as-appropriate" title="Permanent link">&para;</a></h4>
-<p># Add rules for eth0 (latency)
-ip rule add from 192.168.10.10/32 table eth0table</p>
-<p>ip route add 192.168.10.0/24 dev eth0 scope link table eth0table
-ip route add default via 192.168.10.1 dev eth0 table eth0table</p>
-<p># Add rules for eth1 (throughput)
-ip rule add from 10.20.30.10/32 table eth1table</p>
-<p>ip route add 10.20.30.0/24 dev eth1 scope link table eth1table
-ip route add default via 10.20.30.1 dev eth1 table eth1table</p>
+<p># Add rules for eth0 (latency) ip rule add from 192.168.10.10/32 table eth0table</p>
+<p>ip route add 192.168.10.0/24 dev eth0 scope link table eth0table ip route add default via 192.168.10.1 dev eth0 table
+eth0table</p>
+<p># Add rules for eth1 (throughput) ip rule add from 10.20.30.10/32 table eth1table</p>
+<p>ip route add 10.20.30.0/24 dev eth1 scope link table eth1table ip route add default via 10.20.30.1 dev eth1 table
+eth1table</p>
 <h4 id="c-make-persistent">c) Make persistent<a class="headerlink" href="#c-make-persistent" title="Permanent link">&para;</a></h4>
-<p>For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.</p>
+<p>For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your
+working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use
+NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.</p>
 <p>Example systemd unit:</p>
-<p># /etc/systemd/system/perfsonar-policy-routing.service
-<strong>[Unit]</strong>
-Description\=PerfSONAR Policy Routing
+<p># /etc/systemd/system/perfsonar-policy-routing.service <strong>[Unit]</strong> Description\=PerfSONAR Policy Routing
 After\=network.target</p>
-<p><strong>[Service]</strong>
-Type\=oneshot
-ExecStart\=/path/to/your/working/dir/perfsonar-policy-routing.sh</p>
-<p><strong>[Install]</strong>
-WantedBy\=multi-user.target</p>
+<p><strong>[Service]</strong> Type\=oneshot ExecStart\=/path/to/your/working/dir/perfsonar-policy-routing.sh</p>
+<p><strong>[Install]</strong> WantedBy\=multi-user.target</p>
 <p>Enable it:</p>
 <p>systemctl enable --now perfsonar-policy-routing</p>
 <hr />
@@ -2128,53 +2341,31 @@ WantedBy\=multi-user.target</p>
 <h3 id="manual-nftables-example-optional">Manual nftables example (optional)<a class="headerlink" href="#manual-nftables-example-optional" title="Permanent link">&para;</a></h3>
 <p>Below is a sample NFTables rule set that</p>
 <ul>
-<li>Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)</li>
-<li>Restricts SSH access to trusted subnets/hosts</li>
-<li>Accepts ICMP/ICMPv6 and related/permitted connections</li>
+<li>
+<p>Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)</p>
+</li>
+<li>
+<p>Restricts SSH access to trusted subnets/hosts</p>
+</li>
+<li>
+<p>Accepts ICMP/ICMPv6 and related/permitted connections</p>
+</li>
 </ul>
 <p>/etc/nftables.conf:</p>
 <p>flush ruleset</p>
 <p>table inet perfsonar {</p>
-<div class="codehilite"><pre><span></span><code><span class="err">`\</span><span class="nx">n</span><span class="err">\</span><span class="nx">nset</span><span class="w"> </span><span class="nx">allowed</span><span class="err">\</span><span class="nx">_protocols</span><span class="w"> </span><span class="p">{</span>
-<span class="k">type</span><span class="w"> </span><span class="nx">inet</span><span class="err">\</span><span class="nx">_proto</span>
-<span class="nx">elements</span><span class="w"> </span><span class="err">\</span><span class="p">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">icmp</span><span class="p">,</span><span class="w"> </span><span class="nx">icmpv6</span><span class="w"> </span><span class="p">}</span>
+<p>`\n\nset allowed_protocols { type inet_proto elements \= { icmp, icmpv6 } } set allowed_interfaces { type ifname
+elements \= { "lo" } } set allowed_tcp_dports { type inet_service elements \= { 22, 443, 861, 862, 9090, 123, 5201,
+5001, 5000, 5101 } } set allowed_udp_ports { type inet_service elements \= { 123, 5201, 5001, 5000, 5101 } } chain
+allow { ct state established,related accept ct state invalid drop meta l4proto @allowed_protocols accept iifname
+@allowed_interfaces accept tcp dport @allowed_tcp_dports ct state new accept udp dport @allowed_udp_ports ct state
+new accept # traceroute and test ranges udp dport 33434-33634 ct state new accept udp dport 18760-19960 ct state new
+accept udp dport 8760-9960 ct state new accept tcp dport 5890-5900 ct state new accept # SSH controls (add your trusted
+IPs/subnets) tcp dport 22 ip saddr 192.168.10.0/24 accept tcp dport 22 ip saddr 10.20.30.0/24 accept } chain input {
+type filter hook input priority 0; policy drop; jump allow reject with icmpx admin-prohibited }</p>
+<div class="codehilite"><pre><span></span><code>```text
 </code></pre></div>
 
-<p>}
-set allowed_interfaces {
-    type ifname
-    elements \= { "lo" }
-}
-set allowed_tcp_dports {
-    type inet_service
-    elements \= { 22, 443, 861, 862, 9090, 123, 5201, 5001, 5000, 5101 }
-}
-set allowed_udp_ports {
-    type inet_service
-    elements \= { 123, 5201, 5001, 5000, 5101 }
-}
-chain allow {
-    ct state established,related accept
-    ct state invalid drop
-    meta l4proto @allowed_protocols accept
-    iifname @allowed_interfaces accept
-    tcp dport @allowed_tcp_dports ct state new accept
-    udp dport @allowed_udp_ports ct state new accept
-    # traceroute and test ranges
-    udp dport 33434-33634 ct state new accept
-    udp dport 18760-19960 ct state new accept
-    udp dport 8760-9960 ct state new accept
-    tcp dport 5890-5900 ct state new accept
-    # SSH controls (add your trusted IPs/subnets)
-    tcp dport 22 ip saddr 192.168.10.0/24 accept
-    tcp dport 22 ip saddr 10.20.30.0/24 accept
-}
-chain input {
-    type filter hook input priority 0; policy drop;
-    jump allow
-    reject with icmpx admin-prohibited
-}
-    ```</p>
 <p>}</p>
 <p>Apply and persist:</p>
 <p>nft -f /etc/nftables.conf
@@ -2185,20 +2376,26 @@ systemctl enable --now nftables</p>
 <hr />
 <h2 id="6-confirm-operation">6. Confirm Operation<a class="headerlink" href="#6-confirm-operation" title="Permanent link">&para;</a></h2>
 <p>Check containers:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps
-<span class="c1"># or</span>
-docker<span class="w"> </span>ps
+<div class="codehilite"><pre><span></span><code>```
 </code></pre></div>
-<p>Check logs:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
+
+<p>podman ps</p>
+<h1 id="or">or<a class="headerlink" href="#or" title="Permanent link">&para;</a></h1>
+<p>docker ps</p>
+<div class="highlight"><pre><span></span><code>Check logs:
 </code></pre></div>
-<p>Test connectivity between testpoints.</p>
-<hr />
-<h2 id="7-optional-configure-perfsonar-remotes">7. (Optional) Configure perfSONAR Remotes<a class="headerlink" href="#7-optional-configure-perfsonar-remotes" title="Permanent link">&para;</a></h2>
-<p>To register your testpoint with a central config:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>list
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch&quot;</span>
+<p>podman logs perfsonar-testpoint</p>
+<div class="highlight"><pre><span></span><code>Test<span class="w"> </span>connectivity<span class="w"> </span>between<span class="w"> </span>testpoints.
+
+---
+
+<span class="c1">## 7. (Optional) Configure perfSONAR Remotes</span>
+
+To<span class="w"> </span>register<span class="w"> </span>your<span class="w"> </span>testpoint<span class="w"> </span>with<span class="w"> </span>a<span class="w"> </span>central<span class="w"> </span>config:
 </code></pre></div>
+<p>podman exec -it perfsonar-testpoint psconfig remote list podman exec -it perfsonar-testpoint psconfig remote
+--configure-archives add "<a href="https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch">https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch</a>"</p>
+<p>```bash</p>
 <hr />
 <h2 id="8-references-further-reading">8. References &amp; Further Reading<a class="headerlink" href="#8-references-further-reading" title="Permanent link">&para;</a></h2>
 <ul>

@@ -6,32 +6,32 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="High-level architecture, components, and data flow for OSG perfSONAR monitoring.">
+        <meta name="description" content="One-page cheat sheet for perfSONAR deployment, troubleshooting, and common commands.">
       
       
       
-        <link rel="canonical" href="https://osg-htc.org/networking/personas/research/architecture/">
+        <link rel="canonical" href="https://osg-htc.org/networking/quick-reference/">
       
       
-        <link rel="prev" href="../../../features/nftables/">
+        <link rel="prev" href="../personas/research/architecture/">
       
       
-        <link rel="next" href="../../../quick-reference/">
+        <link rel="next" href="../release-notes/quick-deploy-1.4.0/">
       
       
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
-        <title>Architecture of OSG perfSONAR monitoring - OSG Networking Area</title>
+        <title>Quick Reference - OSG Networking Area</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
       
       
 
@@ -50,9 +50,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../css/extra.css">
+      <link rel="stylesheet" href="../css/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#architecture-summary" class="md-skip">
+        <a href="#quick-reference-card" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +94,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href=".." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Architecture of OSG perfSONAR monitoring
+              Quick Reference
             
           </span>
         </div>
@@ -199,7 +199,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -220,7 +220,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../quick-deploy/landing/" class="md-tabs__link">
+        <a href="../personas/quick-deploy/landing/" class="md-tabs__link">
           
   
   
@@ -240,7 +240,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../perfsonar-in-osg/" class="md-tabs__link">
+        <a href="../perfsonar-in-osg/" class="md-tabs__link">
           
   
   
@@ -260,7 +260,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../host-network-tuning/" class="md-tabs__link">
+        <a href="../host-network-tuning/" class="md-tabs__link">
           
   
   
@@ -280,7 +280,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../troubleshoot/triage-checklist/" class="md-tabs__link">
+        <a href="../personas/troubleshoot/triage-checklist/" class="md-tabs__link">
           
   
   
@@ -300,7 +300,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../perfsonar/psetf/" class="md-tabs__link">
+        <a href="../perfsonar/psetf/" class="md-tabs__link">
           
   
   
@@ -320,7 +320,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../perfsonar/tools_scripts/" class="md-tabs__link">
+        <a href="../perfsonar/tools_scripts/" class="md-tabs__link">
           
   
   
@@ -351,7 +351,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../../features/fail2ban/" class="md-tabs__link">
+        <a href="../features/fail2ban/" class="md-tabs__link">
           
   
   
@@ -390,7 +390,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href=".." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -420,7 +420,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -501,7 +501,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../quick-deploy/landing/" class="md-nav__link">
+      <a href="../personas/quick-deploy/landing/" class="md-nav__link">
         
   
   
@@ -536,7 +536,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshoot/landing/" class="md-nav__link">
+      <a href="../personas/troubleshoot/landing/" class="md-nav__link">
         
   
   
@@ -564,7 +564,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../landing/" class="md-nav__link">
+      <a href="../personas/research/landing/" class="md-nav__link">
         
   
   
@@ -660,7 +660,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar-in-osg/" class="md-nav__link">
+      <a href="../perfsonar-in-osg/" class="md-nav__link">
         
   
   
@@ -688,7 +688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/deployment-models/" class="md-nav__link">
+      <a href="../perfsonar/deployment-models/" class="md-nav__link">
         
   
   
@@ -716,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
+      <a href="../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
         
   
   
@@ -744,7 +744,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../quick-deploy/automated-setup/" class="md-nav__link">
+      <a href="../personas/quick-deploy/automated-setup/" class="md-nav__link">
         
   
   
@@ -779,7 +779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/installation/" class="md-nav__link">
+      <a href="../perfsonar/installation/" class="md-nav__link">
         
   
   
@@ -807,7 +807,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/faq/" class="md-nav__link">
+      <a href="../perfsonar/faq/" class="md-nav__link">
         
   
   
@@ -896,7 +896,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../host-network-tuning/" class="md-nav__link">
+      <a href="../host-network-tuning/" class="md-nav__link">
         
   
   
@@ -924,7 +924,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/multiple-nic-guidance/" class="md-nav__link">
+      <a href="../perfsonar/multiple-nic-guidance/" class="md-nav__link">
         
   
   
@@ -1013,7 +1013,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshoot/triage-checklist/" class="md-nav__link">
+      <a href="../personas/troubleshoot/triage-checklist/" class="md-nav__link">
         
   
   
@@ -1048,7 +1048,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../network-troubleshooting/" class="md-nav__link">
+      <a href="../network-troubleshooting/" class="md-nav__link">
         
   
   
@@ -1076,7 +1076,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
+      <a href="../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
         
   
   
@@ -1158,7 +1158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshoot/playbooks/container-startup/" class="md-nav__link">
+      <a href="../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
         
   
   
@@ -1186,7 +1186,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+      <a href="../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
         
   
   
@@ -1214,7 +1214,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+      <a href="../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
         
   
   
@@ -1242,7 +1242,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+      <a href="../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
         
   
   
@@ -1339,7 +1339,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/psetf/" class="md-nav__link">
+      <a href="../perfsonar/psetf/" class="md-nav__link">
         
   
   
@@ -1367,7 +1367,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../osg-network-services/" class="md-nav__link">
+      <a href="../osg-network-services/" class="md-nav__link">
         
   
   
@@ -1395,7 +1395,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../osg-network-analytics/" class="md-nav__link">
+      <a href="../osg-network-analytics/" class="md-nav__link">
         
   
   
@@ -1484,7 +1484,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/tools_scripts/" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/" class="md-nav__link">
         
   
   
@@ -1512,7 +1512,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
         
   
   
@@ -1540,7 +1540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/tools_scripts/README-lsregistration/" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/README-lsregistration/" class="md-nav__link">
         
   
   
@@ -1568,7 +1568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
         
   
   
@@ -1596,7 +1596,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../perfsonar/tools_scripts/docker-compose.yml" class="md-nav__link">
+      <a href="../perfsonar/tools_scripts/docker-compose.yml" class="md-nav__link">
         
   
   
@@ -1624,7 +1624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tools/" class="md-nav__link">
+      <a href="../tools/" class="md-nav__link">
         
   
   
@@ -1773,7 +1773,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../features/fail2ban/" class="md-nav__link">
+      <a href="../features/fail2ban/" class="md-nav__link">
         
   
   
@@ -1801,7 +1801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../features/selinux/" class="md-nav__link">
+      <a href="../features/selinux/" class="md-nav__link">
         
   
   
@@ -1829,7 +1829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../features/nftables/" class="md-nav__link">
+      <a href="../features/nftables/" class="md-nav__link">
         
   
   
@@ -1862,42 +1862,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Architecture
-  
-
-    
-  </span>
-  
-  
-    
-  
-  
-    <span class="md-status md-status--draft"></span>
-  
-
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../personas/research/architecture/" class="md-nav__link">
         
   
   
@@ -1920,35 +1888,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#architecture-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Architecture (summary)
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1958,10 +1897,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../quick-reference/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1977,6 +1943,342 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#essential-contacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Essential Contacts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment Quick Start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-deployment-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-Deployment Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orchestrated-deploy-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Orchestrated Deploy (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-deploy-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Deploy Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#required-ports-firewall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Ports &amp; Firewall
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Required Ports &amp; Firewall">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#open-firewall-nftables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open Firewall (nftables)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#container-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pscheduler-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pScheduler &amp; Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host Tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ls-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LS Registration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-quick-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Quick Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#log-locations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Locations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Links
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Benchmarks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Benchmarks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expected-bandwidth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Bandwidth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#normal-latency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normal Latency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emergency-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Emergency Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Emergency Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#container-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Won't Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-lost-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Lost Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests-not-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests Not Running
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-issues-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues &amp; Solutions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version Information
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2046,7 +2348,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../release-notes/quick-deploy-1.4.0/" class="md-nav__link">
+      <a href="../release-notes/quick-deploy-1.4.0/" class="md-nav__link">
         
   
   
@@ -2074,7 +2376,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../release-notes/quick-deploy-1.3.0/" class="md-nav__link">
+      <a href="../release-notes/quick-deploy-1.3.0/" class="md-nav__link">
         
   
   
@@ -2102,7 +2404,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../release-notes/quick-deploy-1.1.0/" class="md-nav__link">
+      <a href="../release-notes/quick-deploy-1.1.0/" class="md-nav__link">
         
   
   
@@ -2130,7 +2432,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../release-notes/quick-deploy-1.0.1/" class="md-nav__link">
+      <a href="../release-notes/quick-deploy-1.0.1/" class="md-nav__link">
         
   
   
@@ -2158,7 +2460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../release-notes/quick-deploy-1.0.0/" class="md-nav__link">
+      <a href="../release-notes/quick-deploy-1.0.0/" class="md-nav__link">
         
   
   
@@ -2194,7 +2496,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../web-site-management/" class="md-nav__link">
+      <a href="../web-site-management/" class="md-nav__link">
         
   
   
@@ -2247,7 +2549,7 @@
   
   
     <li class="md-path__item">
-      <a href="../../.." class="md-path__link">
+      <a href=".." class="md-path__link">
         
   <span class="md-ellipsis">
     Home
@@ -2270,7 +2572,7 @@
     
     
       <li class="md-path__item">
-        <a href="../../../features/fail2ban/" class="md-path__link">
+        <a href="../features/fail2ban/" class="md-path__link">
           
   <span class="md-ellipsis">
     Advanced
@@ -2298,21 +2600,297 @@
   
 
 
-  <h1>Architecture</h1>
-
-<h2 id="architecture-summary">Architecture (summary)<a class="headerlink" href="#architecture-summary" title="Permanent link">&para;</a></h2>
+<h1 id="quick-reference-card">🚀 Quick Reference Card<a class="headerlink" href="#quick-reference-card" title="Permanent link">&para;</a></h1>
+<p>One-page cheat sheet for perfSONAR deployment, configuration, and troubleshooting.</p>
+<hr />
+<h2 id="essential-contacts">Essential Contacts<a class="headerlink" href="#essential-contacts" title="Permanent link">&para;</a></h2>
+<p>| Scenario | Contact | |----------|---------| | <strong>OSG Site Issues</strong> | <a href="https://support.opensciencegrid.org/">GOC
+Support</a> | | <strong>WLCG Issues</strong> | <a href="https://ggus.eu/">GGUS Ticket</a> → "WLCG perfSONAR
+support" | | <strong>perfSONAR Questions</strong> | <a href="https://lists.internet2.edu/sympa/info/perfsonar-user">User Mailing List</a> | |
+<strong>Local Network</strong> | Your site's network administrator |</p>
+<hr />
+<h2 id="deployment-quick-start">Deployment Quick Start<a class="headerlink" href="#deployment-quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="pre-deployment-checklist">Pre-Deployment Checklist<a class="headerlink" href="#pre-deployment-checklist" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
-<p>perfSONAR agents (testpoints)</p>
+<p>[ ] EL9 OS installed (AlmaLinux, Rocky, RHEL)</p>
 </li>
 <li>
-<p>central collectors (ELK/Elasticsearch ingestion)</p>
+<p>[ ] Hostname set: <code>hostnamectl set-hostname &lt;name&gt;</code></p>
 </li>
 <li>
-<p>configuration services (psconfig / psetf)</p>
+<p>[ ] Time sync enabled: <code>systemctl enable --now chronyd</code></p>
+</li>
+<li>
+<p>[ ] Network interfaces documented: <code>nmcli device status</code></p>
+</li>
+<li>
+<p>[ ] Required packages: <code>dnf install -y podman podman-compose git curl dig nft</code></p>
 </li>
 </ul>
-<p>Diagram and detailed flow to follow.</p>
+<h3 id="orchestrated-deploy-recommended">Orchestrated Deploy (Recommended)<a class="headerlink" href="#orchestrated-deploy-recommended" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download and run</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>/tmp/perfSONAR-orchestrator.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/perfSONAR-orchestrator.sh
+
+<span class="c1"># Interactive (pauses at each step)</span>
+/tmp/perfSONAR-orchestrator.sh
+
+<span class="c1"># Non-interactive (auto-confirm all)</span>
+/tmp/perfSONAR-orchestrator.sh<span class="w"> </span>--non-interactive<span class="w"> </span>--option<span class="w"> </span>A
+
+<span class="c1"># With Let&#39;s Encrypt</span>
+/tmp/perfSONAR-orchestrator.sh<span class="w"> </span>--option<span class="w"> </span>B<span class="w"> </span>--fqdn<span class="w"> </span>&lt;FQDN&gt;<span class="w"> </span>--email<span class="w"> </span>&lt;EMAIL&gt;
+</code></pre></div>
+<h3 id="post-deploy-validation">Post-Deploy Validation<a class="headerlink" href="#post-deploy-validation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Verify services running</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># Check container</span>
+podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+
+<span class="c1"># Verify pSConfig enrollment</span>
+psconfig<span class="w"> </span>remote<span class="w"> </span>list
+
+<span class="c1"># List scheduled tests</span>
+pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class="w"> </span>localhost
+</code></pre></div>
+<hr />
+<h2 id="required-ports-firewall">Required Ports &amp; Firewall<a class="headerlink" href="#required-ports-firewall" title="Permanent link">&para;</a></h2>
+<p>| Port | Protocol | Purpose | Allow From | |------|----------|---------|-----------| | <strong>443</strong> | HTTPS | pScheduler
+(required) | All perfSONAR nodes | | 5001 | TCP/UDP | iperf (bandwidth) | Mesh nodes | | 8080 | HTTP | pSConfig config |
+All (or 443) | | 9000 | TCP | Logging | Central server |</p>
+<h3 id="open-firewall-nftables">Open Firewall (nftables)<a class="headerlink" href="#open-firewall-nftables" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add rule to allow 443</span>
+sudo<span class="w"> </span>nft<span class="w"> </span>add<span class="w"> </span>rule<span class="w"> </span>inet<span class="w"> </span>filter<span class="w"> </span>input<span class="w"> </span>tcp<span class="w"> </span>dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>accept
+
+<span class="c1"># Verify</span>
+nft<span class="w"> </span>list<span class="w"> </span>table<span class="w"> </span>filter
+</code></pre></div>
+<hr />
+<h2 id="common-commands">Common Commands<a class="headerlink" href="#common-commands" title="Permanent link">&para;</a></h2>
+<h3 id="container-management">Container Management<a class="headerlink" href="#container-management" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Status</span>
+podman<span class="w"> </span>ps<span class="w"> </span>-a<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># View logs</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
+podman<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>perfsonar-testpoint<span class="w">          </span><span class="c1"># follow</span>
+
+<span class="c1"># Restart</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># Stop/Start</span>
+systemctl<span class="w"> </span>stop<span class="w"> </span>perfsonar-testpoint
+systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-testpoint
+</code></pre></div>
+<h3 id="pscheduler-tests">pScheduler &amp; Tests<a class="headerlink" href="#pscheduler-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># List all tasks</span>
+pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class="w"> </span>localhost
+
+<span class="c1"># View scheduled tests (JSON format)</span>
+pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class="w"> </span>localhost<span class="w"> </span>--format<span class="w"> </span>json
+
+<span class="c1"># Run manual test</span>
+pscheduler<span class="w"> </span>task<span class="w"> </span>add<span class="w"> </span>--host<span class="w"> </span>&lt;local&gt;<span class="w"> </span>--dest<span class="w"> </span>&lt;remote&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--test-type<span class="w"> </span>latencybg
+
+<span class="c1"># Check pScheduler status</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-pscheduler-agent
+</code></pre></div>
+<h3 id="network-configuration">Network Configuration<a class="headerlink" href="#network-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># View interfaces</span>
+nmcli<span class="w"> </span>device<span class="w"> </span>status
+ip<span class="w"> </span>-br<span class="w"> </span>addr
+
+<span class="c1"># Check routing</span>
+ip<span class="w"> </span>route<span class="w"> </span>show
+ip<span class="w"> </span>rule<span class="w"> </span>show
+
+<span class="c1"># View firewall rules</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset
+
+<span class="c1"># Check listening ports</span>
+ss<span class="w"> </span>-ltnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;(443|5001)&#39;</span>
+</code></pre></div>
+<h3 id="host-tuning">Host Tuning<a class="headerlink" href="#host-tuning" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download tuning script</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/fasterdata-tuning.sh
+
+<span class="c1"># Audit (no changes)</span>
+/tmp/fasterdata-tuning.sh<span class="w"> </span>audit
+
+<span class="c1"># Apply tuning</span>
+sudo<span class="w"> </span>/tmp/fasterdata-tuning.sh<span class="w"> </span>apply
+
+<span class="c1"># For DTN (large buffers)</span>
+sudo<span class="w"> </span>/tmp/fasterdata-tuning.sh<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
+</code></pre></div>
+<h3 id="ls-registration">LS Registration<a class="headerlink" href="#ls-registration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Update registration</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update
+
+<span class="c1"># Auto-enroll in mesh</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--fqdn<span class="w"> </span><span class="k">$(</span>hostname<span class="w"> </span>-f<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--profile<span class="w"> </span>latency
+</code></pre></div>
+<hr />
+<h2 id="troubleshooting-quick-checklist">Troubleshooting Quick Checklist<a class="headerlink" href="#troubleshooting-quick-checklist" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. System info</span>
+hostnamectl
+cat<span class="w"> </span>/etc/os-release
+uname<span class="w"> </span>-a
+
+<span class="c1"># 2. Connectivity</span>
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">8</span>.8.8.8
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">3</span><span class="w"> </span>psconfig.opensciencegrid.org
+
+<span class="c1"># 3. Container status</span>
+podman<span class="w"> </span>ps<span class="w"> </span>-a
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-50
+
+<span class="c1"># 4. Services</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-*
+systemctl<span class="w"> </span>status<span class="w"> </span>podman
+
+<span class="c1"># 5. Network</span>
+ip<span class="w"> </span>-br<span class="w"> </span>addr
+netstat<span class="w"> </span>-ltnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;(443|5001|8080)&#39;</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+
+<span class="c1"># 6. pScheduler</span>
+psconfig<span class="w"> </span>remote<span class="w"> </span>list
+pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class="w"> </span>localhost
+
+<span class="c1"># 7. DNS</span>
+dig<span class="w"> </span>psconfig.opensciencegrid.org
+nslookup<span class="w"> </span><span class="k">$(</span>hostname<span class="w"> </span>-f<span class="k">)</span>
+
+<span class="c1"># 8. Firewall test</span>
+curl<span class="w"> </span>-v<span class="w"> </span>https://psconfig.opensciencegrid.org/
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;remote_testpoint&gt;<span class="w"> </span><span class="m">443</span>
+</code></pre></div>
+<hr />
+<h2 id="configuration-files">Configuration Files<a class="headerlink" href="#configuration-files" title="Permanent link">&para;</a></h2>
+<p>| File | Purpose | |------|---------| | <code>/etc/perfsonar/</code> | Config backups (from legacy toolkit) | | <code>/opt/perfsonar-
+tp/docker-compose.yml</code> | Container definition | | <code>/opt/perfsonar-tp/tools_scripts/</code> | Helper scripts | |
+<code>/etc/NetworkManager/conf.d/</code> | NIC configuration (if using PBR) | | <code>/etc/nftables.conf</code> | Firewall rules | |
+<code>~/.ssh/authorized_keys</code> | SSH keys |</p>
+<hr />
+<h2 id="log-locations">Log Locations<a class="headerlink" href="#log-locations" title="Permanent link">&para;</a></h2>
+<p>| Source | Location | |--------|----------| | <strong>Container</strong> | <code>podman logs perfsonar-testpoint</code> | | <strong>Systemd</strong> |
+<code>journalctl -u perfsonar-testpoint -f</code> | | <strong>Host</strong> | <code>/var/log/messages</code> (EL9) | | <strong>Kernel</strong> | <code>dmesg</code> | |
+<strong>Firewall</strong> | <code>dmesg \| grep -i nft</code> |</p>
+<hr />
+<h2 id="documentation-links">Documentation Links<a class="headerlink" href="#documentation-links" title="Permanent link">&para;</a></h2>
+<p>| Topic | Link | |-------|------| | <strong>Installation</strong> | <a href="../personas/quick-deploy/landing/">Quick Deploy Guide</a> | |
+<strong>Troubleshooting</strong> | <a href="../personas/troubleshoot/landing/">Troubleshooter Guide</a> | | <strong>Host Tuning</strong> | <a href="../host-network-tuning/">Fasterdata
+Tuning</a> | | <strong>Architecture</strong> | <a href="../personas/research/landing/">System Overview</a> | | <strong>Tools</strong> |
+<a href="../perfsonar/tools_scripts/">Tools &amp; Scripts</a> | | <strong>FAQ</strong> | <a href="../perfsonar/faq/">perfSONAR FAQ</a> | | <strong>Official
+Docs</strong> | <a href="https://docs.perfsonar.net/">docs.perfsonar.net</a> |</p>
+<hr />
+<h2 id="performance-benchmarks">Performance Benchmarks<a class="headerlink" href="#performance-benchmarks" title="Permanent link">&para;</a></h2>
+<h3 id="expected-bandwidth">Expected Bandwidth<a class="headerlink" href="#expected-bandwidth" title="Permanent link">&para;</a></h3>
+<p>| Link Speed | Expected Throughput | |------------|-------------------| | 1 Gbps | 900+ Mbps | | 10 Gbps | 9+ Gbps | |
+100 Gbps | 90+ Gbps |</p>
+<p><em>Depends on testpoint tuning, network conditions, and competing tests.</em></p>
+<h3 id="normal-latency">Normal Latency<a class="headerlink" href="#normal-latency" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>Local campus network:</strong> &lt; 5 ms</p>
+</li>
+<li>
+<p><strong>Same region:</strong> 10-50 ms</p>
+</li>
+<li>
+<p><strong>Cross-country:</strong> 50-150 ms</p>
+</li>
+<li>
+<p><strong>Transatlantic:</strong> 100-200 ms</p>
+</li>
+</ul>
+<hr />
+<h2 id="emergency-procedures">Emergency Procedures<a class="headerlink" href="#emergency-procedures" title="Permanent link">&para;</a></h2>
+<h3 id="container-wont-start">Container Won't Start<a class="headerlink" href="#container-wont-start" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Check logs</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># 2. Verify image</span>
+podman<span class="w"> </span>images<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+
+<span class="c1"># 3. Free disk space</span>
+podman<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-a
+
+<span class="c1"># 4. Restart service</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># 5. Check ports</span>
+ss<span class="w"> </span>-ltnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;(443|5001)&#39;</span>
+</code></pre></div>
+<h3 id="container-lost-network">Container Lost Network<a class="headerlink" href="#container-lost-network" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Check network</span>
+ip<span class="w"> </span>link<span class="w"> </span>show
+nmcli<span class="w"> </span>device<span class="w"> </span>status
+
+<span class="c1"># 2. Restart network</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>NetworkManager
+
+<span class="c1"># 3. Restart container</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># 4. Verify routes</span>
+ip<span class="w"> </span>route<span class="w"> </span>show
+</code></pre></div>
+<h3 id="tests-not-running">Tests Not Running<a class="headerlink" href="#tests-not-running" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Check enrollment</span>
+psconfig<span class="w"> </span>remote<span class="w"> </span>list
+
+<span class="c1"># 2. Verify connectivity</span>
+curl<span class="w"> </span>-v<span class="w"> </span>https://psconfig.opensciencegrid.org/
+
+<span class="c1"># 3. Check pScheduler</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-pscheduler-agent
+pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class="w"> </span>localhost
+
+<span class="c1"># 4. Restart all services</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># 5. Escalate</span>
+<span class="c1"># Contact: [Troubleshooter Guide](personas/troubleshoot/landing.md)</span>
+</code></pre></div>
+<hr />
+<h2 id="common-issues-solutions">Common Issues &amp; Solutions<a class="headerlink" href="#common-issues-solutions" title="Permanent link">&para;</a></h2>
+<p>| Issue | Quick Fix | |-------|-----------| | Port 443 in use | <code>ss -ltnp \| grep 443</code> → kill process | | Volume
+permission denied | <code>sudo chown 65534:65534 /volume/path</code> | | DNS not resolving | <code>systemctl restart systemd-resolved</code> |
+| firewall blocking | <code>sudo nft add rule inet filter input tcp dport 443 accept</code> | | High latency | Run:
+<code>/tmp/fasterdata-tuning.sh apply</code> | | Tests scheduled but not running | <code>pscheduler tasks</code> → check network connectivity
+| | Cannot reach remote testpoint | Check firewall on both ends, verify 443 is open |</p>
+<hr />
+<h2 id="version-information">Version Information<a class="headerlink" href="#version-information" title="Permanent link">&para;</a></h2>
+<ul>
+<li>
+<p><strong>Quick Deploy</strong>: v1.4.0+</p>
+</li>
+<li>
+<p><strong>perfSONAR</strong>: 5.0.3+</p>
+</li>
+<li>
+<p><strong>OS</strong>: EL9 (AlmaLinux, Rocky, RHEL)</p>
+</li>
+<li>
+<p><strong>Container</strong>: Podman/Docker</p>
+</li>
+</ul>
+<hr />
+<p><strong>Last Updated:</strong> December 2025 <strong>For issues:</strong> <a href="../personas/troubleshoot/landing/">troubleshooter landing</a> or <a href="#essential-contacts">support
+contacts</a></p>
 
 
 
@@ -2373,10 +2951,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
     
   </body>

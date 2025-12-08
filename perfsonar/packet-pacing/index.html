@@ -508,7 +508,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -571,7 +571,7 @@
     
   
   
-    <span class="md-status md-status--draft"></span>
+    <span class="md-status md-status--active"></span>
   
 
   
@@ -1082,6 +1082,180 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1709,6 +1883,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1725,10 +1927,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_3" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
         
           
-          <label class="md-nav__link" for="__nav_8_3" id="__nav_8_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
             
   
   
@@ -1746,8 +1948,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1970,145 +2172,213 @@
 
 <h1 id="packet-pacing-for-data-transfer-nodes">Packet Pacing for Data Transfer Nodes<a class="headerlink" href="#packet-pacing-for-data-transfer-nodes" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p><strong>Packet pacing</strong> is a critical tuning technique for high-performance Data Transfer Nodes (DTNs) and other hosts that need to move large amounts of data reliably across wide-area networks. By controlling the rate at which packets are sent from the host, packet pacing can dramatically reduce packet loss, prevent receiver buffer overflows, and improve overall throughput — sometimes by <strong>2-4x on long paths</strong>.</p>
-<p>This document explains why packet pacing matters, how it works, and how to implement it on DTN nodes using Linux traffic control (<code>tc</code>).</p>
+<p><strong>Packet pacing</strong> is a critical tuning technique for high-performance Data Transfer Nodes (DTNs) and other hosts that
+need to move large amounts of data reliably across wide-area networks. By controlling the rate at which packets are sent
+from the host, packet pacing can dramatically reduce packet loss, prevent receiver buffer overflows, and improve overall
+throughput — sometimes by <strong>2-4x on long paths</strong>.</p>
+<p>This document explains why packet pacing matters, how it works, and how to implement it on DTN nodes using Linux traffic
+control (<code>tc</code>).</p>
 <hr />
 <h2 id="the-problem-data-rate-bottlenecks-and-packet-loss">The Problem: Data Rate Bottlenecks and Packet Loss<a class="headerlink" href="#the-problem-data-rate-bottlenecks-and-packet-loss" title="Permanent link">&para;</a></h2>
 <p>When transferring data across a network, the effective throughput is limited by the <strong>minimum of three factors</strong>:</p>
 <ol>
-<li><strong>Source host read rate</strong> — How fast the sending host can read data from storage/memory</li>
-<li><strong>Available network bandwidth</strong> — The capacity of the network path</li>
-<li><strong>Destination write rate</strong> — How fast the receiving host can write data to storage/memory</li>
+<li>
+<p><strong>Source host read rate</strong> — How fast the sending host can read data from storage/memory</p>
+</li>
+<li>
+<p><strong>Available network bandwidth</strong> — The capacity of the network path</p>
+</li>
+<li>
+<p><strong>Destination write rate</strong> — How fast the receiving host can write data to storage/memory</p>
+</li>
 </ol>
 <h3 id="common-bottleneck-scenarios">Common Bottleneck Scenarios<a class="headerlink" href="#common-bottleneck-scenarios" title="Permanent link">&para;</a></h3>
-<p><strong>Scenario 1: Fast Source, Slower Network Path</strong>
-- A 10G DTN sends to a 1G receiver or via a 1G network path
-- Without pacing, the DTN floods the network with packets
-- The receiver cannot keep up, leading to buffer overflow and packet loss
-- TCP backs off, causing dramatic throughput drops</p>
-<p><strong>Scenario 2: Multiple Parallel Streams</strong>
-- A 10G DTN with 4-8 parallel GridFTP streams to a 10G receiver
-- Total available bandwidth is 10G, but each stream tries to max out its connection
-- Streams compete for buffers on the receiver
-- Packet loss and TCP backing off reduce overall throughput</p>
-<p><strong>Scenario 3: Unbalanced CPU/Network Performance</strong>
-- A fast 40G/100G host with a slower CPU
-- Network can send packets faster than the CPU can process them
-- Receive-side bottleneck at the slower host
-- Packet loss and retransmission overhead</p>
-<p><strong>Scenario 4: Long-Distance Paths (50-80ms RTT)</strong>
-- Network paths with high latency across continents
-- Even with adequate bandwidth, mismatched send/receive rates cause issues
-- Packets arrive faster than the receiver can drain them
-- Studies show 2-4x throughput improvement with pacing on these paths</p>
+<h4 id="scenario-1-fast-source-slower-network-path">Scenario 1: Fast Source, Slower Network Path<a class="headerlink" href="#scenario-1-fast-source-slower-network-path" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p>A 10G DTN sends to a 1G receiver or via a 1G network path</p>
+</li>
+<li>
+<p>Without pacing, the DTN floods the network with packets</p>
+</li>
+<li>
+<p>The receiver cannot keep up, leading to buffer overflow and packet loss</p>
+</li>
+<li>
+<p>TCP backs off, causing dramatic throughput drops</p>
+</li>
+</ul>
+<h4 id="scenario-2-multiple-parallel-streams">Scenario 2: Multiple Parallel Streams<a class="headerlink" href="#scenario-2-multiple-parallel-streams" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p>A 10G DTN with 4-8 parallel GridFTP streams to a 10G receiver</p>
+</li>
+<li>
+<p>Total available bandwidth is 10G, but each stream tries to max out its connection</p>
+</li>
+<li>
+<p>Streams compete for buffers on the receiver</p>
+</li>
+<li>
+<p>Packet loss and TCP backing off reduce overall throughput</p>
+</li>
+</ul>
+<h4 id="scenario-3-unbalanced-cpunetwork-performance">Scenario 3: Unbalanced CPU/Network Performance<a class="headerlink" href="#scenario-3-unbalanced-cpunetwork-performance" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p>A fast 40G/100G host with a slower CPU</p>
+</li>
+<li>
+<p>Network can send packets faster than the CPU can process them</p>
+</li>
+<li>
+<p>Receive-side bottleneck at the slower host</p>
+</li>
+<li>
+<p>Packet loss and retransmission overhead</p>
+</li>
+</ul>
+<h4 id="scenario-4-long-distance-paths-50-80ms-rtt">Scenario 4: Long-Distance Paths (50-80ms RTT)<a class="headerlink" href="#scenario-4-long-distance-paths-50-80ms-rtt" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p>Network paths with high latency across continents</p>
+</li>
+<li>
+<p>Even with adequate bandwidth, mismatched send/receive rates cause issues</p>
+</li>
+<li>
+<p>Packets arrive faster than the receiver can drain them</p>
+</li>
+<li>
+<p>Studies show 2-4x throughput improvement with pacing on these paths</p>
+</li>
+</ul>
 <hr />
 <h2 id="how-packet-pacing-works">How Packet Pacing Works<a class="headerlink" href="#how-packet-pacing-works" title="Permanent link">&para;</a></h2>
-<p>Packet pacing solves this problem by <strong>controlling the rate at which packets leave the source host</strong>, ensuring the receiver is never overwhelmed and can process packets at a sustainable rate.</p>
+<p>Packet pacing solves this problem by <strong>controlling the rate at which packets leave the source host</strong>, ensuring the
+receiver is never overwhelmed and can process packets at a sustainable rate.</p>
 <h3 id="mechanism-fair-queuing-fq-qdisc">Mechanism: Fair Queuing (FQ) Qdisc<a class="headerlink" href="#mechanism-fair-queuing-fq-qdisc" title="Permanent link">&para;</a></h3>
-<p>Modern Linux (kernel 3.11+) includes the <strong>Fair Queuing (FQ)</strong> scheduler, which implements sophisticated packet pacing. The FQ qdisc:</p>
+<p>Modern Linux (kernel 3.11+) includes the <strong>Fair Queuing (FQ)</strong> scheduler, which implements sophisticated packet pacing.
+The FQ qdisc:</p>
 <ul>
-<li><strong>Maintains separate queues</strong> for different flows (distinguishing between different streams)</li>
-<li><strong>Ensures fair bandwidth sharing</strong> — each flow gets an equal share of available bandwidth</li>
-<li><strong>Paces packets intelligently</strong> — spreads packets out over time instead of sending them in bursts</li>
-<li><strong>Reduces buffer pressure</strong> — keeps receiving end from being overwhelmed</li>
+<li>
+<p><strong>Maintains separate queues</strong> for different flows (distinguishing between different streams)</p>
+</li>
+<li>
+<p><strong>Ensures fair bandwidth sharing</strong> — each flow gets an equal share of available bandwidth</p>
+</li>
+<li>
+<p><strong>Paces packets intelligently</strong> — spreads packets out over time instead of sending them in bursts</p>
+</li>
+<li>
+<p><strong>Reduces buffer pressure</strong> — keeps receiving end from being overwhelmed</p>
+</li>
 </ul>
 <h4 id="fq-vs-fq_codel">FQ vs FQ_CODEL<a class="headerlink" href="#fq-vs-fq_codel" title="Permanent link">&para;</a></h4>
 <ul>
-<li><strong>FQ</strong> (Fair Queuing): Excellent for high-throughput TCP and data transfer</li>
-<li><strong>FQ_CODEL</strong>: Default in modern kernels (4.12+), but less optimal for sustained high-throughput transfers</li>
+<li>
+<p><strong>FQ</strong> (Fair Queuing): Excellent for high-throughput TCP and data transfer</p>
+</li>
+<li>
+<p><strong>FQ_CODEL</strong>: Default in modern kernels (4.12+), but less optimal for sustained high-throughput transfers</p>
+</li>
 </ul>
 <p>For DTN and high-speed data transfer, <strong>FQ is recommended over FQ_CODEL</strong>.</p>
 <h3 id="rate-limiting-with-token-bucket-filter-tbf">Rate Limiting with Token Bucket Filter (TBF)<a class="headerlink" href="#rate-limiting-with-token-bucket-filter-tbf" title="Permanent link">&para;</a></h3>
 <p>The <strong>Token Bucket Filter (TBF)</strong> qdisc enforces a maximum rate limit by:</p>
 <ul>
-<li><strong>Accumulating tokens</strong> at a configured rate (e.g., 2 Gbps)</li>
-<li><strong>Requiring tokens to send packets</strong> — each packet consumes tokens equal to its size</li>
-<li><strong>Queuing packets</strong> when no tokens are available</li>
-<li><strong>Smoothing traffic</strong> into a predictable, controlled rate</li>
+<li>
+<p><strong>Accumulating tokens</strong> at a configured rate (e.g., 2 Gbps)</p>
+</li>
+<li>
+<p><strong>Requiring tokens to send packets</strong> — each packet consumes tokens equal to its size</p>
+</li>
+<li>
+<p><strong>Queuing packets</strong> when no tokens are available</p>
+</li>
+<li>
+<p><strong>Smoothing traffic</strong> into a predictable, controlled rate</p>
+</li>
 </ul>
-<p>The burst size determines how many back-to-back packets can be sent before rate limiting kicks in. Typically, we calculate burst as 1-2ms worth of packets at the target rate.</p>
+<p>The burst size determines how many back-to-back packets can be sent before rate limiting kicks in. Typically, we
+calculate burst as 1-2ms worth of packets at the target rate.</p>
 <hr />
 <h2 id="why-packet-pacing-works-esnet-research-results">Why Packet Pacing Works: ESnet Research Results<a class="headerlink" href="#why-packet-pacing-works-esnet-research-results" title="Permanent link">&para;</a></h2>
 <p>ESnet's performance testing with Berkeley Lab and others has demonstrated significant improvements from packet pacing:</p>
 <h3 id="key-findings">Key Findings<a class="headerlink" href="#key-findings" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Reduced Packet Loss</strong>: By preventing receiver buffer overflow</li>
-<li><strong>Higher Sustained Throughput</strong>: 2-4x improvements on long paths (50-80ms RTT)</li>
-<li><strong>Better Resource Utilization</strong>: Prevents wasted retransmissions and TCP back-off</li>
-<li><strong>Predictable Performance</strong>: More consistent results across different network conditions</li>
-<li><strong>Multi-Stream Benefits</strong>: Especially effective with 4-8 parallel streams (common with GridFTP)</li>
+<li>
+<p><strong>Reduced Packet Loss</strong>: By preventing receiver buffer overflow</p>
+</li>
+<li>
+<p><strong>Higher Sustained Throughput</strong>: 2-4x improvements on long paths (50-80ms RTT)</p>
+</li>
+<li>
+<p><strong>Better Resource Utilization</strong>: Prevents wasted retransmissions and TCP back-off</p>
+</li>
+<li>
+<p><strong>Predictable Performance</strong>: More consistent results across different network conditions</p>
+</li>
+<li>
+<p><strong>Multi-Stream Benefits</strong>: Especially effective with 4-8 parallel streams (common with GridFTP)</p>
+</li>
 </ol>
 <h3 id="real-world-dtn-scenario">Real-World DTN Scenario<a class="headerlink" href="#real-world-dtn-scenario" title="Permanent link">&para;</a></h3>
 <p><strong>Configuration</strong>: 10G DTN with 4 parallel GridFTP streams to a 10G receiver</p>
-<p><strong>Without Pacing</strong>:
-- Bursts of packets overwhelm receiver
-- Packet loss triggers TCP retransmissions
-- TCP congestion control backs off aggressively
-- Throughput: ~3-5 Gbps (underutilizing available 10G)</p>
-<p><strong>With Pacing at 2 Gbps per stream</strong> (8 Gbps total from 4 streams):
-- Smooth traffic reduces packet loss
-- TCP can maintain higher congestion window
-- Better resource utilization at receiver
-- Throughput: ~8-9 Gbps (near line rate)</p>
+<p><strong>Without Pacing</strong>:</p>
+<ul>
+<li>
+<p>Bursts of packets overwhelm receiver</p>
+</li>
+<li>
+<p>Packet loss triggers TCP retransmissions</p>
+</li>
+<li>
+<p>TCP congestion control backs off aggressively</p>
+</li>
+<li>
+<p>Throughput: ~3-5 Gbps (underutilizing available 10G)</p>
+</li>
+</ul>
+<p><strong>With Pacing at 2 Gbps per stream</strong> (8 Gbps total from 4 streams):</p>
+<ul>
+<li>
+<p>Smooth traffic reduces packet loss</p>
+</li>
+<li>
+<p>TCP can maintain higher congestion window</p>
+</li>
+<li>
+<p>Better resource utilization at receiver</p>
+</li>
+<li>
+<p>Throughput: ~8-9 Gbps (near line rate)</p>
+</li>
+</ul>
 <p><strong>Result</strong>: 2-3x throughput improvement</p>
 <hr />
 <h2 id="recommended-pacing-rates-for-common-scenarios">Recommended Pacing Rates for Common Scenarios<a class="headerlink" href="#recommended-pacing-rates-for-common-scenarios" title="Permanent link">&para;</a></h2>
 <h3 id="rule-of-thumb-80-90-of-nic-speed">Rule of Thumb: 80-90% of NIC Speed<a class="headerlink" href="#rule-of-thumb-80-90-of-nic-speed" title="Permanent link">&para;</a></h3>
 <p>For a DTN with <strong>N parallel streams</strong>, divide available bandwidth accordingly:</p>
-<table>
-<thead>
-<tr>
-<th>Host NIC Speed</th>
-<th>Parallel Streams</th>
-<th>Recommended Per-Stream Rate</th>
-<th>Command</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>10G</td>
-<td>4</td>
-<td>2 Gbps</td>
-<td><code>tc qdisc add dev eth0 root fq maxrate 2gbit</code></td>
-</tr>
-<tr>
-<td>10G</td>
-<td>8</td>
-<td>1 Gbps</td>
-<td><code>tc qdisc add dev eth0 root fq maxrate 1gbit</code></td>
-</tr>
-<tr>
-<td>40G</td>
-<td>4</td>
-<td>8 Gbps</td>
-<td><code>tc qdisc add dev eth0 root fq maxrate 8gbit</code></td>
-</tr>
-<tr>
-<td>40G</td>
-<td>8</td>
-<td>5 Gbps</td>
-<td><code>tc qdisc add dev eth0 root fq maxrate 5gbit</code></td>
-</tr>
-<tr>
-<td>100G</td>
-<td>8</td>
-<td>10-12 Gbps</td>
-<td><code>tc qdisc add dev eth0 root fq maxrate 10gbit</code></td>
-</tr>
-<tr>
-<td>100G (to 10G paths)</td>
-<td>Any</td>
-<td>2 Gbps</td>
-<td><code>tc qdisc add dev eth0 root fq maxrate 2gbit</code></td>
-</tr>
-</tbody>
-</table>
+<p>| Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Example Command | | --- | --- | --- | --- | | 10G |
+4 | 2 Gbps | <code>tc qdisc add dev eth0 root fq maxrate 2gbit</code> | | 10G | 8 | 1 Gbps | <code>tc qdisc add dev eth0 root fq maxrate
+1gbit</code> | | 40G | 4 | 8 Gbps | <code>tc qdisc add dev eth0 root fq maxrate 8gbit</code> | | 40G | 8 | 5 Gbps | <code>tc qdisc add dev
+eth0 root fq maxrate 5gbit</code> | | 100G | 8 | 10-12 Gbps | <code>tc qdisc add dev eth0 root fq maxrate 10gbit</code> | | 100G (to 10G
+paths) | Any | 2 Gbps | <code>tc qdisc add dev eth0 root fq maxrate 2gbit</code> |</p>
 <h3 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Conservative default: 2 Gbps</strong> — Works for most 10G-to-10G transfers, prevents overwhelming typical receivers</li>
-<li><strong>Adjust based on RTT</strong>: Longer paths benefit from slightly lower rates</li>
-<li><strong>Divide bandwidth</strong>: With 4 parallel streams on 10G NIC, 2 Gbps/stream = 8 Gbps total (80% utilization)</li>
-<li><strong>Monitor and tune</strong>: Use <code>iperf3 --fq-rate</code> or perfSONAR pscheduler to test your specific path</li>
+<li>
+<p><strong>Conservative default: 2 Gbps</strong> — Works for most 10G-to-10G transfers, prevents overwhelming typical receivers</p>
+</li>
+<li>
+<p><strong>Adjust based on RTT</strong>: Longer paths benefit from slightly lower rates</p>
+</li>
+<li>
+<p><strong>Divide bandwidth</strong>: With 4 parallel streams on 10G NIC, 2 Gbps/stream = 8 Gbps total (80% utilization)</p>
+</li>
+<li>
+<p><strong>Monitor and tune</strong>: Use <code>iperf3 --fq-rate</code> or perfSONAR pscheduler to test your specific path</p>
+</li>
 </ul>
 <hr />
 <h2 id="implementation-using-fasterdata-tuningsh">Implementation: Using fasterdata-tuning.sh<a class="headerlink" href="#implementation-using-fasterdata-tuningsh" title="Permanent link">&para;</a></h2>
@@ -2117,9 +2387,15 @@
 <p>Check what pacing rates are recommended for your DTN:</p>
 <div class="highlight"><pre><span></span><code>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>dtn
 </code></pre></div>
-<p>Output shows:
-- Whether packet pacing is currently applied
-- Recommended default rate: 2 Gbps (2000mbps)</p>
+<p>Output shows:</p>
+<ul>
+<li>
+<p>Whether packet pacing is currently applied</p>
+</li>
+<li>
+<p>Recommended default rate: 2 Gbps (2000mbps)</p>
+</li>
+</ul>
 <h3 id="apply-packet-pacing">Apply Packet Pacing<a class="headerlink" href="#apply-packet-pacing" title="Permanent link">&para;</a></h3>
 <p>Apply packet pacing with default 2 Gbps rate:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing
@@ -2128,10 +2404,18 @@
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>10gbps
 </code></pre></div>
 <p>Supported rate units: <code>kbps</code>, <code>mbps</code>, <code>gbps</code>, <code>tbps</code></p>
-<p>Examples:
-- <code>2gbps</code> — 2 Gigabits per second
-- <code>10000mbps</code> — 10 Gigabits per second (equivalent to 10gbps)
-- <code>2000mbps</code> — 2 Gigabits per second (default)</p>
+<p>Examples:</p>
+<ul>
+<li>
+<p><code>2gbps</code> — 2 Gigabits per second</p>
+</li>
+<li>
+<p><code>10000mbps</code> — 10 Gigabits per second (equivalent to 10gbps)</p>
+</li>
+<li>
+<p><code>2000mbps</code> — 2 Gigabits per second (default)</p>
+</li>
+</ul>
 <h3 id="dry-run-preview">Dry-Run Preview<a class="headerlink" href="#dry-run-preview" title="Permanent link">&para;</a></h3>
 <p>Preview what would be applied without making changes:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--dry-run
@@ -2140,13 +2424,25 @@
 <h3 id="burst-size-calculation">Burst Size Calculation<a class="headerlink" href="#burst-size-calculation" title="Permanent link">&para;</a></h3>
 <p>The script automatically calculates burst size as 1 millisecond worth of packets:</p>
 <ul>
-<li><strong>2 Gbps</strong> → 250 KB burst</li>
-<li><strong>5 Gbps</strong> → 625 KB burst</li>
-<li><strong>10 Gbps</strong> → 1.25 MB burst</li>
+<li>
+<p><strong>2 Gbps</strong> → 250 KB burst</p>
+</li>
+<li>
+<p><strong>5 Gbps</strong> → 625 KB burst</p>
+</li>
+<li>
+<p><strong>10 Gbps</strong> → 1.25 MB burst</p>
+</li>
 </ul>
-<p>Burst is clamped to safe bounds:
-- <strong>Minimum</strong>: 1,500 bytes (typical MTU size)
-- <strong>Maximum</strong>: 10 MB (prevents excessive buffering)</p>
+<p>Burst is clamped to safe bounds:</p>
+<ul>
+<li>
+<p><strong>Minimum</strong>: 1,500 bytes (typical MTU size)</p>
+</li>
+<li>
+<p><strong>Maximum</strong>: 10 MB (prevents excessive buffering)</p>
+</li>
+</ul>
 <hr />
 <h2 id="manual-configuration-with-tc-command">Manual Configuration with <code>tc</code> Command<a class="headerlink" href="#manual-configuration-with-tc-command" title="Permanent link">&para;</a></h2>
 <p>If you prefer to configure packet pacing manually, use the <code>tc</code> command directly:</p>
@@ -2168,10 +2464,18 @@ tc<span class="w"> </span>qdisc<span class="w"> </span>stat<span class="w"> </sp
 <p>For more granular control, use TBF instead of FQ:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>replace<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>tbf<span class="w"> </span>rate<span class="w"> </span>2gbit<span class="w"> </span>burst<span class="w"> </span><span class="m">250000</span><span class="w"> </span>latency<span class="w"> </span>100ms
 </code></pre></div>
-<p>Where:
-- <code>rate</code> = packet pacing rate (e.g., 2gbit, 5gbit)
-- <code>burst</code> = maximum burst size in bytes
-- <code>latency</code> = maximum queuing latency before dropping packets</p>
+<p>Where:</p>
+<ul>
+<li>
+<p><code>rate</code> = packet pacing rate (e.g., 2gbit, 5gbit)</p>
+</li>
+<li>
+<p><code>burst</code> = maximum burst size in bytes</p>
+</li>
+<li>
+<p><code>latency</code> = maximum queuing latency before dropping packets</p>
+</li>
+</ul>
 <hr />
 <h2 id="testing-and-validation">Testing and Validation<a class="headerlink" href="#testing-and-validation" title="Permanent link">&para;</a></h2>
 <h3 id="verify-pacing-is-active">Verify Pacing is Active<a class="headerlink" href="#verify-pacing-is-active" title="Permanent link">&para;</a></h3>
@@ -2196,95 +2500,163 @@ iperf3<span class="w"> </span>-c<span class="w"> </span>&lt;receiver&gt;<span cl
 <h2 id="common-issues-and-troubleshooting">Common Issues and Troubleshooting<a class="headerlink" href="#common-issues-and-troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="issue-pacing-not-applied">Issue: Pacing Not Applied<a class="headerlink" href="#issue-pacing-not-applied" title="Permanent link">&para;</a></h3>
 <p><strong>Symptom</strong>: <code>tc qdisc show</code> shows <code>qdisc mq</code> instead of <code>qdisc fq</code></p>
-<p><strong>Solution</strong>: Ensure <code>/etc/sysctl.conf</code> contains:
+<p><strong>Solution</strong>: Ensure <code>/etc/sysctl.conf</code> contains:</p>
 <div class="highlight"><pre><span></span><code>net.core.default_qdisc<span class="w"> </span><span class="o">=</span><span class="w"> </span>fq
 sysctl<span class="w"> </span>-p
-</code></pre></div></p>
+</code></pre></div>
 <p>Then reapply pacing with <code>fasterdata-tuning.sh</code> or <code>tc</code> command.</p>
 <h3 id="issue-throughput-still-low-after-pacing">Issue: Throughput Still Low After Pacing<a class="headerlink" href="#issue-throughput-still-low-after-pacing" title="Permanent link">&para;</a></h3>
-<p><strong>Causes</strong>:
-- Pacing rate too conservative — try increasing by 10-20%
-- Receiver still bottlenecked — verify receiver can sustain higher rates
-- Network path issue — check for packet loss with <code>mtr</code> or <code>iperf3</code></p>
-<p><strong>Debug Steps</strong>:
-1. Test between same hosts in reverse direction (verify it's not sender-specific)
-2. Gradually increase pacing rate in 1-2 Gbps increments
-3. Monitor <code>tc -s qdisc show dev eth0</code> for dropped/delayed packets</p>
+<p><strong>Causes</strong>:</p>
+<ul>
+<li>
+<p>Pacing rate too conservative — try increasing by 10-20%</p>
+</li>
+<li>
+<p>Receiver still bottlenecked — verify receiver can sustain higher rates</p>
+</li>
+<li>
+<p>Network path issue — check for packet loss with <code>mtr</code> or <code>iperf3</code></p>
+</li>
+</ul>
+<p><strong>Debug Steps</strong>:</p>
+<ol>
+<li>
+<p>Test between same hosts in reverse direction (verify it's not sender-specific)</p>
+</li>
+<li>
+<p>Gradually increase pacing rate in 1-2 Gbps increments</p>
+</li>
+<li>
+<p>Monitor <code>tc -s qdisc show dev eth0</code> for dropped/delayed packets</p>
+</li>
+</ol>
 <h3 id="issue-pacing-configuration-lost-after-reboot">Issue: Pacing Configuration Lost After Reboot<a class="headerlink" href="#issue-pacing-configuration-lost-after-reboot" title="Permanent link">&para;</a></h3>
 <p><strong>Solution</strong>: The <code>fasterdata-tuning.sh</code> apply mode creates a systemd service for persistence. Enable it:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ethtool-persist.service
 sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>ethtool-persist.service
 </code></pre></div>
-<p>Verify:
+<p>Verify:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>ethtool-persist.service
 tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
-</code></pre></div></p>
+</code></pre></div>
 <hr />
 <h2 id="when-not-to-use-packet-pacing">When NOT to Use Packet Pacing<a class="headerlink" href="#when-not-to-use-packet-pacing" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Low-latency, low-throughput applications</strong> — Pacing adds latency</li>
-<li><strong>Latency-sensitive protocols</strong> (HFT, gaming, VoIP) — Avoid pacing</li>
-<li><strong>Measurement hosts</strong> — Pacing should not be applied to measurement/monitor hosts</li>
-<li><strong>Low-bandwidth transfers</strong> — Pacing provides little benefit below 1G</li>
+<li>
+<p><strong>Low-latency, low-throughput applications</strong> — Pacing adds latency</p>
+</li>
+<li>
+<p><strong>Latency-sensitive protocols</strong> (HFT, gaming, VoIP) — Avoid pacing</p>
+</li>
+<li>
+<p><strong>Measurement hosts</strong> — Pacing should not be applied to measurement/monitor hosts</p>
+</li>
+<li>
+<p><strong>Low-bandwidth transfers</strong> — Pacing provides little benefit below 1G</p>
+</li>
 </ul>
 <hr />
 <h2 id="advanced-per-application-pacing">Advanced: Per-Application Pacing<a class="headerlink" href="#advanced-per-application-pacing" title="Permanent link">&para;</a></h2>
-<p>If you need finer control than host-level pacing, applications can set pacing rates using the <code>SO_MAX_PACING_RATE</code> socket option:</p>
+<p>If you need finer control than host-level pacing, applications can set pacing rates using the <code>SO_MAX_PACING_RATE</code>
+socket option:</p>
 <div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sys/socket.h&gt;</span>
 
 <span class="c1">// In your application code:</span>
 <span class="kt">int</span><span class="w"> </span><span class="n">pacing_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2000000000</span><span class="p">;</span><span class="w">  </span><span class="c1">// 2 Gbps in bytes per second</span>
-<span class="n">setsockopt</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span><span class="w"> </span><span class="n">SOL_SOCKET</span><span class="p">,</span><span class="w"> </span><span class="n">SO_MAX_PACING_RATE</span><span class="p">,</span><span class="w"> </span>
+<span class="n">setsockopt</span><span class="p">(</span><span class="n">sockfd</span><span class="p">,</span><span class="w"> </span><span class="n">SOL_SOCKET</span><span class="p">,</span><span class="w"> </span><span class="n">SO_MAX_PACING_RATE</span><span class="p">,</span>
 <span class="w">           </span><span class="o">&amp;</span><span class="n">pacing_rate</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">pacing_rate</span><span class="p">));</span>
 </code></pre></div>
-<p><strong>Requirements</strong>:
-- Kernel 4.13+
-- Host configured with <code>net.core.default_qdisc = fq</code> or <code>fq_codel</code>
-- Application code changes required</p>
+<p><strong>Requirements</strong>:</p>
+<ul>
+<li>
+<p>Kernel 4.13+</p>
+</li>
+<li>
+<p>Host configured with <code>net.core.default_qdisc = fq</code> or <code>fq_codel</code></p>
+</li>
+<li>
+<p>Application code changes required</p>
+</li>
+</ul>
 <hr />
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <h3 id="esnet-fasterdata-documentation">ESnet Fasterdata Documentation<a class="headerlink" href="#esnet-fasterdata-documentation" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>DTN Tuning Guide</strong>: https://fasterdata.es.net/DTN/tuning/</li>
-<li><strong>Packet Pacing Guide</strong>: https://fasterdata.es.net/host-tuning/linux/packet-pacing/</li>
-<li><strong>FQ Pacing Research Results</strong>: https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf</li>
+<li>
+<p><strong>DTN Tuning Guide</strong>: <a href="https://fasterdata.es.net/DTN/tuning/">https://fasterdata.es.net/DTN/tuning/</a></p>
+</li>
+<li>
+<p><strong>Packet Pacing Guide</strong>: <a href="https://fasterdata.es.net/host-tuning/linux/packet-pacing/">https://fasterdata.es.net/host-tuning/linux/packet-pacing/</a></p>
+</li>
+<li>
+<p><strong>FQ Pacing Research Results</strong>: <a href="https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf">https://fasterdata.es.net/assets/fasterdata/FQ-pacing-results.pdf</a></p>
+</li>
 </ul>
 <h3 id="linux-kernel-documentation">Linux Kernel Documentation<a class="headerlink" href="#linux-kernel-documentation" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>tc-fq man page</strong>: <code>man 8 tc-fq</code></li>
-<li><strong>tc-tbf man page</strong>: <code>man 8 tc-tbf</code></li>
-<li><strong>tc man page</strong>: <code>man 8 tc</code></li>
-<li><strong>LWN Article on FQ</strong>: https://lwn.net/Articles/564978/</li>
+<li>
+<p><strong>tc-fq man page</strong>: <code>man 8 tc-fq</code></p>
+</li>
+<li>
+<p><strong>tc-tbf man page</strong>: <code>man 8 tc-tbf</code></p>
+</li>
+<li>
+<p><strong>tc man page</strong>: <code>man 8 tc</code></p>
+</li>
+<li>
+<p><strong>LWN Article on FQ</strong>: <a href="https://lwn.net/Articles/564978/">https://lwn.net/Articles/564978/</a></p>
+</li>
 </ul>
 <h3 id="tools-and-testing">Tools and Testing<a class="headerlink" href="#tools-and-testing" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>iperf3</strong>: https://iperf.fr/ (with <code>--fq-rate</code> support)</li>
-<li><strong>perfSONAR</strong>: https://www.perfsonar.net/ (pscheduler with pacing)</li>
-<li><strong>mtr</strong> (traceroute tool): <code>mtr &lt;destination&gt;</code></li>
+<li>
+<p><strong>iperf3</strong>: <a href="https://iperf.fr/">https://iperf.fr/</a> (with <code>--fq-rate</code> support)</p>
+</li>
+<li>
+<p><strong>perfSONAR</strong>: <a href="https://www.perfsonar.net/">https://www.perfsonar.net/</a> (pscheduler with pacing)</p>
+</li>
+<li>
+<p><strong>mtr</strong> (traceroute tool): <code>mtr &lt;destination&gt;</code></p>
+</li>
 </ul>
 <h3 id="related-tuning">Related Tuning<a class="headerlink" href="#related-tuning" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>SYSCTL Tuning</strong>: See <code>fasterdata-tuning.sh</code> for buffer sizing recommendations</li>
-<li><strong>100G+ Tuning</strong>: https://fasterdata.es.net/host-tuning/linux/100g-tuning/</li>
-<li><strong>BBR Congestion Control</strong>: https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/</li>
+<li>
+<p><strong>SYSCTL Tuning</strong>: See <code>fasterdata-tuning.sh</code> for buffer sizing recommendations</p>
+</li>
+<li>
+<p><strong>100G+ Tuning</strong>: <a href="https://fasterdata.es.net/host-tuning/linux/100g-tuning/">https://fasterdata.es.net/host-tuning/linux/100g-tuning/</a></p>
+</li>
+<li>
+<p><strong>BBR Congestion Control</strong>: <a href="https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/">https://fasterdata.es.net/host-tuning/linux/recent-tcp-enhancements/bbr-tcp/</a></p>
+</li>
 </ul>
 <hr />
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <p><strong>Packet pacing is essential for DTN nodes and high-performance data transfer</strong> because it:</p>
 <ol>
-<li>✅ <strong>Prevents receiver buffer overflow</strong> — Smooth traffic instead of bursts</li>
-<li>✅ <strong>Reduces packet loss</strong> — Eliminates TCP back-off and retransmission overhead</li>
-<li>✅ <strong>Improves throughput 2-4x</strong> — Especially on long paths with high latency</li>
-<li>✅ <strong>Fair bandwidth sharing</strong> — Each flow gets equal treatment</li>
-<li>✅ <strong>Easy to implement</strong> — Single command or script invocation</li>
+<li>
+<p>✅ <strong>Prevents receiver buffer overflow</strong> — Smooth traffic instead of bursts</p>
+</li>
+<li>
+<p>✅ <strong>Reduces packet loss</strong> — Eliminates TCP back-off and retransmission overhead</p>
+</li>
+<li>
+<p>✅ <strong>Improves throughput 2-4x</strong> — Especially on long paths with high latency</p>
+</li>
+<li>
+<p>✅ <strong>Fair bandwidth sharing</strong> — Each flow gets equal treatment</p>
+</li>
+<li>
+<p>✅ <strong>Easy to implement</strong> — Single command or script invocation</p>
+</li>
 </ol>
-<p><strong>Recommended Configuration for 10G DTN with 4 parallel streams</strong>:
+<p><strong>Recommended Configuration for 10G DTN with 4 parallel streams</strong>:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>2gbps
-</code></pre></div></p>
+</code></pre></div>
 <p><strong>Expected Result</strong>: Near-line-rate throughput with minimal packet loss.</p>
 <hr />
-<p><em>Last Updated: December 2025</em>
-<em>References: ESnet Fasterdata, Linux kernel tc documentation</em></p>
+<p><em>Last Updated: December 2025</em> <em>References: ESnet Fasterdata, Linux kernel tc documentation</em></p>
 
 
 

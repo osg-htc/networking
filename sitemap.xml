@@ -2,202 +2,222 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://osg-htc.org/networking/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/BROKEN_LINKS_REPORT/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/host-network-tuning/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/network-troubleshooting/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/osg-network-analytics/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/osg-network-services/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar-in-osg/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/quick-reference/</loc>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/web-site-management/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/features/fail2ban/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/features/nftables/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/features/selinux/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/network-troubleshooting/osg-debugging-document/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/CONTAINER_RESTART_ISSUE/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/FIX_SUMMARY/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/deployment-models/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/faq/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/install-testpoint/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/installation/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/multiple-nic-guidance/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/packet-pacing/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/perfSONAR-and-rp_filter-EL9/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/perfSONAR-sysctl-info/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/psetf/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/register-ps-in-gocdb/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/CHANGELOG/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/DEPRECATION/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/README-lsregistration/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/backups/quick-deploy_landing_original/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/backups/research_landing_original/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/backups/troubleshoot_landing_original/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/install-perfsonar-testpoint/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/intro/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/landing/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/quick-deploy/automated-setup/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/research/architecture/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/research/intro/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/research/landing/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/troubleshoot/intro/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/troubleshoot/landing/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/personas/troubleshoot/triage-checklist/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/troubleshoot/playbooks/container-startup/</loc>
+         <lastmod>2025-12-08</lastmod>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/troubleshoot/playbooks/firewall-issues/</loc>
+         <lastmod>2025-12-08</lastmod>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/troubleshoot/playbooks/performance-issues/</loc>
+         <lastmod>2025-12-08</lastmod>
+    </url>
+    <url>
+         <loc>https://osg-htc.org/networking/personas/troubleshoot/playbooks/tests-not-running/</loc>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/release-notes/quick-deploy-1.0.0/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/release-notes/quick-deploy-1.0.1/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/release-notes/quick-deploy-1.1.0/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/release-notes/quick-deploy-1.3.0/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/release-notes/quick-deploy-1.4.0/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/release-notes/quick-deploy-1.4.1/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/tools/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
     <url>
          <loc>https://osg-htc.org/networking/tools/PR_BROKEN_LINKS_DRAFT/</loc>
-         <lastmod>2025-12-07</lastmod>
+         <lastmod>2025-12-08</lastmod>
     </url>
 </urlset>
