@@ -256,6 +256,7 @@ in non-interactive sessions or when you use `--yes`.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
+
 ```text
 
 The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
@@ -293,6 +294,7 @@ invocation.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
+
 ```text
 
 The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically
@@ -320,6 +322,7 @@ host, and because some measurement infrastructure and registration systems perfo
 
         ```bash
         /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+
 ```text
 
     **Notes and automation tips:**
@@ -375,6 +378,7 @@ If any prerequisite is missing, the script skips that component and continues.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
+
 ```text
 
 - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
@@ -428,6 +432,7 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
             type ipv6_addr
             elements = { 2001:db8::10 }
         }
+
 ```text
 
     Then validate and reload (root shell):
@@ -446,6 +451,7 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
         nft list ruleset
         sestatus
         systemctl status fail2ban
+
 ```text
 
 You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
@@ -835,6 +841,7 @@ patch the Apache SSL configuration after obtaining certificates.
 
     ```bash
     podman exec perfsonar-testpoint apachectl -k graceful
+
 ```text
 
 This approach requires manual intervention after initial certificate issuance and any time the container is recreated.
@@ -860,6 +867,7 @@ entrypoint-wrapper.sh not found`
 
     ```bash
     ls -la /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+
 ```text
 
     If you've already started the container and it failed, remove it before retrying:
@@ -1012,6 +1020,7 @@ available.
             EOF
 
             chmod +x /usr/local/bin/perfsonar-auto-update.sh
+
 ```text
 
 1. Create a systemd service:
@@ -1047,6 +1056,7 @@ available.
             [Install]
             WantedBy=timers.target
             EOF
+
 ```text
 
 1. Enable and start the timer:
@@ -1061,6 +1071,7 @@ available.
 
             ```bash
             systemctl list-timers perfsonar-auto-update.timer
+
 ```text
 
 1. Test manually (optional):
@@ -1075,6 +1086,7 @@ available.
 
             ```bash
             tail -f /var/log/perfsonar-auto-update.log
+
 ```text
 
 This approach ensures containers are updated only when new images are available, minimizing unnecessary restarts while
@@ -1120,6 +1132,7 @@ Perform these checks before handing the host over to operations:
 
         # Verify services inside container are running
         podman exec perfsonar-testpoint systemctl status apache2 psconfig-pscheduler-agent --no-pager
+
 ```text
 
 1. **Network path validation:**
@@ -1138,6 +1151,7 @@ Perform these checks before handing the host over to operations:
         ```bash
         tracepath -n <remote-testpoint>
         ip route get <remote-testpoint-ip>
+
 ```text
 
     Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
@@ -1180,6 +1194,7 @@ Perform these checks before handing the host over to operations:
 
         # Alternative: Check certificate files directly
         sudo openssl x509 -in /etc/letsencrypt/live/<SERVER_FQDN>/cert.pem -noout -dates -issuer
+
 ```text
 
 Ensure the issuer is Let's Encrypt and the validity period is acceptable. This check only applies if you configured
@@ -1233,6 +1248,7 @@ outputs to operations:
     # Verify compose file syntax
     cd /opt/perfsonar-tp
     podman-compose config
+
 ```text
 
     **Common causes:**
@@ -1296,6 +1312,7 @@ with exit code 255.
 
     # Check if using compose-based service (BAD)
     grep -A5 "ExecStart" /etc/systemd/system/perfsonar-testpoint.service
+
 ```text
 
     **Solution:**
@@ -1365,6 +1382,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     # Verify service file configuration
     grep -A5 "ExecStart" /etc/systemd/system/perfsonar-certbot.service
+
 ```text
 
     **Solution:**
@@ -1418,6 +1436,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     # Test if issue resolves, then check audit log
     ausearch -m avc -ts recent > /tmp/selinux-denials.txt
+
 ```text
 
     **Solutions:**
@@ -1479,6 +1498,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     # Verify forward and reverse DNS
     /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+
 ```text
 
     **Solutions:**
@@ -1544,6 +1564,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     # Manually restart testpoint
     podman restart perfsonar-testpoint
+
 ```text
 
     **Solutions:**
@@ -1613,6 +1634,7 @@ filename.
 
     # Manually test update
     systemctl start perfsonar-auto-update.service
+
 ```text
 
     **Solutions:**
@@ -1658,6 +1680,7 @@ filename.
 
     # Check nftables rules
     nft list ruleset
+
 ```text
 
     **Logs:**

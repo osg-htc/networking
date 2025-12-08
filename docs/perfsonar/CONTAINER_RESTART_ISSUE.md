@@ -68,6 +68,7 @@ If you have an existing deployment with the restart loop issue:
    curl -fsSL \
        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
        -o /opt/perfsonar-tp/docker-compose.yml
+
 ```text
 
 1. Restart the service:

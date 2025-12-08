@@ -40,11 +40,10 @@ First, install your chosen EL9 operating system on your host after saving you lo
 
 The following options are then recommended to install perfSONAR for OSG/WLCG:
 
-| Installation method              | Link |
-|----------------------------------|----------------------------------------------------------------------------------
--------| | Toolkit bundle installation | [Toolkit Installation Quick
-Start](https://docs.perfsonar.net/install_quick_start.html)      | | Testpoint bundle installation | Follow quick start
-above but do 'dnf install perfsonar-testpoint' instead of toolkit       |
+| Installation method | Link |
+|---------------------|------|
+| Toolkit bundle installation | [Toolkit Installation Quick Start](https://docs.perfsonar.net/install_quick_start.html) |
+| Testpoint bundle installation | Follow the Quick Start above but use `dnf install perfsonar-testpoint` instead of the toolkit |
 
 You can see more details about EL supported installs at <<https://docs.perfsonar.net/install_el.html>>
 
@@ -128,6 +127,7 @@ site or host firewalls.   An overview of perfSONAR security is available at
 
     ```text
 All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
+
 ```text
 
 For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the
@@ -167,11 +167,13 @@ filling the information please follow those simple guidelines:
 * For each form (service type) fill at least:
 
     ```text
+
 * Hosting Site
 * Service Type
 * Host Name
 * Host IP (optional)
 * Description (optional label used in MaDDash; keep short and unique)
+
 ```text
 
 * Check "N" when asked "Is it a beta service"
