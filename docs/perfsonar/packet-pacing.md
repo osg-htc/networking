@@ -24,7 +24,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 ### Common Bottleneck Scenarios
 
-**Scenario 1: Fast Source, Slower Network Path**
+#### Scenario 1: Fast Source, Slower Network Path
 
 - A 10G DTN sends to a 1G receiver or via a 1G network path
 
@@ -34,7 +34,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 - TCP backs off, causing dramatic throughput drops
 
-**Scenario 2: Multiple Parallel Streams**
+#### Scenario 2: Multiple Parallel Streams
 
 - A 10G DTN with 4-8 parallel GridFTP streams to a 10G receiver
 
@@ -44,7 +44,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 - Packet loss and TCP backing off reduce overall throughput
 
-**Scenario 3: Unbalanced CPU/Network Performance**
+#### Scenario 3: Unbalanced CPU/Network Performance
 
 - A fast 40G/100G host with a slower CPU
 
@@ -54,7 +54,7 @@ When transferring data across a network, the effective throughput is limited by 
 
 - Packet loss and retransmission overhead
 
-**Scenario 4: Long-Distance Paths (50-80ms RTT)**
+#### Scenario 4: Long-Distance Paths (50-80ms RTT)
 
 - Network paths with high latency across continents
 
@@ -159,11 +159,14 @@ ESnet's performance testing with Berkeley Lab and others has demonstrated signif
 
 For a DTN with **N parallel streams**, divide available bandwidth accordingly:
 
-| Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Command | |---|---|---|---| | 10G | 4 | 2 Gbps | `tc
-qdisc add dev eth0 root fq maxrate 2gbit` | | 10G | 8 | 1 Gbps | `tc qdisc add dev eth0 root fq maxrate 1gbit` | | 40G |
-4 | 8 Gbps | `tc qdisc add dev eth0 root fq maxrate 8gbit` | | 40G | 8 | 5 Gbps | `tc qdisc add dev eth0 root fq maxrate
-5gbit` | | 100G | 8 | 10-12 Gbps | `tc qdisc add dev eth0 root fq maxrate 10gbit` | | 100G (to 10G paths) | Any | 2 Gbps
-| `tc qdisc add dev eth0 root fq maxrate 2gbit` |
+| Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Example Command |
+| --- | --- | --- | --- |
+| 10G | 4 | 2 Gbps | `tc qdisc add dev eth0 root fq maxrate 2gbit` |
+| 10G | 8 | 1 Gbps | `tc qdisc add dev eth0 root fq maxrate 1gbit` |
+| 40G | 4 | 8 Gbps | `tc qdisc add dev eth0 root fq maxrate 8gbit` |
+| 40G | 8 | 5 Gbps | `tc qdisc add dev eth0 root fq maxrate 5gbit` |
+| 100G | 8 | 10-12 Gbps | `tc qdisc add dev eth0 root fq maxrate 10gbit` |
+| 100G (to 10G paths) | Any | 2 Gbps | `tc qdisc add dev eth0 root fq maxrate 2gbit` |
 
 ### Rationale
 
