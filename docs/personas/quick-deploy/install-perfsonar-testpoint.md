@@ -39,7 +39,7 @@ extract/save/restore registration config that you may want to use.
 
     ```bash
     /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
-```
+    ```text
 
 Note: Repository clone instructions are in Step 2.
 
@@ -57,14 +57,14 @@ Note: Repository clone instructions are in Step 2.
     hostnamectl set-hostname <testpoint-hostname>
     systemctl enable --now chronyd
     timedatectl set-timezone <Region/City>
-```text
+    ```text
 
 1. **Disable unused services:**
 
     ```bash
     systemctl disable --now firewalld NetworkManager-wait-online
     dnf remove -y rsyslog
-```
+    ```text
 
     ??? info "Why disable unused services?"
 
@@ -79,14 +79,14 @@ container networking.
 
     ```bash
     dnf -y update
-```text
+    ```text
 
 1. **Record NIC names:** Document interface mappings for later PBR configuration.
 
     ```bash
     nmcli device status
     ip -br addr
-```
+    ```text
 
 ---
 
@@ -107,13 +107,13 @@ curl -fsSL \
     -o /tmp/perfSONAR-orchestrator.sh
 chmod 0755 /tmp/perfSONAR-orchestrator.sh
 /tmp/perfSONAR-orchestrator.sh
-```text
+    ```text
 
 **Interactive mode** (pause at each step, confirm/skip/quit):
 
 ```bash
 /tmp/perfSONAR-orchestrator.sh
-```
+```text
 
 **Non-interactive mode** (auto-confirm all steps):
 
@@ -125,7 +125,7 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 
 ```bash
 /tmp/perfSONAR-orchestrator.sh --option B --fqdn <FQDN> --email <EMAIL>
-```
+```text
 
 **Flags:**
 
@@ -177,7 +177,7 @@ curl -fsSL \
     -o /tmp/install_tools_scripts.sh
 chmod 0755 /tmp/install_tools_scripts.sh
 /tmp/install_tools_scripts.sh /opt/perfsonar-tp
-```
+```text
 
 **Verify bootstrap completed successfully:**
 
@@ -247,13 +247,13 @@ in non-interactive sessions or when you use `--yes`.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
-```
+    ```text
 
     Generate and write the config file:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
-```text
+    ```text
 
 The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
 confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
@@ -283,13 +283,13 @@ invocation.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
-```
+    ```text
 
     Full rebuild (destructive – removes all NM connections first):
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
-```text
+    ```text
 
 The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically
 unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual
@@ -297,7 +297,7 @@ NetworkManager restart:
 
     ```bash
     systemctl restart NetworkManager
-```
+    ```text
 
 1. **DNS: forward and reverse entries (required):**
 
@@ -338,7 +338,7 @@ proceeding with registration and testing.
     nmcli connection show
     ip rule show
     ip route show table <table-id>
-```
+    ```text
 
 Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default
 route.
@@ -369,7 +369,7 @@ If any prerequisite is missing, the script skips that component and continues.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
-```text
+    ```text
 
 - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
       summary and answer manually).
@@ -392,7 +392,7 @@ made):
 
         ```bash
         /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
-```
+    ```text
 
     ??? tip "Manually add extra management hosts/subnets"
 
@@ -428,7 +428,7 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
     ```bash
     nft -c -f /etc/nftables.d/perfsonar.nft
     systemctl reload nftables || systemctl restart nftables
-```
+    ```text
 
 1. **Confirm nftables state and security services:**
 
@@ -438,7 +438,7 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
         nft list ruleset
         sestatus
         systemctl status fail2ban
-```text
+    ```text
 
 You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
@@ -465,7 +465,7 @@ Prepare the pSConfig directory and a minimal compose file. No other host bind-mo
 
 ```bash
 mkdir -p /opt/perfsonar-tp/psconfig
-```
+```text
 
 Download a ready-made compose file (or copy it manually): Browse: [repo view](https://github.com/osg-
 htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
@@ -482,7 +482,7 @@ Bring it up:
 
 ```bash
 (cd /opt/perfsonar-tp; podman-compose up -d)
-```
+```text
 
 Verify the container is running and healthy:
 
@@ -525,7 +525,7 @@ systemctl enable --now perfsonar-testpoint.service
 
 systemctl status perfsonar-testpoint.service --no-pager
 podman ps
-```
+```text
 
 Notes:
 
@@ -602,7 +602,7 @@ ls -la /var/www/html
 # Should show sites-available/, sites-enabled/, etc.
 
 ls -la /etc/apache2
-```
+```text
 
 ??? tip "SELinux labeling handled automatically"
 
@@ -637,7 +637,7 @@ If the file is missing, run the Step 2 bootstrap first:
 curl -fsSL \
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
     | bash -s -- /opt/perfsonar-tp
-```
+```text
 
 Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses an entrypoint wrapper
 that auto-discovers Let's Encrypt certificates on container startup and automatically patches the Apache configuration.
@@ -660,7 +660,7 @@ If you want to explicitly set the FQDN (optional):
 # Optional: only needed if you have multiple certificates
 
 sed -i 's/# - SERVER_FQDN=.*/- SERVER_FQDN=<YOUR_FQDN>/' /opt/perfsonar-tp/docker-compose.yml
-```
+```text
 
 Start the containers:
 
@@ -702,7 +702,7 @@ systemctl enable --now perfsonar-testpoint.service perfsonar-certbot.service
 
 systemctl status perfsonar-testpoint.service perfsonar-certbot.service --no-pager
 podman ps
-```
+```text
 
 #### 3) Obtain your first Let's Encrypt certificate (one-time)
 
@@ -725,7 +725,7 @@ podman run --rm --net=host \
     --standalone --agree-tos --non-interactive \
     -d <SERVER_FQDN> -d <ALT_FQDN> \
     -m <LETSENCRYPT_EMAIL>
-```
+```text
 
 ??? info "Certbot command explained"
 
@@ -771,7 +771,7 @@ Check the logs to verify the SSL config was patched:
 
 ```bash
 podman logs perfsonar-testpoint 2>&1 | grep -A5 "Patching Apache"
-```
+```text
 
 You should see output confirming the certificate paths were updated.
 
@@ -798,7 +798,7 @@ Test renewal with a dry-run:
 
 ```bash
 podman exec certbot certbot renew --dry-run
-```
+```text
 
 If successful, certificates will auto-renew before expiry, and the testpoint will be automatically restarted to load the
 new certificates. You can verify this behavior by checking the certbot logs after a renewal:
@@ -820,7 +820,7 @@ patch the Apache SSL configuration after obtaining certificates.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/patch_apache_ssl_for_letsencrypt.sh <SERVER_FQDN>
-```
+    ```text
 
 1. Reload Apache in the running container:
 
@@ -844,7 +844,7 @@ entrypoint-wrapper.sh not found`
     curl -fsSL \
         https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
         | bash -s -- /opt/perfsonar-tp
-```
+    ```text
 
     Then verify the entrypoint wrapper exists:
 
@@ -857,7 +857,7 @@ entrypoint-wrapper.sh not found`
     ```bash
     podman-compose down
     podman-compose up -d
-```
+    ```text
 
 ---
 
@@ -887,7 +887,7 @@ If there are any stale/old/incorrect entries, you can remove them:
 
 ```bash
 podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
-```
+```text
 
 Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before
 applying.
@@ -957,7 +957,7 @@ container and restart the daemon only if needed.
         --city Berkeley --region CA --country US --zip 94720 \
         --latitude 37.5 --longitude -121.7469 \
         --admin-name "pS Admin" --admin-email admin@example.org
-```
+    ```text
 
 1. **Automatic image updates and safe restarts**
 
@@ -1017,7 +1017,7 @@ available.
             [Install]
             WantedBy=multi-user.target
             EOF
-```
+```text
 
 1. Create a systemd timer (runs daily at 3 AM):
 
@@ -1041,7 +1041,7 @@ available.
             ```bash
             systemctl daemon-reload
             systemctl enable --now perfsonar-auto-update.timer
-```
+```text
 
 1. Verify the timer is active:
 
@@ -1054,7 +1054,7 @@ available.
             ```bash
             systemctl start perfsonar-auto-update.service
             journalctl -u perfsonar-auto-update.service -n 50
-```
+```text
 
 1. Monitor the update log:
 
@@ -1084,7 +1084,7 @@ Perform these checks before handing the host over to operations:
 
         # Alternative: check containers directly
         podman ps --filter name=perfsonar
-```
+    ```text
 
     Ensure Podman is active and containers are running.
 
@@ -1114,7 +1114,7 @@ Perform these checks before handing the host over to operations:
 
         ```bash
         podman exec -it perfsonar-testpoint pscheduler task throughput --dest <remote-testpoint>
-```
+    ```text
 
         Check routing from the host:
 
@@ -1148,7 +1148,7 @@ Perform these checks before handing the host over to operations:
         else
             echo "SELinux audit tools not available"
         fi
-```
+    ```text
 
     Investigate any SELinux denials or repeated Fail2Ban bans.
 
@@ -1174,7 +1174,7 @@ outputs to operations:
 
         ```bash
         podman exec -it perfsonar-testpoint pscheduler troubleshoot
-```
+```text
 
 ---
 
@@ -1242,7 +1242,7 @@ outputs to operations:
     # Verify compose file syntax
     cd /opt/perfsonar-tp
     podman-compose config
-```
+    ```text
 
     **Common causes:**
 
@@ -1308,7 +1308,7 @@ with exit code 255.
     # Verify containers are running
     podman ps
     curl -kI https://127.0.0.1/
-```
+    ```text
 
     **Verification:**
 
@@ -1376,7 +1376,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
     # Verify it's running
     systemctl status perfsonar-certbot.service
     podman ps | grep certbot
-```
+    ```text
 
 **Expected result:** The certbot container should be running (not exiting) and the service should be in "active
 (running)" state.
@@ -1429,7 +1429,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     # Review PBR script log
     tail -100 /var/log/perfSONAR-multi-nic-config.log
-```
+    ```text
 
     **Solutions:**
 
@@ -1490,7 +1490,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
         -v /var/www/html:/var/www/html:Z \
         docker.io/certbot/certbot:latest certonly \
         --standalone -d <SERVER_FQDN> -m <EMAIL> --dry-run -vvv
-```
+    ```text
 
     **Common causes:**
 
@@ -1555,7 +1555,7 @@ filename.
     # Check for errors in service logs
     podman exec perfsonar-testpoint journalctl -u apache2 -n 50
     podman exec perfsonar-testpoint journalctl -u pscheduler-ticker -n 50
-```
+    ```text
 
     **Solutions:**
 
@@ -1618,7 +1618,7 @@ filename.
 
     # View compose configuration
     cd /opt/perfsonar-tp && podman-compose config
-```
+    ```text
 
     **Networking:**
 
@@ -1645,6 +1645,6 @@ filename.
 
     # Follow logs in real-time
     podman logs -f perfsonar-testpoint
-```
+    ```text
 
 ---
