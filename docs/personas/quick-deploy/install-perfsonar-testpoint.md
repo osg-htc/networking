@@ -756,7 +756,7 @@ If you've already started the container and it failed, remove it before retrying
 
 ---
 
-## Step 6 – Configure and Enroll in pSConfig
+## Step 6 - Configure and Enroll in pSConfig
 
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
