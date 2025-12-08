@@ -53,7 +53,7 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
      ```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
 
-```
+     ```
 <!-- markdownlint-enable MD040 -->
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
@@ -82,7 +82,13 @@ described in the official guide:
 
 * Please remove any old/stale URLs using `psconfig remote delete <URL>`
 
-* If this is a **new instance** or you have changed the node's FQDN, you will need to notify `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which will then auto-configure the tests. Please indicate if you have preferences for which meshes your node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also add any additional local tests  via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details). Please check which tests are auto-added via central meshes before adding any custom tests to avoid duplication.
+* If this is a **new instance** or you have changed the node's FQDN, you will need to notify
+    `wlcg-perfsonar-support 'at' cern.ch` to add/update the hostname in one or more test meshes, which
+    will then auto-configure the tests. Please indicate if you have preferences for which meshes your
+    node should be included in (USATLAS, USCMS, ATLAS, CMS, LHCb, Alice, BelleII, etc.). You could also
+    add any additional local tests via web interface (see [Configuring regular tests](http://docs.perfsonar.net/manage_regular_tests.html) for details).
+    Please check which tests are auto-added via central meshes before adding any custom tests to avoid
+    duplication.
 
 !!! note
 
@@ -131,7 +137,7 @@ site or host firewalls.   An overview of perfSONAR security is available at
     ```text
 All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
 
-```
+    ```
 
 For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the
 tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be
@@ -172,6 +178,7 @@ filling the information please follow those simple guidelines:
 
 * For each form (service type) fill at least:
 
+    <!-- markdownlint-disable MD040 -->
     ```text
 
 * Hosting Site
@@ -181,6 +188,7 @@ filling the information please follow those simple guidelines:
 * Description (optional label used in MaDDash; keep short and unique)
 
     ```
+    <!-- markdownlint-enable MD040 -->
 
 * Check "N" when asked "Is it a beta service"
 
@@ -191,8 +199,7 @@ filling the information please follow those simple guidelines:
 <!-- -->
 
 * GOCDB screen shot for creating a Service Endpoint:
-<img src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" alt="GOCDB screen shot for creating a Service Endpoint"
-width="1024">
+![GOCDB screen shot for creating a Service Endpoint](../../img/Screen_shot_2013-02-19_at_15.26.52.png)
 
 ## Register perfSONAR in OSG Topology
 

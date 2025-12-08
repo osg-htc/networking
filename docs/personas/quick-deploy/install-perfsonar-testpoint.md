@@ -78,7 +78,6 @@ Note: Repository clone instructions are in Step 2.
 
 ```
 
-
     ```bash
     systemctl disable --now firewalld NetworkManager-wait-online
     dnf remove -y rsyslog
@@ -156,7 +155,6 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 ```bash
 /tmp/perfSONAR-orchestrator.sh
 ```
-
 
 ``` text
 
@@ -446,7 +444,6 @@ proceeding with registration and testing.
 
 ```
 
-
     ```bash
     nmcli connection show
     ip rule show
@@ -486,7 +483,6 @@ If any prerequisite is missing, the script skips that component and continues.
 1. **Install/configure the desired options:**
 
 ```
-
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
@@ -564,7 +560,6 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
 
 ```
 
-
     ```bash
     nft -c -f /etc/nftables.d/perfsonar.nft
     systemctl reload nftables || systemctl restart nftables
@@ -579,14 +574,12 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
 
 ```
 
-
         ```bash
         nft list ruleset
         sestatus
         systemctl status fail2ban
 
         ```
-
 
 ``` text
 
@@ -620,7 +613,6 @@ Prepare the pSConfig directory and a minimal compose file. No other host bind-mo
 ```bash
 mkdir -p /opt/perfsonar-tp/psconfig
 ```
-
 
 ``` text
 
@@ -754,7 +746,6 @@ Run the bundled seeding helper script (automatically installed in Step 2):
 /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 ```
 
-
 ``` text
 
 This script:
@@ -774,7 +765,6 @@ Verify seeding succeeded:
 
 ```
 
-
 ```bash
 # Should show config files
 
@@ -789,7 +779,6 @@ ls -la /var/www/html
 
 ls -la /etc/apache2
 ```
-
 
 ``` text
 
@@ -997,7 +986,6 @@ After successful issuance, restart the perfsonar-testpoint container to trigger 
 
 ```
 
-
 ```bash
 podman restart perfsonar-testpoint
 ```
@@ -1084,7 +1072,6 @@ patch the Apache SSL configuration after obtaining certificates.
 
     ```
 
-
 ``` text
 
 1. Reload Apache in the running container:
@@ -1095,7 +1082,6 @@ patch the Apache SSL configuration after obtaining certificates.
     podman exec perfsonar-testpoint apachectl -k graceful
 
     ```
-
 
 ``` text
 
@@ -1267,7 +1253,6 @@ container and restart the daemon only if needed.
 
     ```
 
-
 ``` text
 
 1. **Automatic image updates and safe restarts**
@@ -1367,7 +1352,6 @@ available.
             EOF
 
             ```
-
 
 ``` text
 
@@ -1531,7 +1515,6 @@ Perform these checks before handing the host over to operations:
 
         ```
 
-
 ``` text
 
     Investigate any SELinux denials or repeated Fail2Ban bans.
@@ -1634,7 +1617,6 @@ outputs to operations:
     **Diagnostic steps:**
 
 ```
-
 
     ```bash
     # Check container logs
@@ -1769,7 +1751,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     ```
 
-
 ``` text
 
     **Solution:**
@@ -1807,7 +1788,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
     podman ps | grep certbot
 
     ```
-
 
 ``` text
 
@@ -1970,7 +1950,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
     **Diagnostic steps:**
 
 ```
-
 
     ```bash
     # Check certificate files

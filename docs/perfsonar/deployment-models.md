@@ -35,7 +35,7 @@ each focused on specific set of tests. The following deployment options are curr
 
 ```
 
-### perfSONAR Toolkit vs Testpoint
+## perfSONAR Toolkit vs Testpoint
 
 The perfSONAR team has documented the types of installations supported at
 <https://docs.perfsonar.net/install_options.html>.   With the release of version 5, OSG/WLCG sites have a new option:
@@ -84,7 +84,7 @@ taking into account the amount of testing that we perform, we recommend at least
 
 * NVMe or SSD disk (128GB should be sufficient) if using full Toolkit install with Opensearch.
 
-<a id="multiple-nic-network-interface-card-guidance"></a>
+<!-- anchor removed; heading provides an automatic id -->
 
 ### Multiple NIC (Network Interface Card) Guidance
 
