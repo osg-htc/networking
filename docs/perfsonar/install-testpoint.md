@@ -4,7 +4,8 @@
 
 ### Bootstrap the perfSONAR testpoint and tools (recommended)
 
-Use the bootstrap script to clone the perfSONAR testpoint repo and install helper scripts under /opt/perfsonar-tp/tools_scripts.
+Use the bootstrap script to clone the perfSONAR testpoint repo and install helper scripts under /opt/perfsonar-
+tp/tools_scripts.
 
 ```bash
 curl -fsSL \
@@ -12,7 +13,7 @@ curl -fsSL \
     -o /tmp/install_tools_scripts.sh
 chmod 0755 /tmp/install_tools_scripts.sh
 /tmp/install_tools_scripts.sh /opt/perfsonar-tp
-```
+```text
 
 ### Ensure the host is up to date
 
@@ -24,7 +25,7 @@ dnf update -y
 
 ```bash
 dnf install -y git podman podman-compose nftables iproute
-```
+```text
 
 Note: Podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.
 
@@ -47,7 +48,7 @@ curl -fsSL \
 
 ```bash
 mkdir -p /opt/perfsonar-tp/psconfig
-```
+```text
 
 ### Edit the compose file as needed
 
@@ -63,7 +64,7 @@ Or, if using Docker:
 
 ```bash
 (cd /opt/perfsonar-tp; docker-compose up -d)
-```
+```text
 
 ### Enable automatic container restart on boot
 
@@ -104,14 +105,18 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable perfsonar-testpoint.service
-```
+```text
 
 Useful commands:
 
 - Start service: `systemctl start perfsonar-testpoint`
+
 - Stop service: `systemctl stop perfsonar-testpoint`
+
 - Restart service: `systemctl restart perfsonar-testpoint`
+
 - Check status: `systemctl status perfsonar-testpoint`
+
 - View logs: `journalctl -u perfsonar-testpoint -f`
 
 ---
@@ -124,15 +129,17 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
-    ```
+```
 
 1. Generate the config file automatically:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
-    ```
+```text
 
-    Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an explicit gateway or mark it as `DEFAULT_ROUTE_NIC` in `/etc/perfSONAR-multi-nic-config.conf`.
+Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only
+NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an
+explicit gateway or mark it as `DEFAULT_ROUTE_NIC` in `/etc/perfSONAR-multi-nic-config.conf`.
 
 Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
 
@@ -140,13 +147,13 @@ Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
-    ```
+```
 
 1. Apply changes:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
-    ```
+```text
 
 The script backs up current NetworkManager profiles and logs actions to /var/log/perfSONAR-multi-nic-config.log.
 
@@ -157,46 +164,41 @@ If you prefer to configure rules manually, see the example below.
 Suppose:
 
 - eth0 is for latency tests, IP \= 192.168.10.10/24, GW \= 192.168.10.1
+
 - eth1 is for throughput tests, IP \= 10.20.30.10/24, GW \= 10.20.30.1
 
 #### a) Add custom routing tables
 
 Edit /etc/iproute2/rt\_tables and add:
 
-200  eth0table
-201  eth1table
+200  eth0table 201  eth1table
 
 #### b) Add routes and rules (replace IPs as appropriate)
 
-\# Add rules for eth0 (latency)
-ip rule add from 192.168.10.10/32 table eth0table
+\# Add rules for eth0 (latency) ip rule add from 192.168.10.10/32 table eth0table
 
-ip route add 192.168.10.0/24 dev eth0 scope link table eth0table
-ip route add default via 192.168.10.1 dev eth0 table eth0table
+ip route add 192.168.10.0/24 dev eth0 scope link table eth0table ip route add default via 192.168.10.1 dev eth0 table
+eth0table
 
-\# Add rules for eth1 (throughput)
-ip rule add from 10.20.30.10/32 table eth1table
+\# Add rules for eth1 (throughput) ip rule add from 10.20.30.10/32 table eth1table
 
-ip route add 10.20.30.0/24 dev eth1 scope link table eth1table
-ip route add default via 10.20.30.1 dev eth1 table eth1table
+ip route add 10.20.30.0/24 dev eth1 scope link table eth1table ip route add default via 10.20.30.1 dev eth1 table
+eth1table
 
 #### c) Make persistent
 
-For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.
+For persistent configuration, add these rules and routes to a script (e.g., ./perfsonar-policy-routing.sh in your
+working directory) and call it from /etc/rc.local (be sure /etc/rc.d/rc.local is executable and enabled), or use
+NetworkManager’s connection profile route-rules and routes fields for the relevant interfaces.
 
 Example systemd unit:
 
-\# /etc/systemd/system/perfsonar-policy-routing.service
-**\[Unit\]**
-Description\=PerfSONAR Policy Routing
+\# /etc/systemd/system/perfsonar-policy-routing.service **\[Unit\]** Description\=PerfSONAR Policy Routing
 After\=network.target
 
-**\[Service\]**
-Type\=oneshot
-ExecStart\=/path/to/your/working/dir/perfsonar-policy-routing.sh
+**\[Service\]** Type\=oneshot ExecStart\=/path/to/your/working/dir/perfsonar-policy-routing.sh
 
-**\[Install\]**
-WantedBy\=multi-user.target
+**\[Install\]** WantedBy\=multi-user.target
 
 Enable it:
 
@@ -218,7 +220,7 @@ Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the 
 
 ```bash
 /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
-```
+```text
 
 The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/perfSONAR-install-nftables.log.
 
@@ -227,7 +229,9 @@ The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/pe
 Below is a sample NFTables rule set that
 
 - Allows required perfSONAR measurement ports (especially for testpoint: traceroute, iperf3, OWAMP, etc.)
+
 - Restricts SSH access to trusted subnets/hosts
+
 - Accepts ICMP/ICMPv6 and related/permitted connections
 
 /etc/nftables.conf:
@@ -236,44 +240,17 @@ flush ruleset
 
 table inet perfsonar {
 
-    `\n\nset allowed\_protocols {
-    type inet\_proto
-    elements \= { icmp, icmpv6 }
-}
-set allowed\_interfaces {
-    type ifname
-    elements \= { "lo" }
-}
-set allowed\_tcp\_dports {
-    type inet\_service
-    elements \= { 22, 443, 861, 862, 9090, 123, 5201, 5001, 5000, 5101 }
-}
-set allowed\_udp\_ports {
-    type inet\_service
-    elements \= { 123, 5201, 5001, 5000, 5101 }
-}
-chain allow {
-    ct state established,related accept
-    ct state invalid drop
-    meta l4proto @allowed\_protocols accept
-    iifname @allowed\_interfaces accept
-    tcp dport @allowed\_tcp\_dports ct state new accept
-    udp dport @allowed\_udp\_ports ct state new accept
-    \# traceroute and test ranges
-    udp dport 33434-33634 ct state new accept
-    udp dport 18760-19960 ct state new accept
-    udp dport 8760-9960 ct state new accept
-    tcp dport 5890-5900 ct state new accept
-    \# SSH controls (add your trusted IPs/subnets)
-    tcp dport 22 ip saddr 192.168.10.0/24 accept
-    tcp dport 22 ip saddr 10.20.30.0/24 accept
-}
-chain input {
-    type filter hook input priority 0; policy drop;
-    jump allow
-    reject with icmpx admin-prohibited
-}
-    ```
+`\n\nset allowed\_protocols { type inet\_proto elements \= { icmp, icmpv6 } } set allowed\_interfaces { type ifname
+elements \= { "lo" } } set allowed\_tcp\_dports { type inet\_service elements \= { 22, 443, 861, 862, 9090, 123, 5201,
+5001, 5000, 5101 } } set allowed\_udp\_ports { type inet\_service elements \= { 123, 5201, 5001, 5000, 5101 } } chain
+allow { ct state established,related accept ct state invalid drop meta l4proto @allowed\_protocols accept iifname
+@allowed\_interfaces accept tcp dport @allowed\_tcp\_dports ct state new accept udp dport @allowed\_udp\_ports ct state
+new accept \# traceroute and test ranges udp dport 33434-33634 ct state new accept udp dport 18760-19960 ct state new
+accept udp dport 8760-9960 ct state new accept tcp dport 5890-5900 ct state new accept \# SSH controls (add your trusted
+IPs/subnets) tcp dport 22 ip saddr 192.168.10.0/24 accept tcp dport 22 ip saddr 10.20.30.0/24 accept } chain input {
+type filter hook input priority 0; policy drop; jump allow reject with icmpx admin-prohibited }
+
+    ```text
 
 }
 
@@ -294,17 +271,23 @@ If you want the container to use a specific NIC, adjust the docker-compose.syste
 
 Check containers:
 
-```bash
-podman ps
-# or
-docker ps
 ```
+
+podman ps
+
+# or
+
+docker ps
+
+```text
 
 Check logs:
 
-```bash
+```text
+
 podman logs perfsonar-testpoint
-```
+
+```bash
 
 Test connectivity between testpoints.
 
@@ -314,10 +297,12 @@ Test connectivity between testpoints.
 
 To register your testpoint with a central config:
 
-```bash
-podman exec -it perfsonar-testpoint psconfig remote list
-podman exec -it perfsonar-testpoint psconfig remote --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
 ```
+
+podman exec -it perfsonar-testpoint psconfig remote list podman exec -it perfsonar-testpoint psconfig remote
+--configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
+
+```bash
 
 ---
 

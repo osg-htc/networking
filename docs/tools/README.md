@@ -14,7 +14,7 @@ find_and_remove_broken_links.py
 
 ```bash
 python docs/tools/find_and_remove_broken_links.py
-```
+```text
 
 - Example (backup and remove broken links):
 

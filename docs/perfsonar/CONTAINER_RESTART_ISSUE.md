@@ -2,17 +2,21 @@
 
 ## Problem Description
 
-The perfSONAR testpoint container enters a restart loop when using certain docker-compose.yml configurations. The container continuously restarts and fails to initialize systemd properly.
+The perfSONAR testpoint container enters a restart loop when using certain docker-compose.yml configurations. The
+container continuously restarts and fails to initialize systemd properly.
 
 ## Root Cause
 
 The issue occurs when the docker-compose.yml file is configured with:
 
 - `privileged: true`
+
 - `cgroupns: private`
+
 - **Missing** `/sys/fs/cgroup:/sys/fs/cgroup:rw` volume mount
 
-The systemd process inside the container requires proper cgroup access to function. Without the cgroup volume mount, systemd cannot initialize properly, causing the container to fail and restart repeatedly.
+The systemd process inside the container requires proper cgroup access to function. Without the cgroup volume mount,
+systemd cannot initialize properly, causing the container to fail and restart repeatedly.
 
 ## Solution
 
@@ -44,7 +48,7 @@ services:
       - CAP_NET_RAW
     labels:
       - io.containers.autoupdate=registry
-```
+```text
 
 ## Fixing Existing Deployments
 
@@ -55,7 +59,7 @@ If you have an existing deployment with the restart loop issue:
    ```bash
    cd /opt/perfsonar-tp
    podman-compose down
-   ```
+```
 
 1. Update the docker-compose.yml file to use the recommended configuration from:
 
@@ -63,13 +67,13 @@ If you have an existing deployment with the restart loop issue:
    curl -fsSL \
        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.yml \
        -o /opt/perfsonar-tp/docker-compose.yml
-   ```
+```text
 
 1. Restart the service:
 
    ```bash
    systemctl restart perfsonar-testpoint
-   ```
+```
 
 ## Verification
 
@@ -78,12 +82,14 @@ Check that containers are running properly:
 ```bash
 podman ps
 systemctl status perfsonar-testpoint
-```
+```text
 
 The perfsonar-testpoint container should show status "Up" and not be restarting.
 
 ## Related Files
 
 - Recommended compose file: `docs/perfsonar/tools_scripts/docker-compose.yml`
+
 - Systemd service installer: `docs/perfsonar/tools_scripts/install-systemd-service.sh`
+
 - Installation guide: `docs/perfsonar/install-testpoint.md`

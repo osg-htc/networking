@@ -9,13 +9,14 @@ tags: [template, quickstart]
 ## Requirements
 
 - OS / versions
+
 - Hardware/network
 
 ## Install (minimal)
 
 ```bash
 # minimal commands
-```
+```text
 
 ## Verify
 

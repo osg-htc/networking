@@ -10,6 +10,7 @@ tags: [automation, ansible]
 This directory contains examples and pointers for automated deployment:
 
 - `ansible/` — playbooks and roles (example skeleton)
+
 - `docker/` — example container-based testpoint deployments (optional)
 
 Use these examples as a starting point and adapt to site policies.

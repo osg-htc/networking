@@ -10,7 +10,9 @@ tags: [architecture, data-pipeline]
 ## Architecture (summary)
 
 - perfSONAR agents (testpoints)
+
 - central collectors (ELK/Elasticsearch ingestion)
+
 - configuration services (psconfig / psetf)
 
 Diagram and detailed flow to follow.

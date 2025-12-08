@@ -16,4 +16,5 @@ This landing page points you to triage checklists, playbooks, and common issue p
 
 - `triage-checklist.md`
 - `playbooks/`
-```
+
+```text
