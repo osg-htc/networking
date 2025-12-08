@@ -18,8 +18,8 @@ please consult official [Troubleshooting Guide](http://docs.perfsonar.net/troubl
 
 For any questions or help with WLCG perfSONAR setup, please contact
 [GGUS](https://wiki.egi.eu/wiki/GGUS:WLCG_perfSONAR_FAQ) WLCG perfSONAR support unit or OSG
-[GOC](http://support.opensciencegrid.org). We strongly recommend anyone maintaining/using perfSONAR to join [perfsonar-
-user](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-
+[GOC](http://support.opensciencegrid.org). We strongly recommend anyone maintaining/using perfSONAR to join
+[perfsonaruser](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-
 announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
 ### Installation or Upgrade
@@ -108,10 +108,10 @@ In case you'd like to manually update the node please follow the official
 [guide](http://docs.perfsonar.net/manage_update.html).
 
 Using automated configuration tools (such as Chef, Puppet, etc) for managing perfSONAR are not officially supported, but
-there are some community driven projects that could be helpful, such as [HEP-Puppet](http://github.com/HEP-
-Puppet/perfsonar). As perfSONAR manages most of its configuration automatically via packages and there is very little
-initial configuration needed, we suggest to keep automated configuration to the minimum necessary to avoid unncessary
-interventions after auto-updates.
+there are some community driven projects that could be helpful, such as [HEP-
+Puppet](http://github.com/HEPPuppet/perfsonar). As perfSONAR manages most of its configuration automatically via
+packages and there is very little initial configuration needed, we suggest to keep automated configuration to the
+minimum necessary to avoid unncessary interventions after auto-updates.
 
 ### Security Considerations
 

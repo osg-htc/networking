@@ -14,12 +14,12 @@ all the various cyber-infrastructure components that rely upon it. Compounding t
 nature, are distributed and typically involve many different "owners" and administrators. When a problem arises
 somewhere along a network path, it can be very difficult to identify and localize.
 
-This was the context for the formation of the [perfSONAR collaboration](https://www.perfsonar.net/about/mission-
-statement). This collaboration is focused on developing and deploying the `perfSONAR` software suite in support of
-network monitoring across the global set of research and education (R&E) networks. The **Open Science Grid** (**OSG**)
-has chosen to base the core of its network monitoring framework on `perfSONAR` because of both the capabilities of the
-toolkit for measuring our networks and its global acceptance as the defacto network monitoring infrastructure of first
-choice.
+This was the context for the formation of the [perfSONAR
+collaboration](https://www.perfsonar.net/about/missionstatement). This collaboration is focused on developing and
+deploying the `perfSONAR` software suite in support of network monitoring across the global set of research and
+education (R&E) networks. The **Open Science Grid** (**OSG**) has chosen to base the core of its network monitoring
+framework on `perfSONAR` because of both the capabilities of the toolkit for measuring our networks and its global
+acceptance as the defacto network monitoring infrastructure of first choice.
 
 The <<https://www.perfsonar.net/about/what-is-perfsonar/>> provides a succinct summary: *perfSONAR is a network
 measurement toolkit designed to provide federated coverage of paths, and help to establish end-to-end usage

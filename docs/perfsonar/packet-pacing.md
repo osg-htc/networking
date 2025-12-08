@@ -159,14 +159,11 @@ ESnet's performance testing with Berkeley Lab and others has demonstrated signif
 
 For a DTN with **N parallel streams**, divide available bandwidth accordingly:
 
-| Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Example Command |
-| --- | --- | --- | --- |
-| 10G | 4 | 2 Gbps | `tc qdisc add dev eth0 root fq maxrate 2gbit` |
-| 10G | 8 | 1 Gbps | `tc qdisc add dev eth0 root fq maxrate 1gbit` |
-| 40G | 4 | 8 Gbps | `tc qdisc add dev eth0 root fq maxrate 8gbit` |
-| 40G | 8 | 5 Gbps | `tc qdisc add dev eth0 root fq maxrate 5gbit` |
-| 100G | 8 | 10-12 Gbps | `tc qdisc add dev eth0 root fq maxrate 10gbit` |
-| 100G (to 10G paths) | Any | 2 Gbps | `tc qdisc add dev eth0 root fq maxrate 2gbit` |
+| Host NIC Speed | Parallel Streams | Recommended Per-Stream Rate | Example Command | | --- | --- | --- | --- | | 10G |
+4 | 2 Gbps | `tc qdisc add dev eth0 root fq maxrate 2gbit` | | 10G | 8 | 1 Gbps | `tc qdisc add dev eth0 root fq maxrate
+1gbit` | | 40G | 4 | 8 Gbps | `tc qdisc add dev eth0 root fq maxrate 8gbit` | | 40G | 8 | 5 Gbps | `tc qdisc add dev
+eth0 root fq maxrate 5gbit` | | 100G | 8 | 10-12 Gbps | `tc qdisc add dev eth0 root fq maxrate 10gbit` | | 100G (to 10G
+paths) | Any | 2 Gbps | `tc qdisc add dev eth0 root fq maxrate 2gbit` |
 
 ### Rationale
 

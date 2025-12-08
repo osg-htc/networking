@@ -481,8 +481,8 @@ Prepare the pSConfig directory and a minimal compose file. No other host bind-mo
 mkdir -p /opt/perfsonar-tp/psconfig
 ```
 
-Download a ready-made compose file (or copy it manually): Browse: [repo view](https://github.com/osg-
-htc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
+Download a ready-made compose file (or copy it manually): Browse: [repo
+view](https://github.com/osghtc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
 
 ```bash
 curl -fsSL \

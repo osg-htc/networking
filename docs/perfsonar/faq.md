@@ -4,8 +4,8 @@ Here we will provide details on troubleshooting perfSONAR installations for OSG 
 configuration options and a FAQ.
 
 A good overview of existing tools provided by perfSONAR toolkit and examples how to use them to identify and isolate
-network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting-
-quick-reference-guide/>
+network problems can be found at <https://fasterdata.es.net/performance-testing/troubleshooting/network-
+troubleshootingquick-reference-guide/>
 
 We are maintaining a [Network Troubleshooting](../network-troubleshooting.md) page to guide users in identifying and
 following up on network problems.
@@ -15,8 +15,8 @@ following up on network problems.
 **What is the recommended way to install a certificate on my perfSONAR host?**
 
 [We recommend using Let's Encrypt](https://letsencrypt.org). There is a tutorial that users may find helpful at [Secure
-Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on-
-centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
+Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-
+oncentos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
 
 <!-- markdownlint-disable MD033 --> <details>
 
