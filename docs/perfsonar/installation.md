@@ -52,6 +52,7 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
 
     ```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
+
 ```text
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
@@ -85,6 +86,7 @@ described in the official guide:
 
     ```text
 Until your host is added on https://psconfig.opensciencegrid.org to one or more meshes by an administrator the automesh configuration above will not return any tests.
+
 ```
 
 * We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
@@ -138,6 +140,7 @@ network administrators to debug network issues.
 
     ```text
 If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
+
 ```
 
 ### Enabling SNMP plugins

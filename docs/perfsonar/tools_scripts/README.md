@@ -62,6 +62,7 @@ After installation:
   ```bash
   /opt/perfsonar-tp/tools_scripts/install-systemd-service.sh /opt/perfsonar-tp
   systemctl enable --now perfsonar-testpoint.service
+
 ```
 
 - Manual installs: After `podman-compose up -d`, install and enable the service as shown above.

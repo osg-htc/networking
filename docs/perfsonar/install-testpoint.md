@@ -129,6 +129,7 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
+
 ```
 
 1. Generate the config file automatically:
@@ -147,6 +148,7 @@ Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --dry-run --debug
+
 ```
 
 1. Apply changes:

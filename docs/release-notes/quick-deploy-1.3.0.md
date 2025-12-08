@@ -153,6 +153,7 @@ None. All changes are backward compatible.
    ```bash
    cd /opt/perfsonar-tp/tools_scripts
    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh | bash -s -- /opt/perfsonar-tp
+
 ```text
 
 1. Review new troubleshooting guide for common issues
