@@ -9,7 +9,7 @@ _February 4th 2013_
   ```text
 This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
 
-```text
+```
 
 # Abstract
 
@@ -524,7 +524,7 @@ TCP window size: 0.08 MByte (default)
 [14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
 bwctl: stop\_exec: 3568979172.016198
 RECEIVER END
-```text
+```
 
 This test reveals that over the course of 10 seconds we achieved an average bandwidth of 979Mbps and sent a total of
 1178MB of data.  We can reverse the direction of this test in the next example:
@@ -595,7 +595,7 @@ TCP window size: 0.08 MByte (default)
 [14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
 bwctl: stop\_exec: 3568979785.230833
 RECEIVER END
-```text
+```
 
 BWCTL requires a stable NTP clock to work properly, be sure that NTP is configured before using this tool.
 

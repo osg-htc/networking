@@ -85,7 +85,7 @@ No action needed - the fixed script is automatically used when running:
 
 ```bash
 /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh --with-certbot
-```text
+```
 
 ### For Existing Deployments with Failing Certbot Service
 
@@ -129,7 +129,7 @@ curl -kI https://127.0.0.1/
 
 # Check certbot logs for renewal messages
 journalctl -u perfsonar-certbot.service -n 20
-```text
+```
 
 **Expected Results:**
 

@@ -15,7 +15,7 @@ each focused on specific set of tests. The following deployment options are curr
 * Two bare metal servers, one for latency node, one for bandwidth node
 * One bare metal server running both latency and bandwidth node together provided that there are two NICs available, please refer to [dual NIC](#multiple-nic-network-interface-card-guidance) section for more details on this.
 
-```text
+```
 
 * **Virtual Machine** - if bare metal is not available then it is also possible to run perfSONAR on a VM, however there are a set of additional requirements to fulfill:
 
@@ -31,7 +31,7 @@ each focused on specific set of tests. The following deployment options are curr
 
 * Docker perfSONAR test instance can however still be used by sites that run multiple perfSONAR instances on site for their internal testing as this deployment model allows to flexibly deploy a testpoint which can send results to a local measurement archive running on the perfSONAR toolkit node.
 
-```text
+```
 
 ### perfSONAR Toolkit vs Testpoint
 
@@ -53,7 +53,7 @@ instead of installing the full Toolkit sites can choose to install the Testpoint
 * No web interface to use for configuration or adding local tests
 * Unable to show results in MaDDash
 
-```text
+```
 
 While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of
 perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced

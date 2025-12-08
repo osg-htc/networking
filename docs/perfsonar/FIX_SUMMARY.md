@@ -72,7 +72,7 @@ A new helper script automates the installation and configuration of the systemd 
 
 ```bash
 sudo bash install-systemd-service.sh [/opt/perfsonar-tp]
-```text
+```
 
 ### 4. Updated Documentation
 
@@ -168,7 +168,7 @@ To apply these fixes to other perfSONAR testpoint deployments:
        -o /tmp/install-systemd-service.sh
    sudo bash /tmp/install-systemd-service.sh /opt/perfsonar-tp
 
-```text
+```
 
 1. **Automated deployment with Ansible**:
 

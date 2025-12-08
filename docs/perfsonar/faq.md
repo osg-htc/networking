@@ -34,7 +34,7 @@ centos-8/#:~:text=Install%20Certbot%20in%20CentOS%208&text=Befor).
     <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>
 <p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
 <p>8. Make a donation :)</p>
-```text
+```
 
 </details>
 <!-- markdownlint-enable MD033 -->

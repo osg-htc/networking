@@ -111,7 +111,7 @@ The perfSONAR network consists of:
 curl -X GET "elasticsearch-server:9200/perfsonar-testpoint/_search" \
   -H 'Content-Type: application/json' \
   -d '{"query": {"match": {"agent": "testpoint.example.com"}}}'
-```text
+```
 
 ### Jupyter Notebooks
 

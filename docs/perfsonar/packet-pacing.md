@@ -187,7 +187,7 @@ Check what pacing rates are recommended for your DTN:
 
 ```bash
 fasterdata-tuning.sh --mode audit --target dtn
-```text
+```
 
 Output shows:
 
@@ -207,7 +207,7 @@ Apply with custom rate (e.g., for 100G host with 8 streams):
 
 ```bash
 sudo fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 10gbps
-```text
+```
 
 Supported rate units: `kbps`, `mbps`, `gbps`, `tbps`
 
@@ -255,7 +255,7 @@ If you prefer to configure packet pacing manually, use the `tc` command directly
 
 ```bash
 tc qdisc show dev eth0
-```text
+```
 
 ### Set Fair Queuing with Pacing
 
@@ -270,7 +270,7 @@ sudo tc qdisc replace dev eth0 root fq maxrate 2gbit
 ```bash
 tc qdisc show dev eth0
 tc qdisc stat dev eth0
-```text
+```
 
 ### Delete Pacing (Revert to Default)
 
@@ -284,7 +284,7 @@ For more granular control, use TBF instead of FQ:
 
 ```bash
 sudo tc qdisc replace dev eth0 root tbf rate 2gbit burst 250000 latency 100ms
-```text
+```
 
 Where:
 
@@ -318,7 +318,7 @@ iperf3 -c <receiver> -P 4 --time 60 --fq-rate 2gbps
 
 # Compare to WITHOUT pacing
 iperf3 -c <receiver> -P 4 --time 60
-```text
+```
 
 Expected improvement: 10-50% higher throughput with pacing on long paths.
 
@@ -368,7 +368,7 @@ Then reapply pacing with `fasterdata-tuning.sh` or `tc` command.
 ```bash
 sudo systemctl enable ethtool-persist.service
 sudo systemctl start ethtool-persist.service
-```text
+```
 
 Verify:
 
@@ -403,7 +403,7 @@ socket option:
 int pacing_rate = 2000000000;  // 2 Gbps in bytes per second
 setsockopt(sockfd, SOL_SOCKET, SO_MAX_PACING_RATE,
            &pacing_rate, sizeof(pacing_rate));
-```text
+```
 
 **Requirements**:
 

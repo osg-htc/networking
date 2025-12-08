@@ -38,7 +38,7 @@ Examples:
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh --local \
   --conf /etc/perfsonar/lsregistrationdaemon.conf \
   --city Berkeley --region CA --country US
-```text
+```
 
 ## Generate a restore script from an existing conf
 

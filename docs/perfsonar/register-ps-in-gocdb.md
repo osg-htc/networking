@@ -25,7 +25,7 @@ filling the information please follow those simple guidelines:
 - Check "Y" when asked "Is this service in production"
 - Check "Y" when asked "Is this service monitored"
 
-```text
+```
 
 <!-- -->
 
