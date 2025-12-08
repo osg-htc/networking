@@ -48,10 +48,12 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
 
 !!! note
 
+<!-- markdownlint-disable MD040 -->
 ```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
 
 ```
+<!-- markdownlint-enable MD040 -->
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:
