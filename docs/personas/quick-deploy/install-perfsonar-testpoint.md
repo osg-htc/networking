@@ -1,4 +1,5 @@
 ﻿# Installing a perfSONAR Testpoint for WLCG/OSG
+<!-- markdownlint-disable MD040 -->
 
 This guide walks WLCG/OSG site administrators through end-to-end installation, configuration, and validation of a
 perfSONAR testpoint on Enterprise Linux 9 (EL9). It uses automated tooling from this repository to streamline the
@@ -33,7 +34,8 @@ extract/save/restore registration config that you may want to use.
       -o /tmp/update-lsreg.sh
     chmod 0755 /tmp/update-lsreg.sh
 
-```
+    ```
+<!-- markdownlint-enable MD040 -->
 
     Use the downloaded tool to extract a restore script:
 
