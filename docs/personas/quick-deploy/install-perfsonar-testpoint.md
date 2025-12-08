@@ -768,6 +768,7 @@ for each FQDN you expose for perfSONAR (one or two depending on whether you spli
 Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation
 alternative below):
 
+<!-- markdownlint-disable MD034 -->
 ```
 
 # Add auto URLs (configures archives too) and show configured remotes
@@ -777,6 +778,7 @@ podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
 
 podman exec -it perfsonar-testpoint psconfig remote list
 
+<!-- markdownlint-enable MD034 -->
 ```text
 
 If there are any stale/old/incorrect entries, you can remove them:
@@ -1172,6 +1174,7 @@ grep -A5 "ExecStart" /etc/systemd/system/perfsonar-testpoint.service
 
 Replace the compose-based systemd service with proper systemd units that use `podman run --systemd=always`:
 
+<!-- markdownlint-disable MD034 -->
 ```bash
 
 # Stop and disable old service
@@ -1201,6 +1204,7 @@ systemctl enable --now perfsonar-certbot.service
 # Verify containers are running
 
 podman ps curl -kI https://127.0.0.1/
+<!-- markdownlint-enable MD034 -->
 ```
 
 **Verification:**
@@ -1253,6 +1257,7 @@ The certbot service needs two flags:
 
 Re-run the installation script to get the fixed version:
 
+<!-- markdownlint-disable MD034 -->
 ```bash
 
 # Stop current service
@@ -1274,6 +1279,7 @@ systemctl daemon-reload systemctl start perfsonar-certbot.service
 # Verify it's running
 
 systemctl status perfsonar-certbot.service podman ps | grep certbot
+<!-- markdownlint-enable MD034 -->
 ```
 
 **Expected result:** The certbot container should be running (not exiting) and the service should be in "active

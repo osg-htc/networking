@@ -16,6 +16,7 @@ archive.
 
 ### Step 1: Verify pSConfig Enrollment
 
+<!-- markdownlint-disable MD034 -->
 ```bash
 
 # Check if enrolled in meshes
@@ -28,6 +29,7 @@ psconfig remote list
 
 # https://psconfig.opensciencegrid.org/pub/auto/<YOUR_HOSTNAME>
 
+<!-- markdownlint-enable MD034 -->
 ```
 
 If empty or missing:
@@ -57,6 +59,7 @@ podman logs perfsonar-testpoint | grep -i scheduler
 
 ### Step 3: Verify Network Connectivity
 
+<!-- markdownlint-disable MD034 -->
 ```bash
 
 # Can reach pSConfig server?
@@ -66,6 +69,7 @@ ping psconfig.opensciencegrid.org curl -I https://psconfig.opensciencegrid.org/p
 # Can reach remote perfSONAR instances?
 
 ping <remote_testpoint_hostname> telnet <remote_testpoint_hostname> 443
+<!-- markdownlint-enable MD034 -->
 ```
 
 ### Step 4: Check Firewall & Ports

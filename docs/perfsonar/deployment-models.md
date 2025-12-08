@@ -106,6 +106,8 @@ steps required in order to configure the node with multiple network cards:
 
 * Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:
 
+<!-- markdownlint-disable MD034 -->
 ``` bash psconfig remote add "<https://psconfig.opensciencegrid.org/pub/auto/<FQDN_latency>"> psconfig remote add
 "https://psconfig.opensciencegrid.org/pub/auto/<FQDN_throughput>" ...
+<!-- markdownlint-enable MD034 -->
 ``` text

@@ -70,12 +70,14 @@ information](http://docs.perfsonar.net/manage_admin_info.html)
 
 * You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:
 
+<!-- markdownlint-disable MD034 -->
 ```
 
 * For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` replacing `<FQDN>` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
 
 === pScheduler Agent ===
 
+<!-- markdownlint-enable MD034 -->
 ``` json [ { "url": "<https://psconfig.opensciencegrid.org/pub/auto/psum01.aglt2.org>", "configure-archives": true } ]
 
 ``` text

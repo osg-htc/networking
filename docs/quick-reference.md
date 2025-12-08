@@ -35,6 +35,7 @@ support" | | **perfSONAR Questions** | [User Mailing List](https://lists.interne
 
 ### Orchestrated Deploy (Recommended)
 
+<!-- markdownlint-disable MD034 -->
 ```bash
 
 # Download and run
@@ -52,6 +53,7 @@ curl -fsSL \ https://raw.githubusercontent.com/osg-htc/networking/master/docs/pe
 # With Let's Encrypt
 
 /tmp/perfSONAR-orchestrator.sh --option B --fqdn <FQDN> --email <EMAIL>
+<!-- markdownlint-enable MD034 -->
 ```
 
 ### Post-Deploy Validation
@@ -165,6 +167,7 @@ ss -ltnp | grep -E '(443|5001)'
 
 ### Host Tuning
 
+<!-- markdownlint-disable MD034 -->
 ```bash
 
 # Download tuning script
@@ -182,6 +185,7 @@ sudo /tmp/fasterdata-tuning.sh apply
 # For DTN (large buffers)
 
 sudo /tmp/fasterdata-tuning.sh apply --target dtn
+<!-- markdownlint-enable MD034 -->
 ```
 
 ### LS Registration

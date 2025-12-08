@@ -89,6 +89,7 @@ No action needed - the fixed script is automatically used when running:
 
 If you're experiencing the certbot service failure, update to the fixed version:
 
+<!-- markdownlint-disable MD034 -->
 ```
 
 # Stop the failing service
@@ -111,6 +112,7 @@ systemctl daemon-reload systemctl start perfsonar-certbot.service
 
 systemctl status perfsonar-certbot.service podman ps | grep certbot
 
+<!-- markdownlint-enable MD034 -->
 ``` text
 
 ## Verification
@@ -151,6 +153,7 @@ journalctl -u perfsonar-certbot.service -n 20
 
 To confirm the fix resolves the reboot persistence issue:
 
+<!-- markdownlint-disable MD034 -->
 ```
 
 # Verify services are enabled
@@ -165,6 +168,7 @@ reboot
 
 systemctl status perfsonar-testpoint.service perfsonar-certbot.service podman ps curl -kI https://127.0.0.1/
 
+<!-- markdownlint-enable MD034 -->
 ``` text
 
 ## Breaking Changes
