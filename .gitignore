@@ -6,3 +6,13 @@ site/
 
 # Editor backups
 *~
+
+# Temporary artifact folder for linter / debug outputs
+tmp/
+
+# Backup files
+*.bak
+
+# Python compiled files
+__pycache__/
+*.pyc
