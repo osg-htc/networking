@@ -34,7 +34,7 @@ Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encryp
     <p>3. Set **SSLCertificateChainFile** to /etc/letsencrypt/live/FQDN/fullchain.pem</p>
 <p>7. Renew your certficate: **certbot renew --dry-run certbot renew**</p>
 <p>8. Make a donation :)</p>
-```text
+```
 
 </details> <!-- markdownlint-enable MD033 -->
 

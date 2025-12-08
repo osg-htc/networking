@@ -13,7 +13,7 @@ curl -fsSL \
     -o /tmp/install_tools_scripts.sh
 chmod 0755 /tmp/install_tools_scripts.sh
 /tmp/install_tools_scripts.sh /opt/perfsonar-tp
-```text
+```
 
 ### Ensure the host is up to date
 
@@ -25,7 +25,7 @@ dnf update -y
 
 ```bash
 dnf install -y git podman podman-compose nftables iproute
-```text
+```
 
 Note: Podman is the default container engine on EL9. If you wish to use Docker instead, install it appropriately.
 
@@ -48,7 +48,7 @@ curl -fsSL \
 
 ```bash
 mkdir -p /opt/perfsonar-tp/psconfig
-```text
+```
 
 ### Edit the compose file as needed
 
@@ -64,7 +64,7 @@ Or, if using Docker:
 
 ```bash
 (cd /opt/perfsonar-tp; docker-compose up -d)
-```text
+```
 
 ### Enable automatic container restart on boot
 
@@ -105,7 +105,7 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable perfsonar-testpoint.service
-```text
+```
 
 Useful commands:
 
@@ -138,7 +138,7 @@ Recommended: use the helper script to generate and apply NetworkManager profiles
 
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
 
-```text
+```
 
 Note: The auto-generator intentionally skips NICs that have neither an IPv4 nor an IPv6 gateway (e.g., management-only
 NICs) to avoid writing non-functional NetworkManager profiles. To include such a NIC in the configuration, set an
@@ -158,7 +158,7 @@ Review and adjust /etc/perfSONAR-multi-nic-config.conf if needed.
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
 
-```text
+```
 
 The script backs up current NetworkManager profiles and logs actions to /var/log/perfSONAR-multi-nic-config.log.
 
@@ -225,7 +225,7 @@ Recommended: configure nftables (and optionally SELinux and Fail2Ban) using the 
 
 ```bash
 /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
-```text
+```
 
 The script writes rules to /etc/nftables.d/perfsonar.nft and logs to /var/log/perfSONAR-install-nftables.log.
 
@@ -288,7 +288,7 @@ docker ps
 
 Check logs:
 
-```text
+```
 
 podman logs perfsonar-testpoint
 

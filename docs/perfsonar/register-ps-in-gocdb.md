@@ -29,7 +29,7 @@ both service types (use the same hostname in the "host name" field).
 - Check "Y" when asked "Is this service in production"
 - Check "Y" when asked "Is this service monitored"
 
-```text
+```
 
 <!-- -->
 
