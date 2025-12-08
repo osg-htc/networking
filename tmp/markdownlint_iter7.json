@@ -1,0 +1,266 @@
+[
+  {
+    "fileName": "docs/perfsonar-in-osg.md",
+    "lineNumber": 9,
+    "ruleNames": [
+      "MD001",
+      "heading-increment"
+    ],
+    "ruleDescription": "Heading levels should only increment by one level at a time",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md001.md",
+    "errorDetail": "Expected: h2; Actual: h3",
+    "errorContext": null,
+    "errorRange": null,
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar-in-osg.md",
+    "lineNumber": 17,
+    "ruleNames": [
+      "MD034",
+      "no-bare-urls"
+    ],
+    "ruleDescription": "Bare URL used",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md034.md",
+    "errorDetail": null,
+    "errorContext": "https://www.perfsonar.net/abou...",
+    "errorRange": [
+      73,
+      40
+    ],
+    "fixInfo": {
+      "editColumn": 73,
+      "deleteCount": 40,
+      "insertText": "<https://www.perfsonar.net/about/mission->"
+    }
+  },
+  {
+    "fileName": "docs/perfsonar/deployment-models.md",
+    "lineNumber": 16,
+    "ruleNames": [
+      "MD051",
+      "link-fragments"
+    ],
+    "ruleDescription": "Link fragments should be valid",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md051.md",
+    "errorDetail": null,
+    "errorContext": "[dual NIC](#multiple-nic-network-interface-card-guidance)",
+    "errorRange": [
+      134,
+      57
+    ],
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar/faq.md",
+    "lineNumber": 7,
+    "ruleNames": [
+      "MD034",
+      "no-bare-urls"
+    ],
+    "ruleDescription": "Bare URL used",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md034.md",
+    "errorDetail": null,
+    "errorContext": "https://fasterdata.es.net/perf...",
+    "errorRange": [
+      35,
+      86
+    ],
+    "fixInfo": {
+      "editColumn": 35,
+      "deleteCount": 86,
+      "insertText": "<https://fasterdata.es.net/performance-testing/troubleshooting/network-troubleshooting->"
+    }
+  },
+  {
+    "fileName": "docs/perfsonar/faq.md",
+    "lineNumber": 13,
+    "ruleNames": [
+      "MD001",
+      "heading-increment"
+    ],
+    "ruleDescription": "Heading levels should only increment by one level at a time",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md001.md",
+    "errorDetail": "Expected: h2; Actual: h4",
+    "errorContext": null,
+    "errorRange": null,
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar/faq.md",
+    "lineNumber": 18,
+    "ruleNames": [
+      "MD034",
+      "no-bare-urls"
+    ],
+    "ruleDescription": "Bare URL used",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md034.md",
+    "errorDetail": null,
+    "errorContext": "https://www.tecmint.com/secure...",
+    "errorRange": [
+      27,
+      75
+    ],
+    "fixInfo": {
+      "editColumn": 27,
+      "deleteCount": 75,
+      "insertText": "<https://www.tecmint.com/secure-apache-with-lets-encrypt-ssl-certificate-on->"
+    }
+  },
+  {
+    "fileName": "docs/perfsonar/faq.md",
+    "lineNumber": 94,
+    "ruleNames": [
+      "MD040",
+      "fenced-code-language"
+    ],
+    "ruleDescription": "Fenced code blocks should have a language specified",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md040.md",
+    "errorDetail": null,
+    "errorContext": "```",
+    "errorRange": null,
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar/install-testpoint.md",
+    "lineNumber": 307,
+    "ruleNames": [
+      "MD034",
+      "no-bare-urls"
+    ],
+    "ruleDescription": "Bare URL used",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md034.md",
+    "errorDetail": null,
+    "errorContext": "https://psconfig.opensciencegr...",
+    "errorRange": [
+      27,
+      63
+    ],
+    "fixInfo": {
+      "editColumn": 27,
+      "deleteCount": 63,
+      "insertText": "<https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch>"
+    }
+  },
+  {
+    "fileName": "docs/perfsonar/installation.md",
+    "lineNumber": 25,
+    "ruleNames": [
+      "MD001",
+      "heading-increment"
+    ],
+    "ruleDescription": "Heading levels should only increment by one level at a time",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md001.md",
+    "errorDetail": "Expected: h2; Actual: h3",
+    "errorContext": null,
+    "errorRange": null,
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar/installation.md",
+    "lineNumber": 111,
+    "ruleNames": [
+      "MD034",
+      "no-bare-urls"
+    ],
+    "ruleDescription": "Bare URL used",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md034.md",
+    "errorDetail": null,
+    "errorContext": "http://github.com/HEP-",
+    "errorRange": [
+      86,
+      22
+    ],
+    "fixInfo": {
+      "editColumn": 86,
+      "deleteCount": 22,
+      "insertText": "<http://github.com/HEP->"
+    }
+  },
+  {
+    "fileName": "docs/perfsonar/installation.md",
+    "lineNumber": 164,
+    "ruleNames": [
+      "MD013",
+      "line-length"
+    ],
+    "ruleDescription": "Line length",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md013.md",
+    "errorDetail": "Expected: 400; Actual: 528",
+    "errorContext": null,
+    "errorRange": [
+      401,
+      128
+    ],
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar/perfSONAR-and-rp_filter-EL9.md",
+    "lineNumber": 8,
+    "ruleNames": [
+      "MD001",
+      "heading-increment"
+    ],
+    "ruleDescription": "Heading levels should only increment by one level at a time",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md001.md",
+    "errorDetail": "Expected: h2; Actual: h3",
+    "errorContext": null,
+    "errorRange": null,
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar/psetf.md",
+    "lineNumber": 27,
+    "ruleNames": [
+      "MD013",
+      "line-length"
+    ],
+    "ruleDescription": "Line length",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md013.md",
+    "errorDetail": "Expected: 400; Actual: 765",
+    "errorContext": null,
+    "errorRange": [
+      401,
+      365
+    ],
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/perfsonar/psetf.md",
+    "lineNumber": 29,
+    "ruleNames": [
+      "MD033",
+      "no-inline-html"
+    ],
+    "ruleDescription": "Inline HTML",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md033.md",
+    "errorDetail": "Element: img",
+    "errorContext": null,
+    "errorRange": [
+      109,
+      4
+    ],
+    "fixInfo": null
+  },
+  {
+    "fileName": "docs/personas/quick-deploy/install-perfsonar-testpoint.md",
+    "lineNumber": 484,
+    "ruleNames": [
+      "MD034",
+      "no-bare-urls"
+    ],
+    "ruleDescription": "Bare URL used",
+    "ruleInformation": "https://github.com/DavidAnson/markdownlint/blob/v0.33.0/doc/md034.md",
+    "errorDetail": null,
+    "errorContext": "https://github.com/osg-",
+    "errorRange": [
+      79,
+      23
+    ],
+    "fixInfo": {
+      "editColumn": 79,
+      "deleteCount": 23,
+      "insertText": "<https://github.com/osg->"
+    }
+  }
+]
