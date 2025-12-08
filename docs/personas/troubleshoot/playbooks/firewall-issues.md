@@ -30,7 +30,7 @@ ss -ltnp | grep -E '(443|5001|8080|9000)'
 for port in $PORTS; do
   nc -zv <remote_testpoint> $port
 done
-```
+```text
 
 Expected results:
 
@@ -83,7 +83,7 @@ curl -v https://<remote_testpoint_hostname>:443/
 # Test from remote back (may need to ask admin)
 
 ssh <remote_admin> "curl -v https://<YOUR_TESTPOINT>:443/"
-```
+```text
 
 ### Step 4: Check Campus/Upstream Firewall
 
@@ -122,7 +122,7 @@ journalctl -n 100 | grep -i "firewall\|dropped\|rejected"
 # nftables audit logs (if enabled)
 
 dmesg | grep -i nft
-```
+```text
 
 ### Step 6: Escalate
 
@@ -199,7 +199,7 @@ nft list table filter
 
 # Usually in /etc/nftables.conf or similar
 
-```
+```text
 
 ### Campus Firewall Blocking
 
@@ -247,7 +247,7 @@ dig @8.8.8.8 <remote_testpoint_hostname>
 # Verify DNS server is reachable
 
 nc -zv <dns_server> 53
-```
+```text
 
 ---
 

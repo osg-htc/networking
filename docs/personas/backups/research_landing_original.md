@@ -11,4 +11,4 @@ tags: [architecture, research]
 ---
 
 This area is for readers who want to understand system architecture, data pipelines, and development notes. See `architecture.md` and `data-pipeline.md`.
-```
+```text

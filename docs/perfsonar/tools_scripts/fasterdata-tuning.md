@@ -19,7 +19,7 @@ sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 # Or download directly from the site (if published):
 sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
-```
+```text
 
 ## Verify the checksum
 
@@ -64,7 +64,7 @@ ethtool -g <iface> # ring buffer sizes
 tc qdisc show dev <iface>
 # Verify IOMMU in kernel cmdline
 cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
-```
+```text
 
 ## Security & Safety
 
@@ -90,7 +90,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 
 Limit apply to specific NICs (comma-separated):
 
-```
+```text
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces
 "ens1f0np0,ens1f1np1"
@@ -108,7 +108,7 @@ pacing-rate 5gbps
 
 Audit without applying changes (DTN target with custom pacing rate):
 
-```
+```text
 
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
 
@@ -141,7 +141,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply
 
 To actually apply and pass specific IOMMU args:
 
-```
+```text
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on
 iommu=pt" --yes

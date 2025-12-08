@@ -9,7 +9,7 @@
   ```text
 This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
 
-```
+```text
 
 # Abstract
 
@@ -474,7 +474,7 @@ Information: Network Middlebox is modifying MSS variable (changed to 1440)
 Server IP addresses are preserved End-to-End
 
 Client IP addresses are preserved End-to-End
-```
+```text
 
 To get additional data, try adding the **-ll** flag, it will produce a more in depth analysis.  NDT is useful as the
 first step of debugging to gather information about the end host, as well as the basic network configuration.
@@ -558,7 +558,7 @@ TCP window size: 16.0 MByte (default)
 [14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
 bwctl: stop\_exec: 3568979256.889493
 RECEIVER END
-```
+```text
 
 A similar result is seen in that we achieve near 1Gbps bandwidth (e.g. the hosts are only connected at 1Gbps).
 
@@ -628,7 +628,7 @@ one-way delay min/median/max = 3.19/3.3/3.27 ms, (err=0.218 ms)
 one-way jitter = 0 ms (P95-P50)
 Hops = 2 (consistently)
 no reordering
-```
+```text
 
 The results clearly state each direction of operation, and any problems that were found.  As in the BWCTL case the tool
 is highly reliant on stable NTP numbers, so be sure your server is synchronized against an NTP server.
@@ -699,10 +699,9 @@ interpreting results:
 - NDT will denote if your host does not have the proper amount of tuning.  If it doesn&#39;t, please considering following the host tuning steps discussed in Section 5.1
 
 - NDT will give the first indication of network problems as well, and may indicate the presence of packet loss,
-  link bottlenecks, or congestion.  Since NDT is based on heuristics these results can turn out to be false
-  positives, but are often worthy of following up on.  In the event of congestion, ask local networking staff to
-  see if there are any heavily utilized links.  If packet loss is an issue, ask to see if any interface errors or
-  discards are present.
+link bottlenecks, or congestion.  Since NDT is based on heuristics these results can turn out to be false positives, but
+are often worthy of following up on.  In the event of congestion, ask local networking staff to see if there are any
+heavily utilized links.  If packet loss is an issue, ask to see if any interface errors or discards are present.
 
 - BWCTL, when used in TCP mode, is only useful at nothing high or low throughput.  This is normally good from a capability standpoint, but it cannot tell you anything else about a serious problem
 

@@ -40,10 +40,9 @@ First, install your chosen EL9 operating system on your host after saving you lo
 
 The following options are then recommended to install perfSONAR for OSG/WLCG:
 
-| Installation method | Link |
-|---------------------|------|
-| Toolkit bundle installation | [Toolkit Installation Quick Start](https://docs.perfsonar.net/install_quick_start.html) |
-| Testpoint bundle installation | Follow the Quick Start above but use `dnf install perfsonar-testpoint` instead of the toolkit |
+| Installation method | Link | |---------------------|------| | Toolkit bundle installation | [Toolkit Installation
+Quick Start](https://docs.perfsonar.net/install_quick_start.html) | | Testpoint bundle installation | Follow the Quick
+Start above but use `dnf install perfsonar-testpoint` instead of the toolkit |
 
 You can see more details about EL supported installs at <<https://docs.perfsonar.net/install_el.html>>
 
@@ -52,7 +51,7 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
     ```text
 In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.
 
-```
+```text
 
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:
@@ -75,7 +74,7 @@ described in the official guide:
       "configure-archives" : true
    }
 ]
-```
+```text
 
 * Please remove any old/stale URLs using `psconfig remote delete <URL>`
 
@@ -128,7 +127,7 @@ site or host firewalls.   An overview of perfSONAR security is available at
     ```text
 All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.
 
-```
+```text
 
 For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the
 tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be
@@ -174,7 +173,7 @@ filling the information please follow those simple guidelines:
 * Host IP (optional)
 * Description (optional label used in MaDDash; keep short and unique)
 
-```
+```text
 
 * Check "N" when asked "Is it a beta service"
 

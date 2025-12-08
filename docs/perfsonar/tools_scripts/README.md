@@ -45,7 +45,7 @@ sudo bash install-systemd-service.sh
 
 # Install with custom path
 sudo bash install-systemd-service.sh /custom/path/to/perfsonar-tp
-```
+```text
 
 After installation:
 
@@ -75,7 +75,7 @@ Preview what would happen (safe):
 
 ```bash
 bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --dry-run
-```
+```text
 
 Install into `/opt/perfsonar-tp/tools_scripts` (creates the directory if missing):
 
@@ -87,7 +87,7 @@ If you already have the perfSONAR testpoint repo checked out in `/opt/perfsonar-
 
 ```bash
 bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
-```
+```text
 
 ## Fasterdata host tuning script
 
@@ -107,7 +107,7 @@ Or once the site is built, from the site URL:
 
 ```text
 https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
-```
+```text
 
 ## Quick install
 
@@ -124,7 +124,7 @@ You can verify the script integrity with the provided SHA256 file:
 ```bash
 curl -L -o /tmp/fasterdata-tuning.sh.sha256 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
 sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
-```
+```text
 
 ## Optional flags (apply mode only)
 
@@ -150,7 +150,7 @@ Apply tuning (requires root):
 
 ```bash
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
-```
+```text
 
 ## Notes
 
@@ -221,7 +221,7 @@ Debian / Ubuntu (apt):
 ```bash
 apt-get update
 apt-get install -y bash coreutils iproute2 network-manager rsync curl openssl nftables podman podman-compose docker.io docker-compose fail2ban policycoreutils
-```
+```text
 
 If you intend to use the lsregistration container helpers, ensure either `podman` or `docker` is installed and that the
 service can list and access containers (e.g., `podman ps` or `docker ps` works as root).
@@ -258,7 +258,7 @@ Generate an example or auto-detected config (preview, dry-run only):
 
 ```bash
 bash perfSONAR-pbr-nm.sh --generate-config-debug
-```
+```text
 
 Write the auto-detected config to /etc (does not apply changes):
 
@@ -273,7 +273,7 @@ bash perfSONAR-pbr-nm.sh
 # or non-interactive
 bash perfSONAR-pbr-nm.sh --yes
 
-```
+```text
 
 ## Gateway requirement, inference, and generator warnings
 
@@ -349,7 +349,7 @@ Run the tests:
 ```bash
 cd docs/perfsonar
 ./tests/run_tests.sh
-```
+```text
 
 ## Notes
 
