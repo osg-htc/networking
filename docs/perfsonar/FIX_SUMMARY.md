@@ -168,13 +168,13 @@ To apply these fixes to other perfSONAR testpoint deployments:
        -o /tmp/install-systemd-service.sh
    sudo bash /tmp/install-systemd-service.sh /opt/perfsonar-tp
 
-```
+   ```
 
 1. **Automated deployment with Ansible**:
 
    ```bash
    ansible-playbook -i inventory ansible/playbooks/deploy-testpoint-container.yml
-```
+   ```
 
 1. **Fix existing deployments with restart issues**:
 

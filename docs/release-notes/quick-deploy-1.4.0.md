@@ -66,7 +66,7 @@ From v1.3.0:
    ```bash
    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh | bash -s -- /opt/perfsonar-tp
 
-```
+   ```
 
 1. Review `DEPRECATION.md` and remove any automation references to `check-deps.sh`.
 
@@ -74,7 +74,7 @@ From v1.3.0:
 
    ```bash
    /opt/perfsonar-tp/tools_scripts/perfSONAR-orchestrator.sh --option A --fqdn <FQDN> --email <EMAIL>
-```
+   ```
 
 1. (Optional) Reapply PBR in non-disruptive mode:
 
@@ -82,7 +82,7 @@ From v1.3.0:
 
    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --apply-inplace
 
-```
+   ```
 
 ## Validation
 
