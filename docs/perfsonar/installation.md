@@ -83,10 +83,10 @@ described in the official guide:
 
 !!! note
 
-    ```text
+```text
 Until your host is added on https://psconfig.opensciencegrid.org to one or more meshes by an administrator the automesh configuration above will not return any tests.
 
-    ```
+```
 
 * We **strongly recommend** configuring perfSONAR in **dual-stack mode** (both IPv4 and IPv6). In case your site has IPv6 support, the only necessary step is to get both A and AAAA records for your perfSONAR DNS names (as well as ensuring the reverse DNS is in place).
 
