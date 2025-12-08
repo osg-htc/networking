@@ -22,7 +22,7 @@ For any questions or help with WLCG perfSONAR setup, please contact
 [perfsonaruser](https://lists.internet2.edu/sympa/subscribe/perfsonar-user) and [perfsonar-
 announce](https://lists.internet2.edu/sympa/subscribe/perfsonar-announce) mailing lists.
 
-### Installation or Upgrade
+## Installation or Upgrade
 
 Prior to installing please consult the [release notes](https://www.perfsonar.net/docs_releasenotes.html)) for the latest
 available release. In case you have already an instance running and wish to re-install/update it then please follow our
@@ -99,7 +99,7 @@ For any further questions, please consult official [Troubleshooting
 Guide](http://docs.perfsonar.net/troubleshooting_overview.html), [FAQ](http://docs.perfsonar.net/FAQ.html) as well as
 WLCG/OSG specific [FAQ](faq.md) or contact directly WLCG or OSG perfSONAR support units.
 
-### Maintenance
+## Maintenance
 
 Provided that you have enabled auto-updates, the only thing that remains is to follow up on any kernel security issues
 and either patch the node as soon as possible or reboot once the patched kernel is released.
@@ -113,7 +113,7 @@ Puppet](http://github.com/HEPPuppet/perfsonar). As perfSONAR manages most of its
 packages and there is very little initial configuration needed, we suggest to keep automated configuration to the
 minimum necessary to avoid unncessary interventions after auto-updates.
 
-### Security Considerations
+## Security Considerations
 
 The perfSONAR toolkit is reviewed both internally and externally for security flaws and the official documentation
 provides a lot of information on what security software is available and what firewall ports need to be opened, please
@@ -142,14 +142,14 @@ If you have a central/campus firewall verify required port openings in the perfS
 
 ```
 
-### Enabling SNMP plugins
+## Enabling SNMP plugins
 
 Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be
 captured and stored in the local measurement archive. This is currently a [beta
 feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking for
 volunteers willing to test, please let us know in case you would be interested.
 
-### Register perfSONAR Service in GOCDB
+## Register perfSONAR Service in GOCDB
 
 This section describes how to register the perfSONAR service in GOCDB.
 
@@ -189,7 +189,7 @@ filling the information please follow those simple guidelines:
 <img src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" alt="GOCDB screen shot for creating a Service Endpoint"
 width="1024">
 
-### Register perfSONAR in OSG Topology
+## Register perfSONAR in OSG Topology
 
 Each *OSG site* should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network
 monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a
