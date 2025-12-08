@@ -31,8 +31,8 @@ def process(path: Path) -> bool:
             if next_line.strip() and not next_line.startswith(' '):
                 # Basic heuristic: join if next_line starts with a lowercase letter or an alphanumeric word fragment
                 if re.match(r'^[a-z0-9/_~%.-]', next_line, flags=re.IGNORECASE):
-                    # Remove final hyphen and newline from current line, then append next_line trimmed of leading whitespace
-                    joined = line.rstrip('\n')[:-1] + next_line.lstrip()
+                    # Keep the final hyphen and newline from current line, then append next_line trimmed of leading whitespace
+                        joined = line.rstrip('\n') + next_line.lstrip()
                     out.append(joined)
                     i += 2
                     changed = True
