@@ -12,6 +12,8 @@ tmp/
 
 # Backup files
 *.bak
+.indent_fix_backups/
+.link_check_backups/
 
 # Python compiled files
 __pycache__/
