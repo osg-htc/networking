@@ -239,25 +239,40 @@ Below is a sample NFTables rule set that
 
 - Accepts ICMP/ICMPv6 and related/permitted connections
 
-/etc/nftables.conf:
+ /etc/nftables.conf:
 
+```nft
 flush ruleset
 
 table inet perfsonar {
 
-`\n\nset allowed\_protocols { type inet\_proto elements \= { icmp, icmpv6 } } set allowed\_interfaces { type ifname
-elements \= { "lo" } } set allowed\_tcp\_dports { type inet\_service elements \= { 22, 443, 861, 862, 9090, 123, 5201,
-5001, 5000, 5101 } } set allowed\_udp\_ports { type inet\_service elements \= { 123, 5201, 5001, 5000, 5101 } } chain
-allow { ct state established,related accept ct state invalid drop meta l4proto @allowed\_protocols accept iifname
-@allowed\_interfaces accept tcp dport @allowed\_tcp\_dports ct state new accept udp dport @allowed\_udp\_ports ct state
-new accept \# traceroute and test ranges udp dport 33434-33634 ct state new accept udp dport 18760-19960 ct state new
-accept udp dport 8760-9960 ct state new accept tcp dport 5890-5900 ct state new accept \# SSH controls (add your trusted
-IPs/subnets) tcp dport 22 ip saddr 192.168.10.0/24 accept tcp dport 22 ip saddr 10.20.30.0/24 accept } chain input {
-type filter hook input priority 0; policy drop; jump allow reject with icmpx admin-prohibited }
-
-    ```text
-
+set allowed_protocols { type inet_proto elements = { icmp, icmpv6 } }
+set allowed_interfaces { type ifname elements = { "lo" } }
+set allowed_tcp_dports { type inet_service elements = { 22, 443, 861, 862, 9090, 123, 5201, 5001, 5000, 5101 } }
+set allowed_udp_ports { type inet_service elements = { 123, 5201, 5001, 5000, 5101 } }
+chain allow {
+    ct state established,related accept
+    ct state invalid drop
+    meta l4proto @allowed_protocols accept
+    iifname @allowed_interfaces accept
+    tcp dport @allowed_tcp_dports ct state new accept
+    udp dport @allowed_udp_ports ct state new accept
+    # traceroute and test ranges
+    udp dport 33434-33634 ct state new accept
+    udp dport 18760-19960 ct state new accept
+    udp dport 8760-9960 ct state new accept
+    tcp dport 5890-5900 ct state new accept
+    # SSH controls (add your trusted IPs/subnets)
+    tcp dport 22 ip saddr 192.168.10.0/24 accept
+    tcp dport 22 ip saddr 10.20.30.0/24 accept
 }
+chain input {
+    type filter hook input priority 0; policy drop;
+    jump allow
+    reject with icmpx admin-prohibited
+}
+
+```
 
 Apply and persist:
 
@@ -274,25 +289,22 @@ If you want the container to use a specific NIC, adjust the docker-compose.syste
 
 ## 6. Confirm Operation
 
+
 Check containers:
 
-    ```
-
+```bash
 podman ps
 
 # or
 
 docker ps
-
-```text
+```
 
 Check logs:
 
-```
-
-podman logs perfsonar-testpoint
-
 ```bash
+podman logs perfsonar-testpoint
+```
 
 Test connectivity between testpoints.
 

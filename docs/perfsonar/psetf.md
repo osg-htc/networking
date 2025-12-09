@@ -13,7 +13,7 @@ loaded in the browser.
 
 A sample initial dashboard is shown below:
 
-![Initial perfSONAR dashboard](../../img/etf.png)
+![Initial perfSONAR dashboard](../img/etf.png)
 
 You can use quicksearch in the left pane to search for hostnames, domains or tests. The tests performed can be divided
 into four categories:
@@ -35,7 +35,7 @@ stored centrally as compared to the local measurement archive. It mainly reflect
 collector and does not provide information about the local services.
 
 This is sample snapshost showing all metrics for particular perfSONAR instance (latency node in this case): ![Sample
-Snapshot of all metrics for a perfSONAR instance](../../img/etf_page.png)
+Snapshot of all metrics for a perfSONAR instance](../img/etf_page.png)
 
 For any issues/questions concerning the monitoring pages and tests, please consult the [FAQ](faq.md)
 

@@ -199,7 +199,7 @@ filling the information please follow those simple guidelines:
 <!-- -->
 
 * GOCDB screen shot for creating a Service Endpoint:
-![GOCDB screen shot for creating a Service Endpoint](../../img/Screen_shot_2013-02-19_at_15.26.52.png)
+![GOCDB screen shot for creating a Service Endpoint](../img/Screen_shot_2013-02-19_at_15.26.52.png)
 
 ## Register perfSONAR in OSG Topology
 
