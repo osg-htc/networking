@@ -78,7 +78,7 @@ sudo bash install-systemd-service.sh [/opt/perfsonar-tp]
 
 **Files Updated**:
 
-- `docs/perfsonar/install-testpoint.md` - Added section on enabling automatic restart
+- `docs/perfsonar/installation.md` - Added section on enabling automatic restart (legacy: previously `install-testpoint.md`)
 
 - `docs/perfsonar/tools_scripts/README.md` - Added systemd service installer documentation
 

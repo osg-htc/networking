@@ -96,4 +96,4 @@ The perfsonar-testpoint container should show status "Up" and not be restarting.
 
 - Systemd service installer: `docs/perfsonar/tools_scripts/install-systemd-service.sh`
 
-- Installation guide: `docs/perfsonar/install-testpoint.md`
+- Installation guide (legacy): `docs/perfsonar/installation.md` (replaces `install-testpoint.md`)
