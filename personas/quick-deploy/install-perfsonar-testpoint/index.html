@@ -887,10 +887,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#modes" class="md-nav__link">
+  <a href="#safety-enhancements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modes
+        Safety Enhancements
       
     </span>
   </a>
@@ -898,10 +898,60 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#safety-enhancements" class="md-nav__link">
+  <a href="#generate-config-file-automatically-or-preview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Safety Enhancements
+        Generate config file automatically (or preview)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply-changes-in-place-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Apply changes (in-place default)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Apply changes (in-place default)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-place-apply-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-place apply (recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-rebuild-destructive-removes-all-nm-connections-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full rebuild (destructive – removes all NM connections first)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-forward-and-reverse-entries-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS: forward and reverse entries (required)
       
     </span>
   </a>
@@ -921,6 +971,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Step 4 – Configure nftables, SELinux, and Fail2Ban">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installconfigure-the-desired-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install/configure the desired options
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confirm-nftables-state-and-security-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Confirm nftables state and security services
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2687,18 +2765,18 @@ process while accommodating site-specific requirements.</p>
 extract/save/restore registration config that you may want to use.</p>
 <details class="info">
 <summary>Quick capture of existing lsregistration config (if you have a src)</summary>
-<p>Download a temp copy:   </p>
-</details>
-<p><div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
+<p>Download a temp copy: <br />
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-o<span class="w"> </span>/tmp/update-lsreg.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-lsreg.sh
 </code></pre></div>
-    Use the downloaded tool to extract a restore script:
+Use the downloaded tool to extract a restore script:
 <div class="highlight"><pre><span></span><code>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
 </code></pre></div>
-    Note: Repository clone instructions are in Step 2.
-    <strong>Note:</strong> All shell commands assume an interactive root shell.</p>
+Note: Repository clone instructions are in Step 2.
+<strong>Note:</strong> All shell commands assume an interactive root shell.</p>
+</details>
 <hr />
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
 <ol>
@@ -2707,40 +2785,38 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </li>
 <li>
 <p><strong>Set the hostname and time sync:</strong> Pick the NIC that will own the default route for the hostname.</p>
-</li>
-</ol>
 <div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
 timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
 </code></pre></div>
-<ol>
-<li><strong>Disable unused services:</strong></li>
-</ol>
+</li>
+<li>
+<p><strong>Disable unused services:</strong></p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
 dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="nv">???</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="s2">&quot;Why disable unused services?&quot;</span>
-
-<span class="w">    </span><span class="n">We</span><span class="w"> </span><span class="n">recommend</span><span class="w"> </span><span class="n">disabling</span><span class="w"> </span><span class="n">unused</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="n">during</span><span class="w"> </span><span class="k">initial</span><span class="w"> </span><span class="n">provisioning</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">reduce</span><span class="w"> </span><span class="n">complexity</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">avoid</span><span class="w"> </span><span class="n">unexpected</span>
-<span class="w">    </span><span class="n">interference</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="k">set</span><span class="n">up</span><span class="p">.</span><span class="w"> </span><span class="n">Services</span><span class="w"> </span><span class="n">such</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n n-Quoted">`firewalld`</span><span class="p">,</span><span class="w"> </span><span class="n n-Quoted">`NetworkManager-wait-online`</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n n-Quoted">`rsyslog`</span>
-<span class="w">    </span><span class="n">can</span><span class="w"> </span><span class="k">alter</span><span class="w"> </span><span class="n">networking</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">hold</span><span class="w"> </span><span class="n">boot</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="k">events</span><span class="p">,</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">conflict</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">automated</span><span class="w"> </span><span class="n">nftables</span><span class="o">/</span><span class="n">NetworkManager</span><span class="w"> </span><span class="n">changes</span>
-<span class="w">    </span><span class="n">performed</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">helper</span><span class="w"> </span><span class="n">scripts</span><span class="p">.</span><span class="w"> </span><span class="n">Disabling</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">essential</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="n">makes</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">install</span><span class="w"> </span><span class="k">deterministic</span><span class="p">,</span><span class="w"> </span><span class="n">reduces</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">host</span>
-<span class="w">    </span><span class="n">attack</span><span class="w"> </span><span class="n">surface</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">avoids</span><span class="w"> </span><span class="n">delays</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">race</span><span class="w"> </span><span class="n">conditions</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="n">configuring</span><span class="w"> </span><span class="n">policy</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">routing</span><span class="p">,</span><span class="w"> </span><span class="n">nftables</span><span class="w"> </span><span class="n">rules</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w">        </span>
-<span class="w">    </span><span class="n">container</span><span class="w"> </span><span class="n">networking</span><span class="p">.</span>
-</code></pre></div>
-
-<ol>
-<li><strong>Update the system:</strong></li>
-</ol>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>update
-<span class="w"> </span><span class="sb">```</span>
-
-<span class="m">1</span>.<span class="w"> </span>**Record<span class="w"> </span>NIC<span class="w"> </span>names:**<span class="w"> </span>Document<span class="w"> </span>interface<span class="w"> </span>mappings<span class="w"> </span><span class="k">for</span><span class="w"> </span>later<span class="w"> </span>PBR<span class="w"> </span>configuration.
-
-<span class="sb">```</span>bash
-nmcli<span class="w"> </span>device<span class="w"> </span>status
+<details class="info">
+<summary>Why disable unused services?</summary>
+<p>We recommend disabling unused services during initial provisioning to reduce complexity and avoid unexpected
+interference with network and container setup. Services such as <code>firewalld</code>, <code>NetworkManager-wait-online</code>, and <code>rsyslog</code>
+can alter networking state, hold boot or network events, or conflict with the automated nftables/NetworkManager changes
+performed by the helper scripts. Disabling non-essential services makes the install deterministic, reduces the host
+attack surface, and avoids delays or race conditions while configuring policy-based routing, nftables rules, and      <br />
+container networking.</p>
+</details>
+</li>
+<li>
+<p><strong>Update the system:</strong></p>
+<p><code>bash
+dnf -y update</code></p>
+</li>
+<li>
+<p><strong>Record NIC names:</strong> Document interface mappings for later PBR configuration.</p>
+<div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>device<span class="w"> </span>status
 ip<span class="w"> </span>-br<span class="w"> </span>addr
 </code></pre></div>
+</li>
+</ol>
 <hr />
 <h2 id="step-2-choose-your-deployment-path">Step 2 – Choose Your Deployment Path<a class="headerlink" href="#step-2-choose-your-deployment-path" title="Permanent link">&para;</a></h2>
 <p>After completing Step 1 (minimal OS hardening), you can proceed in one of two ways:</p>
@@ -2752,8 +2828,6 @@ certificate issuance, and pSConfig enrollment with interactive pauses (or non-in
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/tmp/perfSONAR-orchestrator.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/perfSONAR-orchestrator.sh
-
-/tmp/perfSONAR-orchestrator.sh
 </code></pre></div>
 <p><strong>Interactive mode</strong> (pause at each step, confirm/skip/quit):</p>
 <div class="highlight"><pre><span></span><code>/tmp/perfSONAR-orchestrator.sh
@@ -2766,29 +2840,15 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </code></pre></div>
 <p><strong>Flags:</strong></p>
 <ul>
-<li>
-<p><code>--option {A|B}</code> — A = testpoint only; B = testpoint + Let's Encrypt</p>
-</li>
-<li>
-<p><code>--fqdn NAME</code> — primary FQDN for certificates (Option B)</p>
-</li>
-<li>
-<p><code>--email ADDRESS</code> — email for Let's Encrypt (Option B)</p>
-</li>
-<li>
-<p><code>--non-interactive</code> — skip pauses, auto-confirm</p>
-</li>
-<li>
-<p><code>--yes</code> — auto-confirm internal script prompts</p>
-</li>
-<li>
-<p><code>--dry-run</code> — preview steps without executing</p>
-</li>
-<li>
-<p><code>--auto-update</code> — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates <code>/usr/local/bin/perfsonar-auto-update.sh</code>, a systemd service and timer)</p>
-</li>
+<li><code>--option {A|B}</code> — A = testpoint only; B = testpoint + Let's Encrypt</li>
+<li><code>--fqdn NAME</code> — primary FQDN for certificates (Option B)</li>
+<li><code>--email ADDRESS</code> — email for Let's Encrypt (Option B)</li>
+<li><code>--non-interactive</code> — skip pauses, auto-confirm</li>
+<li><code>--yes</code> — auto-confirm internal script prompts</li>
+<li><code>--dry-run</code> — preview steps without executing</li>
+<li><code>--auto-update</code> — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates <code>/usr/local/bin/perfsonar-auto-update.sh</code>, a systemd service and timer)</li>
 </ul>
-<p><strong>If you choose this path, skip to Step 7</strong> (the orchestrator completes Steps 2–6 for you).</p>
+<p><strong>If you choose this path, skip to <a href="#step-7-register-and-configure-with-wlcgosg">Step 7</a></strong> (the orchestrator completes Steps 2–6 for you).</p>
 <hr />
 <h3 id="path-b-manual-step-by-step">Path B: Manual Step-by-Step<a class="headerlink" href="#path-b-manual-step-by-step" title="Permanent link">&para;</a></h3>
 <p>For users who prefer granular control or need to customize each stage, continue with manual package installation,
@@ -2801,36 +2861,35 @@ prerequisites in one command:</p>
 <span class="w">    </span>nftables<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils-python-utils<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>python3<span class="w"> </span>iproute<span class="w"> </span>iputils<span class="w"> </span>procps-ng<span class="w"> </span>sed<span class="w"> </span>grep<span class="w"> </span>gawk
 </code></pre></div>
-<p>This ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their</p>
-<p>dependencies available.</p>
+<p>This ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their dependencies available.</p>
 <h4 id="step-22-bootstrap-helper-scripts">Step 2.2 – Bootstrap Helper Scripts<a class="headerlink" href="#step-22-bootstrap-helper-scripts" title="Permanent link">&para;</a></h4>
 <p>Use the bootstrap script to install helper scripts under <code>/opt/perfsonar-tp/tools_scripts</code>:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/tmp/install_tools_scripts.sh
+
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install_tools_scripts.sh
+
 /tmp/install_tools_scripts.sh<span class="w"> </span>/opt/perfsonar-tp
 </code></pre></div>
 <p><strong>Verify bootstrap completed successfully:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check that all helper scripts were downloaded</span>
-
 ls<span class="w"> </span>-1<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/*.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
 <span class="c1"># Should show 11 shell scripts</span>
 
 <span class="c1"># Verify key scripts are present and executable</span>
-
 ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/<span class="o">{</span>perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,perfSONAR-orchestrator.sh<span class="o">}</span>
 </code></pre></div>
 <hr />
 <h2 id="step-3-configure-policy-based-routing-pbr">Step 3 – Configure Policy-Based Routing (PBR)<a class="headerlink" href="#step-3-configure-policy-based-routing-pbr" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Skip this step if you used the orchestrator (Path A)</p>
-<p>The orchestrator automates PBR configuration. If you ran it in Step 2, skip to <a href="#step-4-configure-nftables-
-selinux-and-fail2ban">Step 4</a>.</p>
+<p>The orchestrator automates PBR configuration. If you ran it in Step 2, skip to <a href="#step-4-configure-nftables-selinux-and-fail2ban">Step 4</a>.</p>
+</div>
 <p>The script <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh</code> automates NetworkManager profiles and routing rule
 setup. It fills out and consumes the network configuration in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
-</div>
-<h3 id="modes">Modes<a class="headerlink" href="#modes" title="Permanent link">&para;</a></h3>
+<details class="info">
+<summary>Modes of operation</summary>
 <p>By default the script now performs an <strong>in-place apply</strong> that adjusts routes, rules, and NetworkManager connection
 properties <strong>without deleting existing connections or flushing all system routes</strong>. This minimizes disruption and
 usually avoids the need for a reboot.</p>
@@ -2861,124 +2920,90 @@ initial deployments or when you must completely reset inconsistent legacy state.
 </tr>
 </tbody>
 </table>
+</details>
 <h3 id="safety-enhancements">Safety Enhancements<a class="headerlink" href="#safety-enhancements" title="Permanent link">&para;</a></h3>
 <ul>
-<li>
-<p>Detects active SSH session interface and avoids extra disruption to that NIC in in-place mode.</p>
-</li>
-<li>
-<p>Prompts are still skipped with <code>--yes</code>.</p>
-</li>
-<li>
-<p>Dry-run preview supported via <code>--dry-run</code> (combine with <code>--debug</code> for verbose output).</p>
-</li>
-<li>
-<p>Reboot is <strong>no longer generally required</strong>; only consider one if NetworkManager fails to apply the new rules cleanly.</p>
-</li>
-<li>
-<p><strong>Generate config file automatically (or preview):</strong></p>
+<li>Detects active SSH session interface and avoids extra disruption to that NIC in in-place mode.</li>
+<li>Prompts are still skipped with <code>--yes</code>.</li>
+<li>Dry-run preview supported via <code>--dry-run</code> (combine with <code>--debug</code> for verbose output).</li>
+<li>Reboot is <strong>no longer generally required</strong>; only consider one if NetworkManager fails to apply the new rules cleanly.</li>
+</ul>
+<h3 id="generate-config-file-automatically-or-preview">Generate config file automatically (or preview)<a class="headerlink" href="#generate-config-file-automatically-or-preview" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Gateways required for addresses</p>
 <p>Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway.
 If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit
 <code>NIC_IPV4_GWS</code>/<code>NIC_IPV6_GWS</code> accordingly before applying changes.</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Gateway prompts</p>
+<details class="note">
+<summary>Gateway prompts</summary>
 <p>During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be
 determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or <code>-</code> to skip). Prompts are skipped
-in non-interactive sessions or when you use <code>--yes</code>.</p>
-</div>
-<p>Preview generation (no changes):</p>
-</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
-
-<span class="w"> </span><span class="sb">```</span>
-
-<span class="w">    </span>Generate<span class="w"> </span>and<span class="w"> </span>write<span class="w"> </span>the<span class="w"> </span>config<span class="w"> </span>file:
-
-<span class="sb">```</span>bash
-/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+in non-interactive sessions or when you use <code>--yes</code>. Note, NICs without gateways are assumed to NOT be used for perfSONAR.</p>
+</details>
+<p>Preview generation (<strong>no changes</strong>):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug<span class="w">    </span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">writes</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="k">file</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n n-Quoted">`/etc/perfSONAR-multi-nic-config.conf`</span><span class="p">.</span><span class="w"> </span><span class="n">Edit</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">adjust</span><span class="w"> </span><span class="n">site</span><span class="o">-</span><span class="k">specific</span><span class="w"> </span><span class="k">values</span><span class="w"> </span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">g</span><span class="p">.,</span>
-<span class="n">confirm</span><span class="w"> </span><span class="n n-Quoted">`DEFAULT_ROUTE_NIC`</span><span class="p">,</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="n n-Quoted">`NIC_IPV4_ADDROUTE`</span><span class="w"> </span><span class="n">entries</span><span class="p">)</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">verify</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">entries</span><span class="p">.</span><span class="w">  </span><span class="k">Next</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">apply</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">network</span>
-<span class="n">changes</span><span class="p">...</span>
+<p>Generate and <strong>write</strong> the config file:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto<span class="w"> </span>
 </code></pre></div>
-
-<ol>
-<li>
-<p><strong>Apply changes (in-place default):</strong></p>
+<p>The script writes the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>. Edit to adjust site-specific values (e.g.,
+confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entries) and verify the entries.  Next step is to apply the network
+changes...</p>
+<h3 id="apply-changes-in-place-default">Apply changes (in-place default)<a class="headerlink" href="#apply-changes-in-place-default" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Connect via console for network changes</p>
-<p>When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the</p>
-<p>perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script
+<p>When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the
+perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script
 invocation.</p>
 </div>
-<p>??? If SSH connection drops during network reconfiguration:</p>
-<div class="codehilite"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">Access</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">BMC</span><span class="o">/</span><span class="n">iLO</span><span class="o">/</span><span class="n">iDRAC</span><span class="w"> </span><span class="n">console</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">physical</span><span class="w"> </span><span class="n">console</span>
-
-<span class="mf">1.</span><span class="w"> </span><span class="n">Review</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">nic</span><span class="o">-</span><span class="n">config</span><span class="mf">.</span><span class="nb">log</span><span class="err">`</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="n">errors</span>
-
-<span class="mf">1.</span><span class="w"> </span><span class="n">Check</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="err">`</span><span class="n">nmcli</span><span class="w"> </span><span class="n">connection</span><span class="w"> </span><span class="n">show</span><span class="err">`</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="err">`</span><span class="n">ip</span><span class="w"> </span><span class="n">addr</span><span class="err">`</span>
-
-<span class="mf">1.</span><span class="w"> </span><span class="kd">Restore</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">backup</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">needed</span><span class="p">:</span><span class="w"> </span><span class="n">backups</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">backups</span><span class="o">/</span><span class="n">nm</span><span class="o">-</span><span class="n">connections</span><span class="o">-&lt;</span><span class="n">timestamp</span><span class="o">&gt;/</span><span class="err">`</span>
-
-<span class="mf">1.</span><span class="w"> </span><span class="n">Reapply</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">corrections</span><span class="p">:</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="kr">to</span><span class="n">ols_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">pbr</span><span class="o">-</span><span class="n">nm</span><span class="mf">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="n">yes</span><span class="err">`</span>
-</code></pre></div>
-
-<p><strong>In-place apply (recommended):</strong></p>
-</li>
-</ol>
+<h4 id="in-place-apply-recommended">In-place apply (recommended)<a class="headerlink" href="#in-place-apply-recommended" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>**Full rebuild (destructive – removes all NM connections first):**
-</code></pre></div>
-
+<details class="info">
+<summary>If SSH connection drops during network reconfiguration:</summary>
+<ol>
+<li>Access via BMC/iLO/iDRAC console or physical console</li>
+<li>Review <code>/var/log/perfSONAR-multi-nic-config.log</code> for errors</li>
+<li>Check network state with <code>nmcli connection show</code> and <code>ip addr</code></li>
+<li>Restore from backup if needed: backups are in <code>/var/backups/nm-connections-&lt;timestamp&gt;/</code></li>
+<li>Reapply config after corrections: <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes</code></li>
+</ol>
+</details>
+<h4 id="full-rebuild-destructive-removes-all-nm-connections-first">Full rebuild (destructive – removes all NM connections first)<a class="headerlink" href="#full-rebuild-destructive-removes-all-nm-connections-first" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--rebuild-all<span class="w"> </span>--yes
 </code></pre></div>
-<p>The script logs to <code>/var/log/perfSONAR-multi-nic-config.log</code>. After an in-place apply, a reboot is typically
+<p>The policy based routing script logs to <code>/var/log/perfSONAR-multi-nic-config.log</code>. After an in-place apply, a reboot is typically
 unnecessary. If connectivity or rules appear inconsistent (<code>ip rule show</code> / <code>ip route</code> mismatch), consider a manual
 NetworkManager restart:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>NetworkManager
 </code></pre></div>
-<ol>
-<li><strong>DNS: forward and reverse entries (required):</strong></li>
-</ol>
+<h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
 <p>All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching
 reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your
 host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.</p>
 <ul>
-<li>
-<p>For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.</p>
-</li>
-<li>
-<p>For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.</p>
-</li>
-<li>
-<p>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).</p>
-</li>
+<li>For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.</li>
+<li>For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.</li>
+<li>For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).</li>
 </ul>
-<p>??? example "Run the DNS checker" Validate forward/reverse DNS for addresses in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
-<div class="codehilite"><pre><span></span><code>You can run a script to check DNS:
+<details class="info">
+<summary>Run the DNS checker</summary>
+<p>To validate forward/reverse DNS for addresses in <code>/etc/perfSONAR-multi-nic-config.conf</code> you can run a script:
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
 </code></pre></div>
-
-<p><code>bash
-/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh</code></p>
-<p><strong>Notes and automation tips:</strong></p>
-<div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">above</span><span class="w"> </span><span class="n">uses</span><span class="w"> </span><span class="n n-Quoted">`dig`</span><span class="w"> </span><span class="p">(</span><span class="n">bind</span><span class="o">-</span><span class="n">utils</span><span class="w"> </span><span class="n">package</span><span class="p">)</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">commonly</span><span class="w"> </span><span class="n">available</span><span class="p">;</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">adapt</span><span class="w"> </span><span class="n">it</span>
-<span class="w">  </span><span class="k">to</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n n-Quoted">`host`</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">preferred</span><span class="p">.</span>
-
-<span class="o">-</span><span class="w"> </span><span class="n">Run</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">check</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">part</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">provisioning</span><span class="w"> </span><span class="n">CI</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">pre</span><span class="o">-</span><span class="n">flight</span><span class="w"> </span><span class="k">check</span><span class="w"> </span><span class="k">before</span><span class="w"> </span><span class="n">enabling</span><span class="w"> </span><span class="n">measurement</span><span class="w"> </span><span class="k">registration</span><span class="p">.</span>
-
-<span class="o">-</span><span class="w"> </span><span class="k">For</span><span class="w"> </span><span class="n">large</span><span class="w"> </span><span class="n">sites</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">many</span><span class="w"> </span><span class="n">addresses</span><span class="p">,</span><span class="w"> </span><span class="n">parallelize</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">checks</span><span class="w"> </span><span class="p">(</span><span class="n">xargs</span><span class="w"> </span><span class="o">-</span><span class="n">P</span><span class="p">)</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">small</span><span class="w"> </span><span class="n">Python</span>
-<span class="w">  </span><span class="n">script</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">leverages</span><span class="w"> </span><span class="n n-Quoted">`dns.resolver`</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">async</span><span class="w"> </span><span class="n">checks</span><span class="p">.</span>
-
-<span class="o">-</span><span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">PTR</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">hostname</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">trailing</span><span class="w"> </span><span class="n">dot</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">strips</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="k">before</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">forward</span><span class="w"> </span><span class="k">check</span><span class="p">.</span>
-</code></pre></div>
-
+<strong>Notes and automation tips:</strong></p>
+<ul>
+<li>The script above uses <code>dig</code> (bind-utils package) which is commonly available; you can adapt it
+  to use <code>host</code> if preferred.</li>
+<li>Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.</li>
+<li>For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
+  script that leverages <code>dns.resolver</code> for async checks.</li>
+<li>If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.</li>
+</ul>
 <p>If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before
 proceeding with registration and testing.</p>
+</details>
 <p><strong>Verify the routing policy:</strong></p>
 <div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>connection<span class="w"> </span>show
 ip<span class="w"> </span>rule<span class="w"> </span>show
@@ -2990,8 +3015,7 @@ route.</p>
 <h2 id="step-4-configure-nftables-selinux-and-fail2ban">Step 4 – Configure nftables, SELinux, and Fail2Ban<a class="headerlink" href="#step-4-configure-nftables-selinux-and-fail2ban" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Skip this step if you used the orchestrator (Path A)</p>
-<p>The orchestrator automates security hardening. If you ran it in Step 2, skip to <a href="#step-5-deploy-the-
-containerized-perfsonar-testpoint">Step 5</a>.</p>
+<p>The orchestrator automates security hardening. If you ran it in Step 2, skip to <a href="#step-5-deploy-the-containerized-perfsonar-testpoint">Step 5</a>.</p>
 </div>
 <p>Use <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh</code> to configure a hardened nftables profile with
 optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
@@ -3008,11 +3032,10 @@ optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
 </li>
 </ul>
 <p>If any prerequisite is missing, the script skips that component and continues.</p>
-<ol>
-<li><strong>Install/configure the desired options:</strong></li>
-</ol>
+<h3 id="installconfigure-the-desired-options">Install/configure the desired options<a class="headerlink" href="#installconfigure-the-desired-options" title="Permanent link">&para;</a></h3>
+<p>You can use the install script to install the options you want (selinux, fail2ban)
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
-</code></pre></div>
+</code></pre></div></p>
 <div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="nv">Use</span><span class="w"> </span>`<span class="o">--</span><span class="nv">yes</span>`<span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">skip</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">interactive</span><span class="w"> </span><span class="nv">confirmation</span><span class="w"> </span><span class="nv">prompt</span><span class="w"> </span><span class="ss">(</span><span class="nv">omit</span><span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">you</span><span class="w"> </span><span class="nv">prefer</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">review</span><span class="w"> </span><span class="nv">the</span>
 <span class="w">  </span><span class="nv">summary</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">answer</span><span class="w"> </span><span class="nv">manually</span><span class="ss">)</span>.
 
@@ -3021,27 +3044,24 @@ optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
 
 <p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-
 config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.</p>
-<div class="codehilite"><pre><span></span><code><span class="err">???</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="s2">&quot;SSH allow-lists and validation&quot;</span>
-
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">Derives</span><span class="w"> </span><span class="n">SSH</span><span class="w"> </span><span class="n">allow</span><span class="o">-</span><span class="n">lists</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">nic</span><span class="o">-</span><span class="n">config</span><span class="o">.</span><span class="n">conf</span><span class="err">`</span><span class="w"> </span><span class="p">(</span><span class="n">CIDR</span><span class="w"> </span><span class="n">prefixes</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">addresses</span><span class="p">)</span><span class="o">.</span>
-
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">Validates</span><span class="w"> </span><span class="n">nftables</span><span class="w"> </span><span class="n">rules</span><span class="w"> </span><span class="n">before</span><span class="w"> </span><span class="n">writing</span><span class="o">.</span>
-
-<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">Outputs</span><span class="p">:</span><span class="w"> </span><span class="n">rules</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nftables</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">.</span><span class="n">nft</span><span class="err">`</span><span class="p">,</span><span class="w"> </span><span class="nb">log</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">nftables</span><span class="o">.</span><span class="n">log</span><span class="err">`</span><span class="p">,</span><span class="w"> </span><span class="n">backups</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="err">`</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">backups</span><span class="o">/</span><span class="err">`</span><span class="o">.</span>
-
-<span class="err">???</span><span class="w"> </span><span class="n">tip</span><span class="w"> </span><span class="s2">&quot;Preview nftables rules before applying&quot;</span>
-
-<span class="w">    </span><span class="n">You</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">preview</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">fully</span><span class="w"> </span><span class="n">rendered</span><span class="w"> </span><span class="n">nftables</span><span class="w"> </span><span class="n">rules</span><span class="w"> </span><span class="p">(</span><span class="n">no</span><span class="w"> </span><span class="n">changes</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">made</span><span class="p">):</span>
-</code></pre></div>
-
+<details class="info">
+<summary>SSH allow-lists and validation</summary>
+<ul>
+<li>Derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-config.conf</code> (CIDR prefixes and addresses).</li>
+<li>Validates nftables rules before writing.</li>
+<li>Outputs: rules to <code>/etc/nftables.d/perfsonar.nft</code>, log to <code>/var/log/perfSONAR-install-nftables.log</code>, backups to <code>/var/backups/</code>.</li>
+</ul>
+</details>
+<details class="tip">
+<summary>Preview nftables rules before applying</summary>
+<p>You can preview the fully rendered nftables rules (no changes are made):</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--print-rules
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>???<span class="w"> </span><span class="nv">tip</span><span class="w"> </span><span class="s2">&quot;Manually add extra management hosts/subnets&quot;</span>
-
-<span class="w">    </span><span class="k">If</span><span class="w"> </span><span class="nv">you</span><span class="w"> </span><span class="nv">need</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">allow</span><span class="w"> </span><span class="nv">additional</span><span class="w"> </span><span class="nv">SSH</span><span class="w"> </span><span class="nv">sources</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">represented</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">your</span><span class="w"> </span><span class="nv">NIC</span><span class="o">-</span><span class="nv">derived</span><span class="w"> </span><span class="nv">prefixes</span>,<span class="w"> </span><span class="nv">edit</span>
-<span class="w">    </span>`<span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">nftables</span>.<span class="nv">d</span><span class="o">/</span><span class="nv">perfsonar</span>.<span class="nv">nft</span>`<span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">add</span><span class="w"> </span><span class="nv">entries</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">appropriate</span><span class="w"> </span><span class="nv">sets</span>.<span class="w"> </span><span class="nv">Example</span>:
-</code></pre></div>
-
+</details>
+<details class="tip">
+<summary>Manually add extra management hosts/subnets</summary>
+<p>If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit
+<code>/etc/nftables.d/perfsonar.nft</code> and add entries to the appropriate sets. Example:</p>
 <div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
     type ipv4_addr
     flags interval
@@ -3064,15 +3084,12 @@ set ssh_access_ip6_hosts {
     elements = { 2001:db8::10 }
 }
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">Then</span><span class="w"> </span><span class="n">validate</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="w"> </span><span class="n">shell</span><span class="p">):</span>
-</code></pre></div>
-
+<p>Then validate and reload (root shell):</p>
 <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
 systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
 </code></pre></div>
-<ol>
-<li>
-<p><strong>Confirm nftables state and security services:</strong></p>
+</details>
+<h3 id="confirm-nftables-state-and-security-services">Confirm nftables state and security services<a class="headerlink" href="#confirm-nftables-state-and-security-services" title="Permanent link">&para;</a></h3>
 <details class="info">
 <summary>Verification commands</summary>
 <div class="highlight"><pre><span></span><code>nft<span class="w"> </span>list<span class="w"> </span>ruleset
@@ -3081,22 +3098,19 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 </code></pre></div>
 </details>
 <p>You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.</p>
-</li>
-</ol>
 <hr />
 <h2 id="step-5-deploy-the-containerized-perfsonar-testpoint">Step 5 – Deploy the Containerized perfSONAR Testpoint<a class="headerlink" href="#step-5-deploy-the-containerized-perfsonar-testpoint" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Skip this step if you used the orchestrator (Path A)</p>
-<p>The orchestrator automates container deployment and certificate issuance. If you ran it in Step 2, skip to [Step</p>
-<p>6](#step-6-configure-and-enroll-in-psconfig).</p>
-<p>Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:</p>
+<p>The orchestrator automates container deployment and certificate issuance. If you ran it in Step 2, skip to <a href="#step-6-configure-and-enroll-in-psconfig">Step 6</a>.</p>
 </div>
+<p>Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:</p>
 <ul>
 <li>
-<p>Option A: Testpoint only (simplest) — only bind-mount <code>/opt/perfsonar-tp/psconfig</code> for pSConfig.</p>
+<p><strong>Option A:</strong> Testpoint only (simplest) — only bind-mount <code>/opt/perfsonar-tp/psconfig</code> for pSConfig.</p>
 </li>
 <li>
-<p>Option B: Testpoint + Let’s Encrypt — two containers that share Apache files and certs via host bind mounts.</p>
+<p><strong>Option B:</strong> Testpoint + Let’s Encrypt — two containers that share Apache files and certs via host bind mounts.</p>
 </li>
 </ul>
 <p>Use <code>podman-compose</code> (or <code>docker-compose</code>) in the examples below.</p>
@@ -3118,8 +3132,7 @@ view</a></p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps
 </code></pre></div>
 <p>The container should show <code>healthy</code> status. The healthcheck monitors Apache HTTPS availability.</p>
-<p>That's it for the testpoint-only mode. Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are
-consumed by the container at <code>/etc/perfsonar/psconfig</code>. Jump to Step 6 below.</p>
+<p>Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>. </p>
 <h4 id="ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required">Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)<a class="headerlink" href="#ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required" title="Permanent link">&para;</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">podman-compose limitation with systemd containers</p>
@@ -3135,34 +3148,25 @@ code 255.</p>
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
 
 <span class="c1"># Install testpoint-only systemd unit</span>
-
 /tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp
 
 <span class="c1"># Enable and start now</span>
-
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
 
-
 <span class="c1"># Verify service and containers</span>
-
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>--no-pager
 podman<span class="w"> </span>ps
 </code></pre></div>
-<p>Notes:</p>
+<details class="info">
+<summary>Notes on podman/systemd</summary>
 <ul>
-<li>
-<p>The service uses <code>podman run --systemd=always</code> to enable proper systemd operation inside the container</p>
-</li>
-<li>
-<p>The compose file is kept for reference but not used by the systemd units</p>
-</li>
-<li>
-<p>If you need to update container configuration, edit the systemd unit file directly: <code>/etc/systemd/system/perfsonar-testpoint.service</code></p>
-</li>
-<li>
-<p>After editing the unit file, reload and restart: <code>systemctl daemon-reload &amp;&amp; systemctl restart perfsonar-testpoint.service</code></p>
-</li>
+<li>The service uses <code>podman run --systemd=always</code> to enable proper systemd operation inside the container</li>
+<li>The compose file is kept for reference but not used by the systemd units</li>
+<li>If you need to update container configuration, edit the systemd unit file directly: <code>/etc/systemd/system/perfsonar-testpoint.service</code></li>
+<li>After editing the unit file, reload and restart: <code>systemctl daemon-reload &amp;&amp; systemctl restart perfsonar-testpoint.service</code></li>
 </ul>
+</details>
+<p>Jump to <a href="#step-6-configure-and-enroll-in-psconfig">Step 6</a> below.</p>
 <hr />
 <h3 id="option-b-testpoint-lets-encrypt-shared-apache-and-certs">Option B — Testpoint + Let's Encrypt (shared Apache and certs)<a class="headerlink" href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" title="Permanent link">&para;</a></h3>
 <p>This mode runs two containers (<code>perfsonar-testpoint</code> and <code>certbot</code>) and bind-mounts the following host paths so Apache
@@ -3204,62 +3208,40 @@ to fail.</p>
 <p>Run the bundled seeding helper script (automatically installed in Step 2):</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 </code></pre></div>
-<p>This script:</p>
+<details class="info">
+<summary>Seed script details</summary>
 <ul>
-<li>
-<p>Pulls the latest perfSONAR testpoint image</p>
-</li>
-<li>
-<p>Creates temporary containers to extract baseline files</p>
-</li>
-<li>
-<p>Copies content to host directories</p>
-</li>
-<li>
-<p>Verifies seeding was successful</p>
-</li>
-<li>
-<p>Skips seeding if directories already have content (idempotent)</p>
-</li>
+<li>Pulls the latest perfSONAR testpoint image</li>
+<li>Creates temporary containers to extract baseline files</li>
+<li>Copies content to host directories</li>
+<li>Verifies seeding was successful</li>
+<li>Skips seeding if directories already have content (idempotent)</li>
 </ul>
+</details>
 <p>Verify seeding succeeded:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Should show config files</span>
-
 ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
 
-
 <span class="c1"># Should show index.html and perfsonar/ directory</span>
-
 ls<span class="w"> </span>-la<span class="w"> </span>/var/www/html
 
 <span class="c1"># Should show sites-available/, sites-enabled/, etc.</span>
-
 ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2
 </code></pre></div>
 <details class="tip">
 <summary>SELinux labeling handled automatically</summary>
-<p>If SELinux is enforcing, the <code>:Z</code> and <code>:z</code> options in the compose files will cause Podman to relabel the host paths when</p>
-<p>containers start. No manual <code>chcon</code> commands are required.</p>
+<p>If SELinux is enforcing, the <code>:Z</code> and <code>:z</code> options in the compose files will cause Podman to relabel the host paths when
+containers start. No manual <code>chcon</code> commands are required.</p>
 <p><strong>SELinux Volume Labels:</strong></p>
-</details>
 <ul>
-<li>
-<p><code>:Z</code> (uppercase) - Exclusive access. Podman creates a unique SELinux label for this volume that only this specific container can access. Use for volumes that should not be shared between containers.</p>
-</li>
-<li>
-<p><code>:z</code> (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.</p>
-<p>In our compose files:</p>
-</li>
-<li>
-<p><code>/etc/letsencrypt:/etc/letsencrypt:Z</code> - Exclusive to testpoint container</p>
-</li>
-<li>
-<p><code>/var/www/html:/var/www/html:z</code> - Shared between testpoint and certbot containers</p>
-</li>
-<li>
-<p><code>/etc/apache2:/etc/apache2:Z</code> - Exclusive to testpoint container</p>
-</li>
+<li><code>:Z</code> (uppercase) - Exclusive access. Podman creates a unique SELinux label for this volume that only this specific container can access. Use for volumes that should not be shared between containers.</li>
+<li><code>:z</code> (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.
+In our compose files:</li>
+<li><code>/etc/letsencrypt:/etc/letsencrypt:Z</code> - Exclusive to testpoint container</li>
+<li><code>/var/www/html:/var/www/html:z</code> - Shared between testpoint and certbot containers</li>
+<li><code>/etc/apache2:/etc/apache2:Z</code> - Exclusive to testpoint container</li>
 </ul>
+</details>
 <h4 id="2-deploy-the-testpoint-with-automatic-ssl-patching-recommended">2) Deploy the testpoint with automatic SSL patching (recommended)<a class="headerlink" href="#2-deploy-the-testpoint-with-automatic-ssl-patching-recommended" title="Permanent link">&para;</a></h4>
 <p><strong>Prerequisites:</strong> Ensure <code>/opt/perfsonar-tp/tools_scripts</code> exists from Step 2 (bootstrap):</p>
 <div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
@@ -3276,14 +3258,15 @@ that auto-discovers Let's Encrypt certificates on container startup and automati
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le-auto.yml<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
 </code></pre></div>
-<p><strong>Note:</strong> The <code>SERVER_FQDN</code> environment variable is <strong>optional</strong>. The entrypoint wrapper will auto-discover certificates</p>
-<p>in <code>/etc/letsencrypt/live</code> and use the first one found. Only set <code>SERVER_FQDN</code> if you have multiple certificates and
-need to specify which one to use.</p>
+<details class="note">
+<summary>The SERVER_FQDN use is optional</summary>
+<p><strong>Note:</strong> The <code>SERVER_FQDN</code> environment variable is <strong>optional</strong>. The entrypoint wrapper will auto-discover certificates in <code>/etc/letsencrypt/live</code> 
+and use the first one found. Only set <code>SERVER_FQDN</code> if you have multiple certificates and need to specify which one to use.</p>
 <p>If you want to explicitly set the FQDN (optional):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Optional: only needed if you have multiple certificates</span>
-
 sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/# - SERVER_FQDN=.*/- SERVER_FQDN=&lt;YOUR_FQDN&gt;/&#39;</span><span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
 </code></pre></div>
+</details>
 <p>Start the containers:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp
 podman-compose<span class="w"> </span>up<span class="w"> </span>-d
@@ -3305,16 +3288,12 @@ code 255.</p>
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
 
 <span class="c1"># Install both testpoint and certbot systemd units</span>
-
 /tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span>--with-certbot
 
 <span class="c1"># Enable and start services</span>
-
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>perfsonar-certbot.service
 
 <span class="c1"># Verify services</span>
-
-
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span>--no-pager
 podman<span class="w"> </span>ps
 </code></pre></div>
@@ -3336,51 +3315,27 @@ listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.</p>
 <details class="info">
 <summary>Certbot command explained</summary>
 <p><strong>Podman options:</strong></p>
-</details>
 <ul>
-<li>
-<p><code>--rm</code> - Remove container after it exits</p>
-</li>
-<li>
-<p><code>--net=host</code> - Use host network (allows binding port 80)</p>
-</li>
-<li>
-<p><code>-v /etc/letsencrypt:/etc/letsencrypt:Z</code> - Mount certificate storage with exclusive SELinux label</p>
-</li>
-<li>
-<p><code>-v /var/www/html:/var/www/html:Z</code> - Mount webroot for HTTP-01 challenge</p>
-<p><strong>Certbot options:</strong></p>
-</li>
-<li>
-<p><code>certonly</code> - Obtain certificate only, don't install it</p>
-</li>
-<li>
-<p><code>--standalone</code> - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge</p>
-</li>
-<li>
-<p><code>--agree-tos</code> - Agree to Let's Encrypt Terms of Service</p>
-</li>
-<li>
-<p><code>--non-interactive</code> - Don't prompt for input (required for automation)</p>
-</li>
-<li>
-<p><code>-d &lt;FQDN&gt;</code> - Domain name(s) for the certificate (repeat for each domain/SAN)</p>
-</li>
-<li>
-<p><code>-m &lt;EMAIL&gt;</code> - Email for renewal notifications and account recovery</p>
-</li>
+<li><code>--rm</code> - Remove container after it exits</li>
+<li><code>--net=host</code> - Use host network (allows binding port 80)</li>
+<li><code>-v /etc/letsencrypt:/etc/letsencrypt:Z</code> - Mount certificate storage with exclusive SELinux label</li>
+<li><code>-v /var/www/html:/var/www/html:Z</code> - Mount webroot for HTTP-01 challenge</li>
 </ul>
+<p><strong>Certbot options:</strong></p>
+<ul>
+<li><code>certonly</code> - Obtain certificate only, don't install it</li>
+<li><code>--standalone</code> - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge</li>
+<li><code>--agree-tos</code> - Agree to Let's Encrypt Terms of Service</li>
+<li><code>--non-interactive</code> - Don't prompt for input (required for automation)</li>
+<li><code>-d &lt;FQDN&gt;</code> - Domain name(s) for the certificate (repeat for each domain/SAN)</li>
+<li><code>-m &lt;EMAIL&gt;</code> - Email for renewal notifications and account recovery</li>
+</ul>
+</details>
 <p>Replace:</p>
 <ul>
-<li>
-<p><code>&lt;SERVER_FQDN&gt;</code> with your primary hostname (e.g., <code>psum05.aglt2.org</code>)</p>
-</li>
-<li>
-<p><code>&lt;ALT_FQDN&gt;</code> with additional FQDNs if needed (one <code>-d</code> flag per FQDN)</p>
-</li>
-<li>
-<p><code>&lt;LETSENCRYPT_EMAIL&gt;</code> with your email for certificate notifications</p>
-</li>
+<li><code>&lt;SERVER_FQDN&gt;</code> with your primary hostname (e.g., <code>psum05.aglt2.org</code>)</li>
+<li><code>&lt;ALT_FQDN&gt;</code> with additional FQDNs if needed (one <code>-d</code> flag per FQDN)</li>
+<li><code>&lt;LETSENCRYPT_EMAIL&gt;</code> with your email for certificate notifications</li>
 </ul>
 <p>After successful issuance, restart the perfsonar-testpoint container to trigger the automatic patching:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
@@ -3413,22 +3368,16 @@ new certificates. You can verify this behavior by checking the certbot logs afte
 <summary>Alternative: Manual SSL Patching (without automatic entrypoint wrapper)</summary>
 <p>If you prefer not to use the automatic patching entrypoint wrapper, you can use the standard compose file and manually
 patch the Apache SSL configuration after obtaining certificates.</p>
-</details>
 <ol>
-<li>
-<p>Use <code>docker-compose.testpoint-le.yml</code> instead of <code>docker-compose.testpoint-le-auto.yml</code></p>
-</li>
-<li>
-<p>After obtaining Let's Encrypt certificates, run:</p>
+<li>Use <code>docker-compose.testpoint-le.yml</code> instead of <code>docker-compose.testpoint-le-auto.yml</code></li>
+<li>After obtaining Let's Encrypt certificates, run:
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/patch_apache_ssl_for_letsencrypt.sh<span class="w"> </span>&lt;SERVER_FQDN&gt;
-</code></pre></div>
-</li>
-<li>
-<p>Reload Apache in the running container:</p>
+</code></pre></div></li>
+<li>Reload Apache in the running container:
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>apachectl<span class="w"> </span>-k<span class="w"> </span>graceful
-</code></pre></div>
-</li>
+</code></pre></div></li>
 </ol>
+</details>
 <p>This approach requires manual intervention after initial certificate issuance and any time the container is recreated.
 The automatic approach (using the entrypoint wrapper) eliminates this manual step.</p>
 <details class="warning">
@@ -3453,15 +3402,12 @@ podman-compose<span class="w"> </span>up<span class="w"> </span>-d
 <h2 id="step-6-configure-and-enroll-in-psconfig">Step 6 – Configure and Enroll in pSConfig<a class="headerlink" href="#step-6-configure-and-enroll-in-psconfig" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Skip this step if you used the orchestrator (Path A)</p>
-<p>The orchestrator automates pSConfig enrollment. If you ran it in Step 2, skip to <a href="#step-7-register-and-
-configure-with-wlcgosg">Step 7</a>.</p>
-<p>We need to enroll your testpoint with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for</p>
-<p>each FQDN you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).</p>
-<p>Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation
-alternative below):</p>
+<p>The orchestrator automates pSConfig enrollment. If you ran it in Step 2, skip to <a href="#step-7-register-and-configure-with-wlcgosg">Step 7</a>.</p>
 </div>
+<p>We need to enroll your testpoint with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for 
+perfSONAR (one or two depending on whether you split latency/throughput by hostname).</p>
+<p>Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add auto URLs (configures archives too) and show configured remotes</span>
-
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu&quot;</span>
 
@@ -3473,36 +3419,24 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p>Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before
 applying.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Dry run only (show planned URLs):</span>
-
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-n
 
 <span class="c1"># Typical usage (podman):</span>
-
 /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh<span class="w"> </span>-v
 
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>list
 </code></pre></div>
 <details class="note">
-<summary>The auto enroll script details</summary>
-</details>
+<summary>The auto enroll psconfig script details</summary>
 <ul>
-<li>
-<p>Parses IP lists from <code>/etc/perfSONAR-multi-nic-config.conf</code>  (<code>NIC_IPV4_ADDRS</code> / <code>NIC_IPV6_ADDRS</code>).</p>
-</li>
-<li>
-<p>Performs reverse DNS lookups (getent/dig) to derive FQDNs.</p>
-</li>
-<li>
-<p>Deduplicates while preserving discovery order.</p>
-</li>
-<li>
-<p>Adds each <code>https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> with <code>--configure-archives</code>.</p>
-</li>
-<li>
-<p>Lists configured remotes and returns non-zero if any enrollment fails.</p>
-</li>
+<li>Parses IP lists from <code>/etc/perfSONAR-multi-nic-config.conf</code>  (<code>NIC_IPV4_ADDRS</code> / <code>NIC_IPV6_ADDRS</code>).</li>
+<li>Performs reverse DNS lookups (getent/dig) to derive FQDNs.</li>
+<li>Deduplicates while preserving discovery order.</li>
+<li>Adds each <code>https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> with <code>--configure-archives</code>.</li>
+<li>Lists configured remotes and returns non-zero if any enrollment fails.</li>
 </ul>
 <p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
+</details>
 <hr />
 <h2 id="step-7-register-and-configure-with-wlcgosg">Step 7 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-7-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <ol>
@@ -3510,149 +3444,136 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p><strong>OSG/WLCG registration workflow:</strong></p>
 <details class="info">
 <summary>Registration steps and portals</summary>
+<ul>
+<li>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</li>
+<li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</li>
+<li>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint
+        <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</li>
+</ul>
 </details>
 </li>
 <li>
-<p>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</p>
+<p><strong>Document memberships:</strong></p>
+<p>Update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.</p>
 </li>
 <li>
-<p>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</p>
-</li>
-<li>
-<p>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint
-                <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</p>
-</li>
-<li>
-<p><strong>Document memberships:</strong> update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.</p>
-</li>
-<li>
-<p><strong>Update Lookup Service registration inside the container</strong></p>
-</li>
-</ol>
+<p><strong>Update Lookup Service registration inside the container:</strong></p>
 <p>Use the helper script to edit <code>/etc/perfsonar/lsregistrationdaemon.conf</code> inside the running <code>perfsonar-testpoint</code>
-container and restart the daemon only if needed.</p>
-<p>Install and run examples below, pick which type you want (root shell):</p>
+container and restart the daemon only if needed. Install and run examples below, pick which type you want (root shell):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
-
 <span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
 
 <span class="c1"># Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)</span>
 bash<span class="w"> </span>/root/restore-lsreg.sh
-
 
 <span class="c1"># Apply new settings and restart the daemon inside the container</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
-
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 </code></pre></div>
-<ol>
+</li>
 <li>
 <p><strong>Automatic image updates and safe restarts</strong></p>
 <p>Keep containers current and only restart them when their image actually changes.</p>
 <details class="info">
 <summary>Auto-update for compose-managed containers</summary>
 <p>Since these containers are managed by <code>podman-compose</code>, we use a different approach than systemd-managed containers.
-Create a simple script and systemd timer to periodically pull new images and restart containers if updates are</p>
-<p>available.</p>
-</details>
-</li>
+Create a simple script and systemd timer to periodically pull new images and restart containers if updates are available.</p>
+<ol>
 <li>
 <p>Create an update script:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/perfsonar-auto-update.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">#!/bin/bash</span>
+<span class="s"># perfsonar-auto-update.sh - Check for and apply container image updates</span>
+<span class="s">set -e</span>
+
+<span class="s">COMPOSE_DIR=&quot;/opt/perfsonar-tp&quot;</span>
+<span class="s">LOGFILE=&quot;/var/log/perfsonar-auto-update.log&quot;</span>
+
+<span class="s">log() {</span>
+<span class="s">    echo &quot;$(date -Iseconds) $*&quot; | tee -a &quot;$LOGFILE&quot;</span>
+<span class="s">}</span>
+
+<span class="s">cd &quot;$COMPOSE_DIR&quot;</span>
+
+<span class="s">log &quot;Checking for image updates...&quot;</span>
+
+<span class="s"># Pull latest images</span>
+<span class="s">if podman-compose pull 2&gt;&amp;1 | tee -a &quot;$LOGFILE&quot; | grep -q &quot;Downloaded newer image&quot;; then</span>
+<span class="s">    log &quot;New images found - recreating containers...&quot;</span>
+<span class="s">    podman-compose up -d</span>
+<span class="s">    log &quot;Containers updated successfully&quot;</span>
+<span class="s">else</span>
+<span class="s">    log &quot;No updates available&quot;</span>
+<span class="s">fi</span>
+<span class="s">EOF</span>
+
+chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/perfsonar-auto-update.sh
+</code></pre></div>
 </li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/perfsonar-auto-update.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
-<span class="s">    #!/bin/bash</span>
+<li>
+<p>Create a systemd service:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/perfsonar-auto-update.service<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">[Unit]</span>
+<span class="s">Description=perfSONAR Container Auto-Update</span>
+<span class="s">After=network-online.target</span>
 
-<span class="s">    # perfsonar-auto-update.sh - Check for and apply container image updates</span>
+<span class="s">[Service]</span>
+<span class="s">Type=oneshot</span>
+<span class="s">ExecStart=/usr/local/bin/perfsonar-auto-update.sh</span>
 
-<span class="s">    set -e</span>
-
-<span class="s">    COMPOSE_DIR=&quot;/opt/perfsonar-tp&quot;</span>
-<span class="s">    LOGFILE=&quot;/var/log/perfsonar-auto-update.log&quot;</span>
-
-<span class="s">    log() {</span>
-<span class="s">        echo &quot;$(date -Iseconds) $*&quot; | tee -a &quot;$LOGFILE&quot;</span>
-<span class="s">    }</span>
-
-<span class="s">    cd &quot;$COMPOSE_DIR&quot;</span>
-
-<span class="s">    log &quot;Checking for image updates...&quot;</span>
-
-<span class="s">    # Pull latest images</span>
-
-<span class="s">    if podman-compose pull 2&gt;&amp;1 | tee -a &quot;$LOGFILE&quot; | grep -q &quot;Downloaded newer image&quot;; then</span>
-<span class="s">        log &quot;New images found - recreating containers...&quot;</span>
-<span class="s">        podman-compose up -d</span>
-<span class="s">        log &quot;Containers updated successfully&quot;</span>
-<span class="s">    else</span>
-<span class="s">        log &quot;No updates available&quot;</span>
-<span class="s">    fi</span>
-<span class="s">    EOF</span>
-
-<span class="w">    </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/perfsonar-auto-update.sh
+<span class="s">[Install]</span>
+<span class="s">WantedBy=multi-user.target</span>
+<span class="s">EOF</span>
 </code></pre></div>
-<ol>
-<li>Create a systemd service:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/perfsonar-auto-update.service<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
-<span class="s">    [Unit]</span>
-<span class="s">    Description=perfSONAR Container Auto-Update</span>
-<span class="s">    After=network-online.target</span>
+</li>
+<li>
+<p>Create a systemd timer (runs daily at 3 AM):</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/perfsonar-auto-update.timer<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
 
-<span class="s">    [Service]</span>
-<span class="s">    Type=oneshot</span>
-<span class="s">    ExecStart=/usr/local/bin/perfsonar-auto-update.sh</span>
+<span class="s">[Unit]</span>
+<span class="s">Description=perfSONAR Container Auto-Update Timer</span>
 
-<span class="s">    [Install]</span>
-<span class="s">    WantedBy=multi-user.target</span>
-<span class="s">    EOF</span>
+<span class="s">[Timer]</span>
+<span class="s">OnCalendar=daily</span>
+<span class="s">RandomizedDelaySec=1h</span>
+<span class="s">Persistent=true</span>
+
+<span class="s">[Install]</span>
+<span class="s">WantedBy=timers.target</span>
+<span class="s">EOF</span>
 </code></pre></div>
-<ol>
-<li>Create a systemd timer (runs daily at 3 AM):</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/perfsonar-auto-update.timer<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
-
-<span class="s">    [Unit]</span>
-<span class="s">    Description=perfSONAR Container Auto-Update Timer</span>
-
-<span class="s">    [Timer]</span>
-
-<span class="s">    OnCalendar=daily</span>
-<span class="s">    RandomizedDelaySec=1h</span>
-<span class="s">    Persistent=true</span>
-
-<span class="s">    [Install]</span>
-
-<span class="s">    WantedBy=timers.target</span>
-<span class="s">    EOF</span>
+</li>
+<li>
+<p>Enable and start the timer:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>daemon-reload
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-auto-update.timer
 </code></pre></div>
-<ol>
-<li>Enable and start the timer:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>systemctl<span class="w"> </span>daemon-reload
-<span class="w">    </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-auto-update.timer
-</code></pre></div>
-<ol>
-<li>Verify the timer is active:</li>
-</ol>
+</li>
+<li>
+<p>Verify the timer is active:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span>perfsonar-auto-update.timer
 </code></pre></div>
-<ol>
-<li>Test manually (optional):</li>
-</ol>
+</li>
+<li>
+<p>Test manually (optional):</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-auto-update.service
 journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-auto-update.service<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
 </code></pre></div>
-<ol>
-<li>Monitor the update log:</li>
-</ol>
+</li>
+<li>
+<p>Monitor the update log:</p>
 <div class="highlight"><pre><span></span><code>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/perfsonar-auto-update.log
 </code></pre></div>
+</li>
+</ol>
+</details>
+</li>
+</ol>
 <p>This approach ensures containers are updated only when new images are available, minimizing unnecessary restarts while
 keeping your deployment current.</p>
 <hr />
@@ -3663,9 +3584,6 @@ keeping your deployment current.</p>
 <p><strong>System services:</strong></p>
 <details class="info">
 <summary>Verify Podman runtime and containers</summary>
-</details>
-</li>
-</ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check Podman service is available</span>
 systemctl<span class="w"> </span>status<span class="w"> </span>podman
 
@@ -3675,17 +3593,13 @@ systemctl<span class="w"> </span>status<span class="w"> </span>podman
 <span class="c1"># Alternative: check containers directly</span>
 podman<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w"> </span><span class="nv">name</span><span class="o">=</span>perfsonar
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Ensure Podman is active and containers are running.
-</code></pre></div>
-
-<ol>
+</details>
+<p>Ensure Podman is active and containers are running.</p>
+</li>
 <li>
 <p><strong>Container health:</strong></p>
 <details class="info">
 <summary>Check container status and logs</summary>
-</details>
-</li>
-</ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check all containers are running and healthy</span>
 podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
 
@@ -3693,40 +3607,31 @@ podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w">
 podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="w"> </span><span class="m">50</span>
 
 <span class="c1"># If using Let&#39;s Encrypt, check certbot logs</span>
-
 podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span>--tail<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Certbot container not present (testpoint-only mode)&quot;</span>
 
 <span class="c1"># Verify services inside container are running</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>apache2<span class="w"> </span>psconfig-pscheduler-agent<span class="w"> </span>--no-pager
 </code></pre></div>
-<ol>
+</details>
+</li>
 <li>
 <p><strong>Network path validation:</strong></p>
 <details class="info">
 <summary>Test network connectivity and routing</summary>
-<p>Test throughput to a remote testpoint (run from inside the container):</p>
-</details>
-</li>
-</ol>
+<p>Test throughput to a remote testpoint (run from inside the container):
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>pscheduler<span class="w"> </span>task<span class="w"> </span>throughput<span class="w"> </span>--dest<span class="w"> </span>&lt;remote-testpoint&gt;
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>    Check routing from the host:
-</code></pre></div>
-
+</code></pre></div></p>
+<p>Check routing from the host:
 <div class="highlight"><pre><span></span><code>tracepath<span class="w"> </span>-n<span class="w"> </span>&lt;remote-testpoint&gt;
 ip<span class="w"> </span>route<span class="w"> </span>get<span class="w"> </span>&lt;remote-testpoint-ip&gt;
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>        Confirm traffic uses the intended policy-based routes (check `ip route get &lt;dest&gt;`).
-</code></pre></div>
-
-<ol>
+</code></pre></div></p>
+<p>Confirm traffic uses the intended policy-based routes (check <code>ip route get &lt;dest&gt;</code>).</p>
+</details>
+</li>
 <li>
 <p><strong>Security posture:</strong></p>
 <details class="info">
 <summary>Check firewall, fail2ban, and SELinux</summary>
-</details>
-</li>
-</ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check nftables firewall rules</span>
 nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
 
@@ -3746,33 +3651,32 @@ nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> <
 <span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;SELinux audit tools not available&quot;</span>
 <span class="k">fi</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Investigate any SELinux denials or repeated Fail2Ban bans.
-</code></pre></div>
-
-<ol>
+</details>
+<p>Investigate any SELinux denials or repeated Fail2Ban bans.</p>
+</li>
 <li>
 <p><strong>LetsEncrypt certificate check:</strong></p>
 <details class="info">
 <summary>Verify certificate validity</summary>
-</details>
-</li>
-</ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check certificate via HTTPS connection</span>
 <span class="nb">echo</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;SERVER_FQDN&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
-
 
 <span class="c1"># Alternative: Check certificate files directly</span>
 sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>/etc/letsencrypt/live/&lt;SERVER_FQDN&gt;/cert.pem<span class="w"> </span>-noout<span class="w"> </span>-dates<span class="w"> </span>-issuer
 </code></pre></div>
-<p>Ensure the issuer is Let's Encrypt and the validity period is acceptable. This check only applies if you configured
-Let's Encrypt in Step 3.</p>
-<ol>
-<li><strong>Reporting:</strong></li>
-</ol>
-<p>??? info "Run perfSONAR diagnostic reports" Run the perfSONAR troubleshoot command from inside the container and send
-    outputs to operations:</p>
+</details>
+<p>Ensure the issuer is Let's Encrypt and the validity period is acceptable. This check only applies if you configured Let's Encrypt in Step 3.</p>
+</li>
+<li>
+<p><strong>Reporting:</strong></p>
+<details class="info">
+<summary>Run perfSONAR diagnostic reports</summary>
+<p>Run the perfSONAR troubleshoot command from inside the container and send outputs to operations:
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>pscheduler<span class="w"> </span>troubleshoot
-</code></pre></div>
+</code></pre></div></p>
+</details>
+</li>
+</ol>
 <hr />
 <h2 id="ongoing-maintenance">Ongoing Maintenance<a class="headerlink" href="#ongoing-maintenance" title="Permanent link">&para;</a></h2>
 <ul>
@@ -3813,21 +3717,13 @@ podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<sp
 podman-compose<span class="w"> </span>config
 </code></pre></div>
 <p><strong>Common causes:</strong></p>
-</details>
 <ul>
-<li>
-<p>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</p>
-</li>
-<li>
-<p>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</p>
-</li>
-<li>
-<p>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</p>
-</li>
-<li>
-<p>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</p>
-</li>
+<li>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</li>
+<li>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</li>
+<li>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</li>
+<li>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</li>
 </ul>
+</details>
 <details class="failure">
 <summary>Container won't start or exits immediately</summary>
 <p><strong>Symptoms:</strong> <code>podman ps</code> shows no running containers, or container exits shortly after starting.</p>
@@ -3843,21 +3739,13 @@ podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<sp
 podman-compose<span class="w"> </span>config
 </code></pre></div>
 <p><strong>Common causes:</strong></p>
-</details>
 <ul>
-<li>
-<p>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</p>
-</li>
-<li>
-<p>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</p>
-</li>
-<li>
-<p>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</p>
-</li>
-<li>
-<p>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</p>
-</li>
+<li>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</li>
+<li>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</li>
+<li>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</li>
+<li>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</li>
 </ul>
+</details>
 <details class="failure">
 <summary>Container crashes after reboot with exit code 255</summary>
 <p><strong>Symptoms:</strong> Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts
@@ -3872,7 +3760,6 @@ podman<span class="w"> </span>ps<span class="w"> </span>-a
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service
 
 <span class="c1"># View recent container logs</span>
-
 podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span>
 
 <span class="c1"># Check if using compose-based service (BAD)</span>
@@ -3900,7 +3787,6 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
 
 <span class="c1"># If using certbot:</span>
-
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-certbot.service
 
 <span class="c1"># Verify containers are running</span>
@@ -3908,22 +3794,12 @@ podman<span class="w"> </span>ps
 curl<span class="w"> </span>-kI<span class="w"> </span>https://127.0.0.1/
 </code></pre></div>
 <p><strong>Verification:</strong></p>
-<p>After installing the new units, the testpoint should:</p>
+<p>After installing the new units, the testpoint should:
+- Start successfully on boot
+- Run systemd properly inside the container
+- Maintain state across reboots
+- Show "Up" status in <code>podman ps</code> (not "Exited" or crash-looping)</p>
 </details>
-<ul>
-<li>
-<p>Start successfully on boot</p>
-</li>
-<li>
-<p>Run systemd properly inside the container</p>
-</li>
-<li>
-<p>Maintain state across reboots</p>
-</li>
-<li>
-<p>Show "Up" status in <code>podman ps</code> (not "Exited" or crash-looping)</p>
-</li>
-</ul>
 <details class="failure">
 <summary>Certbot service fails with 'Unable to open config file' error</summary>
 <p><strong>Symptoms:</strong> <code>perfsonar-certbot.service</code> fails immediately after starting with exit code 2. Logs show: <code>certbot: error:
@@ -3944,18 +3820,12 @@ journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.se
 grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;ExecStart&quot;</span><span class="w"> </span>/etc/systemd/system/perfsonar-certbot.service
 </code></pre></div>
 <p><strong>Solution:</strong></p>
-<p>The certbot service needs two flags:</p>
-</details>
-<ul>
-<li>
-<p><code>--systemd=always</code> for proper systemd integration and reboot persistence</p>
-</li>
-<li>
-<p><code>--entrypoint=/bin/sh</code> to override the built-in entrypoint</p>
+<p>The certbot service needs two flags:
+- <code>--systemd=always</code> for proper systemd integration and reboot persistence
+- <code>--entrypoint=/bin/sh</code> to override the built-in entrypoint</p>
 <p>Re-run the installation script to get the fixed version:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Stop current service</span>
 systemctl<span class="w"> </span>stop<span class="w"> </span>perfsonar-certbot.service
-
 
 <span class="c1"># Download and install updated systemd units</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
@@ -3974,10 +3844,8 @@ systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-certbot.
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-certbot.service
 podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>certbot
 </code></pre></div>
-</li>
-</ul>
-<p><strong>Expected result:</strong> The certbot container should be running (not exiting) and the service should be in "active
-(running)" state.</p>
+<p><strong>Expected result:</strong> The certbot container should be running (not exiting) and the service should be in "active (running)" state.</p>
+</details>
 <details class="failure">
 <summary>SELinux denials blocking container operations</summary>
 <p><strong>Symptoms:</strong> Container starts but services fail, permission denied errors in logs.</p>
@@ -3994,16 +3862,10 @@ ausearch<span class="w"> </span>-m<span class="w"> </span>avc<span class="w"> </
 <p><strong>Solutions:</strong></p>
 <ul>
 <li>Verify volume labels are correct (<code>:Z</code> for exclusive, <code>:z</code> for shared)</li>
+<li>Recreate containers to reapply SELinux labels: <code>podman-compose down &amp;&amp; podman-compose up -d</code></li>
+<li>If persistent issues, consider creating custom SELinux policy or running in permissive mode</li>
 </ul>
 </details>
-<ul>
-<li>
-<p>Recreate containers to reapply SELinux labels: <code>podman-compose down &amp;&amp; podman-compose up -d</code></p>
-</li>
-<li>
-<p>If persistent issues, consider creating custom SELinux policy or running in permissive mode</p>
-</li>
-</ul>
 <h3 id="networking-issues">Networking Issues<a class="headerlink" href="#networking-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>Policy-based routing not working correctly</summary>
@@ -4028,19 +3890,11 @@ tail<span class="w"> </span>-100<span class="w"> </span>/var/log/perfSONAR-multi
 <p><strong>Solutions:</strong></p>
 <ul>
 <li>Verify <code>/etc/perfSONAR-multi-nic-config.conf</code> has correct IPs and gateways</li>
+<li>Reapply configuration: <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes</code></li>
+<li>Reboot if rules are not being applied correctly</li>
+<li>Check for conflicting NetworkManager or systemd-networkd rules</li>
 </ul>
 </details>
-<ul>
-<li>
-<p>Reapply configuration: <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes</code></p>
-</li>
-<li>
-<p>Reboot if rules are not being applied correctly</p>
-</li>
-<li>
-<p>Check for conflicting NetworkManager or systemd-networkd rules</p>
-</li>
-</ul>
 <details class="failure">
 <summary>DNS resolution failing for test endpoints</summary>
 <p><strong>Symptoms:</strong> perfSONAR tests fail with "unknown host" or DNS errors.</p>
@@ -4058,16 +3912,10 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p><strong>Solutions:</strong></p>
 <ul>
 <li>Ensure DNS servers are correctly configured on host</li>
+<li>Fix missing PTR records in DNS zones</li>
+<li>Verify forward A/AAAA records match reverse PTR records</li>
 </ul>
 </details>
-<ul>
-<li>
-<p>Fix missing PTR records in DNS zones</p>
-</li>
-<li>
-<p>Verify forward A/AAAA records match reverse PTR records</p>
-</li>
-</ul>
 <h3 id="certificate-issues">Certificate Issues<a class="headerlink" href="#certificate-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>Let's Encrypt certificate issuance fails</summary>
@@ -4091,21 +3939,13 @@ podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 <span class="w">    </span>--standalone<span class="w"> </span>-d<span class="w"> </span>&lt;SERVER_FQDN&gt;<span class="w"> </span>-m<span class="w"> </span>&lt;EMAIL&gt;<span class="w"> </span>--dry-run<span class="w"> </span>-vvv
 </code></pre></div>
 <p><strong>Common causes:</strong></p>
-</details>
 <ul>
-<li>
-<p>Port 80 blocked by firewall: Add with <code>perfSONAR-install-nftables.sh --ports=80,443</code></p>
-</li>
-<li>
-<p>Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly</p>
-</li>
-<li>
-<p>DNS not propagated: Wait for DNS changes to propagate globally</p>
-</li>
-<li>
-<p>Rate limiting: Let's Encrypt has rate limits; wait if you've hit them</p>
-</li>
+<li>Port 80 blocked by firewall: Add with <code>perfSONAR-install-nftables.sh --ports=80,443</code></li>
+<li>Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly</li>
+<li>DNS not propagated: Wait for DNS changes to propagate globally</li>
+<li>Rate limiting: Let's Encrypt has rate limits; wait if you've hit them</li>
 </ul>
+</details>
 <details class="failure">
 <summary>Certificate not loaded after renewal</summary>
 <p><strong>Symptoms:</strong> Old certificate still in use after automatic renewal.</p>
@@ -4125,25 +3965,14 @@ podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
 <p><strong>Solutions:</strong></p>
 <ul>
 <li>Verify deploy hook script exists and is executable: <code>/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh</code></li>
-</ul>
-</details>
-<ul>
-<li>
-<p>Ensure deploy hook is mounted in container at: <code>/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh</code></p>
-</li>
-<li>
-<p>Verify Podman socket is mounted in certbot container: <code>/run/podman/podman.sock</code></p>
-</li>
-<li>
-<p>Check deploy hook logs: <code>journalctl -u perfsonar-certbot.service | grep deploy</code></p>
-</li>
-<li>
-<p>Manually restart testpoint after renewals if deploy hook fails: <code>podman restart perfsonar-testpoint</code></p>
-</li>
+<li>Ensure deploy hook is mounted in container at: <code>/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh</code></li>
+<li>Verify Podman socket is mounted in certbot container: <code>/run/podman/podman.sock</code></li>
+<li>Check deploy hook logs: <code>journalctl -u perfsonar-certbot.service | grep deploy</code></li>
+<li>Manually restart testpoint after renewals if deploy hook fails: <code>podman restart perfsonar-testpoint</code></li>
 </ul>
 <p><strong>Note:</strong> Certbot automatically executes scripts in <code>/etc/letsencrypt/renewal-hooks/deploy/</code> when certificates are
-renewed. Do not use <code>--deploy-hook</code> parameter with full paths ending in <code>.sh</code> as certbot will append <code>-hook</code> to the
-filename.</p>
+renewed. Do not use <code>--deploy-hook</code> parameter with full paths ending in <code>.sh</code> as certbot will append <code>-hook</code> to the filename.</p>
+</details>
 <h3 id="perfsonar-service-issues">perfSONAR Service Issues<a class="headerlink" href="#perfsonar-service-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>perfSONAR services not running</summary>
@@ -4161,19 +3990,11 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p><strong>Solutions:</strong></p>
 <ul>
 <li>Restart services inside container: <code>podman exec perfsonar-testpoint systemctl restart apache2</code></li>
+<li>Check Apache SSL configuration was patched correctly</li>
+<li>Verify certificates are in place: <code>ls -la /etc/letsencrypt/live/</code></li>
+<li>Restart container: <code>podman restart perfsonar-testpoint</code></li>
 </ul>
 </details>
-<ul>
-<li>
-<p>Check Apache SSL configuration was patched correctly</p>
-</li>
-<li>
-<p>Verify certificates are in place: <code>ls -la /etc/letsencrypt/live/</code></p>
-</li>
-<li>
-<p>Restart container: <code>podman restart perfsonar-testpoint</code></p>
-</li>
-</ul>
 <h3 id="auto-update-issues">Auto-Update Issues<a class="headerlink" href="#auto-update-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>Auto-update not working</summary>
@@ -4195,19 +4016,11 @@ systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-auto-upd
 <p><strong>Solutions:</strong></p>
 <ul>
 <li>Enable timer if not active: <code>systemctl enable --now perfsonar-auto-update.timer</code></li>
+<li>Verify script exists and is executable: <code>ls -la /usr/local/bin/perfsonar-auto-update.sh</code></li>
+<li>Check podman-compose is installed and working</li>
+<li>Review script for errors and update if needed</li>
 </ul>
 </details>
-<ul>
-<li>
-<p>Verify script exists and is executable: <code>ls -la /usr/local/bin/perfsonar-auto-update.sh</code></p>
-</li>
-<li>
-<p>Check podman-compose is installed and working</p>
-</li>
-<li>
-<p>Review script for errors and update if needed</p>
-</li>
-</ul>
 <h3 id="general-debugging-tips">General Debugging Tips<a class="headerlink" href="#general-debugging-tips" title="Permanent link">&para;</a></h3>
 <details class="tip">
 <summary>Useful debugging commands</summary>
