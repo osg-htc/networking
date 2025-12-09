@@ -446,7 +446,7 @@ The following are some examples of how to use the tools from the command line:
 NDT uses a command line client called **web100clt**.  There are many options available, but in general you must supply a
 server name, and some debugging flags to get additional output.  Here is a simple invocation:
 
-```text
+```bash
 [user@host ~]$ web100clt -n ndt.chic.net.internet2.edu
 
 Testing network path for configuration and performance problems  --  Using IPv6 address
@@ -498,7 +498,7 @@ BWCTL is invoked from the command line with a number of options.  Of these the f
 An example of invoking BWCTL can be seen below.  In this example we are sending data from the host we are on to another
 located in Kansas City MO, on the Internet2 network:
 
-```text
+```bash
 [user@host ~]$ bwctl -f m -t 10 -i 1 -c nms-rthr.kans.net.internet2.edu
 bwctl: Using tool: iperf
 bwctl: 93 seconds until test results available
@@ -530,7 +530,7 @@ RECEIVER END
 This test reveals that over the course of 10 seconds we achieved an average bandwidth of 979Mbps and sent a total of
 1178MB of data.  We can reverse the direction of this test in the next example:
 
-```text
+```bash
 [user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu
 bwctl: Using tool: iperf
 bwctl: 75 seconds until test results available
@@ -567,7 +567,7 @@ end) then test to resources in the middle.  Note that BWCTL supports a 3 mode op
 for both the &#39;-c&#39; and &#39;-s&#39; and perform tests between these two hosts without being physically logged
 into either:
 
-```text
+```bash
 [user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu -c nms-rthr1.hous.net.internet2.edu
 bwctl: Using tool: iperf
 bwctl: 82 seconds until test results available
@@ -606,7 +606,7 @@ OWAMP is a tool that measures latency, loss, out of orderness, and duplication o
 destination.  Note that this test measures each direction **independently** versus that of the traditional round trip
 tool **ping**.  Below is an example of a test:
 
-```text
+```bash
 [user@host ~]$ owping owamp.wash.net.internet2.edu
 Approximately 12.6 seconds until results available
 --- owping statistics from [eth-1.nms-rlat.newy32aoa.net.internet2.edu]:60455 to [owamp.wash.net.internet2.edu]:47148 ---

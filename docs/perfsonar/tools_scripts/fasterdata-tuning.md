@@ -78,7 +78,7 @@ cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
 
-```text
+```bash
 
 Apply tuning (requires root):
 
@@ -86,7 +86,7 @@ Apply tuning (requires root):
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
 
-```text
+```bash
 
 Limit apply to specific NICs (comma-separated):
 
@@ -95,7 +95,7 @@ Limit apply to specific NICs (comma-separated):
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces
 "ens1f0np0,ens1f1np1"
 
-```text
+```bash
 
 Apply packet pacing to DTN nodes (limit traffic to 5 Gbps):
 
@@ -104,7 +104,7 @@ Apply packet pacing to DTN nodes (limit traffic to 5 Gbps):
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-
 pacing-rate 5gbps
 
-```text
+```bash
 
 Audit without applying changes (DTN target with custom pacing rate):
 
@@ -112,7 +112,7 @@ Audit without applying changes (DTN target with custom pacing rate):
 
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
 
-```text
+```bash
 
 Notes
 -----
@@ -137,7 +137,7 @@ Example (preview only):
 
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 
-```text
+```bash
 
 To actually apply and pass specific IOMMU args:
 
