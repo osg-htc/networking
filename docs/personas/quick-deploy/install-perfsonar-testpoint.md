@@ -26,26 +26,19 @@ extract/save/restore registration config that you may want to use.
 
 ??? info "Quick capture of existing lsregistration config (if you have a src)"
     
-     Download temporarily:
-    
+    Download a temp copy:   
 ```bash
 curl -fsSL \
   https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
   -o /tmp/update-lsreg.sh
 chmod 0755 /tmp/update-lsreg.sh
-  
 ```
-    <!-- markdownlint-enable MD040 -->
-    
     Use the downloaded tool to extract a restore script:
-    
 ```bash
 /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
 ```
-    
     Note: Repository clone instructions are in Step 2.
-    
-    > **Note:** All shell commands assume an interactive root shell.
+    **Note:** All shell commands assume an interactive root shell.
     
 ---
 
