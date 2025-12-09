@@ -28,20 +28,20 @@ extract/save/restore registration config that you may want to use.
     
      Download temporarily:
     
-    ```bash
-    curl -fsSL \
-      https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
-      -o /tmp/update-lsreg.sh
-    chmod 0755 /tmp/update-lsreg.sh
-    
-    ```
+```bash
+curl -fsSL \
+  https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+  -o /tmp/update-lsreg.sh
+chmod 0755 /tmp/update-lsreg.sh
+  
+```
     <!-- markdownlint-enable MD040 -->
     
     Use the downloaded tool to extract a restore script:
     
-    ```bash
-    /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
-    ```
+```bash
+/tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
+```
     
     Note: Repository clone instructions are in Step 2.
     
@@ -55,19 +55,18 @@ extract/save/restore registration config that you may want to use.
 
 1. **Set the hostname and time sync:** Pick the NIC that will own the default route for the hostname.
 
-    ```bash
-    hostnamectl set-hostname <testpoint-hostname>
-    systemctl enable --now chronyd
-    timedatectl set-timezone <Region/City>
-
-    ```
+```bash
+hostnamectl set-hostname <testpoint-hostname>
+systemctl enable --now chronyd
+timedatectl set-timezone <Region/City>
+```
 
 1. **Disable unused services:**
 
-    ```bash
-    systemctl disable --now firewalld NetworkManager-wait-online
-    dnf remove -y rsyslog
-    ```
+```bash
+systemctl disable --now firewalld NetworkManager-wait-online
+dnf remove -y rsyslog
+```
 
     ??? info "Why disable unused services?"
         
@@ -80,18 +79,16 @@ extract/save/restore registration config that you may want to use.
         
 1. **Update the system:**
 
-    ```bash
-    dnf -y update
-
-
-    ```
+```bash
+dnf -y update
+ ```
 
 1. **Record NIC names:** Document interface mappings for later PBR configuration.
 
-    ```bash
-    nmcli device status
-    ip -br addr
-    ```
+```bash
+nmcli device status
+ip -br addr
+```
 
 ---
 
@@ -108,7 +105,6 @@ certificate issuance, and pSConfig enrollment with interactive pauses (or non-in
 
 ```bash
 curl -fsSL \
-
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh \
     -o /tmp/perfSONAR-orchestrator.sh
 chmod 0755 /tmp/perfSONAR-orchestrator.sh
@@ -182,7 +178,6 @@ Use the bootstrap script to install helper scripts under `/opt/perfsonar-tp/tool
 
 ```bash
 curl -fsSL \
-
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
     -o /tmp/install_tools_scripts.sh
 chmod 0755 /tmp/install_tools_scripts.sh
@@ -255,17 +250,17 @@ initial deployments or when you must completely reset inconsistent legacy state.
         
     Preview generation (no changes):
         
-    ```bash
-        /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
     
-    ```
+ ```
 
     Generate and write the config file:
         
-    ```bash
-        /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
     
-    ```
+```
 
     The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
     confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
@@ -294,24 +289,24 @@ initial deployments or when you must completely reset inconsistent legacy state.
 
     **In-place apply (recommended):**
 
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
 
-    ```
+```
 
     **Full rebuild (destructive – removes all NM connections first):**
 
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
 
-    ```
+```
 
 The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically
 unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual
 NetworkManager restart:
 
 ```bash
-    systemctl restart NetworkManager
+systemctl restart NetworkManager
 
 ```
 
@@ -329,10 +324,11 @@ host, and because some measurement infrastructure and registration systems perfo
 
 ??? example "Run the DNS checker" Validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
     
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    You can run a script to check DNS:
+```bash
+/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
     
-    ```
+```
     
 **Notes and automation tips:**
     
@@ -385,10 +381,10 @@ If any prerequisite is missing, the script skips that component and continues.
 
 1. **Install/configure the desired options:**
 
-    ```bash
-    /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
 
-    ```
+```
 
     - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
       summary and answer manually).
@@ -410,48 +406,48 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
     
         You can preview the fully rendered nftables rules (no changes are made):
     
-        ```bash
-        /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
     
-        ```
+```
     
     ??? tip "Manually add extra management hosts/subnets"
         
         If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit
         `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets. Example:
         
-        ```nft
-        set ssh_access_ip4_subnets {
-            type ipv4_addr
-            flags interval
-            elements = { 192.0.2.0/24, 198.51.100.0/25 }
-        }
+```nft
+set ssh_access_ip4_subnets {
+    type ipv4_addr
+    flags interval
+    elements = { 192.0.2.0/24, 198.51.100.0/25 }
+}
 
-        set ssh_access_ip4_hosts {
-            type ipv4_addr
-            elements = { 203.0.113.10, 203.0.113.11 }
-        }
+set ssh_access_ip4_hosts {
+    type ipv4_addr
+    elements = { 203.0.113.10, 203.0.113.11 }
+}
 
-        set ssh_access_ip6_subnets {
-            type ipv6_addr
-            flags interval
-            elements = { 2001:db8:1::/64 }
-        }
+set ssh_access_ip6_subnets {
+    type ipv6_addr
+    flags interval
+    elements = { 2001:db8:1::/64 }
+}
 
-        set ssh_access_ip6_hosts {
-            type ipv6_addr
-            elements = { 2001:db8::10 }
-        }
+set ssh_access_ip6_hosts {
+    type ipv6_addr
+    elements = { 2001:db8::10 }
+}
 
-        ```
+```
         
         Then validate and reload (root shell):
         
-        ```bash
-        nft -c -f /etc/nftables.d/perfsonar.nft
-        systemctl reload nftables || systemctl restart nftables
+```bash
+nft -c -f /etc/nftables.d/perfsonar.nft
+systemctl reload nftables || systemctl restart nftables
 
-        ```
+```
         
 1. **Confirm nftables state and security services:**
 
