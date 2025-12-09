@@ -256,17 +256,17 @@ misconfiguration |
         
             Preview generation (no changes):
         
-            ```bash
+        ```bash
             /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
         
-            ```
+        ```
         
             Generate and write the config file:
         
-            ```bash
+        ```bash
             /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
         
-            ```
+        ```
         
         The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
         confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
@@ -450,11 +450,11 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
         
             Then validate and reload (root shell):
         
-            ```bash
+        ```bash
             nft -c -f /etc/nftables.d/perfsonar.nft
             systemctl reload nftables || systemctl restart nftables
         
-            ```
+        ```
         
 1. **Confirm nftables state and security services:**
 
@@ -1022,7 +1022,7 @@ container and restart the daemon only if needed.
         
 1. Create an update script:
 
-            ```bash
+        ```bash
             cat > /usr/local/bin/perfsonar-auto-update.sh << 'EOF'
             #!/bin/bash
 
@@ -1055,11 +1055,11 @@ container and restart the daemon only if needed.
             chmod +x /usr/local/bin/perfsonar-auto-update.sh
 
 
-            ```
+        ```
 
 1. Create a systemd service:
 
-            ```bash
+        ```bash
 
             cat > /etc/systemd/system/perfsonar-auto-update.service << 'EOF'
             [Unit]
@@ -1074,11 +1074,11 @@ container and restart the daemon only if needed.
             WantedBy=multi-user.target
             EOF
 
-            ```
+        ```
 
 1. Create a systemd timer (runs daily at 3 AM):
 
-            ```bash
+        ```bash
             cat > /etc/systemd/system/perfsonar-auto-update.timer << 'EOF'
 
             [Unit]
@@ -1095,15 +1095,15 @@ container and restart the daemon only if needed.
             WantedBy=timers.target
             EOF
 
-            ```
+        ```
 
 1. Enable and start the timer:
 
-            ```bash
+        ```bash
             systemctl daemon-reload
             systemctl enable --now perfsonar-auto-update.timer
 
-            ```
+        ```
 
 1. Verify the timer is active:
 
