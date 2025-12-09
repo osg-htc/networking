@@ -75,8 +75,7 @@ extract/save/restore registration config that you may want to use.
         interference with network and container setup. Services such as `firewalld`, `NetworkManager-wait-online`, and `rsyslog`
         can alter networking state, hold boot or network events, or conflict with the automated nftables/NetworkManager changes
         performed by the helper scripts. Disabling non-essential services makes the install deterministic, reduces the host
-        attack surface, and avoids delays or race conditions while configuring policy-based routing, nftables rules, and
-        
+        attack surface, and avoids delays or race conditions while configuring policy-based routing, nftables rules, and        
         container networking.
         
 1. **Update the system:**
@@ -225,10 +224,10 @@ An optional destructive mode `--rebuild-all` performs the original full workflow
 routes and rules, remove every NetworkManager connection, then recreate connections from scratch. Use this only for
 initial deployments or when you must completely reset inconsistent legacy state.
 
-| Mode | Flag | Disruption | When to use | |------|------|------------|-------------| | In-place (default) | (none) or
-`--apply-inplace` | Low (interfaces stay up; rules adjusted) | Routine updates, gateway changes, add routes | | Full
-rebuild | `--rebuild-all` | High (connections removed; brief connectivity drop) | First-time setup, severe
-misconfiguration |
+| Mode | Flag | Disruption | When to use |
+|------|------|------------|-------------|
+| In-place (default) | (none) or `--apply-inplace` | Low (interfaces stay up; rules adjusted) | Routine updates, gateway changes, add routes |
+| Full rebuild | `--rebuild-all` | High (connections removed; brief connectivity drop) | First-time setup, severe misconfiguration |
 
 ### Safety Enhancements
 
@@ -260,17 +259,17 @@ misconfiguration |
         /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
     
     ```
-        
-            Generate and write the config file:
+
+    Generate and write the config file:
         
     ```bash
         /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
     
     ```
-        
-        The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
-        confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
-        changes...
+
+    The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
+    confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
+    changes...
         
 1. **Apply changes (in-place default):**
 
@@ -281,26 +280,26 @@ misconfiguration |
         perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script
         invocation.
         
-        **If SSH connection drops during network reconfiguration:**
+    ??? If SSH connection drops during network reconfiguration:
         
-1. Access via BMC/iLO/iDRAC console or physical console
+        1. Access via BMC/iLO/iDRAC console or physical console
 
-1. Review `/var/log/perfSONAR-multi-nic-config.log` for errors
+        1. Review `/var/log/perfSONAR-multi-nic-config.log` for errors
 
-1. Check network state with `nmcli connection show` and `ip addr`
+        1. Check network state with `nmcli connection show` and `ip addr`
 
-1. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
+        1. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
 
-1. Reapply config after corrections: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
+        1. Reapply config after corrections: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
 
-    In-place apply (recommended):
+    **In-place apply (recommended):**
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
 
     ```
 
-    Full rebuild (destructive – removes all NM connections first):
+    **Full rebuild (destructive – removes all NM connections first):**
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
@@ -330,34 +329,34 @@ host, and because some measurement infrastructure and registration systems perfo
 
 ??? example "Run the DNS checker" Validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
     
-```bash
-/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
     
-```
+    ```
     
-    **Notes and automation tips:**
+**Notes and automation tips:**
     
-- The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it
+    - The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it
       to use `host` if preferred.
 
-- Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
+    - Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
 
-- For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
+    - For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
       script that leverages `dns.resolver` for async checks.
 
-- If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
+    - If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
 
 If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before
 proceeding with registration and testing.
 
-1. **Verify the routing policy:**
+**Verify the routing policy:**
 
-    ```bash
-    nmcli connection show
-    ip rule show
-    ip route show table <table-id>
+```bash
+nmcli connection show
+ip rule show
+ip route show table <table-id>
 
-    ```
+```
 
 Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default
 route.
@@ -371,10 +370,10 @@ route.
     The orchestrator automates security hardening. If you ran it in Step 2, skip to [Step 5](#step-5-deploy-the-
     containerized-perfsonar-testpoint).
     
-    Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with
-    optional SELinux and Fail2Ban support. No staging or copy step is required.
+Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with
+optional SELinux and Fail2Ban support. No staging or copy step is required.
     
-    Prerequisites (not installed by the script and should have been installed when check-deps.sh was run above):
+Prerequisites (not installed by the script and should have been installed when check-deps.sh was run above):
     
 - `nftables` must already be installed and available (`nft` binary) for firewall configuration.
 
@@ -391,83 +390,81 @@ If any prerequisite is missing, the script skips that component and continues.
 
     ```
 
-- Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
+    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
       summary and answer manually).
 
-- Add `--dry-run` for a rehearsal that only prints the planned actions.
+    - Add `--dry-run` for a rehearsal that only prints the planned actions.
 
 The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-
 config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.
 
     ??? info "SSH allow-lists and validation"
         
-- Derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf` (CIDR prefixes and addresses).
+        - Derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf` (CIDR prefixes and addresses).
 
-- Validates nftables rules before writing.
+        - Validates nftables rules before writing.
 
-- Outputs: rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
+        - Outputs: rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
 
-??? tip "Preview nftables rules before applying" You can preview the fully rendered nftables rules (no changes are
+    ??? tip "Preview nftables rules before applying"
     
-    made):
+        You can preview the fully rendered nftables rules (no changes are made):
     
-```bash
+        ```bash
+        /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
     
-/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
-    
-```
+        ```
     
     ??? tip "Manually add extra management hosts/subnets"
         
         If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit
         `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets. Example:
         
-```nft
-set ssh_access_ip4_subnets {
-    type ipv4_addr
-    flags interval
-    elements = { 192.0.2.0/24, 198.51.100.0/25 }
+        ```nft
+        set ssh_access_ip4_subnets {
+            type ipv4_addr
+            flags interval
+            elements = { 192.0.2.0/24, 198.51.100.0/25 }
+        }
 
-}
+        set ssh_access_ip4_hosts {
+            type ipv4_addr
+            elements = { 203.0.113.10, 203.0.113.11 }
+        }
 
-set ssh_access_ip4_hosts {
-    type ipv4_addr
-    elements = { 203.0.113.10, 203.0.113.11 }
-}
+        set ssh_access_ip6_subnets {
+            type ipv6_addr
+            flags interval
+            elements = { 2001:db8:1::/64 }
+        }
 
-set ssh_access_ip6_subnets {
-    type ipv6_addr
-    flags interval
-    elements = { 2001:db8:1::/64 }
-}
+        set ssh_access_ip6_hosts {
+            type ipv6_addr
+            elements = { 2001:db8::10 }
+        }
 
-set ssh_access_ip6_hosts {
-    type ipv6_addr
-    elements = { 2001:db8::10 }
-}
-
-```
+        ```
         
-            Then validate and reload (root shell):
+        Then validate and reload (root shell):
         
-```bash
-    nft -c -f /etc/nftables.d/perfsonar.nft
-    systemctl reload nftables || systemctl restart nftables
+        ```bash
+        nft -c -f /etc/nftables.d/perfsonar.nft
+        systemctl reload nftables || systemctl restart nftables
 
-```
+        ```
         
 1. **Confirm nftables state and security services:**
 
     ??? info "Verification commands"
         
-```bash
-nft list ruleset
-sestatus
-systemctl status fail2ban
+        ```bash
+        nft list ruleset
+        sestatus
+        systemctl status fail2ban
 
-```
+        ```
         
-        You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
+    You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
         
 ---
 
