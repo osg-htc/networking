@@ -35,18 +35,13 @@ extract/save/restore registration config that you may want to use.
     chmod 0755 /tmp/update-lsreg.sh
 
     ```
-    ``` text
 <!-- markdownlint-enable MD040 -->
 
     Use the downloaded tool to extract a restore script:
 
-    ```
-
     ```bash
     /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
     ```
-
-``` text
 
 Note: Repository clone instructions are in Step 2.
 
@@ -60,9 +55,6 @@ Note: Repository clone instructions are in Step 2.
 
 1. **Set the hostname and time sync:** Pick the NIC that will own the default route for the hostname.
 
-
-```
-
     ```bash
     hostnamectl set-hostname <testpoint-hostname>
     systemctl enable --now chronyd
@@ -70,20 +62,12 @@ Note: Repository clone instructions are in Step 2.
 
     ```
 
-``` text
-
-
-
 1. **Disable unused services:**
-
-```
 
     ```bash
     systemctl disable --now firewalld NetworkManager-wait-online
     dnf remove -y rsyslog
     ```
-
-``` text
 
     ??? info "Why disable unused services?"
 
@@ -97,28 +81,18 @@ container networking.
 
 1. **Update the system:**
 
-
-```
-
     ```bash
     dnf -y update
 
 
     ```
 
-``` text
-
-
 1. **Record NIC names:** Document interface mappings for later PBR configuration.
-
-```
 
     ```bash
     nmcli device status
     ip -br addr
     ```
-
-``` text
 
 ---
 
@@ -133,8 +107,6 @@ certificate issuance, and pSConfig enrollment with interactive pauses (or non-in
 
 **Download and run the orchestrator:**
 
-```
-
 ```bash
 curl -fsSL \
 
@@ -145,38 +117,23 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 /tmp/perfSONAR-orchestrator.sh
 ```
 
-``` text
-
-
 **Interactive mode** (pause at each step, confirm/skip/quit):
-
-```
 
 ```bash
 /tmp/perfSONAR-orchestrator.sh
 ```
 
-``` text
-
 **Non-interactive mode** (auto-confirm all steps):
-
-```
 
 ```bash
 /tmp/perfSONAR-orchestrator.sh --non-interactive --option A
 ```
 
-``` text
-
 **With Let's Encrypt (Option B):**
-
-```
 
 ```bash
 /tmp/perfSONAR-orchestrator.sh --option B --fqdn <FQDN> --email <EMAIL>
 ```
-
-``` text
 
 **Flags:**
 
@@ -192,13 +149,11 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 
 - `--dry-run` — preview steps without executing
 
-
 - `--auto-update` — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates `/usr/local/bin/perfsonar-auto-update.sh`, a systemd service and timer)
 
 **If you choose this path, skip to Step 7** (the orchestrator completes Steps 2–6 for you).
 
 ---
-
 
 ### Path B: Manual Step-by-Step
 
@@ -210,9 +165,6 @@ bootstrap, and configuration.
 On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) are missing. Install all recommended
 prerequisites in one command:
 
-
-```
-
 ```bash
 dnf -y install podman podman-docker podman-compose \
     jq curl tar gzip rsync bind-utils \
@@ -221,8 +173,6 @@ dnf -y install podman podman-docker podman-compose \
 
 ```
 
-``` text
-
 This ensures all subsequent steps (PBR generation, DNS checks, firewall hardening, container deployment) have their
 
 dependencies available.
@@ -230,8 +180,6 @@ dependencies available.
 #### Step 2.2 – Bootstrap Helper Scripts
 
 Use the bootstrap script to install helper scripts under `/opt/perfsonar-tp/tools_scripts`:
-
-```
 
 ```bash
 curl -fsSL \
@@ -242,11 +190,7 @@ chmod 0755 /tmp/install_tools_scripts.sh
 /tmp/install_tools_scripts.sh /opt/perfsonar-tp
 ```
 
-``` text
-
 **Verify bootstrap completed successfully:**
-
-```
 
 ```bash
 # Check that all helper scripts were downloaded
@@ -258,8 +202,6 @@ ls -1 /opt/perfsonar-tp/tools_scripts/*.sh | wc -l
 
 ls -l /opt/perfsonar-tp/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,perfSONAR-orchestrator.sh}
 ```
-
-``` text
 
 ---
 
@@ -292,11 +234,9 @@ misconfiguration |
 
 - Detects active SSH session interface and avoids extra disruption to that NIC in in-place mode.
 
-
 - Prompts are still skipped with `--yes`.
 
 - Dry-run preview supported via `--dry-run` (combine with `--debug` for verbose output).
-
 
 - Reboot is **no longer generally required**; only consider one if NetworkManager fails to apply the new rules cleanly.
 
@@ -316,31 +256,21 @@ in non-interactive sessions or when you use `--yes`.
 
     Preview generation (no changes):
 
-```
-
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug
 
     ```
 
-``` text
-
     Generate and write the config file:
-
-```
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto
 
     ```
 
-``` text
-
-
 The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
 confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
 changes...
-
 
 1. **Apply changes (in-place default):**
 
@@ -359,46 +289,32 @@ invocation.
 
 1. Check network state with `nmcli connection show` and `ip addr`
 
-
 1. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
 
 1. Reapply config after corrections: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
 
-
     In-place apply (recommended):
-
-```
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes
 
     ```
 
-``` text
-
     Full rebuild (destructive – removes all NM connections first):
-
-```
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
 
     ```
 
-``` text
-
 The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically
 unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual
 NetworkManager restart:
-
-```
 
     ```bash
     systemctl restart NetworkManager
 
     ```
-
-``` text
 
 1. **DNS: forward and reverse entries (required):**
 
@@ -406,24 +322,18 @@ All IP addresses that will be used for perfSONAR testing MUST have DNS entries: 
 reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your
 host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.
 
-
 - For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.
 
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
 
 - For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
 
-
 ??? example "Run the DNS checker" Validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
-
-```
 
         ```bash
         /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
 
         ```
-
-``` text
 
     **Notes and automation tips:**
 
@@ -442,16 +352,12 @@ proceeding with registration and testing.
 
 1. **Verify the routing policy:**
 
-```
-
     ```bash
     nmcli connection show
     ip rule show
     ip route show table <table-id>
 
     ```
-
-``` text
 
 Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default
 route.
@@ -470,11 +376,9 @@ optional SELinux and Fail2Ban support. No staging or copy step is required.
 
 Prerequisites (not installed by the script and should have been installed when check-deps.sh was run above):
 
-
 - `nftables` must already be installed and available (`nft` binary) for firewall configuration.
 
 - `fail2ban` must be installed if you want the optional jail configuration.
-
 
 - SELinux tools (e.g., `getenforce`, `policycoreutils`) must be present to attempt SELinux configuration.
 
@@ -482,14 +386,10 @@ If any prerequisite is missing, the script skips that component and continues.
 
 1. **Install/configure the desired options:**
 
-```
-
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
 
     ```
-
-``` text
 
 - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
       summary and answer manually).
@@ -511,22 +411,16 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
 
 made):
 
-```
-
         ```bash
 
         /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
 
         ```
 
-``` text
-
     ??? tip "Manually add extra management hosts/subnets"
 
 If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit
 `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets. Example:
-
-```
 
         ```nft
         set ssh_access_ip4_subnets {
@@ -554,11 +448,7 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
 
         ```
 
-``` text
-
     Then validate and reload (root shell):
-
-```
 
     ```bash
     nft -c -f /etc/nftables.d/perfsonar.nft
@@ -566,13 +456,9 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
 
     ```
 
-``` text
-
 1. **Confirm nftables state and security services:**
 
     ??? info "Verification commands"
-
-```
 
         ```bash
         nft list ruleset
@@ -581,14 +467,11 @@ If you need to allow additional SSH sources not represented by your NIC-derived 
 
         ```
 
-``` text
-
 You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
 ---
 
 ## Step 5 – Deploy the Containerized perfSONAR Testpoint
-
 
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
@@ -608,18 +491,12 @@ Use `podman-compose` (or `docker-compose`) in the examples below.
 
 Prepare the pSConfig directory and a minimal compose file. No other host bind-mounts are required.
 
-```
-
 ```bash
 mkdir -p /opt/perfsonar-tp/psconfig
 ```
 
-``` text
-
 Download a ready-made compose file (or copy it manually): Browse: [repo
 view](https://github.com/osghtc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
-
-```
 
 ```bash
 curl -fsSL \
@@ -627,30 +504,19 @@ curl -fsSL \
     -o /opt/perfsonar-tp/docker-compose.yml
 ```
 
-``` text
-
 Edit the `docker-compose.yml` as desired.
 
 Bring it up:
-
-
-```
 
 ```bash
 (cd /opt/perfsonar-tp; podman-compose up -d)
 ```
 
-``` text
-
 Verify the container is running and healthy:
-
-```
 
 ```bash
 podman ps
 ```
-
-``` text
 
 The container should show `healthy` status. The healthcheck monitors Apache HTTPS availability.
 
@@ -668,8 +534,6 @@ code 255.
     You **must** use the systemd unit approach below instead of relying on compose alone.
 
 Install the provided systemd units to manage containers with proper systemd support:
-
-```
 
 ```bash
 curl -fsSL \
@@ -691,8 +555,6 @@ systemctl enable --now perfsonar-testpoint.service
 systemctl status perfsonar-testpoint.service --no-pager
 podman ps
 ```
-
-``` text
 
 Notes:
 
@@ -739,14 +601,10 @@ to fail.
 
 Run the bundled seeding helper script (automatically installed in Step 2):
 
-```
-
 ```bash
 
 /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 ```
-
-``` text
 
 This script:
 
@@ -756,14 +614,11 @@ This script:
 
 - Copies content to host directories
 
-
 - Verifies seeding was successful
 
 - Skips seeding if directories already have content (idempotent)
 
 Verify seeding succeeded:
-
-```
 
 ```bash
 # Should show config files
@@ -779,8 +634,6 @@ ls -la /var/www/html
 
 ls -la /etc/apache2
 ```
-
-``` text
 
 ??? tip "SELinux labeling handled automatically"
 
@@ -806,17 +659,11 @@ containers start. No manual `chcon` commands are required.
 
 **Prerequisites:** Ensure `/opt/perfsonar-tp/tools_scripts` exists from Step 2 (bootstrap):
 
-```
-
 ```bash
 ls -la /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
 ```
 
-``` text
-
 If the file is missing, run the Step 2 bootstrap first:
-
-```
 
 ```bash
 curl -fsSL \
@@ -824,14 +671,10 @@ curl -fsSL \
     | bash -s -- /opt/perfsonar-tp
 ```
 
-``` text
-
 Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses an entrypoint wrapper
 that auto-discovers Let's Encrypt certificates on container startup and automatically patches the Apache configuration.
 
 Download the auto-patching compose file:
-
-```
 
 ```bash
 curl -fsSL \
@@ -839,17 +682,12 @@ curl -fsSL \
     -o /opt/perfsonar-tp/docker-compose.yml
 ```
 
-``` text
-
 **Note:** The `SERVER_FQDN` environment variable is **optional**. The entrypoint wrapper will auto-discover certificates
 
 in `/etc/letsencrypt/live` and use the first one found. Only set `SERVER_FQDN` if you have multiple certificates and
 need to specify which one to use.
 
-
 If you want to explicitly set the FQDN (optional):
-
-```
 
 ```bash
 
@@ -858,19 +696,12 @@ If you want to explicitly set the FQDN (optional):
 sed -i 's/# - SERVER_FQDN=.*/- SERVER_FQDN=<YOUR_FQDN>/' /opt/perfsonar-tp/docker-compose.yml
 ```
 
-``` text
-
 Start the containers:
-
-
-```
 
 ```bash
 cd /opt/perfsonar-tp
 podman-compose up -d
 ```
-
-``` text
 
 At this point, the testpoint is running with self-signed certificates. The certbot container is also running but won't
 renew anything until you obtain the initial certificates.
@@ -886,8 +717,6 @@ code 255.
     You **must** use the systemd unit approach below instead of relying on compose alone.
 
 Install and enable the systemd units so containers start on boot with proper systemd support:
-
-```
 
 ```bash
 curl -fsSL \
@@ -910,28 +739,19 @@ systemctl status perfsonar-testpoint.service perfsonar-certbot.service --no-page
 podman ps
 ```
 
-``` text
-
 #### 3) Obtain your first Let's Encrypt certificate (one-time)
-
 
 Use Certbot in standalone mode to obtain the initial certificates. The perfsonar-testpoint image is patched to NOT
 listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.
 
 **Important:** Stop the certbot sidecar temporarily to free port 80:
 
-```
-
 ```bash
 podman stop certbot
 
 ```
 
-``` text
-
 Now run Certbot standalone with host networking to bind port 80:
-
-```
 
 ```bash
 podman run --rm --net=host \
@@ -943,17 +763,13 @@ podman run --rm --net=host \
     -m <LETSENCRYPT_EMAIL>
 ```
 
-``` text
-
 ??? info "Certbot command explained"
-
 
     **Podman options:**
 
 - `--rm` - Remove container after it exits
 
 - `--net=host` - Use host network (allows binding port 80)
-
 
 - `-v /etc/letsencrypt:/etc/letsencrypt:Z` - Mount certificate storage with exclusive SELinux label
 
@@ -981,26 +797,17 @@ Replace:
 
 - `<LETSENCRYPT_EMAIL>` with your email for certificate notifications
 
-
 After successful issuance, restart the perfsonar-testpoint container to trigger the automatic patching:
-
-```
 
 ```bash
 podman restart perfsonar-testpoint
 ```
 
-``` text
-
 Check the logs to verify the SSL config was patched:
-
-```
 
 ```bash
 podman logs perfsonar-testpoint 2>&1 | grep -A5 "Patching Apache"
 ```
-
-``` text
 
 You should see output confirming the certificate paths were updated.
 
@@ -1008,15 +815,10 @@ You should see output confirming the certificate paths were updated.
 
 Now that certificates are in place, restart the certbot sidecar to enable automatic renewals:
 
-```
-
 ```bash
 podman start certbot
 
 ```
-
-``` text
-
 
 The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.
 
@@ -1032,58 +834,40 @@ testpoint Apache is patched to NOT listen on port 80. Both containers share the 
 
 Test renewal with a dry-run:
 
-```
-
 ```bash
 podman exec certbot certbot renew --dry-run
 ```
 
-``` text
-
 If successful, certificates will auto-renew before expiry, and the testpoint will be automatically restarted to load the
 new certificates. You can verify this behavior by checking the certbot logs after a renewal:
-
-```
 
 ```bash
 podman logs certbot 2>&1 | grep -A5 "deploy hook"
 
 ```
 
-``` text
-
 ---
 
 ??? info "Alternative: Manual SSL Patching (without automatic entrypoint wrapper)"
-
 
 If you prefer not to use the automatic patching entrypoint wrapper, you can use the standard compose file and manually
 patch the Apache SSL configuration after obtaining certificates.
 
 1. Use `docker-compose.testpoint-le.yml` instead of `docker-compose.testpoint-le-auto.yml`
 
-
 1. After obtaining Let's Encrypt certificates, run:
-
-```
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/patch_apache_ssl_for_letsencrypt.sh <SERVER_FQDN>
 
     ```
 
-``` text
-
 1. Reload Apache in the running container:
-
-```
 
     ```bash
     podman exec perfsonar-testpoint apachectl -k graceful
 
     ```
-
-``` text
 
 This approach requires manual intervention after initial certificate issuance and any time the container is recreated.
 The automatic approach (using the entrypoint wrapper) eliminates this manual step.
@@ -1097,8 +881,6 @@ entrypoint-wrapper.sh not found`
 
     **Fix:** Run the Step 2 bootstrap script to fetch all helper scripts:
 
-```
-
     ```bash
     curl -fsSL \
         https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
@@ -1106,22 +888,14 @@ entrypoint-wrapper.sh not found`
 
     ```
 
-``` text
-
     Then verify the entrypoint wrapper exists:
-
-```
 
     ```bash
     ls -la /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
 
     ```
 
-``` text
-
     If you've already started the container and it failed, remove it before retrying:
-
-```
 
     ```bash
 
@@ -1129,8 +903,6 @@ entrypoint-wrapper.sh not found`
     podman-compose up -d
 
     ```
-
-``` text
 
 ---
 
@@ -1148,8 +920,6 @@ each FQDN you expose for perfSONAR (one or two depending on whether you split la
 Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation
 alternative below):
 
-```
-
 ```bash
 # Add auto URLs (configures archives too) and show configured remotes
 
@@ -1159,22 +929,14 @@ podman exec -it perfsonar-testpoint psconfig remote --configure-archives add \
 podman exec -it perfsonar-testpoint psconfig remote list
 ```
 
-``` text
-
 If there are any stale/old/incorrect entries, you can remove them:
-
-```
 
 ```bash
 podman exec -it perfsonar-testpoint psconfig remote delete "<old-url>"
 ```
 
-``` text
-
 Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before
 applying.
-
-```
 
 ```bash
 # Dry run only (show planned URLs):
@@ -1188,12 +950,9 @@ applying.
 podman exec -it perfsonar-testpoint psconfig remote list
 ```
 
-``` text
-
 ??? note "The auto enroll script details"
 
 - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf`  (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
-
 
 - Performs reverse DNS lookups (getent/dig) to derive FQDNs.
 
@@ -1215,7 +974,6 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
 
 - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
 
-
 - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
 
 - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
@@ -1229,8 +987,6 @@ Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside 
 container and restart the daemon only if needed.
 
     Install and run examples below, pick which type you want (root shell):
-
-```
 
     ```bash
     # Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
@@ -1253,8 +1009,6 @@ container and restart the daemon only if needed.
 
     ```
 
-``` text
-
 1. **Automatic image updates and safe restarts**
 
     Keep containers current and only restart them when their image actually changes.
@@ -1267,8 +1021,6 @@ Create a simple script and systemd timer to periodically pull new images and res
 available.
 
 1. Create an update script:
-
-```
 
             ```bash
             cat > /usr/local/bin/perfsonar-auto-update.sh << 'EOF'
@@ -1305,11 +1057,7 @@ available.
 
             ```
 
-``` text
-
 1. Create a systemd service:
-
-```
 
             ```bash
 
@@ -1328,11 +1076,7 @@ available.
 
             ```
 
-``` text
-
 1. Create a systemd timer (runs daily at 3 AM):
-
-```
 
             ```bash
             cat > /etc/systemd/system/perfsonar-auto-update.timer << 'EOF'
@@ -1353,11 +1097,7 @@ available.
 
             ```
 
-``` text
-
 1. Enable and start the timer:
-
-```
 
             ```bash
             systemctl daemon-reload
@@ -1365,22 +1105,14 @@ available.
 
             ```
 
-``` text
-
 1. Verify the timer is active:
-
-```
 
             ```bash
             systemctl list-timers perfsonar-auto-update.timer
 
             ```
 
-``` text
-
 1. Test manually (optional):
-
-```
 
             ```bash
 
@@ -1389,19 +1121,12 @@ available.
 
             ```
 
-``` text
-
 1. Monitor the update log:
-
-
-```
 
             ```bash
             tail -f /var/log/perfsonar-auto-update.log
 
             ```
-
-``` text
 
 This approach ensures containers are updated only when new images are available, minimizing unnecessary restarts while
 keeping your deployment current.
@@ -1416,8 +1141,6 @@ Perform these checks before handing the host over to operations:
 
     ??? info "Verify Podman runtime and containers"
 
-```
-
         ```bash
         # Check Podman service is available
         systemctl status podman
@@ -1430,15 +1153,11 @@ Perform these checks before handing the host over to operations:
 
         ```
 
-``` text
-
     Ensure Podman is active and containers are running.
 
 1. **Container health:**
 
     ??? info "Check container status and logs"
-
-```
 
         ```bash
         # Check all containers are running and healthy
@@ -1456,26 +1175,18 @@ Perform these checks before handing the host over to operations:
 
         ```
 
-``` text
-
 1. **Network path validation:**
 
     ??? info "Test network connectivity and routing"
 
         Test throughput to a remote testpoint (run from inside the container):
 
-```
-
         ```bash
         podman exec -it perfsonar-testpoint pscheduler task throughput --dest <remote-testpoint>
 
         ```
 
-``` text
-
         Check routing from the host:
-
-```
 
         ```bash
         tracepath -n <remote-testpoint>
@@ -1483,15 +1194,11 @@ Perform these checks before handing the host over to operations:
 
         ```
 
-``` text
-
     Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
 
 1. **Security posture:**
 
     ??? info "Check firewall, fail2ban, and SELinux"
-
-```
 
         ```bash
         # Check nftables firewall rules
@@ -1515,15 +1222,11 @@ Perform these checks before handing the host over to operations:
 
         ```
 
-``` text
-
     Investigate any SELinux denials or repeated Fail2Ban bans.
 
 1. **LetsEncrypt certificate check:**
 
     ??? info "Verify certificate validity"
-
-```
 
         ```bash
         # Check certificate via HTTPS connection
@@ -1535,9 +1238,6 @@ Perform these checks before handing the host over to operations:
 
         ```
 
-``` text
-
-
 Ensure the issuer is Let's Encrypt and the validity period is acceptable. This check only applies if you configured
 Let's Encrypt in Step 3.
 
@@ -1546,14 +1246,10 @@ Let's Encrypt in Step 3.
 ??? info "Run perfSONAR diagnostic reports" Run the perfSONAR troubleshoot command from inside the container and send
 outputs to operations:
 
-```
-
         ```bash
         podman exec -it perfsonar-testpoint pscheduler troubleshoot
 
         ```
-
-``` text
 
 ---
 
@@ -1583,8 +1279,6 @@ outputs to operations:
 
     **Diagnostic steps:**
 
-```
-
     ```bash
     # Check container logs
     podman logs perfsonar-testpoint
@@ -1597,8 +1291,6 @@ outputs to operations:
     podman-compose config
 
     ```
-
-``` text
 
     **Common causes:**
 
@@ -1616,8 +1308,6 @@ outputs to operations:
 
     **Diagnostic steps:**
 
-```
-
     ```bash
     # Check container logs
     podman logs perfsonar-testpoint
@@ -1630,8 +1320,6 @@ outputs to operations:
     podman-compose config
 
     ```
-
-``` text
 
     **Common causes:**
 
@@ -1653,8 +1341,6 @@ with exit code 255.
 
     **Diagnostic steps:**
 
-```
-
     ```bash
     # Check container status
     podman ps -a
@@ -1671,13 +1357,9 @@ with exit code 255.
 
     ```
 
-``` text
-
     **Solution:**
 
     Replace the compose-based systemd service with proper systemd units that use `podman run --systemd=always`:
-
-```
 
     ```bash
     # Stop and disable old service
@@ -1709,8 +1391,6 @@ with exit code 255.
 
     ```
 
-``` text
-
     **Verification:**
 
     After installing the new units, the testpoint should:
@@ -1731,10 +1411,7 @@ Unable to open config file: trap exit TERM; while...`
 **Cause:** The certbot container image has a built-in entrypoint that expects certbot commands directly. When using a
 shell loop for renewal, the entrypoint tries to parse the shell command as a certbot config file, causing this error.
 
-
     **Diagnostic steps:**
-
-```
 
     ```bash
     # Check certbot service status
@@ -1751,8 +1428,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     ```
 
-``` text
-
     **Solution:**
 
     The certbot service needs two flags:
@@ -1762,8 +1437,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 - `--entrypoint=/bin/sh` to override the built-in entrypoint
 
     Re-run the installation script to get the fixed version:
-
-```
 
     ```bash
     # Stop current service
@@ -1789,8 +1462,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     ```
 
-``` text
-
 **Expected result:** The certbot container should be running (not exiting) and the service should be in "active
 (running)" state.
 
@@ -1799,8 +1470,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
     **Symptoms:** Container starts but services fail, permission denied errors in logs.
 
     **Diagnostic steps:**
-
-```
 
     ```bash
 
@@ -1814,8 +1483,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
     ausearch -m avc -ts recent > /tmp/selinux-denials.txt
 
     ```
-
-``` text
 
     **Solutions:**
 
@@ -1831,10 +1498,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     **Symptoms:** Traffic not using expected interfaces, routing to wrong gateway.
 
-
     **Diagnostic steps:**
-
-```
 
     ```bash
     # Check routing rules
@@ -1855,8 +1519,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     ```
 
-``` text
-
     **Solutions:**
 
     - Verify `/etc/perfSONAR-multi-nic-config.conf` has correct IPs and gateways
@@ -1865,7 +1527,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 - Reboot if rules are not being applied correctly
 
-
 - Check for conflicting NetworkManager or systemd-networkd rules
 
 ??? failure "DNS resolution failing for test endpoints"
@@ -1873,8 +1534,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
     **Symptoms:** perfSONAR tests fail with "unknown host" or DNS errors.
 
     **Diagnostic steps:**
-
-```
 
     ```bash
     # Test DNS resolution from container
@@ -1889,8 +1548,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     ```
 
-``` text
-
     **Solutions:**
 
     - Ensure DNS servers are correctly configured on host
@@ -1901,14 +1558,11 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
 ### Certificate Issues
 
-
 ??? failure "Let's Encrypt certificate issuance fails"
 
     **Symptoms:** Certbot fails with "Failed to authenticate" or "Connection refused" errors.
 
     **Diagnostic steps:**
-
-```
 
     ```bash
     # Check if port 80 is open
@@ -1930,10 +1584,7 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     ```
 
-``` text
-
     **Common causes:**
-
 
 - Port 80 blocked by firewall: Add with `perfSONAR-install-nftables.sh --ports=80,443`
 
@@ -1949,8 +1600,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
 
     **Diagnostic steps:**
 
-```
-
     ```bash
     # Check certificate files
     ls -la /etc/letsencrypt/live/<fqdn>/
@@ -1965,8 +1614,6 @@ shell loop for renewal, the entrypoint tries to parse the shell command as a cer
     podman restart perfsonar-testpoint
 
     ```
-
-``` text
 
     **Solutions:**
 
@@ -1992,8 +1639,6 @@ filename.
 
     **Diagnostic steps:**
 
-```
-
     ```bash
     # Check service status inside container
     podman exec perfsonar-testpoint systemctl status apache2
@@ -2005,8 +1650,6 @@ filename.
     podman exec perfsonar-testpoint journalctl -u pscheduler-ticker -n 50
 
     ```
-
-``` text
 
     **Solutions:**
 
@@ -2026,8 +1669,6 @@ filename.
 
     **Diagnostic steps:**
 
-```
-
     ```bash
     # Check timer status
     systemctl status perfsonar-auto-update.timer
@@ -2043,8 +1684,6 @@ filename.
     systemctl start perfsonar-auto-update.service
 
     ```
-
-``` text
 
     **Solutions:**
 
@@ -2062,8 +1701,6 @@ filename.
 
     **Container management:**
 
-```
-
     ```bash
     # View all containers (running and stopped)
     podman ps -a
@@ -2079,11 +1716,7 @@ filename.
 
     ```
 
-``` text
-
     **Networking:**
-
-```
 
     ```bash
     # Check which process is listening on a port
@@ -2098,11 +1731,7 @@ filename.
 
     ```
 
-``` text
-
     **Logs:**
-
-```
 
     ```bash
     # System journal for container runtime
@@ -2115,8 +1744,6 @@ filename.
     podman logs -f perfsonar-testpoint
 
     ```
-
-``` text
 
 ---
 ```
