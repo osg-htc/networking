@@ -1,0 +1,24 @@
+# Example GitHub Actions job to run the site backtick check.
+# Save this under .github/workflows/ci-backtick-check.yml in your repo if desired.
+# This sample is informational and uses the actions/checkout action.
+
+name: Backtick check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install requirements (optional)
+        run: python -m pip install --upgrade pip
+      - name: Run backtick check
+        run: python3 scripts/check_site_for_backticks.py --build
