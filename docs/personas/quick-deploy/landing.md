@@ -43,19 +43,19 @@ interactive or non-interactive deploys.
 
 - Non-interactive mode: `--non-interactive` flag for automated deployment
 
-### 🔧 Custom Deploy — Manual Step-by-Step Control
-
-**Time:** 60-90 minutes | **Skill level:** System administrator + networking knowledge
-
-For multi-NIC setups or customization, follow **[Manual Steps](../../perfsonar/install-testpoint.md)**.
-
-Covers: package install, PBR configuration, container deployment, certificate handling, mesh enrollment.
-
 ### 🤖 Automated/Repeatable Deploy
 
 **Time:** Varies | **Skill level:** DevOps/automation engineer
 
 For deploying multiple testpoints or CI/CD pipelines, see **[Automated Setup Examples](automated-setup/README.md)**.
+
+### 🔧 Custom Deploy — Manual Step-by-Step (Legacy)
+
+**Time:** 60–90 minutes | **Skill level:** System administrator + networking knowledge
+
+For multi-NIC setups or customization, consult the legacy manual **[Manual Steps (legacy)](../../perfsonar/installation.md)**.
+
+Covers: toolkit-based installs, detailed package/manual steps, and advanced network configs.
 
 Reference: Ansible playbooks, orchestrator `--non-interactive` mode, containerized workflows.
 
