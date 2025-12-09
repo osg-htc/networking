@@ -2337,32 +2337,18 @@ each focused on specific set of tests. The following deployment options are curr
 <a href="https://docs.perfsonar.net/install_options.html">https://docs.perfsonar.net/install_options.html</a>.   With the release of version 5, OSG/WLCG sites have a new option:
 instead of installing the full Toolkit sites can choose to install the Testpoint bundle.</p>
 <ul>
-<li>
-<p>Pros</p>
-<div class="codehilite"><pre><span></span><code>```text
+<li>Pros</li>
+</ul>
+<div class="highlight"><pre><span></span><code>* Simpler deployment when a local web interface is not needed and a central measurement archive is available.
+* Less resource intensive for both memory and I/O capacity.
 </code></pre></div>
-
 <ul>
-<li>Simpler deployment when a local web interface is not needed and a central measurement archive is available.</li>
-<li>Less resource intensive for both memory and I/O capacity.
-    ```</li>
+<li>Cons</li>
 </ul>
-</li>
-<li>
-<p>Cons</p>
-<div class="codehilite"><pre><span></span><code>```text
+<div class="highlight"><pre><span></span><code>* Measurements are not stored locally
+* No web interface to use for configuration or adding local tests
+* Unable to show results in MaDDash
 </code></pre></div>
-
-<ul>
-<li>Measurements are not stored locally</li>
-<li>No web interface to use for configuration or adding local tests</li>
-<li>
-<p>Unable to show results in MaDDash</p>
-<p>```</p>
-</li>
-</ul>
-</li>
-</ul>
 <p>While sites are free to choose whatever deployment method they want, we would like to strongly recommend the use of
 perfSONAR's containerized testpoint. This method was chosen as a "best practice" recommendation because of the reduced
 resource constraints, less components and easier management.</p>

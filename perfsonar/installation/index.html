@@ -2377,18 +2377,8 @@ Start above but use <code>dnf install perfsonar-testpoint</code> instead of the 
 <p>You can see more details about EL supported installs at &lt;<a href="https://docs.perfsonar.net/install_el.html">https://docs.perfsonar.net/install_el.html</a>&gt;</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
-<!-- markdownlint-disable MD040 -->
-<div class="codehilite"><pre><span></span><code><span class="o">&lt;!--</span><span class="w"> </span><span class="n">markdownlint</span><span class="o">-</span><span class="n">disable</span><span class="w"> </span><span class="n">MD040</span><span class="w"> </span><span class="o">--&gt;</span>
-<span class="w"> </span><span class="err">```</span><span class="n">text</span>
-</code></pre></div>
-
 <p>In all cases, we strongly recommend keeping auto-updates enabled. With yum auto-updates there is a possibility that updated packages can "break" your perfSONAR install but this risk is accepted in order to have security updates quickly applied.</p>
-<div class="codehilite"><pre><span></span><code> ```
-</code></pre></div>
-
-<!-- markdownlint-enable MD040 -->
-
+</div>
 <p>The following <em>additional</em> steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:</p>
 <ul>
@@ -2401,9 +2391,10 @@ described in the official guide:</p>
 <li>
 <p>You will need to configure your instance(s) to use the OSG/WLCG mesh-configuration. Please follow the steps below:</p>
 </li>
+<li>
+<p>For toolkit versions 5.0 and higher run: <code>psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> replacing <code>&lt;FQDN&gt;</code> with your host (e.g. <code>psum01.aglt2.org</code>). Verify with <code>psconfig remote list</code>.</p>
+</li>
 </ul>
-<div class="highlight"><pre><span></span><code>* For toolkit versions 5.0 and higher run: `psconfig remote add https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;` replacing `&lt;FQDN&gt;` with your host (e.g. `psum01.aglt2.org`). Verify with `psconfig remote list`.
-</code></pre></div>
 <p><code>json
 === pScheduler Agent ===
 [
@@ -2467,12 +2458,8 @@ site or host firewalls.   An overview of perfSONAR security is available at
 <a href="https://www.perfsonar.net/deployment_security.html">https://www.perfsonar.net/deployment_security.html</a></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>```text</p>
-</div>
 <p>All perfSONAR instances must have port 443 accessible to other perfSONAR instances. Port 443 is used by pScheduler to schedule tests. If unreachable, tests may not run and results may be missing.</p>
-<div class="codehilite"><pre><span></span><code>```
-</code></pre></div>
-
+</div>
 <p>For sites that are concerned about having port 443 open, there is a possiblity to get a list of hosts to/from which the
 tests will be initiated. However as this list is dynamic, implementing the corresponding firewall rules would need to be
 done both locally and on the central/campus firewall in a way that would ensure dynamic updates. It's important to
@@ -2480,13 +2467,9 @@ emphasize that port 443 provides access to the perfSONAR web interface as well, 
 network administrators to debug network issues.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>```text</p>
+<p>If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.
+<!-- markdownlint-enable MD040 --></p>
 </div>
-<p>If you have a central/campus firewall verify required port openings in the perfSONAR security documentation.</p>
-<div class="codehilite"><pre><span></span><code><span class="err">```</span>
-<span class="o">&lt;!--</span><span class="w"> </span><span class="n">markdownlint</span><span class="o">-</span><span class="n">enable</span><span class="w"> </span><span class="n">MD040</span><span class="w"> </span><span class="o">--&gt;</span>
-</code></pre></div>
-
 <h2 id="enabling-snmp-plugins">Enabling SNMP plugins<a class="headerlink" href="#enabling-snmp-plugins" title="Permanent link">&para;</a></h2>
 <p>Starting from release 4.0.2, perfSONAR toolkit allows to configure passive SNMP traffic from the local routers to be
 captured and stored in the local measurement archive. This is currently a <a href="http://www.perfsonar.net/release-notes/version-4-0-2/">beta
@@ -2511,17 +2494,11 @@ filling the information please follow those simple guidelines:</p>
 <li>
 <p>For each form (service type) fill at least:</p>
 <p><!-- markdownlint-disable MD040 -->
-```text</p>
-</li>
-<li>
-<p>Hosting Site</p>
-</li>
-<li>Service Type</li>
-<li>Host Name</li>
-<li>Host IP (optional)</li>
-<li>
-<p>Description (optional label used in MaDDash; keep short and unique)</p>
-<p>```
+* Hosting Site
+* Service Type
+* Host Name
+* Host IP (optional)
+* Description (optional label used in MaDDash; keep short and unique)
 <!-- markdownlint-enable MD040 --></p>
 </li>
 <li>
