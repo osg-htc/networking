@@ -44,4 +44,15 @@ bash scripts/tests/run_tests.sh
 - The scripts aim to be conservative: if in doubt they default to adding `text` as a neutral fenced-code language label to avoid changing semantics.
 - If a script acts on files you do not want to change, run it against a single file or a fixtures directory first and use `git diff` to review changes.
 
+## Continuous Integration (CI)
+
+Add the site backtick check to CI to prevent regressions where literal `` ` `` sequences are displayed in generated HTML. A minimal CI step can run the included script which builds the site and fails if visible triple-backticks are found:
+
+```bash
+# in CI: from repo root
+python3 scripts/check_site_for_backticks.py --build
+```
+
+On GitHub Actions, you can add a simple job that runs on PRs after the repository checkout step.
+
 If you need help adding additional heuristics or tests, submit an issue or open a PR describing the desired behavior.
