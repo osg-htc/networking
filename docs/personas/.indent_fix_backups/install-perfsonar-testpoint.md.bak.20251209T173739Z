@@ -311,10 +311,10 @@ The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place 
 unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual
 NetworkManager restart:
 
-```bash
+    ```bash
     systemctl restart NetworkManager
 
-```
+    ```
 
 1. **DNS: forward and reverse entries (required):**
 
@@ -986,28 +986,28 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
 Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint`
 container and restart the daemon only if needed.
 
-Install and run examples below, pick which type you want (root shell):
+    Install and run examples below, pick which type you want (root shell):
 
-```bash
-# Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
-    --dry-run --site-name "Acme Co." --project WLCG \
+    ```bash
+    # Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
+        --dry-run --site-name "Acme Co." --project WLCG \
 
-    --admin-email admin@example.org --admin-name "pS Admin"
+        --admin-email admin@example.org --admin-name "pS Admin"
 
-# Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)
-bash /root/restore-lsreg.sh
+    # Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)
+    bash /root/restore-lsreg.sh
 
 
-# Apply new settings and restart the daemon inside the container
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh create \
-    --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-    --city Berkeley --region CA --country US --zip 94720 \
-    --latitude 37.5 --longitude -121.7469 \
+    # Apply new settings and restart the daemon inside the container
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh create \
+        --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+        --city Berkeley --region CA --country US --zip 94720 \
+        --latitude 37.5 --longitude -121.7469 \
 
-    --admin-name "pS Admin" --admin-email admin@example.org
+        --admin-name "pS Admin" --admin-email admin@example.org
 
-```
+    ```
 
 1. **Automatic image updates and safe restarts**
 

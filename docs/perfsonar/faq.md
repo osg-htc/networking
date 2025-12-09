@@ -20,7 +20,7 @@ Apache with Lets Encrypt](https://www.tecmint.com/secure-apache-with-lets-encryp
 
 <!-- markdownlint-disable MD033 --> <details>
 
-```text
+```
 <summary>A quick set of steps is shown here:</summary>
 <p>0. Install certbot with yum, dnf, or snap:  **yum install certbot python3-certbot-apache**</p>
 <p>1. Certbot needs port 80/443 so stop anything blocking it or using it:  **systemctl stop firewalld  systemctl stop httpd**</p>
@@ -87,7 +87,7 @@ httpd not running or inaccessible, etc.), you can ask for help by opening a GGUS
 
 * **perfSONAR json summary** is failing
 
-```text
+```
 
 * This means the toolkit's homepage is inaccessible, which is required to check many additional services, so in turn all the other metrics will likely be in unknown or critical state. Please check for usual causes (disk full, httpd not running or blocked), we need to be able to access your homepage via HTTP or HTTPS
 

@@ -99,13 +99,13 @@ bash docs/perfsonar/tools_scripts/install_tools_scripts.sh --skip-testpoint
 
 You can download the raw script from the GitHub repo (master branch):
 
-```text
+```
 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
 ```
 
 Or once the site is built, from the site URL:
 
-```text
+```
 https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 ```
 

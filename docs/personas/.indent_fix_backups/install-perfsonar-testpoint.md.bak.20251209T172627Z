@@ -311,10 +311,10 @@ The script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place 
 unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual
 NetworkManager restart:
 
-```bash
+    ```bash
     systemctl restart NetworkManager
 
-```
+    ```
 
 1. **DNS: forward and reverse entries (required):**
 
@@ -330,10 +330,10 @@ host, and because some measurement infrastructure and registration systems perfo
 
 ??? example "Run the DNS checker" Validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf`.
     
-```bash
-/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+        ```bash
+        /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
     
-```
+        ```
     
     **Notes and automation tips:**
     
@@ -411,61 +411,61 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
     
     made):
     
-```bash
+        ```bash
     
-/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
+        /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
     
-```
+        ```
     
     ??? tip "Manually add extra management hosts/subnets"
         
         If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit
         `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets. Example:
         
-```nft
-set ssh_access_ip4_subnets {
-    type ipv4_addr
-    flags interval
-    elements = { 192.0.2.0/24, 198.51.100.0/25 }
-
-}
-
-set ssh_access_ip4_hosts {
-    type ipv4_addr
-    elements = { 203.0.113.10, 203.0.113.11 }
-}
-
-set ssh_access_ip6_subnets {
-    type ipv6_addr
-    flags interval
-    elements = { 2001:db8:1::/64 }
-}
-
-set ssh_access_ip6_hosts {
-    type ipv6_addr
-    elements = { 2001:db8::10 }
-}
-
-```
+        ```nft
+        set ssh_access_ip4_subnets {
+            type ipv4_addr
+            flags interval
+            elements = { 192.0.2.0/24, 198.51.100.0/25 }
+        
+        }
+        
+        set ssh_access_ip4_hosts {
+            type ipv4_addr
+            elements = { 203.0.113.10, 203.0.113.11 }
+        }
+        
+        set ssh_access_ip6_subnets {
+            type ipv6_addr
+            flags interval
+            elements = { 2001:db8:1::/64 }
+        }
+        
+        set ssh_access_ip6_hosts {
+            type ipv6_addr
+            elements = { 2001:db8::10 }
+        }
+        
+        ```
         
             Then validate and reload (root shell):
         
-```bash
-    nft -c -f /etc/nftables.d/perfsonar.nft
-    systemctl reload nftables || systemctl restart nftables
-
-```
+        ```bash
+            nft -c -f /etc/nftables.d/perfsonar.nft
+            systemctl reload nftables || systemctl restart nftables
+        
+        ```
         
 1. **Confirm nftables state and security services:**
 
     ??? info "Verification commands"
         
-```bash
-nft list ruleset
-sestatus
-systemctl status fail2ban
-
-```
+        ```bash
+        nft list ruleset
+        sestatus
+        systemctl status fail2ban
+        
+        ```
         
         You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
         
@@ -986,28 +986,28 @@ Integrate into provisioning CI by running with `-n` (dry-run) for approval and t
 Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint`
 container and restart the daemon only if needed.
 
-Install and run examples below, pick which type you want (root shell):
+    Install and run examples below, pick which type you want (root shell):
 
-```bash
-# Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
-    --dry-run --site-name "Acme Co." --project WLCG \
+    ```bash
+    # Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh update \
+        --dry-run --site-name "Acme Co." --project WLCG \
 
-    --admin-email admin@example.org --admin-name "pS Admin"
+        --admin-email admin@example.org --admin-name "pS Admin"
 
-# Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)
-bash /root/restore-lsreg.sh
+    # Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)
+    bash /root/restore-lsreg.sh
 
 
-# Apply new settings and restart the daemon inside the container
-/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh create \
-    --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
-    --city Berkeley --region CA --country US --zip 94720 \
-    --latitude 37.5 --longitude -121.7469 \
+    # Apply new settings and restart the daemon inside the container
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh create \
+        --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+        --city Berkeley --region CA --country US --zip 94720 \
+        --latitude 37.5 --longitude -121.7469 \
 
-    --admin-name "pS Admin" --admin-email admin@example.org
+        --admin-name "pS Admin" --admin-email admin@example.org
 
-```
+    ```
 
 1. **Automatic image updates and safe restarts**
 
@@ -1022,111 +1022,111 @@ bash /root/restore-lsreg.sh
         
 1. Create an update script:
 
-```bash
-    cat > /usr/local/bin/perfsonar-auto-update.sh << 'EOF'
-    #!/bin/bash
+        ```bash
+            cat > /usr/local/bin/perfsonar-auto-update.sh << 'EOF'
+            #!/bin/bash
 
-    # perfsonar-auto-update.sh - Check for and apply container image updates
+            # perfsonar-auto-update.sh - Check for and apply container image updates
 
-    set -e
+            set -e
 
-    COMPOSE_DIR="/opt/perfsonar-tp"
-    LOGFILE="/var/log/perfsonar-auto-update.log"
+            COMPOSE_DIR="/opt/perfsonar-tp"
+            LOGFILE="/var/log/perfsonar-auto-update.log"
 
-    log() {
-        echo "$(date -Iseconds) $*" | tee -a "$LOGFILE"
-    }
+            log() {
+                echo "$(date -Iseconds) $*" | tee -a "$LOGFILE"
+            }
 
-    cd "$COMPOSE_DIR"
+            cd "$COMPOSE_DIR"
 
-    log "Checking for image updates..."
+            log "Checking for image updates..."
 
-    # Pull latest images
+            # Pull latest images
 
-    if podman-compose pull 2>&1 | tee -a "$LOGFILE" | grep -q "Downloaded newer image"; then
-        log "New images found - recreating containers..."
-        podman-compose up -d
-        log "Containers updated successfully"
-    else
-        log "No updates available"
-    fi
-    EOF
+            if podman-compose pull 2>&1 | tee -a "$LOGFILE" | grep -q "Downloaded newer image"; then
+                log "New images found - recreating containers..."
+                podman-compose up -d
+                log "Containers updated successfully"
+            else
+                log "No updates available"
+            fi
+            EOF
 
-    chmod +x /usr/local/bin/perfsonar-auto-update.sh
+            chmod +x /usr/local/bin/perfsonar-auto-update.sh
 
 
-```
+        ```
 
 1. Create a systemd service:
 
-```bash
+        ```bash
 
-    cat > /etc/systemd/system/perfsonar-auto-update.service << 'EOF'
-    [Unit]
-    Description=perfSONAR Container Auto-Update
-    After=network-online.target
+            cat > /etc/systemd/system/perfsonar-auto-update.service << 'EOF'
+            [Unit]
+            Description=perfSONAR Container Auto-Update
+            After=network-online.target
 
-    [Service]
-    Type=oneshot
-    ExecStart=/usr/local/bin/perfsonar-auto-update.sh
+            [Service]
+            Type=oneshot
+            ExecStart=/usr/local/bin/perfsonar-auto-update.sh
 
-    [Install]
-    WantedBy=multi-user.target
-    EOF
+            [Install]
+            WantedBy=multi-user.target
+            EOF
 
-```
+        ```
 
 1. Create a systemd timer (runs daily at 3 AM):
 
-```bash
-    cat > /etc/systemd/system/perfsonar-auto-update.timer << 'EOF'
+        ```bash
+            cat > /etc/systemd/system/perfsonar-auto-update.timer << 'EOF'
 
-    [Unit]
-    Description=perfSONAR Container Auto-Update Timer
+            [Unit]
+            Description=perfSONAR Container Auto-Update Timer
 
-    [Timer]
+            [Timer]
 
-    OnCalendar=daily
-    RandomizedDelaySec=1h
-    Persistent=true
+            OnCalendar=daily
+            RandomizedDelaySec=1h
+            Persistent=true
 
-    [Install]
+            [Install]
 
-    WantedBy=timers.target
-    EOF
+            WantedBy=timers.target
+            EOF
 
-```
+        ```
 
 1. Enable and start the timer:
 
-```bash
-    systemctl daemon-reload
-    systemctl enable --now perfsonar-auto-update.timer
+        ```bash
+            systemctl daemon-reload
+            systemctl enable --now perfsonar-auto-update.timer
 
-```
+        ```
 
 1. Verify the timer is active:
 
-```bash
-systemctl list-timers perfsonar-auto-update.timer
+            ```bash
+            systemctl list-timers perfsonar-auto-update.timer
 
-```
+            ```
 
 1. Test manually (optional):
 
-```bash
+            ```bash
 
-systemctl start perfsonar-auto-update.service
-journalctl -u perfsonar-auto-update.service -n 50
+            systemctl start perfsonar-auto-update.service
+            journalctl -u perfsonar-auto-update.service -n 50
 
-```
+            ```
 
 1. Monitor the update log:
 
-```bash
-tail -f /var/log/perfsonar-auto-update.log
+            ```bash
+            tail -f /var/log/perfsonar-auto-update.log
 
-```
+            ```
 
 This approach ensures containers are updated only when new images are available, minimizing unnecessary restarts while
 keeping your deployment current.
@@ -1141,17 +1141,17 @@ Perform these checks before handing the host over to operations:
 
     ??? info "Verify Podman runtime and containers"
         
-```bash
-# Check Podman service is available
-systemctl status podman
+        ```bash
+        # Check Podman service is available
+        systemctl status podman
 
-# Verify containers are managed by compose
-cd /opt/perfsonar-tp && podman-compose ps
+        # Verify containers are managed by compose
+        cd /opt/perfsonar-tp && podman-compose ps
 
-# Alternative: check containers directly
-podman ps --filter name=perfsonar
+        # Alternative: check containers directly
+        podman ps --filter name=perfsonar
 
-```
+        ```
 
     Ensure Podman is active and containers are running.
 
@@ -1159,21 +1159,21 @@ podman ps --filter name=perfsonar
 
     ??? info "Check container status and logs"
         
-```bash
-# Check all containers are running and healthy
-podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+        ```bash
+        # Check all containers are running and healthy
+        podman ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
 
-# Check perfsonar-testpoint logs for errors
-podman logs perfsonar-testpoint --tail 50
+        # Check perfsonar-testpoint logs for errors
+        podman logs perfsonar-testpoint --tail 50
 
-# If using Let's Encrypt, check certbot logs
+        # If using Let's Encrypt, check certbot logs
 
-podman logs certbot --tail 20 2>/dev/null || echo "Certbot container not present (testpoint-only mode)"
+        podman logs certbot --tail 20 2>/dev/null || echo "Certbot container not present (testpoint-only mode)"
 
-# Verify services inside container are running
-podman exec perfsonar-testpoint systemctl status apache2 psconfig-pscheduler-agent --no-pager
+        # Verify services inside container are running
+        podman exec perfsonar-testpoint systemctl status apache2 psconfig-pscheduler-agent --no-pager
 
-```
+        ```
 
 1. **Network path validation:**
 
@@ -1181,18 +1181,18 @@ podman exec perfsonar-testpoint systemctl status apache2 psconfig-pscheduler-age
         
         Test throughput to a remote testpoint (run from inside the container):
         
-```bash
-podman exec -it perfsonar-testpoint pscheduler task throughput --dest <remote-testpoint>
-
-```
+        ```bash
+        podman exec -it perfsonar-testpoint pscheduler task throughput --dest <remote-testpoint>
+        
+        ```
         
         Check routing from the host:
         
-```bash
-tracepath -n <remote-testpoint>
-ip route get <remote-testpoint-ip>
-
-```
+        ```bash
+        tracepath -n <remote-testpoint>
+        ip route get <remote-testpoint-ip>
+        
+        ```
         
             Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
         
@@ -1200,27 +1200,27 @@ ip route get <remote-testpoint-ip>
 
     ??? info "Check firewall, fail2ban, and SELinux"
         
-```bash
-# Check nftables firewall rules
-nft list ruleset | grep perfsonar
+        ```bash
+        # Check nftables firewall rules
+        nft list ruleset | grep perfsonar
 
-# Check fail2ban status (if installed in Step 4)
-if command -v fail2ban-client >/dev/null 2>&1; then
-    fail2ban-client status
-else
-    echo "fail2ban not installed (optional)"
-fi
+        # Check fail2ban status (if installed in Step 4)
+        if command -v fail2ban-client >/dev/null 2>&1; then
+            fail2ban-client status
+        else
+            echo "fail2ban not installed (optional)"
+        fi
 
-# Check for recent SELinux denials
-if command -v ausearch >/dev/null 2>&1; then
-    ausearch --message AVC --just-one
-elif [ -f /var/log/audit/audit.log ]; then
-    grep -i "avc.*denied" /var/log/audit/audit.log | tail -5
-else
-    echo "SELinux audit tools not available"
-fi
+        # Check for recent SELinux denials
+        if command -v ausearch >/dev/null 2>&1; then
+            ausearch --message AVC --just-one
+        elif [ -f /var/log/audit/audit.log ]; then
+            grep -i "avc.*denied" /var/log/audit/audit.log | tail -5
+        else
+            echo "SELinux audit tools not available"
+        fi
 
-```
+        ```
 
     Investigate any SELinux denials or repeated Fail2Ban bans.
 
@@ -1228,15 +1228,15 @@ fi
 
     ??? info "Verify certificate validity"
         
-```bash
-# Check certificate via HTTPS connection
-echo | openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> 2>/dev/null | openssl x509 -noout -dates -issuer
+        ```bash
+        # Check certificate via HTTPS connection
+        echo | openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> 2>/dev/null | openssl x509 -noout -dates -issuer
 
 
-# Alternative: Check certificate files directly
-sudo openssl x509 -in /etc/letsencrypt/live/<SERVER_FQDN>/cert.pem -noout -dates -issuer
+        # Alternative: Check certificate files directly
+        sudo openssl x509 -in /etc/letsencrypt/live/<SERVER_FQDN>/cert.pem -noout -dates -issuer
 
-```
+        ```
 
 Ensure the issuer is Let's Encrypt and the validity period is acceptable. This check only applies if you configured
 Let's Encrypt in Step 3.
@@ -1246,10 +1246,10 @@ Let's Encrypt in Step 3.
 ??? info "Run perfSONAR diagnostic reports" Run the perfSONAR troubleshoot command from inside the container and send
     outputs to operations:
     
-```bash
-podman exec -it perfsonar-testpoint pscheduler troubleshoot
+        ```bash
+        podman exec -it perfsonar-testpoint pscheduler troubleshoot
     
-```
+        ```
     
 ---
 

@@ -7,7 +7,7 @@
 Use the bootstrap script to clone the perfSONAR testpoint repo and install helper scripts under /opt/perfsonar-
 tp/tools_scripts.
 
-```bash
+```
 curl -fsSL \
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
     -o /tmp/install_tools_scripts.sh

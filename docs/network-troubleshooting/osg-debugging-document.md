@@ -6,10 +6,7 @@
 
 !!! note
 
-  ```text
-This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
-
-  ```
+  This document is old but still may have useful information.  Many tools it references may no longer be supported or available.
 
 # Abstract
 
