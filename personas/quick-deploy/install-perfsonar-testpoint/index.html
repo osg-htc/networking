@@ -2688,20 +2688,23 @@ extract/save/restore registration config that you may want to use.</p>
 <details class="info">
 <summary>Quick capture of existing lsregistration config (if you have a src)</summary>
 <p>Download temporarily:</p>
+</details>
 <p><div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-o<span class="w"> </span>/tmp/update-lsreg.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-lsreg.sh
 </code></pre></div>
-<!-- markdownlint-enable MD040 --></p>
-<p>Use the downloaded tool to extract a restore script:</p>
+    <!-- markdownlint-enable MD040 --></p>
+<div class="codehilite"><pre><span></span><code><span class="n">Use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">downloaded</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="p">:</span>
+</code></pre></div>
+
 <div class="highlight"><pre><span></span><code>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
 </code></pre></div>
-<p>Note: Repository clone instructions are in Step 2.</p>
-<blockquote>
-<p><strong>Note:</strong> All shell commands assume an interactive root shell.</p>
-</blockquote>
-</details>
+<div class="codehilite"><pre><span></span><code><span class="n">Note</span><span class="o">:</span><span class="w"> </span><span class="n">Repository</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">Step</span><span class="w"> </span><span class="mi">2</span><span class="o">.</span>
+
+<span class="o">&gt;</span><span class="w"> </span><span class="o">**</span><span class="n">Note</span><span class="o">:**</span><span class="w"> </span><span class="n">All</span><span class="w"> </span><span class="n">shell</span><span class="w"> </span><span class="n">commands</span><span class="w"> </span><span class="n">assume</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">interactive</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="n">shell</span><span class="o">.</span>
+</code></pre></div>
+
 <hr />
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
 <ol>
@@ -2710,38 +2713,40 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </li>
 <li>
 <p><strong>Set the hostname and time sync:</strong> Pick the NIC that will own the default route for the hostname.</p>
+</li>
+</ol>
 <div class="highlight"><pre><span></span><code>hostnamectl<span class="w"> </span>set-hostname<span class="w"> </span>&lt;testpoint-hostname&gt;
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>chronyd
 timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Region/City&gt;
 </code></pre></div>
-</li>
-<li>
-<p><strong>Disable unused services:</strong></p>
+<ol>
+<li><strong>Disable unused services:</strong></li>
+</ol>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
 dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
 </code></pre></div>
-<details class="info">
-<summary>Why disable unused services?</summary>
-<p>We recommend disabling unused services during initial provisioning to reduce complexity and avoid unexpected
-interference with network and container setup. Services such as <code>firewalld</code>, <code>NetworkManager-wait-online</code>, and <code>rsyslog</code>
-can alter networking state, hold boot or network events, or conflict with the automated nftables/NetworkManager changes
-performed by the helper scripts. Disabling non-essential services makes the install deterministic, reduces the host
-attack surface, and avoids delays or race conditions while configuring policy-based routing, nftables rules, and      <br />
-container networking.</p>
-</details>
-</li>
-<li>
-<p><strong>Update the system:</strong></p>
-<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>update
+<div class="codehilite"><pre><span></span><code><span class="nv">???</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="s2">&quot;Why disable unused services?&quot;</span>
+
+<span class="w">    </span><span class="n">We</span><span class="w"> </span><span class="n">recommend</span><span class="w"> </span><span class="n">disabling</span><span class="w"> </span><span class="n">unused</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="n">during</span><span class="w"> </span><span class="k">initial</span><span class="w"> </span><span class="n">provisioning</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">reduce</span><span class="w"> </span><span class="n">complexity</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">avoid</span><span class="w"> </span><span class="n">unexpected</span>
+<span class="w">    </span><span class="n">interference</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="k">set</span><span class="n">up</span><span class="p">.</span><span class="w"> </span><span class="n">Services</span><span class="w"> </span><span class="n">such</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n n-Quoted">`firewalld`</span><span class="p">,</span><span class="w"> </span><span class="n n-Quoted">`NetworkManager-wait-online`</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n n-Quoted">`rsyslog`</span>
+<span class="w">    </span><span class="n">can</span><span class="w"> </span><span class="k">alter</span><span class="w"> </span><span class="n">networking</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">hold</span><span class="w"> </span><span class="n">boot</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="k">events</span><span class="p">,</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">conflict</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">automated</span><span class="w"> </span><span class="n">nftables</span><span class="o">/</span><span class="n">NetworkManager</span><span class="w"> </span><span class="n">changes</span>
+<span class="w">    </span><span class="n">performed</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">helper</span><span class="w"> </span><span class="n">scripts</span><span class="p">.</span><span class="w"> </span><span class="n">Disabling</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">essential</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="n">makes</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">install</span><span class="w"> </span><span class="k">deterministic</span><span class="p">,</span><span class="w"> </span><span class="n">reduces</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">host</span>
+<span class="w">    </span><span class="n">attack</span><span class="w"> </span><span class="n">surface</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">avoids</span><span class="w"> </span><span class="n">delays</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">race</span><span class="w"> </span><span class="n">conditions</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="n">configuring</span><span class="w"> </span><span class="n">policy</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">routing</span><span class="p">,</span><span class="w"> </span><span class="n">nftables</span><span class="w"> </span><span class="n">rules</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w">        </span>
+<span class="w">    </span><span class="n">container</span><span class="w"> </span><span class="n">networking</span><span class="p">.</span>
 </code></pre></div>
-</li>
-<li>
-<p><strong>Record NIC names:</strong> Document interface mappings for later PBR configuration.</p>
-<div class="highlight"><pre><span></span><code>nmcli<span class="w"> </span>device<span class="w"> </span>status
+
+<ol>
+<li><strong>Update the system:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>update
+<span class="w"> </span><span class="sb">```</span>
+
+<span class="m">1</span>.<span class="w"> </span>**Record<span class="w"> </span>NIC<span class="w"> </span>names:**<span class="w"> </span>Document<span class="w"> </span>interface<span class="w"> </span>mappings<span class="w"> </span><span class="k">for</span><span class="w"> </span>later<span class="w"> </span>PBR<span class="w"> </span>configuration.
+
+<span class="sb">```</span>bash
+nmcli<span class="w"> </span>device<span class="w"> </span>status
 ip<span class="w"> </span>-br<span class="w"> </span>addr
 </code></pre></div>
-</li>
-</ol>
 <hr />
 <h2 id="step-2-choose-your-deployment-path">Step 2 – Choose Your Deployment Path<a class="headerlink" href="#step-2-choose-your-deployment-path" title="Permanent link">&para;</a></h2>
 <p>After completing Step 1 (minimal OS hardening), you can proceed in one of two ways:</p>
@@ -2750,7 +2755,6 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 certificate issuance, and pSConfig enrollment with interactive pauses (or non-interactive batch mode).</p>
 <p><strong>Download and run the orchestrator:</strong></p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/tmp/perfSONAR-orchestrator.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/perfSONAR-orchestrator.sh
@@ -2808,7 +2812,6 @@ prerequisites in one command:</p>
 <h4 id="step-22-bootstrap-helper-scripts">Step 2.2 – Bootstrap Helper Scripts<a class="headerlink" href="#step-22-bootstrap-helper-scripts" title="Permanent link">&para;</a></h4>
 <p>Use the bootstrap script to install helper scripts under <code>/opt/perfsonar-tp/tools_scripts</code>:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-o<span class="w"> </span>/tmp/install_tools_scripts.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install_tools_scripts.sh
@@ -2893,15 +2896,23 @@ determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gatewa
 in non-interactive sessions or when you use <code>--yes</code>.</p>
 </div>
 <p>Preview generation (no changes):</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
-</code></pre></div>
-<p>Generate and write the config file:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
-</code></pre></div>
-<p>The script writes the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>. Edit to adjust site-specific values (e.g.,
-confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entries) and verify the entries.  Next step is to apply the network
-changes...</p>
 </li>
+</ul>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-debug
+
+<span class="w"> </span><span class="sb">```</span>
+
+<span class="w">    </span>Generate<span class="w"> </span>and<span class="w"> </span>write<span class="w"> </span>the<span class="w"> </span>config<span class="w"> </span>file:
+
+<span class="sb">```</span>bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">writes</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="k">file</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n n-Quoted">`/etc/perfSONAR-multi-nic-config.conf`</span><span class="p">.</span><span class="w"> </span><span class="n">Edit</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">adjust</span><span class="w"> </span><span class="n">site</span><span class="o">-</span><span class="k">specific</span><span class="w"> </span><span class="k">values</span><span class="w"> </span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">g</span><span class="p">.,</span>
+<span class="n">confirm</span><span class="w"> </span><span class="n n-Quoted">`DEFAULT_ROUTE_NIC`</span><span class="p">,</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="n n-Quoted">`NIC_IPV4_ADDROUTE`</span><span class="w"> </span><span class="n">entries</span><span class="p">)</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">verify</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">entries</span><span class="p">.</span><span class="w">  </span><span class="k">Next</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">apply</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">network</span>
+<span class="n">changes</span><span class="p">...</span>
+</code></pre></div>
+
+<ol>
 <li>
 <p><strong>Apply changes (in-place default):</strong></p>
 <div class="admonition warning">
@@ -2923,17 +2934,19 @@ invocation.</p>
 </code></pre></div>
 
 <p><strong>In-place apply (recommended):</strong></p>
+</li>
+</ol>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
 </code></pre></div>
-<p><strong>Full rebuild (destructive – removes all NM connections first):</strong></p>
+<div class="codehilite"><pre><span></span><code>**Full rebuild (destructive – removes all NM connections first):**
+</code></pre></div>
+
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--rebuild-all<span class="w"> </span>--yes
 </code></pre></div>
-</li>
-</ul>
 <p>The script logs to <code>/var/log/perfSONAR-multi-nic-config.log</code>. After an in-place apply, a reboot is typically
 unnecessary. If connectivity or rules appear inconsistent (<code>ip rule show</code> / <code>ip route</code> mismatch), consider a manual
 NetworkManager restart:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>systemctl<span class="w"> </span>restart<span class="w"> </span>NetworkManager
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>NetworkManager
 </code></pre></div>
 <ol>
 <li><strong>DNS: forward and reverse entries (required):</strong></li>
@@ -2953,12 +2966,11 @@ host, and because some measurement infrastructure and registration systems perfo
 </li>
 </ul>
 <p>??? example "Run the DNS checker" Validate forward/reverse DNS for addresses in <code>/etc/perfSONAR-multi-nic-config.conf</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="n">bash</span>
-<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">check</span><span class="o">-</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">dns</span><span class="o">.</span><span class="n">sh</span>
-
-<span class="err">```</span>
+<div class="codehilite"><pre><span></span><code>You can run a script to check DNS:
 </code></pre></div>
 
+<p><code>bash
+/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh</code></p>
 <p><strong>Notes and automation tips:</strong></p>
 <div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">script</span><span class="w"> </span><span class="n">above</span><span class="w"> </span><span class="n">uses</span><span class="w"> </span><span class="n n-Quoted">`dig`</span><span class="w"> </span><span class="p">(</span><span class="n">bind</span><span class="o">-</span><span class="n">utils</span><span class="w"> </span><span class="n">package</span><span class="p">)</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">commonly</span><span class="w"> </span><span class="n">available</span><span class="p">;</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">adapt</span><span class="w"> </span><span class="n">it</span>
 <span class="w">  </span><span class="k">to</span><span class="w"> </span><span class="k">use</span><span class="w"> </span><span class="n n-Quoted">`host`</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">preferred</span><span class="p">.</span>
@@ -3003,21 +3015,16 @@ optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
 </ul>
 <p>If any prerequisite is missing, the script skips that component and continues.</p>
 <ol>
-<li>
-<p><strong>Install/configure the desired options:</strong></p>
+<li><strong>Install/configure the desired options:</strong></li>
+</ol>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
 </code></pre></div>
-<ul>
-<li>
-<p>Use <code>--yes</code> to skip the interactive confirmation prompt (omit it if you prefer to review the
-  summary and answer manually).</p>
-</li>
-<li>
-<p>Add <code>--dry-run</code> for a rehearsal that only prints the planned actions.</p>
-</li>
-</ul>
-</li>
-</ol>
+<div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="nv">Use</span><span class="w"> </span>`<span class="o">--</span><span class="nv">yes</span>`<span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">skip</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">interactive</span><span class="w"> </span><span class="nv">confirmation</span><span class="w"> </span><span class="nv">prompt</span><span class="w"> </span><span class="ss">(</span><span class="nv">omit</span><span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">you</span><span class="w"> </span><span class="nv">prefer</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">review</span><span class="w"> </span><span class="nv">the</span>
+<span class="w">  </span><span class="nv">summary</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">answer</span><span class="w"> </span><span class="nv">manually</span><span class="ss">)</span>.
+
+<span class="o">-</span><span class="w"> </span><span class="nv">Add</span><span class="w"> </span>`<span class="o">--</span><span class="nv">dry</span><span class="o">-</span><span class="nv">run</span>`<span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">rehearsal</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">only</span><span class="w"> </span><span class="nv">prints</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">planned</span><span class="w"> </span><span class="nv">actions</span>.
+</code></pre></div>
+
 <p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-
 config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.</p>
 <div class="codehilite"><pre><span></span><code><span class="err">???</span><span class="w"> </span><span class="n">info</span><span class="w"> </span><span class="s2">&quot;SSH allow-lists and validation&quot;</span>
@@ -3031,51 +3038,44 @@ config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—onl
 <span class="err">???</span><span class="w"> </span><span class="n">tip</span><span class="w"> </span><span class="s2">&quot;Preview nftables rules before applying&quot;</span>
 
 <span class="w">    </span><span class="n">You</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">preview</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">fully</span><span class="w"> </span><span class="n">rendered</span><span class="w"> </span><span class="n">nftables</span><span class="w"> </span><span class="n">rules</span><span class="w"> </span><span class="p">(</span><span class="n">no</span><span class="w"> </span><span class="n">changes</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">made</span><span class="p">):</span>
-
-<span class="w">    </span><span class="err">```</span><span class="n">bash</span>
-<span class="w">    </span><span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">-</span><span class="n">tp</span><span class="o">/</span><span class="n">tools_scripts</span><span class="o">/</span><span class="n">perfSONAR</span><span class="o">-</span><span class="n">install</span><span class="o">-</span><span class="n">nftables</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">--</span><span class="nb">print</span><span class="o">-</span><span class="n">rules</span>
-
-<span class="w">    </span><span class="err">```</span>
-
-<span class="err">???</span><span class="w"> </span><span class="n">tip</span><span class="w"> </span><span class="s2">&quot;Manually add extra management hosts/subnets&quot;</span>
-
-<span class="w">    </span><span class="n">If</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="n">additional</span><span class="w"> </span><span class="n">SSH</span><span class="w"> </span><span class="n">sources</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">represented</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">NIC</span><span class="o">-</span><span class="n">derived</span><span class="w"> </span><span class="n">prefixes</span><span class="p">,</span><span class="w"> </span><span class="n">edit</span>
-<span class="w">    </span><span class="err">`</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nftables</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">.</span><span class="n">nft</span><span class="err">`</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="n">entries</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">appropriate</span><span class="w"> </span><span class="n">sets</span><span class="o">.</span><span class="w"> </span><span class="n">Example</span><span class="p">:</span>
-
-<span class="w">    </span><span class="err">```</span><span class="n">nft</span>
-<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip4_subnets</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">type</span><span class="w"> </span><span class="n">ipv4_addr</span>
-<span class="w">        </span><span class="n">flags</span><span class="w"> </span><span class="n">interval</span>
-<span class="w">        </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mf">192.0</span><span class="o">.</span><span class="mf">2.0</span><span class="o">/</span><span class="mi">24</span><span class="p">,</span><span class="w"> </span><span class="mf">198.51</span><span class="o">.</span><span class="mf">100.0</span><span class="o">/</span><span class="mi">25</span><span class="w"> </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip4_hosts</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">type</span><span class="w"> </span><span class="n">ipv4_addr</span>
-<span class="w">        </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mf">203.0</span><span class="o">.</span><span class="mf">113.10</span><span class="p">,</span><span class="w"> </span><span class="mf">203.0</span><span class="o">.</span><span class="mf">113.11</span><span class="w"> </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip6_subnets</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">type</span><span class="w"> </span><span class="n">ipv6_addr</span>
-<span class="w">        </span><span class="n">flags</span><span class="w"> </span><span class="n">interval</span>
-<span class="w">        </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">2001</span><span class="p">:</span><span class="n">db8</span><span class="p">:</span><span class="mi">1</span><span class="p">::</span><span class="o">/</span><span class="mi">64</span><span class="w"> </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="n">set</span><span class="w"> </span><span class="n">ssh_access_ip6_hosts</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">type</span><span class="w"> </span><span class="n">ipv6_addr</span>
-<span class="w">        </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">2001</span><span class="p">:</span><span class="n">db8</span><span class="p">::</span><span class="mi">10</span><span class="w"> </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="err">```</span>
-
-<span class="w">    </span><span class="n">Then</span><span class="w"> </span><span class="n">validate</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="w"> </span><span class="n">shell</span><span class="p">):</span>
-
-<span class="w">    </span><span class="err">```</span><span class="n">bash</span>
-<span class="w">    </span><span class="n">nft</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nftables</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">perfsonar</span><span class="o">.</span><span class="n">nft</span>
-<span class="w">    </span><span class="n">systemctl</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">nftables</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">systemctl</span><span class="w"> </span><span class="n">restart</span><span class="w"> </span><span class="n">nftables</span>
-
-<span class="w">    </span><span class="err">```</span>
 </code></pre></div>
 
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--print-rules
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>???<span class="w"> </span><span class="nv">tip</span><span class="w"> </span><span class="s2">&quot;Manually add extra management hosts/subnets&quot;</span>
+
+<span class="w">    </span><span class="k">If</span><span class="w"> </span><span class="nv">you</span><span class="w"> </span><span class="nv">need</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">allow</span><span class="w"> </span><span class="nv">additional</span><span class="w"> </span><span class="nv">SSH</span><span class="w"> </span><span class="nv">sources</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">represented</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">your</span><span class="w"> </span><span class="nv">NIC</span><span class="o">-</span><span class="nv">derived</span><span class="w"> </span><span class="nv">prefixes</span>,<span class="w"> </span><span class="nv">edit</span>
+<span class="w">    </span>`<span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">nftables</span>.<span class="nv">d</span><span class="o">/</span><span class="nv">perfsonar</span>.<span class="nv">nft</span>`<span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">add</span><span class="w"> </span><span class="nv">entries</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">appropriate</span><span class="w"> </span><span class="nv">sets</span>.<span class="w"> </span><span class="nv">Example</span>:
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code>set ssh_access_ip4_subnets {
+    type ipv4_addr
+    flags interval
+    elements = { 192.0.2.0/24, 198.51.100.0/25 }
+}
+
+set ssh_access_ip4_hosts {
+    type ipv4_addr
+    elements = { 203.0.113.10, 203.0.113.11 }
+}
+
+set ssh_access_ip6_subnets {
+    type ipv6_addr
+    flags interval
+    elements = { 2001:db8:1::/64 }
+}
+
+set ssh_access_ip6_hosts {
+    type ipv6_addr
+    elements = { 2001:db8::10 }
+}
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">Then</span><span class="w"> </span><span class="n">validate</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="p">(</span><span class="n">root</span><span class="w"> </span><span class="n">shell</span><span class="p">):</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code>nft<span class="w"> </span>-c<span class="w"> </span>-f<span class="w"> </span>/etc/nftables.d/perfsonar.nft
+systemctl<span class="w"> </span>reload<span class="w"> </span>nftables<span class="w"> </span><span class="o">||</span><span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>nftables
+</code></pre></div>
 <ol>
 <li>
 <p><strong>Confirm nftables state and security services:</strong></p>
