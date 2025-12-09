@@ -100,7 +100,7 @@ passing extra-vars to the playbook.
 Key variables (role defaults in `ansible/roles/testpoint/defaults/main.yml`):
 
 - `perfsonar_install_tools_scripts` (bool, default: false)
-    - When true, the role will download the helper scripts into
+  - When true, the role will download the helper scripts into
       `/opt/perfsonar-tp/tools_scripts` (from the `docs/perfsonar/tools_scripts` raw URLs)
 - `perfsonar_tools_root` (string, default: `/opt/perfsonar-tp`) - destination root
 - `perfsonar_run_check_deps` (bool, default: false) - run the `check-deps.sh` script

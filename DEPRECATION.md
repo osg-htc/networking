@@ -16,10 +16,10 @@ The unified prerequisite installation and the guided orchestrator now cover depe
 ### Recommended replacements
 
 - Install prerequisites up front (RHEL/Alma/Rocky 9):
-    - See Step 1 of `docs/personas/quick-deploy/install-perfsonar-testpoint.md` for the one-shot package install.
+  - See Step 1 of `docs/personas/quick-deploy/install-perfsonar-testpoint.md` for the one-shot package install.
 - Use the guided installer to verify and apply configuration:
-    - Orchestrator: `docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh`
-    - Bootstrap fetcher: `docs/perfsonar/tools_scripts/install_tools_scripts.sh`
+  - Orchestrator: `docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh`
+  - Bootstrap fetcher: `docs/perfsonar/tools_scripts/install_tools_scripts.sh`
 
 ### Migration
 
