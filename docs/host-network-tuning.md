@@ -140,7 +140,7 @@ Detailed log with full ethtool/sysctl/tc output is written to `/tmp/fasterdata-t
 
 You can download the script directly from the GitHub repo (raw) or the site after it is published:
 
-```text
+```
 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
 https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 ```
