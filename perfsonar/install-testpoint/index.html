@@ -2352,21 +2352,36 @@ After\=network.target</p>
 </li>
 </ul>
 <p>/etc/nftables.conf:</p>
-<p>flush ruleset</p>
-<p>table inet perfsonar {</p>
-<p>`\n\nset allowed_protocols { type inet_proto elements \= { icmp, icmpv6 } } set allowed_interfaces { type ifname
-elements \= { "lo" } } set allowed_tcp_dports { type inet_service elements \= { 22, 443, 861, 862, 9090, 123, 5201,
-5001, 5000, 5101 } } set allowed_udp_ports { type inet_service elements \= { 123, 5201, 5001, 5000, 5101 } } chain
-allow { ct state established,related accept ct state invalid drop meta l4proto @allowed_protocols accept iifname
-@allowed_interfaces accept tcp dport @allowed_tcp_dports ct state new accept udp dport @allowed_udp_ports ct state
-new accept # traceroute and test ranges udp dport 33434-33634 ct state new accept udp dport 18760-19960 ct state new
-accept udp dport 8760-9960 ct state new accept tcp dport 5890-5900 ct state new accept # SSH controls (add your trusted
-IPs/subnets) tcp dport 22 ip saddr 192.168.10.0/24 accept tcp dport 22 ip saddr 10.20.30.0/24 accept } chain input {
-type filter hook input priority 0; policy drop; jump allow reject with icmpx admin-prohibited }</p>
-<div class="codehilite"><pre><span></span><code>```text
-</code></pre></div>
+<div class="highlight"><pre><span></span><code>flush ruleset
 
-<p>}</p>
+table inet perfsonar {
+
+set allowed_protocols { type inet_proto elements = { icmp, icmpv6 } }
+set allowed_interfaces { type ifname elements = { &quot;lo&quot; } }
+set allowed_tcp_dports { type inet_service elements = { 22, 443, 861, 862, 9090, 123, 5201, 5001, 5000, 5101 } }
+set allowed_udp_ports { type inet_service elements = { 123, 5201, 5001, 5000, 5101 } }
+chain allow {
+    ct state established,related accept
+    ct state invalid drop
+    meta l4proto @allowed_protocols accept
+    iifname @allowed_interfaces accept
+    tcp dport @allowed_tcp_dports ct state new accept
+    udp dport @allowed_udp_ports ct state new accept
+    # traceroute and test ranges
+    udp dport 33434-33634 ct state new accept
+    udp dport 18760-19960 ct state new accept
+    udp dport 8760-9960 ct state new accept
+    tcp dport 5890-5900 ct state new accept
+    # SSH controls (add your trusted IPs/subnets)
+    tcp dport 22 ip saddr 192.168.10.0/24 accept
+    tcp dport 22 ip saddr 10.20.30.0/24 accept
+}
+chain input {
+    type filter hook input priority 0; policy drop;
+    jump allow
+    reject with icmpx admin-prohibited
+}
+</code></pre></div>
 <p>Apply and persist:</p>
 <p>nft -f /etc/nftables.conf
 systemctl enable --now nftables</p>
@@ -2376,24 +2391,22 @@ systemctl enable --now nftables</p>
 <hr />
 <h2 id="6-confirm-operation">6. Confirm Operation<a class="headerlink" href="#6-confirm-operation" title="Permanent link">&para;</a></h2>
 <p>Check containers:</p>
-<div class="codehilite"><pre><span></span><code>```
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps
+
+<span class="c1"># or</span>
+
+docker<span class="w"> </span>ps
 </code></pre></div>
-
-<p>podman ps</p>
-<h1 id="or">or<a class="headerlink" href="#or" title="Permanent link">&para;</a></h1>
-<p>docker ps</p>
-<div class="highlight"><pre><span></span><code>Check logs:
+<p>Check logs:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
 </code></pre></div>
-<p>podman logs perfsonar-testpoint</p>
-<div class="highlight"><pre><span></span><code>Test<span class="w"> </span>connectivity<span class="w"> </span>between<span class="w"> </span>testpoints.
-
----
-
-<span class="c1">## 7. (Optional) Configure perfSONAR Remotes</span>
-
-To<span class="w"> </span>register<span class="w"> </span>your<span class="w"> </span>testpoint<span class="w"> </span>with<span class="w"> </span>a<span class="w"> </span>central<span class="w"> </span>config:
-</code></pre></div>
-<p>podman exec -it perfsonar-testpoint psconfig remote list podman exec -it perfsonar-testpoint psconfig remote
+<p>Test connectivity between testpoints.</p>
+<hr />
+<h2 id="7-optional-configure-perfsonar-remotes">7. (Optional) Configure perfSONAR Remotes<a class="headerlink" href="#7-optional-configure-perfsonar-remotes" title="Permanent link">&para;</a></h2>
+<p>To register your testpoint with a central config:</p>
+<p>```bash
+podman exec -it perfsonar-testpoint psconfig remote list
+podman exec -it perfsonar-testpoint psconfig remote --configure-archives add "https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch"
 --configure-archives add "<a href="https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch">https://psconfig.opensciencegrid.org/pub/auto/psb02-gva.cern.ch</a>"</p>
 <p>```bash</p>
 <hr />
