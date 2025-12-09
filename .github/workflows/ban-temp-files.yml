@@ -1,0 +1,26 @@
+name: Ban temp and backup files
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ban_temp_files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Fail if tracked temp/.bak files exist
+        run: |
+          set -e
+          # Look for any files matching tmp/ or *.bak tracked in commit
+          list=$(git ls-files | grep -E "(^tmp/|\.bak$)" || true)
+          if [ -n "$list" ]; then
+            echo "Found forbidden tracked files:\n$list"
+            exit 1
+          fi
+        shell: bash
