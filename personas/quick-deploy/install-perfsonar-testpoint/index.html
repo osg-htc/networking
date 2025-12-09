@@ -2687,24 +2687,18 @@ process while accommodating site-specific requirements.</p>
 extract/save/restore registration config that you may want to use.</p>
 <details class="info">
 <summary>Quick capture of existing lsregistration config (if you have a src)</summary>
-<p>Download temporarily:</p>
+<p>Download a temp copy:   </p>
 </details>
 <p><div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-o<span class="w"> </span>/tmp/update-lsreg.sh
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-lsreg.sh
 </code></pre></div>
-    <!-- markdownlint-enable MD040 --></p>
-<div class="codehilite"><pre><span></span><code><span class="n">Use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">downloaded</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">extract</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">restore</span><span class="w"> </span><span class="n">script</span><span class="p">:</span>
-</code></pre></div>
-
+    Use the downloaded tool to extract a restore script:
 <div class="highlight"><pre><span></span><code>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">Note</span><span class="o">:</span><span class="w"> </span><span class="n">Repository</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="n">instructions</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">Step</span><span class="w"> </span><span class="mi">2</span><span class="o">.</span>
-
-<span class="o">&gt;</span><span class="w"> </span><span class="o">**</span><span class="n">Note</span><span class="o">:**</span><span class="w"> </span><span class="n">All</span><span class="w"> </span><span class="n">shell</span><span class="w"> </span><span class="n">commands</span><span class="w"> </span><span class="n">assume</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">interactive</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="n">shell</span><span class="o">.</span>
-</code></pre></div>
-
+    Note: Repository clone instructions are in Step 2.
+    <strong>Note:</strong> All shell commands assume an interactive root shell.</p>
 <hr />
 <h2 id="step-1-install-and-harden-el9">Step 1 – Install and Harden EL9<a class="headerlink" href="#step-1-install-and-harden-el9" title="Permanent link">&para;</a></h2>
 <ol>
