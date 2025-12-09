@@ -2690,33 +2690,33 @@ before moving on to new tests.  In general the following recommendation can be m
 </ul>
 <p>NDT uses a command line client called <strong>web100clt</strong>.  There are many options available, but in general you must supply a
 server name, and some debugging flags to get additional output.  Here is a simple invocation:</p>
-<div class="highlight"><pre><span></span><code>[user@host ~]$ web100clt -n ndt.chic.net.internet2.edu
+<div class="highlight"><pre><span></span><code><span class="o">[</span>user@host<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>web100clt<span class="w"> </span>-n<span class="w"> </span>ndt.chic.net.internet2.edu
 
-Testing network path for configuration and performance problems  --  Using IPv6 address
+Testing<span class="w"> </span>network<span class="w"> </span>path<span class="w"> </span><span class="k">for</span><span class="w"> </span>configuration<span class="w"> </span>and<span class="w"> </span>performance<span class="w"> </span>problems<span class="w">  </span>--<span class="w">  </span>Using<span class="w"> </span>IPv6<span class="w"> </span>address
 
-Checking for Middleboxes . . . . . . . . . . . . . . . . . .  Done
+Checking<span class="w"> </span><span class="k">for</span><span class="w"> </span>Middleboxes<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w">  </span>Done
 
-checking for firewalls . . . . . . . . . . . . . . . . . . .  Done
+checking<span class="w"> </span><span class="k">for</span><span class="w"> </span>firewalls<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w">  </span>Done
 
-running 10s outbound test (client to server) . . . . .  92.16 Mb/s
+running<span class="w"> </span>10s<span class="w"> </span>outbound<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">(</span>client<span class="w"> </span>to<span class="w"> </span>server<span class="o">)</span><span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w">  </span><span class="m">92</span>.16<span class="w"> </span>Mb/s
 
-running 10s inbound test (server to client) . . . . . . 90.63 Mb/s
+running<span class="w"> </span>10s<span class="w"> </span>inbound<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">(</span>server<span class="w"> </span>to<span class="w"> </span>client<span class="o">)</span><span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span>.<span class="w"> </span><span class="m">90</span>.63<span class="w"> </span>Mb/s
 
-The slowest link in the end-to-end path is a 100 Mbps Full duplex Fast Ethernet subnet
+The<span class="w"> </span>slowest<span class="w"> </span>link<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>end-to-end<span class="w"> </span>path<span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span><span class="m">100</span><span class="w"> </span>Mbps<span class="w"> </span>Full<span class="w"> </span>duplex<span class="w"> </span>Fast<span class="w"> </span>Ethernet<span class="w"> </span>subnet
 
-Information: Other network traffic is congesting the link
+Information:<span class="w"> </span>Other<span class="w"> </span>network<span class="w"> </span>traffic<span class="w"> </span>is<span class="w"> </span>congesting<span class="w"> </span>the<span class="w"> </span>link
 
-Information [S2C]: Packet queuing detected: 15.06% (local buffers)
+Information<span class="w"> </span><span class="o">[</span>S2C<span class="o">]</span>:<span class="w"> </span>Packet<span class="w"> </span>queuing<span class="w"> </span>detected:<span class="w"> </span><span class="m">15</span>.06%<span class="w"> </span><span class="o">(</span><span class="nb">local</span><span class="w"> </span>buffers<span class="o">)</span>
 
-Server &amp;#39;ndt.chic.net.internet2.edu&amp;#39; is not behind a firewall. [Connection to the ephemeral port was successful]
+Server<span class="w"> </span><span class="p">&amp;</span><span class="c1">#39;ndt.chic.net.internet2.edu&amp;#39; is not behind a firewall. [Connection to the ephemeral port was successful]</span>
 
-Client is probably behind a firewall. [Connection to the ephemeral port failed]
+Client<span class="w"> </span>is<span class="w"> </span>probably<span class="w"> </span>behind<span class="w"> </span>a<span class="w"> </span>firewall.<span class="w"> </span><span class="o">[</span>Connection<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>ephemeral<span class="w"> </span>port<span class="w"> </span>failed<span class="o">]</span>
 
-Information: Network Middlebox is modifying MSS variable (changed to 1440)
+Information:<span class="w"> </span>Network<span class="w"> </span>Middlebox<span class="w"> </span>is<span class="w"> </span>modifying<span class="w"> </span>MSS<span class="w"> </span>variable<span class="w"> </span><span class="o">(</span>changed<span class="w"> </span>to<span class="w"> </span><span class="m">1440</span><span class="o">)</span>
 
-Server IP addresses are preserved End-to-End
+Server<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>are<span class="w"> </span>preserved<span class="w"> </span>End-to-End
 
-Client IP addresses are preserved End-to-End
+Client<span class="w"> </span>IP<span class="w"> </span>addresses<span class="w"> </span>are<span class="w"> </span>preserved<span class="w"> </span>End-to-End
 </code></pre></div>
 <p>To get additional data, try adding the <strong>-ll</strong> flag, it will produce a more in depth analysis.  NDT is useful as the
 first step of debugging to gather information about the end host, as well as the basic network configuration.</p>
@@ -2744,96 +2744,96 @@ first step of debugging to gather information about the end host, as well as the
 </ul>
 <p>An example of invoking BWCTL can be seen below.  In this example we are sending data from the host we are on to another
 located in Kansas City MO, on the Internet2 network:</p>
-<div class="highlight"><pre><span></span><code>[user@host ~]$ bwctl -f m -t 10 -i 1 -c nms-rthr.kans.net.internet2.edu
-bwctl: Using tool: iperf
-bwctl: 93 seconds until test results available
-RECEIVER START
-bwctl: exec\_line: /usr/bin/iperf -B 64.57.16.210 -s -f m -m -p 5011 -t 10 -i 1
-bwctl: start\_tool: 3568979157.239050
+<div class="highlight"><pre><span></span><code><span class="o">[</span>user@host<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>bwctl<span class="w"> </span>-f<span class="w"> </span>m<span class="w"> </span>-t<span class="w"> </span><span class="m">10</span><span class="w"> </span>-i<span class="w"> </span><span class="m">1</span><span class="w"> </span>-c<span class="w"> </span>nms-rthr.kans.net.internet2.edu
+bwctl:<span class="w"> </span>Using<span class="w"> </span>tool:<span class="w"> </span>iperf
+bwctl:<span class="w"> </span><span class="m">93</span><span class="w"> </span>seconds<span class="w"> </span><span class="k">until</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>results<span class="w"> </span>available
+RECEIVER<span class="w"> </span>START
+bwctl:<span class="w"> </span>exec<span class="se">\_</span>line:<span class="w"> </span>/usr/bin/iperf<span class="w"> </span>-B<span class="w"> </span><span class="m">64</span>.57.16.210<span class="w"> </span>-s<span class="w"> </span>-f<span class="w"> </span>m<span class="w"> </span>-m<span class="w"> </span>-p<span class="w"> </span><span class="m">5011</span><span class="w"> </span>-t<span class="w"> </span><span class="m">10</span><span class="w"> </span>-i<span class="w"> </span><span class="m">1</span>
+bwctl:<span class="w"> </span>start<span class="se">\_</span>tool:<span class="w"> </span><span class="m">3568979157</span>.239050
 ------------------------------------------------------------
-Server listening on TCP port 5011
-Binding to local address 64.57.16.210
-TCP window size: 0.08 MByte (default)
+Server<span class="w"> </span>listening<span class="w"> </span>on<span class="w"> </span>TCP<span class="w"> </span>port<span class="w"> </span><span class="m">5011</span>
+Binding<span class="w"> </span>to<span class="w"> </span><span class="nb">local</span><span class="w"> </span>address<span class="w"> </span><span class="m">64</span>.57.16.210
+TCP<span class="w"> </span>window<span class="w"> </span>size:<span class="w"> </span><span class="m">0</span>.08<span class="w"> </span>MByte<span class="w"> </span><span class="o">(</span>default<span class="o">)</span>
 ------------------------------------------------------------
-[14] local 64.57.16.210 port 5011 connected with 64.57.17.18 port 5011
-[14]  0.0- 1.0 sec    105 MBytes    879 Mbits/sec
-[14]  1.0- 2.0 sec    118 MBytes    990 Mbits/sec
-[14]  2.0- 3.0 sec    118 MBytes    990 Mbits/sec
-[14]  3.0- 4.0 sec    118 MBytes    990 Mbits/sec
-[14]  4.0- 5.0 sec    118 MBytes    990 Mbits/sec
-[14]  5.0- 6.0 sec    118 MBytes    990 Mbits/sec
-[14]  6.0- 7.0 sec    118 MBytes    990 Mbits/sec
-[14]  7.0- 8.0 sec    118 MBytes    990 Mbits/sec
-[14]  8.0- 9.0 sec    118 MBytes    990 Mbits/sec
-[14]  9.0-10.0 sec    118 MBytes    990 Mbits/sec
-[14]  0.0-10.1 sec  1178 MBytes    979 Mbits/sec
-[14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
-bwctl: stop\_exec: 3568979172.016198
-RECEIVER END
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="m">64</span>.57.16.210<span class="w"> </span>port<span class="w"> </span><span class="m">5011</span><span class="w"> </span>connected<span class="w"> </span>with<span class="w"> </span><span class="m">64</span>.57.17.18<span class="w"> </span>port<span class="w"> </span><span class="m">5011</span>
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">0</span>.0-<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">105</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">879</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">1</span>.0-<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">2</span>.0-<span class="w"> </span><span class="m">3</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">3</span>.0-<span class="w"> </span><span class="m">4</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">4</span>.0-<span class="w"> </span><span class="m">5</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">5</span>.0-<span class="w"> </span><span class="m">6</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">6</span>.0-<span class="w"> </span><span class="m">7</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">7</span>.0-<span class="w"> </span><span class="m">8</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">8</span>.0-<span class="w"> </span><span class="m">9</span>.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">9</span>.0-10.0<span class="w"> </span>sec<span class="w">    </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">0</span>.0-10.1<span class="w"> </span>sec<span class="w">  </span><span class="m">1178</span><span class="w"> </span>MBytes<span class="w">    </span><span class="m">979</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w"> </span>MSS<span class="w"> </span>size<span class="w"> </span><span class="m">8948</span><span class="w"> </span>bytes<span class="w"> </span><span class="o">(</span>MTU<span class="w"> </span><span class="m">8988</span><span class="w"> </span>bytes,<span class="w"> </span>unknown<span class="w"> </span>interface<span class="o">)</span>
+bwctl:<span class="w"> </span>stop<span class="se">\_</span>exec:<span class="w"> </span><span class="m">3568979172</span>.016198
+RECEIVER<span class="w"> </span>END
 </code></pre></div>
 <p>This test reveals that over the course of 10 seconds we achieved an average bandwidth of 979Mbps and sent a total of
 1178MB of data.  We can reverse the direction of this test in the next example:</p>
-<div class="highlight"><pre><span></span><code>[user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu
-bwctl: Using tool: iperf
-bwctl: 75 seconds until test results available
-RECEIVER START
-bwctl: exec\_line: /usr/bin/iperf -B 64.57.17.18 -s -f m -m -p 5011 -t 10 -i 1
-bwctl: start\_tool: 3568979241.960327
+<div class="highlight"><pre><span></span><code><span class="o">[</span>user@host<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>bwctl<span class="w"> </span>-f<span class="w"> </span>m<span class="w"> </span>-t<span class="w"> </span><span class="m">10</span><span class="w"> </span>-i<span class="w"> </span><span class="m">1</span><span class="w"> </span>-s<span class="w"> </span>nms-rthr.kans.net.internet2.edu
+bwctl:<span class="w"> </span>Using<span class="w"> </span>tool:<span class="w"> </span>iperf
+bwctl:<span class="w"> </span><span class="m">75</span><span class="w"> </span>seconds<span class="w"> </span><span class="k">until</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>results<span class="w"> </span>available
+RECEIVER<span class="w"> </span>START
+bwctl:<span class="w"> </span>exec<span class="se">\_</span>line:<span class="w"> </span>/usr/bin/iperf<span class="w"> </span>-B<span class="w"> </span><span class="m">64</span>.57.17.18<span class="w"> </span>-s<span class="w"> </span>-f<span class="w"> </span>m<span class="w"> </span>-m<span class="w"> </span>-p<span class="w"> </span><span class="m">5011</span><span class="w"> </span>-t<span class="w"> </span><span class="m">10</span><span class="w"> </span>-i<span class="w"> </span><span class="m">1</span>
+bwctl:<span class="w"> </span>start<span class="se">\_</span>tool:<span class="w"> </span><span class="m">3568979241</span>.960327
 ------------------------------------------------------------
-Server listening on TCP port 5011
-Binding to local address 64.57.17.18
-TCP window size: 16.0 MByte (default)
+Server<span class="w"> </span>listening<span class="w"> </span>on<span class="w"> </span>TCP<span class="w"> </span>port<span class="w"> </span><span class="m">5011</span>
+Binding<span class="w"> </span>to<span class="w"> </span><span class="nb">local</span><span class="w"> </span>address<span class="w"> </span><span class="m">64</span>.57.17.18
+TCP<span class="w"> </span>window<span class="w"> </span>size:<span class="w"> </span><span class="m">16</span>.0<span class="w"> </span>MByte<span class="w"> </span><span class="o">(</span>default<span class="o">)</span>
 ------------------------------------------------------------
-[14] local 64.57.17.18 port 5011 connected with 64.57.16.210 port 5011
-[ID] Interval       Transfer     Bandwidth
-[14]  0.0- 1.0 sec   111 MBytes   929 Mbits/sec
-[14]  1.0- 2.0 sec   118 MBytes   990 Mbits/sec
-[14]  2.0- 3.0 sec   118 MBytes   990 Mbits/sec
-[14]  3.0- 4.0 sec   118 MBytes   990 Mbits/sec
-[14]  4.0- 5.0 sec   118 MBytes   990 Mbits/sec
-[14]  5.0- 6.0 sec   118 MBytes   990 Mbits/sec
-[14]  6.0- 7.0 sec   118 MBytes   990 Mbits/sec
-[14]  7.0- 8.0 sec   118 MBytes   990 Mbits/sec
-[14]  8.0- 9.0 sec   118 MBytes   990 Mbits/sec
-[14]  9.0-10.0 sec   118 MBytes   990 Mbits/sec
-[14]  0.0-10.2 sec  1193 MBytes   984 Mbits/sec
-[14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
-bwctl: stop\_exec: 3568979256.889493
-RECEIVER END
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="m">64</span>.57.17.18<span class="w"> </span>port<span class="w"> </span><span class="m">5011</span><span class="w"> </span>connected<span class="w"> </span>with<span class="w"> </span><span class="m">64</span>.57.16.210<span class="w"> </span>port<span class="w"> </span><span class="m">5011</span>
+<span class="o">[</span>ID<span class="o">]</span><span class="w"> </span>Interval<span class="w">       </span>Transfer<span class="w">     </span>Bandwidth
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">0</span>.0-<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">111</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">929</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">1</span>.0-<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">2</span>.0-<span class="w"> </span><span class="m">3</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">3</span>.0-<span class="w"> </span><span class="m">4</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">4</span>.0-<span class="w"> </span><span class="m">5</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">5</span>.0-<span class="w"> </span><span class="m">6</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">6</span>.0-<span class="w"> </span><span class="m">7</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">7</span>.0-<span class="w"> </span><span class="m">8</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">8</span>.0-<span class="w"> </span><span class="m">9</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">9</span>.0-10.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">0</span>.0-10.2<span class="w"> </span>sec<span class="w">  </span><span class="m">1193</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">984</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w"> </span>MSS<span class="w"> </span>size<span class="w"> </span><span class="m">8948</span><span class="w"> </span>bytes<span class="w"> </span><span class="o">(</span>MTU<span class="w"> </span><span class="m">8988</span><span class="w"> </span>bytes,<span class="w"> </span>unknown<span class="w"> </span>interface<span class="o">)</span>
+bwctl:<span class="w"> </span>stop<span class="se">\_</span>exec:<span class="w"> </span><span class="m">3568979256</span>.889493
+RECEIVER<span class="w"> </span>END
 </code></pre></div>
 <p>A similar result is seen in that we achieve near 1Gbps bandwidth (e.g. the hosts are only connected at 1Gbps).</p>
 <p>BWCTL can (and should) be used to check available bandwidth between servers.  Start first on the long path (e.g. end-to-
 end) then test to resources in the middle.  Note that BWCTL supports a 3 mode operation, wherein you can provide options
 for both the &#39;-c&#39; and &#39;-s&#39; and perform tests between these two hosts without being physically logged
 into either:</p>
-<div class="highlight"><pre><span></span><code>[user@host ~]$ bwctl -f m -t 10 -i 1 -s nms-rthr.kans.net.internet2.edu -c nms-rthr1.hous.net.internet2.edu
-bwctl: Using tool: iperf
-bwctl: 82 seconds until test results available
-RECEIVER START
-bwctl: exec\_line: /usr/bin/iperf -B 64.57.16.130 -s -f m -m -p 5001 -t 10 -i 1
-bwctl: start\_tool: 3568979772.344387
+<div class="highlight"><pre><span></span><code><span class="o">[</span>user@host<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>bwctl<span class="w"> </span>-f<span class="w"> </span>m<span class="w"> </span>-t<span class="w"> </span><span class="m">10</span><span class="w"> </span>-i<span class="w"> </span><span class="m">1</span><span class="w"> </span>-s<span class="w"> </span>nms-rthr.kans.net.internet2.edu<span class="w"> </span>-c<span class="w"> </span>nms-rthr1.hous.net.internet2.edu
+bwctl:<span class="w"> </span>Using<span class="w"> </span>tool:<span class="w"> </span>iperf
+bwctl:<span class="w"> </span><span class="m">82</span><span class="w"> </span>seconds<span class="w"> </span><span class="k">until</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>results<span class="w"> </span>available
+RECEIVER<span class="w"> </span>START
+bwctl:<span class="w"> </span>exec<span class="se">\_</span>line:<span class="w"> </span>/usr/bin/iperf<span class="w"> </span>-B<span class="w"> </span><span class="m">64</span>.57.16.130<span class="w"> </span>-s<span class="w"> </span>-f<span class="w"> </span>m<span class="w"> </span>-m<span class="w"> </span>-p<span class="w"> </span><span class="m">5001</span><span class="w"> </span>-t<span class="w"> </span><span class="m">10</span><span class="w"> </span>-i<span class="w"> </span><span class="m">1</span>
+bwctl:<span class="w"> </span>start<span class="se">\_</span>tool:<span class="w"> </span><span class="m">3568979772</span>.344387
 
 ------------------------------------------------------------
-Server listening on TCP port 5001
-Binding to local address 64.57.16.130
-TCP window size: 0.08 MByte (default)
+Server<span class="w"> </span>listening<span class="w"> </span>on<span class="w"> </span>TCP<span class="w"> </span>port<span class="w"> </span><span class="m">5001</span>
+Binding<span class="w"> </span>to<span class="w"> </span><span class="nb">local</span><span class="w"> </span>address<span class="w"> </span><span class="m">64</span>.57.16.130
+TCP<span class="w"> </span>window<span class="w"> </span>size:<span class="w"> </span><span class="m">0</span>.08<span class="w"> </span>MByte<span class="w"> </span><span class="o">(</span>default<span class="o">)</span>
 ------------------------------------------------------------
-[14] local 64.57.16.130 port 5001 connected with 64.57.16.210 port 5001
-[ID] Interval       Transfer     Bandwidth
-[14]  0.0- 1.0 sec   103 MBytes   861 Mbits/sec
-[14]  1.0- 2.0 sec   118 MBytes   990 Mbits/sec
-[14]  2.0- 3.0 sec   118 MBytes   990 Mbits/sec
-[14]  3.0- 4.0 sec   118 MBytes   990 Mbits/sec
-[14]  4.0- 5.0 sec   118 MBytes   990 Mbits/sec
-[14]  5.0- 6.0 sec   118 MBytes   990 Mbits/sec
-[14]  6.0- 7.0 sec   118 MBytes   990 Mbits/sec
-[14]  7.0- 8.0 sec   118 MBytes   990 Mbits/sec
-[14]  8.0- 9.0 sec   118 MBytes   990 Mbits/sec
-[14]  9.0-10.0 sec   118 MBytes   990 Mbits/sec
-[14]  0.0-10.2 sec  1183 MBytes   977 Mbits/sec
-[14] MSS size 8948 bytes (MTU 8988 bytes, unknown interface)
-bwctl: stop\_exec: 3568979785.230833
-RECEIVER END
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w"> </span><span class="nb">local</span><span class="w"> </span><span class="m">64</span>.57.16.130<span class="w"> </span>port<span class="w"> </span><span class="m">5001</span><span class="w"> </span>connected<span class="w"> </span>with<span class="w"> </span><span class="m">64</span>.57.16.210<span class="w"> </span>port<span class="w"> </span><span class="m">5001</span>
+<span class="o">[</span>ID<span class="o">]</span><span class="w"> </span>Interval<span class="w">       </span>Transfer<span class="w">     </span>Bandwidth
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">0</span>.0-<span class="w"> </span><span class="m">1</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">103</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">861</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">1</span>.0-<span class="w"> </span><span class="m">2</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">2</span>.0-<span class="w"> </span><span class="m">3</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">3</span>.0-<span class="w"> </span><span class="m">4</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">4</span>.0-<span class="w"> </span><span class="m">5</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">5</span>.0-<span class="w"> </span><span class="m">6</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">6</span>.0-<span class="w"> </span><span class="m">7</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">7</span>.0-<span class="w"> </span><span class="m">8</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">8</span>.0-<span class="w"> </span><span class="m">9</span>.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">9</span>.0-10.0<span class="w"> </span>sec<span class="w">   </span><span class="m">118</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">990</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w">  </span><span class="m">0</span>.0-10.2<span class="w"> </span>sec<span class="w">  </span><span class="m">1183</span><span class="w"> </span>MBytes<span class="w">   </span><span class="m">977</span><span class="w"> </span>Mbits/sec
+<span class="o">[</span><span class="m">14</span><span class="o">]</span><span class="w"> </span>MSS<span class="w"> </span>size<span class="w"> </span><span class="m">8948</span><span class="w"> </span>bytes<span class="w"> </span><span class="o">(</span>MTU<span class="w"> </span><span class="m">8988</span><span class="w"> </span>bytes,<span class="w"> </span>unknown<span class="w"> </span>interface<span class="o">)</span>
+bwctl:<span class="w"> </span>stop<span class="se">\_</span>exec:<span class="w"> </span><span class="m">3568979785</span>.230833
+RECEIVER<span class="w"> </span>END
 </code></pre></div>
 <p>BWCTL requires a stable NTP clock to work properly, be sure that NTP is configured before using this tool.</p>
 <ul>
@@ -2842,27 +2842,27 @@ RECEIVER END
 <p>OWAMP is a tool that measures latency, loss, out of orderness, and duplication of packets between a source and a
 destination.  Note that this test measures each direction <strong>independently</strong> versus that of the traditional round trip
 tool <strong>ping</strong>.  Below is an example of a test:</p>
-<div class="highlight"><pre><span></span><code>[user@host ~]$ owping owamp.wash.net.internet2.edu
-Approximately 12.6 seconds until results available
---- owping statistics from [eth-1.nms-rlat.newy32aoa.net.internet2.edu]:60455 to [owamp.wash.net.internet2.edu]:47148 ---
-SID:        00160034d4ba4cad4e8c0485546b4ebf
-first:        2013-02-04T15:05:18.240
-last:        2013-02-04T15:05:27.254
-100 sent, 0 lost (0.000%), 0 duplicates
-one-way delay min/median/max = 2.02/2.1/2.06 ms, (err=0.218 ms)
-one-way jitter = 0 ms (P95-P50)
-Hops = 2 (consistently)
-no reordering
+<div class="highlight"><pre><span></span><code><span class="o">[</span>user@host<span class="w"> </span>~<span class="o">]</span>$<span class="w"> </span>owping<span class="w"> </span>owamp.wash.net.internet2.edu
+Approximately<span class="w"> </span><span class="m">12</span>.6<span class="w"> </span>seconds<span class="w"> </span><span class="k">until</span><span class="w"> </span>results<span class="w"> </span>available
+---<span class="w"> </span>owping<span class="w"> </span>statistics<span class="w"> </span>from<span class="w"> </span><span class="o">[</span>eth-1.nms-rlat.newy32aoa.net.internet2.edu<span class="o">]</span>:60455<span class="w"> </span>to<span class="w"> </span><span class="o">[</span>owamp.wash.net.internet2.edu<span class="o">]</span>:47148<span class="w"> </span>---
+SID:<span class="w">        </span>00160034d4ba4cad4e8c0485546b4ebf
+first:<span class="w">        </span><span class="m">2013</span>-02-04T15:05:18.240
+last:<span class="w">        </span><span class="m">2013</span>-02-04T15:05:27.254
+<span class="m">100</span><span class="w"> </span>sent,<span class="w"> </span><span class="m">0</span><span class="w"> </span>lost<span class="w"> </span><span class="o">(</span><span class="m">0</span>.000%<span class="o">)</span>,<span class="w"> </span><span class="m">0</span><span class="w"> </span>duplicates
+one-way<span class="w"> </span>delay<span class="w"> </span>min/median/max<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span>.02/2.1/2.06<span class="w"> </span>ms,<span class="w"> </span><span class="o">(</span><span class="nv">err</span><span class="o">=</span><span class="m">0</span>.218<span class="w"> </span>ms<span class="o">)</span>
+one-way<span class="w"> </span><span class="nv">jitter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="w"> </span>ms<span class="w"> </span><span class="o">(</span>P95-P50<span class="o">)</span>
+<span class="nv">Hops</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="o">(</span>consistently<span class="o">)</span>
+no<span class="w"> </span>reordering
 
---- owping statistics from [owamp.wash.net.internet2.edu]:47149 to [eth-1.nms-rlat.newy32aoa.net.internet2.edu]:33562 ---
-SID:        00170098d4ba4cad8eb45282697d2cc2
-first:        2013-02-04T15:05:18.259
-last:        2013-02-04T15:05:27.175
-100 sent, 0 lost (0.000%), 0 duplicates
-one-way delay min/median/max = 3.19/3.3/3.27 ms, (err=0.218 ms)
-one-way jitter = 0 ms (P95-P50)
-Hops = 2 (consistently)
-no reordering
+---<span class="w"> </span>owping<span class="w"> </span>statistics<span class="w"> </span>from<span class="w"> </span><span class="o">[</span>owamp.wash.net.internet2.edu<span class="o">]</span>:47149<span class="w"> </span>to<span class="w"> </span><span class="o">[</span>eth-1.nms-rlat.newy32aoa.net.internet2.edu<span class="o">]</span>:33562<span class="w"> </span>---
+SID:<span class="w">        </span>00170098d4ba4cad8eb45282697d2cc2
+first:<span class="w">        </span><span class="m">2013</span>-02-04T15:05:18.259
+last:<span class="w">        </span><span class="m">2013</span>-02-04T15:05:27.175
+<span class="m">100</span><span class="w"> </span>sent,<span class="w"> </span><span class="m">0</span><span class="w"> </span>lost<span class="w"> </span><span class="o">(</span><span class="m">0</span>.000%<span class="o">)</span>,<span class="w"> </span><span class="m">0</span><span class="w"> </span>duplicates
+one-way<span class="w"> </span>delay<span class="w"> </span>min/median/max<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span>.19/3.3/3.27<span class="w"> </span>ms,<span class="w"> </span><span class="o">(</span><span class="nv">err</span><span class="o">=</span><span class="m">0</span>.218<span class="w"> </span>ms<span class="o">)</span>
+one-way<span class="w"> </span><span class="nv">jitter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="w"> </span>ms<span class="w"> </span><span class="o">(</span>P95-P50<span class="o">)</span>
+<span class="nv">Hops</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="o">(</span>consistently<span class="o">)</span>
+no<span class="w"> </span>reordering
 </code></pre></div>
 <p>The results clearly state each direction of operation, and any problems that were found.  As in the BWCTL case the tool
 is highly reliant on stable NTP numbers, so be sure your server is synchronized against an NTP server.</p>
