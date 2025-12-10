@@ -42,6 +42,8 @@ sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 
 Audit and apply ESnet Fasterdata-inspired host and NIC tuning for EL9 systems.
 
+**NEW in v1.2.0**: Save/restore state functionality for testing different tuning configurations.
+
 **Quick Usage:**
 
 ```bash
@@ -50,7 +52,18 @@ Audit and apply ESnet Fasterdata-inspired host and NIC tuning for EL9 systems.
 
 # Apply tuning (requires root)
 sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn
+
+# Save current state before testing
+sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline
+
+# Restore saved state
+sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
+
+# List all saved states
+/usr/local/bin/fasterdata-tuning.sh --list-states
 ```
+
+**State Management**: Save and restore system configurations for before/after performance testing. Captures sysctl parameters, interface settings, configuration files, CPU governor, and tuned profile. See [Fasterdata Tuning Guide](fasterdata-tuning.md#state-management-save--restore-configurations) for complete workflow examples.
 
 **Full Documentation:** [Fasterdata Tuning Guide](fasterdata-tuning.md)
 
