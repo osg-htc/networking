@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.1.3
+# Version: 1.2.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Audit and optionally apply host/network tuning recommended by ESnet Fasterdata
 # for high-throughput hosts (EL9 focus). Defaults to audit-only.
+#
+# NEW in v1.2.0: Save/restore state functionality for testing configurations
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -88,6 +90,16 @@ Options:
   --color                 Enable colorized output (default)
   --nocolor               Disable colorized output
   --dry-run               Do not make changes when in apply mode; show actions only
+
+State Management Options:
+  --save-state            Save current system state to a file
+  --label LABEL           Label for saved state (optional, default: timestamp)
+  --restore-state FILE    Restore system state from saved file or label
+  --list-states           List all saved states
+  --diff-state FILE       Show differences between current and saved state
+  --delete-state FILE     Delete a saved state file
+  --auto-save-before      Auto-save state before applying changes (use with --mode apply)
+
   --help                  Show this help
 EOF
 }
@@ -211,6 +223,19 @@ AUTO_YES=0
 DRY_RUN=0
 PACKET_PACING_RATE="2000mbps"
 APPLY_PACKET_PACING=0
+
+# Save/restore state management
+SAVE_STATE=0
+RESTORE_STATE=""
+LIST_STATES=0
+DIFF_STATE=""
+DELETE_STATE=""
+STATE_LABEL=""
+AUTO_SAVE_BEFORE=0
+STATE_DIR="/var/lib/fasterdata-tuning"
+STATE_SUBDIR="$STATE_DIR/saved-states"
+BACKUP_SUBDIR="$STATE_DIR/backups"
+LOG_SUBDIR="$STATE_DIR/logs"
 
 get_host_fqdns() {
   local iface ip ip_cidr fqdn
@@ -1899,6 +1924,861 @@ apply_jumbo() {
   done
 }
 
+##############################################################################
+# State Management Functions (Save/Restore)
+##############################################################################
+
+ensure_state_directories() {
+  # Create state management directories if they don't exist
+  for dir in "$STATE_DIR" "$STATE_SUBDIR" "$BACKUP_SUBDIR" "$LOG_SUBDIR"; do
+    if [[ ! -d "$dir" ]]; then
+      mkdir -p "$dir" 2>/dev/null || {
+        log_warn "Cannot create directory $dir (need root permissions for state management)"
+        return 1
+      }
+    fi
+  done
+  return 0
+}
+
+generate_state_filename() {
+  local label="$1"
+  local timestamp
+  timestamp=$(date -u +%Y%m%d-%H%M%S)
+  if [[ -n "$label" ]]; then
+    echo "${timestamp}-${label}.json"
+  else
+    echo "${timestamp}.json"
+  fi
+}
+
+resolve_state_file() {
+  # Resolve state file from label or filename
+  # Returns full path to state file or empty if not found
+  local input="$1"
+  
+  # If it's an absolute path and exists, use it
+  if [[ "$input" == /* ]] && [[ -f "$input" ]]; then
+    echo "$input"
+    return 0
+  fi
+  
+  # If it's just a filename in the state directory
+  if [[ -f "$STATE_SUBDIR/$input" ]]; then
+    echo "$STATE_SUBDIR/$input"
+    return 0
+  fi
+  
+  # Try to find by label (search for files ending with -LABEL.json)
+  local matches
+  matches=$(find "$STATE_SUBDIR" -name "*-${input}.json" 2>/dev/null | head -1)
+  if [[ -n "$matches" ]]; then
+    echo "$matches"
+    return 0
+  fi
+  
+  # Not found
+  return 1
+}
+
+capture_sysctl_state() {
+  # Capture current sysctl values as JSON
+  local keys=(
+    "net.core.rmem_max"
+    "net.core.wmem_max"
+    "net.core.rmem_default"
+    "net.core.wmem_default"
+    "net.ipv4.tcp_rmem"
+    "net.ipv4.tcp_wmem"
+    "net.core.netdev_max_backlog"
+    "net.ipv4.tcp_congestion_control"
+    "net.ipv4.tcp_mtu_probing"
+    "net.core.default_qdisc"
+  )
+  
+  local json="{"
+  local first=1
+  for key in "${keys[@]}"; do
+    local value
+    value=$(sysctl -n "$key" 2>/dev/null || echo "")
+    if [[ -n "$value" ]]; then
+      [[ $first -eq 0 ]] && json+=","
+      json+="\"$key\":\"$value\""
+      first=0
+    fi
+  done
+  json+="}"
+  echo "$json"
+}
+
+capture_sysctl_file_state() {
+  # Capture /etc/sysctl.d/90-fasterdata.conf state
+  local sysctl_file="/etc/sysctl.d/90-fasterdata.conf"
+  local json="{"
+  json+="\"path\":\"$sysctl_file\","
+  
+  if [[ -f "$sysctl_file" ]]; then
+    json+="\"exists\":true,"
+    # Create backup
+    local backup_name
+    backup_name="90-fasterdata.conf.$(date -u +%Y%m%d-%H%M%S)"
+    local backup_path="$BACKUP_SUBDIR/$backup_name"
+    if cp "$sysctl_file" "$backup_path" 2>/dev/null; then
+      json+="\"backup_path\":\"$backup_path\","
+    else
+      json+="\"backup_path\":null,"
+    fi
+    # Store content as base64
+    local content_b64
+    content_b64=$(base64 -w 0 "$sysctl_file" 2>/dev/null || base64 "$sysctl_file" 2>/dev/null || echo "")
+    json+="\"content_base64\":\"$content_b64\""
+  else
+    json+="\"exists\":false,"
+    json+="\"backup_path\":null,"
+    json+="\"content_base64\":null"
+  fi
+  
+  json+="}"
+  echo "$json"
+}
+
+capture_interface_state() {
+  local iface="$1"
+  
+  # Get interface state
+  local state
+  state=$(ip link show "$iface" 2>/dev/null | awk '/state/ {print $9}' || echo "unknown")
+  
+  # Get MTU
+  local mtu
+  mtu=$(get_nic_mtu "$iface")
+  
+  # Get txqueuelen
+  local txqlen
+  if [[ -f /sys/class/net/$iface/tx_queue_len ]]; then
+    txqlen=$(cat "/sys/class/net/$iface/tx_queue_len" 2>/dev/null || echo "0")
+  else
+    txqlen="0"
+  fi
+  
+  # Get speed
+  local speed
+  speed=$(get_iface_speed "$iface")
+  
+  # Get qdisc
+  local qdisc_full
+  qdisc_full=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 || echo "unknown")
+  
+  # Build JSON
+  local json="{"
+  json+="\"state\":\"$state\","
+  json+="\"mtu\":$mtu,"
+  json+="\"txqueuelen\":$txqlen,"
+  json+="\"speed\":$speed,"
+  json+="\"qdisc\":\"$qdisc_full\","
+  
+  # Ethtool features
+  if command -v ethtool >/dev/null 2>&1; then
+    local features
+    features=$(ethtool -k "$iface" 2>/dev/null | grep -E '^(rx-checksumming|tx-checksumming|scatter-gather|tcp-segmentation-offload|generic-segmentation-offload|generic-receive-offload|large-receive-offload):' || true)
+    
+    json+="\"ethtool_features\":{"
+    local feat_first=1
+    while IFS=: read -r feat_name feat_val; do
+      feat_name=$(echo "$feat_name" | tr -d ' ')
+      feat_val=$(echo "$feat_val" | awk '{print $1}')
+      [[ $feat_first -eq 0 ]] && json+=","
+      json+="\"$feat_name\":\"$feat_val\""
+      feat_first=0
+    done <<< "$features"
+    json+="},"
+    
+    # Ring buffers
+    local ring_info
+    ring_info=$(ethtool -g "$iface" 2>/dev/null || echo "")
+    local rx_cur rx_max tx_cur tx_max
+    rx_cur=$(echo "$ring_info" | awk '/^RX:/ {getline; print $2; exit}' || echo "0")
+    rx_max=$(echo "$ring_info" | awk '/^RX:/ {print $2; exit}' || echo "0")
+    tx_cur=$(echo "$ring_info" | awk '/^TX:/ {getline; print $2; exit}' || echo "0")
+    tx_max=$(echo "$ring_info" | awk '/^TX:/ {print $2; exit}' || echo "0")
+    
+    json+="\"ring_buffers\":{"
+    json+="\"rx\":${rx_cur:-0},"
+    json+="\"rx_max\":${rx_max:-0},"
+    json+="\"tx\":${tx_cur:-0},"
+    json+="\"tx_max\":${tx_max:-0}"
+    json+="},"
+  else
+    json+="\"ethtool_features\":{},"
+    json+="\"ring_buffers\":{},"
+  fi
+  
+  # NetworkManager connection info
+  if command -v nmcli >/dev/null 2>&1; then
+    local nm_conn
+    nm_conn=$(nmcli -t -f NAME,DEVICE connection show 2>/dev/null | awk -F: -v dev="$iface" '$2==dev {print $1; exit}' || echo "")
+    json+="\"nm_connection\":\"$nm_conn\","
+    
+    if [[ -n "$nm_conn" ]]; then
+      local nm_mtu
+      nm_mtu=$(nmcli -t -f 802-3-ethernet.mtu connection show "$nm_conn" 2>/dev/null | cut -d: -f2 || echo "0")
+      json+="\"nm_mtu\":${nm_mtu:-0}"
+    else
+      json+="\"nm_mtu\":0"
+    fi
+  else
+    json+="\"nm_connection\":\"\","
+    json+="\"nm_mtu\":0"
+  fi
+  
+  json+="}"
+  echo "$json"
+}
+
+capture_ethtool_service_state() {
+  # Capture ethtool-persist.service state
+  local svc_file="/etc/systemd/system/ethtool-persist.service"
+  local json="{"
+  json+="\"path\":\"$svc_file\","
+  
+  if [[ -f "$svc_file" ]]; then
+    json+="\"exists\":true,"
+    
+    # Check if enabled
+    local enabled=false
+    if systemctl is-enabled ethtool-persist.service &>/dev/null; then
+      enabled=true
+    fi
+    json+="\"enabled\":$enabled,"
+    
+    # Create backup
+    local backup_name
+    backup_name="ethtool-persist.service.$(date -u +%Y%m%d-%H%M%S)"
+    local backup_path="$BACKUP_SUBDIR/$backup_name"
+    if cp "$svc_file" "$backup_path" 2>/dev/null; then
+      json+="\"backup_path\":\"$backup_path\","
+    else
+      json+="\"backup_path\":null,"
+    fi
+    
+    # Store content as base64
+    local content_b64
+    content_b64=$(base64 -w 0 "$svc_file" 2>/dev/null || base64 "$svc_file" 2>/dev/null || echo "")
+    json+="\"content_base64\":\"$content_b64\""
+  else
+    json+="\"exists\":false,"
+    json+="\"enabled\":false,"
+    json+="\"backup_path\":null,"
+    json+="\"content_base64\":null"
+  fi
+  
+  json+="}"
+  echo "$json"
+}
+
+capture_cpu_state() {
+  # Capture CPU governor and SMT state
+  local json="{"
+  
+  # CPU governors
+  json+="\"governors\":{"
+  if [[ -d /sys/devices/system/cpu/cpu0/cpufreq ]]; then
+    local cpu=0
+    local first=1
+    for gov_file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+      [[ ! -f "$gov_file" ]] && continue
+      local gov
+      gov=$(cat "$gov_file" 2>/dev/null || echo "unknown")
+      [[ $first -eq 0 ]] && json+=","
+      json+="\"cpu$cpu\":\"$gov\""
+      first=0
+      ((cpu++))
+    done
+  fi
+  json+="},"
+  
+  # SMT state
+  if [[ -r /sys/devices/system/cpu/smt/control ]]; then
+    local smt
+    smt=$(cat /sys/devices/system/cpu/smt/control 2>/dev/null || echo "unknown")
+    json+="\"smt\":{\"control\":\"$smt\",\"supported\":true}"
+  else
+    json+="\"smt\":{\"control\":\"unknown\",\"supported\":false}"
+  fi
+  
+  json+="}"
+  echo "$json"
+}
+
+capture_tuned_state() {
+  # Capture tuned profile state
+  local json="{"
+  
+  if command -v tuned-adm >/dev/null 2>&1; then
+    local active
+    active=$(tuned-adm active 2>/dev/null | awk '{print $4}' || echo "unknown")
+    json+="\"available\":true,"
+    json+="\"active_profile\":\"$active\""
+  else
+    json+="\"available\":false,"
+    json+="\"active_profile\":\"unknown\""
+  fi
+  
+  json+="}"
+  echo "$json"
+}
+
+do_save_state() {
+  # Main function to save system state
+  require_root
+  
+  if ! ensure_state_directories; then
+    echo "ERROR: Cannot create state directories (need root permissions)" >&2
+    return 1
+  fi
+  
+  local state_file
+  state_file="$STATE_SUBDIR/$(generate_state_filename "$STATE_LABEL")"
+  
+  log_info "Saving system state to $state_file"
+  
+  # Build state JSON
+  local state_json="{"
+  
+  # Metadata
+  state_json+="\"metadata\":{"
+  state_json+="\"version\":\"1.0\","
+  state_json+="\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
+  state_json+="\"hostname\":\"$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo unknown)\","
+  state_json+="\"kernel\":\"$(uname -r)\","
+  state_json+="\"label\":\"${STATE_LABEL:-auto}\","
+  state_json+="\"created_by\":\"fasterdata-tuning.sh v1.2.0\""
+  state_json+="},"
+  
+  # Sysctl values
+  state_json+="\"sysctl\":$(capture_sysctl_state),"
+  
+  # Sysctl file
+  state_json+="\"sysctl_file\":$(capture_sysctl_file_state),"
+  
+  # Interfaces
+  state_json+="\"interfaces\":{"
+  local ifs
+  ifs=$(get_ifaces)
+  local first=1
+  for iface in $ifs; do
+    [[ $first -eq 0 ]] && state_json+=","
+    state_json+="\"$iface\":$(capture_interface_state "$iface")"
+    first=0
+  done
+  state_json+="},"
+  
+  # Ethtool persist service
+  state_json+="\"ethtool_service\":$(capture_ethtool_service_state),"
+  
+  # CPU state
+  state_json+="\"cpu\":$(capture_cpu_state),"
+  
+  # Tuned state
+  state_json+="\"tuned\":$(capture_tuned_state),"
+  
+  # Warnings
+  state_json+="\"warnings\":["
+  state_json+="\"Ring buffer settings may not be fully restorable if hardware limits change\","
+  state_json+="\"State restoration does not include GRUB/boot configuration\","
+  state_json+="\"NetworkManager connection changes may cause brief network interruption\""
+  state_json+="]"
+  
+  state_json+="}"
+  
+  # Write state file
+  if echo "$state_json" | python3 -m json.tool > "$state_file" 2>/dev/null; then
+    log_info "State saved successfully to $state_file"
+    echo "State file: $state_file"
+    if [[ -n "$STATE_LABEL" ]]; then
+      echo "Label: $STATE_LABEL"
+    fi
+    return 0
+  else
+    # Fallback if python3 not available or json.tool fails
+    echo "$state_json" > "$state_file"
+    log_info "State saved to $state_file (unformatted JSON)"
+    echo "State file: $state_file"
+    return 0
+  fi
+}
+
+do_list_states() {
+  # List all saved states
+  if [[ ! -d "$STATE_SUBDIR" ]]; then
+    echo "No saved states found (directory $STATE_SUBDIR does not exist)"
+    return 0
+  fi
+  
+  local states
+  states=$(find "$STATE_SUBDIR" -name "*.json" -type f 2>/dev/null | sort -r)
+  
+  if [[ -z "$states" ]]; then
+    echo "No saved states found in $STATE_SUBDIR"
+    return 0
+  fi
+  
+  echo "Saved States:"
+  echo "============="
+  
+  while IFS= read -r state_file; do
+    local basename
+    basename=$(basename "$state_file")
+    
+    # Try to extract metadata from JSON
+    if command -v python3 >/dev/null 2>&1; then
+      local timestamp label hostname
+      timestamp=$(python3 -c "import json,sys; print(json.load(open('$state_file')).get('metadata',{}).get('timestamp','unknown'))" 2>/dev/null || echo "unknown")
+      label=$(python3 -c "import json,sys; print(json.load(open('$state_file')).get('metadata',{}).get('label','unknown'))" 2>/dev/null || echo "unknown")
+      hostname=$(python3 -c "import json,sys; print(json.load(open('$state_file')).get('metadata',{}).get('hostname','unknown'))" 2>/dev/null || echo "unknown")
+      
+      echo ""
+      echo "File: $basename"
+      echo "  Timestamp: $timestamp"
+      echo "  Label: $label"
+      echo "  Hostname: $hostname"
+      echo "  Path: $state_file"
+    else
+      echo ""
+      echo "File: $basename"
+      echo "  Path: $state_file"
+    fi
+  done <<< "$states"
+  
+  echo ""
+}
+
+do_delete_state() {
+  # Delete a saved state file
+  require_root
+  
+  local state_file
+  state_file=$(resolve_state_file "$DELETE_STATE")
+  
+  if [[ -z "$state_file" ]]; then
+    echo "ERROR: State file not found: $DELETE_STATE" >&2
+    echo "Use --list-states to see available states" >&2
+    return 1
+  fi
+  
+  if [[ $AUTO_YES -ne 1 ]]; then
+    read -r -p "Delete state file $state_file? [y/N] " resp
+    if [[ ! "$resp" =~ ^[Yy]$ ]]; then
+      log_info "Delete cancelled"
+      return 0
+    fi
+  fi
+  
+  if rm "$state_file" 2>/dev/null; then
+    log_info "Deleted state file: $state_file"
+    return 0
+  else
+    echo "ERROR: Failed to delete $state_file" >&2
+    return 1
+  fi
+}
+
+do_diff_state() {
+  # Show differences between current and saved state
+  local state_file
+  state_file=$(resolve_state_file "$DIFF_STATE")
+  
+  if [[ -z "$state_file" ]]; then
+    echo "ERROR: State file not found: $DIFF_STATE" >&2
+    echo "Use --list-states to see available states" >&2
+    return 1
+  fi
+  
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "ERROR: python3 required for diff functionality" >&2
+    return 1
+  fi
+  
+  log_info "Comparing current state with $state_file"
+  
+  # Load saved state
+  local saved_state
+  saved_state=$(cat "$state_file")
+  
+  echo ""
+  echo "Differences between current state and saved state:"
+  echo "==================================================="
+  echo ""
+  
+  # Compare sysctl values
+  echo "Sysctl Parameters:"
+  echo "------------------"
+  local keys=(
+    "net.core.rmem_max"
+    "net.core.wmem_max"
+    "net.core.rmem_default"
+    "net.core.wmem_default"
+    "net.ipv4.tcp_rmem"
+    "net.ipv4.tcp_wmem"
+    "net.core.netdev_max_backlog"
+    "net.ipv4.tcp_congestion_control"
+    "net.ipv4.tcp_mtu_probing"
+    "net.core.default_qdisc"
+  )
+  
+  for key in "${keys[@]}"; do
+    local current saved
+    current=$(sysctl -n "$key" 2>/dev/null || echo "")
+    saved=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl',{}).get('$key',''))" 2>/dev/null || echo "")
+    
+    if [[ "$current" != "$saved" ]]; then
+      echo "  $key:"
+      echo "    Current: $current"
+      echo "    Saved:   $saved"
+    fi
+  done
+  
+  echo ""
+  echo "Interface Settings:"
+  echo "-------------------"
+  
+  local ifs
+  ifs=$(get_ifaces)
+  for iface in $ifs; do
+    local has_diff=0
+    local diff_output=""
+    
+    # Check MTU
+    local current_mtu saved_mtu
+    current_mtu=$(get_nic_mtu "$iface")
+    saved_mtu=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('mtu',0))" 2>/dev/null || echo "0")
+    
+    if [[ "$current_mtu" != "$saved_mtu" ]] && [[ "$saved_mtu" != "0" ]]; then
+      diff_output+="    MTU: $current_mtu (saved: $saved_mtu)\n"
+      has_diff=1
+    fi
+    
+    # Check txqueuelen
+    local current_txq saved_txq
+    if [[ -f /sys/class/net/$iface/tx_queue_len ]]; then
+      current_txq=$(cat "/sys/class/net/$iface/tx_queue_len" 2>/dev/null || echo "0")
+    else
+      current_txq="0"
+    fi
+    saved_txq=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('txqueuelen',0))" 2>/dev/null || echo "0")
+    
+    if [[ "$current_txq" != "$saved_txq" ]] && [[ "$saved_txq" != "0" ]]; then
+      diff_output+="    txqueuelen: $current_txq (saved: $saved_txq)\n"
+      has_diff=1
+    fi
+    
+    if [[ $has_diff -eq 1 ]]; then
+      echo "  $iface:"
+      echo -e "$diff_output"
+    fi
+  done
+  
+  echo ""
+  echo "Use --restore-state to restore the saved configuration"
+  echo ""
+}
+
+do_restore_state() {
+  # Main function to restore system state
+  require_root
+  
+  local state_file
+  state_file=$(resolve_state_file "$RESTORE_STATE")
+  
+  if [[ -z "$state_file" ]]; then
+    echo "ERROR: State file not found: $RESTORE_STATE" >&2
+    echo "Use --list-states to see available states" >&2
+    return 1
+  fi
+  
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "ERROR: python3 required for state restoration" >&2
+    return 1
+  fi
+  
+  log_info "Restoring system state from $state_file"
+  
+  # Load state file
+  local saved_state
+  saved_state=$(cat "$state_file")
+  
+  # Validate JSON
+  if ! python3 -c "import json,sys; json.loads('$saved_state')" 2>/dev/null; then
+    echo "ERROR: Invalid JSON in state file" >&2
+    return 1
+  fi
+  
+  # Show what will be restored
+  echo ""
+  echo "State to be restored:"
+  echo "====================="
+  local saved_hostname saved_timestamp saved_label
+  saved_hostname=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('metadata',{}).get('hostname','unknown'))" 2>/dev/null)
+  saved_timestamp=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('metadata',{}).get('timestamp','unknown'))" 2>/dev/null)
+  saved_label=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('metadata',{}).get('label','unknown'))" 2>/dev/null)
+  
+  echo "  Hostname: $saved_hostname"
+  echo "  Timestamp: $saved_timestamp"
+  echo "  Label: $saved_label"
+  echo ""
+  
+  # Warn if different hostname
+  local current_hostname
+  current_hostname=$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo "unknown")
+  if [[ "$current_hostname" != "$saved_hostname" ]]; then
+    log_warn "State was saved on different host: $saved_hostname (current: $current_hostname)"
+  fi
+  
+  if [[ $AUTO_YES -ne 1 ]]; then
+    read -r -p "Proceed with restoration? [y/N] " resp
+    if [[ ! "$resp" =~ ^[Yy]$ ]]; then
+      log_info "Restoration cancelled"
+      return 0
+    fi
+  fi
+  
+  echo ""
+  log_info "Beginning state restoration..."
+  
+  # Restore sysctl values
+  echo ""
+  log_info "Restoring sysctl parameters..."
+  local keys=(
+    "net.core.rmem_max"
+    "net.core.wmem_max"
+    "net.core.rmem_default"
+    "net.core.wmem_default"
+    "net.ipv4.tcp_rmem"
+    "net.ipv4.tcp_wmem"
+    "net.core.netdev_max_backlog"
+    "net.ipv4.tcp_congestion_control"
+    "net.ipv4.tcp_mtu_probing"
+    "net.core.default_qdisc"
+  )
+  
+  for key in "${keys[@]}"; do
+    local value
+    value=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl',{}).get('$key',''))" 2>/dev/null || echo "")
+    
+    if [[ -n "$value" ]]; then
+      if sysctl -w "$key=$value" >/dev/null 2>&1; then
+        echo "  ✓ $key = $value"
+      else
+        log_warn "Failed to restore $key=$value"
+      fi
+    fi
+  done
+  
+  # Restore sysctl file
+  echo ""
+  log_info "Restoring sysctl configuration file..."
+  local sysctl_file="/etc/sysctl.d/90-fasterdata.conf"
+  local file_existed
+  file_existed=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl_file',{}).get('exists',False))" 2>/dev/null)
+  
+  if [[ "$file_existed" == "True" ]]; then
+    local content_b64
+    content_b64=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl_file',{}).get('content_base64',''))" 2>/dev/null || echo "")
+    
+    if [[ -n "$content_b64" ]]; then
+      if echo "$content_b64" | base64 -d > "$sysctl_file" 2>/dev/null; then
+        echo "  ✓ Restored $sysctl_file"
+      else
+        log_warn "Failed to restore $sysctl_file"
+      fi
+    fi
+  else
+    # File didn't exist in saved state, remove it if present
+    if [[ -f "$sysctl_file" ]]; then
+      if rm "$sysctl_file" 2>/dev/null; then
+        echo "  ✓ Removed $sysctl_file (did not exist in saved state)"
+      else
+        log_warn "Failed to remove $sysctl_file"
+      fi
+    else
+      echo "  ✓ $sysctl_file (not present in saved state, not present now)"
+    fi
+  fi
+  
+  # Restore interface settings
+  echo ""
+  log_info "Restoring interface settings..."
+  local ifs
+  ifs=$(get_ifaces)
+  
+  for iface in $ifs; do
+    # Check if interface was in saved state
+    local iface_existed
+    iface_existed=$(python3 -c "import json,sys; print('$iface' in json.loads('$saved_state').get('interfaces',{}))" 2>/dev/null)
+    
+    if [[ "$iface_existed" != "True" ]]; then
+      log_warn "Interface $iface was not in saved state, skipping"
+      continue
+    fi
+    
+    echo "  Interface: $iface"
+    
+    # Restore MTU
+    local saved_mtu
+    saved_mtu=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('mtu',0))" 2>/dev/null || echo "0")
+    if [[ "$saved_mtu" != "0" ]] && [[ "$saved_mtu" != "null" ]]; then
+      if ip link set dev "$iface" mtu "$saved_mtu" >/dev/null 2>&1; then
+        echo "    ✓ MTU: $saved_mtu"
+      else
+        log_warn "Failed to restore MTU for $iface"
+      fi
+    fi
+    
+    # Restore txqueuelen
+    local saved_txq
+    saved_txq=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('txqueuelen',0))" 2>/dev/null || echo "0")
+    if [[ "$saved_txq" != "0" ]] && [[ "$saved_txq" != "null" ]]; then
+      if ip link set dev "$iface" txqueuelen "$saved_txq" >/dev/null 2>&1; then
+        echo "    ✓ txqueuelen: $saved_txq"
+      else
+        log_warn "Failed to restore txqueuelen for $iface"
+      fi
+    fi
+    
+    # Restore ethtool features (best effort)
+    if command -v ethtool >/dev/null 2>&1; then
+      # Try to restore common features
+      local features=("rx-checksumming" "tx-checksumming" "scatter-gather" "tcp-segmentation-offload" "generic-segmentation-offload" "generic-receive-offload" "large-receive-offload")
+      for feat in "${features[@]}"; do
+        local saved_val
+        saved_val=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('ethtool_features',{}).get('$feat',''))" 2>/dev/null || echo "")
+        
+        if [[ "$saved_val" == "on" ]] || [[ "$saved_val" == "off" ]]; then
+          ethtool -K "$iface" "$feat" "$saved_val" >/dev/null 2>&1 || true
+        fi
+      done
+      echo "    ✓ Ethtool features restored (best effort)"
+    fi
+    
+    # Restore qdisc
+    local saved_qdisc
+    saved_qdisc=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('qdisc',''))" 2>/dev/null || echo "")
+    if [[ -n "$saved_qdisc" ]]; then
+      # Extract qdisc type (first word)
+      local qdisc_type="${saved_qdisc%% *}"
+      if [[ "$qdisc_type" =~ ^(fq|fq_codel|pfifo_fast|mq|tbf)$ ]]; then
+        if tc qdisc replace dev "$iface" root "$qdisc_type" >/dev/null 2>&1; then
+          echo "    ✓ qdisc: $qdisc_type"
+        else
+          log_warn "Failed to restore qdisc for $iface"
+        fi
+      fi
+    fi
+  done
+  
+  # Restore ethtool-persist service
+  echo ""
+  log_info "Restoring ethtool-persist service..."
+  local svc_file="/etc/systemd/system/ethtool-persist.service"
+  local svc_existed
+  svc_existed=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('ethtool_service',{}).get('exists',False))" 2>/dev/null)
+  
+  if [[ "$svc_existed" == "True" ]]; then
+    local content_b64
+    content_b64=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('ethtool_service',{}).get('content_base64',''))" 2>/dev/null || echo "")
+    
+    if [[ -n "$content_b64" ]]; then
+      if echo "$content_b64" | base64 -d > "$svc_file" 2>/dev/null; then
+        systemctl daemon-reload
+        
+        local was_enabled
+        was_enabled=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('ethtool_service',{}).get('enabled',False))" 2>/dev/null)
+        
+        if [[ "$was_enabled" == "True" ]]; then
+          systemctl enable ethtool-persist.service >/dev/null 2>&1
+          echo "  ✓ Restored and enabled ethtool-persist.service"
+        else
+          systemctl disable ethtool-persist.service >/dev/null 2>&1
+          echo "  ✓ Restored ethtool-persist.service (disabled)"
+        fi
+      else
+        log_warn "Failed to restore ethtool-persist.service"
+      fi
+    fi
+  else
+    # Service didn't exist in saved state
+    if [[ -f "$svc_file" ]]; then
+      systemctl disable ethtool-persist.service >/dev/null 2>&1 || true
+      if rm "$svc_file" 2>/dev/null; then
+        echo "  ✓ Removed ethtool-persist.service (did not exist in saved state)"
+      else
+        log_warn "Failed to remove ethtool-persist.service"
+      fi
+      systemctl daemon-reload
+    else
+      echo "  ✓ ethtool-persist.service (not present in saved state, not present now)"
+    fi
+  fi
+  
+  # Restore CPU governor
+  echo ""
+  log_info "Restoring CPU governor..."
+  if [[ -d /sys/devices/system/cpu/cpu0/cpufreq ]]; then
+    local cpu=0
+    for gov_file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+      [[ ! -f "$gov_file" ]] && continue
+      
+      local saved_gov
+      saved_gov=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('cpu',{}).get('governors',{}).get('cpu$cpu',''))" 2>/dev/null || echo "")
+      
+      if [[ -n "$saved_gov" ]] && [[ "$saved_gov" != "null" ]]; then
+        if echo "$saved_gov" > "$gov_file" 2>/dev/null; then
+          echo "  ✓ CPU $cpu: $saved_gov"
+        else
+          log_warn "Failed to restore governor for CPU $cpu"
+        fi
+      fi
+      ((cpu++))
+    done
+  else
+    echo "  ✓ CPU governor not supported on this system"
+  fi
+  
+  # Restore tuned profile
+  echo ""
+  log_info "Restoring tuned profile..."
+  if command -v tuned-adm >/dev/null 2>&1; then
+    local saved_profile
+    saved_profile=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('tuned',{}).get('active_profile',''))" 2>/dev/null || echo "")
+    
+    if [[ -n "$saved_profile" ]] && [[ "$saved_profile" != "unknown" ]] && [[ "$saved_profile" != "null" ]]; then
+      if tuned-adm profile "$saved_profile" >/dev/null 2>&1; then
+        echo "  ✓ Tuned profile: $saved_profile"
+      else
+        log_warn "Failed to restore tuned profile: $saved_profile"
+      fi
+    else
+      echo "  ✓ No tuned profile in saved state"
+    fi
+  else
+    echo "  ✓ tuned-adm not available"
+  fi
+  
+  echo ""
+  log_info "State restoration complete!"
+  echo ""
+  echo "Summary:"
+  echo "  - Sysctl parameters restored"
+  echo "  - Interface settings restored"
+  echo "  - Configuration files restored"
+  echo "  - CPU governor restored"
+  echo "  - Tuned profile restored"
+  echo ""
+  echo "Note: Some settings may require a reboot to take full effect."
+  echo "Run with --mode audit to verify the restored state."
+  echo ""
+}
+
 print_host_info() {
   local os_release kernel_ver mem_info_str fqdn smt_status cpu_info cpu_vendor
   os_release=$(awk -F'=' '/^PRETTY_NAME/ {print $2}' /etc/os-release 2>/dev/null | tr -d '"')
@@ -2211,10 +3091,43 @@ main() {
       --yes) AUTO_YES=1; shift;;
       --dry-run) DRY_RUN=1; shift;;
           --json) OUTPUT_JSON=1; shift;;
+      --save-state) SAVE_STATE=1; shift;;
+      --label) STATE_LABEL="$2"; shift 2;;
+      --restore-state) RESTORE_STATE="$2"; shift 2;;
+      --list-states) LIST_STATES=1; shift;;
+      --diff-state) DIFF_STATE="$2"; shift 2;;
+      --delete-state) DELETE_STATE="$2"; shift 2;;
+      --auto-save-before) AUTO_SAVE_BEFORE=1; shift;;
       -h|--help) usage; exit 0;;
       *) echo "Unknown arg: $1" >&2; usage; exit 1;;
     esac
   done
+
+  # Handle state management operations first (they exit early)
+  if [[ $LIST_STATES -eq 1 ]]; then
+    do_list_states
+    exit 0
+  fi
+  
+  if [[ -n "$DELETE_STATE" ]]; then
+    do_delete_state
+    exit $?
+  fi
+  
+  if [[ -n "$DIFF_STATE" ]]; then
+    do_diff_state
+    exit $?
+  fi
+  
+  if [[ -n "$RESTORE_STATE" ]]; then
+    do_restore_state
+    exit $?
+  fi
+  
+  if [[ $SAVE_STATE -eq 1 ]]; then
+    do_save_state
+    exit $?
+  fi
 
   if [[ "$TARGET_TYPE" != "measurement" && "$TARGET_TYPE" != "dtn" ]]; then
     echo "ERROR: --target must be measurement or dtn" >&2
@@ -2276,6 +3189,25 @@ main() {
 
   if [[ "$OUTPUT_JSON" -eq 1 && "$MODE" != "audit" ]]; then
     echo "ERROR: --json is only supported with --mode audit" >&2; exit 1
+  fi
+  
+  # Validate auto-save-before flag
+  if [[ $AUTO_SAVE_BEFORE -eq 1 && "$MODE" != "apply" ]]; then
+    echo "ERROR: --auto-save-before requires --mode apply" >&2
+    exit 1
+  fi
+  
+  # Auto-save state before applying changes
+  if [[ $AUTO_SAVE_BEFORE -eq 1 && "$MODE" == "apply" ]]; then
+    log_info "Auto-saving state before applying changes..."
+    if [[ -z "$STATE_LABEL" ]]; then
+      STATE_LABEL="pre-apply-auto"
+    fi
+    if do_save_state; then
+      echo ""
+    else
+      log_warn "Failed to auto-save state, continuing with apply..."
+    fi
   fi
 
   if [[ "$MODE" == "audit" ]]; then

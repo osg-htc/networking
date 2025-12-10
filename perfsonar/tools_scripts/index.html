@@ -2702,13 +2702,24 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </sp
 <h2 id="host-tuning">Host Tuning<a class="headerlink" href="#host-tuning" title="Permanent link">&para;</a></h2>
 <h3 id="fasterdata-tuning-script">Fasterdata Tuning Script<a class="headerlink" href="#fasterdata-tuning-script" title="Permanent link">&para;</a></h3>
 <p>Audit and apply ESnet Fasterdata-inspired host and NIC tuning for EL9 systems.</p>
+<p><strong>NEW in v1.2.0</strong>: Save/restore state functionality for testing different tuning configurations.</p>
 <p><strong>Quick Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Audit mode (no changes)</span>
 /usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
 
 <span class="c1"># Apply tuning (requires root)</span>
 sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
+
+<span class="c1"># Save current state before testing</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--save-state<span class="w"> </span>--label<span class="w"> </span>baseline
+
+<span class="c1"># Restore saved state</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
+
+<span class="c1"># List all saved states</span>
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--list-states
 </code></pre></div>
+<p><strong>State Management</strong>: Save and restore system configurations for before/after performance testing. Captures sysctl parameters, interface settings, configuration files, CPU governor, and tuned profile. See <a href="fasterdata-tuning/#state-management-save--restore-configurations">Fasterdata Tuning Guide</a> for complete workflow examples.</p>
 <p><strong>Full Documentation:</strong> <a href="fasterdata-tuning/">Fasterdata Tuning Guide</a></p>
 <p><strong>Download:</strong>
 <div class="highlight"><pre><span></span><code><span class="c1"># Direct download</span>
