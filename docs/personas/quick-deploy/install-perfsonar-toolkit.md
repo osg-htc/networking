@@ -12,7 +12,7 @@ For upstream RPM installation documentation, see: <https://docs.perfsonar.net/in
 
 ## Choosing Between Toolkit and Testpoint
 
-### Use perfSONAR Toolkit (this guide) if you need:
+### Use perfSONAR Toolkit (this guide) if you need
 
 - **Local web interface** for configuration, monitoring, and viewing measurement results
 - **Local measurement archive** to store test data on-site with your own retention policies
@@ -20,7 +20,7 @@ For upstream RPM installation documentation, see: <https://docs.perfsonar.net/in
 - **Site-specific data retention** requirements or regulatory compliance needs
 - **On-site troubleshooting** access to historical measurement data without external dependencies
 
-### Use perfSONAR Testpoint instead if you prefer:
+### Use perfSONAR Testpoint instead if you prefer
 
 - **Lightweight container-based** deployment with minimal local resources
 - **Central archiving** where measurements are stored at a remote archive (WLCG/OSG central infrastructure)
@@ -339,7 +339,8 @@ host, and because some measurement infrastructure and registration systems perfo
 - For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
 - For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
 
-??? info "Run the DNS checker" 
+??? info "Run the DNS checker"
+
     
     To validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf` you can run a script:
     ```bash
@@ -358,6 +359,8 @@ host, and because some measurement infrastructure and registration systems perfo
     proceeding with registration and testing.
 
 **Verify the routing policy:**
+
+    
 
 ```bash
 nmcli connection show
@@ -399,11 +402,12 @@ integrated with your PBR configuration. This script can derive SSH allow-lists f
 
 ### Install/configure additional custom options
 
-You can use the install script to install the options you want (selinux, fail2ban)
+You can use the install script to install the options you want (selinux, fail2ban).
+
 ```bash
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
 ```
- 
+
     - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
       summary and answer manually).
 
@@ -485,6 +489,7 @@ health and completes first-time web interface configuration.
 
 Check that all perfSONAR services are running:
 
+
 ```bash
 systemctl status pscheduler-scheduler
 systemctl status pscheduler-runner
@@ -496,6 +501,7 @@ systemctl status perfsonar-lsregistrationdaemon
 ```
 
 All services should show `active (running)` status. If any service is not running, start it:
+
 
 ```bash
 systemctl start <service-name>
@@ -531,9 +537,9 @@ The perfSONAR Toolkit provides a comprehensive web interface for configuration a
 
 1. Open a browser and navigate to: `https://<your-hostname>/toolkit`
 
-2. **First-time setup wizard:**
+1. **First-time setup wizard:**
    
-   On first access, you'll be guided through initial configuration:
+    On first access, you'll be guided through initial configuration:
    
    - **Create administrator account**: Set username and password for web UI access
    - **Administrative information**: Site name, location, contact details
@@ -541,7 +547,7 @@ The perfSONAR Toolkit provides a comprehensive web interface for configuration a
    - **Test configuration**: Review default test settings (typically defaults are appropriate)
    - **Archive settings**: Configure local and/or remote archiving
 
-3. **Complete the wizard** to enable full functionality
+1. **Complete the wizard** to enable full functionality
 
 ??? tip "Web UI features"
     
@@ -619,6 +625,7 @@ systemctl restart pscheduler-scheduler pscheduler-runner pscheduler-archiver psc
     Manual updates require regular monitoring to ensure security patches are applied promptly.
 
 ---
+
 ## Step 6 – Configure and Enroll in pSConfig
 
 Enroll your toolkit host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN
@@ -629,14 +636,15 @@ you expose for perfSONAR (one or two depending on whether you split latency/thro
 The easiest way to configure pSConfig is via the web interface:
 
 1. Navigate to: `https://<your-hostname>/toolkit/admin?view=psconfig`
-2. Click "Add Remote Configuration"
-3. Enter the auto URL: `https://psconfig.opensciencegrid.org/pub/auto/<your-fqdn>`
-4. Enable "Configure Archives" to automatically set up result archiving
-5. Save and restart the pSConfig agent
+1. Click "Add Remote Configuration"
+1. Enter the auto URL: `https://psconfig.opensciencegrid.org/pub/auto/<your-fqdn>`
+1. Enable "Configure Archives" to automatically set up result archiving
+1. Save and restart the pSConfig agent
 
 ### Option B: Command Line Configuration
 
 Basic enrollment via command line:
+
 
 ```bash
 # Add auto URLs (configures archives too) and show configured remotes
@@ -648,14 +656,30 @@ psconfig remote list
 
 If there are any stale/old/incorrect entries, you can remove them:
 
+
 ```bash
 psconfig remote delete "<old-url>"
 ```
 
 ### Option C: Automated Enrollment Script
 
-Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before
-applying.
+
+Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.
+
+**For RPM Toolkit installs (non-container):**
+
+```bash
+# Dry run only (show planned URLs):
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-auto-enroll-psconfig.sh --local -n
+
+# Apply enrollment:
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-auto-enroll-psconfig.sh --local -v
+
+# Verify configured remotes
+psconfig remote list
+```
+
+**For container-based installs:**
 
 ```bash
 # Dry run only (show planned URLs):
@@ -665,7 +689,7 @@ applying.
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
 
 # Verify configured remotes
-psconfig remote list
+podman exec -it perfsonar-testpoint psconfig remote list
 ```
 
 ??? note "The auto enroll psconfig script details"
@@ -702,12 +726,12 @@ psconfig remote list
     The easiest way to configure registration information is via the Toolkit web interface:
     
     1. Navigate to: `https://<your-hostname>/toolkit/admin?view=host`
-    2. Fill in administrative information:
+    1. Fill in administrative information:
         - Site name, organization, location (city, state, country, zip code)
         - Latitude and longitude (for map display)
         - Administrator name and email
         - Projects (WLCG, OSG, etc.)
-    3. Save changes - the lsregistrationdaemon restarts automatically
+    1. Save changes - the lsregistrationdaemon restarts automatically
     
     **Option B: Command Line**
     
@@ -722,16 +746,33 @@ psconfig remote list
     
     **Option C: Helper Script**
     
-    Use the helper script to update registration (removes `podman exec` wrapper compared to testpoint):
 
+    Use the helper script to update registration. For RPM Toolkit installs, use the `--local` flag:
+
+    **For RPM Toolkit installs (non-container):**
     ```bash
     # Preview changes only
-    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh update \
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh update --local \
         --dry-run --site-name "Acme Co." --project WLCG \
         --admin-email admin@example.org --admin-name "pS Admin"
 
     # Apply new settings and restart the daemon
-    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh create \
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh create --local \
+        --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+        --city Berkeley --region CA --country US --zip 94720 \
+        --latitude 37.5 --longitude -121.7469 \
+        --admin-name "pS Admin" --admin-email admin@example.org
+    ```
+
+    **For container-based installs:**
+    ```bash
+    # Preview changes only
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh update --container perfsonar-testpoint \
+        --dry-run --site-name "Acme Co." --project WLCG \
+        --admin-email admin@example.org --admin-name "pS Admin"
+
+    # Apply new settings and restart the daemon in the container
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh create --container perfsonar-testpoint \
         --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
         --city Berkeley --region CA --country US --zip 94720 \
         --latitude 37.5 --longitude -121.7469 \
