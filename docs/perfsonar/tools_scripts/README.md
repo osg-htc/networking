@@ -2,16 +2,18 @@
 
 This directory contains helper scripts for perfSONAR deployment, configuration, and tuning.
 
-## Available Tools
+## Available tools
 
-| Tool | Purpose | Documentation |
-|------|---------|---------------|
-| **fasterdata-tuning.sh** | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
-| **perfSONAR-pbr-nm.sh** | Multi-NIC policy-based routing | [Multiple NIC Guidance](../multiple-nic-guidance.md) |
-| **perfSONAR-update-lsregistration.sh** | LS registration management | [LS Registration Tools](README-lsregistration.md) |
-| **perfSONAR-auto-enroll-psconfig.sh** | Automatic pSConfig enrollment | [Installation Guides](../../personas/quick-deploy/landing.md) |
-| **install_tools_scripts.sh** | Bulk installer for all scripts | [Installation](#installation) |
-| **install-systemd-service.sh** | Container auto-start on boot | [Container Management](#container-management) |
+| Tool | Version | Purpose | Documentation |
+|------|---------|---------|---------------|
+| **fasterdata-tuning.sh** | v1.2.0 | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
+| **perfSONAR-pbr-nm.sh** | — | Multi-NIC policy-based routing | [Multiple NIC Guidance](../multiple-nic-guidance.md) |
+| **perfSONAR-update-lsregistration.sh** | — | LS registration management | [LS Registration Tools](README-lsregistration.md) |
+| **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment | [Installation Guides](../../personas/quick-deploy/landing.md) |
+| **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
+| **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
+
+**Latest Updates**: v1.2.0 (Dec 2025) adds save/restore state management to fasterdata-tuning.sh
 
 ---
 

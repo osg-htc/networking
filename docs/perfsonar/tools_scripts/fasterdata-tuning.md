@@ -30,7 +30,7 @@ sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://osg-htc.org/networki
 sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 ```
 
-## Verify the Checksum (Optional)
+## Verify the checksum (optional)
 
 To verify script integrity, compare the downloaded file with the provided SHA256 checksum:
 
@@ -84,7 +84,7 @@ tc qdisc show dev <iface>
 cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 ```
 
-## Security & Safety
+## Security & safety
 
 - Always test in a staging environment first. Use `--mode audit` to review before applying.
 
@@ -141,9 +141,31 @@ sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on iommu=pt" --yes
 ```
 
-## State Management: Save & Restore Configurations
+## State management: Save and restore configurationsns
 
 **NEW in v1.2.0**: The script now supports saving and restoring system state for testing different tuning configurations.
+
+### Quick testing workflow
+
+**TL;DR**: Save baseline → Apply tuning → Test → Restore → Compare
+
+```bash
+# Save baseline state
+sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline
+
+# Apply tuning
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target measurement --yes
+
+# Run your performance tests here (iperf3, perfSONAR tests, etc.)
+
+# Restore baseline
+sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
+
+# Compare configurations
+/usr/local/bin/fasterdata-tuning.sh --diff-state baseline
+```
+
+**For detailed step-by-step workflow with multiple tuning profiles, see [Example Performance Testing Workflow](#example-performance-testing-workflow) below.**
 
 ### Why use save/restore?
 
@@ -299,25 +321,24 @@ sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
 /usr/local/bin/fasterdata-tuning.sh --mode audit
 ```
 
-### State Management Caveats
+### State management caveats
 
-**What IS saved/restored:**
+**What is and is not saved/restored:**
 
-- ✅ Sysctl parameters (runtime values)
-- ✅ Configuration files (`/etc/sysctl.d/90-fasterdata.conf`, systemd service)
-- ✅ Per-interface settings (txqueuelen, MTU, ring buffers, offload features, qdisc)
-- ✅ CPU governor (runtime)
-- ✅ SMT state (runtime)
-- ✅ Tuned profile
+| Component | Saved/Restored | Notes |
+|-----------|----------------|-------|
+| Sysctl parameters | ✅ Yes | Runtime values (TCP buffers, congestion control, etc.) |
+| Configuration files | ✅ Yes | `/etc/sysctl.d/90-fasterdata.conf`, systemd services |
+| Per-interface settings | ✅ Yes | txqueuelen, MTU, ring buffers, offload features, qdisc |
+| CPU governor | ✅ Yes | Runtime setting |
+| SMT state | ✅ Yes | Runtime setting |
+| Tuned profile | ✅ Yes | Active profile |
+| GRUB kernel cmdline | ❌ No | Requires reboot (IOMMU, persistent nosmt); not suitable for testing cycles |
+| Kernel module parameters | ❌ No | Out of scope |
+| Firewall rules | ❌ No | Not modified by this script |
+| Network interfaces | ❌ No | Interface creation/deletion not supported |
 
-**What is NOT saved/restored:**
-
-- ❌ GRUB kernel command-line parameters (IOMMU, persistent nosmt) - requires reboot
-- ❌ Kernel module parameters
-- ❌ Firewall rules
-- ❌ Network interface creation/deletion
-
-**Limitations:**
+**Important limitations:**
 
 1. **Hardware-dependent**: Ring buffer sizes are limited by NIC hardware; restoration may fail if hardware doesn't support saved values
 2. **Hostname-specific**: Restoring a state from a different hostname will trigger a warning but proceed
@@ -325,7 +346,7 @@ sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
 4. **Side effects**: Changing tuned profile may modify additional sysctls not tracked by this script
 5. **Requires python3**: State save/restore operations require python3 for JSON processing
 
-### State File Format
+### State file format
 
 State files are stored as JSON in `/var/lib/fasterdata-tuning/saved-states/` with the following structure:
 
