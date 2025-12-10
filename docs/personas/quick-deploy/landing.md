@@ -45,7 +45,7 @@ Get perfSONAR running on OSG/WLCG in **1-2 hours** with guided installation.
 
 Optimize kernel and NIC settings for network throughput:
 
-- **[Fasterdata Tuning](../../network-troubleshooting.md)** — ESnet recommendations for high-performance hosts
+- **[Fasterdata Tuning](../../perfsonar/tools_scripts/fasterdata-tuning.md)** — ESnet recommendations for high-performance hosts
 - Tool: `fasterdata-tuning.sh` (audit and apply modes, ~15 minutes)
 
 ---
