@@ -1,17 +1,21 @@
 # Host and Network Tuning (EL9)
 
-This guide distills ESnet Fasterdata recommendations for high-throughput hosts (perfSONAR/DTN-style) on Enterprise Linux
+!!! note "Documentation Moved"
+    This page has been consolidated. Please see the canonical documentation:
+    
+    **[Fasterdata Host & Network Tuning Guide](perfsonar/tools_scripts/fasterdata-tuning.md)**
 
-1. Primary sources:
+---
 
-- <https://fasterdata.es.net/host-tuning/>
+## Quick Reference
 
-- <https://fasterdata.es.net/network-tuning/>
+For ESnet Fasterdata recommendations and the `fasterdata-tuning.sh` script, see:
 
-- <https://fasterdata.es.net/DTN/>
+- **[Fasterdata Tuning Script Documentation](perfsonar/tools_scripts/fasterdata-tuning.md)** — Complete guide for audit and apply modes
+- **[ESnet Fasterdata Host Tuning](https://fasterdata.es.net/host-tuning/)** — Upstream recommendations
+- **[ESnet Network Tuning](https://fasterdata.es.net/network-tuning/)** — Network-level guidance
+- **[ESnet DTN Tuning](https://fasterdata.es.net/DTN/)** — Data Transfer Node specific tuning
 
-Use the provided audit/apply script to check your host against these recommendations and optionally enforce them. Read
-the cautions before applying.
 
 ## What this covers
 
@@ -365,6 +369,9 @@ To manually update this service, re-run the script with `--mode apply` to regene
 - Sysctl settings persist via `/etc/sysctl.d/90-fasterdata.conf`
 
 - NIC ethtool changes do not persist by default; consider:
+
+</details>
+
 
 - running this script from a boot-time systemd unit, or
 

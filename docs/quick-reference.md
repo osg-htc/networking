@@ -237,7 +237,7 @@ tp/docker-compose.yml` | Container definition | | `/opt/perfsonar-tp/tools_scrip
 ## Documentation Links
 
 | Topic | Link | |-------|------| | **Installation** | [Quick Deploy Guide](personas/quick-deploy/landing.md) | |
-**Troubleshooting** | [Troubleshooter Guide](personas/troubleshoot/landing.md) | | **Host Tuning** | [Fasterdata
+**Troubleshooting** | [Troubleshooter Guide](personas/troubleshoot/landing.md) | | **Host Tuning** | [Fasterdata Tuning](perfsonar/tools_scripts/fasterdata-tuning.md)
 Tuning](host-network-tuning.md) | | **Architecture** | [System Overview](personas/research/landing.md) | | **Tools** |
 [Tools & Scripts](perfsonar/tools_scripts/README.md) | | **FAQ** | [perfSONAR FAQ](perfsonar/faq.md) | | **Official
 Docs** | [docs.perfsonar.net](https://docs.perfsonar.net/) |

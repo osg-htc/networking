@@ -38,7 +38,7 @@ nav:
     - 'Legacy Installation (Archive)': 'perfsonar/installation.md'
     - 'FAQ': 'perfsonar/faq.md'
   - Host Tuning:
-    - 'Fasterdata Host Tuning': 'host-network-tuning.md'
+    - 'Fasterdata Host Tuning': 'perfsonar/tools_scripts/fasterdata-tuning.md'
     - 'Multiple NIC Guidance': 'perfsonar/multiple-nic-guidance.md'
   - Troubleshooting:
     - 'Triage Checklist': 'personas/troubleshoot/triage-checklist.md'
