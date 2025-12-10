@@ -1,15 +1,46 @@
 ---
-title: "Quick Deploy — perfSONAR Testpoint"
-description: "Concise, verified quickstart to deploy a perfSONAR testpoint for OSG/WLCG monitoring."
+title: "Quick Deploy — perfSONAR for OSG/WLCG"
+description: "Concise, verified quickstarts to deploy perfSONAR Testpoint or Toolkit for OSG/WLCG monitoring."
 persona: quick-deploy
 owners: ["networking-team@osg-htc.org"]
 status: active
-tags: [quickstart, perfSONAR, testpoint, deployment]
+tags: [quickstart, perfSONAR, testpoint, toolkit, deployment]
 ---
 
-# 🚀 Quick Deploy — perfSONAR Testpoint
+# 🚀 Quick Deploy — perfSONAR for OSG/WLCG
 
-Get a perfSONAR testpoint running on OSG/WLCG in **1-2 hours** with guided automation.
+Get perfSONAR running on OSG/WLCG in **1-2 hours** with guided installation.
+
+---
+
+## Choose Your Deployment Type
+
+### 🐳 perfSONAR Testpoint (Container-based)
+
+**Best for:** Lightweight deployment, central data archiving, minimal local resources
+
+**Features:**
+- Container-based deployment (podman/docker)
+- No local web UI (measurements viewed via central services)
+- Remote archiving only (data stored at WLCG/OSG central archive)
+- Smaller footprint, simplified updates
+
+**Time:** 30-60 minutes | **Guide:** [Install perfSONAR Testpoint](install-perfsonar-testpoint.md)
+
+---
+
+### 📦 perfSONAR Toolkit (RPM-based)
+
+**Best for:** Full-featured installation, local web UI, on-site data storage
+
+**Features:**
+- RPM package installation
+- Local web interface at `https://hostname/toolkit`
+- Local measurement archive (OpenSearch + Logstash)
+- Full perfSONAR capabilities
+- Site-specific data retention
+
+**Time:** 45-90 minutes | **Guide:** [Install perfSONAR Toolkit](install-perfsonar-toolkit.md)
 
 ---
 
@@ -28,13 +59,13 @@ Understand the deployment landscape and requirements:
 
 ---
 
-## Installation Paths
+## Testpoint Installation Paths
 
-### ⚡ Fast Track — Orchestrated Deploy (Recommended)
+### ⚡ Fast Track — Orchestrated Deploy (Recommended for Testpoint)
 
 **Time:** 30-60 minutes | **Skill level:** System administrator
 
-Follow the **[Full Installation Guide](install-perfsonar-testpoint.md)** which uses the orchestrator for guided,
+Follow the **[Testpoint Installation Guide](install-perfsonar-testpoint.md)** which uses the orchestrator for guided,
 interactive or non-interactive deploys.
 
 - `perfSONAR-orchestrator.sh` — automates package install, PBR, security, containers, certificates, and mesh enrollment
@@ -49,7 +80,7 @@ interactive or non-interactive deploys.
 
 For deploying multiple testpoints or CI/CD pipelines, see **[Automated Setup Examples](automated-setup/README.md)**.
 
-### 🔧 Custom Deploy — Manual Step-by-Step (Legacy)
+### 🔧 Custom Deploy — Manual Step-by-Step
 
 **Time:** 60–90 minutes | **Skill level:** System administrator + networking knowledge
 
