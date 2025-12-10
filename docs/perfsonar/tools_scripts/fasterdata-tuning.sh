@@ -2020,7 +2020,8 @@ capture_sysctl_file_state() {
   if [[ -f "$sysctl_file" ]]; then
     json+="\"exists\":true,"
     # Create backup
-    local backup_name="90-fasterdata.conf.$(date -u +%Y%m%d-%H%M%S)"
+    local backup_name
+    backup_name="90-fasterdata.conf.$(date -u +%Y%m%d-%H%M%S)"
     local backup_path="$BACKUP_SUBDIR/$backup_name"
     if cp "$sysctl_file" "$backup_path" 2>/dev/null; then
       json+="\"backup_path\":\"$backup_path\","
@@ -2151,7 +2152,8 @@ capture_ethtool_service_state() {
     json+="\"enabled\":$enabled,"
     
     # Create backup
-    local backup_name="ethtool-persist.service.$(date -u +%Y%m%d-%H%M%S)"
+    local backup_name
+    backup_name="ethtool-persist.service.$(date -u +%Y%m%d-%H%M%S)"
     local backup_path="$BACKUP_SUBDIR/$backup_name"
     if cp "$svc_file" "$backup_path" 2>/dev/null; then
       json+="\"backup_path\":\"$backup_path\","
@@ -2593,7 +2595,11 @@ do_restore_state() {
   else
     # File didn't exist in saved state, remove it if present
     if [[ -f "$sysctl_file" ]]; then
-      rm "$sysctl_file" 2>/dev/null && echo "  ✓ Removed $sysctl_file (did not exist in saved state)" || log_warn "Failed to remove $sysctl_file"
+      if rm "$sysctl_file" 2>/dev/null; then
+        echo "  ✓ Removed $sysctl_file (did not exist in saved state)"
+      else
+        log_warn "Failed to remove $sysctl_file"
+      fi
     else
       echo "  ✓ $sysctl_file (not present in saved state, not present now)"
     fi
@@ -2661,7 +2667,11 @@ do_restore_state() {
       # Extract qdisc type (first word)
       local qdisc_type="${saved_qdisc%% *}"
       if [[ "$qdisc_type" =~ ^(fq|fq_codel|pfifo_fast|mq|tbf)$ ]]; then
-        tc qdisc replace dev "$iface" root "$qdisc_type" >/dev/null 2>&1 && echo "    ✓ qdisc: $qdisc_type" || log_warn "Failed to restore qdisc for $iface"
+        if tc qdisc replace dev "$iface" root "$qdisc_type" >/dev/null 2>&1; then
+          echo "    ✓ qdisc: $qdisc_type"
+        else
+          log_warn "Failed to restore qdisc for $iface"
+        fi
       fi
     fi
   done
@@ -2699,7 +2709,11 @@ do_restore_state() {
     # Service didn't exist in saved state
     if [[ -f "$svc_file" ]]; then
       systemctl disable ethtool-persist.service >/dev/null 2>&1 || true
-      rm "$svc_file" 2>/dev/null && echo "  ✓ Removed ethtool-persist.service (did not exist in saved state)" || log_warn "Failed to remove ethtool-persist.service"
+      if rm "$svc_file" 2>/dev/null; then
+        echo "  ✓ Removed ethtool-persist.service (did not exist in saved state)"
+      else
+        log_warn "Failed to remove ethtool-persist.service"
+      fi
       systemctl daemon-reload
     else
       echo "  ✓ ethtool-persist.service (not present in saved state, not present now)"
@@ -2718,7 +2732,11 @@ do_restore_state() {
       saved_gov=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('cpu',{}).get('governors',{}).get('cpu$cpu',''))" 2>/dev/null || echo "")
       
       if [[ -n "$saved_gov" ]] && [[ "$saved_gov" != "null" ]]; then
-        echo "$saved_gov" > "$gov_file" 2>/dev/null && echo "  ✓ CPU $cpu: $saved_gov" || log_warn "Failed to restore governor for CPU $cpu"
+        if echo "$saved_gov" > "$gov_file" 2>/dev/null; then
+          echo "  ✓ CPU $cpu: $saved_gov"
+        else
+          log_warn "Failed to restore governor for CPU $cpu"
+        fi
       fi
       ((cpu++))
     done
