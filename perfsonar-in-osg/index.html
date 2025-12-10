@@ -783,6 +783,98 @@
   
   
   
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/quick-deploy/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy perfSONAR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
         
@@ -791,7 +883,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Deploy (Testpoint)
+    Install Testpoint (Container)
   
 
     
@@ -800,6 +892,42 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/quick-deploy/install-perfsonar-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Toolkit (RPM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2318,9 +2446,13 @@ regularly and consistently measure a set of network metrics that we can use to u
 operating. When problems arise, the data, along with access to the <code>perfSONAR</code> tools, can be used to diagnose and
 localize problems. The presence of perfSONAR toolkit deployments across our sites and networks makes identifying and
 fixing network problems feasible.</p>
-<p>We strongly recommend that all OSG (and WLCG) sites deploy <code>perfSONAR</code> toolkit instances as described in our
-<a href="../perfsonar/installation/">installation guide</a>. Before installing you should consult the
-<a href="../perfsonar/deployment-models/">requirements</a> along with the guidance on <a href="../perfsonar/deployment-models/">deployment models</a>.</p>
+<p>We strongly recommend that all OSG (and WLCG) sites deploy <code>perfSONAR</code> instances. You can choose between:</p>
+<ul>
+<li><strong><a href="../personas/quick-deploy/install-perfsonar-testpoint/">Testpoint (container-based)</a></strong> - Recommended for most sites, lightweight deployment</li>
+<li><strong><a href="../personas/quick-deploy/install-perfsonar-toolkit/">Toolkit (RPM-based)</a></strong> - For sites needing local web UI and measurement archive</li>
+</ul>
+<p>Before installing, consult the <a href="../perfsonar/deployment-models/">requirements</a> and <a href="../perfsonar/deployment-models/">deployment models</a> guidance.</p>
+<p>See the <a href="../personas/quick-deploy/landing/">Quick Deploy landing page</a> for a comparison and installation guides.</p>
 <div class="admonition note installing perfsonar not only benefits users at a site but will enable network engineers and osg staff to much">
 <p class="admonition-title">Note</p>
 </div>

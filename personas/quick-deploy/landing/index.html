@@ -6,17 +6,17 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Concise, verified quickstart to deploy a perfSONAR testpoint for OSG/WLCG monitoring.">
+        <meta name="description" content="Concise, verified quickstarts to deploy perfSONAR Testpoint or Toolkit for OSG/WLCG monitoring.">
       
       
       
         <link rel="canonical" href="https://osg-htc.org/networking/personas/quick-deploy/landing/">
       
       
-        <link rel="prev" href="../../..">
+        <link rel="prev" href="../../../perfsonar/deployment-models/">
       
       
-        <link rel="next" href="../../troubleshoot/landing/">
+        <link rel="next" href="../install-perfsonar-testpoint/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Quick Deploy — perfSONAR Testpoint - OSG Networking Area</title>
+        <title>Quick Deploy — perfSONAR for OSG/WLCG - OSG Networking Area</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#quick-deploy-perfsonar-testpoint" class="md-skip">
+        <a href="#quick-deploy-perfsonar-for-osgwlcg" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Quick Deploy — perfSONAR Testpoint
+              Quick Deploy — perfSONAR for OSG/WLCG
             
           </span>
         </div>
@@ -216,12 +216,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="./" class="md-tabs__link">
           
   
@@ -238,10 +236,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../../../perfsonar-in-osg/" class="md-tabs__link">
           
   
@@ -442,31 +442,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -484,7 +481,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -576,6 +573,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#choose-your-deployment-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choose Your Deployment Type
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choose Your Deployment Type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#perfsonar-testpoint-container-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐳 perfSONAR Testpoint (Container-based)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perfsonar-toolkit-rpm-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 perfSONAR Toolkit (RPM-based)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#before-you-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -587,22 +623,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation-paths" class="md-nav__link">
+  <a href="#testpoint-installation-paths" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation Paths
+        Testpoint Installation Paths
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Installation Paths">
+    <nav class="md-nav" aria-label="Testpoint Installation Paths">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fast-track-orchestrated-deploy-recommended" class="md-nav__link">
+  <a href="#fast-track-orchestrated-deploy-recommended-for-testpoint" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ⚡ Fast Track — Orchestrated Deploy (Recommended)
+        ⚡ Fast Track — Orchestrated Deploy (Recommended for Testpoint)
       
     </span>
   </a>
@@ -621,10 +657,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#custom-deploy-manual-step-by-step-legacy" class="md-nav__link">
+  <a href="#custom-deploy-manual-step-by-step" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🔧 Custom Deploy — Manual Step-by-Step (Legacy)
+        🔧 Custom Deploy — Manual Step-by-Step
       
     </span>
   </a>
@@ -813,28 +849,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -852,7 +891,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -923,6 +962,346 @@
                 
   
   
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy perfSONAR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy perfSONAR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#choose-your-deployment-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choose Your Deployment Type
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choose Your Deployment Type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#perfsonar-testpoint-container-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐳 perfSONAR Testpoint (Container-based)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#perfsonar-toolkit-rpm-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 perfSONAR Toolkit (RPM-based)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-you-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before You Start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testpoint-installation-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testpoint Installation Paths
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testpoint Installation Paths">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fast-track-orchestrated-deploy-recommended-for-testpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚡ Fast Track — Orchestrated Deploy (Recommended for Testpoint)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatedrepeatable-deploy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🤖 Automated/Repeatable Deploy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-deploy-manual-step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Custom Deploy — Manual Step-by-Step
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-deploy-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Deploy Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Post-Deploy Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#host-tuning-optional-but-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host Tuning (Optional but Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-configuration-multi-nic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Configuration (Multi-NIC)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ls-registration-enrollment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LS Registration &amp; Enrollment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-hardening-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Hardening (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation &amp; Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support &amp; Resources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-tools-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Tools &amp; Scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
@@ -933,7 +1312,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Deploy (Testpoint)
+    Install Testpoint (Container)
   
 
     
@@ -942,6 +1321,42 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install-perfsonar-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Toolkit (RPM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2405,10 +2820,28 @@
     
     
       <li class="md-path__item">
+        <a href="../../../perfsonar-in-osg/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    perfSONAR Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
         <a href="./" class="md-path__link">
           
   <span class="md-ellipsis">
-    Get Started
+    Installation Guides
   </span>
 
         </a>
@@ -2430,8 +2863,28 @@
   
 
 
-<h1 id="quick-deploy-perfsonar-testpoint">🚀 Quick Deploy — perfSONAR Testpoint<a class="headerlink" href="#quick-deploy-perfsonar-testpoint" title="Permanent link">&para;</a></h1>
-<p>Get a perfSONAR testpoint running on OSG/WLCG in <strong>1-2 hours</strong> with guided automation.</p>
+<h1 id="quick-deploy-perfsonar-for-osgwlcg">🚀 Quick Deploy — perfSONAR for OSG/WLCG<a class="headerlink" href="#quick-deploy-perfsonar-for-osgwlcg" title="Permanent link">&para;</a></h1>
+<p>Get perfSONAR running on OSG/WLCG in <strong>1-2 hours</strong> with guided installation.</p>
+<hr />
+<h2 id="choose-your-deployment-type">Choose Your Deployment Type<a class="headerlink" href="#choose-your-deployment-type" title="Permanent link">&para;</a></h2>
+<h3 id="perfsonar-testpoint-container-based">🐳 perfSONAR Testpoint (Container-based)<a class="headerlink" href="#perfsonar-testpoint-container-based" title="Permanent link">&para;</a></h3>
+<p><strong>Best for:</strong> Lightweight deployment, central data archiving, minimal local resources</p>
+<p><strong>Features:</strong>
+- Container-based deployment (podman/docker)
+- No local web UI (measurements viewed via central services)
+- Remote archiving only (data stored at WLCG/OSG central archive)
+- Smaller footprint, simplified updates</p>
+<p><strong>Time:</strong> 30-60 minutes | <strong>Guide:</strong> <a href="../install-perfsonar-testpoint/">Install perfSONAR Testpoint</a></p>
+<hr />
+<h3 id="perfsonar-toolkit-rpm-based">📦 perfSONAR Toolkit (RPM-based)<a class="headerlink" href="#perfsonar-toolkit-rpm-based" title="Permanent link">&para;</a></h3>
+<p><strong>Best for:</strong> Full-featured installation, local web UI, on-site data storage</p>
+<p><strong>Features:</strong>
+- RPM package installation
+- Local web interface at <code>https://hostname/toolkit</code>
+- Local measurement archive (OpenSearch + Logstash)
+- Full perfSONAR capabilities
+- Site-specific data retention</p>
+<p><strong>Time:</strong> 45-90 minutes | <strong>Guide:</strong> <a href="../install-perfsonar-toolkit/">Install perfSONAR Toolkit</a></p>
 <hr />
 <h2 id="before-you-start">Before You Start<a class="headerlink" href="#before-you-start" title="Permanent link">&para;</a></h2>
 <p>Understand the deployment landscape and requirements:</p>
@@ -2450,10 +2903,10 @@
 </li>
 </ul>
 <hr />
-<h2 id="installation-paths">Installation Paths<a class="headerlink" href="#installation-paths" title="Permanent link">&para;</a></h2>
-<h3 id="fast-track-orchestrated-deploy-recommended">⚡ Fast Track — Orchestrated Deploy (Recommended)<a class="headerlink" href="#fast-track-orchestrated-deploy-recommended" title="Permanent link">&para;</a></h3>
+<h2 id="testpoint-installation-paths">Testpoint Installation Paths<a class="headerlink" href="#testpoint-installation-paths" title="Permanent link">&para;</a></h2>
+<h3 id="fast-track-orchestrated-deploy-recommended-for-testpoint">⚡ Fast Track — Orchestrated Deploy (Recommended for Testpoint)<a class="headerlink" href="#fast-track-orchestrated-deploy-recommended-for-testpoint" title="Permanent link">&para;</a></h3>
 <p><strong>Time:</strong> 30-60 minutes | <strong>Skill level:</strong> System administrator</p>
-<p>Follow the <strong><a href="../install-perfsonar-testpoint/">Full Installation Guide</a></strong> which uses the orchestrator for guided,
+<p>Follow the <strong><a href="../install-perfsonar-testpoint/">Testpoint Installation Guide</a></strong> which uses the orchestrator for guided,
 interactive or non-interactive deploys.</p>
 <ul>
 <li>
@@ -2469,7 +2922,7 @@ interactive or non-interactive deploys.</p>
 <h3 id="automatedrepeatable-deploy">🤖 Automated/Repeatable Deploy<a class="headerlink" href="#automatedrepeatable-deploy" title="Permanent link">&para;</a></h3>
 <p><strong>Time:</strong> Varies | <strong>Skill level:</strong> DevOps/automation engineer</p>
 <p>For deploying multiple testpoints or CI/CD pipelines, see <strong><a href="../automated-setup/">Automated Setup Examples</a></strong>.</p>
-<h3 id="custom-deploy-manual-step-by-step-legacy">🔧 Custom Deploy — Manual Step-by-Step (Legacy)<a class="headerlink" href="#custom-deploy-manual-step-by-step-legacy" title="Permanent link">&para;</a></h3>
+<h3 id="custom-deploy-manual-step-by-step">🔧 Custom Deploy — Manual Step-by-Step<a class="headerlink" href="#custom-deploy-manual-step-by-step" title="Permanent link">&para;</a></h3>
 <p><strong>Time:</strong> 60–90 minutes | <strong>Skill level:</strong> System administrator + networking knowledge</p>
 <p>For multi-NIC setups or customization, consult the legacy manual <strong><a href="../../../perfsonar/installation/">Manual Steps (legacy)</a></strong>.</p>
 <p>Covers: toolkit-based installs, detailed package/manual steps, and advanced network configs.</p>

@@ -14,7 +14,7 @@
         <link rel="prev" href="../../perfsonar-in-osg/">
       
       
-        <link rel="next" href="../../personas/quick-deploy/install-perfsonar-testpoint/">
+        <link rel="next" href="../../personas/quick-deploy/landing/">
       
       
         
@@ -759,6 +759,28 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#testpoint-container-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testpoint (Container-based)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toolkit-rpm-based" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Toolkit (RPM-based)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#perfsonar-hardware-requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -800,6 +822,98 @@
   
   
   
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/quick-deploy/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy perfSONAR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
         
@@ -808,7 +922,7 @@
   <span class="md-ellipsis">
     
   
-    Quick Deploy (Testpoint)
+    Install Testpoint (Container)
   
 
     
@@ -817,6 +931,42 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../personas/quick-deploy/install-perfsonar-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Toolkit (RPM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2334,14 +2484,26 @@ each focused on specific set of tests. The following deployment options are curr
 </code></pre></div>
 <h2 id="perfsonar-toolkit-vs-testpoint">perfSONAR Toolkit vs Testpoint<a class="headerlink" href="#perfsonar-toolkit-vs-testpoint" title="Permanent link">&para;</a></h2>
 <p>The perfSONAR team has documented the types of installations supported at
-<a href="https://docs.perfsonar.net/install_options.html">https://docs.perfsonar.net/install_options.html</a>.   With the release of version 5, OSG/WLCG sites have a new option:
-instead of installing the full Toolkit sites can choose to install the Testpoint bundle.</p>
+<a href="https://docs.perfsonar.net/install_options.html">https://docs.perfsonar.net/install_options.html</a>. With the release of version 5, OSG/WLCG sites can choose between two deployment options:</p>
+<h3 id="testpoint-container-based">Testpoint (Container-based)<a class="headerlink" href="#testpoint-container-based" title="Permanent link">&para;</a></h3>
+<p><strong>Installation guide:</strong> <a href="../../personas/quick-deploy/install-perfsonar-testpoint/">Install perfSONAR Testpoint</a></p>
 <ul>
-<li>Pros</li>
+<li><strong>Pros:</strong></li>
+<li>Simpler deployment when a local web interface is not needed and a central measurement archive is available</li>
+<li>Less resource intensive for both memory and I/O capacity</li>
+<li>Container-based updates and management</li>
+<li>Recommended for most OSG/WLCG sites</li>
 </ul>
-<div class="highlight"><pre><span></span><code>* Simpler deployment when a local web interface is not needed and a central measurement archive is available.
-* Less resource intensive for both memory and I/O capacity.
-</code></pre></div>
+<h3 id="toolkit-rpm-based">Toolkit (RPM-based)<a class="headerlink" href="#toolkit-rpm-based" title="Permanent link">&para;</a></h3>
+<p><strong>Installation guide:</strong> <a href="../../personas/quick-deploy/install-perfsonar-toolkit/">Install perfSONAR Toolkit</a></p>
+<ul>
+<li><strong>Pros:</strong></li>
+<li>Local web interface at <code>https://hostname/toolkit</code> for configuration and monitoring</li>
+<li>Local measurement archive (OpenSearch + Logstash) for on-site data retention</li>
+<li>Full-featured perfSONAR installation</li>
+<li>Suitable for sites with specific data retention or regulatory requirements</li>
+</ul>
+<p><strong>See the <a href="../../personas/quick-deploy/landing/">deployment comparison</a> for detailed feature comparison.</strong></p>
 <ul>
 <li>Cons</li>
 </ul>
