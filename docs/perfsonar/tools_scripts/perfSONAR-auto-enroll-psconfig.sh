@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # perfSONAR-auto-enroll-psconfig.sh
-# Purpose: Automatically enroll a perfSONAR testpoint container with OSG/WLCG pSConfig
+# Purpose: Automatically enroll a perfSONAR testpoint (container or RPM Toolkit) with OSG/WLCG pSConfig
 # by deriving FQDNs from IPs listed in /etc/perfSONAR-multi-nic-config.conf (reverse DNS)
 # and adding the corresponding auto URLs via `psconfig remote --configure-archives add`.
+#
+# Supports:
+#   - Container mode (default): uses podman/docker to run psconfig inside the container
+#   - Local mode (--local): runs psconfig commands directly on the host (RPM Toolkit install)
 #
 # Version: 1.0.0 - 2025-11-09
 # Author: Shawn McKee, University of Michigan
@@ -39,6 +43,7 @@ ASSUME_YES=0
 DRY_RUN=0
 VERBOSE=0
 USE_DOCKER=0
+LOCAL_MODE=0
 
 log() { echo "[INFO] $*"; }
 err() { echo "[ERROR] $*" >&2; }
@@ -72,6 +77,7 @@ Usage:
 Options:
   -c <container>   Container name (default: perfsonar-testpoint)
   -f <config>      Path to multi-NIC config (default: /etc/perfSONAR-multi-nic-config.conf)
+  --local          Run psconfig commands directly on host (RPM Toolkit)
   -y               Assume yes; do not prompt for confirmation
   -n               Dry-run; show FQDNs and planned URLs but do not enroll
   -v               Verbose output
@@ -81,6 +87,7 @@ Options:
 Requirements:
   - podman (preferred) or docker available
   - running perfSONAR testpoint container accessible
+  - psconfig available on host (for local mode)
   - dig OR getent for reverse lookups
 
 Exit codes:
@@ -88,6 +95,7 @@ Exit codes:
   1 - Usage error
   2 - No FQDNs discovered
   3 - Enrollment failures (one or more adds failed)
+  4 - psconfig not found in local mode
 EOF
 }
 
@@ -101,6 +109,9 @@ while getopts ":c:f:ynvh-:" opt; do
     h) usage; exit 0;;
     -)
       case "$OPTARG" in
+        local)
+          LOCAL_MODE=1
+          ;;
         version) echo "$PROG_NAME version $VERSION"; exit 0;;
         *) err "Unknown option: --$OPTARG"; usage; exit 1;;
       esac
@@ -109,12 +120,18 @@ while getopts ":c:f:ynvh-:" opt; do
   esac
 done
 
-if ! command -v podman >/dev/null 2>&1; then
-  if command -v docker >/dev/null 2>&1; then
-    USE_DOCKER=1
-    log "podman not found; falling back to docker"
-  else
-    err "Neither podman nor docker found in PATH"; exit 1
+if [[ $LOCAL_MODE -eq 0 ]]; then
+  if ! command -v podman >/dev/null 2>&1; then
+    if command -v docker >/dev/null 2>&1; then
+      USE_DOCKER=1
+      log "podman not found; falling back to docker"
+    else
+      err "Neither podman nor docker found in PATH"; exit 1
+    fi
+  fi
+else
+  if ! command -v psconfig >/dev/null 2>&1; then
+    err "psconfig not found in PATH for local mode (RPM Toolkit)."; exit 4
   fi
 fi
 
@@ -219,19 +236,28 @@ if [ $ASSUME_YES -eq 0 ]; then
   [ "$ans" = "y" ] || { err "Aborted by user"; exit 1; }
 fi
 
-RUNTIME="podman"
-[ $USE_DOCKER -eq 1 ] && RUNTIME="docker"
-
 FAILURES=0
-for fq in "${UNIQ[@]}"; do
-  url="https://psconfig.opensciencegrid.org/pub/auto/$fq"
-  log "Enrolling $fq -> $url"
-  if ! $RUNTIME exec "$CONTAINER" psconfig remote --configure-archives add "$url"; then
-    err "Enrollment failed for $fq"; FAILURES=$((FAILURES+1))
-  fi
-done
-
-log "Configured remotes:"; $RUNTIME exec "$CONTAINER" psconfig remote list || true
+if [[ $LOCAL_MODE -eq 0 ]]; then
+  RUNTIME="podman"
+  [ $USE_DOCKER -eq 1 ] && RUNTIME="docker"
+  for fq in "${UNIQ[@]}"; do
+    url="https://psconfig.opensciencegrid.org/pub/auto/$fq"
+    log "Enrolling $fq -> $url"
+    if ! $RUNTIME exec "$CONTAINER" psconfig remote --configure-archives add "$url"; then
+      err "Enrollment failed for $fq"; FAILURES=$((FAILURES+1))
+    fi
+  done
+  log "Configured remotes:"; $RUNTIME exec "$CONTAINER" psconfig remote list || true
+else
+  for fq in "${UNIQ[@]}"; do
+    url="https://psconfig.opensciencegrid.org/pub/auto/$fq"
+    log "Enrolling $fq -> $url (local mode)"
+    if ! psconfig remote --configure-archives add "$url"; then
+      err "Enrollment failed for $fq"; FAILURES=$((FAILURES+1))
+    fi
+  done
+  log "Configured remotes (local):"; psconfig remote list || true
+fi
 
 if [ $FAILURES -gt 0 ]; then
   err "$FAILURES enrollment(s) failed"; exit 3
