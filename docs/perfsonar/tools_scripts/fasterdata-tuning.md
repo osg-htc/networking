@@ -147,6 +147,203 @@ iommu=pt" --yes
 
 ```
 
+## State Management: Save & Restore Configurations
+
+**NEW in v1.2.0**: The script now supports saving and restoring system state for testing different tuning configurations.
+
+### Why use save/restore?
+
+When testing performance with different tuning configurations, you need to:
+
+1. Save your baseline (pre-tuning) configuration
+2. Apply tuning changes
+3. Test performance
+4. Restore the baseline to test alternative configurations
+5. Compare results
+
+The save/restore functionality captures all settings that `--mode apply` modifies, including:
+
+- Sysctl parameters (TCP buffers, congestion control, etc.)
+- Per-interface settings (txqueuelen, MTU, ring buffers, offload features, qdisc)
+- Configuration files (`/etc/sysctl.d/90-fasterdata.conf`, `/etc/systemd/system/ethtool-persist.service`)
+- CPU governor settings
+- Tuned profile
+- SMT (Simultaneous Multithreading) state
+
+**Note**: GRUB/boot configuration (IOMMU, persistent SMT) is not saved/restored as it requires a reboot to take effect.
+
+### Save Current State
+
+Save the current system configuration before making changes:
+
+```bash
+# Save state with a descriptive label (requires root)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --save-state --label baseline
+
+# Save state with automatic timestamp
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --save-state
+```
+
+State files are stored in: `/var/lib/fasterdata-tuning/saved-states/`
+
+### Auto-Save Before Applying
+
+Automatically save state before applying tuning changes:
+
+```bash
+# Apply tuning and auto-save the pre-apply state
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --auto-save-before --label pre-tuning
+```
+
+### List Saved States
+
+View all saved configuration states:
+
+```bash
+bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --list-states
+```
+
+Example output:
+
+```
+Saved States:
+=============
+
+File: 20251210-143000-baseline.json
+  Timestamp: 2025-12-10T14:30:00Z
+  Label: baseline
+  Hostname: perfsonar.example.org
+  Path: /var/lib/fasterdata-tuning/saved-states/20251210-143000-baseline.json
+
+File: 20251210-150000-tuned-measurement.json
+  Timestamp: 2025-12-10T15:00:00Z
+  Label: tuned-measurement
+  Hostname: perfsonar.example.org
+  Path: /var/lib/fasterdata-tuning/saved-states/20251210-150000-tuned-measurement.json
+```
+
+### Compare Current vs Saved State
+
+Show differences between current configuration and a saved state:
+
+```bash
+# Compare using label
+bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --diff-state baseline
+
+# Compare using filename
+bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --diff-state 20251210-143000-baseline.json
+```
+
+### Restore Saved State
+
+Restore a previously saved configuration:
+
+```bash
+# Restore using label (requires root)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state baseline --yes
+
+# Restore using filename (with interactive confirmation)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state 20251210-143000-baseline.json
+```
+
+The restore process:
+
+1. Validates the state file exists and is valid JSON
+2. Warns if restoring from a different hostname
+3. Prompts for confirmation (unless `--yes` specified)
+4. Restores all saved settings:
+   - Sysctl parameters (runtime)
+   - Configuration files
+   - Per-interface settings
+   - CPU governor
+   - Tuned profile
+5. Reports success/failure for each component
+
+### Delete Saved State
+
+Remove a saved state file:
+
+```bash
+# Delete using label (requires root)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --delete-state baseline --yes
+
+# Delete using filename (with interactive confirmation)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --delete-state 20251210-143000-baseline.json
+```
+
+### Example Performance Testing Workflow
+
+Complete workflow for testing before/after tuning:
+
+```bash
+# 1. Save baseline configuration
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --save-state --label baseline
+
+# 2. Run baseline performance tests
+# ... run your perfSONAR tests, iperf3, etc ...
+
+# 3. Apply tuning with auto-save
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --auto-save-before --label pre-measurement-tuning
+
+# 4. Run tests with tuned configuration
+# ... run your perfSONAR tests, iperf3, etc ...
+
+# 5. Compare configurations
+bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --diff-state baseline
+
+# 6. Try alternative tuning (e.g., DTN profile)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state baseline --yes
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --auto-save-before --label pre-dtn-tuning
+
+# 7. Run tests with DTN tuning
+# ... run your perfSONAR tests, iperf3, etc ...
+
+# 8. Restore to baseline when done
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state baseline --yes
+
+# 9. Verify restoration
+bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit
+```
+
+### State Management Caveats
+
+**What IS saved/restored:**
+
+- ✅ Sysctl parameters (runtime values)
+- ✅ Configuration files (`/etc/sysctl.d/90-fasterdata.conf`, systemd service)
+- ✅ Per-interface settings (txqueuelen, MTU, ring buffers, offload features, qdisc)
+- ✅ CPU governor (runtime)
+- ✅ SMT state (runtime)
+- ✅ Tuned profile
+
+**What is NOT saved/restored:**
+
+- ❌ GRUB kernel command-line parameters (IOMMU, persistent nosmt) - requires reboot
+- ❌ Kernel module parameters
+- ❌ Firewall rules
+- ❌ Network interface creation/deletion
+
+**Limitations:**
+
+1. **Hardware-dependent**: Ring buffer sizes are limited by NIC hardware; restoration may fail if hardware doesn't support saved values
+2. **Hostname-specific**: Restoring a state from a different hostname will trigger a warning but proceed
+3. **NetworkManager**: Connection modifications may cause brief network interruptions
+4. **Side effects**: Changing tuned profile may modify additional sysctls not tracked by this script
+5. **Requires python3**: State save/restore operations require python3 for JSON processing
+
+### State File Format
+
+State files are stored as JSON in `/var/lib/fasterdata-tuning/saved-states/` with the following structure:
+
+- **Metadata**: Timestamp, hostname, kernel version, label, creator version
+- **Sysctl values**: All tracked network tuning parameters
+- **Configuration files**: Base64-encoded content with backup paths
+- **Per-interface settings**: MTU, txqueuelen, qdisc, ethtool features, ring buffers, NetworkManager connection info
+- **System settings**: CPU governor, SMT state, tuned profile
+- **Warnings**: List of restoration limitations
+
+Backup copies of modified files are stored in `/var/lib/fasterdata-tuning/backups/`.
+
 ## Reference and source
 
 - Source script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
