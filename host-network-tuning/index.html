@@ -11,10 +11,6 @@
         <link rel="canonical" href="https://osg-htc.org/networking/host-network-tuning/">
       
       
-        <link rel="prev" href="../perfsonar/faq/">
-      
-      
-        <link rel="next" href="../perfsonar/multiple-nic-guidance/">
       
       
         
@@ -25,7 +21,7 @@
     
     
       
-        <title>Fasterdata Host Tuning - OSG Networking Area</title>
+        <title>Host and Network Tuning (EL9) - OSG Networking Area</title>
       
     
     
@@ -112,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Fasterdata Host Tuning
+              Host and Network Tuning (EL9)
             
           </span>
         </div>
@@ -254,13 +250,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../perfsonar/tools_scripts/fasterdata-tuning/" class="md-tabs__link">
           
   
   
@@ -960,31 +954,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -1002,7 +993,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1017,37 +1008,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Fasterdata Host Tuning
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
         
   
   
@@ -1063,264 +1027,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-this-covers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What this covers
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-this" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to use this
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#script-fasterdata-tuningsh" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Script: fasterdata-tuning.sh
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Script: fasterdata-tuning.sh">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#host-types" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host Types
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Examples
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#what-the-script-does" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What the script does
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#output-and-logs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Output and logs
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-the-fasterdata-script" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Getting the Fasterdata script
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Getting the Fasterdata script">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#color-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Color Output
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#driver-guidance" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Driver Guidance
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cautions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cautions
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-apply-flags" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional apply flags
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#manual-checklist-summary-of-recommendations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Manual checklist (summary of recommendations)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verification-after-tuning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verification after tuning
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#additional-topics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Additional Topics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Additional Topics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#smt-simultaneous-multi-threading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SMT (Simultaneous Multi-Threading)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#driver-updates" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Driver Updates
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#persistence-service-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Persistence Service Details
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#persistence-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Persistence notes
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1928,7 +1634,7 @@
   <span class="md-ellipsis">
     
   
-    Fasterdata Tuning Script
+    Fasterdata Host Tuning
   
 
     
@@ -2579,46 +2285,6 @@
   
 
 
-  <nav class="md-path" aria-label="Navigation" >
-    <ol class="md-path__list">
-      
-        
-  
-  
-    <li class="md-path__item">
-      <a href=".." class="md-path__link">
-        
-  <span class="md-ellipsis">
-    Home
-  </span>
-
-      </a>
-    </li>
-  
-
-      
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="./" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Host Tuning
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-    </ol>
-  </nav>
-
               
               <article class="md-content__inner md-typeset">
                 
@@ -2630,23 +2296,20 @@
 
 
 <h1 id="host-and-network-tuning-el9">Host and Network Tuning (EL9)<a class="headerlink" href="#host-and-network-tuning-el9" title="Permanent link">&para;</a></h1>
-<p>This guide distills ESnet Fasterdata recommendations for high-throughput hosts (perfSONAR/DTN-style) on Enterprise Linux</p>
-<ol>
-<li>
-<p>Primary sources:</p>
-</li>
-<li>
-<p><a href="https://fasterdata.es.net/host-tuning/">https://fasterdata.es.net/host-tuning/</a></p>
-</li>
-<li>
-<p><a href="https://fasterdata.es.net/network-tuning/">https://fasterdata.es.net/network-tuning/</a></p>
-</li>
-<li>
-<p><a href="https://fasterdata.es.net/DTN/">https://fasterdata.es.net/DTN/</a></p>
-</li>
-</ol>
-<p>Use the provided audit/apply script to check your host against these recommendations and optionally enforce them. Read
-the cautions before applying.</p>
+<div class="admonition note">
+<p class="admonition-title">Documentation Moved</p>
+<p>This page has been consolidated. Please see the canonical documentation:</p>
+<p><strong><a href="../perfsonar/tools_scripts/fasterdata-tuning/">Fasterdata Host &amp; Network Tuning Guide</a></strong></p>
+</div>
+<hr />
+<h2 id="quick-reference">Quick Reference<a class="headerlink" href="#quick-reference" title="Permanent link">&para;</a></h2>
+<p>For ESnet Fasterdata recommendations and the <code>fasterdata-tuning.sh</code> script, see:</p>
+<ul>
+<li><strong><a href="../perfsonar/tools_scripts/fasterdata-tuning/">Fasterdata Tuning Script Documentation</a></strong> — Complete guide for audit and apply modes</li>
+<li><strong><a href="https://fasterdata.es.net/host-tuning/">ESnet Fasterdata Host Tuning</a></strong> — Upstream recommendations</li>
+<li><strong><a href="https://fasterdata.es.net/network-tuning/">ESnet Network Tuning</a></strong> — Network-level guidance</li>
+<li><strong><a href="https://fasterdata.es.net/DTN/">ESnet DTN Tuning</a></strong> — Data Transfer Node specific tuning</li>
+</ul>
 <h2 id="what-this-covers">What this covers<a class="headerlink" href="#what-this-covers" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
@@ -3024,6 +2687,9 @@ systemctl<span class="w"> </span>cat<span class="w"> </span>ethtool-persist.serv
 <li>
 <p>NIC ethtool changes do not persist by default; consider:</p>
 </li>
+</ul>
+</details>
+<ul>
 <li>
 <p>running this script from a boot-time systemd unit, or</p>
 </li>
