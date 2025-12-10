@@ -7,6 +7,15 @@ Script: `docs/perfsonar/tools_scripts/fasterdata-tuning.sh`
 
 ## Purpose
 
+The `fasterdata-tuning.sh` script helps network administrators optimize Enterprise Linux 9 systems for high-throughput data transfers by:
+
+- **Auditing** current system configuration against ESnet Fasterdata best practices
+- **Applying** recommended tuning automatically with safe defaults
+- **Testing** different configurations via save/restore state management (v1.2.0+)
+- **Persisting** settings across reboots via systemd and sysctl.d
+
+Recommended for perfSONAR testpoints, Data Transfer Nodes (DTNs), and dedicated high-performance networking hosts.
+
 ## Download & Install
 
 You can download the script directly from the website or GitHub raw URL and install it locally for repeated use:
@@ -39,7 +48,7 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
 
 - Centralizes recommended sysctl tuning for high-throughput, long-distance transfers (buffer sizing, qdisc, congestion control), reducing guesswork and manual errors.
 
-- Applies and persists sysctl settings in `/etc/sysctl.conf` and helps persist per-NIC settings (ethtool) via a `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
+- Applies and persists sysctl settings in `/etc/sysctl.d/90-fasterdata.conf` and helps persist per-NIC settings (ethtool) via a `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
 
 - For DTN nodes: Supports packet pacing via traffic control (tc) token bucket filter (tbf) to limit outgoing traffic to a specified rate, important for multi-stream transfer scenarios.
 
@@ -76,48 +85,28 @@ cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 
 ## Usage
 
+```bash
+# Audit mode (default) - no changes applied
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
 
- 
-Apply tuning (requires root):
-
-```bash
-
+# Apply tuning (requires root)
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
 
-```
+# Limit apply to specific NICs (comma-separated)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces "ens1f0np0,ens1f1np1"
 
-Limit apply to specific NICs (comma-separated):
+# Apply packet pacing to DTN nodes (limit traffic to 5 Gbps)
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 5gbps
 
-```bash
-
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces
-"ens1f0np0,ens1f1np1"
-
-```
-
-Apply packet pacing to DTN nodes (limit traffic to 5 Gbps):
-
-```bash
-
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-
-pacing-rate 5gbps
-
-```
-
-Audit without applying changes (DTN target with custom pacing rate):
-
-```bash
-
+# Audit without applying changes (DTN target with custom pacing rate)
 bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
-
 ```
 
 Notes
 -----
  - IOMMU: The script checks whether `iommu=pt` plus vendor-specific flags (`intel_iommu=on` or `amd_iommu=on`) are present. When you run with `--apply-iommu` and `--mode apply`, the script will optionally back up `/etc/default/grub`, append the appropriate IOMMU flags (or use values provided via `--iommu-args`) and regenerate GRUB (using `grubby` or `grub2-mkconfig` where available). Use `--dry-run` to preview the GRUB changes. You may also set `--iommu-args "intel_iommu=on iommu=pt"` to provide custom boot args.
 - SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.
-- Apply mode writes to `/etc/sysctl.conf` and creates `/etc/systemd/system/ethtool-persist.service` when necessary.
+- Apply mode writes to `/etc/sysctl.d/90-fasterdata.conf` and creates `/etc/systemd/system/ethtool-persist.service` when necessary.
 - **Packet Pacing (DTN only):** For Data Transfer Node targets, the script can apply token bucket filter (tbf) qdisc to pace outgoing traffic. This is recommended when a DTN node handles multiple simultaneous transfers where the effective transfer rate is limited by the minimum of: source read rate, network bandwidth, and destination write rate. See the `--apply-packet-pacing` and `--packet-pacing-rate` flags below. For detailed information on why packet pacing is important and how it works, see the separate [Packet Pacing guide](../packet-pacing.md).
 
 Optional apply flags (use with `--mode apply`):
@@ -130,21 +119,15 @@ Optional apply flags (use with `--mode apply`):
 - `--persist-smt`: If set along with `--apply-smt`, also persist the change via GRUB edits (`nosmt` applied/removed).
 - `--yes`: Skip interactive confirmations; use with caution.
 - `--dry-run`: Preview the exact GRUB, sysctl, tc, and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.
-Example (preview only):
+
+**Examples:**
 
 ```bash
-
+# Preview IOMMU changes (dry-run)
 sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 
-```
-
-To actually apply and pass specific IOMMU args:
-
-```bash
-
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on
-iommu=pt" --yes
-
+# Apply with custom IOMMU args
+sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on iommu=pt" --yes
 ```
 
 ## State Management: Save & Restore Configurations
