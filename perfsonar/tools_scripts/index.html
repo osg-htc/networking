@@ -1671,7 +1671,7 @@
   <a href="#available-tools" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Available Tools
+        Available tools
       
     </span>
   </a>
@@ -2644,11 +2644,12 @@
 
 <h1 id="perfsonar-tools-scripts">perfSONAR Tools &amp; Scripts<a class="headerlink" href="#perfsonar-tools-scripts" title="Permanent link">&para;</a></h1>
 <p>This directory contains helper scripts for perfSONAR deployment, configuration, and tuning.</p>
-<h2 id="available-tools">Available Tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h2>
+<h2 id="available-tools">Available tools<a class="headerlink" href="#available-tools" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Tool</th>
+<th>Version</th>
 <th>Purpose</th>
 <th>Documentation</th>
 </tr>
@@ -2656,36 +2657,43 @@
 <tbody>
 <tr>
 <td><strong>fasterdata-tuning.sh</strong></td>
+<td>v1.2.0</td>
 <td>Host &amp; NIC tuning (ESnet Fasterdata)</td>
 <td><a href="fasterdata-tuning/">Fasterdata Tuning Guide</a></td>
 </tr>
 <tr>
 <td><strong>perfSONAR-pbr-nm.sh</strong></td>
+<td>—</td>
 <td>Multi-NIC policy-based routing</td>
 <td><a href="../multiple-nic-guidance/">Multiple NIC Guidance</a></td>
 </tr>
 <tr>
 <td><strong>perfSONAR-update-lsregistration.sh</strong></td>
+<td>—</td>
 <td>LS registration management</td>
 <td><a href="README-lsregistration/">LS Registration Tools</a></td>
 </tr>
 <tr>
 <td><strong>perfSONAR-auto-enroll-psconfig.sh</strong></td>
+<td>—</td>
 <td>Automatic pSConfig enrollment</td>
 <td><a href="../../personas/quick-deploy/landing/">Installation Guides</a></td>
 </tr>
 <tr>
 <td><strong>install_tools_scripts.sh</strong></td>
+<td>—</td>
 <td>Bulk installer for all scripts</td>
 <td><a href="#installation">Installation</a></td>
 </tr>
 <tr>
 <td><strong>install-systemd-service.sh</strong></td>
+<td>—</td>
 <td>Container auto-start on boot</td>
 <td><a href="#container-management">Container Management</a></td>
 </tr>
 </tbody>
 </table>
+<p><strong>Latest Updates</strong>: v1.2.0 (Dec 2025) adds save/restore state management to fasterdata-tuning.sh</p>
 <hr />
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <h3 id="download-all-scripts">Download All Scripts<a class="headerlink" href="#download-all-scripts" title="Permanent link">&para;</a></h3>
@@ -2721,15 +2729,6 @@ sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> 
 </code></pre></div>
 <p><strong>State Management</strong>: Save and restore system configurations for before/after performance testing. Captures sysctl parameters, interface settings, configuration files, CPU governor, and tuned profile. See <a href="fasterdata-tuning/#state-management-save--restore-configurations">Fasterdata Tuning Guide</a> for complete workflow examples.</p>
 <p><strong>Full Documentation:</strong> <a href="fasterdata-tuning/">Fasterdata Tuning Guide</a></p>
-<p><strong>Download:</strong>
-<div class="highlight"><pre><span></span><code><span class="c1"># Direct download</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh
-
-<span class="c1"># Or from the published site</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span>https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh
-</code></pre></div></p>
 <hr />
 <h2 id="multi-nic-configuration">Multi-NIC Configuration<a class="headerlink" href="#multi-nic-configuration" title="Permanent link">&para;</a></h2>
 <h3 id="policy-based-routing-pbr">Policy-Based Routing (PBR)<a class="headerlink" href="#policy-based-routing-pbr" title="Permanent link">&para;</a></h3>

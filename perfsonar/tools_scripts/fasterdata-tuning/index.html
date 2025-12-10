@@ -1099,10 +1099,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-the-checksum" class="md-nav__link">
+  <a href="#verify-the-checksum-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify the checksum
+        Verify the checksum (optional)
       
     </span>
   </a>
@@ -1146,7 +1146,7 @@
   <a href="#security-safety" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security &amp; Safety
+        Security &amp; safety
       
     </span>
   </a>
@@ -1176,16 +1176,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#state-management-save-restore-configurations" class="md-nav__link">
+  <a href="#state-management-save-and-restore-configurationsns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State Management: Save &amp; Restore Configurations
+        State management: Save and restore configurationsns
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="State Management: Save &amp; Restore Configurations">
+    <nav class="md-nav" aria-label="State management: Save and restore configurationsns">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-testing-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick testing workflow
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#why-use-saverestore" class="md-nav__link">
@@ -1210,10 +1221,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#auto-save-before-applying" class="md-nav__link">
+  <a href="#auto-save-before-apply" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auto-Save Before Applying
+        Auto-save Before Apply
       
     </span>
   </a>
@@ -1243,10 +1254,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#restore-saved-state" class="md-nav__link">
+  <a href="#restore-state" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Restore Saved State
+        Restore State
       
     </span>
   </a>
@@ -1279,7 +1290,7 @@
   <a href="#state-management-caveats" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State Management Caveats
+        State management caveats
       
     </span>
   </a>
@@ -1290,7 +1301,7 @@
   <a href="#state-file-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State File Format
+        State file format
       
     </span>
   </a>
@@ -2002,10 +2013,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-the-checksum" class="md-nav__link">
+  <a href="#verify-the-checksum-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify the checksum
+        Verify the checksum (optional)
       
     </span>
   </a>
@@ -2049,7 +2060,7 @@
   <a href="#security-safety" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security &amp; Safety
+        Security &amp; safety
       
     </span>
   </a>
@@ -2079,16 +2090,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#state-management-save-restore-configurations" class="md-nav__link">
+  <a href="#state-management-save-and-restore-configurationsns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State Management: Save &amp; Restore Configurations
+        State management: Save and restore configurationsns
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="State Management: Save &amp; Restore Configurations">
+    <nav class="md-nav" aria-label="State management: Save and restore configurationsns">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-testing-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick testing workflow
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#why-use-saverestore" class="md-nav__link">
@@ -2113,10 +2135,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#auto-save-before-applying" class="md-nav__link">
+  <a href="#auto-save-before-apply" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Auto-Save Before Applying
+        Auto-save Before Apply
       
     </span>
   </a>
@@ -2146,10 +2168,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#restore-saved-state" class="md-nav__link">
+  <a href="#restore-state" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Restore Saved State
+        Restore State
       
     </span>
   </a>
@@ -2182,7 +2204,7 @@
   <a href="#state-management-caveats" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State Management Caveats
+        State management caveats
       
     </span>
   </a>
@@ -2193,7 +2215,7 @@
   <a href="#state-file-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State File Format
+        State file format
       
     </span>
   </a>
@@ -2917,6 +2939,14 @@
 and NIC tuning recommendations for Enterprise Linux 9.</p>
 <p>Script: <code>docs/perfsonar/tools_scripts/fasterdata-tuning.sh</code></p>
 <h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">&para;</a></h2>
+<p>The <code>fasterdata-tuning.sh</code> script helps network administrators optimize Enterprise Linux 9 systems for high-throughput data transfers by:</p>
+<ul>
+<li><strong>Auditing</strong> current system configuration against ESnet Fasterdata best practices</li>
+<li><strong>Applying</strong> recommended tuning automatically with safe defaults</li>
+<li><strong>Testing</strong> different configurations via save/restore state management (v1.2.0+)</li>
+<li><strong>Persisting</strong> settings across reboots via systemd and sysctl.d</li>
+</ul>
+<p>Recommended for perfSONAR testpoints, Data Transfer Nodes (DTNs), and dedicated high-performance networking hosts.</p>
 <h2 id="download-install">Download &amp; Install<a class="headerlink" href="#download-install" title="Permanent link">&para;</a></h2>
 <p>You can download the script directly from the website or GitHub raw URL and install it locally for repeated use:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download via curl to a system location and make it executable</span>
@@ -2927,12 +2957,19 @@ sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </sp
 sudo<span class="w"> </span>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh
 sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh
 </code></pre></div>
-<h2 id="verify-the-checksum">Verify the checksum<a class="headerlink" href="#verify-the-checksum" title="Permanent link">&para;</a></h2>
-<p>To verify the script integrity, compare the downloaded script with the provided SHA256 checksum file in this repo:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
-curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
-sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256<span class="w"> </span>--status<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checksum mismatch&quot;</span>
+<h2 id="verify-the-checksum-optional">Verify the checksum (optional)<a class="headerlink" href="#verify-the-checksum-optional" title="Permanent link">&para;</a></h2>
+<p>To verify script integrity, compare the downloaded file with the provided SHA256 checksum:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download script and checksum</span>
+curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+curl<span class="w"> </span>-L<span class="w"> </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
+
+<span class="c1"># Verify checksum</span>
+sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tuning.sh.sha256
 </code></pre></div>
+<p>Expected output: <code>fasterdata-tuning.sh: OK</code></p>
+<p><strong>Note:</strong> The checksum file is manually maintained and updated with each script release.</p>
 <h2 id="why-use-this-script">Why use this script?<a class="headerlink" href="#why-use-this-script" title="Permanent link">&para;</a></h2>
 <p>This script packages ESnet Fasterdata best practices into an audit/apply helper that:</p>
 <ul>
@@ -2943,7 +2980,7 @@ sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tunin
 <p>Centralizes recommended sysctl tuning for high-throughput, long-distance transfers (buffer sizing, qdisc, congestion control), reducing guesswork and manual errors.</p>
 </li>
 <li>
-<p>Applies and persists sysctl settings in <code>/etc/sysctl.conf</code> and helps persist per-NIC settings (ethtool) via a <code>systemd</code> oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.</p>
+<p>Applies and persists sysctl settings in <code>/etc/sysctl.d/90-fasterdata.conf</code> and helps persist per-NIC settings (ethtool) via a <code>systemd</code> oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.</p>
 </li>
 <li>
 <p>For DTN nodes: Supports packet pacing via traffic control (tc) token bucket filter (tbf) to limit outgoing traffic to a specified rate, important for multi-stream transfer scenarios.</p>
@@ -2971,7 +3008,7 @@ tc qdisc show dev &lt;iface&gt;
 # Verify IOMMU in kernel cmdline
 cat /proc/cmdline | grep -E &quot;iommu=pt|intel_iommu=on|amd_iommu=on&quot;
 </code></pre></div>
-<h2 id="security-safety">Security &amp; Safety<a class="headerlink" href="#security-safety" title="Permanent link">&para;</a></h2>
+<h2 id="security-safety">Security &amp; safety<a class="headerlink" href="#security-safety" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
 <p>Always test in a staging environment first. Use <code>--mode audit</code> to review before applying.</p>
@@ -2984,26 +3021,27 @@ cat /proc/cmdline | grep -E &quot;iommu=pt|intel_iommu=on|amd_iommu=on&quot;
 </li>
 </ul>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<p>bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement</p>
-<p>Apply tuning (requires root):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
-</code></pre></div>
-<p>Limit apply to specific NICs (comma-separated):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--ifaces
-<span class="s2">&quot;ens1f0np0,ens1f1np1&quot;</span>
-</code></pre></div>
-<p>Apply packet pacing to DTN nodes (limit traffic to 5 Gbps):</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--packet-
-pacing-rate<span class="w"> </span>5gbps
-</code></pre></div>
-<p>Audit without applying changes (DTN target with custom pacing rate):</p>
-<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>10gbps
+<p><strong>Quick Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Audit mode (no changes)</span>
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>measurement
+
+<span class="c1"># Apply tuning (requires root)</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
+
+<span class="c1"># Apply with specific interfaces</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--ifaces<span class="w"> </span><span class="s2">&quot;ens1f0np0,ens1f1np1&quot;</span>
+
+<span class="c1"># Apply with packet pacing</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>5gbps
+
+<span class="c1"># Audit packet pacing settings</span>
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>10gbps
 </code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
 <ul>
 <li>IOMMU: The script checks whether <code>iommu=pt</code> plus vendor-specific flags (<code>intel_iommu=on</code> or <code>amd_iommu=on</code>) are present. When you run with <code>--apply-iommu</code> and <code>--mode apply</code>, the script will optionally back up <code>/etc/default/grub</code>, append the appropriate IOMMU flags (or use values provided via <code>--iommu-args</code>) and regenerate GRUB (using <code>grubby</code> or <code>grub2-mkconfig</code> where available). Use <code>--dry-run</code> to preview the GRUB changes. You may also set <code>--iommu-args "intel_iommu=on iommu=pt"</code> to provide custom boot args.</li>
 <li>SMT: The script detects SMT status and suggests commands to toggle runtime SMT; persistence requires GRUB edits (kernel cmdline). It does not toggle SMT by default.</li>
-<li>Apply mode writes to <code>/etc/sysctl.conf</code> and creates <code>/etc/systemd/system/ethtool-persist.service</code> when necessary.</li>
+<li>Apply mode writes to <code>/etc/sysctl.d/90-fasterdata.conf</code> and creates <code>/etc/systemd/system/ethtool-persist.service</code> when necessary.</li>
 <li><strong>Packet Pacing (DTN only):</strong> For Data Transfer Node targets, the script can apply token bucket filter (tbf) qdisc to pace outgoing traffic. This is recommended when a DTN node handles multiple simultaneous transfers where the effective transfer rate is limited by the minimum of: source read rate, network bandwidth, and destination write rate. See the <code>--apply-packet-pacing</code> and <code>--packet-pacing-rate</code> flags below. For detailed information on why packet pacing is important and how it works, see the separate <a href="../../packet-pacing/">Packet Pacing guide</a>.</li>
 </ul>
 <p>Optional apply flags (use with <code>--mode apply</code>):</p>
@@ -3015,17 +3053,34 @@ pacing-rate<span class="w"> </span>5gbps
 <li><code>--apply-smt on|off</code>: Toggle SMT state at runtime. Requires <code>--mode apply</code>. Example: <code>--apply-smt off</code>.</li>
 <li><code>--persist-smt</code>: If set along with <code>--apply-smt</code>, also persist the change via GRUB edits (<code>nosmt</code> applied/removed).</li>
 <li><code>--yes</code>: Skip interactive confirmations; use with caution.</li>
-<li><code>--dry-run</code>: Preview the exact GRUB, sysctl, tc, and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.
-Example (preview only):</li>
+<li><code>--dry-run</code>: Preview the exact GRUB, sysctl, tc, and sysfs commands that would be run without actually applying them. Useful for audits and CI checks.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--dry-run
+<p><strong>Examples:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Preview IOMMU changes (dry-run)</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--dry-run
+
+<span class="c1"># Apply with custom IOMMU args</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--iommu-args<span class="w"> </span><span class="s2">&quot;intel_iommu=on iommu=pt&quot;</span><span class="w"> </span>--yes
 </code></pre></div>
-<p>To actually apply and pass specific IOMMU args:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--iommu-args<span class="w"> </span><span class="s2">&quot;intel_iommu=on</span>
-<span class="s2">iommu=pt&quot;</span><span class="w"> </span>--yes
-</code></pre></div>
-<h2 id="state-management-save-restore-configurations">State Management: Save &amp; Restore Configurations<a class="headerlink" href="#state-management-save-restore-configurations" title="Permanent link">&para;</a></h2>
+<h2 id="state-management-save-and-restore-configurationsns">State management: Save and restore configurationsns<a class="headerlink" href="#state-management-save-and-restore-configurationsns" title="Permanent link">&para;</a></h2>
 <p><strong>NEW in v1.2.0</strong>: The script now supports saving and restoring system state for testing different tuning configurations.</p>
+<h3 id="quick-testing-workflow">Quick testing workflow<a class="headerlink" href="#quick-testing-workflow" title="Permanent link">&para;</a></h3>
+<p><strong>TL;DR</strong>: Save baseline → Apply tuning → Test → Restore → Compare</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save baseline state</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--save-state<span class="w"> </span>--label<span class="w"> </span>baseline
+
+<span class="c1"># Apply tuning</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--yes
+
+<span class="c1"># Run your performance tests here (iperf3, perfSONAR tests, etc.)</span>
+
+<span class="c1"># Restore baseline</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
+
+<span class="c1"># Compare configurations</span>
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--diff-state<span class="w"> </span>baseline
+</code></pre></div>
+<p><strong>For detailed step-by-step workflow with multiple tuning profiles, see <a href="#example-performance-testing-workflow">Example Performance Testing Workflow</a> below.</strong></p>
 <h3 id="why-use-saverestore">Why use save/restore?<a class="headerlink" href="#why-use-saverestore" title="Permanent link">&para;</a></h3>
 <p>When testing performance with different tuning configurations, you need to:</p>
 <ol>
@@ -3048,20 +3103,20 @@ Example (preview only):</li>
 <h3 id="save-current-state">Save Current State<a class="headerlink" href="#save-current-state" title="Permanent link">&para;</a></h3>
 <p>Save the current system configuration before making changes:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Save state with a descriptive label (requires root)</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--save-state<span class="w"> </span>--label<span class="w"> </span>baseline
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--save-state<span class="w"> </span>--label<span class="w"> </span>baseline
 
 <span class="c1"># Save state with automatic timestamp</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--save-state
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--save-state
 </code></pre></div>
 <p>State files are stored in: <code>/var/lib/fasterdata-tuning/saved-states/</code></p>
-<h3 id="auto-save-before-applying">Auto-Save Before Applying<a class="headerlink" href="#auto-save-before-applying" title="Permanent link">&para;</a></h3>
-<p>Automatically save state before applying tuning changes:</p>
+<h3 id="auto-save-before-apply">Auto-save Before Apply<a class="headerlink" href="#auto-save-before-apply" title="Permanent link">&para;</a></h3>
+<p>Automatically save the current state before applying changes:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Apply tuning and auto-save the pre-apply state</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--auto-save-before<span class="w"> </span>--label<span class="w"> </span>pre-tuning
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--auto-save-before<span class="w"> </span>--label<span class="w"> </span>pre-tuning
 </code></pre></div>
 <h3 id="list-saved-states">List Saved States<a class="headerlink" href="#list-saved-states" title="Permanent link">&para;</a></h3>
 <p>View all saved configuration states:</p>
-<div class="highlight"><pre><span></span><code>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--list-states
+<div class="highlight"><pre><span></span><code>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--list-states
 </code></pre></div>
 <p>Example output:</p>
 <div class="highlight"><pre><span></span><code>Saved States:
@@ -3082,18 +3137,18 @@ File: 20251210-150000-tuned-measurement.json
 <h3 id="compare-current-vs-saved-state">Compare Current vs Saved State<a class="headerlink" href="#compare-current-vs-saved-state" title="Permanent link">&para;</a></h3>
 <p>Show differences between current configuration and a saved state:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Compare using label</span>
-bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--diff-state<span class="w"> </span>baseline
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--diff-state<span class="w"> </span>baseline
 
 <span class="c1"># Compare using filename</span>
-bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--diff-state<span class="w"> </span><span class="m">20251210</span>-143000-baseline.json
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--diff-state<span class="w"> </span><span class="m">20251210</span>-143000-baseline.json
 </code></pre></div>
-<h3 id="restore-saved-state">Restore Saved State<a class="headerlink" href="#restore-saved-state" title="Permanent link">&para;</a></h3>
+<h3 id="restore-state">Restore State<a class="headerlink" href="#restore-state" title="Permanent link">&para;</a></h3>
 <p>Restore a previously saved configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Restore using label (requires root)</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
 
 <span class="c1"># Restore using filename (with interactive confirmation)</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span><span class="m">20251210</span>-143000-baseline.json
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span><span class="m">20251210</span>-143000-baseline.json
 </code></pre></div>
 <p>The restore process:</p>
 <ol>
@@ -3111,59 +3166,105 @@ sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scr
 <h3 id="delete-saved-state">Delete Saved State<a class="headerlink" href="#delete-saved-state" title="Permanent link">&para;</a></h3>
 <p>Remove a saved state file:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Delete using label (requires root)</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--delete-state<span class="w"> </span>baseline<span class="w"> </span>--yes
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--delete-state<span class="w"> </span>baseline<span class="w"> </span>--yes
 
 <span class="c1"># Delete using filename (with interactive confirmation)</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--delete-state<span class="w"> </span><span class="m">20251210</span>-143000-baseline.json
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--delete-state<span class="w"> </span><span class="m">20251210</span>-143000-baseline.json
 </code></pre></div>
 <h3 id="example-performance-testing-workflow">Example Performance Testing Workflow<a class="headerlink" href="#example-performance-testing-workflow" title="Permanent link">&para;</a></h3>
 <p>Complete workflow for testing before/after tuning:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1. Save baseline configuration</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--save-state<span class="w"> </span>--label<span class="w"> </span>baseline
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--save-state<span class="w"> </span>--label<span class="w"> </span>baseline
 
 <span class="c1"># 2. Run baseline performance tests</span>
 <span class="c1"># ... run your perfSONAR tests, iperf3, etc ...</span>
 
 <span class="c1"># 3. Apply tuning with auto-save</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--auto-save-before<span class="w"> </span>--label<span class="w"> </span>pre-measurement-tuning
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--auto-save-before<span class="w"> </span>--label<span class="w"> </span>pre-measurement-tuning
 
 <span class="c1"># 4. Run tests with tuned configuration</span>
 <span class="c1"># ... run your perfSONAR tests, iperf3, etc ...</span>
 
 <span class="c1"># 5. Compare configurations</span>
-bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--diff-state<span class="w"> </span>baseline
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--diff-state<span class="w"> </span>baseline
 
 <span class="c1"># 6. Try alternative tuning (e.g., DTN profile)</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--auto-save-before<span class="w"> </span>--label<span class="w"> </span>pre-dtn-tuning
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--auto-save-before<span class="w"> </span>--label<span class="w"> </span>pre-dtn-tuning
 
 <span class="c1"># 7. Run tests with DTN tuning</span>
 <span class="c1"># ... run your perfSONAR tests, iperf3, etc ...</span>
 
 <span class="c1"># 8. Restore to baseline when done</span>
-sudo<span class="w"> </span>bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--restore-state<span class="w"> </span>baseline<span class="w"> </span>--yes
 
 <span class="c1"># 9. Verify restoration</span>
-bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit
 </code></pre></div>
-<h3 id="state-management-caveats">State Management Caveats<a class="headerlink" href="#state-management-caveats" title="Permanent link">&para;</a></h3>
-<p><strong>What IS saved/restored:</strong></p>
-<ul>
-<li>✅ Sysctl parameters (runtime values)</li>
-<li>✅ Configuration files (<code>/etc/sysctl.d/90-fasterdata.conf</code>, systemd service)</li>
-<li>✅ Per-interface settings (txqueuelen, MTU, ring buffers, offload features, qdisc)</li>
-<li>✅ CPU governor (runtime)</li>
-<li>✅ SMT state (runtime)</li>
-<li>✅ Tuned profile</li>
-</ul>
-<p><strong>What is NOT saved/restored:</strong></p>
-<ul>
-<li>❌ GRUB kernel command-line parameters (IOMMU, persistent nosmt) - requires reboot</li>
-<li>❌ Kernel module parameters</li>
-<li>❌ Firewall rules</li>
-<li>❌ Network interface creation/deletion</li>
-</ul>
-<p><strong>Limitations:</strong></p>
+<h3 id="state-management-caveats">State management caveats<a class="headerlink" href="#state-management-caveats" title="Permanent link">&para;</a></h3>
+<p><strong>What is and is not saved/restored:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Saved/Restored</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sysctl parameters</td>
+<td>✅ Yes</td>
+<td>Runtime values (TCP buffers, congestion control, etc.)</td>
+</tr>
+<tr>
+<td>Configuration files</td>
+<td>✅ Yes</td>
+<td><code>/etc/sysctl.d/90-fasterdata.conf</code>, systemd services</td>
+</tr>
+<tr>
+<td>Per-interface settings</td>
+<td>✅ Yes</td>
+<td>txqueuelen, MTU, ring buffers, offload features, qdisc</td>
+</tr>
+<tr>
+<td>CPU governor</td>
+<td>✅ Yes</td>
+<td>Runtime setting</td>
+</tr>
+<tr>
+<td>SMT state</td>
+<td>✅ Yes</td>
+<td>Runtime setting</td>
+</tr>
+<tr>
+<td>Tuned profile</td>
+<td>✅ Yes</td>
+<td>Active profile</td>
+</tr>
+<tr>
+<td>GRUB kernel cmdline</td>
+<td>❌ No</td>
+<td>Requires reboot (IOMMU, persistent nosmt); not suitable for testing cycles</td>
+</tr>
+<tr>
+<td>Kernel module parameters</td>
+<td>❌ No</td>
+<td>Out of scope</td>
+</tr>
+<tr>
+<td>Firewall rules</td>
+<td>❌ No</td>
+<td>Not modified by this script</td>
+</tr>
+<tr>
+<td>Network interfaces</td>
+<td>❌ No</td>
+<td>Interface creation/deletion not supported</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Important limitations:</strong></p>
 <ol>
 <li><strong>Hardware-dependent</strong>: Ring buffer sizes are limited by NIC hardware; restoration may fail if hardware doesn't support saved values</li>
 <li><strong>Hostname-specific</strong>: Restoring a state from a different hostname will trigger a warning but proceed</li>
@@ -3171,7 +3272,7 @@ bash<span class="w"> </span>docs/perfsonar/tools_scripts/fasterdata-tuning.sh<sp
 <li><strong>Side effects</strong>: Changing tuned profile may modify additional sysctls not tracked by this script</li>
 <li><strong>Requires python3</strong>: State save/restore operations require python3 for JSON processing</li>
 </ol>
-<h3 id="state-file-format">State File Format<a class="headerlink" href="#state-file-format" title="Permanent link">&para;</a></h3>
+<h3 id="state-file-format">State file format<a class="headerlink" href="#state-file-format" title="Permanent link">&para;</a></h3>
 <p>State files are stored as JSON in <code>/var/lib/fasterdata-tuning/saved-states/</code> with the following structure:</p>
 <ul>
 <li><strong>Metadata</strong>: Timestamp, hostname, kernel version, label, creator version</li>
