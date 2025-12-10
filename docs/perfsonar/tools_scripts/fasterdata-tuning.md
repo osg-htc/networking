@@ -30,15 +30,24 @@ sudo curl -L -o /usr/local/bin/fasterdata-tuning.sh https://osg-htc.org/networki
 sudo chmod +x /usr/local/bin/fasterdata-tuning.sh
 ```
 
-## Verify the checksum
+## Verify the Checksum (Optional)
 
-To verify the script integrity, compare the downloaded script with the provided SHA256 checksum file in this repo:
+To verify script integrity, compare the downloaded file with the provided SHA256 checksum:
 
 ```bash
-curl -L -o /tmp/fasterdata-tuning.sh https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
-curl -L -o /tmp/fasterdata-tuning.sh.sha256 https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
-sha256sum -c /tmp/fasterdata-tuning.sh.sha256 --status && echo "OK" || echo "Checksum mismatch"
+# Download script and checksum
+curl -L -o /tmp/fasterdata-tuning.sh \
+  https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh
+curl -L -o /tmp/fasterdata-tuning.sh.sha256 \
+  https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh.sha256
+
+# Verify checksum
+sha256sum -c /tmp/fasterdata-tuning.sh.sha256
 ```
+
+Expected output: `fasterdata-tuning.sh: OK`
+
+**Note:** The checksum file is manually maintained and updated with each script release.
 
 ## Why use this script?
 
@@ -85,21 +94,23 @@ cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 
 ## Usage
 
+**Quick Usage:**
+
 ```bash
-# Audit mode (default) - no changes applied
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target measurement
+# Audit mode (no changes)
+/usr/local/bin/fasterdata-tuning.sh --mode audit --target measurement
 
 # Apply tuning (requires root)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn
 
-# Limit apply to specific NICs (comma-separated)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --ifaces "ens1f0np0,ens1f1np1"
+# Apply with specific interfaces
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target measurement --ifaces "ens1f0np0,ens1f1np1"
 
-# Apply packet pacing to DTN nodes (limit traffic to 5 Gbps)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 5gbps
+# Apply with packet pacing
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 5gbps
 
-# Audit without applying changes (DTN target with custom pacing rate)
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
+# Audit packet pacing settings
+/usr/local/bin/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
 ```
 
 Notes
@@ -124,10 +135,10 @@ Optional apply flags (use with `--mode apply`):
 
 ```bash
 # Preview IOMMU changes (dry-run)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 
 # Apply with custom IOMMU args
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on iommu=pt" --yes
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on iommu=pt" --yes
 ```
 
 ## State Management: Save & Restore Configurations
@@ -161,21 +172,21 @@ Save the current system configuration before making changes:
 
 ```bash
 # Save state with a descriptive label (requires root)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --save-state --label baseline
+sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline
 
 # Save state with automatic timestamp
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --save-state
+sudo /usr/local/bin/fasterdata-tuning.sh --save-state
 ```
 
 State files are stored in: `/var/lib/fasterdata-tuning/saved-states/`
 
-### Auto-Save Before Applying
+### Auto-save Before Apply
 
-Automatically save state before applying tuning changes:
+Automatically save the current state before applying changes:
 
 ```bash
 # Apply tuning and auto-save the pre-apply state
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --auto-save-before --label pre-tuning
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target measurement --auto-save-before --label pre-tuning
 ```
 
 ### List Saved States
@@ -183,7 +194,7 @@ sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --targe
 View all saved configuration states:
 
 ```bash
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --list-states
+/usr/local/bin/fasterdata-tuning.sh --list-states
 ```
 
 Example output:
@@ -211,22 +222,22 @@ Show differences between current configuration and a saved state:
 
 ```bash
 # Compare using label
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --diff-state baseline
+/usr/local/bin/fasterdata-tuning.sh --diff-state baseline
 
 # Compare using filename
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --diff-state 20251210-143000-baseline.json
+/usr/local/bin/fasterdata-tuning.sh --diff-state 20251210-143000-baseline.json
 ```
 
-### Restore Saved State
+### Restore State
 
 Restore a previously saved configuration:
 
 ```bash
 # Restore using label (requires root)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state baseline --yes
+sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
 
 # Restore using filename (with interactive confirmation)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state 20251210-143000-baseline.json
+sudo /usr/local/bin/fasterdata-tuning.sh --restore-state 20251210-143000-baseline.json
 ```
 
 The restore process:
@@ -248,10 +259,10 @@ Remove a saved state file:
 
 ```bash
 # Delete using label (requires root)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --delete-state baseline --yes
+sudo /usr/local/bin/fasterdata-tuning.sh --delete-state baseline --yes
 
 # Delete using filename (with interactive confirmation)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --delete-state 20251210-143000-baseline.json
+sudo /usr/local/bin/fasterdata-tuning.sh --delete-state 20251210-143000-baseline.json
 ```
 
 ### Example Performance Testing Workflow
@@ -260,32 +271,32 @@ Complete workflow for testing before/after tuning:
 
 ```bash
 # 1. Save baseline configuration
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --save-state --label baseline
+sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline
 
 # 2. Run baseline performance tests
 # ... run your perfSONAR tests, iperf3, etc ...
 
 # 3. Apply tuning with auto-save
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target measurement --auto-save-before --label pre-measurement-tuning
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target measurement --auto-save-before --label pre-measurement-tuning
 
 # 4. Run tests with tuned configuration
 # ... run your perfSONAR tests, iperf3, etc ...
 
 # 5. Compare configurations
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --diff-state baseline
+/usr/local/bin/fasterdata-tuning.sh --diff-state baseline
 
 # 6. Try alternative tuning (e.g., DTN profile)
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state baseline --yes
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode apply --target dtn --auto-save-before --label pre-dtn-tuning
+sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn --auto-save-before --label pre-dtn-tuning
 
 # 7. Run tests with DTN tuning
 # ... run your perfSONAR tests, iperf3, etc ...
 
 # 8. Restore to baseline when done
-sudo bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --restore-state baseline --yes
+sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
 
 # 9. Verify restoration
-bash docs/perfsonar/tools_scripts/fasterdata-tuning.sh --mode audit
+/usr/local/bin/fasterdata-tuning.sh --mode audit
 ```
 
 ### State Management Caveats

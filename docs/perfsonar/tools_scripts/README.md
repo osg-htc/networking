@@ -67,17 +67,6 @@ sudo /usr/local/bin/fasterdata-tuning.sh --restore-state baseline --yes
 
 **Full Documentation:** [Fasterdata Tuning Guide](fasterdata-tuning.md)
 
-**Download:**
-```bash
-# Direct download
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh \
-  -o /tmp/fasterdata-tuning.sh
-
-# Or from the published site
-curl -fsSL https://osg-htc.org/networking/perfsonar/tools_scripts/fasterdata-tuning.sh \
-  -o /tmp/fasterdata-tuning.sh
-```
-
 ---
 
 ## Multi-NIC Configuration

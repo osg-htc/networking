@@ -52,11 +52,11 @@ Optimize kernel and NIC settings for network throughput:
 
 ## Support & Resources
 
-- [Quick Triage Checklist](../troubleshoot/triage-checklist.md)
 - [perfSONAR FAQ](../../perfsonar/faq.md)
 - [Troubleshooter Guide](../troubleshoot/landing.md)
+- [Quick Triage Checklist](../troubleshoot/triage-checklist.md)
 - [Network Troubleshooting Guide](../../network-troubleshooting.md)
-- [Tools & Scripts](../../perfsonar/tools_scripts/README.md)
-- [perfSONAR user mailing list](https://lists.internet2.edu/sympa/info/perfsonar-user)
+- [Tools & Scripts Reference](../../perfsonar/tools_scripts/README.md)
+- [perfSONAR User Mailing List](https://lists.internet2.edu/sympa/info/perfsonar-user)
 - [OSG GOC support](https://support.opensciencegrid.org/)
 - [WLCG GGUS ticket](https://ggus.eu/) → "WLCG perfSONAR support"
