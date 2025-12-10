@@ -1,0 +1,1330 @@
+﻿# Installing a perfSONAR Toolkit for WLCG/OSG
+<!-- markdownlint-disable MD040 -->
+
+This guide walks WLCG/OSG site administrators through end-to-end installation, configuration, and validation of a
+perfSONAR Toolkit on Enterprise Linux 9 (EL9) using RPM packages. The Toolkit provides a full-featured perfSONAR
+installation with a local web interface for configuration and monitoring, plus a local measurement archive for data
+storage.
+
+For upstream RPM installation documentation, see: <https://docs.perfsonar.net/install_el.html>
+
+---
+
+## Choosing Between Toolkit and Testpoint
+
+### Use perfSONAR Toolkit (this guide) if you need:
+
+- **Local web interface** for configuration, monitoring, and viewing measurement results
+- **Local measurement archive** to store test data on-site with your own retention policies
+- **Full-featured installation** with all perfSONAR capabilities
+- **Site-specific data retention** requirements or regulatory compliance needs
+- **On-site troubleshooting** access to historical measurement data without external dependencies
+
+### Use perfSONAR Testpoint instead if you prefer:
+
+- **Lightweight container-based** deployment with minimal local resources
+- **Central archiving** where measurements are stored at a remote archive (WLCG/OSG central infrastructure)
+- **Simplified updates** via container image pulls rather than RPM package management
+- **Reduced local storage** requirements (no local measurement archive)
+
+See [Installing a perfSONAR Testpoint](install-perfsonar-testpoint.md) for the container-based deployment guide.
+
+---
+
+## Prerequisites and Planning
+
+Before you begin, it may be helpful to gather the following information:
+
+- **Hardware details:** hostname, BMC/iLO/iDRAC credentials (if used), interface names, available storage locations.
+
+- **Network data:** IPv4/IPv6 assignments for each NIC, default gateway, internal/external VLAN
+  information.
+
+- **Operational contacts:** site admin email, OSG facility/site name, latitude/longitude.
+
+## Existing perfSONAR configuration
+
+If replacing an existing instance, you may want to back up `/etc/perfsonar/` files, especially
+`lsregistrationdaemon.conf`, and any container volumes. We have a script named`perfSONAR-update-lsregistration.sh` to
+extract/save/restore registration config that you may want to use.
+
+??? info "Quick capture of existing lsregistration config (if you have a src)"
+    
+    Download a temp copy:   
+    ```bash
+    curl -fsSL \
+      https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh \
+      -o /tmp/update-lsreg.sh
+    chmod 0755 /tmp/update-lsreg.sh
+    ```
+    Use the downloaded tool to extract a restore script:
+    ```bash
+    /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
+    ```
+    Note: Repository clone instructions are in Step 2.
+    **Note:** All shell commands assume an interactive root shell.
+    
+---
+
+## Step 1 – Install and Harden EL9
+
+1. **Provision EL9:** Install AlmaLinux, Rocky Linux, or RHEL 9 with the *Minimal* profile.
+
+1. **Set the hostname and time sync:** Pick the NIC that will own the default route for the hostname.
+
+    ```bash
+    hostnamectl set-hostname <testpoint-hostname>
+    systemctl enable --now chronyd
+    timedatectl set-timezone <Region/City>
+    ```
+
+1. **Disable unused services:**
+
+    ```bash
+    systemctl disable --now firewalld NetworkManager-wait-online
+    dnf remove -y rsyslog
+    ```
+
+    ??? info "Why disable unused services?"
+        
+        We recommend disabling unused services during initial provisioning to reduce complexity and avoid unexpected
+        interference with network and container setup. Services such as `firewalld`, `NetworkManager-wait-online`, and `rsyslog`
+        can alter networking state, hold boot or network events, or conflict with the automated nftables/NetworkManager changes
+        performed by the helper scripts. Disabling non-essential services makes the install deterministic, reduces the host
+        attack surface, and avoids delays or race conditions while configuring policy-based routing, nftables rules, and        
+        container networking.
+        
+1. **Update the system:**
+
+    ```bash
+    dnf -y update
+     ```
+
+1. **Record NIC names:** Document interface mappings for later PBR configuration.
+
+    ```bash
+    nmcli device status
+    ip -br addr
+    ```
+
+---
+
+## Step 2 – Install perfSONAR Toolkit via RPM
+
+After completing Step 1 (minimal OS hardening), install the perfSONAR Toolkit bundle using RPM packages.
+
+### Step 2.1 – Configure DNF Repositories
+
+Configure DNF to access EPEL, CRB (CodeReady Builder), and perfSONAR repositories:
+
+```bash
+# Install EPEL repository
+dnf install -y epel-release
+
+# Enable CRB (CodeReady Builder) repository
+dnf config-manager --set-enabled crb
+
+# Install perfSONAR repository for EL9
+dnf install -y http://software.internet2.edu/rpms/el9/x86_64/latest/packages/perfsonar-repo-0.11-1.noarch.rpm
+
+# Refresh DNF cache
+dnf clean all
+```
+
+??? info "What these repositories provide"
+    
+    - **EPEL** (Extra Packages for Enterprise Linux): Community packages not in base EL9
+    - **CRB** (CodeReady Builder): Additional development and build tools
+    - **perfSONAR repo**: Official perfSONAR packages maintained by Internet2
+
+### Step 2.2 – Install perfSONAR Toolkit Bundle
+
+Install the complete toolkit bundle:
+
+```bash
+dnf install -y perfsonar-toolkit
+```
+
+This bundle automatically includes:
+
+- Core perfSONAR measurement tools (pScheduler, OWAMP, traceroute, throughput tests)
+- **perfsonar-toolkit-security**: Firewall rules (nftables) and fail2ban configuration
+- **perfsonar-toolkit-sysctl**: Network tuning parameters optimized for measurements
+- **perfsonar-toolkit-systemenv-testpoint**: Automatic updates and logging configuration
+- **Web interface**: Local UI at `https://<hostname>/toolkit`
+- **Measurement archive**: Local OpenSearch and Logstash for storing test results
+
+Installation takes approximately 5-10 minutes depending on network speed.
+
+??? info "Alternative automated installation"
+    
+    perfSONAR provides a one-line automated installer script:
+    ```bash
+    curl -s https://downloads.perfsonar.net/install | sh -s - toolkit
+    ```
+    
+    This script performs the same steps as above (configure repos + install bundle).
+
+### Step 2.3 – Run Post-Install Configuration Scripts
+
+The toolkit bundle includes configuration scripts that must be run after installation:
+
+```bash
+# Configure system tuning parameters (sysctl)
+/usr/lib/perfsonar/scripts/configure_sysctl
+
+# Configure firewall rules
+/usr/lib/perfsonar/scripts/configure_firewall install
+```
+
+??? info "What these scripts configure"
+    
+    **`configure_sysctl`**:
+    - TCP congestion control algorithm (htcp instead of reno)
+    - Maximum TCP buffer sizes for high-bandwidth paths
+    - Network stack tuning for measurement workloads
+    - Creates `/etc/sysctl.d/perfsonar-sysctl.conf`
+    
+    **`configure_firewall`**:
+    - Opens required ports for perfSONAR services (pScheduler, OWAMP, HTTP/HTTPS)
+    - Configures nftables rules (compatible with existing rules)
+    - Enables fail2ban with perfSONAR jails
+    - Creates `/etc/nftables.d/perfsonar.nft`
+
+### Step 2.4 – Install Helper Scripts for PBR and Management
+
+Install OSG/WLCG helper scripts for policy-based routing and advanced configuration:
+
+```bash
+# Install base packages for helper scripts
+dnf -y install jq curl tar gzip rsync bind-utils \
+    python3 iproute iputils procps-ng sed grep gawk
+
+# Bootstrap helper scripts
+curl -fsSL \
+    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
+    -o /tmp/install_tools_scripts.sh
+
+chmod 0755 /tmp/install_tools_scripts.sh
+
+/tmp/install_tools_scripts.sh /opt/perfsonar-toolkit
+```
+
+**Verify bootstrap completed successfully:**
+
+```bash
+# Check that all helper scripts were downloaded
+ls -1 /opt/perfsonar-toolkit/tools_scripts/*.sh | wc -l
+# Should show 11 shell scripts
+
+# Verify key scripts are present and executable
+ls -l /opt/perfsonar-toolkit/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,check-perfsonar-dns.sh}
+```
+
+??? info "Why install helper scripts?"
+    
+    The OSG/WLCG helper scripts provide automation for:
+    - Multi-NIC policy-based routing configuration
+    - DNS forward/reverse validation
+    - Registration information management
+    - Custom nftables rules integrated with PBR
+    
+    These scripts are optional but highly recommended for sites with multiple network interfaces or
+    complex routing requirements.
+
+---
+
+## Step 3 – Configure Policy-Based Routing (PBR)
+
+The script `/opt/perfsonar-toolkit/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule
+setup. It fills out and consumes the network configuration in `/etc/perfSONAR-multi-nic-config.conf`.
+    
+??? info "Modes of operation"
+
+    By default the script now performs an **in-place apply** that adjusts routes, rules, and NetworkManager connection
+    properties **without deleting existing connections or flushing all system routes**. This minimizes disruption and
+    usually avoids the need for a reboot.
+
+    An optional destructive mode `--rebuild-all` performs the original full workflow: backup existing profiles, flush all
+    routes and rules, remove every NetworkManager connection, then recreate connections from scratch. Use this only for
+    initial deployments or when you must completely reset inconsistent legacy state.
+
+    | Mode | Flag | Disruption | When to use |
+    |------|------|------------|-------------|
+    | In-place (default) | (none) or `--apply-inplace` | Low (interfaces stay up; rules adjusted) | Routine updates, gateway changes, add routes |
+    | Full rebuild | `--rebuild-all` | High (connections removed; brief connectivity drop) | First-time setup, severe misconfiguration |
+
+### Safety Enhancements
+
+- Detects active SSH session interface and avoids extra disruption to that NIC in in-place mode.
+- Prompts are still skipped with `--yes`.
+- Dry-run preview supported via `--dry-run` (combine with `--debug` for verbose output).
+- Reboot is **no longer generally required**; only consider one if NetworkManager fails to apply the new rules cleanly.
+
+### Generate config file automatically (or preview)
+
+!!! warning "Gateways required for addresses"
+        
+    Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway.
+    If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit
+    `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
+        
+??? note "Gateway prompts"
+        
+    During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be
+    determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped
+    in non-interactive sessions or when you use `--yes`. Note, NICs without gateways are assumed to NOT be used for perfSONAR.
+        
+Preview generation (**no changes**):
+        
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-debug    
+```
+
+Generate and **write** the config file:
+        
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto 
+```
+
+The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
+confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
+changes...
+        
+### Apply changes (in-place default)
+
+!!! warning "Connect via console for network changes"
+        
+    When applying network changes across an ssh connection, your session may be interrupted.   Please try to run the
+    perfSONAR-pbr-nm.sh script when connected either directly to the console or by using 'nohup' in front of the script
+    invocation.
+
+#### In-place apply (recommended)
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-pbr-nm.sh --yes
+```
+        
+??? info "If SSH connection drops during network reconfiguration:"
+        
+    1. Access via BMC/iLO/iDRAC console or physical console
+    1. Review `/var/log/perfSONAR-multi-nic-config.log` for errors
+    1. Check network state with `nmcli connection show` and `ip addr`
+    1. Restore from backup if needed: backups are in `/var/backups/nm-connections-<timestamp>/`
+    1. Reapply config after corrections: `/opt/perfsonar-toolkit/tools_scripts/perfSONAR-pbr-nm.sh --yes`
+
+
+#### Full rebuild (destructive – removes all NM connections first)
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-pbr-nm.sh --rebuild-all --yes
+```
+
+The policy based routing script logs to `/var/log/perfSONAR-multi-nic-config.log`. After an in-place apply, a reboot is typically
+unnecessary. If connectivity or rules appear inconsistent (`ip rule show` / `ip route` mismatch), consider a manual
+NetworkManager restart:
+
+```bash
+systemctl restart NetworkManager
+
+```
+
+### DNS: forward and reverse entries (required)
+
+All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching
+reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your
+host, and because some measurement infrastructure and registration systems perform forward/reverse consistency checks.
+
+- For single-stack IPv4-only hosts: ensure A and PTR are present and consistent.
+- For single-stack IPv6-only hosts: ensure AAAA and PTR are present and consistent.
+- For dual-stack hosts: both IPv4 and IPv6 addresses used for testing must have matching forward and reverse records (A+PTR and AAAA+PTR).
+
+??? info "Run the DNS checker" 
+    
+    To validate forward/reverse DNS for addresses in `/etc/perfSONAR-multi-nic-config.conf` you can run a script:
+    ```bash
+    /opt/perfsonar-toolkit/tools_scripts/check-perfsonar-dns.sh
+    ```
+    **Notes and automation tips:**
+    
+    - The script above uses `dig` (bind-utils package) which is commonly available; you can adapt it
+      to use `host` if preferred.
+    - Run the check as part of your provisioning CI or as a pre-flight check before enabling measurement registration.
+    - For large sites or many addresses, parallelize the checks (xargs -P) or use a small Python
+      script that leverages `dns.resolver` for async checks.
+    - If your PTR returns a hostname with a trailing dot, the script strips it before the forward check.
+
+    If any addresses fail these checks, correct the DNS zone (forward and/or reverse) and allow DNS propagation before
+    proceeding with registration and testing.
+
+**Verify the routing policy:**
+
+```bash
+nmcli connection show
+ip rule show
+ip route show table <table-id>
+
+```
+
+Confirm that non-default interfaces have their own routing tables and that the default interface owns the system default
+route.
+
+---
+
+## Step 4 – Configure nftables, SELinux, and Fail2Ban
+
+!!! info "Toolkit automatic security hardening"
+    
+    The **perfsonar-toolkit** bundle automatically configured security during installation (Step 2):
+    
+    - **nftables rules** via `/usr/lib/perfsonar/scripts/configure_firewall`
+    - **fail2ban** with perfSONAR jails for SSH and service protection
+    - **SELinux policies** (if enforcing mode is enabled)
+    
+    This step is **optional** and only needed if you want to:
+    
+    - Customize firewall rules beyond the toolkit defaults
+    - Integrate with OSG helper scripts for PBR-derived SSH access control
+    - Add site-specific security policies
+
+### Optional: Customize Security with Helper Scripts
+
+Use `/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh` to configure additional hardened nftables rules
+integrated with your PBR configuration. This script can derive SSH allow-lists from your multi-NIC configuration.
+
+**Prerequisites:**
+
+- nftables, fail2ban, and SELinux tools are already installed by the perfsonar-toolkit bundle
+- Multi-NIC configuration file at `/etc/perfSONAR-multi-nic-config.conf` (from Step 3)
+
+### Install/configure additional custom options
+
+You can use the install script to install the options you want (selinux, fail2ban)
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes
+```
+ 
+    - Use `--yes` to skip the interactive confirmation prompt (omit it if you prefer to review the
+      summary and answer manually).
+
+    - Add `--dry-run` for a rehearsal that only prints the planned actions.
+
+The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-
+config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.
+
+??? info "SSH allow-lists and validation"
+        
+    - Derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf` (CIDR prefixes and addresses).
+    - Validates nftables rules before writing.
+    - Outputs: rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
+
+??? tip "Preview nftables rules before applying"
+    
+    You can preview the fully rendered nftables rules (no changes are made):
+    
+    ```bash
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh --print-rules
+    ```
+    
+??? tip "Manually add extra management hosts/subnets"
+        
+    If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit
+    `/etc/nftables.d/perfsonar.nft` and add entries to the appropriate sets. Example:
+        
+    ```nft
+    set ssh_access_ip4_subnets {
+        type ipv4_addr
+        flags interval
+        elements = { 192.0.2.0/24, 198.51.100.0/25 }
+    }
+
+    set ssh_access_ip4_hosts {
+        type ipv4_addr
+        elements = { 203.0.113.10, 203.0.113.11 }
+    }
+
+    set ssh_access_ip6_subnets {
+        type ipv6_addr
+        flags interval
+        elements = { 2001:db8:1::/64 }
+    }
+
+    set ssh_access_ip6_hosts {
+        type ipv6_addr
+        elements = { 2001:db8::10 }
+    }
+    ```
+        
+    Then validate and reload (root shell):
+        
+    ```bash
+    nft -c -f /etc/nftables.d/perfsonar.nft
+    systemctl reload nftables || systemctl restart nftables
+    ```
+        
+### Confirm nftables state and security services
+
+??? info "Verification commands"
+        
+    ```bash
+    nft list ruleset
+    sestatus
+    systemctl status fail2ban
+    ```
+        
+You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
+        
+---
+
+## Step 5 – Start and Configure perfSONAR Services
+
+The perfSONAR Toolkit installation automatically enables and starts all required services. This step verifies service
+health and completes first-time web interface configuration.
+
+### Step 5.1 – Verify perfSONAR Services
+
+Check that all perfSONAR services are running:
+
+```bash
+systemctl status pscheduler-scheduler
+systemctl status pscheduler-runner
+systemctl status pscheduler-archiver
+systemctl status pscheduler-ticker
+systemctl status psconfig-pscheduler-agent
+systemctl status owamp-server
+systemctl status perfsonar-lsregistrationdaemon
+```
+
+All services should show `active (running)` status. If any service is not running, start it:
+
+```bash
+systemctl start <service-name>
+```
+
+??? info "What each service does"
+    
+    - **pscheduler-scheduler**: Schedules measurement tests
+    - **pscheduler-runner**: Executes scheduled tests
+    - **pscheduler-archiver**: Archives measurement results to local and remote stores
+    - **pscheduler-ticker**: Manages periodic tasks and cleanup
+    - **psconfig-pscheduler-agent**: Processes pSConfig templates and creates scheduled tests
+    - **owamp-server**: One-Way Active Measurement Protocol (latency/loss measurements)
+    - **perfsonar-lsregistrationdaemon**: Registers this host with the global Lookup Service
+
+??? info "Additional services (measurement archive)"
+    
+    The toolkit also runs OpenSearch and Logstash for local measurement archive:
+    ```bash
+    systemctl status opensearch
+    systemctl status logstash
+    ```
+    
+    These services store measurement results locally for web UI display and historical analysis.
+
+All services are configured to start automatically on boot via systemd.
+
+### Step 5.2 – Access the Web Interface
+
+The perfSONAR Toolkit provides a comprehensive web interface for configuration and monitoring.
+
+**Access the web UI:**
+
+1. Open a browser and navigate to: `https://<your-hostname>/toolkit`
+
+2. **First-time setup wizard:**
+   
+   On first access, you'll be guided through initial configuration:
+   
+   - **Create administrator account**: Set username and password for web UI access
+   - **Administrative information**: Site name, location, contact details
+   - **Host information**: Verify hostname, addresses, and network interfaces
+   - **Test configuration**: Review default test settings (typically defaults are appropriate)
+   - **Archive settings**: Configure local and/or remote archiving
+
+3. **Complete the wizard** to enable full functionality
+
+??? tip "Web UI features"
+    
+    The web interface provides:
+    
+    - **Dashboard**: Real-time and historical measurement results with graphs
+    - **Test Configuration**: Schedule on-demand or regular tests to remote endpoints
+    - **Administrative Info**: Update site information, contacts, and registration details
+    - **Service Health**: Monitor perfSONAR service status and system resources
+    - **Archive Configuration**: Manage local archive retention and remote archive destinations
+    - **Host Details**: View network interfaces, routes, and system information
+
+??? info "Accessing web UI remotely"
+    
+    If you need to access the web UI from outside your local network:
+    
+    - Ensure firewall allows HTTPS (port 443) from your management networks
+    - Consider using SSH port forwarding for secure remote access:
+      ```bash
+      ssh -L 8443:localhost:443 root@<perfsonar-host>
+      ```
+      Then access: `https://localhost:8443/toolkit`
+
+**Web UI URL:** `https://<your-hostname>/toolkit`
+
+For detailed web UI documentation, see: <https://docs.perfsonar.net/manage_admin_info.html>
+
+### Step 5.3 – Configure Automatic Updates
+
+The perfSONAR Toolkit enables automatic updates by default using `dnf-automatic`.
+
+**Verify automatic updates are enabled:**
+
+```bash
+systemctl status dnf-automatic.timer
+```
+
+The timer should show `active` and run daily to check for and install perfSONAR package updates.
+
+**Manual update check:**
+
+```bash
+dnf check-update perfsonar\*
+```
+
+**Apply updates manually** (if needed):
+
+```bash
+dnf update perfsonar\*
+
+# Restart affected services after updates
+systemctl restart pscheduler-scheduler pscheduler-runner pscheduler-archiver pscheduler-ticker psconfig-pscheduler-agent
+```
+
+??? info "How automatic updates work"
+    
+    - **dnf-automatic** runs daily (configured in `/etc/dnf/automatic.conf`)
+    - Updates are downloaded and installed automatically
+    - Security updates are prioritized
+    - Services are restarted as needed by RPM post-install scripts
+    - Update logs: `/var/log/dnf.log` and `journalctl -u dnf-automatic`
+
+??? warning "Update behavior"
+    
+    By default, the toolkit applies updates automatically. If you prefer manual control:
+    
+    ```bash
+    # Disable automatic updates
+    systemctl disable dnf-automatic.timer
+    
+    # Re-enable later if desired
+    systemctl enable --now dnf-automatic.timer
+    ```
+    
+    Manual updates require regular monitoring to ensure security patches are applied promptly.
+
+---
+## Step 6 – Configure and Enroll in pSConfig
+
+Enroll your toolkit host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN
+you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
+
+### Option A: Web UI Configuration (Recommended)
+
+The easiest way to configure pSConfig is via the web interface:
+
+1. Navigate to: `https://<your-hostname>/toolkit/admin?view=psconfig`
+2. Click "Add Remote Configuration"
+3. Enter the auto URL: `https://psconfig.opensciencegrid.org/pub/auto/<your-fqdn>`
+4. Enable "Configure Archives" to automatically set up result archiving
+5. Save and restart the pSConfig agent
+
+### Option B: Command Line Configuration
+
+Basic enrollment via command line:
+
+```bash
+# Add auto URLs (configures archives too) and show configured remotes
+psconfig remote --configure-archives add \
+    "https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"
+
+psconfig remote list
+```
+
+If there are any stale/old/incorrect entries, you can remove them:
+
+```bash
+psconfig remote delete "<old-url>"
+```
+
+### Option C: Automated Enrollment Script
+
+Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before
+applying.
+
+```bash
+# Dry run only (show planned URLs):
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n
+
+# Apply enrollment:
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -v
+
+# Verify configured remotes
+psconfig remote list
+```
+
+??? note "The auto enroll psconfig script details"
+    
+    - Parses IP lists from `/etc/perfSONAR-multi-nic-config.conf`  (`NIC_IPV4_ADDRS` / `NIC_IPV6_ADDRS`).
+    - Performs reverse DNS lookups (getent/dig) to derive FQDNs.
+    - Deduplicates while preserving discovery order.
+    - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
+    - Lists configured remotes and returns non-zero if any enrollment fails.
+
+    Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
+
+---
+
+## Step 7 – Register and Configure with WLCG/OSG
+
+1. **OSG/WLCG registration workflow:**
+
+    ??? info "Registration steps and portals"
+        
+        - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
+        - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
+        - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
+                `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+
+1. **Document memberships:**
+
+    Update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.
+
+1. **Update Lookup Service registration:**
+
+    **Option A: Web UI (Recommended)**
+    
+    The easiest way to configure registration information is via the Toolkit web interface:
+    
+    1. Navigate to: `https://<your-hostname>/toolkit/admin?view=host`
+    2. Fill in administrative information:
+        - Site name, organization, location (city, state, country, zip code)
+        - Latitude and longitude (for map display)
+        - Administrator name and email
+        - Projects (WLCG, OSG, etc.)
+    3. Save changes - the lsregistrationdaemon restarts automatically
+    
+    **Option B: Command Line**
+    
+    Edit `/etc/perfsonar/lsregistrationdaemon.conf` directly and restart the service:
+    
+    ```bash
+    vi /etc/perfsonar/lsregistrationdaemon.conf
+    
+    # After editing, restart the registration daemon
+    systemctl restart perfsonar-lsregistrationdaemon
+    ```
+    
+    **Option C: Helper Script**
+    
+    Use the helper script to update registration (removes `podman exec` wrapper compared to testpoint):
+
+    ```bash
+    # Preview changes only
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh update \
+        --dry-run --site-name "Acme Co." --project WLCG \
+        --admin-email admin@example.org --admin-name "pS Admin"
+
+    # Apply new settings and restart the daemon
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh create \
+        --site-name "Acme Co." --domain example.org --project WLCG --project OSG \
+        --city Berkeley --region CA --country US --zip 94720 \
+        --latitude 37.5 --longitude -121.7469 \
+        --admin-name "pS Admin" --admin-email admin@example.org
+    ```
+
+1. **Automatic updates**
+
+    The perfSONAR Toolkit uses `dnf-automatic` for automatic updates (already configured in Step 5).
+
+---
+
+## Step 8 – Post-Install Validation
+
+Perform these checks before handing the host over to operations:
+
+1. **System services:**
+
+    ??? info "Verify perfSONAR services"
+        
+        ```bash
+        # Check all perfSONAR services are running
+        systemctl status pscheduler-scheduler pscheduler-runner pscheduler-archiver pscheduler-ticker
+        systemctl status psconfig-pscheduler-agent owamp-server perfsonar-lsregistrationdaemon
+        
+        # Check web server (Apache)
+        systemctl status apache2 --no-pager
+        
+        # Check measurement archive services
+        systemctl status opensearch logstash
+        ```
+
+    Ensure all services show `active (running)` status.
+
+1. **Web interface access:**
+
+    ??? info "Verify web UI is accessible"
+        
+        ```bash
+        # Test HTTPS connectivity to web UI
+        curl -k -s -o /dev/null -w "%{http_code}" https://localhost/toolkit
+        # Should return 200
+        
+        # Check Apache error logs if issues
+        journalctl -u apache2 -n 50
+        ```
+        
+        Access the web UI in a browser: `https://<your-hostname>/toolkit`
+        
+        Verify the dashboard loads and shows measurement results (may take a few minutes after first tests run).
+
+1. **Service logs:**
+
+    ??? info "Check perfSONAR service logs for errors"
+        
+        ```bash
+        # Check pScheduler logs for errors
+        journalctl -u pscheduler-scheduler -n 50 --no-pager
+        journalctl -u pscheduler-runner -n 50 --no-pager
+        
+        # Check pSConfig agent logs
+        journalctl -u psconfig-pscheduler-agent -n 50 --no-pager
+        
+        # Check registration daemon
+        journalctl -u perfsonar-lsregistrationdaemon -n 20 --no-pager
+        ```
+
+1. **Network path validation:**
+
+    ??? info "Test network connectivity and routing"
+        
+        Test throughput to a remote endpoint:
+        ```bash
+        pscheduler task throughput --dest <remote-testpoint>
+        ```
+        
+        Check routing from the host:
+        ```bash
+        tracepath -n <remote-testpoint>
+        ip route get <remote-testpoint-ip>
+        ```
+        
+        Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
+        
+1. **Security posture:**
+
+    ??? info "Check firewall, fail2ban, and SELinux"
+        
+        ```bash
+        # Check nftables firewall rules
+        nft list ruleset | grep perfsonar
+
+        # Check fail2ban status (automatically installed by toolkit)
+        systemctl status fail2ban
+        fail2ban-client status
+
+        # Check for recent SELinux denials
+        if command -v ausearch >/dev/null 2>&1; then
+            ausearch --message AVC --just-one
+        elif [ -f /var/log/audit/audit.log ]; then
+            grep -i "avc.*denied" /var/log/audit/audit.log | tail -5
+        else
+            echo "SELinux audit tools not available"
+        fi
+        ```
+
+    Investigate any SELinux denials or repeated Fail2Ban bans.
+
+1. **Certificate check (if using HTTPS):**
+
+    ??? info "Verify certificate validity"
+        
+        ```bash
+        # Check certificate via HTTPS connection
+        echo | openssl s_client -connect <your-hostname>:443 -servername <your-hostname> 2>/dev/null | openssl x509 -noout -dates -issuer
+        ```
+
+    Ensure the certificate is valid and not expired.
+
+1. **Measurement archive:**
+
+    ??? info "Verify local archive is collecting data"
+        
+        Check that OpenSearch is receiving measurement results:
+        
+        ```bash
+        # Check OpenSearch cluster health
+        curl -k https://localhost:9200/_cluster/health?pretty
+        
+        # Check for measurement data (after tests have run)
+        curl -k https://localhost:9200/_cat/indices?v | grep pscheduler
+        ```
+        
+        Via web UI: Navigate to `https://<your-hostname>/toolkit/archive` to view stored measurements.
+
+1. **Reporting:**
+
+    ??? info "Run perfSONAR diagnostic reports"
+        
+        Run the perfSONAR troubleshoot command and send outputs to operations:
+        ```bash
+        pscheduler troubleshoot
+        ```
+    
+---
+
+## Ongoing Maintenance
+
+- **Quarterly or as-needed:** Re-validate routing policy and nftables rules after network changes or security audits.
+
+- **Monthly or during maintenance windows:** Apply OS updates (`dnf update`) and reboot during scheduled downtime.
+
+- Monitor psconfig feeds for changes in mesh participation and test configuration.
+
+- Track certificate expiry with `certbot renew --dry-run` if you rely on Let's Encrypt (automatic renewal is configured but monitoring is recommended).
+
+- Review container logs periodically for errors: `podman logs perfsonar-testpoint` and `podman logs certbot`.
+
+- Verify auto-update timer is active: `systemctl list-timers perfsonar-auto-update.timer`.
+
+---
+
+## Troubleshooting
+
+### Container Issues
+
+??? failure "Container won't start or exits immediately"
+    
+    **Symptoms:** `podman ps` shows no running containers, or container exits shortly after starting.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check container logs
+    podman logs perfsonar-testpoint
+
+    # Check for systemd initialization errors
+    podman logs perfsonar-testpoint 2>&1 | grep -i "failed\|error"
+
+    # Verify compose file syntax
+    cd /opt/perfsonar-toolkit
+    podman-compose config
+
+    ```
+
+    **Common causes:**
+
+    - Missing entrypoint wrapper: Ensure `/opt/perfsonar-toolkit/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
+    - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
+    - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
+    - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
+
+??? failure "Container won't start or exits immediately"
+    
+    **Symptoms:** `podman ps` shows no running containers, or container exits shortly after starting.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check container logs
+    podman logs perfsonar-testpoint
+
+    # Check for systemd initialization errors
+    podman logs perfsonar-testpoint 2>&1 | grep -i "failed\|error"
+
+    # Verify compose file syntax
+    cd /opt/perfsonar-toolkit
+    podman-compose config
+
+    ```
+
+    **Common causes:**
+
+    - Missing entrypoint wrapper: Ensure `/opt/perfsonar-toolkit/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
+    - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
+    - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
+    - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
+
+??? failure "Container crashes after reboot with exit code 255"
+    
+    **Symptoms:** Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts
+    with exit code 255.
+    
+    **Cause:** The perfSONAR testpoint image runs systemd internally but podman-compose doesn't support the
+    `--systemd=always` flag required for proper systemd operation in containers.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check container status
+    podman ps -a
+
+    # Check systemd service status
+    systemctl status perfsonar-testpoint.service
+
+    # View recent container logs
+    podman logs perfsonar-testpoint --tail 100
+
+    # Check if using compose-based service (BAD)
+    grep -A5 "ExecStart" /etc/systemd/system/perfsonar-testpoint.service
+    ```
+
+    **Solution:**
+
+    Replace the compose-based systemd service with proper systemd units that use `podman run --systemd=always`:
+
+    ```bash
+    # Stop and disable old service
+    systemctl stop perfsonar-testpoint.service
+    systemctl disable perfsonar-testpoint.service
+
+    # Install new systemd units
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
+        -o /tmp/install-systemd-units.sh
+    chmod 0755 /tmp/install-systemd-units.sh
+
+    # For testpoint only:
+    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-toolkit
+
+    # For testpoint + certbot:
+    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-toolkit --with-certbot
+
+    # Enable and start
+    systemctl enable --now perfsonar-testpoint.service
+
+    # If using certbot:
+    systemctl enable --now perfsonar-certbot.service
+
+    # Verify containers are running
+    podman ps
+    curl -kI https://127.0.0.1/
+    ```
+
+    **Verification:**
+
+    After installing the new units, the testpoint should:
+    - Start successfully on boot
+    - Run systemd properly inside the container
+    - Maintain state across reboots
+    - Show "Up" status in `podman ps` (not "Exited" or crash-looping)
+
+??? failure "Certbot service fails with 'Unable to open config file' error"
+    
+    **Symptoms:** `perfsonar-certbot.service` fails immediately after starting with exit code 2. Logs show: `certbot: error:
+    Unable to open config file: trap exit TERM; while...`
+    
+    **Cause:** The certbot container image has a built-in entrypoint that expects certbot commands directly. When using a
+    shell loop for renewal, the entrypoint tries to parse the shell command as a certbot config file, causing this error.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check certbot service status
+    systemctl status perfsonar-certbot.service
+
+    # View detailed logs
+    journalctl -u perfsonar-certbot.service -n 50
+
+    # Check for the error in logs
+    journalctl -u perfsonar-certbot.service | grep "Unable to open config file"
+
+    # Verify service file configuration
+    grep -A5 "ExecStart" /etc/systemd/system/perfsonar-certbot.service
+    ```
+
+    **Solution:**
+
+    The certbot service needs two flags:
+    - `--systemd=always` for proper systemd integration and reboot persistence
+    - `--entrypoint=/bin/sh` to override the built-in entrypoint
+
+    Re-run the installation script to get the fixed version:
+
+    ```bash
+    # Stop current service
+    systemctl stop perfsonar-certbot.service
+
+    # Download and install updated systemd units
+    curl -fsSL \
+        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
+        -o /tmp/install-systemd-units.sh
+    chmod 0755 /tmp/install-systemd-units.sh
+
+    # Install with certbot support
+    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-toolkit --with-certbot
+
+    # Start the fixed service
+    systemctl daemon-reload
+    systemctl start perfsonar-certbot.service
+
+    # Verify it's running
+    systemctl status perfsonar-certbot.service
+    podman ps | grep certbot
+    ```
+
+    **Expected result:** The certbot container should be running (not exiting) and the service should be in "active (running)" state.
+
+??? failure "SELinux denials blocking container operations"
+    
+    **Symptoms:** Container starts but services fail, permission denied errors in logs.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    
+    # Check for recent SELinux denials
+    ausearch -m avc -ts recent
+
+    # Temporarily set to permissive for testing
+    setenforce 0
+
+    # Test if issue resolves, then check audit log
+    ausearch -m avc -ts recent > /tmp/selinux-denials.txt
+
+    ```
+
+    **Solutions:**
+
+    - Verify volume labels are correct (`:Z` for exclusive, `:z` for shared)
+    - Recreate containers to reapply SELinux labels: `podman-compose down && podman-compose up -d`
+    - If persistent issues, consider creating custom SELinux policy or running in permissive mode
+
+### Networking Issues
+
+??? failure "Policy-based routing not working correctly"
+    
+    **Symptoms:** Traffic not using expected interfaces, routing to wrong gateway.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check routing rules
+    ip rule show
+
+    # Check routing tables
+    ip route show table all
+
+
+    # Test specific route lookup
+    ip route get <destination-ip>
+
+    # Check NetworkManager connections
+    nmcli connection show
+
+    # Review PBR script log
+    tail -100 /var/log/perfSONAR-multi-nic-config.log
+
+    ```
+
+    **Solutions:**
+
+    - Verify `/etc/perfSONAR-multi-nic-config.conf` has correct IPs and gateways
+    - Reapply configuration: `/opt/perfsonar-toolkit/tools_scripts/perfSONAR-pbr-nm.sh --yes`
+    - Reboot if rules are not being applied correctly
+    - Check for conflicting NetworkManager or systemd-networkd rules
+
+??? failure "DNS resolution failing for test endpoints"
+    
+    **Symptoms:** perfSONAR tests fail with "unknown host" or DNS errors.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Test DNS resolution from container
+    podman exec -it perfsonar-testpoint dig <remote-testpoint>
+
+    # Check container's resolv.conf
+
+    podman exec -it perfsonar-testpoint cat /etc/resolv.conf
+
+    # Verify forward and reverse DNS
+    /opt/perfsonar-toolkit/tools_scripts/check-perfsonar-dns.sh
+
+    ```
+
+    **Solutions:**
+
+    - Ensure DNS servers are correctly configured on host
+    - Fix missing PTR records in DNS zones
+    - Verify forward A/AAAA records match reverse PTR records
+
+### Certificate Issues
+
+??? failure "Let's Encrypt certificate issuance fails"
+    
+    **Symptoms:** Certbot fails with "Failed to authenticate" or "Connection refused" errors.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check if port 80 is open
+    nft list ruleset | grep "80"
+
+    # Verify Apache is NOT listening on port 80 in container
+    podman exec perfsonar-testpoint netstat -tlnp | grep :80
+
+    # Test port 80 accessibility from external host
+    curl -v http://<your-fqdn>/
+
+    # Run certbot in verbose mode
+
+    podman run --rm --net=host \
+        -v /etc/letsencrypt:/etc/letsencrypt:Z \
+        -v /var/www/html:/var/www/html:Z \
+        docker.io/certbot/certbot:latest certonly \
+        --standalone -d <SERVER_FQDN> -m <EMAIL> --dry-run -vvv
+
+    ```
+
+    **Common causes:**
+
+    - Port 80 blocked by firewall: Add with `perfSONAR-install-nftables.sh --ports=80,443`
+    - Apache listening on port 80: Verify testpoint-entrypoint-wrapper.sh patched Apache correctly
+    - DNS not propagated: Wait for DNS changes to propagate globally
+    - Rate limiting: Let's Encrypt has rate limits; wait if you've hit them
+
+??? failure "Certificate not loaded after renewal"
+    
+    **Symptoms:** Old certificate still in use after automatic renewal.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check certificate files
+    ls -la /etc/letsencrypt/live/<fqdn>/
+
+    # Verify deploy hook is configured
+    podman logs certbot 2>&1 | grep "deploy hook"
+
+    # Check if container restarted
+    podman ps --format 'table {{.Names}}\t{{.Status}}'
+
+    # Manually restart testpoint
+    podman restart perfsonar-testpoint
+
+    ```
+
+    **Solutions:**
+
+    - Verify deploy hook script exists and is executable: `/opt/perfsonar-toolkit/tools_scripts/certbot-deploy-hook.sh`
+    - Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
+    - Verify Podman socket is mounted in certbot container: `/run/podman/podman.sock`
+    - Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
+    - Manually restart testpoint after renewals if deploy hook fails: `podman restart perfsonar-testpoint`
+
+    **Note:** Certbot automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are
+    renewed. Do not use `--deploy-hook` parameter with full paths ending in `.sh` as certbot will append `-hook` to the filename.
+
+### perfSONAR Service Issues
+
+??? failure "perfSONAR services not running"
+    
+    **Symptoms:** Web interface not accessible, tests not running.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check service status inside container
+    podman exec perfsonar-testpoint systemctl status apache2
+    podman exec perfsonar-testpoint systemctl status pscheduler-ticker
+    podman exec perfsonar-testpoint systemctl status owamp-server
+
+    # Check for errors in service logs
+    podman exec perfsonar-testpoint journalctl -u apache2 -n 50
+    podman exec perfsonar-testpoint journalctl -u pscheduler-ticker -n 50
+
+    ```
+
+    **Solutions:**
+
+    - Restart services inside container: `podman exec perfsonar-testpoint systemctl restart apache2`
+    - Check Apache SSL configuration was patched correctly
+    - Verify certificates are in place: `ls -la /etc/letsencrypt/live/`
+    - Restart container: `podman restart perfsonar-testpoint`
+
+### Auto-Update Issues
+
+??? failure "Auto-update not working"
+    
+    **Symptoms:** Containers not updating despite new images available.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check timer status
+    systemctl status perfsonar-auto-update.timer
+    systemctl list-timers perfsonar-auto-update.timer
+
+    # Check service logs
+    journalctl -u perfsonar-auto-update.service -n 100
+
+    # Check update log
+    tail -50 /var/log/perfsonar-auto-update.log
+
+    # Manually test update
+    systemctl start perfsonar-auto-update.service
+
+    ```
+
+    **Solutions:**
+
+    - Enable timer if not active: `systemctl enable --now perfsonar-auto-update.timer`
+    - Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
+    - Check podman-compose is installed and working
+    - Review script for errors and update if needed
+
+### General Debugging Tips
+
+??? tip "Useful debugging commands"
+    
+    **Container management:**
+    
+    ```bash
+    # View all containers (running and stopped)
+    podman ps -a
+
+    # View container resource usage
+    podman stats
+
+    # Enter container for interactive debugging
+    podman exec -it perfsonar-testpoint /bin/bash
+
+    # View compose configuration
+    cd /opt/perfsonar-toolkit && podman-compose config
+
+    ```
+
+    **Networking:**
+
+    ```bash
+    # Check which process is listening on a port
+    ss -tlnp | grep <port>
+
+    # Test connectivity to remote testpoint
+    ping <remote-ip>
+    traceroute <remote-ip>
+
+    # Check nftables rules
+    nft list ruleset
+    ```
+
+    **Logs:**
+
+    ```bash
+    # System journal for container runtime
+    journalctl -u podman -n 100
+
+    # All logs from a container
+    podman logs perfsonar-testpoint --tail=100
+
+    # Follow logs in real-time
+    podman logs -f perfsonar-testpoint
+    ```
+
+---

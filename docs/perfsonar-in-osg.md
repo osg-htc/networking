@@ -37,10 +37,14 @@ operating. When problems arise, the data, along with access to the `perfSONAR` t
 localize problems. The presence of perfSONAR toolkit deployments across our sites and networks makes identifying and
 fixing network problems feasible.
 
-We strongly recommend that all OSG (and WLCG) sites deploy `perfSONAR` toolkit instances as described in our
-[installation guide](perfsonar/installation.md). Before installing you should consult the
-[requirements](perfsonar/deployment-models.md) along with the guidance on [deployment models](perfsonar/deployment-
-models.md).
+We strongly recommend that all OSG (and WLCG) sites deploy `perfSONAR` instances. You can choose between:
+
+- **[Testpoint (container-based)](personas/quick-deploy/install-perfsonar-testpoint.md)** - Recommended for most sites, lightweight deployment
+- **[Toolkit (RPM-based)](personas/quick-deploy/install-perfsonar-toolkit.md)** - For sites needing local web UI and measurement archive
+
+Before installing, consult the [requirements](perfsonar/deployment-models.md) and [deployment models](perfsonar/deployment-models.md) guidance.
+
+See the [Quick Deploy landing page](personas/quick-deploy/landing.md) for a comparison and installation guides.
 
 !!! note Installing perfSONAR not only benefits users at a site but will enable network engineers and OSG staff to much
 more effectively support those sites if network issues are suspected.

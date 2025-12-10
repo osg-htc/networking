@@ -10,9 +10,14 @@ Choose the path that matches your goal:
 
 ### :rocket: Deploy perfSONAR
 
-Quick, tested steps to deploy a perfSONAR testpoint for OSG/WLCG monitoring.
+Quick, tested steps to deploy perfSONAR for OSG/WLCG monitoring.
 
-- **Time:** 30-60 minutes
+Choose your deployment type:
+
+- **Testpoint (Container)** - Lightweight, recommended for most sites
+- **Toolkit (RPM)** - Full-featured with local web UI and archive
+
+- **Time:** 30-90 minutes depending on type
 
 - **Skill level:** Systems administrator
 

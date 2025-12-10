@@ -38,15 +38,29 @@ each focused on specific set of tests. The following deployment options are curr
 ## perfSONAR Toolkit vs Testpoint
 
 The perfSONAR team has documented the types of installations supported at
-<https://docs.perfsonar.net/install_options.html>.   With the release of version 5, OSG/WLCG sites have a new option:
-instead of installing the full Toolkit sites can choose to install the Testpoint bundle.
+<https://docs.perfsonar.net/install_options.html>. With the release of version 5, OSG/WLCG sites can choose between two deployment options:
 
-* Pros
+### Testpoint (Container-based)
 
-```
-* Simpler deployment when a local web interface is not needed and a central measurement archive is available.
-* Less resource intensive for both memory and I/O capacity.
-```
+**Installation guide:** [Install perfSONAR Testpoint](../personas/quick-deploy/install-perfsonar-testpoint.md)
+
+* **Pros:**
+  * Simpler deployment when a local web interface is not needed and a central measurement archive is available
+  * Less resource intensive for both memory and I/O capacity
+  * Container-based updates and management
+  * Recommended for most OSG/WLCG sites
+
+### Toolkit (RPM-based)
+
+**Installation guide:** [Install perfSONAR Toolkit](../personas/quick-deploy/install-perfsonar-toolkit.md)
+
+* **Pros:**
+  * Local web interface at `https://hostname/toolkit` for configuration and monitoring
+  * Local measurement archive (OpenSearch + Logstash) for on-site data retention
+  * Full-featured perfSONAR installation
+  * Suitable for sites with specific data retention or regulatory requirements
+
+**See the [deployment comparison](../personas/quick-deploy/landing.md) for detailed feature comparison.**
 
 * Cons
 

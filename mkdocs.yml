@@ -30,7 +30,10 @@ nav:
   - perfSONAR Guides:
     - 'Why perfSONAR in OSG/WLCG': 'perfsonar-in-osg.md'
     - 'Deployment Models': 'perfsonar/deployment-models.md'
-    - 'Quick Deploy (Testpoint)': 'personas/quick-deploy/install-perfsonar-testpoint.md'
+    - Installation Guides:
+      - 'Quick Deploy Landing': 'personas/quick-deploy/landing.md'
+      - 'Install Testpoint (Container)': 'personas/quick-deploy/install-perfsonar-testpoint.md'
+      - 'Install Toolkit (RPM)': 'personas/quick-deploy/install-perfsonar-toolkit.md'
     - 'Automated Setup': 'personas/quick-deploy/automated-setup/README.md'
     - 'Legacy Installation (Archive)': 'perfsonar/installation.md'
     - 'FAQ': 'perfsonar/faq.md'
