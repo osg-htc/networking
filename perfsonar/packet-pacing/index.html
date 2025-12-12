@@ -11,6 +11,10 @@
         <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/packet-pacing/">
       
       
+        <link rel="prev" href="../multiple-nic-guidance/">
+      
+      
+        <link rel="next" href="../../personas/troubleshoot/triage-checklist/">
       
       
         
@@ -21,7 +25,7 @@
     
     
       
-        <title>Packet Pacing for Data Transfer Nodes - OSG Networking Area</title>
+        <title>Packet Pacing (fq vs tbf) - OSG Networking Area</title>
       
     
     
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#packet-pacing-for-data-transfer-nodes" class="md-skip">
+        <a href="#packet-pacing-on-linux-fq-vs-tbf" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Packet Pacing for Data Transfer Nodes
+              Packet Pacing (fq vs tbf)
             
           </span>
         </div>
@@ -250,10 +254,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../tools_scripts/fasterdata-tuning/" class="md-tabs__link">
           
   
@@ -954,28 +960,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -993,7 +1002,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1055,6 +1064,759 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packet Pacing (fq vs tbf)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packet Pacing (fq vs tbf)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fq-fair-queue-and-tcp-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fq (Fair Queue) and TCP Pacing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="fq (Fair Queue) and TCP Pacing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#useful-fq-knobs-advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Useful fq knobs (advanced)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tbf-token-bucket-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tbf (Token Bucket Filter)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="tbf (Token Bucket Filter)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-tbf-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example tbf command
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interaction-with-tuned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interaction with tuned
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#perfsonardtn-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        perfSONAR/DTN considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="perfSONAR/DTN considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ui-cues-in-audits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UI cues in audits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem-data-rate-bottlenecks-and-packet-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem: Data Rate Bottlenecks and Packet Loss
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Problem: Data Rate Bottlenecks and Packet Loss">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-bottleneck-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Bottleneck Scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Bottleneck Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-fast-source-slower-network-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1: Fast Source, Slower Network Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-multiple-parallel-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2: Multiple Parallel Streams
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-unbalanced-cpunetwork-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3: Unbalanced CPU/Network Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-4-long-distance-paths-50-80ms-rtt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 4: Long-Distance Paths (50-80ms RTT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-packet-pacing-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Packet Pacing Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How Packet Pacing Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mechanism-fair-queuing-fq-qdisc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mechanism: Fair Queuing (FQ) Qdisc
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mechanism: Fair Queuing (FQ) Qdisc">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fq-vs-fq_codel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FQ vs FQ_CODEL
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting-with-token-bucket-filter-tbf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting with Token Bucket Filter (TBF)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-packet-pacing-works-esnet-research-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Packet Pacing Works: ESnet Research Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Why Packet Pacing Works: ESnet Research Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Findings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-world-dtn-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-World DTN Scenario
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-pacing-rates-for-common-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Pacing Rates for Common Scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Pacing Rates for Common Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rule-of-thumb-80-90-of-nic-speed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule of Thumb: 80-90% of NIC Speed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-using-fasterdata-tuningsh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation: Using fasterdata-tuning.sh
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation: Using fasterdata-tuning.sh">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#audit-current-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Current State
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply-packet-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Apply Packet Pacing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dry-run-preview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dry-Run Preview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#burst-size-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Burst Size Calculation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manual-configuration-with-tc-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual Configuration with tc Command
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manual Configuration with tc Command">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-current-qdisc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Current Qdisc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-fair-queuing-with-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Set Fair Queuing with Pacing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-pacing-revert-to-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Delete Pacing (Revert to Default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-token-bucket-filter-tbf-instead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Token Bucket Filter (TBF) Instead
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing and Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing and Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#verify-pacing-is-active" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify Pacing is Active
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-with-iperf3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test with iperf3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-with-perfsonar-pscheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test with perfSONAR pscheduler
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-issues-and-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues and Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues and Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-pacing-not-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Pacing Not Applied
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-throughput-still-low-after-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Throughput Still Low After Pacing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-pacing-configuration-lost-after-reboot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Pacing Configuration Lost After Reboot
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-not-to-use-packet-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When NOT to Use Packet Pacing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-per-application-pacing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced: Per-Application Pacing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esnet-fasterdata-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESnet Fasterdata Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linux-kernel-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux Kernel Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools-and-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools and Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#related-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2285,6 +3047,46 @@
   
 
 
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../tools_scripts/fasterdata-tuning/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Host Tuning
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
               
               <article class="md-content__inner md-typeset">
                 
@@ -2295,7 +3097,68 @@
   
 
 
-<h1 id="packet-pacing-for-data-transfer-nodes">Packet Pacing for Data Transfer Nodes<a class="headerlink" href="#packet-pacing-for-data-transfer-nodes" title="Permanent link">&para;</a></h1>
+<h1 id="packet-pacing-on-linux-fq-vs-tbf">Packet Pacing on Linux: fq vs tbf<a class="headerlink" href="#packet-pacing-on-linux-fq-vs-tbf" title="Permanent link">&para;</a></h1>
+<p>This document explains how Linux packet pacing works with the <code>fq</code> (Fair Queue) queuing discipline and how it differs from explicit rate limiting with <code>tbf</code> (Token Bucket Filter). It also clarifies how these interact with tuned profiles and site use-cases for perfSONAR/DTN hosts.</p>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<ul>
+<li>fq: Enables per-flow TCP pacing. Smooths bursts and respects per-flow pacing rates set by the kernel or applications. No hard interface cap.</li>
+<li>tbf: Enforces an interface-level cap. Useful for policy or hardware constraints. Not per-flow; applies to all traffic through the qdisc.</li>
+<li>tuned: The <code>network-throughput</code> profile commonly sets <code>net.core.default_qdisc=fq</code>, which activates TCP pacing when the interface uses <code>fq</code>.</li>
+</ul>
+<h2 id="fq-fair-queue-and-tcp-pacing">fq (Fair Queue) and TCP Pacing<a class="headerlink" href="#fq-fair-queue-and-tcp-pacing" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Per-flow queues: <code>fq</code> maintains separate queues per flow (e.g., TCP connections).</li>
+<li>SO_MAX_PACING_RATE: Applications may call <code>setsockopt()</code> with <code>SO_MAX_PACING_RATE</code> to set a desired max pacing rate for a socket. Examples: <code>iperf3</code> and some data transfer tools set this.</li>
+<li>Kernel-driven pacing: Even when applications do not set <code>SO_MAX_PACING_RATE</code>, modern Linux TCP computes pacing based on congestion window and RTT, and <code>sch_fq</code> uses <code>sk-&gt;sk_pacing_rate</code> to schedule packets, smoothing bursts.</li>
+<li>Default behavior: If no pacing rate is set, traffic is not hard-capped by <code>fq</code>; flows still benefit from isolation and burst smoothing.</li>
+<li>Why use fq: Aligns with Fasterdata guidance for high-throughput hosts; improves fairness and latency under load; works well with BBR/CUBIC.</li>
+</ul>
+<h3 id="useful-fq-knobs-advanced">Useful <code>fq</code> knobs (advanced)<a class="headerlink" href="#useful-fq-knobs-advanced" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>tc qdisc add dev &lt;if&gt; root fq [quantum &lt;bytes&gt;] [flow_limit &lt;packets&gt;] [low_rate_threshold &lt;bps&gt;]</code></li>
+<li>Most sites do not need to tune these; the defaults work well with modern kernels.</li>
+</ul>
+<h2 id="tbf-token-bucket-filter">tbf (Token Bucket Filter)<a class="headerlink" href="#tbf-token-bucket-filter" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Interface-level rate cap: <code>tbf</code> enforces a maximum transmission rate using a token bucket, with <code>rate</code>, <code>burst</code>, and <code>latency</code> parameters.</li>
+<li>Not per-flow: All traffic shares the cap; can reduce overall throughput if set below link capacity.</li>
+<li>When to use: Site policy requiring caps; hardware or upstream constraints; lab/testing scenarios.</li>
+</ul>
+<h3 id="example-tbf-command">Example <code>tbf</code> command<a class="headerlink" href="#example-tbf-command" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code># Cap to 2 Gbps, allow ~1ms burst, 100ms latency budget
+sudo tc qdisc replace dev eth0 root tbf rate 2000mbps burst 250000 latency 100ms
+</code></pre></div>
+- Burst guidance: Roughly <code>(rate * 1ms) / 8</code> bytes; clamp between ~1500 bytes and ~10MB.
+- Remove tbf: <code>sudo tc qdisc del dev eth0 root</code> or replace with <code>fq</code>.</p>
+<h2 id="interaction-with-tuned">Interaction with tuned<a class="headerlink" href="#interaction-with-tuned" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>tuned-adm profile network-throughput</code> typically sets <code>net.core.default_qdisc=fq</code> (via sysctl), so new interfaces use <code>fq</code>.</li>
+<li>Audits should accept <code>fq</code> (TCP pacing) or <code>tbf</code> (explicit cap) as “pacing applied,” depending on site intent.</li>
+<li>If tuned or other tooling configures <code>tbf</code> unexpectedly, confirm site requirements before changing it to <code>fq</code>.</li>
+</ul>
+<h2 id="perfsonardtn-considerations">perfSONAR/DTN considerations<a class="headerlink" href="#perfsonardtn-considerations" title="Permanent link">&para;</a></h2>
+<p>Measurement hosts: Prefer <code>fq</code> for smoothing bursts without artificial caps.
+ DTN hosts: Default to <code>fq</code>; add <code>tbf</code> only when a specific cap is required. The tuning script supports both paths:
+  - <code>--apply-packet-pacing</code> → sets <code>fq</code> (TCP pacing)
+  - <code>--apply-packet-pacing --use-tbf-cap</code> → applies <code>tbf</code> with an auto cap (default ≈ 90% of link speed)
+  - <code>--apply-packet-pacing --tbf-cap-rate 2000mbps</code> → applies <code>tbf</code> with an explicit cap (deprecated alias: <code>--packet-pacing-rate</code>)</p>
+<h3 id="ui-cues-in-audits">UI cues in audits<a class="headerlink" href="#ui-cues-in-audits" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>fq</code> is shown in green (preferred)</li>
+<li><code>tbf</code> is shown in cyan (acceptable when an interface cap is intentional)</li>
+</ul>
+<h2 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Show qdisc: <code>tc qdisc show dev &lt;if&gt;</code> should report <code>fq ...</code> or <code>tbf ...</code> at root.</li>
+<li>Check sysctl: <code>sysctl -n net.core.default_qdisc</code> should be <code>fq</code> under <code>network-throughput</code> tuned profile.</li>
+<li>Application-level: Tools like <code>iperf3</code> may set <code>SO_MAX_PACING_RATE</code>; otherwise kernel TCP pacing applies with <code>fq</code>.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>ESnet Fasterdata: Host/network tuning guidance</li>
+<li>Linux <code>sch_fq</code> documentation and TCP pacing discussions</li>
+<li><code>tc</code> qdisc manual pages: <code>man tc</code>, <code>man tc-fq</code>, <code>man tc-tbf</code># Packet Pacing for Data Transfer Nodes</li>
+</ul>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p><strong>Packet pacing</strong> is a critical tuning technique for high-performance Data Transfer Nodes (DTNs) and other hosts that
 need to move large amounts of data reliably across wide-area networks. By controlling the rate at which packets are sent
@@ -2704,7 +3567,7 @@ socket option:</p>
 </li>
 </ul>
 <hr />
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<h2 id="references_1">References<a class="headerlink" href="#references_1" title="Permanent link">&para;</a></h2>
 <h3 id="esnet-fasterdata-documentation">ESnet Fasterdata Documentation<a class="headerlink" href="#esnet-fasterdata-documentation" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
@@ -2757,7 +3620,7 @@ socket option:</p>
 </li>
 </ul>
 <hr />
-<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<h2 id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h2>
 <p><strong>Packet pacing is essential for DTN nodes and high-performance data transfer</strong> because it:</p>
 <ol>
 <li>

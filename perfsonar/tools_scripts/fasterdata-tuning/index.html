@@ -1176,15 +1176,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#state-management-save-and-restore-configurationsns" class="md-nav__link">
+  <a href="#state-management-save--restore-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State management: Save and restore configurationsns
+        State Management: Save &amp; Restore Configurations
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="State management: Save and restore configurationsns">
+    <nav class="md-nav" aria-label="State Management: Save &amp; Restore Configurations">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1348,6 +1348,34 @@
     
   
     Multiple NIC Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../packet-pacing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packet Pacing (fq vs tbf)
   
 
     
@@ -2090,15 +2118,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#state-management-save-and-restore-configurationsns" class="md-nav__link">
+  <a href="#state-management-save--restore-configurations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        State management: Save and restore configurationsns
+        State Management: Save &amp; Restore Configurations
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="State management: Save and restore configurationsns">
+    <nav class="md-nav" aria-label="State Management: Save &amp; Restore Configurations">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2983,7 +3011,7 @@ sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tunin
 <p>Applies and persists sysctl settings in <code>/etc/sysctl.d/90-fasterdata.conf</code> and helps persist per-NIC settings (ethtool) via a <code>systemd</code> oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.</p>
 </li>
 <li>
-<p>For DTN nodes: Supports packet pacing via traffic control (tc) token bucket filter (tbf) to limit outgoing traffic to a specified rate, important for multi-stream transfer scenarios.</p>
+<p>For DTN nodes: Supports TCP pacing via <code>fq</code> by default, with an optional interface cap via <code>tbf</code> when policy or constraints require it.</p>
 </li>
 </ul>
 <h2 id="who-should-use-it">Who should use it?<a class="headerlink" href="#who-should-use-it" title="Permanent link">&para;</a></h2>
@@ -3031,11 +3059,14 @@ sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> 
 <span class="c1"># Apply with specific interfaces</span>
 sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--ifaces<span class="w"> </span><span class="s2">&quot;ens1f0np0,ens1f1np1&quot;</span>
 
-<span class="c1"># Apply with packet pacing</span>
-sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>5gbps
+<span class="c1"># Apply with packet pacing (fq by default)</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing
+
+<span class="c1"># Apply with explicit interface cap using tbf</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing<span class="w"> </span>--use-tbf-cap<span class="w"> </span>--tbf-cap-rate<span class="w"> </span>5gbps
 
 <span class="c1"># Audit packet pacing settings</span>
-/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--packet-pacing-rate<span class="w"> </span>10gbps
+/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>audit<span class="w"> </span>--target<span class="w"> </span>dtn
 </code></pre></div>
 <h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
 <ul>
@@ -3046,8 +3077,9 @@ sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> 
 </ul>
 <p>Optional apply flags (use with <code>--mode apply</code>):</p>
 <ul>
-<li><code>--apply-packet-pacing</code>: Apply packet pacing to DTN interfaces via tc token bucket filter. Only works with <code>--target dtn</code>. Default pacing rate is 2 Gbps (adjustable with <code>--packet-pacing-rate</code>).</li>
-<li><code>--packet-pacing-rate RATE</code>: Set the packet pacing rate for DTN nodes. Accepts units: kbps, mbps, gbps, tbps (e.g., <code>2gbps</code>, <code>10gbps</code>, <code>10000mbps</code>). Default: 2000mbps. Burst size is automatically calculated as 1 millisecond worth of packets at the specified rate.</li>
+<li><code>--apply-packet-pacing</code>: Enable packet pacing for DTN interfaces. By default, uses <code>fq</code> (Linux TCP pacing) — preferred.</li>
+<li><code>--use-tbf-cap</code>: Use <code>tbf</code> to apply an interface rate cap instead of <code>fq</code>. If no <code>--tbf-cap-rate</code> is provided, a default of ~90% of link speed is used.</li>
+<li><code>--tbf-cap-rate RATE</code>: Explicit <code>tbf</code> cap (e.g., <code>2000mbps</code>). Implies <code>--use-tbf-cap</code>. Deprecated alias: <code>--packet-pacing-rate</code>.</li>
 <li><code>--apply-iommu</code>: Edit GRUB to add <code>iommu=pt</code> and vendor-specific flags (e.g., <code>intel_iommu=on iommu=pt</code>) to the kernel cmdline and regenerate GRUB. On EL9/BLS systems the script will use <code>grubby</code> to update kernel entries; otherwise it falls back to <code>grub2-mkconfig -o /boot/grub2/grub.cfg</code> or <code>update-grub</code> as available. Requires confirmation or <code>--yes</code> to skip the interactive prompt.</li>
 <li><code>--iommu-args ARGS</code>: Provide custom kernel cmdline arguments to apply for IOMMU (e.g., <code>intel_iommu=on iommu=pt</code>). When set, these args override vendor-appropriate defaults.</li>
 <li><code>--apply-smt on|off</code>: Toggle SMT state at runtime. Requires <code>--mode apply</code>. Example: <code>--apply-smt off</code>.</li>
@@ -3062,7 +3094,7 @@ sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> 
 <span class="c1"># Apply with custom IOMMU args</span>
 sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--iommu-args<span class="w"> </span><span class="s2">&quot;intel_iommu=on iommu=pt&quot;</span><span class="w"> </span>--yes
 </code></pre></div>
-<h2 id="state-management-save-and-restore-configurationsns">State management: Save and restore configurationsns<a class="headerlink" href="#state-management-save-and-restore-configurationsns" title="Permanent link">&para;</a></h2>
+<h2 id="state-management-save--restore-configurations">State Management: Save &amp; Restore Configurations<a class="headerlink" href="#state-management-save--restore-configurations" title="Permanent link">&para;</a></h2>
 <p><strong>NEW in v1.2.0</strong>: The script now supports saving and restoring system state for testing different tuning configurations.</p>
 <h3 id="quick-testing-workflow">Quick testing workflow<a class="headerlink" href="#quick-testing-workflow" title="Permanent link">&para;</a></h3>
 <p><strong>TL;DR</strong>: Save baseline → Apply tuning → Test → Restore → Compare</p>
