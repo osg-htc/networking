@@ -75,6 +75,11 @@ APPLY_TCP_CC=""
 APPLY_JUMBO=0
 OUTPUT_JSON=0
 
+get_script_version() {
+  # Extract version from the script header comment
+  awk -F': ' '/^# Version:/ {print $2; exit}' "$0" 2>/dev/null || echo "unknown"
+}
+
 usage() {
   cat <<'EOF'
 Usage: fasterdata-tuning.sh [OPTIONS]
@@ -109,6 +114,7 @@ State Management Options:
   --auto-save-before      Auto-save state before applying changes (use with --mode apply)
 
   --help                  Show this help
+  --version               Show script version
 EOF
 }
 
@@ -3137,6 +3143,7 @@ main() {
       --delete-state) DELETE_STATE="$2"; shift 2;;
       --auto-save-before) AUTO_SAVE_BEFORE=1; shift;;
       -h|--help) usage; exit 0;;
+      -v|--version) echo "fasterdata-tuning.sh v$(get_script_version)"; exit 0;;
       *) echo "Unknown arg: $1" >&2; usage; exit 1;;
     esac
   done
