@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.0
+# Version: 1.3.1
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -12,6 +12,7 @@
 # NEW in v1.3.0: Packet pacing modes — default to fq (TCP pacing);
 #                optional tbf interface cap via --use-tbf-cap/--tbf-cap-rate;
 #                audit recognizes fq and tbf; fq shown green, tbf cyan.
+# NEW in v1.3.1: Skip checksum validation on bond/VLAN interfaces (they delegate to member NICs).
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -1088,11 +1089,17 @@ iface_audit() {
     if [[ "$offload_devs" =~ lro:[[:space:]]*on ]]; then
       offload_issue="lro on"
     fi
-    if ! echo "$offload_devs" | grep -q 'rx-checksumming:.*on'; then
-      offload_issue="rx csum off"
-    fi
-    if ! echo "$offload_devs" | grep -q 'tx-checksumming:.*on'; then
-      offload_issue="tx csum off"
+    # Skip checksum checks on bond and VLAN interfaces; they delegate to member NICs
+    local is_virtual_iface=0
+    [[ "$driver" == "bonding" ]] && is_virtual_iface=1
+    [[ "$driver" == *"VLAN"* ]] && is_virtual_iface=1
+    if [[ $is_virtual_iface -eq 0 ]]; then
+      if ! echo "$offload_devs" | grep -q 'rx-checksumming:.*on'; then
+        offload_issue="rx csum off"
+      fi
+      if ! echo "$offload_devs" | grep -q 'tx-checksumming:.*on'; then
+        offload_issue="tx csum off"
+      fi
     fi
   else
     offload_issue="missing ethtool"

@@ -6,7 +6,7 @@ This directory contains helper scripts for perfSONAR deployment, configuration, 
 
 | Tool | Version | Purpose | Documentation |
 |------|---------|---------|---------------|
-| **fasterdata-tuning.sh** | v1.3.0 | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
+| **fasterdata-tuning.sh** | v1.3.1 | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
 | **perfSONAR-pbr-nm.sh** | — | Multi-NIC policy-based routing | [Multiple NIC Guidance](../multiple-nic-guidance.md) |
 | **perfSONAR-update-lsregistration.sh** | — | LS registration management | [LS Registration Tools](README-lsregistration.md) |
 | **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment | [Installation Guides](../../personas/quick-deploy/landing.md) |
