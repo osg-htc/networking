@@ -40,6 +40,7 @@ nav:
   - Host Tuning:
     - 'Fasterdata Host Tuning': 'perfsonar/tools_scripts/fasterdata-tuning.md'
     - 'Multiple NIC Guidance': 'perfsonar/multiple-nic-guidance.md'
+    - 'Packet Pacing (fq vs tbf)': 'perfsonar/packet-pacing.md'
   - Troubleshooting:
     - 'Triage Checklist': 'personas/troubleshoot/triage-checklist.md'
     - 'Network Troubleshooting Guide': 'network-troubleshooting.md'

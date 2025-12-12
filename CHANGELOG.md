@@ -6,6 +6,23 @@
 All notable changes to this repository will be documented in this file.
 
 ## [1.2.0] - 2025-11-10
+## [1.3.0] - 2025-12-12
+
+### Added
+
+- Packet pacing guide: `docs/perfsonar/packet-pacing.md` (fq vs tbf, tuned interaction, verification steps); linked under Host Tuning in navigation.
+
+### Changed
+
+- `fasterdata-tuning.sh` v1.3.0:
+  - Default packet pacing uses `fq` (Linux TCP pacing). New flags add optional interface cap via `tbf`:
+    - `--use-tbf-cap` to enable `tbf`
+    - `--tbf-cap-rate RATE` to set an explicit cap (deprecated alias: `--packet-pacing-rate`)
+    - If `--use-tbf-cap` is set without a rate, a default cap of ~90% of the link speed is applied per interface
+  - Audit recognizes both `fq` and `tbf` as “pacing applied”; other qdiscs are flagged
+  - Audit output colorization: `fq` shown in green (preferred), `tbf` shown in cyan (acceptable when caps are intentional)
+  - Systemd persist service mirrors applied behavior (fq by default; tbf with persisted rate when used)
+
 
 ### Added
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.2.0
+# Version: 1.3.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -9,6 +9,9 @@
 # for high-throughput hosts (EL9 focus). Defaults to audit-only.
 #
 # NEW in v1.2.0: Save/restore state functionality for testing configurations
+# NEW in v1.3.0: Packet pacing modes — default to fq (TCP pacing);
+#                optional tbf interface cap via --use-tbf-cap/--tbf-cap-rate;
+#                audit recognizes fq and tbf; fq shown green, tbf cyan.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -38,7 +41,9 @@
 #   - Optional: --apply-smt on|off         -> enables/disables SMT
 #   - Optional: --persist-smt              -> makes SMT setting persistent in GRUB
 #   - Optional: --apply-packet-pacing       -> enables packet pacing (DTN targets only)
-#   - Optional: --packet-pacing-rate RATE   -> set packet pacing rate (e.g., 2000mbps)
+#   - Optional: --use-tbf-cap               -> use tbf to cap interface rate (default cap ≈ 90% link speed)
+#   - Optional: --tbf-cap-rate RATE         -> explicit tbf cap (e.g., 2000mbps); implies --use-tbf-cap
+#   - Deprecated: --packet-pacing-rate RATE -> alias for --tbf-cap-rate
 #
 # Notes:
 #   - Ethtool settings persist via systemd service created in apply mode
@@ -82,8 +87,10 @@ Options:
   --apply-iommu           Apply IOMMU kernel cmdline options (requires --mode apply; vendor auto-detected)
   --apply-smt on|off      Enable or disable SMT (requires root)
   --persist-smt           Make SMT configuration persistent in GRUB (requires --apply-smt)
-  --apply-packet-pacing   Enable packet pacing (DTN targets only); sets qdisc=tbf when applied
-  --packet-pacing-rate RATE  Set the packet pacing rate (default: 2000mbps)
+  --apply-packet-pacing   Enable packet pacing (DTN targets only). Default uses fq for TCP pacing.
+  --use-tbf-cap           Use tbf to apply an interface rate cap instead of fq. If no rate is provided, a default fraction of link speed is used.
+  --tbf-cap-rate RATE     Explicit tbf cap (e.g., 2000mbps). Implies --use-tbf-cap.
+  --packet-pacing-rate RATE  (deprecated) Alias for --tbf-cap-rate.
   --yes                   Skip interactive prompts and accept defaults
   --json                  Print JSON machine-readable audit (audit mode only)
   --iommu-args ARGS       Optional custom kernel cmdline args to set for IOMMU (default: vendor-specific intel|amd args)
@@ -223,6 +230,10 @@ AUTO_YES=0
 DRY_RUN=0
 PACKET_PACING_RATE="2000mbps"
 APPLY_PACKET_PACING=0
+USE_TBF_CAP=0
+TBF_CAP_RATE=""
+DEFAULT_TBF_NUM=9
+DEFAULT_TBF_DEN=10
 
 # Save/restore state management
 SAVE_STATE=0
@@ -524,7 +535,7 @@ print_json() {
     local issues_arr=()
     if [[ "$txqlen" != "?" && "$txqlen" -lt "$desired_txqlen" ]]; then issues_arr+=("txqlen $txqlen<${desired_txqlen}"); fi
     local qdisc_type="${qdisc%% *}"
-    if [[ "$qdisc_type" != "fq" ]]; then issues_arr+=("qdisc=${qdisc:-unknown}"); fi
+    if [[ "$qdisc_type" != "fq" && "$qdisc_type" != "tbf" ]]; then issues_arr+=("qdisc=${qdisc:-unknown}"); fi
     if [[ "$offload_issue" != "ok" ]]; then issues_arr+=("$offload_issue"); fi
     if [[ -n "$rings_cur" && -n "$rings_max" && "$rings_cur" != "$rings_max" ]]; then issues_arr+=("rings $rings_cur (max $rings_max)"); fi
     # JSON entry for this iface
@@ -1116,6 +1127,8 @@ iface_audit() {
   fi
   if [[ "$qdisc_val" == "fq" ]]; then
     qdisc_display="$(colorize green "$qdisc_val")${qdisc_rest}"
+  elif [[ "$qdisc_val" == "tbf" ]]; then
+    qdisc_display="$(colorize cyan "$qdisc_val")${qdisc_rest}"
   else
     qdisc_display="$(colorize yellow "$qdisc_val")${qdisc_rest}"
   fi
@@ -1156,7 +1169,7 @@ iface_audit() {
   fi
   # Extract just the first word of qdisc (e.g., "fq" from "fq 8005: root")
   local qdisc_type="${qdisc%% *}"
-  if [[ "${qdisc_type:-}" != "fq" ]]; then
+  if [[ "${qdisc_type:-}" != "fq" && "${qdisc_type:-}" != "tbf" ]]; then
     issues+=("qdisc=${qdisc:-unknown}")
   fi
   if [[ "$offload_issue" != "ok" ]]; then
@@ -1242,16 +1255,17 @@ iface_packet_pacing_audit() {
     return 0
   fi
   
-  # Check current qdisc - should be tbf (token bucket filter) for pacing
+  # Check current qdisc - fq enables Linux TCP pacing; tbf indicates explicit rate cap
   local current_qdisc
   current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1)
   
   # If we're not applying pacing, just report current state
   if [[ $APPLY_PACKET_PACING -eq 0 ]]; then
-    if [[ "$current_qdisc" != *"tbf"* ]]; then
-      return 1  # Not using tbf; would need packet pacing applied
+    # Accept either fq (TCP pacing) or tbf (explicit cap) as "pacing applied"
+    if [[ "$current_qdisc" == *" fq"* || "$current_qdisc" == fq* || "$current_qdisc" == *" tbf"* ]]; then
+      return 0
     fi
-    return 0  # Already using tbf
+    return 1
   fi
   
   return 0
@@ -1265,61 +1279,59 @@ iface_apply_packet_pacing() {
     return
   fi
   
-  log_info "Applying packet pacing ($pacing_rate) to $iface via tc tbf qdisc"
-  
-  # Parse rate and convert to bits per second for tc
-  # tc expects rate in: bit, kbit, mbit, gbit, tbit, or bps, kbps, mbps, gbps, tbps
-  local rate_normalized="$pacing_rate"
-  
-  # Normalize case if needed (tc accepts both cases)
-  rate_normalized="${rate_normalized,,}"  # lowercase
-  
-  # Verify rate is in acceptable format
-  if ! [[ "$rate_normalized" =~ ^[0-9]+(kbps|mbps|gbps|tbps|kbit|mbit|gbit|tbit|bit|bps)$ ]]; then
-    log_warn "Invalid packet pacing rate format: $pacing_rate (use e.g., 2gbps, 10000mbps)"
-    return 1
+  # Decide on tbf vs fq: use tbf if explicitly requested or a cap rate is provided; otherwise fq
+  if [[ $USE_TBF_CAP -eq 1 || -n "$TBF_CAP_RATE" ]]; then
+    # Determine effective rate: explicit cap wins; else compute fraction of iface speed
+    local effective_rate="$TBF_CAP_RATE"
+    if [[ -z "$effective_rate" ]]; then
+      local if_speed
+      if_speed=$(get_iface_speed "$iface")
+      if [[ -n "$if_speed" && "$if_speed" -gt 0 ]]; then
+        local rate_mbps=$(( if_speed * DEFAULT_TBF_NUM / DEFAULT_TBF_DEN ))
+        if [[ "$rate_mbps" -lt 1 ]]; then rate_mbps=1; fi
+        effective_rate="${rate_mbps}mbps"
+      else
+        effective_rate="$PACKET_PACING_RATE"  # fallback legacy default
+        log_warn "Unknown speed for $iface; falling back to $effective_rate for tbf"
+      fi
+    fi
+    log_info "Applying packet pacing cap ($pacing_rate) to $iface via tc tbf qdisc"
+    local rate_normalized="${effective_rate,,}"
+    if ! [[ "$rate_normalized" =~ ^[0-9]+(kbps|mbps|gbps|tbps|kbit|mbit|gbit|tbit|bit|bps)$ ]]; then
+      log_warn "Invalid tbf rate format: $effective_rate (use e.g., 2gbps, 10000mbps)"
+      return 1
+    fi
+    local burst_bytes
+    case "$rate_normalized" in
+      *gbps)
+        local gbps_val="${rate_normalized%gbps}"
+        burst_bytes=$((gbps_val * 125000))
+        ;;
+      *mbps)
+        local mbps_val="${rate_normalized%mbps}"
+        burst_bytes=$((mbps_val * 125))
+        ;;
+      *kbps)
+        local kbps_val="${rate_normalized%kbps}"
+        burst_bytes=$((kbps_val / 8))
+        ;;
+      *)
+        burst_bytes=1000000
+        ;;
+    esac
+    [[ $burst_bytes -lt 1500 ]] && burst_bytes=1500
+    [[ $burst_bytes -gt 10485760 ]] && burst_bytes=10485760
+    tc qdisc replace dev "$iface" root tbf rate "$rate_normalized" burst "$burst_bytes" latency 100ms >/dev/null 2>&1 || \
+      log_warn "Failed to apply tbf packet pacing to $iface"
+    log_info "Packet pacing qdisc set on $iface: rate=$rate_normalized burst=$burst_bytes"
+  else
+    log_info "Applying TCP pacing to $iface via fq qdisc"
+    if tc qdisc replace dev "$iface" root fq >/dev/null 2>&1; then
+      log_info "Packet pacing enabled on $iface with fq qdisc"
+    else
+      log_warn "Failed to apply fq qdisc to $iface for packet pacing"
+    fi
   fi
-  
-  # Get interface speed to validate pacing rate doesn't exceed link speed
-  local if_speed
-  if_speed=$(get_iface_speed "$iface")
-  
-  # Set up tbf (token bucket filter) qdisc
-  # tbf parameters: rate=limit latency=burst
-  # burst size calculation: typical is rate * 0.001 (1ms worth of packets)
-  # For example: 2gbps with 1ms latency = 2000000000 bits/sec * 0.001 = 2000000 bits = 250000 bytes
-  
-  # Calculate burst size in bytes (assuming 1ms worth of packets at the specified rate)
-  # Formula: (rate in bps) * 0.001 seconds / 8 bits per byte
-  local burst_bytes
-  case "$rate_normalized" in
-    *gbps)
-      local gbps_val="${rate_normalized%gbps}"
-      burst_bytes=$((gbps_val * 125000))  # (gbps * 1e9 bits/s * 0.001s) / 8 bits/byte
-      ;;
-    *mbps)
-      local mbps_val="${rate_normalized%mbps}"
-      burst_bytes=$((mbps_val * 125))  # (mbps * 1e6 bits/s * 0.001s) / 8 bits/byte
-      ;;
-    *kbps)
-      local kbps_val="${rate_normalized%kbps}"
-      burst_bytes=$((kbps_val / 8))  # (kbps * 1e3 bits/s * 0.001s) / 8 bits/byte
-      ;;
-    *)
-      # Default burst size: 1 MB for very high rates, smaller for others
-      burst_bytes=1000000
-      ;;
-  esac
-  
-  # Ensure burst size is reasonable (minimum 1500 bytes for MTU, maximum 10 MB)
-  [[ $burst_bytes -lt 1500 ]] && burst_bytes=1500
-  [[ $burst_bytes -gt 10485760 ]] && burst_bytes=10485760
-  
-  # Apply tbf qdisc with the specified rate and calculated burst
-  tc qdisc replace dev "$iface" root tbf rate "$rate_normalized" burst "$burst_bytes" latency 100ms >/dev/null 2>&1 || \
-    log_warn "Failed to apply packet pacing qdisc to $iface"
-  
-  log_info "Packet pacing qdisc set on $iface: rate=$rate_normalized burst=$burst_bytes"
 }
 
 # shellcheck disable=SC2120
@@ -1358,11 +1370,21 @@ create_ethtool_persist_service() {
       exec_cmds+=("ExecStart=/sbin/ip link set dev $iface txqueuelen $txqlen")
     fi
     
-    # Capture qdisc settings (fq for normal mode, tbf for packet pacing)
-    if [[ "$TARGET_TYPE" == "dtn" ]] && [[ $APPLY_PACKET_PACING -eq 1 ]]; then
-      # DTN with packet pacing: use tbf qdisc
-      local pacing_rate="$PACKET_PACING_RATE"
-      local rate_normalized="${pacing_rate,,}"
+    # Capture qdisc settings: fq by default; if tbf cap is used, persist per-iface rate
+    if [[ "$TARGET_TYPE" == "dtn" ]] && [[ $APPLY_PACKET_PACING -eq 1 ]] && [[ $USE_TBF_CAP -eq 1 || -n "$TBF_CAP_RATE" ]]; then
+      local effective_rate="$TBF_CAP_RATE"
+      if [[ -z "$effective_rate" ]]; then
+        local if_speed
+        if_speed=$(get_iface_speed "$iface")
+        if [[ -n "$if_speed" && "$if_speed" -gt 0 ]]; then
+          local rate_mbps=$(( if_speed * DEFAULT_TBF_NUM / DEFAULT_TBF_DEN ))
+          [[ "$rate_mbps" -lt 1 ]] && rate_mbps=1
+          effective_rate="${rate_mbps}mbps"
+        else
+          effective_rate="$PACKET_PACING_RATE"
+        fi
+      fi
+      local rate_normalized="${effective_rate,,}"
       local burst_bytes
       case "$rate_normalized" in
         *gbps)
@@ -1385,7 +1407,6 @@ create_ethtool_persist_service() {
       [[ $burst_bytes -gt 10485760 ]] && burst_bytes=10485760
       exec_cmds+=("ExecStart=/sbin/tc qdisc replace dev $iface root tbf rate $rate_normalized burst $burst_bytes latency 100ms")
     else
-      # Default: use fq qdisc for fair queuing
       exec_cmds+=("ExecStart=/sbin/tc qdisc replace dev $iface root fq")
     fi
   done
@@ -3008,10 +3029,18 @@ print_summary() {
   echo "- Target type: $TARGET_TYPE"
   if [[ "$TARGET_TYPE" == "dtn" ]]; then
     if [[ $APPLY_PACKET_PACING -eq 1 ]]; then
-      echo "- Packet pacing: ENABLED (rate=$PACKET_PACING_RATE, qdisc=tbf)"
+      if [[ $USE_TBF_CAP -eq 1 || -n "$TBF_CAP_RATE" ]]; then
+        local disp_rate
+        disp_rate="$TBF_CAP_RATE"
+        [[ -z "$disp_rate" ]] && disp_rate="<auto-fraction-of-link>"
+        echo "- Packet pacing: ENABLED (qdisc=tbf, rate=$disp_rate)"
+      else
+        echo "- Packet pacing: ENABLED (qdisc=fq)"
+      fi
     else
       echo "- Packet pacing: not applied (use --apply-packet-pacing with --mode apply to enable)"
-      echo "  Recommended pacing rate: $PACKET_PACING_RATE (adjustable via --packet-pacing-rate)"
+      echo "  Optional: --use-tbf-cap (prefer fq; tbf only when policy requires a cap)"
+      echo "  Optional: --tbf-cap-rate RATE (e.g., 2000mbps)"
     fi
   fi
   local sysctl_mismatches_disp
@@ -3078,8 +3107,10 @@ main() {
       --mode) MODE="$2"; shift 2;;
       --ifaces) IFACES="$2"; shift 2;;
       --target) TARGET_TYPE="$2"; shift 2;;
-      --packet-pacing-rate) PACKET_PACING_RATE="$2"; shift 2;;
+      --tbf-cap-rate) TBF_CAP_RATE="$2"; USE_TBF_CAP=1; shift 2;;
+      --packet-pacing-rate) TBF_CAP_RATE="$2"; USE_TBF_CAP=1; log_warn "--packet-pacing-rate is deprecated; use --tbf-cap-rate"; shift 2;;
       --apply-packet-pacing) APPLY_PACKET_PACING=1; shift;;
+      --use-tbf-cap) USE_TBF_CAP=1; shift;;
       --color) USE_COLOR=1; shift;;
       --nocolor) USE_COLOR=0; shift;;
         --apply-iommu) APPLY_IOMMU=1; shift;;
@@ -3232,7 +3263,7 @@ main() {
     if [[ "$MODE" == "audit" ]]; then
       iface_audit "$iface"
       if ! iface_packet_pacing_audit "$iface" "$PACKET_PACING_RATE"; then
-        IF_ISSUES+=("$iface: needs packet pacing (DTN target with non-tbf qdisc)")
+        IF_ISSUES+=("$iface: needs packet pacing (DTN target with non-fq qdisc)")
       fi
     else
       iface_apply "$iface"
