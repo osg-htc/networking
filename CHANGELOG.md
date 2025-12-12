@@ -12,6 +12,10 @@ All notable changes to this repository will be documented in this file.
 
 - `fasterdata-tuning.sh` v1.3.1: Skip checksum offload validation on bond and VLAN interfaces (they delegate checksum support to member physical NICs). Prevents false positives in audit reports.
 
+### Added
+
+- `fasterdata-tuning.sh` v1.3.1: Add `--version`/`-v` option to print the script version.
+
 ## [1.3.0] - 2025-12-12
 
 ### Added
