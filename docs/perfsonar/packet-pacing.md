@@ -1,4 +1,60 @@
-# Packet Pacing for Data Transfer Nodes
+# Packet Pacing on Linux: fq vs tbf
+
+This document explains how Linux packet pacing works with the `fq` (Fair Queue) queuing discipline and how it differs from explicit rate limiting with `tbf` (Token Bucket Filter). It also clarifies how these interact with tuned profiles and site use-cases for perfSONAR/DTN hosts.
+
+## Summary
+- fq: Enables per-flow TCP pacing. Smooths bursts and respects per-flow pacing rates set by the kernel or applications. No hard interface cap.
+- tbf: Enforces an interface-level cap. Useful for policy or hardware constraints. Not per-flow; applies to all traffic through the qdisc.
+- tuned: The `network-throughput` profile commonly sets `net.core.default_qdisc=fq`, which activates TCP pacing when the interface uses `fq`.
+
+## fq (Fair Queue) and TCP Pacing
+- Per-flow queues: `fq` maintains separate queues per flow (e.g., TCP connections).
+- SO_MAX_PACING_RATE: Applications may call `setsockopt()` with `SO_MAX_PACING_RATE` to set a desired max pacing rate for a socket. Examples: `iperf3` and some data transfer tools set this.
+- Kernel-driven pacing: Even when applications do not set `SO_MAX_PACING_RATE`, modern Linux TCP computes pacing based on congestion window and RTT, and `sch_fq` uses `sk->sk_pacing_rate` to schedule packets, smoothing bursts.
+- Default behavior: If no pacing rate is set, traffic is not hard-capped by `fq`; flows still benefit from isolation and burst smoothing.
+- Why use fq: Aligns with Fasterdata guidance for high-throughput hosts; improves fairness and latency under load; works well with BBR/CUBIC.
+
+### Useful `fq` knobs (advanced)
+- `tc qdisc add dev <if> root fq [quantum <bytes>] [flow_limit <packets>] [low_rate_threshold <bps>]`
+- Most sites do not need to tune these; the defaults work well with modern kernels.
+
+## tbf (Token Bucket Filter)
+- Interface-level rate cap: `tbf` enforces a maximum transmission rate using a token bucket, with `rate`, `burst`, and `latency` parameters.
+- Not per-flow: All traffic shares the cap; can reduce overall throughput if set below link capacity.
+- When to use: Site policy requiring caps; hardware or upstream constraints; lab/testing scenarios.
+
+### Example `tbf` command
+```
+# Cap to 2 Gbps, allow ~1ms burst, 100ms latency budget
+sudo tc qdisc replace dev eth0 root tbf rate 2000mbps burst 250000 latency 100ms
+```
+- Burst guidance: Roughly `(rate * 1ms) / 8` bytes; clamp between ~1500 bytes and ~10MB.
+- Remove tbf: `sudo tc qdisc del dev eth0 root` or replace with `fq`.
+
+## Interaction with tuned
+- `tuned-adm profile network-throughput` typically sets `net.core.default_qdisc=fq` (via sysctl), so new interfaces use `fq`.
+- Audits should accept `fq` (TCP pacing) or `tbf` (explicit cap) as “pacing applied,” depending on site intent.
+- If tuned or other tooling configures `tbf` unexpectedly, confirm site requirements before changing it to `fq`.
+
+## perfSONAR/DTN considerations
+ Measurement hosts: Prefer `fq` for smoothing bursts without artificial caps.
+ DTN hosts: Default to `fq`; add `tbf` only when a specific cap is required. The tuning script supports both paths:
+  - `--apply-packet-pacing` → sets `fq` (TCP pacing)
+  - `--apply-packet-pacing --use-tbf-cap` → applies `tbf` with an auto cap (default ≈ 90% of link speed)
+  - `--apply-packet-pacing --tbf-cap-rate 2000mbps` → applies `tbf` with an explicit cap (deprecated alias: `--packet-pacing-rate`)
+
+### UI cues in audits
+ - `fq` is shown in green (preferred)
+ - `tbf` is shown in cyan (acceptable when an interface cap is intentional)
+## Verification
+- Show qdisc: `tc qdisc show dev <if>` should report `fq ...` or `tbf ...` at root.
+- Check sysctl: `sysctl -n net.core.default_qdisc` should be `fq` under `network-throughput` tuned profile.
+- Application-level: Tools like `iperf3` may set `SO_MAX_PACING_RATE`; otherwise kernel TCP pacing applies with `fq`.
+
+## References
+- ESnet Fasterdata: Host/network tuning guidance
+- Linux `sch_fq` documentation and TCP pacing discussions
+- `tc` qdisc manual pages: `man tc`, `man tc-fq`, `man tc-tbf`# Packet Pacing for Data Transfer Nodes
 
 ## Overview
 

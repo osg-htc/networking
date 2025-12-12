@@ -59,7 +59,7 @@ This script packages ESnet Fasterdata best practices into an audit/apply helper 
 
 - Applies and persists sysctl settings in `/etc/sysctl.d/90-fasterdata.conf` and helps persist per-NIC settings (ethtool) via a `systemd` oneshot service; it also checks for problematic driver versions and provides vendor-specific guidance.
 
-- For DTN nodes: Supports packet pacing via traffic control (tc) token bucket filter (tbf) to limit outgoing traffic to a specified rate, important for multi-stream transfer scenarios.
+- For DTN nodes: Supports TCP pacing via `fq` by default, with an optional interface cap via `tbf` when policy or constraints require it.
 
 ## Who should use it?
 
@@ -106,11 +106,14 @@ sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn
 # Apply with specific interfaces
 sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target measurement --ifaces "ens1f0np0,ens1f1np1"
 
-# Apply with packet pacing
-sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --packet-pacing-rate 5gbps
+# Apply with packet pacing (fq by default)
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing
+
+# Apply with explicit interface cap using tbf
+sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --target dtn --apply-packet-pacing --use-tbf-cap --tbf-cap-rate 5gbps
 
 # Audit packet pacing settings
-/usr/local/bin/fasterdata-tuning.sh --mode audit --target dtn --packet-pacing-rate 10gbps
+/usr/local/bin/fasterdata-tuning.sh --mode audit --target dtn
 ```
 
 Notes
@@ -122,8 +125,9 @@ Notes
 
 Optional apply flags (use with `--mode apply`):
 
-- `--apply-packet-pacing`: Apply packet pacing to DTN interfaces via tc token bucket filter. Only works with `--target dtn`. Default pacing rate is 2 Gbps (adjustable with `--packet-pacing-rate`).
-- `--packet-pacing-rate RATE`: Set the packet pacing rate for DTN nodes. Accepts units: kbps, mbps, gbps, tbps (e.g., `2gbps`, `10gbps`, `10000mbps`). Default: 2000mbps. Burst size is automatically calculated as 1 millisecond worth of packets at the specified rate.
+- `--apply-packet-pacing`: Enable packet pacing for DTN interfaces. By default, uses `fq` (Linux TCP pacing) — preferred.
+- `--use-tbf-cap`: Use `tbf` to apply an interface rate cap instead of `fq`. If no `--tbf-cap-rate` is provided, a default of ~90% of link speed is used.
+- `--tbf-cap-rate RATE`: Explicit `tbf` cap (e.g., `2000mbps`). Implies `--use-tbf-cap`. Deprecated alias: `--packet-pacing-rate`.
 - `--apply-iommu`: Edit GRUB to add `iommu=pt` and vendor-specific flags (e.g., `intel_iommu=on iommu=pt`) to the kernel cmdline and regenerate GRUB. On EL9/BLS systems the script will use `grubby` to update kernel entries; otherwise it falls back to `grub2-mkconfig -o /boot/grub2/grub.cfg` or `update-grub` as available. Requires confirmation or `--yes` to skip the interactive prompt.
 - `--iommu-args ARGS`: Provide custom kernel cmdline arguments to apply for IOMMU (e.g., `intel_iommu=on iommu=pt`). When set, these args override vendor-appropriate defaults.
 - `--apply-smt on|off`: Toggle SMT state at runtime. Requires `--mode apply`. Example: `--apply-smt off`.
@@ -141,7 +145,7 @@ sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-iommu --dry-run
 sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-iommu --iommu-args "intel_iommu=on iommu=pt" --yes
 ```
 
-## State management: Save and restore configurationsns
+## State Management: Save & Restore Configurations {#state-management-save--restore-configurations}
 
 **NEW in v1.2.0**: The script now supports saving and restoring system state for testing different tuning configurations.
 
