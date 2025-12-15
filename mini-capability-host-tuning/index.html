@@ -2324,21 +2324,120 @@
 
 
 <h1 id="host-network-tuning-optimization-testing">Host Network Tuning Optimization Testing<a class="headerlink" href="#host-network-tuning-optimization-testing" title="Permanent link">&para;</a></h1>
-<p>Capability:  Host Network Tuning Optimization Testing</p>
-<p>Description:  We need to evaluate what host network tunings are still relevant/appropriate for RHEL9 (or similar) OSes using high speed NICs (25/40/100/200/400 Gbps) and fast storage (suggested by Dale Carder and Eli Dart)</p>
-<p>This document can be used to track the history of the capability challenge.   Clone the set below, replacing N with 1 for the first mini-challenge.  Future mini-challenges will be 2, 3, etc.</p>
+<h2 id="capability-summary">Capability Summary<a class="headerlink" href="#capability-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Capability Name</strong></td>
+<td>Host Network Tuning Optimization Testing</td>
+</tr>
+<tr>
+<td><strong>Related Framework Items</strong></td>
+<td>Congestion Control (BBRv3), Jumbo Frames support, network performance optimization</td>
+</tr>
+<tr>
+<td><strong>Importance</strong></td>
+<td>4 (High)</td>
+</tr>
+<tr>
+<td><strong>Urgency</strong></td>
+<td>3 (Medium)</td>
+</tr>
+<tr>
+<td><strong>Potential Gains</strong></td>
+<td>4 (Significant)</td>
+</tr>
+<tr>
+<td><strong>Dependencies</strong></td>
+<td>RHEL 9, 25+ Gbps NICs, Linux kernel 5.x+, ethtool, tc commands</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Mini-Challenge 1 scheduled for January 2026</td>
+</tr>
+<tr>
+<td><strong>Framework Reference</strong></td>
+<td>See <a href="https://docs.google.com/document/d/1KOExqbp5DKwtjBaVwRDJvBmGPIHiBOk5ldfNK0RQS78/edit">WLCG Capability Test Framework</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="overview-and-rationale">Overview and Rationale<a class="headerlink" href="#overview-and-rationale" title="Permanent link">&para;</a></h2>
+<p>We evaluate ESnet Fasterdata-recommended host network tunings for RHEL 9 systems with high-speed NICs (25/40/100/200/400 Gbps) and fast storage. This capability addresses the broader "congestion control and host tuning" problem space.</p>
+<p><strong>Note on Prior Work</strong>: An earlier test of congestion control protocols (Edoardo, DC24) did not show gains from switching algorithms alone. This mini-challenge expands the scope to include:
+- <strong>Sysctl TCP buffer tuning</strong> (rmem/wmem scaled by link speed)
+- <strong>Qdisc packet pacing</strong> (fq for fair scheduling, tbf for rate capping)
+- <strong>Ethtool offload optimization</strong> (GRO/TSO/GSO tuning)
+- <strong>NIC ring buffer and txqueuelen scaling</strong>
+- <strong>Automated audit and state management</strong> (safe rollback via <code>fasterdata-tuning.sh</code>)</p>
+<p>The hypothesis is that <strong>comprehensive host tuning</strong> (not congestion control alone) provides measurable throughput and latency benefits.</p>
+<h2 id="capability-tracking-table">Capability Tracking Table<a class="headerlink" href="#capability-tracking-table" title="Permanent link">&para;</a></h2>
+<p>Per the WLCG Capability Test Framework, this table tracks all mini-challenges and their status:</p>
+<table>
+<thead>
+<tr>
+<th>Mini-Challenge</th>
+<th>Status</th>
+<th>Start Date</th>
+<th>Expected End</th>
+<th>Key Sites</th>
+<th>Primary Metric</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MC-1: Host Tuning (Jan 2026)</td>
+<td>Planned</td>
+<td>Jan 10, 2026</td>
+<td>Mar 7, 2026</td>
+<td>FNAL, Purdue, BNL, UCI</td>
+<td>Throughput gain (%)</td>
+<td>TBD</td>
+</tr>
+<tr>
+<td>MC-2: Host Tuning + Jumbo Frames</td>
+<td>Planned</td>
+<td>Q2 2026</td>
+<td>TBD</td>
+<td>TBD</td>
+<td>Jumbo frame benefit</td>
+<td>TBD</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tracking-history">Tracking History<a class="headerlink" href="#tracking-history" title="Permanent link">&para;</a></h2>
+<p>This document tracks mini-challenge instances. Clone the section below for each new challenge, incrementing N.</p>
 <h2 id="participants">Participants<a class="headerlink" href="#participants" title="Permanent link">&para;</a></h2>
 <p>(Please add your name): Shawn McKee, Lincoln Bryant, Eduardo Bach, Eli Dart, </p>
 <h1 id="capability-challenge-1-host-network-tuning-optimization-testing-january-2026">Capability Challenge 1: Host Network Tuning Optimization Testing (January 2026)<a class="headerlink" href="#capability-challenge-1-host-network-tuning-optimization-testing-january-2026" title="Permanent link">&para;</a></h1>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>Validate and optimize ESnet Fasterdata-recommended host network tuning configurations for RHEL 9 systems with high-speed NICs (25/40/100 Gbps) and high-performance storage. This challenge will test the <code>fasterdata-tuning.sh</code> v1.3.1 automated tuning tool across USCMS and USATLAS production sites to measure impact on data transfer throughput, latency, and operational overhead.</p>
+<h2 id="overview-and-advantages">Overview and Advantages<a class="headerlink" href="#overview-and-advantages" title="Permanent link">&para;</a></h2>
+<p><strong>Goal</strong>: Validate and optimize ESnet Fasterdata-recommended host network tuning configurations for RHEL 9 systems with high-speed NICs (25/40/100 Gbps) and high-performance storage.</p>
+<p><strong>Expected Advantages</strong>:
+1. <strong>Improved throughput</strong> (5–15% for single and multi-flow TCP transfers)
+2. <strong>Reduced latency</strong> and jitter (more predictable job scheduling)
+3. <strong>Better CPU efficiency</strong> (lower CPU utilization per Gbps transferred via fq pacing)
+4. <strong>Operational simplicity</strong> (automated audit and rollback via <code>fasterdata-tuning.sh</code> v1.3.1+)
+5. <strong>Hardware compatibility</strong> (validated across Broadcom, Mellanox, Intel NICs)
+6. <strong>Production-ready tooling</strong> (state save/restore for safe testing and deployment)</p>
+<p><strong>Differentiators from Prior Work</strong>:
+- Previous congestion control test (DC24) focused on algorithm selection alone (BBR vs CUBIC)
+- This challenge includes <strong>full-stack host tuning</strong>: sysctl, qdisc, ethtool, NIC ring buffers
+- Comprehensive approach addresses bottlenecks beyond congestion control protocol choice</p>
 <h2 id="plan-1-testing-methodology-and-implementation">Plan-1: Testing Methodology and Implementation<a class="headerlink" href="#plan-1-testing-methodology-and-implementation" title="Permanent link">&para;</a></h2>
+<p><strong>Tool</strong>: ESnet Fasterdata tuning script (<code>fasterdata-tuning.sh</code> v1.3.1+, available at https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh)</p>
 <h3 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Validate tuning effectiveness</strong>: Measure throughput and latency improvements with automated host tuning applied vs. baseline (stock RHEL 9 defaults)</li>
 <li><strong>Test automation reliability</strong>: Confirm <code>fasterdata-tuning.sh</code> audit and apply operations complete without errors across diverse hardware</li>
 <li><strong>Evaluate operational cost</strong>: Assess prerequisites, deployment time, post-apply stability, and resource overhead</li>
 <li><strong>Document best practices</strong>: Provide site operators with clear deployment guidance and decision criteria</li>
+<li><strong>Inform WLCG infrastructure decisions</strong>: Gather evidence for whether host tuning should become a recommended best practice</li>
 </ol>
 <h3 id="key-considerations">Key Considerations<a class="headerlink" href="#key-considerations" title="Permanent link">&para;</a></h3>
 <ul>
