@@ -1,0 +1,2692 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://osg-htc.org/networking/mini-capability-host-tuning/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Host Network Tuning Optimization Testing - OSG Networking Area</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","UA-69012-29"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","UA-69012-29",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=UA-69012-29",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#host-network-tuning-optimization-testing" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OSG Networking Area
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Host Network Tuning Optimization Testing
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/osg-htc/networking/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../personas/quick-deploy/landing/" class="md-tabs__link">
+          
+  
+  
+  Get Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../perfsonar-in-osg/" class="md-tabs__link">
+          
+  
+  
+  perfSONAR Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../perfsonar/tools_scripts/fasterdata-tuning/" class="md-tabs__link">
+          
+  
+  
+  Host Tuning
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../personas/troubleshoot/triage-checklist/" class="md-tabs__link">
+          
+  
+  
+  Troubleshooting
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../perfsonar/psetf/" class="md-tabs__link">
+          
+  
+  
+  Network Services & Data
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../perfsonar/tools_scripts/" class="md-tabs__link">
+          
+  
+  
+  Tools & Scripts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../features/fail2ban/" class="md-tabs__link">
+          
+  
+  
+  Advanced
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OSG Networking Area
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/osg-htc/networking/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/quick-deploy/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy perfSONAR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshoot Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/research/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Understand the System
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    perfSONAR Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    perfSONAR Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar-in-osg/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Why perfSONAR in OSG/WLCG
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/deployment-models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/quick-deploy/landing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deploy perfSONAR
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--active"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Testpoint (Container)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/quick-deploy/install-perfsonar-toolkit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Toolkit (RPM)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/quick-deploy/automated-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automated Setup
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Legacy Installation (Archive)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Tuning
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Host Tuning
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fasterdata Host Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/multiple-nic-guidance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multiple NIC Guidance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/packet-pacing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packet Pacing (fq vs tbf)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/triage-checklist/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Triage Checklist
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network-troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Troubleshooting Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OSG Debugging Document
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Playbooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Playbooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Container Startup Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tests Not Running
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Firewall & Network Access
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Services & Data
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Network Services & Data
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/psetf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure Monitoring (PSETF)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../osg-network-services/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Datastore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../osg-network-analytics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analytics Platform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools & Scripts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tools & Scripts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/tools_scripts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fasterdata Host Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/tools_scripts/README-lsregistration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LS Registration Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LS Registration Updater
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../perfsonar/tools_scripts/docker-compose.yml" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose Bundles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Link-Check Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_1" id="__nav_8_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Features
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/fail2ban/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    fail2ban
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/selinux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SELinux
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/nftables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nftables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../personas/research/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--draft"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Release Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/quick-deploy-1.4.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v1.4.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/quick-deploy-1.3.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v1.3.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/quick-deploy-1.1.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v1.1.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/quick-deploy-1.0.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v1.0.1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/quick-deploy-1.0.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v1.0.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-site-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Site Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="host-network-tuning-optimization-testing">Host Network Tuning Optimization Testing<a class="headerlink" href="#host-network-tuning-optimization-testing" title="Permanent link">&para;</a></h1>
+<p>Capability:  Host Network Tuning Optimization Testing</p>
+<p>Description:  We need to evaluate what host network tunings are still relevant/appropriate for RHEL9 (or similar) OSes using high speed NICs (25/40/100/200/400 Gbps) and fast storage (suggested by Dale Carder and Eli Dart)</p>
+<p>This document can be used to track the history of the capability challenge.   Clone the set below, replacing N with 1 for the first mini-challenge.  Future mini-challenges will be 2, 3, etc.</p>
+<h2 id="participants">Participants<a class="headerlink" href="#participants" title="Permanent link">&para;</a></h2>
+<p>(Please add your name): Shawn McKee, Lincoln Bryant, Eduardo Bach, Eli Dart, </p>
+<h1 id="capability-challenge-1-host-network-tuning-optimization-testing-january-2026">Capability Challenge 1: Host Network Tuning Optimization Testing (January 2026)<a class="headerlink" href="#capability-challenge-1-host-network-tuning-optimization-testing-january-2026" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Validate and optimize ESnet Fasterdata-recommended host network tuning configurations for RHEL 9 systems with high-speed NICs (25/40/100 Gbps) and high-performance storage. This challenge will test the <code>fasterdata-tuning.sh</code> v1.3.1 automated tuning tool across USCMS and USATLAS production sites to measure impact on data transfer throughput, latency, and operational overhead.</p>
+<h2 id="plan-1-testing-methodology-and-implementation">Plan-1: Testing Methodology and Implementation<a class="headerlink" href="#plan-1-testing-methodology-and-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Validate tuning effectiveness</strong>: Measure throughput and latency improvements with automated host tuning applied vs. baseline (stock RHEL 9 defaults)</li>
+<li><strong>Test automation reliability</strong>: Confirm <code>fasterdata-tuning.sh</code> audit and apply operations complete without errors across diverse hardware</li>
+<li><strong>Evaluate operational cost</strong>: Assess prerequisites, deployment time, post-apply stability, and resource overhead</li>
+<li><strong>Document best practices</strong>: Provide site operators with clear deployment guidance and decision criteria</li>
+</ol>
+<h3 id="key-considerations">Key Considerations<a class="headerlink" href="#key-considerations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Minimal risk</strong>: Tuning changes are reversible; state save/restore feature enables easy rollback</li>
+<li><strong>Staged rollout</strong>: Start with 1–2 dedicated test nodes per site before broader deployment</li>
+<li><strong>Hardware diversity</strong>: Include varied NIC types (Broadcom, Mellanox, Intel) and bond/VLAN configurations to validate tool robustness</li>
+<li><strong>Network isolation</strong>: Test data transfers occur on dedicated test networks to avoid production impact</li>
+<li><strong>Baseline preservation</strong>: Maintain unmodified reference nodes for comparison</li>
+</ul>
+<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>RHEL 9.x systems with 25 Gbps or faster NICs</li>
+<li>Dedicated test network or isolated VLAN for data transfer tests</li>
+<li>Data transfer tools (iperf3, iperf, gridftp) and monitoring infrastructure (netflow, packet sniffers)</li>
+<li>Administrative access to apply sysctl, ethtool, and tc commands</li>
+<li>Systems administration time for coordination and troubleshooting</li>
+</ul>
+<h3 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Permanent link">&para;</a></h3>
+<h4 id="phase-1-setup-and-baseline-week-12">Phase 1: Setup and Baseline (Week 1–2)<a class="headerlink" href="#phase-1-setup-and-baseline-week-12" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Deploy test harness on 2 USCMS + 2 USATLAS sites (4 sites total; 2 nodes per site)</li>
+<li>Perform baseline measurements (no tuning applied):</li>
+<li>Single-flow and multi-flow TCP throughput</li>
+<li>Latency and jitter percentiles</li>
+<li>CPU utilization and context switches</li>
+<li>Memory footprint and cache misses</li>
+<li>Capture system configuration (kernel, drivers, firmware versions)</li>
+<li>Save baseline state using <code>fasterdata-tuning.sh --save-state</code></li>
+</ol>
+<h4 id="phase-2-deployment-week-34">Phase 2: Deployment (Week 3–4)<a class="headerlink" href="#phase-2-deployment-week-34" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Run audit on all test nodes: <code>./fasterdata-tuning.sh --mode audit --target measurement</code></li>
+<li>Apply tuning on half of test nodes (one per site): <code>sudo ./fasterdata-tuning.sh --mode apply --target measurement</code></li>
+<li>Log all changes to sysctl, ethtool, and tc settings</li>
+<li>Verify persistence across reboot</li>
+</ol>
+<h4 id="phase-3-performance-testing-week-57-overlaps-phase-2">Phase 3: Performance Testing (Week 5–7, overlaps Phase 2)<a class="headerlink" href="#phase-3-performance-testing-week-57-overlaps-phase-2" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>Data transfer tests</strong> (weekly, 3 iterations per configuration):</li>
+<li>1-hour sustained single-flow TCP transfer (iperf3)</li>
+<li>10 parallel flows (iperf3) to simulate production workload</li>
+<li>GridFTP transfers (if available) to test real application behavior</li>
+<li><strong>Network protocol validation</strong>:</li>
+<li>Verify BBR congestion control is active and behaving correctly</li>
+<li>Confirm fq qdisc packet pacing without breaking VLAN/bond interfaces</li>
+<li>Check for unexpected packet loss or reordering</li>
+<li><strong>System stability</strong>:</li>
+<li>Monitor dmesg for errors or warnings</li>
+<li>Check for NIC resets or driver issues</li>
+<li>Verify no memory leaks in long-running tests</li>
+</ol>
+<h4 id="phase-4-costrisk-assessment-week-8">Phase 4: Cost/Risk Assessment (Week 8)<a class="headerlink" href="#phase-4-costrisk-assessment-week-8" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Document time to apply tuning per site (includes audit, apply, testing)</li>
+<li>Quantify resource overhead (CPU for fq qdisc, memory for larger TCP buffers)</li>
+<li>Identify any compatibility issues (driver bugs, performance regressions)</li>
+<li>Test rollback procedure: restore baseline state and verify transfer performance returns to baseline</li>
+</ol>
+<h4 id="phase-5-analysis-and-reporting-week-910">Phase 5: Analysis and Reporting (Week 9–10)<a class="headerlink" href="#phase-5-analysis-and-reporting-week-910" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Aggregate results across 4 sites</li>
+<li>Calculate throughput/latency improvements (statistical significance testing)</li>
+<li>Produce site-specific and aggregate reports</li>
+<li>Recommendations for production deployment</li>
+</ol>
+<h2 id="metrics-1-measurements-and-monitoring">Metrics-1: Measurements and Monitoring<a class="headerlink" href="#metrics-1-measurements-and-monitoring" title="Permanent link">&para;</a></h2>
+<h3 id="primary-metrics">Primary Metrics<a class="headerlink" href="#primary-metrics" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Method</th>
+<th>Target</th>
+<th>Success Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Single-flow throughput</strong></td>
+<td>iperf3 -t 3600 (1 hour)</td>
+<td>Baseline + 10%</td>
+<td>Improvement or no regression</td>
+</tr>
+<tr>
+<td><strong>Multi-flow throughput</strong></td>
+<td>iperf3 -P 10 (10 parallel)</td>
+<td>Baseline + 5%</td>
+<td>Improvement or no regression</td>
+</tr>
+<tr>
+<td><strong>Latency (p50, p95, p99)</strong></td>
+<td>iperf3 histogram or netperf</td>
+<td>&lt;100μs (p50)</td>
+<td>Stable or improved</td>
+</tr>
+<tr>
+<td><strong>CPU utilization</strong></td>
+<td>top, /proc/stat</td>
+<td>&lt;80% at saturation</td>
+<td>Tuning does not create bottleneck</td>
+</tr>
+<tr>
+<td><strong>Memory usage (TCP buffers)</strong></td>
+<td>/proc/meminfo</td>
+<td>&lt;5% of system RAM</td>
+<td>Acceptable overhead</td>
+</tr>
+</tbody>
+</table>
+<h3 id="secondary-metrics">Secondary Metrics<a class="headerlink" href="#secondary-metrics" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Packet loss rate</strong>: Goal &lt;0.01% over sustained transfers</li>
+<li><strong>Reboot safety</strong>: Tuning persists correctly post-reboot without errors</li>
+<li><strong>Rollback success</strong>: State restore returns system to baseline state exactly</li>
+<li><strong>Deployment time</strong>: Minutes to complete audit and apply on a node</li>
+<li><strong>Hardware compatibility</strong>: Pass audit on 100% of tested NIC types (Broadcom, Mellanox, Intel)</li>
+</ul>
+<h3 id="monitoring-infrastructure">Monitoring Infrastructure<a class="headerlink" href="#monitoring-infrastructure" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>netperf</strong> or <strong>iperf3</strong> for throughput and latency</li>
+<li><strong>ifstat</strong> / <strong>ethtool -S</strong> for NIC statistics (errors, drops, retransmits)</li>
+<li><strong>sysstat</strong> (sar) for CPU, memory, context switches</li>
+<li><strong>tcpdump</strong> for packet-level inspection (sample-based, not full packet capture)</li>
+<li><strong>systemd journal</strong> for ethtool-persist service logs and errors</li>
+</ul>
+<h2 id="cost-benefit-1-cost-and-benefit-analysis">Cost-Benefit-1: Cost and Benefit Analysis<a class="headerlink" href="#cost-benefit-1-cost-and-benefit-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="benefit-estimation">Benefit Estimation<a class="headerlink" href="#benefit-estimation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Throughput improvement</strong>: If baseline is 18 Gbps and tuning achieves 20 Gbps (11% gain), then:</li>
+<li>Benefit = <code>(20 - 18) / 18 × 100 = 11% faster data transfers</code></li>
+<li>Operational impact: ~10% reduction in transfer time for long-running jobs</li>
+<li><strong>Energy efficiency</strong>: Lower CPU utilization per Gbps transferred translates to reduced power consumption</li>
+<li><strong>Latency reduction</strong>: Lower jitter enables more predictable job scheduling and fewer retransmissions</li>
+</ol>
+<h3 id="cost-estimation">Cost Estimation<a class="headerlink" href="#cost-estimation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Personnel</strong>: </li>
+<li>Site admins: 2–4 hours per site for initial setup and monitoring (total 8–16 hours across 4 sites)</li>
+<li>Central team: 4–8 hours for test harness setup, coordination, analysis</li>
+<li><strong>Infrastructure</strong>: </li>
+<li>Dedicated test NICs or VLANs (typically already available at HPC sites)</li>
+<li>Storage for baseline captures and test logs (~100 MB per site)</li>
+<li><strong>Runtime</strong>: </li>
+<li>Baseline testing: 4 hours per node (1 day for all 8 nodes)</li>
+<li>Tuned testing: 6 hours per node (1.5 days for all 4 tuned nodes)</li>
+<li>Total test runtime: ~3 weeks (overlapping phases)</li>
+</ol>
+<h3 id="cost-benefit-comparison">Cost-Benefit Comparison<a class="headerlink" href="#cost-benefit-comparison" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Scenario A (10% throughput gain, 10 PB/year data)</strong>: </li>
+<li>Benefit: 1 PB faster transfer capacity</li>
+<li>Cost: ~50 site-hours + test infrastructure; amortized over 1 year = negligible</li>
+<li>
+<p><strong>Recommendation: Deploy</strong></p>
+</li>
+<li>
+<p><strong>Scenario B (no improvement observed)</strong>:</p>
+</li>
+<li>Benefit: Validation that RHEL 9 defaults are adequate; knowledge benefit</li>
+<li>Cost: As above</li>
+<li><strong>Recommendation: Document findings; do not mandate deployment</strong></li>
+</ul>
+<h3 id="contingency">Contingency<a class="headerlink" href="#contingency" title="Permanent link">&para;</a></h3>
+<p>If a site observes instability or regressions:
+- Immediate action: Restore baseline state using <code>--restore-state</code> feature
+- Investigation: Capture logs and hardware details for root cause analysis
+- Fallback: Tuning is optional; sites can defer deployment until issue is resolved</p>
+<h2 id="schedule-1-timeline-january-2026">Schedule-1: Timeline (January 2026)<a class="headerlink" href="#schedule-1-timeline-january-2026" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Duration</th>
+<th>Dates</th>
+<th>Deliverables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Planning &amp; Coordination</strong></td>
+<td>1 week</td>
+<td>Jan 1–10</td>
+<td>Site participant list, test plan review, hardware inventory</td>
+</tr>
+<tr>
+<td><strong>Setup &amp; Baseline</strong></td>
+<td>2 weeks</td>
+<td>Jan 10–24</td>
+<td>Baseline measurements, system configs captured, baseline states saved</td>
+</tr>
+<tr>
+<td><strong>Deployment &amp; Testing</strong></td>
+<td>4 weeks</td>
+<td>Jan 24–Feb 21</td>
+<td>Tuning applied, weekly test runs, logs and raw data collected</td>
+</tr>
+<tr>
+<td><strong>Analysis &amp; Reporting</strong></td>
+<td>2 weeks</td>
+<td>Feb 21–Mar 7</td>
+<td>Results aggregated, cost-benefit analysis, final report</td>
+</tr>
+<tr>
+<td><strong>Presentation</strong></td>
+<td>1 week</td>
+<td>Mar 7–14</td>
+<td>Summary slides for WLCG/LHCONE meetings</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Milestones</strong>:
+- Jan 10: Participant kickoff call
+- Jan 24: All sites ready for testing
+- Feb 7: Interim results discussion
+- Mar 14: Final presentation at next WLCG or LHCONE meeting</p>
+<h2 id="team-1-participants-and-responsibilities">Team-1: Participants and Responsibilities<a class="headerlink" href="#team-1-participants-and-responsibilities" title="Permanent link">&para;</a></h2>
+<h3 id="central-coordination">Central Coordination<a class="headerlink" href="#central-coordination" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Shawn McKee (U. Michigan)</strong>: Lead, test plan owner, fasterdata-tuning.sh expert</li>
+<li><strong>Lincoln Bryant (U. Wisconsin)</strong>: Testing infrastructure, data analysis</li>
+<li><strong>Eduardo Bach (UC San Diego/SuperCC)</strong>: Network monitoring, results validation</li>
+</ul>
+<h3 id="uscms-sites-2-sites">USCMS Sites (2 sites)<a class="headerlink" href="#uscms-sites-2-sites" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>T1 Site (Fermilab)</strong></li>
+<li>Proponent: [Site admin name]</li>
+<li>
+<p>Responsibilities: Deploy on 2 test nodes, run baseline and tuned test cycles, report results</p>
+</li>
+<li>
+<p><strong>T2 Site (Purdue)</strong></p>
+</li>
+<li>Proponent: [Site admin name]</li>
+<li>Responsibilities: Same as above; additional focus on multi-flow workloads</li>
+</ol>
+<h3 id="usatlas-sites-2-sites">USATLAS Sites (2 sites)<a class="headerlink" href="#usatlas-sites-2-sites" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>T1 Site (BNL)</strong></li>
+<li>Proponent: [Site admin name]</li>
+<li>
+<p>Responsibilities: Deploy on 2 test nodes, focus on stability and rollback validation</p>
+</li>
+<li>
+<p><strong>T2 Site (UC Irvine)</strong></p>
+</li>
+<li>Proponent: [Site admin name]</li>
+<li>Responsibilities: Same as above; additional focus on hardware compatibility (mixed NIC types)</li>
+</ol>
+<h3 id="advisory-committee">Advisory Committee<a class="headerlink" href="#advisory-committee" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Eli Dart (LBNL/ESnet)</strong>: Fasterdata recommendations validation</li>
+<li><strong>Dale Carder (LBNL)</strong>: Storage and network architecture guidance</li>
+<li>Additional WLCG Network Operations contacts as needed</li>
+</ul>
+<h3 id="communication">Communication<a class="headerlink" href="#communication" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Weekly syncs</strong>: Mondays 2 PM ET during active testing phases</li>
+<li><strong>Shared spreadsheet</strong>: Track test runs, measurement results, issues, and blockers</li>
+<li><strong>Central repo</strong>: All logs, scripts, and analysis pushed to <code>/root/Git-Repositories/networking/</code> branch <code>mini-challenge-1</code></li>
+</ul>
+<h2 id="evaluation-criteria-1-success-metrics-and-decision-framework">Evaluation Criteria-1: Success Metrics and Decision Framework<a class="headerlink" href="#evaluation-criteria-1-success-metrics-and-decision-framework" title="Permanent link">&para;</a></h2>
+<h3 id="success-criteria">Success Criteria<a class="headerlink" href="#success-criteria" title="Permanent link">&para;</a></h3>
+<ol>
+<li>✅ <strong>Data quality</strong>: Baseline and tuned measurements completed for ≥80% of planned test cycles</li>
+<li>✅ <strong>No regressions</strong>: Throughput does not decrease by &gt;5% after tuning (or isolated to specific hardware)</li>
+<li>✅ <strong>Stability</strong>: All nodes complete test phases without unplanned reboots or service errors</li>
+<li>✅ <strong>Reproducibility</strong>: Tuning changes are consistently applied and measured across all sites</li>
+<li>✅ <strong>Cost acceptable</strong>: Total site effort ≤20 hours per site</li>
+</ol>
+<h3 id="gono-go-decision-framework">Go/No-Go Decision Framework<a class="headerlink" href="#gono-go-decision-framework" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Go for production recommendation</strong>: If ≥2 sites show ≥5% improvement with no major regressions</li>
+<li><strong>Conditional recommendation</strong>: If improvement is site-specific or hardware-specific; recommend per-site evaluation</li>
+<li><strong>No recommendation</strong>: If no improvement observed or regressions encountered; document findings and defer</li>
+</ul>
+<h2 id="results-1-summary-and-follow-up">Results-1: Summary and Follow-Up<a class="headerlink" href="#results-1-summary-and-follow-up" title="Permanent link">&para;</a></h2>
+<p><em>To be completed by March 2026.</em></p>
+<ul>
+<li><strong>Aggregate throughput improvement</strong>: [TBD]</li>
+<li><strong>Sites deploying to production</strong>: [TBD]</li>
+<li><strong>Key lessons learned</strong>: [TBD]</li>
+<li><strong>Recommended next steps</strong>: [TBD]</li>
+<li><strong>Full report location</strong>: <code>/root/Git-Repositories/networking/docs/reports/mini-challenge-1-final-report.md</code> (or similar)</li>
+</ul>
+<h1 id="capability-challenge-n1">Capability Challenge N+1<a class="headerlink" href="#capability-challenge-n1" title="Permanent link">&para;</a></h1>
+<p>…</p>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>
