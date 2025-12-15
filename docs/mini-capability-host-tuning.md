@@ -44,7 +44,7 @@ Per the WLCG Capability Test Framework, this table tracks all mini-challenges an
 
 | Mini-Challenge | Status | Start Date | Expected End | Key Sites | Primary Focus | Outcome |
 |---|---|---|---|---|---|---|
-| MC-1: Network + Storage Tuning | Planned | Jan 10, 2026 | Mar 14, 2026 | FNAL, Purdue, BNL, UCI | Network (Fasterdata), Storage I/O, CPU affinity | TBD |
+| MC-1: Network + Storage Tuning | Planned | Jan 10, 2026 | Mar 14, 2026 | FNAL, UCSD, Nebraska, BNL, AGLT2, NET2 | Network (Fasterdata), Storage I/O, CPU affinity | TBD |
 | MC-2: Host Tuning + Jumbo Frames | Planned | Q2 2026 | TBD | TBD (subset MC-1 + new) | Jumbo Frames (MTU 9000), Advanced storage | TBD |
 
 ## Tracking History
@@ -166,7 +166,7 @@ Add a short verification checklist to each test run to confirm save/restore succ
 
 #### Phase 1: Setup and Baseline (Week 1–2)
 **WAN Data Transfer Baseline** (PRIMARY):
-1. Deploy test harness on 2 USCMS + 2 USATLAS sites (4 sites total; 2 data transfer nodes per site)
+1. Deploy test harness on 3 USCMS + 3 USATLAS sites (6 sites total; 2 data transfer nodes per site)
 2. Perform baseline WAN data transfer measurements (no tuning applied):
    - **GridFTP/FTS transfers**: 1-hour sustained transfer to remote WLCG site; measure throughput, transfer time, stalls
    - **XRootD transfers** (if available): Read/write to remote XRootD endpoint; measure throughput and latency
@@ -445,10 +445,16 @@ If a site observes instability, performance regression, or compatibility issues:
 | **Presentation** | 1 week | Mar 7–14 | Summary slides for WLCG/LHCONE meetings |
 
 **Key Milestones**:
+- Dec 18, 2025: Submit CHEP 2026 abstract
 - Jan 10: Participant kickoff call
 - Jan 24: All sites ready for testing
 - Feb 7: Interim results discussion
+- Feb 9–13, 2026: Report initial results at ATLAS Software & Computing Week
 - Mar 14: Final presentation at next WLCG or LHCONE meeting
+
+**Conference & Publication Milestones**:
+- May 25–29, 2026: Present results at CHEP 2026
+- Jun 30, 2026: Finalize CHEP paper on results
 
 ## Team-1: Participants and Responsibilities
 
@@ -460,38 +466,64 @@ If a site observes instability, performance regression, or compatibility issues:
 - **Diego Davila (UCSD / USCMS T2)**: Storage and CMS data transfer expert; assists with transfer-job setup and validation
 - **Hiro Ito (BNL)**: FTS and transfer orchestration expert; advisor for ATLAS transfer testing
 
-### USCMS Sites (2 sites)
+### USCMS Sites (3 sites)
 1. **T1 Site (Fermilab)**
    - **Network Proponent**: Asif Shaw (FNAL)
    - **Storage/Data Transfer Proponent**: [Site storage or data transfer engineer]
    - **Responsibilities**: 
-     - Deploy network tuning on 2 data transfer nodes (production or pre-production)
-     - Baseline and tuned WAN transfer tests: GridFTP/FTS to remote T1/T2 sites, perfSONAR validation
+     - Deploy network tuning on data transfer nodes (production or pre-production)
+     - Baseline and tuned WAN transfer tests: GridFTP/FTS to remote sites, perfSONAR validation
      - Storage tuning: Identify and apply best I/O scheduler for GridFTP backends
      - Monitor host impact: CPU, I/O wait, retransmits during WAN transfers
      - Document compatibility and any site-specific constraints
    - **Effort**: ~7–8 hours per site
    
-2. **T2 Site (Purdue)**
-   - **Network Proponent**: [Site admin name]
-   - **Storage/Data Transfer Proponent**: [Site storage or data transfer engineer]
+2. **T2 Site (UCSD)**
+   - **Network Proponent**: Diego Davila (UCSD)
+   - **Storage/Data Transfer Proponent**: Diego Davila (UCSD)
    - **Responsibilities**: 
-     - Same as Fermilab; focus on XRootD or HTTP-based transfers if dCache not used
+     - Same as Fermilab; focus on UCSD transfer infrastructure and XRootD/CMS workflows
      - Explore NUMA-aware tuning for data transfer processes if applicable
      - Test multi-flow WAN transfers (concurrent FTS jobs) to validate tuning under load
    - **Effort**: ~7–8 hours per site
 
-### USATLAS Sites (2 sites)
+3. **T3 Site (Nebraska)**
+   - **Network Proponent**: Garhan Attebury (University of Nebraska)
+   - **Storage/Data Transfer Proponent**: [Site storage or data transfer engineer]
+   - **Responsibilities**: 
+     - Deploy tuning and run baseline/tuned WAN transfer tests; focus on Nebraskan infrastructure
+     - Validate multi-site transfer behavior and concurrency under load
+     - Document any site-specific constraints or firmware issues
+   - **Effort**: ~7–8 hours per site
+
+### USATLAS Sites (3 sites)
 1. **T1 Site (BNL)**
    - **Network Proponent**: [Site admin name]
    - **Storage/Data Transfer Proponent**: Carlos Gamboa (BNL)
    - **Responsibilities**: 
-     - Deploy on 2 data transfer nodes; focus on stability and rollback validation
+     - Deploy on data transfer nodes; focus on stability and rollback validation
      - Baseline and tuned WAN transfer tests: XRootD, GridFTP, or Rucio/FTS transfers to remote sites
      - Storage tuning: Test I/O scheduler options for EOS or dCache storage backend
      - Collaborate with Hiro Ito for FTS orchestration and ATLAS-specific transfer validation
      - Extensive error log collection for dCache/XRootD compatibility analysis
      - Validate rollback procedure does not disrupt production transfers
+   - **Effort**: ~7–8 hours per site
+
+2. **T2 Site (AGLT2)**
+   - **Network Proponent**: Wendy Dronen (AGLT2)
+   - **Storage/Data Transfer Proponent**: Shawn McKee (AGLT2)
+   - **Responsibilities**: 
+     - Same as BNL; additional focus on AGLT2 hardware and mixed NIC compatibility
+     - Validate tuning against AGLT2 dCache pools and transfer nodes
+     - Document any firmware-specific constraints for storage or NIC drivers
+   - **Effort**: ~7–8 hours per site
+
+3. **T3 Site (NET2)**
+   - **Network Proponent**: Eduardo Bach (NET2)
+   - **Storage/Data Transfer Proponent**: Eduardo Bach (NET2)
+   - **Responsibilities**: 
+     - NET2 site proponent for ATLAS; validate transfer behavior for ATLAS workflows
+     - Collaborate on cross-site Global Configuration Sweeps and ATLAS-specific transfer validation
    - **Effort**: ~7–8 hours per site
    
 2. **T2 Site (UC Irvine)**
