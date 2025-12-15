@@ -21,7 +21,7 @@
     
     
       
-        <title>Host Network Tuning Optimization Testing - OSG Networking Area</title>
+        <title>Host Optimization and Tuning Testing - OSG Networking Area</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#host-network-tuning-optimization-testing" class="md-skip">
+        <a href="#host-optimization-and-tuning-testing" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Host Network Tuning Optimization Testing
+              Host Optimization and Tuning Testing
             
           </span>
         </div>
@@ -2323,7 +2323,7 @@
   
 
 
-<h1 id="host-network-tuning-optimization-testing">Host Network Tuning Optimization Testing<a class="headerlink" href="#host-network-tuning-optimization-testing" title="Permanent link">&para;</a></h1>
+<h1 id="host-optimization-and-tuning-testing">Host Optimization and Tuning Testing<a class="headerlink" href="#host-optimization-and-tuning-testing" title="Permanent link">&para;</a></h1>
 <h2 id="capability-summary">Capability Summary<a class="headerlink" href="#capability-summary" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2335,11 +2335,11 @@
 <tbody>
 <tr>
 <td><strong>Capability Name</strong></td>
-<td>Host Network Tuning Optimization Testing</td>
+<td>Host Optimization and Tuning (Network, Storage, CPU, Memory)</td>
 </tr>
 <tr>
 <td><strong>Related Framework Items</strong></td>
-<td>Congestion Control (BBRv3), Jumbo Frames support, network performance optimization</td>
+<td>Congestion Control (BBRv3), Jumbo Frames support, Storage performance, CPU affinity</td>
 </tr>
 <tr>
 <td><strong>Importance</strong></td>
@@ -2351,11 +2351,11 @@
 </tr>
 <tr>
 <td><strong>Potential Gains</strong></td>
-<td>4 (Significant)</td>
+<td>4–5 (Significant to Major)</td>
 </tr>
 <tr>
 <td><strong>Dependencies</strong></td>
-<td>RHEL 9, 25+ Gbps NICs, Linux kernel 5.x+, ethtool, tc commands</td>
+<td>RHEL 9, 25+ Gbps NICs, NVMe/SSD storage, Linux kernel 5.x+, ethtool, tc, iostat tools</td>
 </tr>
 <tr>
 <td><strong>Status</strong></td>
@@ -2368,14 +2368,20 @@
 </tbody>
 </table>
 <h2 id="overview-and-rationale">Overview and Rationale<a class="headerlink" href="#overview-and-rationale" title="Permanent link">&para;</a></h2>
-<p>We evaluate ESnet Fasterdata-recommended host network tunings for RHEL 9 systems with high-speed NICs (25/40/100/200/400 Gbps) and fast storage. This capability addresses the broader "congestion control and host tuning" problem space.</p>
-<p><strong>Note on Prior Work</strong>: An earlier test of congestion control protocols (Edoardo, DC24) did not show gains from switching algorithms alone. This mini-challenge expands the scope to include:
+<p>We evaluate comprehensive host optimizations for RHEL 9 systems with high-speed NICs (25/40/100/200/400 Gbps) and high-performance storage (NVMe/SSD). This capability addresses end-to-end data movement performance by optimizing <strong>network</strong>, <strong>storage</strong>, <strong>CPU</strong>, and <strong>memory</strong> subsystems.</p>
+<p><strong>Scope</strong>: Mini-Challenge 1 focuses on two primary areas:
+1. <strong>Network Tuning</strong> (ESnet Fasterdata recommendations): Sysctl buffers, qdisc pacing, ethtool offloads, NIC ring buffers
+2. <strong>Storage Tuning</strong> (New exploration): I/O scheduler selection, storage queue depth, read-ahead, NUMA affinity for storage controllers</p>
+<p><strong>Note on Prior Work</strong>: An earlier test of congestion control protocols (Edoardo, DC24) focused on algorithm selection alone (BBR vs CUBIC) — no gains observed. This mini-challenge expands scope to:
 - <strong>Sysctl TCP buffer tuning</strong> (rmem/wmem scaled by link speed)
 - <strong>Qdisc packet pacing</strong> (fq for fair scheduling, tbf for rate capping)
 - <strong>Ethtool offload optimization</strong> (GRO/TSO/GSO tuning)
 - <strong>NIC ring buffer and txqueuelen scaling</strong>
-- <strong>Automated audit and state management</strong> (safe rollback via <code>fasterdata-tuning.sh</code>)</p>
-<p>The hypothesis is that <strong>comprehensive host tuning</strong> (not congestion control alone) provides measurable throughput and latency benefits.</p>
+- <strong>Storage I/O scheduler tuning</strong> (ioscheduler selection for high-speed storage)
+- <strong>Storage queue depth and I/O concurrency optimization</strong>
+- <strong>NUMA-aware memory and I/O affinity</strong>
+- <strong>Automated audit and state management</strong> (safe rollback via <code>fasterdata-tuning.sh</code> and storage tuning tools)</p>
+<p>The hypothesis is that <strong>comprehensive host optimization across all subsystems</strong> (not individual components in isolation) provides significant throughput and latency improvements, with measurable benefit for data-intensive workflows (HTC, HPC, AI/ML).</p>
 <h2 id="capability-tracking-table">Capability Tracking Table<a class="headerlink" href="#capability-tracking-table" title="Permanent link">&para;</a></h2>
 <p>Per the WLCG Capability Test Framework, this table tracks all mini-challenges and their status:</p>
 <table>
@@ -2386,18 +2392,18 @@
 <th>Start Date</th>
 <th>Expected End</th>
 <th>Key Sites</th>
-<th>Primary Metric</th>
+<th>Primary Focus</th>
 <th>Outcome</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>MC-1: Host Tuning (Jan 2026)</td>
+<td>MC-1: Network + Storage Tuning</td>
 <td>Planned</td>
 <td>Jan 10, 2026</td>
-<td>Mar 7, 2026</td>
+<td>Mar 14, 2026</td>
 <td>FNAL, Purdue, BNL, UCI</td>
-<td>Throughput gain (%)</td>
+<td>Network (Fasterdata), Storage I/O, CPU affinity</td>
 <td>TBD</td>
 </tr>
 <tr>
@@ -2405,8 +2411,8 @@
 <td>Planned</td>
 <td>Q2 2026</td>
 <td>TBD</td>
-<td>TBD</td>
-<td>Jumbo frame benefit</td>
+<td>TBD (subset MC-1 + new)</td>
+<td>Jumbo Frames (MTU 9000), Advanced storage</td>
 <td>TBD</td>
 </tr>
 </tbody>
@@ -2415,28 +2421,33 @@
 <p>This document tracks mini-challenge instances. Clone the section below for each new challenge, incrementing N.</p>
 <h2 id="participants">Participants<a class="headerlink" href="#participants" title="Permanent link">&para;</a></h2>
 <p>(Please add your name): Shawn McKee, Lincoln Bryant, Eduardo Bach, Eli Dart, </p>
-<h1 id="capability-challenge-1-host-network-tuning-optimization-testing-january-2026">Capability Challenge 1: Host Network Tuning Optimization Testing (January 2026)<a class="headerlink" href="#capability-challenge-1-host-network-tuning-optimization-testing-january-2026" title="Permanent link">&para;</a></h1>
+<h1 id="capability-challenge-1-comprehensive-host-optimization-testing-january-2026">Capability Challenge 1: Comprehensive Host Optimization Testing (January 2026)<a class="headerlink" href="#capability-challenge-1-comprehensive-host-optimization-testing-january-2026" title="Permanent link">&para;</a></h1>
 <h2 id="overview-and-advantages">Overview and Advantages<a class="headerlink" href="#overview-and-advantages" title="Permanent link">&para;</a></h2>
-<p><strong>Goal</strong>: Validate and optimize ESnet Fasterdata-recommended host network tuning configurations for RHEL 9 systems with high-speed NICs (25/40/100 Gbps) and high-performance storage.</p>
+<p><strong>Goal</strong>: Validate comprehensive host optimization for RHEL 9 systems, including network tuning (Fasterdata), storage I/O tuning, and CPU/memory optimization. Target: high-speed NICs (25/40/100+ Gbps) and high-performance storage (NVMe/SSD).</p>
 <p><strong>Expected Advantages</strong>:
-1. <strong>Improved throughput</strong> (5–15% for single and multi-flow TCP transfers)
-2. <strong>Reduced latency</strong> and jitter (more predictable job scheduling)
-3. <strong>Better CPU efficiency</strong> (lower CPU utilization per Gbps transferred via fq pacing)
-4. <strong>Operational simplicity</strong> (automated audit and rollback via <code>fasterdata-tuning.sh</code> v1.3.1+)
-5. <strong>Hardware compatibility</strong> (validated across Broadcom, Mellanox, Intel NICs)
-6. <strong>Production-ready tooling</strong> (state save/restore for safe testing and deployment)</p>
+1. <strong>Improved throughput</strong> (5–15% for single and multi-flow transfers, 10%+ for storage-bound workloads)
+2. <strong>Reduced latency</strong> and jitter (more predictable job scheduling, lower tail latencies)
+3. <strong>Better CPU efficiency</strong> (lower CPU utilization per Gbps via fq pacing; improved I/O efficiency via queue tuning)
+4. <strong>Enhanced storage performance</strong> (faster data staging, reduced I/O wait on batch jobs)
+5. <strong>Operational simplicity</strong> (automated audit and rollback via <code>fasterdata-tuning.sh</code> and storage tuning playbooks)
+6. <strong>Hardware compatibility</strong> (validated across Broadcom, Mellanox, Intel NICs; various storage controllers and SSDs)
+7. <strong>Production-ready tooling</strong> (state save/restore for safe testing and deployment)</p>
 <p><strong>Differentiators from Prior Work</strong>:
 - Previous congestion control test (DC24) focused on algorithm selection alone (BBR vs CUBIC)
-- This challenge includes <strong>full-stack host tuning</strong>: sysctl, qdisc, ethtool, NIC ring buffers
-- Comprehensive approach addresses bottlenecks beyond congestion control protocol choice</p>
+- This challenge includes <strong>full-stack host optimization</strong>: sysctl, qdisc, ethtool, NIC ring buffers, <strong>storage I/O scheduler</strong>, <strong>queue depth</strong>, <strong>NUMA affinity</strong>
+- Comprehensive approach addresses bottlenecks across network, storage, and CPU subsystems</p>
 <h2 id="plan-1-testing-methodology-and-implementation">Plan-1: Testing Methodology and Implementation<a class="headerlink" href="#plan-1-testing-methodology-and-implementation" title="Permanent link">&para;</a></h2>
-<p><strong>Tool</strong>: ESnet Fasterdata tuning script (<code>fasterdata-tuning.sh</code> v1.3.1+, available at https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh)</p>
+<p><strong>Primary Tools</strong>: 
+- ESnet Fasterdata tuning script (<code>fasterdata-tuning.sh</code> v1.3.1+, https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh)
+- Storage tuning playbooks and tools (Ansible for I/O scheduler, queue depth; <code>fio</code> / <code>iozone</code> for benchmarks)</p>
 <h3 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Validate tuning effectiveness</strong>: Measure throughput and latency improvements with automated host tuning applied vs. baseline (stock RHEL 9 defaults)</li>
-<li><strong>Test automation reliability</strong>: Confirm <code>fasterdata-tuning.sh</code> audit and apply operations complete without errors across diverse hardware</li>
-<li><strong>Evaluate operational cost</strong>: Assess prerequisites, deployment time, post-apply stability, and resource overhead</li>
-<li><strong>Document best practices</strong>: Provide site operators with clear deployment guidance and decision criteria</li>
+<li><strong>Validate network tuning effectiveness</strong>: Measure throughput and latency improvements with Fasterdata tuning applied vs. baseline</li>
+<li><strong>Validate storage tuning effectiveness</strong>: Measure storage I/O throughput and latency with tuning applied vs. baseline</li>
+<li><strong>Test automation reliability</strong>: Confirm <code>fasterdata-tuning.sh</code> and storage playbooks complete without errors across diverse hardware</li>
+<li><strong>Evaluate operational cost</strong>: Assess prerequisites, deployment time, post-apply stability, resource overhead</li>
+<li><strong>Document best practices</strong>: Provide deployment guidance for network, storage, and CPU/memory optimization</li>
+<li><strong>Identify site-specific constraints</strong>: Discover hardware/firmware limitations (e.g., NIC driver bugs, storage controller limits)</li>
 <li><strong>Inform WLCG infrastructure decisions</strong>: Gather evidence for whether host tuning should become a recommended best practice</li>
 </ol>
 <h3 id="key-considerations">Key Considerations<a class="headerlink" href="#key-considerations" title="Permanent link">&para;</a></h3>
@@ -2449,53 +2460,93 @@
 </ul>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>Network</strong>:</li>
 <li>RHEL 9.x systems with 25 Gbps or faster NICs</li>
 <li>Dedicated test network or isolated VLAN for data transfer tests</li>
 <li>Data transfer tools (iperf3, iperf, gridftp) and monitoring infrastructure (netflow, packet sniffers)</li>
 <li>Administrative access to apply sysctl, ethtool, and tc commands</li>
-<li>Systems administration time for coordination and troubleshooting</li>
+<li><strong>Storage</strong>:</li>
+<li>RHEL 9.x systems with NVMe or SSD storage</li>
+<li>Dedicated storage test paths (can be on shared storage, isolated by filesystem mount point)</li>
+<li>Storage benchmarking tools (fio, iozone, bonnie++)</li>
+<li>I/O scheduler change capability (change via <code>/sys/block/*/queue/scheduler</code>)</li>
+<li>Monitoring infrastructure (iostat, pmdk/ndctl for NVMe, custom I/O profiling if desired)</li>
+<li><strong>General</strong>:</li>
+<li>Systems administration time for coordination and troubleshooting (~5–6 hours per site)</li>
+<li>Centralized communication and result tracking mechanism (shared spreadsheet, git repo)</li>
 </ul>
 <h3 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Permanent link">&para;</a></h3>
 <h4 id="phase-1-setup-and-baseline-week-12">Phase 1: Setup and Baseline (Week 1–2)<a class="headerlink" href="#phase-1-setup-and-baseline-week-12" title="Permanent link">&para;</a></h4>
-<ol>
-<li>Deploy test harness on 2 USCMS + 2 USATLAS sites (4 sites total; 2 nodes per site)</li>
-<li>Perform baseline measurements (no tuning applied):</li>
-<li>Single-flow and multi-flow TCP throughput</li>
-<li>Latency and jitter percentiles</li>
-<li>CPU utilization and context switches</li>
-<li>Memory footprint and cache misses</li>
-<li>Capture system configuration (kernel, drivers, firmware versions)</li>
-<li>Save baseline state using <code>fasterdata-tuning.sh --save-state</code></li>
-</ol>
+<p><strong>Network Testing</strong>:
+1. Deploy network test harness on 2 USCMS + 2 USATLAS sites (4 sites total; 2 nodes per site)
+2. Perform network baseline measurements (no tuning applied):
+   - Single-flow and multi-flow TCP throughput (iperf3)
+   - Latency and jitter percentiles (iperf3 histogram)
+   - CPU utilization and context switches (top, /proc/stat)
+   - Memory footprint and cache misses (sysstat, perf)
+3. Capture network system configuration (kernel, NIC drivers, firmware versions, ethtool -i)
+4. Save network baseline state using <code>fasterdata-tuning.sh --save-state</code></p>
+<p><strong>Storage Testing</strong>:
+1. Identify baseline I/O scheduler for each storage device (cat /sys/block/*/queue/scheduler)
+2. Perform storage baseline measurements (existing I/O scheduler):
+   - Sequential read throughput (fio seq-read, direct I/O, large block size)
+   - Random read IOPS and latency (fio rand-read, 4K blocks, percentiles)
+   - Sequential write throughput (fio seq-write, direct I/O)
+   - Write latency (fio, percentiles)
+3. Capture storage system configuration (device model, firmware, NUMA topology, queue depth settings)
+4. Document baseline I/O scheduler and any custom queue settings</p>
 <h4 id="phase-2-deployment-week-34">Phase 2: Deployment (Week 3–4)<a class="headerlink" href="#phase-2-deployment-week-34" title="Permanent link">&para;</a></h4>
-<ol>
-<li>Run audit on all test nodes: <code>./fasterdata-tuning.sh --mode audit --target measurement</code></li>
-<li>Apply tuning on half of test nodes (one per site): <code>sudo ./fasterdata-tuning.sh --mode apply --target measurement</code></li>
-<li>Log all changes to sysctl, ethtool, and tc settings</li>
-<li>Verify persistence across reboot</li>
-</ol>
+<p><strong>Network Tuning</strong>:
+1. Run audit on all network test nodes: <code>./fasterdata-tuning.sh --mode audit --target measurement</code>
+2. Apply tuning on half of test nodes (one per site): <code>sudo ./fasterdata-tuning.sh --mode apply --target measurement</code>
+3. Log all changes to sysctl, ethtool, and tc settings
+4. Verify persistence across reboot</p>
+<p><strong>Storage Tuning</strong>:
+1. For each storage device, identify best I/O scheduler for your workload (candidates: <code>mq-deadline</code>, <code>noop</code>, <code>bfq</code>):
+   - Test each scheduler via: <code>echo "scheduler-name" | sudo tee /sys/block/*/queue/scheduler</code>
+   - Run fio benchmarks (same tests as baseline) and compare results
+2. Select tuned I/O scheduler based on performance and latency results
+3. Apply tuned scheduler to half of storage test nodes (one per site)
+4. Optionally apply NUMA affinity (if storage controller visible in numa topology): <code>numactl -m N -C N fio [test]</code>
+5. Document selected scheduler and any NUMA settings</p>
 <h4 id="phase-3-performance-testing-week-57-overlaps-phase-2">Phase 3: Performance Testing (Week 5–7, overlaps Phase 2)<a class="headerlink" href="#phase-3-performance-testing-week-57-overlaps-phase-2" title="Permanent link">&para;</a></h4>
-<ol>
-<li><strong>Data transfer tests</strong> (weekly, 3 iterations per configuration):</li>
-<li>1-hour sustained single-flow TCP transfer (iperf3)</li>
-<li>10 parallel flows (iperf3) to simulate production workload</li>
-<li>GridFTP transfers (if available) to test real application behavior</li>
-<li><strong>Network protocol validation</strong>:</li>
-<li>Verify BBR congestion control is active and behaving correctly</li>
-<li>Confirm fq qdisc packet pacing without breaking VLAN/bond interfaces</li>
-<li>Check for unexpected packet loss or reordering</li>
-<li><strong>System stability</strong>:</li>
-<li>Monitor dmesg for errors or warnings</li>
-<li>Check for NIC resets or driver issues</li>
-<li>Verify no memory leaks in long-running tests</li>
-</ol>
+<p><strong>Network Testing</strong> (weekly, 3 iterations per configuration):
+1. Data transfer tests:
+   - 1-hour sustained single-flow TCP transfer (iperf3)
+   - 10 parallel flows (iperf3) to simulate production workload
+   - GridFTP transfers (if available) to test real application behavior
+2. Network protocol validation:
+   - Verify BBR congestion control is active and behaving correctly
+   - Confirm fq qdisc packet pacing without breaking VLAN/bond interfaces
+   - Check for unexpected packet loss or reordering
+3. System stability:
+   - Monitor dmesg for errors or warnings
+   - Check for NIC resets or driver issues
+   - Verify no memory leaks in long-running tests</p>
+<p><strong>Storage Testing</strong> (weekly, 2–3 iterations per configuration):
+1. Run same fio benchmarks as Phase 1 baseline:
+   - Sequential read/write throughput
+   - Random read IOPS and latency (percentiles)
+   - Compare to baseline for same scheduler
+   - Compare different schedulers for same device
+2. Monitor storage system during tests:
+   - iostat -x for I/O queue depth, service time
+   - Check for throttling or command queue saturation
+   - Verify data integrity (md5sum checks on read/write cycles)
+3. Longer-duration stability test:
+   - Run fio for 4+ hours to detect memory leaks or stalls in I/O subsystem
+   - Monitor kernel logs for storage errors or timeouts</p>
 <h4 id="phase-4-costrisk-assessment-week-8">Phase 4: Cost/Risk Assessment (Week 8)<a class="headerlink" href="#phase-4-costrisk-assessment-week-8" title="Permanent link">&para;</a></h4>
-<ol>
-<li>Document time to apply tuning per site (includes audit, apply, testing)</li>
-<li>Quantify resource overhead (CPU for fq qdisc, memory for larger TCP buffers)</li>
-<li>Identify any compatibility issues (driver bugs, performance regressions)</li>
-<li>Test rollback procedure: restore baseline state and verify transfer performance returns to baseline</li>
-</ol>
+<p><strong>Network Assessment</strong>:
+1. Document time to apply network tuning per site (includes audit, apply, testing)
+2. Quantify resource overhead (CPU for fq qdisc, memory for larger TCP buffers)
+3. Identify any compatibility issues (driver bugs, performance regressions, bond/VLAN issues)
+4. Test rollback procedure: restore network baseline state and verify transfer performance returns to baseline</p>
+<p><strong>Storage Assessment</strong>:
+1. Document time to identify and apply best I/O scheduler per site
+2. Quantify resource overhead (CPU for scheduler changes, memory for queue depth tuning)
+3. Identify hardware constraints (e.g., "Scheduler X not supported on this NVMe firmware")
+4. Test rollback procedure: restore baseline I/O scheduler and verify I/O performance returns to baseline</p>
 <h4 id="phase-5-analysis-and-reporting-week-910">Phase 5: Analysis and Reporting (Week 9–10)<a class="headerlink" href="#phase-5-analysis-and-reporting-week-910" title="Permanent link">&para;</a></h4>
 <ol>
 <li>Aggregate results across 4 sites</li>
@@ -2504,7 +2555,7 @@
 <li>Recommendations for production deployment</li>
 </ol>
 <h2 id="metrics-1-measurements-and-monitoring">Metrics-1: Measurements and Monitoring<a class="headerlink" href="#metrics-1-measurements-and-monitoring" title="Permanent link">&para;</a></h2>
-<h3 id="primary-metrics">Primary Metrics<a class="headerlink" href="#primary-metrics" title="Permanent link">&para;</a></h3>
+<h3 id="primary-network-metrics">Primary Network Metrics<a class="headerlink" href="#primary-network-metrics" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2547,13 +2598,65 @@
 </tr>
 </tbody>
 </table>
+<h3 id="primary-storage-metrics">Primary Storage Metrics<a class="headerlink" href="#primary-storage-metrics" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Method</th>
+<th>Target</th>
+<th>Success Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sequential read throughput</strong></td>
+<td>fio (seq-read, direct I/O)</td>
+<td>Baseline + 5%</td>
+<td>Improvement or stable</td>
+</tr>
+<tr>
+<td><strong>Random read IOPS</strong></td>
+<td>fio (rand-read, 4K blocks)</td>
+<td>Baseline + 5%</td>
+<td>Improvement or stable</td>
+</tr>
+<tr>
+<td><strong>Read latency (p50, p99)</strong></td>
+<td>fio (latency histogram)</td>
+<td>&lt;5ms (p50)</td>
+<td>Stable or improved</td>
+</tr>
+<tr>
+<td><strong>Sequential write throughput</strong></td>
+<td>fio (seq-write, direct I/O)</td>
+<td>Baseline + 5%</td>
+<td>Improvement or stable</td>
+</tr>
+<tr>
+<td><strong>Write latency (p50, p99)</strong></td>
+<td>fio (latency histogram)</td>
+<td>&lt;10ms (p50)</td>
+<td>Stable or improved</td>
+</tr>
+<tr>
+<td><strong>I/O queue depth utilization</strong></td>
+<td>iostat -x (avgqu-sz)</td>
+<td>Optimized per scheduler</td>
+<td>No bottleneck</td>
+</tr>
+</tbody>
+</table>
 <h3 id="secondary-metrics">Secondary Metrics<a class="headerlink" href="#secondary-metrics" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Packet loss rate</strong>: Goal &lt;0.01% over sustained transfers</li>
-<li><strong>Reboot safety</strong>: Tuning persists correctly post-reboot without errors</li>
-<li><strong>Rollback success</strong>: State restore returns system to baseline state exactly</li>
-<li><strong>Deployment time</strong>: Minutes to complete audit and apply on a node</li>
-<li><strong>Hardware compatibility</strong>: Pass audit on 100% of tested NIC types (Broadcom, Mellanox, Intel)</li>
+<li><strong>Network packet loss rate</strong>: Goal &lt;0.01% over sustained transfers</li>
+<li><strong>Network reboot safety</strong>: Tuning persists correctly post-reboot without errors</li>
+<li><strong>Network rollback success</strong>: State restore returns system to baseline state exactly</li>
+<li><strong>Storage I/O scheduler performance</strong>: Compare mq-deadline vs noop vs bfq for your workload</li>
+<li><strong>Network deployment time</strong>: Minutes to complete audit and apply on a node</li>
+<li><strong>Network hardware compatibility</strong>: Pass audit on 100% of tested NIC types (Broadcom, Mellanox, Intel)</li>
+<li><strong>Storage NUMA affinity impact</strong>: Measure latency change when I/O processes are affinized to storage controller NUMA node</li>
+<li><strong>Filesystem cache effectiveness</strong>: Monitor dirty pages, writeback latency, sync stalls</li>
 </ul>
 <h3 id="monitoring-infrastructure">Monitoring Infrastructure<a class="headerlink" href="#monitoring-infrastructure" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2566,45 +2669,70 @@
 <h2 id="cost-benefit-1-cost-and-benefit-analysis">Cost-Benefit-1: Cost and Benefit Analysis<a class="headerlink" href="#cost-benefit-1-cost-and-benefit-analysis" title="Permanent link">&para;</a></h2>
 <h3 id="benefit-estimation">Benefit Estimation<a class="headerlink" href="#benefit-estimation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Throughput improvement</strong>: If baseline is 18 Gbps and tuning achieves 20 Gbps (11% gain), then:</li>
+<li><strong>Network throughput improvement</strong>: If baseline is 18 Gbps and tuning achieves 20 Gbps (11% gain):</li>
 <li>Benefit = <code>(20 - 18) / 18 × 100 = 11% faster data transfers</code></li>
 <li>Operational impact: ~10% reduction in transfer time for long-running jobs</li>
-<li><strong>Energy efficiency</strong>: Lower CPU utilization per Gbps transferred translates to reduced power consumption</li>
+<li><strong>Storage I/O improvement</strong>: If baseline is 500 MB/s and storage tuning achieves 550 MB/s (10% gain):</li>
+<li>Benefit = <code>(550 - 500) / 500 × 100 = 10% faster I/O-bound workloads</code></li>
+<li>Operational impact: Data staging time reduced; job turnaround improved for storage-heavy workflows</li>
+<li><strong>CPU efficiency</strong>: Lower CPU utilization per Gbps + per IOPS translates to reduced power consumption and headroom for job scheduling</li>
 <li><strong>Latency reduction</strong>: Lower jitter enables more predictable job scheduling and fewer retransmissions</li>
+<li><strong>Combined impact (network + storage)</strong>: For workflows with both network and storage bottlenecks, combined tuning can deliver 15%+ improvement</li>
 </ol>
 <h3 id="cost-estimation">Cost Estimation<a class="headerlink" href="#cost-estimation" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Personnel</strong>: </li>
-<li>Site admins: 2–4 hours per site for initial setup and monitoring (total 8–16 hours across 4 sites)</li>
-<li>Central team: 4–8 hours for test harness setup, coordination, analysis</li>
+<li>Site admins (network tuning): 2–4 hours per site for initial setup and monitoring</li>
+<li>Site admins (storage tuning): 2–3 hours per site for I/O scheduler selection, NUMA affinity exploration</li>
+<li>Central team: 6–10 hours for test harness setup, coordination, analysis</li>
+<li><strong>Total: ~50 site-hours across 4 sites</strong></li>
 <li><strong>Infrastructure</strong>: </li>
 <li>Dedicated test NICs or VLANs (typically already available at HPC sites)</li>
-<li>Storage for baseline captures and test logs (~100 MB per site)</li>
+<li>Test storage paths on existing storage (no new hardware required)</li>
+<li>Storage for baseline captures and test logs (~200 MB per site)</li>
 <li><strong>Runtime</strong>: </li>
-<li>Baseline testing: 4 hours per node (1 day for all 8 nodes)</li>
-<li>Tuned testing: 6 hours per node (1.5 days for all 4 tuned nodes)</li>
+<li>Network baseline testing: 2 hours per node (0.5 days for all 8 nodes)</li>
+<li>Storage baseline testing: 2 hours per node (0.5 days for all 8 nodes)</li>
+<li>Tuned network testing: 3 hours per node (0.75 days for 4 tuned nodes)</li>
+<li>Tuned storage testing: 3 hours per node (0.75 days for 4 tuned nodes)</li>
 <li>Total test runtime: ~3 weeks (overlapping phases)</li>
 </ol>
+<h3 id="tools-and-cost">Tools and Cost<a class="headerlink" href="#tools-and-cost" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Network tuning tools</strong>: <code>fasterdata-tuning.sh</code> (open-source, free)</li>
+<li><strong>Storage benchmarking tools</strong>: <code>fio</code>, <code>iozone</code>, <code>bonnie++</code> (open-source, free)</li>
+<li><strong>System analysis tools</strong>: <code>iostat</code>, <code>ethtool</code>, <code>numactl</code> (standard RHEL 9, free)</li>
+<li><strong>Automation</strong>: Ansible playbooks for storage tuning (to be developed; ~4 hours effort)</li>
+</ul>
 <h3 id="cost-benefit-comparison">Cost-Benefit Comparison<a class="headerlink" href="#cost-benefit-comparison" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Scenario A (10% throughput gain, 10 PB/year data)</strong>: </li>
-<li>Benefit: 1 PB faster transfer capacity</li>
-<li>Cost: ~50 site-hours + test infrastructure; amortized over 1 year = negligible</li>
+<li><strong>Scenario A (Network 10% + Storage 8% improvement, 10 PB/year data)</strong>:</li>
+<li>Benefit: Faster transfers + faster staging = ~10–15% overall improvement in data movement time</li>
+<li>Cost: ~50 site-hours + automation development (~4 hours); amortized over 1 year = negligible</li>
 <li>
 <p><strong>Recommendation: Deploy</strong></p>
 </li>
 <li>
-<p><strong>Scenario B (no improvement observed)</strong>:</p>
+<p><strong>Scenario B (Network 5% + Storage 3%, but high stability concern)</strong>:</p>
 </li>
-<li>Benefit: Validation that RHEL 9 defaults are adequate; knowledge benefit</li>
+<li>Benefit: Modest improvement with monitoring overhead</li>
 <li>Cost: As above</li>
-<li><strong>Recommendation: Document findings; do not mandate deployment</strong></li>
+<li>
+<p><strong>Recommendation: Selective deployment; identify constraints and resolve before wider rollout</strong></p>
+</li>
+<li>
+<p><strong>Scenario C (No improvement observed)</strong>:</p>
+</li>
+<li>Benefit: Validation that RHEL 9 + modern storage defaults are adequate; knowledge benefit</li>
+<li>Cost: As above</li>
+<li><strong>Recommendation: Document findings; do not mandate; continue monitoring for future kernel/driver improvements</strong></li>
 </ul>
 <h3 id="contingency">Contingency<a class="headerlink" href="#contingency" title="Permanent link">&para;</a></h3>
-<p>If a site observes instability or regressions:
-- Immediate action: Restore baseline state using <code>--restore-state</code> feature
-- Investigation: Capture logs and hardware details for root cause analysis
-- Fallback: Tuning is optional; sites can defer deployment until issue is resolved</p>
+<p>If a site observes instability, performance regression, or compatibility issues:
+- <strong>Immediate action</strong>: Restore baseline state using <code>--restore-state</code> feature of fasterdata-tuning.sh and storage rollback playbook
+- <strong>Investigation</strong>: Capture logs and hardware details (NIC model, storage device, firmware versions) for root cause analysis
+- <strong>Fallback</strong>: Tuning is optional; sites can defer deployment until issue is resolved or workaround is identified
+- <strong>Knowledge sharing</strong>: Document site-specific constraints (e.g., "Broadcom BCM5719 driver does not support fq pacing") for the community</p>
 <h2 id="schedule-1-timeline-january-2026">Schedule-1: Timeline (January 2026)<a class="headerlink" href="#schedule-1-timeline-january-2026" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2656,69 +2784,104 @@
 <h2 id="team-1-participants-and-responsibilities">Team-1: Participants and Responsibilities<a class="headerlink" href="#team-1-participants-and-responsibilities" title="Permanent link">&para;</a></h2>
 <h3 id="central-coordination">Central Coordination<a class="headerlink" href="#central-coordination" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Shawn McKee (U. Michigan)</strong>: Lead, test plan owner, fasterdata-tuning.sh expert</li>
-<li><strong>Lincoln Bryant (U. Wisconsin)</strong>: Testing infrastructure, data analysis</li>
+<li><strong>Shawn McKee (U. Michigan)</strong>: Lead, test plan owner, network tuning (fasterdata-tuning.sh) expert</li>
+<li><strong>Lincoln Bryant (U. Wisconsin)</strong>: Testing infrastructure, data analysis, automation</li>
 <li><strong>Eduardo Bach (UC San Diego/SuperCC)</strong>: Network monitoring, results validation</li>
+<li><strong>TBD (Storage Expert)</strong>: Storage tuning lead, I/O scheduler and benchmark tool expert</li>
 </ul>
 <h3 id="uscms-sites-2-sites">USCMS Sites (2 sites)<a class="headerlink" href="#uscms-sites-2-sites" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>T1 Site (Fermilab)</strong></li>
-<li>Proponent: [Site admin name]</li>
+<li><strong>Network Proponent</strong>: [Site admin name]</li>
+<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Responsibilities</strong>: <ul>
+<li>Deploy network tuning on 2 test nodes; run baseline and tuned test cycles (iperf3, netperf)</li>
+<li>Identify and try I/O scheduler options for storage tests; baseline and tune on 2 storage nodes</li>
+<li>Run fio benchmarks (seq-read, rand-read, seq-write); document storage hardware and firmware</li>
+</ul>
+</li>
 <li>
-<p>Responsibilities: Deploy on 2 test nodes, run baseline and tuned test cycles, report results</p>
+<p><strong>Effort</strong>: ~4–5 hours per site</p>
 </li>
 <li>
 <p><strong>T2 Site (Purdue)</strong></p>
 </li>
-<li>Proponent: [Site admin name]</li>
-<li>Responsibilities: Same as above; additional focus on multi-flow workloads</li>
+<li><strong>Network Proponent</strong>: [Site admin name]</li>
+<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Responsibilities</strong>: <ul>
+<li>Same as Fermilab; additional focus on multi-flow workloads and NUMA-aware storage tuning</li>
+<li>Explore <code>numactl</code> affinity for I/O processes if storage controller supports it</li>
+</ul>
+</li>
+<li><strong>Effort</strong>: ~5–6 hours per site</li>
 </ol>
 <h3 id="usatlas-sites-2-sites">USATLAS Sites (2 sites)<a class="headerlink" href="#usatlas-sites-2-sites" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>T1 Site (BNL)</strong></li>
-<li>Proponent: [Site admin name]</li>
+<li><strong>Network Proponent</strong>: [Site admin name]</li>
+<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Responsibilities</strong>: <ul>
+<li>Deploy on 2 network test nodes; focus on stability and rollback validation</li>
+<li>Deploy storage tuning; validate rollback procedure</li>
+<li>Extensive error log collection for compatibility analysis</li>
+</ul>
+</li>
 <li>
-<p>Responsibilities: Deploy on 2 test nodes, focus on stability and rollback validation</p>
+<p><strong>Effort</strong>: ~5–6 hours per site</p>
 </li>
 <li>
 <p><strong>T2 Site (UC Irvine)</strong></p>
 </li>
-<li>Proponent: [Site admin name]</li>
-<li>Responsibilities: Same as above; additional focus on hardware compatibility (mixed NIC types)</li>
+<li><strong>Network Proponent</strong>: [Site admin name]</li>
+<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Responsibilities</strong>: <ul>
+<li>Same as BNL; additional focus on hardware compatibility (mixed NIC types and storage controllers)</li>
+<li>Document any firmware-specific I/O scheduler constraints</li>
+</ul>
+</li>
+<li><strong>Effort</strong>: ~5–6 hours per site</li>
 </ol>
 <h3 id="advisory-committee">Advisory Committee<a class="headerlink" href="#advisory-committee" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Eli Dart (LBNL/ESnet)</strong>: Fasterdata recommendations validation</li>
+<li><strong>Eli Dart (LBNL/ESnet)</strong>: Network tuning (Fasterdata) validation and guidance</li>
 <li><strong>Dale Carder (LBNL)</strong>: Storage and network architecture guidance</li>
-<li>Additional WLCG Network Operations contacts as needed</li>
+<li><strong>[TBD Storage Architect]</strong>: Storage tuning best practices and I/O scheduler recommendations</li>
+<li><strong>Additional WLCG Network Operations and Storage contacts</strong> as needed</li>
 </ul>
 <h3 id="communication">Communication<a class="headerlink" href="#communication" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Weekly syncs</strong>: Mondays 2 PM ET during active testing phases</li>
-<li><strong>Shared spreadsheet</strong>: Track test runs, measurement results, issues, and blockers</li>
-<li><strong>Central repo</strong>: All logs, scripts, and analysis pushed to <code>/root/Git-Repositories/networking/</code> branch <code>mini-challenge-1</code></li>
+<li><strong>Weekly syncs</strong>: Mondays 2 PM ET during active testing phases (Jan–Mar 2026)</li>
+<li><strong>Shared spreadsheet</strong>: Track test runs, measurement results (network throughput, storage IOPS, latency), issues, and blockers</li>
+<li><strong>Central repo</strong>: All logs, scripts, Ansible playbooks, and analysis pushed to <code>/root/Git-Repositories/networking/</code> branch <code>mini-challenge-1</code></li>
+<li><strong>Escalation</strong>: Any blocker (hardware failure, data corruption, driver bug) reported immediately to central coordination team</li>
 </ul>
 <h2 id="evaluation-criteria-1-success-metrics-and-decision-framework">Evaluation Criteria-1: Success Metrics and Decision Framework<a class="headerlink" href="#evaluation-criteria-1-success-metrics-and-decision-framework" title="Permanent link">&para;</a></h2>
 <h3 id="success-criteria">Success Criteria<a class="headerlink" href="#success-criteria" title="Permanent link">&para;</a></h3>
 <ol>
-<li>✅ <strong>Data quality</strong>: Baseline and tuned measurements completed for ≥80% of planned test cycles</li>
-<li>✅ <strong>No regressions</strong>: Throughput does not decrease by &gt;5% after tuning (or isolated to specific hardware)</li>
+<li>✅ <strong>Data quality</strong>: Baseline and tuned measurements completed for ≥80% of planned test cycles (network and storage)</li>
+<li>✅ <strong>No regressions</strong>: Throughput does not decrease by &gt;5% after tuning; latency does not increase by &gt;10% (or isolated to specific hardware)</li>
 <li>✅ <strong>Stability</strong>: All nodes complete test phases without unplanned reboots or service errors</li>
 <li>✅ <strong>Reproducibility</strong>: Tuning changes are consistently applied and measured across all sites</li>
-<li>✅ <strong>Cost acceptable</strong>: Total site effort ≤20 hours per site</li>
+<li>✅ <strong>Cost acceptable</strong>: Total site effort ≤25 hours per site (network + storage)</li>
+<li>✅ <strong>Storage insights</strong>: I/O scheduler recommendations documented for each site's hardware</li>
 </ol>
 <h3 id="gono-go-decision-framework">Go/No-Go Decision Framework<a class="headerlink" href="#gono-go-decision-framework" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Go for production recommendation</strong>: If ≥2 sites show ≥5% improvement with no major regressions</li>
-<li><strong>Conditional recommendation</strong>: If improvement is site-specific or hardware-specific; recommend per-site evaluation</li>
-<li><strong>No recommendation</strong>: If no improvement observed or regressions encountered; document findings and defer</li>
+<li><strong>Go for production recommendation</strong>: If ≥2 sites show ≥5% improvement in network throughput OR ≥5% improvement in storage I/O, with no major regressions</li>
+<li><strong>Conditional recommendation</strong>: If improvement is site-specific or hardware-specific (e.g., NVMe benefits from noop, SSD from mq-deadline); recommend per-site evaluation and document constraints</li>
+<li><strong>Partial recommendation</strong>: If only network OR only storage shows improvement; recommend for the subsystem showing gains; defer other pending resolution</li>
+<li><strong>No recommendation</strong>: If no improvement observed or significant regressions encountered; document findings and defer for future kernel/driver versions</li>
 </ul>
 <h2 id="results-1-summary-and-follow-up">Results-1: Summary and Follow-Up<a class="headerlink" href="#results-1-summary-and-follow-up" title="Permanent link">&para;</a></h2>
-<p><em>To be completed by March 2026.</em></p>
+<p><em>To be completed by March 14, 2026.</em></p>
 <ul>
-<li><strong>Aggregate throughput improvement</strong>: [TBD]</li>
-<li><strong>Sites deploying to production</strong>: [TBD]</li>
+<li><strong>Aggregate network throughput improvement</strong>: [TBD]</li>
+<li><strong>Aggregate storage I/O improvement</strong>: [TBD]</li>
+<li><strong>Sites deploying network tuning to production</strong>: [TBD]</li>
+<li><strong>Sites deploying storage tuning to production</strong>: [TBD]</li>
 <li><strong>Key lessons learned</strong>: [TBD]</li>
+<li><strong>I/O scheduler recommendations by hardware type</strong>: [TBD]</li>
+<li><strong>NUMA affinity impact</strong>: [TBD]</li>
 <li><strong>Recommended next steps</strong>: [TBD]</li>
 <li><strong>Full report location</strong>: <code>/root/Git-Repositories/networking/docs/reports/mini-challenge-1-final-report.md</code> (or similar)</li>
 </ul>
