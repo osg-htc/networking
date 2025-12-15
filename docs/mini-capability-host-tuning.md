@@ -52,11 +52,11 @@ Per the WLCG Capability Test Framework, this table tracks all mini-challenges an
 This document tracks mini-challenge instances. Clone the section below for each new challenge, incrementing N.
 
 ## Participants
-(Please add your name): Shawn McKee, Lincoln Bryant, Eduardo Bach, Eli Dart, Diego Davila, Garhan Attebury, Asif Shaw, Carlos Gamboa, Hiro Ito, Wendy Dronen, Philippe Laurens
+(Please add your name): Shawn McKee, Eduardo Bach, Eli Dart, Diego Davila, Garhan Attebury, Asif Shaw, Carlos Gamboa, Hiro Ito, Wendy Dronen, Philippe Laurens
 
 **Participants & Roles**
 - **Shawn McKee (AGLT2 / University of Michigan)**: Lead, test plan owner, dCache, networking and storage expert; organizing mini-capability challenges and central coordination.
-- **Lincoln Bryant (U. Wisconsin)**: Testing infrastructure, automation, data analysis and result aggregation.
+- **[Vacant]**: Testing infrastructure, automation, data aggregation (role open; volunteers welcome).
 - **Eduardo Bach (UC San Diego / SuperCC)**: Network monitoring, dCache and network admin, results validation.
 - **Eli Dart (LBNL / ESnet)**: Fasterdata and perfSONAR expert; advisory role on network tuning validation.
 - **Diego Davila (UCSD / USCMS T2)**: Storage and network expert; CMS data transfer configuration and testing lead.
@@ -454,7 +454,7 @@ If a site observes instability, performance regression, or compatibility issues:
 
 ### Central Coordination
 - **Shawn McKee (U. Michigan / AGLT2)**: Lead, test plan owner, dCache, network and storage tuning expert; main organizer and contact for mini-challenge logistics
-- **Lincoln Bryant (U. Wisconsin)**: Testing infrastructure, automation, data aggregation and analysis; test harness lead
+- **[Volunteer Needed]**: Testing infrastructure, automation, data aggregation and analysis; test harness lead (volunteer needed)
 - **Eduardo Bach (UC San Diego / SuperCC)**: Network monitoring, perfSONAR coordination and results validation; dCache and network admin
 - **Eli Dart (LBNL / ESnet)**: Fasterdata advisor, perfSONAR and network tuning validation
 - **Diego Davila (UCSD / USCMS T2)**: Storage and CMS data transfer expert; assists with transfer-job setup and validation
