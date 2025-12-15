@@ -2435,8 +2435,8 @@
 - <strong>Asif Shaw (Fermilab / USCMS T1)</strong>: CMS network and systems expert; FNAL site proponent and transfer testing lead.
 - <strong>Carlos Gamboa (BNL / USATLAS T1)</strong>: BNL dCache manager; storage tuning and compatibility lead.
 - <strong>Hiro Ito (BNL)</strong>: FTS and ATLAS data transfer expert; transfer orchestration and validation.
-- <strong>Wendy Dronen (AGLT2 / U. Michigan)</strong>: System administrator and site operator at AGLT2.
-- <strong>Philippe Laurens (AGLT2 / Michigan State)</strong>: System administrator and AGLT2 site operator.
+- <strong>Wendy Dronen (AGLT2 / U. Michigan)</strong>: System administrator and UM site operator at AGLT2.
+- <strong>Philippe Laurens (AGLT2 / Michigan State)</strong>: System administrator and AGLT2 MSU site operator.
 - <strong>Others</strong>: Additional participants may join; list to be updated as volunteers sign up. </p>
 <h1 id="capability-challenge-1-comprehensive-host-optimization-testing-january-2026">Capability Challenge 1: Comprehensive Host Optimization Testing (January 2026)<a class="headerlink" href="#capability-challenge-1-comprehensive-host-optimization-testing-january-2026" title="Permanent link">&para;</a></h1>
 <h2 id="overview-and-advantages">Overview and Advantages<a class="headerlink" href="#overview-and-advantages" title="Permanent link">&para;</a></h2>
@@ -2500,10 +2500,11 @@
 <ul>
 <li><strong>Minimal risk</strong>: Tuning changes are reversible; state save/restore feature enables easy rollback</li>
 <li><strong>Staged rollout</strong>: Start with 1–2 dedicated data transfer nodes per site before broader deployment (may be production or pre-production nodes)</li>
+<li><strong>Production operations</strong>: All testing is performed while regular production transfers and operations are underway; tests will introduce additional transfer flows to stress storage and transfer infrastructure. Coordinate test timing and throttling with site operations to avoid unacceptable disruption.</li>
 <li><strong>Hardware diversity</strong>: Include varied NIC types (Broadcom, Mellanox, Intel) and bond/VLAN configurations to validate tool robustness</li>
 <li><strong>Storage infrastructure</strong>: Sites use existing production storage (dCache, XRootD, EOS); no new storage deployment required</li>
-<li><strong>Real-world workloads</strong>: Test WAN transfers using actual data transfer protocols and tools (GridFTP, XRootD, FTS, Rucio)</li>
-<li><strong>Baseline preservation</strong>: Maintain unmodified reference nodes for comparison; measure baseline WAN transfer performance before tuning</li>
+<li><strong>Real-world workloads</strong>: Test WAN transfers using actual data transfer protocols and tools (GridFTP, XRootD, FTS, Rucio) and complementary synthetic stress flows to expose bottlenecks</li>
+<li><strong>Baseline preservation</strong>: Maintain unmodified reference nodes for comparison; measure baseline WAN transfer performance and current production load before tuning</li>
 </ul>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2538,8 +2539,7 @@
    - CPU utilization (top, sar) for data transfer process and kernel I/O
    - Memory usage and TCP buffer utilization
    - I/O wait percentage (iostat, sar)
-   - Network statistics (ethtool -S, retransmits, drops)
-4. Capture system configuration (kernel, NIC drivers, firmware, storage software versions)
+   - Network statistics (ethtool -S, retransmits, drops)   - <strong>Record production load</strong>: Note baseline production transfer rates and schedule windows; document typical transfer concurrency so added test flows can be interpreted in context4. Capture system configuration (kernel, NIC drivers, firmware, storage software versions)
 4. Save baseline state and record the saved filename (example):
    - <code>sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline</code>
    - Run <code>sudo /usr/local/bin/fasterdata-tuning.sh --list-states</code> to note the saved filename (e.g., <code>/var/lib/fasterdata-tuning/saved-states/20251210T143000Z-baseline.json</code>) and include it in test logs</p>
@@ -2600,7 +2600,7 @@
 <p>For storage changes use an Ansible playbook that sets <code>/sys/block/*/queue/scheduler</code> and any NUMA affinity settings.
 4. <strong>Confirm successful apply</strong>: On all hosts, run an audit to verify the expected changes are in place and collect JSON output to central logging:
    - <code>ansible data-transfer -m shell -a "sudo /usr/local/bin/fasterdata-tuning.sh --mode audit --json" -o &gt; audit-outputs/&lt;config&gt;-audit.json</code>
-5. <strong>Run synchronized WAN transfers</strong>: Coordinate start times (within 1 minute) across sites and run the signed transfer jobs (GridFTP/FTS/XRootD) for the defined duration. Collect per-host and transfer-system logs.
+5. <strong>Run synchronized WAN transfers</strong>: Coordinate start times (within 1 minute) across sites and run the signed transfer jobs (GridFTP/FTS/XRootD) for the defined duration. These runs may include additional synthetic/stress transfer flows (short-duration bursts or long-run sustained flows) specifically designed to stress storage and transfer subsystems while production transfers continue. Collect per-host, production, and transfer-system logs and note any service impact or throttling events.
 6. <strong>Save tuned state</strong>: After verification and before heavy testing, save the tuned state on each host:
    - <code>sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label network-tuned</code>
 7. <strong>Repeat for each configuration</strong>: Restore baseline or apply the next configuration across all hosts and repeat steps 4–6. For restore between configs use <code>--restore-state</code> with the recorded baseline file or the appropriate saved-state file for that configuration.
@@ -2609,6 +2609,7 @@
 - All hosts report the expected audit results (<code>--mode audit --json</code>) for the current configuration
 - Saved state files are present and recorded centrally for each host
 - Transfer job start times are synchronized (within 1 minute) across all sites
+- Record production transfer load and note interactions with added stress flows
 - Logs (GridFTP, XRootD, FTS, perfSONAR, host metrics) are collected and archived under <code>logs/&lt;config&gt;/</code>
 - After restore, a short transfer confirms baseline behavior</p>
 <p>Notes and cautions:
