@@ -2406,7 +2406,7 @@
 <td>Planned</td>
 <td>Jan 10, 2026</td>
 <td>Mar 14, 2026</td>
-<td>FNAL, Purdue, BNL, UCI</td>
+<td>FNAL, UCSD, Nebraska, BNL, AGLT2, NET2</td>
 <td>Network (Fasterdata), Storage I/O, CPU affinity</td>
 <td>TBD</td>
 </tr>
@@ -2528,7 +2528,7 @@
 <h3 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Permanent link">&para;</a></h3>
 <h4 id="phase-1-setup-and-baseline-week-12">Phase 1: Setup and Baseline (Week 1–2)<a class="headerlink" href="#phase-1-setup-and-baseline-week-12" title="Permanent link">&para;</a></h4>
 <p><strong>WAN Data Transfer Baseline</strong> (PRIMARY):
-1. Deploy test harness on 2 USCMS + 2 USATLAS sites (4 sites total; 2 data transfer nodes per site)
+1. Deploy test harness on 3 USCMS + 3 USATLAS sites (6 sites total; 2 data transfer nodes per site)
 2. Perform baseline WAN data transfer measurements (no tuning applied):
    - <strong>GridFTP/FTS transfers</strong>: 1-hour sustained transfer to remote WLCG site; measure throughput, transfer time, stalls
    - <strong>XRootD transfers</strong> (if available): Read/write to remote XRootD endpoint; measure throughput and latency
@@ -2940,10 +2940,15 @@
 </tbody>
 </table>
 <p><strong>Key Milestones</strong>:
+- Dec 18, 2025: Submit CHEP 2026 abstract
 - Jan 10: Participant kickoff call
 - Jan 24: All sites ready for testing
 - Feb 7: Interim results discussion
+- Feb 9–13, 2026: Report initial results at ATLAS Software &amp; Computing Week
 - Mar 14: Final presentation at next WLCG or LHCONE meeting</p>
+<p><strong>Conference &amp; Publication Milestones</strong>:
+- May 25–29, 2026: Present results at CHEP 2026
+- Jun 30, 2026: Finalize CHEP paper on results</p>
 <h2 id="team-1-participants-and-responsibilities">Team-1: Participants and Responsibilities<a class="headerlink" href="#team-1-participants-and-responsibilities" title="Permanent link">&para;</a></h2>
 <h3 id="central-coordination">Central Coordination<a class="headerlink" href="#central-coordination" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2954,14 +2959,14 @@
 <li><strong>Diego Davila (UCSD / USCMS T2)</strong>: Storage and CMS data transfer expert; assists with transfer-job setup and validation</li>
 <li><strong>Hiro Ito (BNL)</strong>: FTS and transfer orchestration expert; advisor for ATLAS transfer testing</li>
 </ul>
-<h3 id="uscms-sites-2-sites">USCMS Sites (2 sites)<a class="headerlink" href="#uscms-sites-2-sites" title="Permanent link">&para;</a></h3>
+<h3 id="uscms-sites-3-sites">USCMS Sites (3 sites)<a class="headerlink" href="#uscms-sites-3-sites" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>T1 Site (Fermilab)</strong></li>
 <li><strong>Network Proponent</strong>: Asif Shaw (FNAL)</li>
 <li><strong>Storage/Data Transfer Proponent</strong>: [Site storage or data transfer engineer]</li>
 <li><strong>Responsibilities</strong>: <ul>
-<li>Deploy network tuning on 2 data transfer nodes (production or pre-production)</li>
-<li>Baseline and tuned WAN transfer tests: GridFTP/FTS to remote T1/T2 sites, perfSONAR validation</li>
+<li>Deploy network tuning on data transfer nodes (production or pre-production)</li>
+<li>Baseline and tuned WAN transfer tests: GridFTP/FTS to remote sites, perfSONAR validation</li>
 <li>Storage tuning: Identify and apply best I/O scheduler for GridFTP backends</li>
 <li>Monitor host impact: CPU, I/O wait, retransmits during WAN transfers</li>
 <li>Document compatibility and any site-specific constraints</li>
@@ -2971,30 +2976,71 @@
 <p><strong>Effort</strong>: ~7–8 hours per site</p>
 </li>
 <li>
-<p><strong>T2 Site (Purdue)</strong></p>
+<p><strong>T2 Site (UCSD)</strong></p>
 </li>
-<li><strong>Network Proponent</strong>: [Site admin name]</li>
-<li><strong>Storage/Data Transfer Proponent</strong>: [Site storage or data transfer engineer]</li>
+<li><strong>Network Proponent</strong>: Diego Davila (UCSD)</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: Diego Davila (UCSD)</li>
 <li><strong>Responsibilities</strong>: <ul>
-<li>Same as Fermilab; focus on XRootD or HTTP-based transfers if dCache not used</li>
+<li>Same as Fermilab; focus on UCSD transfer infrastructure and XRootD/CMS workflows</li>
 <li>Explore NUMA-aware tuning for data transfer processes if applicable</li>
 <li>Test multi-flow WAN transfers (concurrent FTS jobs) to validate tuning under load</li>
 </ul>
 </li>
+<li>
+<p><strong>Effort</strong>: ~7–8 hours per site</p>
+</li>
+<li>
+<p><strong>T3 Site (Nebraska)</strong></p>
+</li>
+<li><strong>Network Proponent</strong>: Garhan Attebury (University of Nebraska)</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: [Site storage or data transfer engineer]</li>
+<li><strong>Responsibilities</strong>: <ul>
+<li>Deploy tuning and run baseline/tuned WAN transfer tests; focus on Nebraskan infrastructure</li>
+<li>Validate multi-site transfer behavior and concurrency under load</li>
+<li>Document any site-specific constraints or firmware issues</li>
+</ul>
+</li>
 <li><strong>Effort</strong>: ~7–8 hours per site</li>
 </ol>
-<h3 id="usatlas-sites-2-sites">USATLAS Sites (2 sites)<a class="headerlink" href="#usatlas-sites-2-sites" title="Permanent link">&para;</a></h3>
+<h3 id="usatlas-sites-3-sites">USATLAS Sites (3 sites)<a class="headerlink" href="#usatlas-sites-3-sites" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>T1 Site (BNL)</strong></li>
 <li><strong>Network Proponent</strong>: [Site admin name]</li>
 <li><strong>Storage/Data Transfer Proponent</strong>: Carlos Gamboa (BNL)</li>
 <li><strong>Responsibilities</strong>: <ul>
-<li>Deploy on 2 data transfer nodes; focus on stability and rollback validation</li>
+<li>Deploy on data transfer nodes; focus on stability and rollback validation</li>
 <li>Baseline and tuned WAN transfer tests: XRootD, GridFTP, or Rucio/FTS transfers to remote sites</li>
 <li>Storage tuning: Test I/O scheduler options for EOS or dCache storage backend</li>
 <li>Collaborate with Hiro Ito for FTS orchestration and ATLAS-specific transfer validation</li>
 <li>Extensive error log collection for dCache/XRootD compatibility analysis</li>
 <li>Validate rollback procedure does not disrupt production transfers</li>
+</ul>
+</li>
+<li>
+<p><strong>Effort</strong>: ~7–8 hours per site</p>
+</li>
+<li>
+<p><strong>T2 Site (AGLT2)</strong></p>
+</li>
+<li><strong>Network Proponent</strong>: Wendy Dronen (AGLT2)</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: Shawn McKee (AGLT2)</li>
+<li><strong>Responsibilities</strong>: <ul>
+<li>Same as BNL; additional focus on AGLT2 hardware and mixed NIC compatibility</li>
+<li>Validate tuning against AGLT2 dCache pools and transfer nodes</li>
+<li>Document any firmware-specific constraints for storage or NIC drivers</li>
+</ul>
+</li>
+<li>
+<p><strong>Effort</strong>: ~7–8 hours per site</p>
+</li>
+<li>
+<p><strong>T3 Site (NET2)</strong></p>
+</li>
+<li><strong>Network Proponent</strong>: Eduardo Bach (NET2)</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: Eduardo Bach (NET2)</li>
+<li><strong>Responsibilities</strong>: <ul>
+<li>NET2 site proponent for ATLAS; validate transfer behavior for ATLAS workflows</li>
+<li>Collaborate on cross-site Global Configuration Sweeps and ATLAS-specific transfer validation</li>
 </ul>
 </li>
 <li>
