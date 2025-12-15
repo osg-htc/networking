@@ -2368,10 +2368,11 @@
 </tbody>
 </table>
 <h2 id="overview-and-rationale">Overview and Rationale<a class="headerlink" href="#overview-and-rationale" title="Permanent link">&para;</a></h2>
-<p>We evaluate comprehensive host optimizations for RHEL 9 systems with high-speed NICs (25/40/100/200/400 Gbps) and high-performance storage (NVMe/SSD). This capability addresses end-to-end data movement performance by optimizing <strong>network</strong>, <strong>storage</strong>, <strong>CPU</strong>, and <strong>memory</strong> subsystems.</p>
-<p><strong>Scope</strong>: Mini-Challenge 1 focuses on two primary areas:
-1. <strong>Network Tuning</strong> (ESnet Fasterdata recommendations): Sysctl buffers, qdisc pacing, ethtool offloads, NIC ring buffers
-2. <strong>Storage Tuning</strong> (New exploration): I/O scheduler selection, storage queue depth, read-ahead, NUMA affinity for storage controllers</p>
+<p>We evaluate comprehensive host optimizations for RHEL 9 systems with high-speed NICs (25/40/100/200/400 Gbps) and high-performance storage (NVMe/SSD, dCache, XRootD, EOS). This capability addresses <strong>WAN (wide-area network) data transfer performance</strong> by optimizing host-level <strong>network</strong>, <strong>storage</strong>, <strong>CPU</strong>, and <strong>memory</strong> subsystems.</p>
+<p><strong>Primary Goal</strong>: Improve site ability to transfer data across the WAN by tuning hosts to better utilize available bandwidth and reduce transfer latency.</p>
+<p><strong>Scope</strong>: Mini-Challenge 1 optimizes two host subsystems that impact WAN data transfer performance:
+1. <strong>Network Tuning</strong> (ESnet Fasterdata recommendations): Sysctl buffers, qdisc pacing, ethtool offloads, NIC ring buffers — enables full utilization of high-speed links
+2. <strong>Storage Tuning</strong> (New exploration): I/O scheduler selection, storage queue depth, read-ahead, NUMA affinity — reduces I/O wait that throttles data transfer throughput</p>
 <p><strong>Note on Prior Work</strong>: An earlier test of congestion control protocols (Edoardo, DC24) focused on algorithm selection alone (BBR vs CUBIC) — no gains observed. This mini-challenge expands scope to:
 - <strong>Sysctl TCP buffer tuning</strong> (rmem/wmem scaled by link speed)
 - <strong>Qdisc packet pacing</strong> (fq for fair scheduling, tbf for rate capping)
@@ -2381,7 +2382,10 @@
 - <strong>Storage queue depth and I/O concurrency optimization</strong>
 - <strong>NUMA-aware memory and I/O affinity</strong>
 - <strong>Automated audit and state management</strong> (safe rollback via <code>fasterdata-tuning.sh</code> and storage tuning tools)</p>
-<p>The hypothesis is that <strong>comprehensive host optimization across all subsystems</strong> (not individual components in isolation) provides significant throughput and latency improvements, with measurable benefit for data-intensive workflows (HTC, HPC, AI/ML).</p>
+<p>The hypothesis is that <strong>comprehensive host optimization across all subsystems</strong> (not individual components in isolation) provides significant WAN data transfer throughput and latency improvements, with measurable benefit for:
+- <strong>Data-intensive workflows</strong> (HTC job input/output staging, HPC dataset transfers, AI/ML training data)
+- <strong>Site data transfer capacity</strong> (higher effective bandwidth utilization, fewer stalled transfers)
+- <strong>Operational efficiency</strong> (reduced transfer time, lower host CPU utilization per Gbps transferred)</p>
 <h2 id="capability-tracking-table">Capability Tracking Table<a class="headerlink" href="#capability-tracking-table" title="Permanent link">&para;</a></h2>
 <p>Per the WLCG Capability Test Framework, this table tracks all mini-challenges and their status:</p>
 <table>
@@ -2442,59 +2446,70 @@
 - Storage tuning playbooks and tools (Ansible for I/O scheduler, queue depth; <code>fio</code> / <code>iozone</code> for benchmarks)</p>
 <h3 id="objectives">Objectives<a class="headerlink" href="#objectives" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Validate network tuning effectiveness</strong>: Measure throughput and latency improvements with Fasterdata tuning applied vs. baseline</li>
-<li><strong>Validate storage tuning effectiveness</strong>: Measure storage I/O throughput and latency with tuning applied vs. baseline</li>
-<li><strong>Test automation reliability</strong>: Confirm <code>fasterdata-tuning.sh</code> and storage playbooks complete without errors across diverse hardware</li>
-<li><strong>Evaluate operational cost</strong>: Assess prerequisites, deployment time, post-apply stability, resource overhead</li>
-<li><strong>Document best practices</strong>: Provide deployment guidance for network, storage, and CPU/memory optimization</li>
-<li><strong>Identify site-specific constraints</strong>: Discover hardware/firmware limitations (e.g., NIC driver bugs, storage controller limits)</li>
+<li><strong>Validate WAN data transfer performance improvement</strong>: Measure real-world data transfer throughput and latency (GridFTP, XRootD, HTTP/WebDAV) with host tuning applied vs. baseline</li>
+<li><strong>Validate host tuning effectiveness</strong>: Use perfSONAR and diagnostic tools (iperf3, fio) to isolate network and storage bottlenecks</li>
+<li><strong>Quantify host impact</strong>: Measure CPU utilization, memory usage, and I/O wait reduction during WAN transfers</li>
+<li><strong>Test automation reliability</strong>: Confirm <code>fasterdata-tuning.sh</code> and storage playbooks complete without errors on production data transfer nodes</li>
+<li><strong>Evaluate operational cost</strong>: Assess prerequisites, deployment time, post-apply stability, resource overhead on production infrastructure (dCache, XRootD, EOS)</li>
+<li><strong>Document best practices</strong>: Provide deployment guidance for network, storage, and CPU/memory optimization tailored to data transfer workloads</li>
+<li><strong>Identify site-specific constraints</strong>: Discover hardware/firmware limitations and storage software compatibility (e.g., dCache with fq pacing, XRootD with I/O scheduler changes)</li>
 <li><strong>Inform WLCG infrastructure decisions</strong>: Gather evidence for whether host tuning should become a recommended best practice</li>
 </ol>
 <h3 id="key-considerations">Key Considerations<a class="headerlink" href="#key-considerations" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Minimal risk</strong>: Tuning changes are reversible; state save/restore feature enables easy rollback</li>
-<li><strong>Staged rollout</strong>: Start with 1–2 dedicated test nodes per site before broader deployment</li>
+<li><strong>Staged rollout</strong>: Start with 1–2 dedicated data transfer nodes per site before broader deployment (may be production or pre-production nodes)</li>
 <li><strong>Hardware diversity</strong>: Include varied NIC types (Broadcom, Mellanox, Intel) and bond/VLAN configurations to validate tool robustness</li>
-<li><strong>Network isolation</strong>: Test data transfers occur on dedicated test networks to avoid production impact</li>
-<li><strong>Baseline preservation</strong>: Maintain unmodified reference nodes for comparison</li>
+<li><strong>Storage infrastructure</strong>: Sites use existing production storage (dCache, XRootD, EOS); no new storage deployment required</li>
+<li><strong>Real-world workloads</strong>: Test WAN transfers using actual data transfer protocols and tools (GridFTP, XRootD, FTS, Rucio)</li>
+<li><strong>Baseline preservation</strong>: Maintain unmodified reference nodes for comparison; measure baseline WAN transfer performance before tuning</li>
 </ul>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Network</strong>:</li>
+<li><strong>Data Transfer Infrastructure</strong>:</li>
+<li>Production or pre-production data transfer nodes (GridFTP, XRootD, FTS, dCache, EOS)</li>
 <li>RHEL 9.x systems with 25 Gbps or faster NICs</li>
-<li>Dedicated test network or isolated VLAN for data transfer tests</li>
-<li>Data transfer tools (iperf3, iperf, gridftp) and monitoring infrastructure (netflow, packet sniffers)</li>
-<li>Administrative access to apply sysctl, ethtool, and tc commands</li>
+<li>WAN connectivity to remote test endpoints (other WLCG sites or perfSONAR nodes)</li>
+<li>perfSONAR nodes or testpoints for baseline network validation</li>
+<li>Data transfer monitoring (FTS logs, XRootD monitoring, GridFTP logs, perfSONAR dashboards)</li>
+<li><strong>Network</strong>:</li>
+<li>Administrative access to apply sysctl, ethtool, and tc commands on data transfer nodes</li>
+<li>Ability to test on production or dedicated data transfer VLANs</li>
+<li>Network diagnostic tools (iperf3, netperf, ping, traceroute, mtr)</li>
 <li><strong>Storage</strong>:</li>
-<li>RHEL 9.x systems with NVMe or SSD storage</li>
-<li>Dedicated storage test paths (can be on shared storage, isolated by filesystem mount point)</li>
-<li>Storage benchmarking tools (fio, iozone, bonnie++)</li>
+<li>Existing production storage (dCache, XRootD, EOS, NFS, or direct-attached NVMe/SSD)</li>
 <li>I/O scheduler change capability (change via <code>/sys/block/*/queue/scheduler</code>)</li>
-<li>Monitoring infrastructure (iostat, pmdk/ndctl for NVMe, custom I/O profiling if desired)</li>
+<li>Storage diagnostic tools (fio, iostat, iotop)</li>
 <li><strong>General</strong>:</li>
-<li>Systems administration time for coordination and troubleshooting (~5–6 hours per site)</li>
-<li>Centralized communication and result tracking mechanism (shared spreadsheet, git repo)</li>
+<li>Systems administration and storage operations time (~6–8 hours per site)</li>
+<li>Centralized communication and result tracking (shared spreadsheet, git repo, weekly syncs)</li>
 </ul>
 <h3 id="procedure">Procedure<a class="headerlink" href="#procedure" title="Permanent link">&para;</a></h3>
 <h4 id="phase-1-setup-and-baseline-week-12">Phase 1: Setup and Baseline (Week 1–2)<a class="headerlink" href="#phase-1-setup-and-baseline-week-12" title="Permanent link">&para;</a></h4>
-<p><strong>Network Testing</strong>:
-1. Deploy network test harness on 2 USCMS + 2 USATLAS sites (4 sites total; 2 nodes per site)
-2. Perform network baseline measurements (no tuning applied):
-   - Single-flow and multi-flow TCP throughput (iperf3)
-   - Latency and jitter percentiles (iperf3 histogram)
-   - CPU utilization and context switches (top, /proc/stat)
-   - Memory footprint and cache misses (sysstat, perf)
-3. Capture network system configuration (kernel, NIC drivers, firmware versions, ethtool -i)
-4. Save network baseline state using <code>fasterdata-tuning.sh --save-state</code></p>
-<p><strong>Storage Testing</strong>:
-1. Identify baseline I/O scheduler for each storage device (cat /sys/block/*/queue/scheduler)
-2. Perform storage baseline measurements (existing I/O scheduler):
-   - Sequential read throughput (fio seq-read, direct I/O, large block size)
-   - Random read IOPS and latency (fio rand-read, 4K blocks, percentiles)
-   - Sequential write throughput (fio seq-write, direct I/O)
-   - Write latency (fio, percentiles)
-3. Capture storage system configuration (device model, firmware, NUMA topology, queue depth settings)
-4. Document baseline I/O scheduler and any custom queue settings</p>
+<p><strong>WAN Data Transfer Baseline</strong> (PRIMARY):
+1. Deploy test harness on 2 USCMS + 2 USATLAS sites (4 sites total; 2 data transfer nodes per site)
+2. Perform baseline WAN data transfer measurements (no tuning applied):
+   - <strong>GridFTP/FTS transfers</strong>: 1-hour sustained transfer to remote WLCG site; measure throughput, transfer time, stalls
+   - <strong>XRootD transfers</strong> (if available): Read/write to remote XRootD endpoint; measure throughput and latency
+   - <strong>HTTP/WebDAV</strong> (if available): Download/upload tests to remote storage endpoint
+   - <strong>perfSONAR tests</strong>: Automated throughput tests to remote perfSONAR nodes; validate link capacity and baseline RTT
+3. Monitor host impact during baseline transfers:
+   - CPU utilization (top, sar) for data transfer process and kernel I/O
+   - Memory usage and TCP buffer utilization
+   - I/O wait percentage (iostat, sar)
+   - Network statistics (ethtool -S, retransmits, drops)
+4. Capture system configuration (kernel, NIC drivers, firmware, storage software versions)
+5. Save baseline state using <code>fasterdata-tuning.sh --save-state</code></p>
+<p><strong>Network Diagnostic Tests</strong> (SECONDARY):
+1. Run perfSONAR on-demand tests (iperf3, ping) to validate link capacity and baseline RTT
+2. Single-flow and multi-flow TCP throughput (iperf3) to isolate pure network performance
+3. Document any observed bottlenecks (CPU saturation, I/O wait, retransmits)</p>
+<p><strong>Storage Diagnostic Tests</strong> (SECONDARY):
+1. Identify baseline I/O scheduler for storage devices (cat /sys/block/*/queue/scheduler)
+2. Run fio benchmarks on storage paths used by data transfer software:
+   - Sequential read/write throughput (large block sizes matching transfer tools)
+   - I/O latency percentiles (p50, p95, p99)
+3. Capture storage system configuration (device model, firmware, NUMA topology, dCache/XRootD/EOS configuration)</p>
 <h4 id="phase-2-deployment-week-34">Phase 2: Deployment (Week 3–4)<a class="headerlink" href="#phase-2-deployment-week-34" title="Permanent link">&para;</a></h4>
 <p><strong>Network Tuning</strong>:
 1. Run audit on all network test nodes: <code>./fasterdata-tuning.sh --mode audit --target measurement</code>
@@ -2510,32 +2525,41 @@
 4. Optionally apply NUMA affinity (if storage controller visible in numa topology): <code>numactl -m N -C N fio [test]</code>
 5. Document selected scheduler and any NUMA settings</p>
 <h4 id="phase-3-performance-testing-week-57-overlaps-phase-2">Phase 3: Performance Testing (Week 5–7, overlaps Phase 2)<a class="headerlink" href="#phase-3-performance-testing-week-57-overlaps-phase-2" title="Permanent link">&para;</a></h4>
-<p><strong>Network Testing</strong> (weekly, 3 iterations per configuration):
-1. Data transfer tests:
-   - 1-hour sustained single-flow TCP transfer (iperf3)
-   - 10 parallel flows (iperf3) to simulate production workload
-   - GridFTP transfers (if available) to test real application behavior
-2. Network protocol validation:
-   - Verify BBR congestion control is active and behaving correctly
+<p><strong>WAN Data Transfer Performance Testing</strong> (PRIMARY - weekly, 2–3 iterations per configuration):
+1. Real-world data transfer tests:
+   - <strong>GridFTP/FTS transfers</strong>: 1–2 hour sustained transfers to remote WLCG sites; measure throughput improvement vs. baseline
+   - <strong>XRootD transfers</strong>: Read/write to remote endpoints; measure throughput and latency improvement
+   - <strong>HTTP/WebDAV</strong>: Upload/download tests; measure throughput and transfer time reduction
+   - <strong>perfSONAR automated tests</strong>: Scheduled throughput tests to validate link utilization improvement
+2. Host impact measurements (compare tuned vs. baseline):
+   - CPU utilization during transfers (should decrease with tuning)
+   - I/O wait percentage (should decrease with storage tuning)
+   - Memory usage and TCP buffer efficiency
+   - Network retransmits and packet loss (should stay low or decrease)
+3. Data transfer software validation:
+   - Verify GridFTP/XRootD/FTS continue to operate correctly with tuning applied
+   - Check for compatibility issues with dCache/XRootD/EOS and fq pacing or I/O scheduler changes
+   - Monitor transfer logs for errors or performance warnings
+4. Stability and long-duration testing:
+   - Run multi-hour transfers (4+ hours) to detect stability issues
+   - Monitor system logs (dmesg, syslog) for errors
+   - Verify no service restarts or transfer failures</p>
+<p><strong>Network Diagnostic Tests</strong> (SECONDARY - for troubleshooting):
+1. perfSONAR on-demand tests (iperf3) to isolate network performance:
+   - Single-flow and multi-flow TCP throughput
+   - Verify BBR congestion control is active and performing correctly
    - Confirm fq qdisc packet pacing without breaking VLAN/bond interfaces
-   - Check for unexpected packet loss or reordering
-3. System stability:
-   - Monitor dmesg for errors or warnings
-   - Check for NIC resets or driver issues
-   - Verify no memory leaks in long-running tests</p>
-<p><strong>Storage Testing</strong> (weekly, 2–3 iterations per configuration):
-1. Run same fio benchmarks as Phase 1 baseline:
-   - Sequential read/write throughput
-   - Random read IOPS and latency (percentiles)
-   - Compare to baseline for same scheduler
-   - Compare different schedulers for same device
-2. Monitor storage system during tests:
-   - iostat -x for I/O queue depth, service time
-   - Check for throttling or command queue saturation
-   - Verify data integrity (md5sum checks on read/write cycles)
-3. Longer-duration stability test:
-   - Run fio for 4+ hours to detect memory leaks or stalls in I/O subsystem
-   - Monitor kernel logs for storage errors or timeouts</p>
+2. Network protocol validation:
+   - Check for unexpected packet loss or reordering (tcpdump sampling)
+   - Verify NIC offloads (GRO/TSO/GSO) are functioning correctly</p>
+<p><strong>Storage Diagnostic Tests</strong> (SECONDARY - for troubleshooting):
+1. Run fio benchmarks to isolate storage performance changes:
+   - Compare sequential read/write throughput to baseline
+   - Measure I/O latency improvement with tuned I/O scheduler
+2. Monitor storage subsystem during data transfers:
+   - iostat -x for I/O queue depth and service time
+   - Verify no storage bottlenecks (queue saturation, throttling)
+   - Check dCache/XRootD/EOS logs for storage-related warnings</p>
 <h4 id="phase-4-costrisk-assessment-week-8">Phase 4: Cost/Risk Assessment (Week 8)<a class="headerlink" href="#phase-4-costrisk-assessment-week-8" title="Permanent link">&para;</a></h4>
 <p><strong>Network Assessment</strong>:
 1. Document time to apply network tuning per site (includes audit, apply, testing)
@@ -2555,7 +2579,68 @@
 <li>Recommendations for production deployment</li>
 </ol>
 <h2 id="metrics-1-measurements-and-monitoring">Metrics-1: Measurements and Monitoring<a class="headerlink" href="#metrics-1-measurements-and-monitoring" title="Permanent link">&para;</a></h2>
-<h3 id="primary-network-metrics">Primary Network Metrics<a class="headerlink" href="#primary-network-metrics" title="Permanent link">&para;</a></h3>
+<h3 id="primary-metrics-wan-data-transfer-performance">Primary Metrics: WAN Data Transfer Performance<a class="headerlink" href="#primary-metrics-wan-data-transfer-performance" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Method</th>
+<th>Target</th>
+<th>Success Criterion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GridFTP/FTS throughput</strong></td>
+<td>Real transfers to remote sites</td>
+<td>Baseline + 10–15%</td>
+<td>Significant improvement</td>
+</tr>
+<tr>
+<td><strong>XRootD transfer throughput</strong></td>
+<td>XRootD read/write to remote endpoint</td>
+<td>Baseline + 10%</td>
+<td>Improvement or stable</td>
+</tr>
+<tr>
+<td><strong>HTTP/WebDAV throughput</strong></td>
+<td>Upload/download to remote storage</td>
+<td>Baseline + 10%</td>
+<td>Improvement or stable</td>
+</tr>
+<tr>
+<td><strong>perfSONAR throughput</strong></td>
+<td>Automated tests to remote nodes</td>
+<td>Link capacity - 5%</td>
+<td>Near-line-rate utilization</td>
+</tr>
+<tr>
+<td><strong>Transfer completion time</strong></td>
+<td>GridFTP/FTS transfer duration</td>
+<td>Baseline - 10%</td>
+<td>Faster transfers</td>
+</tr>
+<tr>
+<td><strong>CPU utilization during transfer</strong></td>
+<td>top, sar (during WAN transfer)</td>
+<td>&lt;70% at saturation</td>
+<td>Improved efficiency</td>
+</tr>
+<tr>
+<td><strong>I/O wait during transfer</strong></td>
+<td>iostat, sar (%iowait)</td>
+<td>&lt;20% during transfer</td>
+<td>Storage not bottleneck</td>
+</tr>
+<tr>
+<td><strong>Network retransmits</strong></td>
+<td>ss -ti, ethtool -S</td>
+<td>&lt;0.01% of packets</td>
+<td>Stable or improved</td>
+</tr>
+</tbody>
+</table>
+<h3 id="secondary-metrics-network-diagnostic-tests-perfsonar-iperf3">Secondary Metrics: Network Diagnostic Tests (perfSONAR, iperf3)<a class="headerlink" href="#secondary-metrics-network-diagnostic-tests-perfsonar-iperf3" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2579,16 +2664,10 @@
 <td>Improvement or no regression</td>
 </tr>
 <tr>
-<td><strong>Latency (p50, p95, p99)</strong></td>
-<td>iperf3 histogram or netperf</td>
-<td>&lt;100μs (p50)</td>
-<td>Stable or improved</td>
-</tr>
-<tr>
-<td><strong>CPU utilization</strong></td>
-<td>top, /proc/stat</td>
-<td>&lt;80% at saturation</td>
-<td>Tuning does not create bottleneck</td>
+<td><strong>RTT latency</strong></td>
+<td>perfSONAR ping, iperf3</td>
+<td>Stable vs. baseline</td>
+<td>No degradation</td>
 </tr>
 <tr>
 <td><strong>Memory usage (TCP buffers)</strong></td>
@@ -2598,7 +2677,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="primary-storage-metrics">Primary Storage Metrics<a class="headerlink" href="#primary-storage-metrics" title="Permanent link">&para;</a></h3>
+<h3 id="secondary-metrics-storage-diagnostic-tests-fio">Secondary Metrics: Storage Diagnostic Tests (fio)<a class="headerlink" href="#secondary-metrics-storage-diagnostic-tests-fio" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -2616,25 +2695,13 @@
 <td>Improvement or stable</td>
 </tr>
 <tr>
-<td><strong>Random read IOPS</strong></td>
-<td>fio (rand-read, 4K blocks)</td>
-<td>Baseline + 5%</td>
-<td>Improvement or stable</td>
-</tr>
-<tr>
-<td><strong>Read latency (p50, p99)</strong></td>
-<td>fio (latency histogram)</td>
-<td>&lt;5ms (p50)</td>
-<td>Stable or improved</td>
-</tr>
-<tr>
 <td><strong>Sequential write throughput</strong></td>
 <td>fio (seq-write, direct I/O)</td>
 <td>Baseline + 5%</td>
 <td>Improvement or stable</td>
 </tr>
 <tr>
-<td><strong>Write latency (p50, p99)</strong></td>
+<td><strong>I/O latency (p50, p99)</strong></td>
 <td>fio (latency histogram)</td>
 <td>&lt;10ms (p50)</td>
 <td>Stable or improved</td>
@@ -2647,55 +2714,66 @@
 </tr>
 </tbody>
 </table>
-<h3 id="secondary-metrics">Secondary Metrics<a class="headerlink" href="#secondary-metrics" title="Permanent link">&para;</a></h3>
+<h3 id="operational-metrics">Operational Metrics<a class="headerlink" href="#operational-metrics" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Network packet loss rate</strong>: Goal &lt;0.01% over sustained transfers</li>
-<li><strong>Network reboot safety</strong>: Tuning persists correctly post-reboot without errors</li>
-<li><strong>Network rollback success</strong>: State restore returns system to baseline state exactly</li>
-<li><strong>Storage I/O scheduler performance</strong>: Compare mq-deadline vs noop vs bfq for your workload</li>
-<li><strong>Network deployment time</strong>: Minutes to complete audit and apply on a node</li>
-<li><strong>Network hardware compatibility</strong>: Pass audit on 100% of tested NIC types (Broadcom, Mellanox, Intel)</li>
-<li><strong>Storage NUMA affinity impact</strong>: Measure latency change when I/O processes are affinized to storage controller NUMA node</li>
-<li><strong>Filesystem cache effectiveness</strong>: Monitor dirty pages, writeback latency, sync stalls</li>
+<li><strong>Data transfer software compatibility</strong>: GridFTP, XRootD, FTS, dCache, EOS operate correctly with tuning</li>
+<li><strong>Reboot safety</strong>: Tuning persists correctly post-reboot; transfers resume without manual intervention</li>
+<li><strong>Rollback success</strong>: State restore returns system to baseline; data transfer performance returns to baseline</li>
+<li><strong>Deployment time</strong>: Minutes to complete audit and apply tuning on a data transfer node</li>
+<li><strong>Hardware compatibility</strong>: Pass audit on 100% of tested NIC types (Broadcom, Mellanox, Intel) and storage backends</li>
+<li><strong>Storage I/O scheduler selection</strong>: Optimal scheduler documented for dCache, XRootD, EOS on different storage hardware</li>
+<li><strong>NUMA affinity impact</strong>: Measure WAN transfer performance change with I/O process affinity to storage controller NUMA node</li>
 </ul>
 <h3 id="monitoring-infrastructure">Monitoring Infrastructure<a class="headerlink" href="#monitoring-infrastructure" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>netperf</strong> or <strong>iperf3</strong> for throughput and latency</li>
-<li><strong>ifstat</strong> / <strong>ethtool -S</strong> for NIC statistics (errors, drops, retransmits)</li>
-<li><strong>sysstat</strong> (sar) for CPU, memory, context switches</li>
-<li><strong>tcpdump</strong> for packet-level inspection (sample-based, not full packet capture)</li>
-<li><strong>systemd journal</strong> for ethtool-persist service logs and errors</li>
+<li><strong>Data transfer logs</strong>: GridFTP transfer logs, XRootD monitoring, FTS dashboard, dCache/EOS admin logs</li>
+<li><strong>perfSONAR</strong>: Automated throughput tests and historical performance data</li>
+<li><strong>iperf3/netperf</strong>: Network diagnostic tests for troubleshooting</li>
+<li><strong>fio</strong>: Storage diagnostic tests for troubleshooting I/O bottlenecks</li>
+<li><strong>sysstat</strong> (sar): CPU, memory, I/O wait, context switches during transfers</li>
+<li><strong>ethtool -S</strong>: NIC statistics (errors, drops, retransmits)</li>
+<li><strong>iostat -x</strong>: Storage I/O queue depth, service time, utilization</li>
+<li><strong>ss -ti</strong>: TCP connection statistics (retransmits, congestion window)</li>
+<li><strong>systemd journal</strong>: ethtool-persist service logs and tuning application errors</li>
 </ul>
 <h2 id="cost-benefit-1-cost-and-benefit-analysis">Cost-Benefit-1: Cost and Benefit Analysis<a class="headerlink" href="#cost-benefit-1-cost-and-benefit-analysis" title="Permanent link">&para;</a></h2>
 <h3 id="benefit-estimation">Benefit Estimation<a class="headerlink" href="#benefit-estimation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Network throughput improvement</strong>: If baseline is 18 Gbps and tuning achieves 20 Gbps (11% gain):</li>
-<li>Benefit = <code>(20 - 18) / 18 × 100 = 11% faster data transfers</code></li>
-<li>Operational impact: ~10% reduction in transfer time for long-running jobs</li>
-<li><strong>Storage I/O improvement</strong>: If baseline is 500 MB/s and storage tuning achieves 550 MB/s (10% gain):</li>
-<li>Benefit = <code>(550 - 500) / 500 × 100 = 10% faster I/O-bound workloads</code></li>
-<li>Operational impact: Data staging time reduced; job turnaround improved for storage-heavy workflows</li>
-<li><strong>CPU efficiency</strong>: Lower CPU utilization per Gbps + per IOPS translates to reduced power consumption and headroom for job scheduling</li>
-<li><strong>Latency reduction</strong>: Lower jitter enables more predictable job scheduling and fewer retransmissions</li>
-<li><strong>Combined impact (network + storage)</strong>: For workflows with both network and storage bottlenecks, combined tuning can deliver 15%+ improvement</li>
+<li><strong>WAN data transfer throughput improvement</strong>: If baseline GridFTP transfer is 15 Gbps and tuning achieves 18 Gbps (20% gain on 100 Gbps link):</li>
+<li>Benefit = <code>(18 - 15) / 15 × 100 = 20% faster WAN transfers</code></li>
+<li>Operational impact: For a site transferring 10 PB/year, this saves ~60 days of transfer time annually</li>
+<li>Cost savings: Reduced transfer duration = lower risk of transfer failures, faster job turnaround</li>
+<li><strong>Host efficiency improvement</strong>: Lower CPU utilization and I/O wait during transfers:</li>
+<li>Benefit: More headroom for concurrent transfers and batch jobs on same host</li>
+<li>Operational impact: Can increase number of concurrent FTS transfers per node by 10–15%</li>
+<li><strong>Storage-bound workload improvement</strong>: If storage I/O is bottleneck, tuning can improve WAN transfer by reducing I/O wait:</li>
+<li>Benefit: Transfers no longer stalled waiting for storage read/write</li>
+<li>Example: XRootD reads complete faster → higher sustained transfer rate</li>
+<li><strong>Latency reduction</strong>: Lower jitter and fewer retransmissions enable more stable high-speed transfers:</li>
+<li>Benefit: Fewer transfer failures and restarts</li>
+<li>Operational impact: Improved success rate for large (multi-TB) file transfers</li>
+<li><strong>Combined impact (network + storage)</strong>: For sites with both network and storage tuning, WAN transfer improvements of 15–25% are achievable</li>
 </ol>
 <h3 id="cost-estimation">Cost Estimation<a class="headerlink" href="#cost-estimation" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Personnel</strong>: </li>
-<li>Site admins (network tuning): 2–4 hours per site for initial setup and monitoring</li>
-<li>Site admins (storage tuning): 2–3 hours per site for I/O scheduler selection, NUMA affinity exploration</li>
-<li>Central team: 6–10 hours for test harness setup, coordination, analysis</li>
-<li><strong>Total: ~50 site-hours across 4 sites</strong></li>
+<li>Site admins (network tuning): 3–4 hours per site for tuning application and WAN transfer testing</li>
+<li>Site storage operations (storage tuning): 2–3 hours per site for I/O scheduler selection and validation</li>
+<li>Site data transfer team: 2–3 hours per site for GridFTP/XRootD/FTS testing and log analysis</li>
+<li>Central team: 8–12 hours for test coordination, perfSONAR setup, result analysis</li>
+<li><strong>Total: ~60–70 site-hours across 4 sites</strong></li>
 <li><strong>Infrastructure</strong>: </li>
-<li>Dedicated test NICs or VLANs (typically already available at HPC sites)</li>
-<li>Test storage paths on existing storage (no new hardware required)</li>
-<li>Storage for baseline captures and test logs (~200 MB per site)</li>
+<li>Use existing production or pre-production data transfer nodes (GridFTP, XRootD, dCache, EOS)</li>
+<li>Use existing perfSONAR nodes for baseline validation</li>
+<li>Use existing WAN connectivity to remote WLCG sites</li>
+<li>Storage for transfer logs and baseline captures (~500 MB per site)</li>
+<li><strong>No new hardware or network infrastructure required</strong></li>
 <li><strong>Runtime</strong>: </li>
-<li>Network baseline testing: 2 hours per node (0.5 days for all 8 nodes)</li>
-<li>Storage baseline testing: 2 hours per node (0.5 days for all 8 nodes)</li>
-<li>Tuned network testing: 3 hours per node (0.75 days for 4 tuned nodes)</li>
-<li>Tuned storage testing: 3 hours per node (0.75 days for 4 tuned nodes)</li>
-<li>Total test runtime: ~3 weeks (overlapping phases)</li>
+<li>WAN transfer baseline testing: 3–4 hours per site (includes multiple transfer tests)</li>
+<li>Network and storage diagnostic baseline: 2 hours per site</li>
+<li>Tuning application and reboot validation: 1 hour per site</li>
+<li>Tuned WAN transfer testing: 4–5 hours per site (includes multiple transfer iterations)</li>
+<li>Total test runtime: ~4 weeks (overlapping phases, allowing time for scheduled WAN transfers)</li>
 </ol>
 <h3 id="tools-and-cost">Tools and Cost<a class="headerlink" href="#tools-and-cost" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2706,26 +2784,34 @@
 </ul>
 <h3 id="cost-benefit-comparison">Cost-Benefit Comparison<a class="headerlink" href="#cost-benefit-comparison" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Scenario A (Network 10% + Storage 8% improvement, 10 PB/year data)</strong>:</li>
-<li>Benefit: Faster transfers + faster staging = ~10–15% overall improvement in data movement time</li>
-<li>Cost: ~50 site-hours + automation development (~4 hours); amortized over 1 year = negligible</li>
+<li><strong>Scenario A (WAN transfer 15–20% improvement, 10 PB/year site)</strong>:</li>
+<li>Benefit: 15–20% faster WAN transfers = 1.5–2 PB more data transferred in same time window OR 50–60 days saved annually</li>
+<li>Cost: ~60–70 site-hours for testing + tuning deployment; amortized over 1 year = negligible</li>
 <li>
-<p><strong>Recommendation: Deploy</strong></p>
+<p><strong>Recommendation: Deploy to production data transfer nodes</strong></p>
 </li>
 <li>
-<p><strong>Scenario B (Network 5% + Storage 3%, but high stability concern)</strong>:</p>
+<p><strong>Scenario B (WAN transfer 5–10% improvement, storage software compatibility concerns)</strong>:</p>
 </li>
-<li>Benefit: Modest improvement with monitoring overhead</li>
+<li>Benefit: Modest WAN transfer improvement; may require monitoring for dCache/XRootD stability</li>
+<li>Cost: As above + ongoing monitoring overhead</li>
+<li>
+<p><strong>Recommendation: Selective deployment; document constraints (e.g., "dCache pool nodes need specific fq settings"); deploy where stable</strong></p>
+</li>
+<li>
+<p><strong>Scenario C (No WAN transfer improvement observed, but diagnostic tests show gains)</strong>:</p>
+</li>
+<li>Benefit: iperf3 shows improvement but real transfers don’t → bottleneck elsewhere (application layer, remote site, storage backend)</li>
 <li>Cost: As above</li>
 <li>
-<p><strong>Recommendation: Selective deployment; identify constraints and resolve before wider rollout</strong></p>
+<p><strong>Recommendation: Document findings; investigate application-layer bottlenecks; defer host tuning until root cause identified</strong></p>
 </li>
 <li>
-<p><strong>Scenario C (No improvement observed)</strong>:</p>
+<p><strong>Scenario D (Site-specific hardware issue: regression observed)</strong>:</p>
 </li>
-<li>Benefit: Validation that RHEL 9 + modern storage defaults are adequate; knowledge benefit</li>
-<li>Cost: As above</li>
-<li><strong>Recommendation: Document findings; do not mandate; continue monitoring for future kernel/driver improvements</strong></li>
+<li>Benefit: None; specific NIC or storage controller incompatible with tuning</li>
+<li>Cost: As above + troubleshooting time</li>
+<li><strong>Recommendation: Rollback immediately; document hardware constraint; share with community for awareness</strong></li>
 </ul>
 <h3 id="contingency">Contingency<a class="headerlink" href="#contingency" title="Permanent link">&para;</a></h3>
 <p>If a site observes instability, performance regression, or compatibility issues:
@@ -2785,75 +2871,83 @@
 <h3 id="central-coordination">Central Coordination<a class="headerlink" href="#central-coordination" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Shawn McKee (U. Michigan)</strong>: Lead, test plan owner, network tuning (fasterdata-tuning.sh) expert</li>
-<li><strong>Lincoln Bryant (U. Wisconsin)</strong>: Testing infrastructure, data analysis, automation</li>
-<li><strong>Eduardo Bach (UC San Diego/SuperCC)</strong>: Network monitoring, results validation</li>
-<li><strong>TBD (Storage Expert)</strong>: Storage tuning lead, I/O scheduler and benchmark tool expert</li>
+<li><strong>Lincoln Bryant (U. Wisconsin)</strong>: Testing infrastructure, data analysis, automation, perfSONAR coordination</li>
+<li><strong>Eduardo Bach (UC San Diego/SuperCC)</strong>: Network monitoring, perfSONAR results validation</li>
+<li><strong>TBD (Storage/Data Transfer Expert)</strong>: Storage tuning lead, data transfer software (GridFTP, XRootD, FTS) expertise</li>
 </ul>
 <h3 id="uscms-sites-2-sites">USCMS Sites (2 sites)<a class="headerlink" href="#uscms-sites-2-sites" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>T1 Site (Fermilab)</strong></li>
 <li><strong>Network Proponent</strong>: [Site admin name]</li>
-<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: [Site storage or data transfer engineer]</li>
 <li><strong>Responsibilities</strong>: <ul>
-<li>Deploy network tuning on 2 test nodes; run baseline and tuned test cycles (iperf3, netperf)</li>
-<li>Identify and try I/O scheduler options for storage tests; baseline and tune on 2 storage nodes</li>
-<li>Run fio benchmarks (seq-read, rand-read, seq-write); document storage hardware and firmware</li>
+<li>Deploy network tuning on 2 data transfer nodes (production or pre-production)</li>
+<li>Baseline and tuned WAN transfer tests: GridFTP to remote T1/T2 sites, FTS transfers, perfSONAR validation</li>
+<li>Storage tuning: Identify and apply best I/O scheduler for dCache pools or GridFTP storage backend</li>
+<li>Monitor host impact: CPU, I/O wait, retransmits during WAN transfers</li>
+<li>Document dCache compatibility with fq pacing and I/O scheduler changes</li>
 </ul>
 </li>
 <li>
-<p><strong>Effort</strong>: ~4–5 hours per site</p>
+<p><strong>Effort</strong>: ~7–8 hours per site</p>
 </li>
 <li>
 <p><strong>T2 Site (Purdue)</strong></p>
 </li>
 <li><strong>Network Proponent</strong>: [Site admin name]</li>
-<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: [Site storage or data transfer engineer]</li>
 <li><strong>Responsibilities</strong>: <ul>
-<li>Same as Fermilab; additional focus on multi-flow workloads and NUMA-aware storage tuning</li>
-<li>Explore <code>numactl</code> affinity for I/O processes if storage controller supports it</li>
+<li>Same as Fermilab; focus on XRootD or HTTP-based transfers if dCache not used</li>
+<li>Explore NUMA-aware tuning for data transfer processes if applicable</li>
+<li>Test multi-flow WAN transfers (concurrent FTS jobs) to validate tuning under load</li>
 </ul>
 </li>
-<li><strong>Effort</strong>: ~5–6 hours per site</li>
+<li><strong>Effort</strong>: ~7–8 hours per site</li>
 </ol>
 <h3 id="usatlas-sites-2-sites">USATLAS Sites (2 sites)<a class="headerlink" href="#usatlas-sites-2-sites" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>T1 Site (BNL)</strong></li>
 <li><strong>Network Proponent</strong>: [Site admin name]</li>
-<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: [Site storage or data transfer engineer]</li>
 <li><strong>Responsibilities</strong>: <ul>
-<li>Deploy on 2 network test nodes; focus on stability and rollback validation</li>
-<li>Deploy storage tuning; validate rollback procedure</li>
-<li>Extensive error log collection for compatibility analysis</li>
+<li>Deploy on 2 data transfer nodes; focus on stability and rollback validation</li>
+<li>Baseline and tuned WAN transfer tests: XRootD, GridFTP, or Rucio/FTS transfers to remote sites</li>
+<li>Storage tuning: Test I/O scheduler options for EOS or dCache storage backend</li>
+<li>Extensive error log collection for dCache/XRootD compatibility analysis</li>
+<li>Validate rollback procedure does not disrupt production transfers</li>
 </ul>
 </li>
 <li>
-<p><strong>Effort</strong>: ~5–6 hours per site</p>
+<p><strong>Effort</strong>: ~7–8 hours per site</p>
 </li>
 <li>
 <p><strong>T2 Site (UC Irvine)</strong></p>
 </li>
 <li><strong>Network Proponent</strong>: [Site admin name]</li>
-<li><strong>Storage Proponent</strong>: [Site storage engineer or admin name]</li>
+<li><strong>Storage/Data Transfer Proponent</strong>: [Site storage or data transfer engineer]</li>
 <li><strong>Responsibilities</strong>: <ul>
-<li>Same as BNL; additional focus on hardware compatibility (mixed NIC types and storage controllers)</li>
-<li>Document any firmware-specific I/O scheduler constraints</li>
+<li>Same as BNL; additional focus on hardware compatibility (mixed NIC types, storage controllers)</li>
+<li>Document firmware-specific constraints for I/O schedulers or fq pacing</li>
+<li>Test WAN transfers with tuning on mixed hardware to validate portability</li>
 </ul>
 </li>
-<li><strong>Effort</strong>: ~5–6 hours per site</li>
+<li><strong>Effort</strong>: ~7–8 hours per site</li>
 </ol>
 <h3 id="advisory-committee">Advisory Committee<a class="headerlink" href="#advisory-committee" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Eli Dart (LBNL/ESnet)</strong>: Network tuning (Fasterdata) validation and guidance</li>
+<li><strong>Eli Dart (LBNL/ESnet)</strong>: Network tuning (Fasterdata) validation and guidance; perfSONAR expertise</li>
 <li><strong>Dale Carder (LBNL)</strong>: Storage and network architecture guidance</li>
-<li><strong>[TBD Storage Architect]</strong>: Storage tuning best practices and I/O scheduler recommendations</li>
-<li><strong>Additional WLCG Network Operations and Storage contacts</strong> as needed</li>
+<li><strong>[TBD WLCG Data Transfer Expert]</strong>: GridFTP, XRootD, FTS, and Rucio expertise; data transfer best practices</li>
+<li><strong>[TBD Storage Software Expert]</strong>: dCache, XRootD, EOS tuning and compatibility guidance</li>
+<li><strong>Additional WLCG Network Operations, Storage, and Data Management contacts</strong> as needed</li>
 </ul>
 <h3 id="communication">Communication<a class="headerlink" href="#communication" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Weekly syncs</strong>: Mondays 2 PM ET during active testing phases (Jan–Mar 2026)</li>
-<li><strong>Shared spreadsheet</strong>: Track test runs, measurement results (network throughput, storage IOPS, latency), issues, and blockers</li>
-<li><strong>Central repo</strong>: All logs, scripts, Ansible playbooks, and analysis pushed to <code>/root/Git-Repositories/networking/</code> branch <code>mini-challenge-1</code></li>
-<li><strong>Escalation</strong>: Any blocker (hardware failure, data corruption, driver bug) reported immediately to central coordination team</li>
+<li><strong>Shared spreadsheet</strong>: Track WAN transfer tests, measurement results (GridFTP/XRootD throughput, perfSONAR tests, host CPU/I/O wait), issues, and blockers</li>
+<li><strong>Central repo</strong>: All logs (GridFTP, XRootD, FTS, perfSONAR, fio, iperf3), scripts, Ansible playbooks, and analysis pushed to <code>/root/Git-Repositories/networking/</code> branch <code>mini-challenge-1</code></li>
+<li><strong>Escalation</strong>: Any blocker (transfer failures, data corruption, dCache/XRootD errors, driver bug) reported immediately to central coordination team</li>
+<li><strong>Data transfer dashboards</strong>: Use existing FTS, perfSONAR, and site monitoring dashboards to track real-time performance</li>
 </ul>
 <h2 id="evaluation-criteria-1-success-metrics-and-decision-framework">Evaluation Criteria-1: Success Metrics and Decision Framework<a class="headerlink" href="#evaluation-criteria-1-success-metrics-and-decision-framework" title="Permanent link">&para;</a></h2>
 <h3 id="success-criteria">Success Criteria<a class="headerlink" href="#success-criteria" title="Permanent link">&para;</a></h3>
@@ -2875,13 +2969,15 @@
 <h2 id="results-1-summary-and-follow-up">Results-1: Summary and Follow-Up<a class="headerlink" href="#results-1-summary-and-follow-up" title="Permanent link">&para;</a></h2>
 <p><em>To be completed by March 14, 2026.</em></p>
 <ul>
-<li><strong>Aggregate network throughput improvement</strong>: [TBD]</li>
-<li><strong>Aggregate storage I/O improvement</strong>: [TBD]</li>
+<li><strong>Aggregate WAN data transfer throughput improvement</strong>: [TBD] (GridFTP, XRootD, FTS)</li>
+<li><strong>perfSONAR throughput improvement</strong>: [TBD]</li>
+<li><strong>Host efficiency improvement</strong> (CPU utilization, I/O wait reduction): [TBD]</li>
 <li><strong>Sites deploying network tuning to production</strong>: [TBD]</li>
 <li><strong>Sites deploying storage tuning to production</strong>: [TBD]</li>
+<li><strong>Data transfer software compatibility findings</strong>: [TBD] (dCache, XRootD, EOS, GridFTP, FTS)</li>
 <li><strong>Key lessons learned</strong>: [TBD]</li>
-<li><strong>I/O scheduler recommendations by hardware type</strong>: [TBD]</li>
-<li><strong>NUMA affinity impact</strong>: [TBD]</li>
+<li><strong>I/O scheduler recommendations by storage software and hardware</strong>: [TBD]</li>
+<li><strong>NUMA affinity impact on WAN transfers</strong>: [TBD]</li>
 <li><strong>Recommended next steps</strong>: [TBD]</li>
 <li><strong>Full report location</strong>: <code>/root/Git-Repositories/networking/docs/reports/mini-challenge-1-final-report.md</code> (or similar)</li>
 </ul>
