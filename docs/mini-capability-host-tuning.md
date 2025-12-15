@@ -52,7 +52,21 @@ Per the WLCG Capability Test Framework, this table tracks all mini-challenges an
 This document tracks mini-challenge instances. Clone the section below for each new challenge, incrementing N.
 
 ## Participants
-(Please add your name): Shawn McKee, Lincoln Bryant, Eduardo Bach, Eli Dart, 
+(Please add your name): Shawn McKee, Lincoln Bryant, Eduardo Bach, Eli Dart, Diego Davila, Garhan Attebury, Asif Shaw, Carlos Gamboa, Hiro Ito, Wendy Dronen, Philippe Laurens
+
+**Participants & Roles**
+- **Shawn McKee (AGLT2 / University of Michigan)**: Lead, test plan owner, dCache, networking and storage expert; organizing mini-capability challenges and central coordination.
+- **Lincoln Bryant (U. Wisconsin)**: Testing infrastructure, automation, data analysis and result aggregation.
+- **Eduardo Bach (UC San Diego / SuperCC)**: Network monitoring, dCache and network admin, results validation.
+- **Eli Dart (LBNL / ESnet)**: Fasterdata and perfSONAR expert; advisory role on network tuning validation.
+- **Diego Davila (UCSD / USCMS T2)**: Storage and network expert; CMS data transfer configuration and testing lead.
+- **Garhan Attebury (University of Nebraska / USCMS T2)**: Network and systems expert; site proponent and test operator for Nebraska.
+- **Asif Shaw (Fermilab / USCMS T1)**: CMS network and systems expert; FNAL site proponent and transfer testing lead.
+- **Carlos Gamboa (BNL / USATLAS T1)**: BNL dCache manager; storage tuning and compatibility lead.
+- **Hiro Ito (BNL)**: FTS and ATLAS data transfer expert; transfer orchestration and validation.
+- **Wendy Dronen (AGLT2 / U. Michigan)**: System administrator and site operator at AGLT2.
+- **Philippe Laurens (AGLT2 / Michigan State)**: System administrator and AGLT2 site operator.
+- **Others**: Additional participants may join; list to be updated as volunteers sign up. 
 
 # Capability Challenge 1: Comprehensive Host Optimization Testing (January 2026)
 
@@ -79,6 +93,37 @@ This document tracks mini-challenge instances. Clone the section below for each 
 **Primary Tools**: 
 - ESnet Fasterdata tuning script (`fasterdata-tuning.sh` v1.3.1+, https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/fasterdata-tuning.sh)
 - Storage tuning playbooks and tools (Ansible for I/O scheduler, queue depth; `fio` / `iozone` for benchmarks)
+
+## State Management: Save/Restore with `fasterdata-tuning.sh`
+
+`fasterdata-tuning.sh` provides structured state capture and restore functionality which is central to safe A/B testing of host tuning. Key points:
+
+- Save location: saved states are written as JSON to `/var/lib/fasterdata-tuning/saved-states/` with filenames like `<timestamp>-<label>.json` (e.g., `20251210T143000Z-baseline.json`). Backups of modified files are stored in `/var/lib/fasterdata-tuning/backups/`.
+- Basic commands:
+  - Save baseline state: `sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline`
+  - List saved states: `sudo /usr/local/bin/fasterdata-tuning.sh --list-states`
+  - Show difference vs current: `sudo /usr/local/bin/fasterdata-tuning.sh --diff-state /var/lib/fasterdata-tuning/saved-states/<file>.json`
+  - Restore a saved state: `sudo /usr/local/bin/fasterdata-tuning.sh --restore-state /var/lib/fasterdata-tuning/saved-states/<file>.json`
+  - Auto-save before apply: `sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --auto-save-before --label pre-apply`
+- What is captured: sysctl values (and `/etc/sysctl.d/90-fasterdata.conf`), per-interface settings (MTU, qdisc, txqueuelen, ethtool feature flags, ring settings), `ethtool-persist` service content, GRUB/kernel cmdline (for IOMMU/SMT), tuned profile, CPU governor/SMT state, and helpful warnings about non-restorable items.
+- File format: JSON with `metadata`, `sysctl`, `interfaces`, `grub`, `tuned`, and other sections (human- and machine-readable for test automation).
+- Restore caveats:
+  - Restores sysctl and per-interface runtime settings and will restore persistence artifacts (sysctl file, ethtool service). Some changes (GRUB/kernel cmdline) require a reboot to take effect.
+  - Ring buffer values may not be fully reversible on hardware that doesn't support previous values; the state file includes warnings.
+  - Always validate a restore on a non-production node first.
+
+Recommended usage in the test plan:
+- Phase 1 (baseline): run `--save-state --label baseline` and record the saved filename in the test log.
+- Phase 2 (apply): use `--mode apply --auto-save-before --label pre-apply` or run a separate `--save-state --label post-apply` after applying tuning to capture the tuned state.
+- Between test iterations: use `--diff-state` to confirm only expected changes were made.
+- Phase 4 (rollback and validation): run `--restore-state` with the baseline file, then verify via `--diff-state` that the system is back to baseline and re-run a short transfer test to ensure behavior returned to baseline.
+- Archive the state JSON files alongside test logs for reproducibility and postmortem analysis.
+
+Add a short verification checklist to each test run to confirm save/restore success:
+- `sudo /usr/local/bin/fasterdata-tuning.sh --list-states` shows saved file
+- `sudo /usr/local/bin/fasterdata-tuning.sh --diff-state <file>` shows expected diffs
+- After `--restore-state <file>`, verify `sysctl -n net.core.rmem_max` (or another key) equals the baseline value and that `tc qdisc show` shows baseline qdisc
+- Run a short (e.g., 10 minute) transfer to confirm baseline behavior restored
 
 ### Objectives
 1. **Validate WAN data transfer performance improvement**: Measure real-world data transfer throughput and latency (GridFTP, XRootD, HTTP/WebDAV) with host tuning applied vs. baseline
@@ -133,7 +178,9 @@ This document tracks mini-challenge instances. Clone the section below for each 
    - I/O wait percentage (iostat, sar)
    - Network statistics (ethtool -S, retransmits, drops)
 4. Capture system configuration (kernel, NIC drivers, firmware, storage software versions)
-5. Save baseline state using `fasterdata-tuning.sh --save-state`
+4. Save baseline state and record the saved filename (example):
+   - `sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline`
+   - Run `sudo /usr/local/bin/fasterdata-tuning.sh --list-states` to note the saved filename (e.g., `/var/lib/fasterdata-tuning/saved-states/20251210T143000Z-baseline.json`) and include it in test logs
 
 **Network Diagnostic Tests** (SECONDARY):
 1. Run perfSONAR on-demand tests (iperf3, ping) to validate link capacity and baseline RTT
@@ -184,6 +231,42 @@ This document tracks mini-challenge instances. Clone the section below for each 
    - Monitor system logs (dmesg, syslog) for errors
    - Verify no service restarts or transfer failures
 
+**Global Configuration Sweep (synchronized across all sites)**:
+
+Purpose: Measure the end-to-end impact when all data transfer hosts are placed on the same configuration, then change the entire fleet to a different configuration and repeat the measurements. This avoids partial-path inconsistencies and better isolates host-level effects on WAN transfers.
+
+Steps:
+1. **Prepare configuration variants**: Define the configurations to compare (e.g., `baseline` (stock), `network-tuned` (Fasterdata apply with fq), `network+storage-tuned` (Fasterdata + I/O scheduler), `tbf-cap` (tbf cap + storage tune)). Document the exact commands/playbooks used to apply each.
+2. **Record baseline**: On every test host, save baseline state and record filenames:
+   - `sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline`
+   - Use `sudo /usr/local/bin/fasterdata-tuning.sh --list-states` and save the returned filenames centrally (one per host).
+3. **Apply configuration to all hosts**: Use an orchestration tool (Ansible recommended) to run the apply on all data-transfer nodes simultaneously or in a controlled batch. Example Ansible ad-hoc:
+
+```bash
+ansible data-transfer -i inventory -m shell -a "sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-packet-pacing --yes"
+```
+
+For storage changes use an Ansible playbook that sets `/sys/block/*/queue/scheduler` and any NUMA affinity settings.
+4. **Confirm successful apply**: On all hosts, run an audit to verify the expected changes are in place and collect JSON output to central logging:
+   - `ansible data-transfer -m shell -a "sudo /usr/local/bin/fasterdata-tuning.sh --mode audit --json" -o > audit-outputs/<config>-audit.json`
+5. **Run synchronized WAN transfers**: Coordinate start times (within 1 minute) across sites and run the signed transfer jobs (GridFTP/FTS/XRootD) for the defined duration. Collect per-host and transfer-system logs.
+6. **Save tuned state**: After verification and before heavy testing, save the tuned state on each host:
+   - `sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label network-tuned`
+7. **Repeat for each configuration**: Restore baseline or apply the next configuration across all hosts and repeat steps 4–6. For restore between configs use `--restore-state` with the recorded baseline file or the appropriate saved-state file for that configuration.
+8. **Aggregate and compare**: For each configuration, run at least 3 iterations of the transfer tests; aggregate results, compute means and 95% confidence intervals, and perform paired comparisons between configurations to detect statistically significant differences.
+
+Verification checklist for each global sweep:
+- All hosts report the expected audit results (`--mode audit --json`) for the current configuration
+- Saved state files are present and recorded centrally for each host
+- Transfer job start times are synchronized (within 1 minute) across all sites
+- Logs (GridFTP, XRootD, FTS, perfSONAR, host metrics) are collected and archived under `logs/<config>/`
+- After restore, a short transfer confirms baseline behavior
+
+Notes and cautions:
+- Always test restores on non-production nodes first. If GRUB/cmdline changes are present, schedule a reboot window and test restores with coordination to avoid service disruption.
+- If any host cannot restore to its previous ring buffer values, document the limitation and exclude the host from the cross-configuration comparison or mark it as a special-case in the analysis.
+
+
 **Network Diagnostic Tests** (SECONDARY - for troubleshooting):
 1. perfSONAR on-demand tests (iperf3) to isolate network performance:
    - Single-flow and multi-flow TCP throughput
@@ -207,13 +290,20 @@ This document tracks mini-challenge instances. Clone the section below for each 
 1. Document time to apply network tuning per site (includes audit, apply, testing)
 2. Quantify resource overhead (CPU for fq qdisc, memory for larger TCP buffers)
 3. Identify any compatibility issues (driver bugs, performance regressions, bond/VLAN issues)
-4. Test rollback procedure: restore network baseline state and verify transfer performance returns to baseline
+4. Test rollback procedure:
+   - Restore baseline state: `sudo /usr/local/bin/fasterdata-tuning.sh --restore-state /var/lib/fasterdata-tuning/saved-states/<baseline-file>.json`
+   - Confirm restoration with `sudo /usr/local/bin/fasterdata-tuning.sh --diff-state /var/lib/fasterdata-tuning/saved-states/<baseline-file>.json` (should show no unexpected diffs)
+   - Reboot if GRUB/kernel cmdline changes were recorded in the state and required for full restoration
+   - Run a short WAN transfer to verify transfer behavior returned to baseline and log the results
 
 **Storage Assessment**:
 1. Document time to identify and apply best I/O scheduler per site
 2. Quantify resource overhead (CPU for scheduler changes, memory for queue depth tuning)
 3. Identify hardware constraints (e.g., "Scheduler X not supported on this NVMe firmware")
-4. Test rollback procedure: restore baseline I/O scheduler and verify I/O performance returns to baseline
+4. Test rollback procedure:
+   - Restore baseline I/O scheduler and configuration (use site tools or `echo "<scheduler>" | sudo tee /sys/block/*/queue/scheduler`)
+   - Confirm that storage settings match the captured baseline (compare fio short-run results and `iostat -x` metrics)
+   - If a storage change required kernel/module reload or other action, document the steps and validate with a short transfer test
 
 #### Phase 5: Analysis and Reporting (Week 9–10)
 1. Aggregate results across 4 sites
@@ -363,21 +453,23 @@ If a site observes instability, performance regression, or compatibility issues:
 ## Team-1: Participants and Responsibilities
 
 ### Central Coordination
-- **Shawn McKee (U. Michigan)**: Lead, test plan owner, network tuning (fasterdata-tuning.sh) expert
-- **Lincoln Bryant (U. Wisconsin)**: Testing infrastructure, data analysis, automation, perfSONAR coordination
-- **Eduardo Bach (UC San Diego/SuperCC)**: Network monitoring, perfSONAR results validation
-- **TBD (Storage/Data Transfer Expert)**: Storage tuning lead, data transfer software (GridFTP, XRootD, FTS) expertise
+- **Shawn McKee (U. Michigan / AGLT2)**: Lead, test plan owner, dCache, network and storage tuning expert; main organizer and contact for mini-challenge logistics
+- **Lincoln Bryant (U. Wisconsin)**: Testing infrastructure, automation, data aggregation and analysis; test harness lead
+- **Eduardo Bach (UC San Diego / SuperCC)**: Network monitoring, perfSONAR coordination and results validation; dCache and network admin
+- **Eli Dart (LBNL / ESnet)**: Fasterdata advisor, perfSONAR and network tuning validation
+- **Diego Davila (UCSD / USCMS T2)**: Storage and CMS data transfer expert; assists with transfer-job setup and validation
+- **Hiro Ito (BNL)**: FTS and transfer orchestration expert; advisor for ATLAS transfer testing
 
 ### USCMS Sites (2 sites)
 1. **T1 Site (Fermilab)**
-   - **Network Proponent**: [Site admin name]
+   - **Network Proponent**: Asif Shaw (FNAL)
    - **Storage/Data Transfer Proponent**: [Site storage or data transfer engineer]
    - **Responsibilities**: 
      - Deploy network tuning on 2 data transfer nodes (production or pre-production)
-     - Baseline and tuned WAN transfer tests: GridFTP to remote T1/T2 sites, FTS transfers, perfSONAR validation
-     - Storage tuning: Identify and apply best I/O scheduler for dCache pools or GridFTP storage backend
+     - Baseline and tuned WAN transfer tests: GridFTP/FTS to remote T1/T2 sites, perfSONAR validation
+     - Storage tuning: Identify and apply best I/O scheduler for GridFTP backends
      - Monitor host impact: CPU, I/O wait, retransmits during WAN transfers
-     - Document dCache compatibility with fq pacing and I/O scheduler changes
+     - Document compatibility and any site-specific constraints
    - **Effort**: ~7–8 hours per site
    
 2. **T2 Site (Purdue)**
@@ -392,11 +484,12 @@ If a site observes instability, performance regression, or compatibility issues:
 ### USATLAS Sites (2 sites)
 1. **T1 Site (BNL)**
    - **Network Proponent**: [Site admin name]
-   - **Storage/Data Transfer Proponent**: [Site storage or data transfer engineer]
+   - **Storage/Data Transfer Proponent**: Carlos Gamboa (BNL)
    - **Responsibilities**: 
      - Deploy on 2 data transfer nodes; focus on stability and rollback validation
      - Baseline and tuned WAN transfer tests: XRootD, GridFTP, or Rucio/FTS transfers to remote sites
      - Storage tuning: Test I/O scheduler options for EOS or dCache storage backend
+     - Collaborate with Hiro Ito for FTS orchestration and ATLAS-specific transfer validation
      - Extensive error log collection for dCache/XRootD compatibility analysis
      - Validate rollback procedure does not disrupt production transfers
    - **Effort**: ~7–8 hours per site
@@ -413,6 +506,7 @@ If a site observes instability, performance regression, or compatibility issues:
 ### Advisory Committee
 - **Eli Dart (LBNL/ESnet)**: Network tuning (Fasterdata) validation and guidance; perfSONAR expertise
 - **Dale Carder (LBNL)**: Storage and network architecture guidance
+- **Hiro Ito (BNL)**: FTS and ATLAS transfer orchestration and validation
 - **[TBD WLCG Data Transfer Expert]**: GridFTP, XRootD, FTS, and Rucio expertise; data transfer best practices
 - **[TBD Storage Software Expert]**: dCache, XRootD, EOS tuning and compatibility guidance
 - **Additional WLCG Network Operations, Storage, and Data Management contacts** as needed
