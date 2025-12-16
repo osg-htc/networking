@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.2
+# Version: 1.3.3
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -15,6 +15,9 @@
 # NEW in v1.3.1: Skip checksum validation on bond/VLAN interfaces (they delegate to member NICs).
 # NEW in v1.3.2: Fix JSON state save corruption: properly quote ring buffer and nm_mtu values,
 #                sanitize non-numeric values, strip newlines from qdisc strings.
+# NEW in v1.3.3: Fix state diff/restore parsing to handle escaped tabs/newlines safely via Python
+#                (avoids empty Saved fields and JSON validation errors when state files contain
+#                escaped control characters).
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
