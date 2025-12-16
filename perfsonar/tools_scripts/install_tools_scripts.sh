@@ -49,18 +49,28 @@ TOOLS_SRC="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perf
 echo "[INFO] Target root: $DEST_ROOT"
 mkdir -p "$DEST_ROOT"
 
-if [ ! -d "$DEST_ROOT/.git" ] && [ ! -d "$DEST_ROOT/psconfig" ]; then
+if [ -d "$DEST_ROOT" ] && [ "$(ls -A "$DEST_ROOT" 2>/dev/null || true)" != "" ]; then
+  # Destination exists and is not empty. If it's a git checkout, update it;
+  # otherwise use the existing tree and continue fetching helpers from the
+  # docs tree. This avoids warning messages when users pass an existing
+  # non-empty directory (for example an RPM install path).
+  if [ -d "$DEST_ROOT/.git" ]; then
+    echo "[INFO] Destination $DEST_ROOT exists and appears to be a git repo; attempting a shallow update..."
+    GIT_TERMINAL_PROMPT=0 git -C "$DEST_ROOT" fetch --depth=1 origin master >/dev/null 2>&1 || true
+    GIT_TERMINAL_PROMPT=0 git -C "$DEST_ROOT" reset --hard origin/master >/dev/null 2>&1 || true
+  else
+    echo "[INFO] Destination $DEST_ROOT exists and is not empty; using existing contents and fetching helpers from docs tree."
+  fi
+else
   echo "[INFO] Cloning perfSONAR testpoint repository (non-interactive shallow clone)..."
   # Prevent git from prompting interactively for credentials. If the clone
   # fails (for example if the repo is private or network-restricted), fall
   # back to creating the destination directory and continue fetching helper
   # scripts from the docs tree (these are fetched below via raw.githubusercontent).
   GIT_TERMINAL_PROMPT=0 git clone --depth 1 "$TP_REPO_URL" "$DEST_ROOT" || {
-    echo "[WARN] git clone failed or would prompt for credentials; creating $DEST_ROOT and continuing with helper downloads."
+    echo "[WARN] git clone failed or would prompt for credentials; creating empty $DEST_ROOT and continuing with helper downloads."
     mkdir -p "$DEST_ROOT"
   }
-else
-  echo "[INFO] perfSONAR testpoint appears already present; skipping clone."
 fi
 
 TOOLS_DIR="$DEST_ROOT/tools_scripts"
@@ -82,8 +92,6 @@ files=(
 
     # perfSONAR utilities
     perfSONAR-extract-lsregistration.sh
-    perfSONAR-update-lsregistration.sh
-
     # tooling added recently
     fasterdata-tuning.sh
     repair-state-json.sh
