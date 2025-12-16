@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.3
+# Version: 1.3.4
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -18,6 +18,8 @@
 # NEW in v1.3.3: Fix state diff/restore parsing to handle escaped tabs/newlines safely via Python
 #                (avoids empty Saved fields and JSON validation errors when state files contain
 #                escaped control characters).
+# NEW in v1.3.4: Eliminate newline corruption in saved-state JSON by quoting/sanitizing all
+#                string fields and robustly parsing tuned active profile.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -2110,11 +2112,11 @@ capture_interface_state() {
   
   # Build JSON
   local json="{"
-  json+="\"state\":\"$state\","
+  json+="\"state\":$(json_quote "$state"),"
   json+="\"mtu\":$mtu,"
   json+="\"txqueuelen\":$txqlen,"
   json+="\"speed\":$speed,"
-  json+="\"qdisc\":\"$qdisc_full\","
+  json+="\"qdisc\":$(json_quote "$qdisc_full"),"
   
   # Ethtool features
   if command -v ethtool >/dev/null 2>&1; then
@@ -2127,7 +2129,7 @@ capture_interface_state() {
       feat_name=$(echo "$feat_name" | tr -d ' ')
       feat_val=$(echo "$feat_val" | awk '{print $1}')
       [[ $feat_first -eq 0 ]] && json+=","
-      json+="\"$feat_name\":\"$feat_val\""
+      json+="\"$feat_name\":$(json_quote "$feat_val")"
       feat_first=0
     done <<< "$features"
     json+="},"
@@ -2161,7 +2163,7 @@ capture_interface_state() {
   if command -v nmcli >/dev/null 2>&1; then
     local nm_conn
     nm_conn=$(nmcli -t -f NAME,DEVICE connection show 2>/dev/null | awk -F: -v dev="$iface" '$2==dev {print $1; exit}' || echo "")
-    json+="\"nm_connection\":\"$nm_conn\","
+    json+="\"nm_connection\":$(json_quote "$nm_conn"),"
     
     if [[ -n "$nm_conn" ]]; then
       local nm_mtu
@@ -2170,7 +2172,7 @@ capture_interface_state() {
       if echo "$nm_mtu" | grep -qE '^[0-9]+$'; then
         json+="\"nm_mtu\":${nm_mtu}"
       else
-        json+="\"nm_mtu\":\"${nm_mtu}\""
+        json+="\"nm_mtu\":$(json_quote "$nm_mtu")"
       fi
     else
       json+="\"nm_mtu\":0"
@@ -2188,7 +2190,7 @@ capture_ethtool_service_state() {
   # Capture ethtool-persist.service state
   local svc_file="/etc/systemd/system/ethtool-persist.service"
   local json="{"
-  json+="\"path\":\"$svc_file\","
+  json+="\"path\":$(json_quote "$svc_file"),"
   
   if [[ -f "$svc_file" ]]; then
     json+="\"exists\":true,"
@@ -2205,7 +2207,7 @@ capture_ethtool_service_state() {
     backup_name="ethtool-persist.service.$(date -u +%Y%m%d-%H%M%S)"
     local backup_path="$BACKUP_SUBDIR/$backup_name"
     if cp "$svc_file" "$backup_path" 2>/dev/null; then
-      json+="\"backup_path\":\"$backup_path\","
+      json+="\"backup_path\":$(json_quote "$backup_path"),"
     else
       json+="\"backup_path\":null,"
     fi
@@ -2213,7 +2215,7 @@ capture_ethtool_service_state() {
     # Store content as base64
     local content_b64
     content_b64=$(base64 -w 0 "$svc_file" 2>/dev/null || base64 "$svc_file" 2>/dev/null || echo "")
-    json+="\"content_base64\":\"$content_b64\""
+    json+="\"content_base64\":$(json_quote "$content_b64")"
   else
     json+="\"exists\":false,"
     json+="\"enabled\":false,"
@@ -2239,7 +2241,7 @@ capture_cpu_state() {
       local gov
       gov=$(cat "$gov_file" 2>/dev/null || echo "unknown")
       [[ $first -eq 0 ]] && json+=","
-      json+="\"cpu$cpu\":\"$gov\""
+      json+="\"cpu$cpu\":$(json_quote "$gov")"
       first=0
       ((cpu++))
     done
@@ -2250,7 +2252,7 @@ capture_cpu_state() {
   if [[ -r /sys/devices/system/cpu/smt/control ]]; then
     local smt
     smt=$(cat /sys/devices/system/cpu/smt/control 2>/dev/null || echo "unknown")
-    json+="\"smt\":{\"control\":\"$smt\",\"supported\":true}"
+    json+="\"smt\":{\"control\":$(json_quote "$smt"),\"supported\":true}"
   else
     json+="\"smt\":{\"control\":\"unknown\",\"supported\":false}"
   fi
@@ -2264,10 +2266,19 @@ capture_tuned_state() {
   local json="{"
   
   if command -v tuned-adm >/dev/null 2>&1; then
-    local active
-    active=$(tuned-adm active 2>/dev/null | awk '{print $4}' || echo "unknown")
+    local active raw
+    raw=$(tuned-adm active 2>/dev/null || echo "")
+    # Prefer the explicit format: "Current active profile: <name>"
+    active=$(printf '%s' "$raw" | sed -n 's/^Current active profile: //p' | head -n1)
+    # Fallback to last word if format differs
+    if [[ -z "$active" ]]; then
+      active=$(printf '%s' "$raw" | awk '{print $NF}' | head -n1)
+    fi
+    # Sanitize: remove any newlines and collapse tabs/spaces
+    active=$(printf '%s' "$active" | tr '\n' ' ' | tr '\t' ' ' | sed 's/  */ /g' | sed 's/^ *//; s/ *$//')
+    [[ -z "$active" ]] && active="unknown"
     json+="\"available\":true,"
-    json+="\"active_profile\":\"$active\""
+    json+="\"active_profile\":$(json_quote "$active")"
   else
     json+="\"available\":false,"
     json+="\"active_profile\":\"unknown\""
@@ -2298,10 +2309,10 @@ do_save_state() {
   state_json+="\"metadata\":{"
   state_json+="\"version\":\"1.0\","
   state_json+="\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
-  state_json+="\"hostname\":\"$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo unknown)\","
-  state_json+="\"kernel\":\"$(uname -r)\","
-  state_json+="\"label\":\"${STATE_LABEL:-auto}\","
-  state_json+="\"created_by\":\"fasterdata-tuning.sh v1.2.0\""
+  state_json+="\"hostname\":$(json_quote "$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo unknown)"),"
+  state_json+="\"kernel\":$(json_quote "$(uname -r)"),"
+  state_json+="\"label\":$(json_quote "${STATE_LABEL:-auto}"),"
+  state_json+="\"created_by\":$(json_quote "fasterdata-tuning.sh v1.2.0")"
   state_json+="},"
   
   # Sysctl values

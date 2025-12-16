@@ -6,6 +6,12 @@
 All notable changes to this repository will be documented in this file.
 
 ## [1.3.3] - 2025-12-16
+## [1.3.4] - 2025-12-16
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.4: Prevent corrupted (multi-line) JSON in saved states by quoting and sanitizing all string fields and robustly parsing `tuned-adm active`. This ensures state files are valid single-line JSON and fixes failures like two-line outputs.
+
 
 ### Fixed
 
