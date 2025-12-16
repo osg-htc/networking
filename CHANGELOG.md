@@ -7,6 +7,12 @@ All notable changes to this repository will be documented in this file.
 
 ## [1.3.3] - 2025-12-16
 ## [1.3.4] - 2025-12-16
+## [1.3.5] - 2025-12-16
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.5: Escape tabs and control characters in sysctl values (e.g., `net.ipv4.tcp_rmem`, `net.ipv4.tcp_wmem`) so saved-state JSON is valid and consumable by `--diff-state` and `--restore-state`.
+
 
 ### Fixed
 
