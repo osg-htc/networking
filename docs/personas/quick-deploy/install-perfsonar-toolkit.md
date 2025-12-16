@@ -630,7 +630,430 @@ systemctl restart pscheduler-scheduler pscheduler-runner pscheduler-archiver psc
 
 ---
 
-## Step 6 – Configure and Enroll in pSConfig
+## Step 6 – Install and Configure Let's Encrypt SSL Certificates (Optional but Recommended)
+
+The perfSONAR Toolkit web interface uses HTTPS with self-signed certificates by default. For production deployments,
+replacing these with Let's Encrypt certificates provides:
+
+- **Browser trust**: No certificate warnings when accessing the web UI
+- **Security**: Industry-standard encryption with automatic renewals
+- **Compliance**: Meets security requirements for production infrastructure
+
+This step is optional but highly recommended for production sites.
+
+### Step 6.1 – Prerequisites for Let's Encrypt
+
+Before obtaining Let's Encrypt certificates, ensure:
+
+1. **DNS is configured correctly:**
+   
+   Your hostname must have valid forward (A/AAAA) and reverse (PTR) DNS records that are publicly resolvable.
+   Verify this with the DNS checker:
+   
+   ```bash
+   /opt/perfsonar-toolkit/tools_scripts/check-perfsonar-dns.sh
+   ```
+
+2. **Port 80 is accessible:**
+   
+   Let's Encrypt uses HTTP-01 challenge which requires port 80 to be open from the internet. Update your firewall:
+   
+   ```bash
+   # Add HTTP port to nftables (in addition to existing HTTPS)
+   /opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh --ports=80,443 --yes
+   ```
+
+3. **Apache is not listening on port 80:**
+   
+   The perfSONAR Toolkit Apache server should only listen on port 443 (HTTPS). Verify this:
+   
+   ```bash
+   # Check Apache is only listening on 443, not 80
+   ss -tlnp | grep :80
+   ss -tlnp | grep :443
+   
+   # Should show port 443 with httpd, but port 80 should be free
+   ```
+
+??? warning "If Apache is listening on port 80"
+    
+    The Toolkit's Apache configuration should not bind to port 80. If it is, check `/etc/httpd/conf/httpd.conf` and
+    `/etc/httpd/conf.d/*.conf` for `Listen 80` directives and comment them out:
+    
+    ```bash
+    # Find Listen directives
+    grep -r "^Listen 80" /etc/httpd/
+    
+    # Edit the file(s) and comment out or change to Listen 443
+    vi /etc/httpd/conf/httpd.conf
+    
+    # Restart Apache
+    systemctl restart httpd
+    ```
+
+### Step 6.2 – Install Certbot
+
+Install certbot using snapd (recommended method) or EPEL packages:
+
+**Option A: Install via Snap (Recommended)**
+
+```bash
+# Install snapd
+dnf install -y snapd
+systemctl enable --now snapd.socket
+
+# Wait for snapd to initialize
+sleep 10
+
+# Create symlink for classic snap support
+ln -sf /var/lib/snapd/snap /snap
+
+# Install certbot
+snap install --classic certbot
+
+# Create symlink for certbot command
+ln -sf /snap/bin/certbot /usr/bin/certbot
+```
+
+**Option B: Install via DNF (Alternative)**
+
+```bash
+# Install certbot from EPEL
+dnf install -y certbot
+
+# Verify installation
+certbot --version
+```
+
+??? info "Why use snap for certbot?"
+    
+    The Certbot developers recommend snap installation because:
+    - Always provides the latest certbot version
+    - Automatic updates via snap refresh
+    - Consistent across distributions
+    - Includes all necessary dependencies
+    
+    EPEL packages work but may lag behind upstream releases.
+
+### Step 6.3 – Obtain Let's Encrypt Certificate
+
+Use certbot in standalone mode to obtain your certificate. Replace `<your-fqdn>` with your host's fully-qualified domain name
+and `<admin-email>` with your email address (used for renewal notifications).
+
+**Obtain certificate (interactive):**
+
+```bash
+# Stop Apache temporarily to free port 80
+systemctl stop httpd
+
+# Obtain certificate using standalone mode
+certbot certonly --standalone \
+    -d <your-fqdn> \
+    -m <admin-email> \
+    --agree-tos
+
+# Restart Apache
+systemctl start httpd
+```
+
+**Example:**
+
+```bash
+certbot certonly --standalone \
+    -d ps-toolkit.example.org \
+    -m psadmin@example.org \
+    --agree-tos
+```
+
+**Non-interactive (for automation):**
+
+```bash
+systemctl stop httpd
+
+certbot certonly --standalone \
+    -d <your-fqdn> \
+    -m <admin-email> \
+    --agree-tos \
+    --non-interactive
+
+systemctl start httpd
+```
+
+??? info "Certificate file locations"
+    
+    After successful issuance, certificates are stored at:
+    
+    - Full chain: `/etc/letsencrypt/live/<your-fqdn>/fullchain.pem`
+    - Private key: `/etc/letsencrypt/live/<your-fqdn>/privkey.pem`
+    - Chain only: `/etc/letsencrypt/live/<your-fqdn>/chain.pem`
+    - Certificate only: `/etc/letsencrypt/live/<your-fqdn>/cert.pem`
+    
+    The actual certificate files are in `/etc/letsencrypt/archive/<your-fqdn>/` and the `live/` directory contains
+    symlinks to the latest versions.
+
+### Step 6.4 – Configure Apache to Use Let's Encrypt Certificate
+
+Use the helper script to update Apache SSL configuration:
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/configure-toolkit-letsencrypt.sh <your-fqdn>
+```
+
+**Example:**
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/configure-toolkit-letsencrypt.sh ps-toolkit.example.org
+```
+
+This script:
+
+- Backs up the original Apache SSL configuration
+- Updates `SSLCertificateFile` to point to Let's Encrypt fullchain
+- Updates `SSLCertificateKeyFile` to point to Let's Encrypt private key
+- Adds or updates `SSLCertificateChainFile`
+
+**Verify Apache configuration syntax:**
+
+```bash
+apachectl configtest
+```
+
+**Reload Apache to apply changes:**
+
+```bash
+systemctl reload httpd
+```
+
+**Verify the certificate is in use:**
+
+```bash
+# Check certificate via OpenSSL
+echo | openssl s_client -connect <your-fqdn>:443 -servername <your-fqdn> 2>/dev/null | openssl x509 -noout -issuer -dates
+
+# Should show:
+# issuer=C=US, O=Let's Encrypt, CN=...
+# notBefore=...
+# notAfter=...
+```
+
+**Test in browser:**
+
+Navigate to `https://<your-fqdn>/toolkit` and verify:
+
+- No certificate warnings
+- Certificate is issued by "Let's Encrypt"
+- Certificate is valid (green padlock icon)
+
+### Step 6.5 – Configure Automatic Certificate Renewal
+
+Let's Encrypt certificates expire after 90 days. Configure automatic renewal to avoid expiration.
+
+**Test renewal process (dry run):**
+
+```bash
+# Perform a test renewal without actually renewing
+certbot renew --dry-run --pre-hook "systemctl stop httpd" --post-hook "systemctl start httpd"
+```
+
+If the dry run succeeds, configure automatic renewal:
+
+**Option A: Using Certbot Timer (Recommended)**
+
+Certbot automatically installs a systemd timer for renewals when installed via snap:
+
+```bash
+# Check timer status
+systemctl list-timers | grep certbot
+
+# If not present, enable it
+systemctl enable --now snap.certbot.renew.timer
+
+# Or for EPEL installation:
+systemctl enable --now certbot-renew.timer
+```
+
+**Option B: Using Cron (Alternative)**
+
+Add a cron job for automatic renewal:
+
+```bash
+# Create renewal script
+cat > /usr/local/bin/certbot-renew.sh << 'EOF'
+#!/bin/bash
+# Renew Let's Encrypt certificates and reload Apache
+
+certbot renew \
+    --pre-hook "systemctl stop httpd" \
+    --post-hook "systemctl start httpd" \
+    --quiet
+
+exit 0
+EOF
+
+chmod 0755 /usr/local/bin/certbot-renew.sh
+
+# Add cron job (runs twice daily at 3:30 AM and 3:30 PM)
+cat > /etc/cron.d/certbot-renew << 'EOF'
+30 3,15 * * * root /usr/local/bin/certbot-renew.sh
+EOF
+```
+
+??? info "Renewal frequency and timing"
+    
+    - Certbot automatically checks certificates and only renews those expiring within 30 days
+    - Running renewal checks twice daily ensures timely renewal even if one attempt fails
+    - The `--quiet` flag suppresses output unless there's an error
+    - Pre/post hooks stop and start Apache to free port 80 for the standalone authenticator
+
+**Verify automatic renewal is configured:**
+
+```bash
+# For snap installation
+systemctl status snap.certbot.renew.timer
+
+# For EPEL installation
+systemctl status certbot-renew.timer
+
+# For cron-based renewal
+crontab -l | grep certbot
+# or
+cat /etc/cron.d/certbot-renew
+```
+
+### Step 6.6 – Monitor Certificate Expiration
+
+Even with automatic renewal, monitor certificate expiration to catch renewal failures:
+
+**Check certificate expiration date:**
+
+```bash
+# Check all certificates
+certbot certificates
+
+# Check specific certificate via OpenSSL
+echo | openssl s_client -connect <your-fqdn>:443 -servername <your-fqdn> 2>/dev/null | openssl x509 -noout -dates
+```
+
+**Set up expiration monitoring (optional):**
+
+??? tip "Email alerts for expiration"
+    
+    Let's Encrypt sends expiration warning emails to the address provided during certificate issuance. Ensure this email
+    address is monitored:
+    
+    ```bash
+    # Check configured email
+    grep email /etc/letsencrypt/renewal/<your-fqdn>.conf
+    ```
+    
+    You can also set up local monitoring using nagios, icinga, or a simple script:
+    
+    ```bash
+    #!/bin/bash
+    # check-cert-expiry.sh - Alert if certificate expires within 14 days
+    
+    DOMAIN="<your-fqdn>"
+    WARN_DAYS=14
+    
+    EXPIRY=$(echo | openssl s_client -connect ${DOMAIN}:443 -servername ${DOMAIN} 2>/dev/null | \
+             openssl x509 -noout -enddate | cut -d= -f2)
+    
+    EXPIRY_EPOCH=$(date -d "${EXPIRY}" +%s)
+    NOW_EPOCH=$(date +%s)
+    DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+    
+    if [ $DAYS_LEFT -lt $WARN_DAYS ]; then
+        echo "WARNING: Certificate for ${DOMAIN} expires in ${DAYS_LEFT} days!"
+        # Send alert via email, Slack, etc.
+    else
+        echo "OK: Certificate valid for ${DAYS_LEFT} more days"
+    fi
+    ```
+
+### Troubleshooting Let's Encrypt
+
+??? failure "Certificate issuance fails with 'Connection refused'"
+    
+    **Symptoms:** Certbot fails with "Failed to authenticate" or "Connection refused" errors during HTTP-01 challenge.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Verify port 80 is open in firewall
+    nft list ruleset | grep "dport 80"
+    
+    # Test port 80 accessibility from external host
+    curl -v http://<your-fqdn>/
+    
+    # Check nothing is listening on port 80
+    ss -tlnp | grep :80
+    ```
+    
+    **Solutions:**
+    
+    - Add port 80 to nftables: `/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh --ports=80,443 --yes`
+    - Ensure Apache is not listening on port 80 (should only listen on 443)
+    - Verify DNS resolves correctly from public internet
+    - Check network firewall/router allows inbound port 80
+
+??? failure "Certificate renewal fails"
+    
+    **Symptoms:** Certificate expires or renewal fails with errors in logs.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check renewal logs
+    journalctl -u snap.certbot.renew.timer -n 50
+    # or
+    grep certbot /var/log/syslog | tail -50
+    
+    # Test renewal manually
+    certbot renew --dry-run --pre-hook "systemctl stop httpd" --post-hook "systemctl start httpd" -vvv
+    
+    # Check certificate status
+    certbot certificates
+    ```
+    
+    **Common causes:**
+    
+    - Port 80 blocked: Verify firewall allows HTTP during renewal
+    - Apache failed to stop/start: Check Apache service status
+    - DNS changes: Verify hostname still resolves correctly
+    - Rate limiting: Let's Encrypt has rate limits (5 renewals per 7 days per domain)
+    
+    **Solutions:**
+    
+    - Fix firewall or DNS issues
+    - Manually renew: `certbot renew --force-renewal`
+    - If rate limited, wait 7 days before retrying
+
+??? failure "Browser shows old certificate after renewal"
+    
+    **Symptoms:** Certificate renewed successfully but browser still shows old/expired certificate.
+    
+    **Diagnostic steps:**
+    
+    ```bash
+    # Check certificate files are updated
+    ls -la /etc/letsencrypt/live/<your-fqdn>/
+    
+    # Verify Apache configuration points to correct files
+    grep SSLCertificate /etc/httpd/conf.d/ssl.conf
+    
+    # Check Apache loaded the new certificate
+    systemctl status httpd
+    ```
+    
+    **Solutions:**
+    
+    - Reload or restart Apache: `systemctl restart httpd`
+    - Clear browser cache and hard refresh (Ctrl+Shift+R)
+    - Verify SSL configuration: `apachectl -t -D DUMP_VHOSTS`
+
+---
+
+## Step 7 – Configure and Enroll in pSConfig
 
 Enroll your toolkit host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN
 you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).
@@ -708,7 +1131,7 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
 ---
 
-## Step 7 – Register and Configure with WLCG/OSG
+## Step 8 – Register and Configure with WLCG/OSG
 
 1. **OSG/WLCG registration workflow:**
 
@@ -792,7 +1215,7 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
 ---
 
-## Step 8 – Post-Install Validation
+## Step 9 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
 
