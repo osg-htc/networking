@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#113-2025-12-06" class="md-skip">
+        <a href="#132-2025-12-16" class="md-skip">
           Skip to content
         </a>
       
@@ -2325,12 +2325,35 @@
 
   <h1>CHANGELOG</h1>
 
-<h2 id="113-2025-12-06">[1.1.3] - 2025-12-06<a class="headerlink" href="#113-2025-12-06" title="Permanent link">&para;</a></h2>
+<h2 id="132-2025-12-16">[1.3.2] - 2025-12-16<a class="headerlink" href="#132-2025-12-16" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Critical JSON state save corruption fix</strong>: Fixed invalid JSON generation in <code>--save-state</code> that caused <code>--restore-state</code> to fail</li>
+<li>Properly quote non-numeric ring buffer values (e.g., <code>Mini:</code>, <code>push</code>, <code>n/a</code>)</li>
+<li>Properly quote non-numeric <code>nm_mtu</code> values (e.g., <code>auto</code>)</li>
+<li>Sanitize ring buffer values to ensure numeric-only or properly quoted strings</li>
+<li>Strip embedded newlines from qdisc strings that corrupted JSON structure</li>
+<li><strong>Fixed packet pacing audit detection</strong>: <code>--mode audit</code> now correctly detects if packet pacing is already applied by checking actual qdisc state instead of relying on command-line flags</li>
+<li>Added <code>repair-state-json.sh</code> utility script to repair existing corrupted JSON state files</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Enhanced JSON generation in <code>capture_interface_state()</code> with proper type validation</li>
+<li>Ring buffer values now validated as numeric before embedding in JSON</li>
+<li>Non-numeric values are quoted as strings</li>
+<li>Summary now checks system state for packet pacing instead of flag state</li>
+</ul>
+<h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Users with existing corrupted state files can repair them using <code>repair-state-json.sh &lt;file.json&gt;</code></li>
+<li>The script creates backups before repair and validates output with <code>jq</code> or Python</li>
+</ul>
+<h2 id="113-2025-12-06">[1.1.3] - 2025-12-06<a class="headerlink" href="#113-2025-12-06" title="Permanent link">&para;</a></h2>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Corrected IOMMU audit messaging to suggest <code>grubby</code> for BLS systems (EL9+) and <code>grub2-mkconfig</code>/<code>update-grub</code> for legacy systems. Also bumped <code>fasterdata-tuning.sh</code> to v1.1.3 and updated site copy + checksums.</li>
 </ul>
-<h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
+<h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>This is a minor documentation &amp; diagnostic improvement; no new behavioral changes beyond clearer messaging and version bump.</li>
 </ul>

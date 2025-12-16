@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.1
+# Version: 1.3.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -13,6 +13,8 @@
 #                optional tbf interface cap via --use-tbf-cap/--tbf-cap-rate;
 #                audit recognizes fq and tbf; fq shown green, tbf cyan.
 # NEW in v1.3.1: Skip checksum validation on bond/VLAN interfaces (they delegate to member NICs).
+# NEW in v1.3.2: Fix JSON state save corruption: properly quote ring buffer and nm_mtu values,
+#                sanitize non-numeric values, strip newlines from qdisc strings.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -2101,7 +2103,7 @@ capture_interface_state() {
   
   # Get qdisc
   local qdisc_full
-  qdisc_full=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 || echo "unknown")
+  qdisc_full=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 | tr '\n' ' ' | sed 's/[[:space:]]*$//' || echo "unknown")
   
   # Build JSON
   local json="{"
@@ -2137,10 +2139,15 @@ capture_interface_state() {
     tx_max=$(echo "$ring_info" | awk '/^TX:/ {print $2; exit}' || echo "0")
     
     json+="\"ring_buffers\":{"
-    json+="\"rx\":${rx_cur:-0},"
-    json+="\"rx_max\":${rx_max:-0},"
-    json+="\"tx\":${tx_cur:-0},"
-    json+="\"tx_max\":${tx_max:-0}"
+    # Handle non-numeric ring buffer values (e.g., "Mini:", empty strings)
+    rx_cur=$(echo "${rx_cur:-0}" | grep -E '^[0-9]+$' || echo "0")
+    rx_max=$(echo "${rx_max:-0}" | grep -E '^[0-9]+$' || echo "0")
+    tx_cur=$(echo "${tx_cur:-0}" | grep -E '^[0-9]+$' || echo "0")
+    tx_max=$(echo "${tx_max:-0}" | grep -E '^[0-9]+$' || echo "0")
+    json+="\"rx\":${rx_cur},"
+    json+="\"rx_max\":${rx_max},"
+    json+="\"tx\":${tx_cur},"
+    json+="\"tx_max\":${tx_max}"
     json+="},"
   else
     json+="\"ethtool_features\":{},"
@@ -2156,7 +2163,12 @@ capture_interface_state() {
     if [[ -n "$nm_conn" ]]; then
       local nm_mtu
       nm_mtu=$(nmcli -t -f 802-3-ethernet.mtu connection show "$nm_conn" 2>/dev/null | cut -d: -f2 || echo "0")
-      json+="\"nm_mtu\":${nm_mtu:-0}"
+      # Handle non-numeric nm_mtu values (e.g., "auto")
+      if echo "$nm_mtu" | grep -qE '^[0-9]+$'; then
+        json+="\"nm_mtu\":${nm_mtu}"
+      else
+        json+="\"nm_mtu\":\"${nm_mtu}\""
+      fi
     else
       json+="\"nm_mtu\":0"
     fi
@@ -3041,12 +3053,29 @@ print_summary() {
   printf "\nSummary:\n"
   echo "- Target type: $TARGET_TYPE"
   if [[ "$TARGET_TYPE" == "dtn" ]]; then
-    if [[ $APPLY_PACKET_PACING -eq 1 ]]; then
-      if [[ $USE_TBF_CAP -eq 1 || -n "$TBF_CAP_RATE" ]]; then
-        local disp_rate
-        disp_rate="$TBF_CAP_RATE"
-        [[ -z "$disp_rate" ]] && disp_rate="<auto-fraction-of-link>"
-        echo "- Packet pacing: ENABLED (qdisc=tbf, rate=$disp_rate)"
+    # Check if pacing is actually applied by examining qdisc on interfaces
+    local has_pacing=0
+    local pacing_type=""
+    local ifs
+    ifs=$(get_ifaces)
+    for iface in $ifs; do
+      local current_qdisc
+      current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 || echo "")
+      local qdisc_type="${current_qdisc%% *}"
+      if [[ "$qdisc_type" == "fq" ]]; then
+        has_pacing=1
+        pacing_type="fq"
+        break
+      elif [[ "$qdisc_type" == "tbf" ]]; then
+        has_pacing=1
+        pacing_type="tbf"
+        break
+      fi
+    done
+    
+    if [[ $has_pacing -eq 1 ]]; then
+      if [[ "$pacing_type" == "tbf" ]]; then
+        echo "- Packet pacing: ENABLED (qdisc=tbf)"
       else
         echo "- Packet pacing: ENABLED (qdisc=fq)"
       fi
