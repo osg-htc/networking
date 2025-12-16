@@ -2447,9 +2447,16 @@ do_diff_state() {
   
   log_info "Comparing current state with $state_file"
   
-  # Load saved state
+  # Load saved state as a single-line JSON string to avoid shell quoting issues
   local saved_state
-  saved_state=$(cat "$state_file")
+  saved_state=$(python3 - "$state_file" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], 'r') as f:
+    print(json.dumps(json.load(f)))
+PY
+  )
   
   echo ""
   echo "Differences between current state and saved state:"
@@ -2475,7 +2482,7 @@ do_diff_state() {
   for key in "${keys[@]}"; do
     local current saved
     current=$(sysctl -n "$key" 2>/dev/null || echo "")
-    saved=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl',{}).get('$key',''))" 2>/dev/null || echo "")
+    saved=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('sysctl',{}).get('$key',''))" 2>/dev/null || echo "")
     
     if [[ "$current" != "$saved" ]]; then
       echo "  $key:"
@@ -2497,7 +2504,7 @@ do_diff_state() {
     # Check MTU
     local current_mtu saved_mtu
     current_mtu=$(get_nic_mtu "$iface")
-    saved_mtu=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('mtu',0))" 2>/dev/null || echo "0")
+    saved_mtu=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('interfaces',{}).get('$iface',{}).get('mtu',0))" 2>/dev/null || echo "0")
     
     if [[ "$current_mtu" != "$saved_mtu" ]] && [[ "$saved_mtu" != "0" ]]; then
       diff_output+="    MTU: $current_mtu (saved: $saved_mtu)\n"
@@ -2511,7 +2518,7 @@ do_diff_state() {
     else
       current_txq="0"
     fi
-    saved_txq=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('txqueuelen',0))" 2>/dev/null || echo "0")
+    saved_txq=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('interfaces',{}).get('$iface',{}).get('txqueuelen',0))" 2>/dev/null || echo "0")
     
     if [[ "$current_txq" != "$saved_txq" ]] && [[ "$saved_txq" != "0" ]]; then
       diff_output+="    txqueuelen: $current_txq (saved: $saved_txq)\n"
@@ -2549,12 +2556,16 @@ do_restore_state() {
   
   log_info "Restoring system state from $state_file"
   
-  # Load state file
+  # Load state file safely via Python and stringify to one line
   local saved_state
-  saved_state=$(cat "$state_file")
-  
-  # Validate JSON
-  if ! python3 -c "import json,sys; json.loads('$saved_state')" 2>/dev/null; then
+  if ! saved_state=$(python3 - "$state_file" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], 'r') as f:
+    print(json.dumps(json.load(f)))
+PY
+  ); then
     echo "ERROR: Invalid JSON in state file" >&2
     return 1
   fi
@@ -2564,9 +2575,9 @@ do_restore_state() {
   echo "State to be restored:"
   echo "====================="
   local saved_hostname saved_timestamp saved_label
-  saved_hostname=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('metadata',{}).get('hostname','unknown'))" 2>/dev/null)
-  saved_timestamp=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('metadata',{}).get('timestamp','unknown'))" 2>/dev/null)
-  saved_label=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('metadata',{}).get('label','unknown'))" 2>/dev/null)
+  saved_hostname=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('metadata',{}).get('hostname','unknown'))" 2>/dev/null)
+  saved_timestamp=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('metadata',{}).get('timestamp','unknown'))" 2>/dev/null)
+  saved_label=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('metadata',{}).get('label','unknown'))" 2>/dev/null)
   
   echo "  Hostname: $saved_hostname"
   echo "  Timestamp: $saved_timestamp"
@@ -2609,7 +2620,7 @@ do_restore_state() {
   
   for key in "${keys[@]}"; do
     local value
-    value=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl',{}).get('$key',''))" 2>/dev/null || echo "")
+    value=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('sysctl',{}).get('$key',''))" 2>/dev/null || echo "")
     
     if [[ -n "$value" ]]; then
       if sysctl -w "$key=$value" >/dev/null 2>&1; then
@@ -2625,11 +2636,11 @@ do_restore_state() {
   log_info "Restoring sysctl configuration file..."
   local sysctl_file="/etc/sysctl.d/90-fasterdata.conf"
   local file_existed
-  file_existed=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl_file',{}).get('exists',False))" 2>/dev/null)
+  file_existed=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('sysctl_file',{}).get('exists',False))" 2>/dev/null)
   
   if [[ "$file_existed" == "True" ]]; then
     local content_b64
-    content_b64=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('sysctl_file',{}).get('content_base64',''))" 2>/dev/null || echo "")
+    content_b64=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('sysctl_file',{}).get('content_base64',''))" 2>/dev/null || echo "")
     
     if [[ -n "$content_b64" ]]; then
       if echo "$content_b64" | base64 -d > "$sysctl_file" 2>/dev/null; then
@@ -2660,7 +2671,7 @@ do_restore_state() {
   for iface in $ifs; do
     # Check if interface was in saved state
     local iface_existed
-    iface_existed=$(python3 -c "import json,sys; print('$iface' in json.loads('$saved_state').get('interfaces',{}))" 2>/dev/null)
+    iface_existed=$(python3 -c "import json,sys; print('$iface' in json.loads(r'''$saved_state''').get('interfaces',{}))" 2>/dev/null)
     
     if [[ "$iface_existed" != "True" ]]; then
       log_warn "Interface $iface was not in saved state, skipping"
@@ -2671,7 +2682,7 @@ do_restore_state() {
     
     # Restore MTU
     local saved_mtu
-    saved_mtu=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('mtu',0))" 2>/dev/null || echo "0")
+    saved_mtu=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('interfaces',{}).get('$iface',{}).get('mtu',0))" 2>/dev/null || echo "0")
     if [[ "$saved_mtu" != "0" ]] && [[ "$saved_mtu" != "null" ]]; then
       if ip link set dev "$iface" mtu "$saved_mtu" >/dev/null 2>&1; then
         echo "    ✓ MTU: $saved_mtu"
@@ -2682,7 +2693,7 @@ do_restore_state() {
     
     # Restore txqueuelen
     local saved_txq
-    saved_txq=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('txqueuelen',0))" 2>/dev/null || echo "0")
+    saved_txq=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('interfaces',{}).get('$iface',{}).get('txqueuelen',0))" 2>/dev/null || echo "0")
     if [[ "$saved_txq" != "0" ]] && [[ "$saved_txq" != "null" ]]; then
       if ip link set dev "$iface" txqueuelen "$saved_txq" >/dev/null 2>&1; then
         echo "    ✓ txqueuelen: $saved_txq"
@@ -2697,7 +2708,7 @@ do_restore_state() {
       local features=("rx-checksumming" "tx-checksumming" "scatter-gather" "tcp-segmentation-offload" "generic-segmentation-offload" "generic-receive-offload" "large-receive-offload")
       for feat in "${features[@]}"; do
         local saved_val
-        saved_val=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('ethtool_features',{}).get('$feat',''))" 2>/dev/null || echo "")
+        saved_val=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('interfaces',{}).get('$iface',{}).get('ethtool_features',{}).get('$feat',''))" 2>/dev/null || echo "")
         
         if [[ "$saved_val" == "on" ]] || [[ "$saved_val" == "off" ]]; then
           ethtool -K "$iface" "$feat" "$saved_val" >/dev/null 2>&1 || true
@@ -2708,7 +2719,7 @@ do_restore_state() {
     
     # Restore qdisc
     local saved_qdisc
-    saved_qdisc=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('interfaces',{}).get('$iface',{}).get('qdisc',''))" 2>/dev/null || echo "")
+    saved_qdisc=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('interfaces',{}).get('$iface',{}).get('qdisc',''))" 2>/dev/null || echo "")
     if [[ -n "$saved_qdisc" ]]; then
       # Extract qdisc type (first word)
       local qdisc_type="${saved_qdisc%% *}"
@@ -2727,18 +2738,18 @@ do_restore_state() {
   log_info "Restoring ethtool-persist service..."
   local svc_file="/etc/systemd/system/ethtool-persist.service"
   local svc_existed
-  svc_existed=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('ethtool_service',{}).get('exists',False))" 2>/dev/null)
+  svc_existed=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('ethtool_service',{}).get('exists',False))" 2>/dev/null)
   
   if [[ "$svc_existed" == "True" ]]; then
     local content_b64
-    content_b64=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('ethtool_service',{}).get('content_base64',''))" 2>/dev/null || echo "")
+    content_b64=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('ethtool_service',{}).get('content_base64',''))" 2>/dev/null || echo "")
     
     if [[ -n "$content_b64" ]]; then
       if echo "$content_b64" | base64 -d > "$svc_file" 2>/dev/null; then
         systemctl daemon-reload
         
         local was_enabled
-        was_enabled=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('ethtool_service',{}).get('enabled',False))" 2>/dev/null)
+        was_enabled=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('ethtool_service',{}).get('enabled',False))" 2>/dev/null)
         
         if [[ "$was_enabled" == "True" ]]; then
           systemctl enable ethtool-persist.service >/dev/null 2>&1
@@ -2775,7 +2786,7 @@ do_restore_state() {
       [[ ! -f "$gov_file" ]] && continue
       
       local saved_gov
-      saved_gov=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('cpu',{}).get('governors',{}).get('cpu$cpu',''))" 2>/dev/null || echo "")
+      saved_gov=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('cpu',{}).get('governors',{}).get('cpu$cpu',''))" 2>/dev/null || echo "")
       
       if [[ -n "$saved_gov" ]] && [[ "$saved_gov" != "null" ]]; then
         if echo "$saved_gov" > "$gov_file" 2>/dev/null; then
@@ -2795,7 +2806,7 @@ do_restore_state() {
   log_info "Restoring tuned profile..."
   if command -v tuned-adm >/dev/null 2>&1; then
     local saved_profile
-    saved_profile=$(python3 -c "import json,sys; print(json.loads('$saved_state').get('tuned',{}).get('active_profile',''))" 2>/dev/null || echo "")
+    saved_profile=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('tuned',{}).get('active_profile',''))" 2>/dev/null || echo "")
     
     if [[ -n "$saved_profile" ]] && [[ "$saved_profile" != "unknown" ]] && [[ "$saved_profile" != "null" ]]; then
       if tuned-adm profile "$saved_profile" >/dev/null 2>&1; then
@@ -3059,7 +3070,7 @@ print_summary() {
     local ifs
     ifs=$(get_ifaces)
     for iface in $ifs; do
-      local current_qdisc
+      local current_qdiscGeener
       current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 || echo "")
       local qdisc_type="${current_qdisc%% *}"
       if [[ "$qdisc_type" == "fq" ]]; then
