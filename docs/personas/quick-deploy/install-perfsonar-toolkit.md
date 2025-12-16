@@ -59,7 +59,7 @@ extract/save/restore registration config that you may want to use.
     ```
     Use the downloaded tool to extract a restore script:
     ```bash
-    /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
+    /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh --local
     ```
     Note: Repository clone instructions are in Step 2.
     **Note:** All shell commands assume an interactive root shell.
@@ -121,8 +121,12 @@ Configure DNF to access EPEL, CRB (CodeReady Builder), and perfSONAR repositorie
 # Install EPEL repository
 dnf install -y epel-release
 
-# Enable CRB (CodeReady Builder) repository
-dnf config-manager --set-enabled crb
+# Non-RHEL Enable CRB (CodeReady Builder) repository
+dnf config-manager --set-enabled crb  
+# --OR--
+# For RHEL Enable access to codeready-builder. 
+# NOTE auto-install script from perfSONAR doesn't set this (tries "crb" above which fails for RHEL)
+subscription-manager repos --enable codeready-builder-for-rhel-9-x86_64-rpms
 
 # Install perfSONAR repository for EL9
 dnf install -y http://software.internet2.edu/rpms/el9/x86_64/latest/packages/perfsonar-repo-0.11-1.noarch.rpm
@@ -215,10 +219,10 @@ chmod 0755 /tmp/install_tools_scripts.sh
 ```bash
 # Check that all helper scripts were downloaded
 ls -1 /opt/perfsonar-toolkit/tools_scripts/*.sh | wc -l
-# Should show 11 shell scripts
+# Should show 17 shell scripts
 
 # Verify key scripts are present and executable
-ls -l /opt/perfsonar-toolkit/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,check-perfsonar-dns.sh}
+ls -l /opt/perfsonar-toolkit/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,check-perfsonar-dns.sh,fasterdata-tuning.sh}
 ```
 
 ??? info "Why install helper scripts?"
@@ -762,6 +766,9 @@ podman exec -it perfsonar-testpoint psconfig remote list
         --city Berkeley --region CA --country US --zip 94720 \
         --latitude 37.5 --longitude -121.7469 \
         --admin-name "pS Admin" --admin-email admin@example.org
+
+    # Save current config
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh save --output my-lsreg.sh --local 
     ```
 
     **For container-based installs:**

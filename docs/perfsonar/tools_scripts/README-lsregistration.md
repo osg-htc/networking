@@ -24,6 +24,8 @@ inside the container.
 
 - Attempts a best-effort restart of `lsregistrationdaemon` on the host.
 
+- Restart behavior: the script now attempts to restart the `perfsonar-lsregistrationdaemon` unit first (common in RPM installs), falls back to `lsregistrationdaemon` if that unit is not present, and finally falls back to signalling the process via `pkill -HUP` when `systemctl` is not available.
+
 Examples:
 
 ```bash
