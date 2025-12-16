@@ -5,6 +5,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.3.3] - 2025-12-16
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.3: Load saved-state JSON via Python and keep escapes intact so `--diff-state` and `--restore-state` correctly read saved values (no empty Saved fields or JSON validation errors).
+
 ## [1.2.0] - 2025-11-10
 ## [1.3.1] - 2025-12-12
 
