@@ -15,7 +15,7 @@ set -euo pipefail
 
 usage() {
   cat <<EOF
-Usage: $0 <input.json> [output.json]
+Usage: $0 [OPTIONS] <input.json> [output.json]
 
 Repair corrupted JSON state files from fasterdata-tuning.sh.
 
@@ -23,10 +23,22 @@ Arguments:
   input.json    The corrupted JSON file to repair
   output.json   Output file (default: input.json.repaired)
 
+Options:
+  -h, --help    Show this help message and exit
+
 The script creates a backup at input.json.backup before repair.
 EOF
   exit 1
 }
+
+# Parse options
+if [[ $# -eq 0 ]]; then
+  usage
+fi
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  usage
+fi
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
   usage
@@ -63,8 +75,8 @@ sed -i 's/:Mini:/:Mini/g' "$OUTPUT_FILE"
 sed -i 's/:Mini\([,}]\)/:"Mini"\1/g' "$OUTPUT_FILE"
 
 # Fix 2: Quote 'auto' values (nm_mtu issue)
-# Pattern: :"nm_mtu":auto -> :"nm_mtu":"auto"
-sed -i 's/:"nm_mtu":auto\([,}]\)/:"nm_mtu":"auto"\1/g' "$OUTPUT_FILE"
+# Pattern: "nm_mtu":auto -> "nm_mtu":"auto"
+sed -i 's/"nm_mtu":auto\([,}]\)/"nm_mtu":"auto"\1/g' "$OUTPUT_FILE"
 
 # Fix 3: Quote 'push' values (ring buffer issue)
 # Pattern: :"tx":push -> :"tx":"push"
@@ -76,13 +88,14 @@ sed -i 's/:N\/A\([,}]\)/:"N\/A"\1/g' "$OUTPUT_FILE"
 sed -i 's/:not available\([,}]\)/:"not available"\1/gi' "$OUTPUT_FILE"
 sed -i 's/:unknown\([,}]\)/:"unknown"\1/g' "$OUTPUT_FILE"
 
-# Fix 5: Remove embedded newlines in JSON strings
+# Fix 5: Remove embedded newlines and control characters in JSON strings
 # This is trickier - we'll use Python if available
 if command -v python3 >/dev/null 2>&1; then
-  echo "Using Python to fix embedded newlines..."
-  python3 <<'PYEOF' "$OUTPUT_FILE"
+  echo "Using Python to fix embedded newlines and control characters..."
+  python3 - "$OUTPUT_FILE" <<'PYEOF'
 import sys
 import re
+import json
 
 if len(sys.argv) < 2:
     sys.exit(1)
@@ -93,20 +106,26 @@ try:
     with open(filename, 'r') as f:
         content = f.read()
     
-    # Remove newlines that appear inside string values
-    # This is a simplified approach - look for newlines between quotes
-    # that aren't preceded by proper JSON structure
+    # First, escape tab characters and other control chars that appear in JSON values
+    # Replace literal tabs with escaped tabs in string values
+    content = content.replace('\t', '\\t')
     
-    # First, try to identify and fix obvious cases:
-    # A newline followed by non-whitespace that's not a valid JSON start
-    fixed = re.sub(r'"\s*\n\s*([^"{}\[\]:,])', r'" \1', content)
+    # Remove newlines that appear inside string values
+    # Pattern: Look for newlines between quotes that aren't valid JSON breaks
+    # Simple approach: convert literal newlines within quoted strings to spaces
+    lines = content.split('\n')
+    if len(lines) > 1:
+        # The file should be one line of JSON
+        # Join with space to fix embedded newlines
+        content = ' '.join(line.strip() for line in lines)
     
     with open(filename, 'w') as f:
-        f.write(fixed)
+        f.write(content)
     
-    print("Fixed embedded newlines")
+    print("Fixed embedded newlines and control characters")
 except Exception as e:
     print(f"Warning: Could not fix newlines: {e}", file=sys.stderr)
+    sys.exit(1)
 PYEOF
 else
   echo "Python3 not available - skipping newline repair"
