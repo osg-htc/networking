@@ -98,6 +98,7 @@ files=(
 
     # SSL certificate helpers
     patch_apache_ssl_for_letsencrypt.sh
+    configure-toolkit-letsencrypt.sh
     testpoint-entrypoint-wrapper.sh
     certbot-deploy-hook.sh
 
