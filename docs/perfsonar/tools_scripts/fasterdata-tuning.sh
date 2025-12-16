@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.3
+# Version: 1.3.4
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -18,6 +18,8 @@
 # NEW in v1.3.3: Fix state diff/restore parsing to handle escaped tabs/newlines safely via Python
 #                (avoids empty Saved fields and JSON validation errors when state files contain
 #                escaped control characters).
+# NEW in v1.3.4: Eliminate newline corruption in saved-state JSON by quoting/sanitizing all
+#                string fields and robustly parsing tuned active profile.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
