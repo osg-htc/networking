@@ -117,14 +117,14 @@ echo "[INFO] Fetching helper files into $TOOLS_DIR"
 for f in "${files[@]}"; do
   dst="$TOOLS_DIR/$(basename "$f")"
   echo "  - $f"
-  if curl -fsSL "$TOOLS_SRC/$f" -o "$dst"; then
+  if curl -fsSL "$TOOLS_SRC/$f" -o "$dst" 2>/dev/null; then
     :
   else
     echo "[WARN] Failed to fetch $f; continuing."
     rm -f "$dst"
   fi
-  # also attempt to fetch an accompanying .sha256 when present
-  if curl -fsSL "$TOOLS_SRC/$f.sha256" -o "$dst.sha256"; then
+  # also attempt to fetch an accompanying .sha256 when present (suppress curl stderr)
+  if curl -fsSL "$TOOLS_SRC/$f.sha256" -o "$dst.sha256" 2>/dev/null; then
     :
   else
     rm -f "$dst.sha256" 2>/dev/null || true
