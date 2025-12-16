@@ -5,11 +5,11 @@ set -euo pipefail
 # Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
 #
-# Version: 1.0.0 - 2025-11-09
+# Version: 1.0.1 - 2025-12-16
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 PROG_NAME="$(basename "$0")"
 
 # Check for --version or --help flags
@@ -66,8 +66,8 @@ fi
 TOOLS_DIR="$DEST_ROOT/tools_scripts"
 mkdir -p "$TOOLS_DIR"
 
-scripts=(
-    # helpers and installers
+files=(
+    # core helpers and installers
     check-deps.sh
     check-perfsonar-dns.sh
     perfSONAR-pbr-nm.sh
@@ -76,7 +76,18 @@ scripts=(
     perfSONAR-auto-enroll-psconfig.sh
     seed_testpoint_host_dirs.sh
     perfSONAR-orchestrator.sh
-    
+    install_tools_scripts.sh
+    install-systemd-service.sh
+    install-systemd-units.sh
+
+    # perfSONAR utilities
+    perfSONAR-extract-lsregistration.sh
+    perfSONAR-update-lsregistration.sh
+
+    # tooling added recently
+    fasterdata-tuning.sh
+    repair-state-json.sh
+
     # SSL certificate helpers
     patch_apache_ssl_for_letsencrypt.sh
     testpoint-entrypoint-wrapper.sh
@@ -87,16 +98,36 @@ scripts=(
     docker-compose.testpoint-le.yml
     docker-compose.testpoint-le-auto.yml
 
-    # docs / READMEs (optional, copied so users can view usage offline)
+    # docs / READMEs and design notes
     README.md
     README-lsregistration.md
+    CHANGELOG.md
+    SAVE_RESTORE_DESIGN.md
 )
 
-echo "[INFO] Fetching helper scripts into $TOOLS_DIR"
-for s in "${scripts[@]}"; do
-  echo "  - $s"
-  curl -fsSL "$TOOLS_SRC/$s" -o "$TOOLS_DIR/$s"
+echo "[INFO] Fetching helper files into $TOOLS_DIR"
+for f in "${files[@]}"; do
+  dst="$TOOLS_DIR/$(basename "$f")"
+  echo "  - $f"
+  if curl -fsSL "$TOOLS_SRC/$f" -o "$dst"; then
+    :
+  else
+    echo "[WARN] Failed to fetch $f; continuing."
+    rm -f "$dst"
+  fi
+  # also attempt to fetch an accompanying .sha256 when present
+  if curl -fsSL "$TOOLS_SRC/$f.sha256" -o "$dst.sha256"; then
+    :
+  else
+    rm -f "$dst.sha256" 2>/dev/null || true
+  fi
 done
+
+# Make shell scripts executable where appropriate
+sh_files=("$TOOLS_DIR"/*.sh)
+if [ -e "${sh_files[0]:-}" ]; then
+  chmod 0755 "$TOOLS_DIR"/*.sh || true
+fi
 
 # Note: The script `perfSONAR-extract-lsregistration.sh` was deprecated and is
 # intentionally not included in the fetched helpers. See

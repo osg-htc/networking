@@ -22,6 +22,17 @@
 - Users with existing corrupted state files can repair them using `repair-state-json.sh <file.json>`
 - The script creates backups before repair and validates output with `jq` or Python
 
+## [Unreleased] - 2025-12-16
+
+### Changed
+
+- **Installer:** `install_tools_scripts.sh` bumped to `1.0.1` and updated to fetch a fuller set of helper scripts and docs, and attempt to fetch accompanying `.sha256` checksum files when available.
+- **lsregistration helper:** `perfSONAR-update-lsregistration.sh` now supports non-container (RPM) installs more robustly by attempting to restart the `perfsonar-lsregistrationdaemon` service name where present and falling back to `lsregistrationdaemon`, and will prefer the `perfsonar-` prefixed unit when restarting.
+
+### Notes
+
+- The `docs/perfsonar/tools_scripts` directory now includes updated `.sha256` checksum files for modified scripts. See the PR for details.
+
 ## [1.1.3] - 2025-12-06
 
 ### Fixed
