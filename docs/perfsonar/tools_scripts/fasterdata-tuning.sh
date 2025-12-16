@@ -3073,7 +3073,6 @@ print_summary() {
     local ifs
     ifs=$(get_ifaces)
     for iface in $ifs; do
-      local current_qdiscGeener
       current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 || echo "")
       local qdisc_type="${current_qdisc%% *}"
       if [[ "$qdisc_type" == "fq" ]]; then
