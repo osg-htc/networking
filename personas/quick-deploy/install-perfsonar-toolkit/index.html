@@ -1217,15 +1217,109 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-6-configure-and-enroll-in-psconfig" class="md-nav__link">
+  <a href="#step-6-install-and-configure-lets-encrypt-ssl-certificates-optional-but-recommended" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 6 – Configure and Enroll in pSConfig
+        Step 6 – Install and Configure Let's Encrypt SSL Certificates (Optional but Recommended)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Step 6 – Configure and Enroll in pSConfig">
+    <nav class="md-nav" aria-label="Step 6 – Install and Configure Let&#39;s Encrypt SSL Certificates (Optional but Recommended)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-61-prerequisites-for-lets-encrypt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.1 – Prerequisites for Let's Encrypt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-62-install-certbot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.2 – Install Certbot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-63-obtain-lets-encrypt-certificate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.3 – Obtain Let's Encrypt Certificate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-64-configure-apache-to-use-lets-encrypt-certificate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.4 – Configure Apache to Use Let's Encrypt Certificate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-65-configure-automatic-certificate-renewal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.5 – Configure Automatic Certificate Renewal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-66-monitor-certificate-expiration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6.6 – Monitor Certificate Expiration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-lets-encrypt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Let's Encrypt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-configure-and-enroll-in-psconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7 – Configure and Enroll in pSConfig
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7 – Configure and Enroll in pSConfig">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1267,10 +1361,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-7-register-and-configure-with-wlcgosg" class="md-nav__link">
+  <a href="#step-8-register-and-configure-with-wlcgosg" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 7 – Register and Configure with WLCG/OSG
+        Step 8 – Register and Configure with WLCG/OSG
       
     </span>
   </a>
@@ -1278,10 +1372,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-8-post-install-validation" class="md-nav__link">
+  <a href="#step-9-post-install-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 8 – Post-Install Validation
+        Step 9 – Post-Install Validation
       
     </span>
   </a>
@@ -3473,7 +3567,344 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 <p>Manual updates require regular monitoring to ensure security patches are applied promptly.</p>
 </details>
 <hr />
-<h2 id="step-6-configure-and-enroll-in-psconfig">Step 6 – Configure and Enroll in pSConfig<a class="headerlink" href="#step-6-configure-and-enroll-in-psconfig" title="Permanent link">&para;</a></h2>
+<h2 id="step-6-install-and-configure-lets-encrypt-ssl-certificates-optional-but-recommended">Step 6 – Install and Configure Let's Encrypt SSL Certificates (Optional but Recommended)<a class="headerlink" href="#step-6-install-and-configure-lets-encrypt-ssl-certificates-optional-but-recommended" title="Permanent link">&para;</a></h2>
+<p>The perfSONAR Toolkit web interface uses HTTPS with self-signed certificates by default. For production deployments,
+replacing these with Let's Encrypt certificates provides:</p>
+<ul>
+<li><strong>Browser trust</strong>: No certificate warnings when accessing the web UI</li>
+<li><strong>Security</strong>: Industry-standard encryption with automatic renewals</li>
+<li><strong>Compliance</strong>: Meets security requirements for production infrastructure</li>
+</ul>
+<p>This step is optional but highly recommended for production sites.</p>
+<h3 id="step-61-prerequisites-for-lets-encrypt">Step 6.1 – Prerequisites for Let's Encrypt<a class="headerlink" href="#step-61-prerequisites-for-lets-encrypt" title="Permanent link">&para;</a></h3>
+<p>Before obtaining Let's Encrypt certificates, ensure:</p>
+<ol>
+<li><strong>DNS is configured correctly:</strong></li>
+</ol>
+<p>Your hostname must have valid forward (A/AAAA) and reverse (PTR) DNS records that are publicly resolvable.
+   Verify this with the DNS checker:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/check-perfsonar-dns.sh
+</code></pre></div>
+<ol>
+<li><strong>Port 80 is accessible:</strong></li>
+</ol>
+<p>Let's Encrypt uses HTTP-01 challenge which requires port 80 to be open from the internet. Update your firewall:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add HTTP port to nftables (in addition to existing HTTPS)</span>
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--ports<span class="o">=</span><span class="m">80</span>,443<span class="w"> </span>--yes
+</code></pre></div>
+<ol>
+<li><strong>Apache is not listening on port 80:</strong></li>
+</ol>
+<p>The perfSONAR Toolkit Apache server should only listen on port 443 (HTTPS). Verify this:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check Apache is only listening on 443, not 80</span>
+ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:80
+ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:443
+
+<span class="c1"># Should show port 443 with httpd, but port 80 should be free</span>
+</code></pre></div>
+<details class="warning">
+<summary>If Apache is listening on port 80</summary>
+<p>The Toolkit's Apache configuration should not bind to port 80. If it is, check <code>/etc/httpd/conf/httpd.conf</code> and
+<code>/etc/httpd/conf.d/*.conf</code> for <code>Listen 80</code> directives and comment them out:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Find Listen directives</span>
+grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;^Listen 80&quot;</span><span class="w"> </span>/etc/httpd/
+
+<span class="c1"># Edit the file(s) and comment out or change to Listen 443</span>
+vi<span class="w"> </span>/etc/httpd/conf/httpd.conf
+
+<span class="c1"># Restart Apache</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>httpd
+</code></pre></div>
+</details>
+<h3 id="step-62-install-certbot">Step 6.2 – Install Certbot<a class="headerlink" href="#step-62-install-certbot" title="Permanent link">&para;</a></h3>
+<p>Install certbot using snapd (recommended method) or EPEL packages:</p>
+<p><strong>Option A: Install via Snap (Recommended)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install snapd</span>
+dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>snapd
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>snapd.socket
+
+<span class="c1"># Wait for snapd to initialize</span>
+sleep<span class="w"> </span><span class="m">10</span>
+
+<span class="c1"># Create symlink for classic snap support</span>
+ln<span class="w"> </span>-sf<span class="w"> </span>/var/lib/snapd/snap<span class="w"> </span>/snap
+
+<span class="c1"># Install certbot</span>
+snap<span class="w"> </span>install<span class="w"> </span>--classic<span class="w"> </span>certbot
+
+<span class="c1"># Create symlink for certbot command</span>
+ln<span class="w"> </span>-sf<span class="w"> </span>/snap/bin/certbot<span class="w"> </span>/usr/bin/certbot
+</code></pre></div>
+<p><strong>Option B: Install via DNF (Alternative)</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install certbot from EPEL</span>
+dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>certbot
+
+<span class="c1"># Verify installation</span>
+certbot<span class="w"> </span>--version
+</code></pre></div>
+<details class="info">
+<summary>Why use snap for certbot?</summary>
+<p>The Certbot developers recommend snap installation because:
+- Always provides the latest certbot version
+- Automatic updates via snap refresh
+- Consistent across distributions
+- Includes all necessary dependencies</p>
+<p>EPEL packages work but may lag behind upstream releases.</p>
+</details>
+<h3 id="step-63-obtain-lets-encrypt-certificate">Step 6.3 – Obtain Let's Encrypt Certificate<a class="headerlink" href="#step-63-obtain-lets-encrypt-certificate" title="Permanent link">&para;</a></h3>
+<p>Use certbot in standalone mode to obtain your certificate. Replace <code>&lt;your-fqdn&gt;</code> with your host's fully-qualified domain name
+and <code>&lt;admin-email&gt;</code> with your email address (used for renewal notifications).</p>
+<p><strong>Obtain certificate (interactive):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Stop Apache temporarily to free port 80</span>
+systemctl<span class="w"> </span>stop<span class="w"> </span>httpd
+
+<span class="c1"># Obtain certificate using standalone mode</span>
+certbot<span class="w"> </span>certonly<span class="w"> </span>--standalone<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>&lt;your-fqdn&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-m<span class="w"> </span>&lt;admin-email&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--agree-tos
+
+<span class="c1"># Restart Apache</span>
+systemctl<span class="w"> </span>start<span class="w"> </span>httpd
+</code></pre></div>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code>certbot<span class="w"> </span>certonly<span class="w"> </span>--standalone<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>ps-toolkit.example.org<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-m<span class="w"> </span>psadmin@example.org<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--agree-tos
+</code></pre></div>
+<p><strong>Non-interactive (for automation):</strong></p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>stop<span class="w"> </span>httpd
+
+certbot<span class="w"> </span>certonly<span class="w"> </span>--standalone<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>&lt;your-fqdn&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-m<span class="w"> </span>&lt;admin-email&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--agree-tos<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--non-interactive
+
+systemctl<span class="w"> </span>start<span class="w"> </span>httpd
+</code></pre></div>
+<details class="info">
+<summary>Certificate file locations</summary>
+<p>After successful issuance, certificates are stored at:</p>
+<ul>
+<li>Full chain: <code>/etc/letsencrypt/live/&lt;your-fqdn&gt;/fullchain.pem</code></li>
+<li>Private key: <code>/etc/letsencrypt/live/&lt;your-fqdn&gt;/privkey.pem</code></li>
+<li>Chain only: <code>/etc/letsencrypt/live/&lt;your-fqdn&gt;/chain.pem</code></li>
+<li>Certificate only: <code>/etc/letsencrypt/live/&lt;your-fqdn&gt;/cert.pem</code></li>
+</ul>
+<p>The actual certificate files are in <code>/etc/letsencrypt/archive/&lt;your-fqdn&gt;/</code> and the <code>live/</code> directory contains
+symlinks to the latest versions.</p>
+</details>
+<h3 id="step-64-configure-apache-to-use-lets-encrypt-certificate">Step 6.4 – Configure Apache to Use Let's Encrypt Certificate<a class="headerlink" href="#step-64-configure-apache-to-use-lets-encrypt-certificate" title="Permanent link">&para;</a></h3>
+<p>Use the helper script to update Apache SSL configuration:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/configure-toolkit-letsencrypt.sh<span class="w"> </span>&lt;your-fqdn&gt;
+</code></pre></div>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/configure-toolkit-letsencrypt.sh<span class="w"> </span>ps-toolkit.example.org
+</code></pre></div>
+<p>This script:</p>
+<ul>
+<li>Backs up the original Apache SSL configuration</li>
+<li>Updates <code>SSLCertificateFile</code> to point to Let's Encrypt fullchain</li>
+<li>Updates <code>SSLCertificateKeyFile</code> to point to Let's Encrypt private key</li>
+<li>Adds or updates <code>SSLCertificateChainFile</code></li>
+</ul>
+<p><strong>Verify Apache configuration syntax:</strong></p>
+<div class="highlight"><pre><span></span><code>apachectl<span class="w"> </span>configtest
+</code></pre></div>
+<p><strong>Reload Apache to apply changes:</strong></p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>reload<span class="w"> </span>httpd
+</code></pre></div>
+<p><strong>Verify the certificate is in use:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check certificate via OpenSSL</span>
+<span class="nb">echo</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;your-fqdn&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;your-fqdn&gt;<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-issuer<span class="w"> </span>-dates
+
+<span class="c1"># Should show:</span>
+<span class="c1"># issuer=C=US, O=Let&#39;s Encrypt, CN=...</span>
+<span class="c1"># notBefore=...</span>
+<span class="c1"># notAfter=...</span>
+</code></pre></div>
+<p><strong>Test in browser:</strong></p>
+<p>Navigate to <code>https://&lt;your-fqdn&gt;/toolkit</code> and verify:</p>
+<ul>
+<li>No certificate warnings</li>
+<li>Certificate is issued by "Let's Encrypt"</li>
+<li>Certificate is valid (green padlock icon)</li>
+</ul>
+<h3 id="step-65-configure-automatic-certificate-renewal">Step 6.5 – Configure Automatic Certificate Renewal<a class="headerlink" href="#step-65-configure-automatic-certificate-renewal" title="Permanent link">&para;</a></h3>
+<p>Let's Encrypt certificates expire after 90 days. Configure automatic renewal to avoid expiration.</p>
+<p><strong>Test renewal process (dry run):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Perform a test renewal without actually renewing</span>
+certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run<span class="w"> </span>--pre-hook<span class="w"> </span><span class="s2">&quot;systemctl stop httpd&quot;</span><span class="w"> </span>--post-hook<span class="w"> </span><span class="s2">&quot;systemctl start httpd&quot;</span>
+</code></pre></div>
+<p>If the dry run succeeds, configure automatic renewal:</p>
+<p><strong>Option A: Using Certbot Timer (Recommended)</strong></p>
+<p>Certbot automatically installs a systemd timer for renewals when installed via snap:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check timer status</span>
+systemctl<span class="w"> </span>list-timers<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>certbot
+
+<span class="c1"># If not present, enable it</span>
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>snap.certbot.renew.timer
+
+<span class="c1"># Or for EPEL installation:</span>
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>certbot-renew.timer
+</code></pre></div>
+<p><strong>Option B: Using Cron (Alternative)</strong></p>
+<p>Add a cron job for automatic renewal:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create renewal script</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/certbot-renew.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">#!/bin/bash</span>
+<span class="s"># Renew Let&#39;s Encrypt certificates and reload Apache</span>
+
+<span class="s">certbot renew \</span>
+<span class="s">    --pre-hook &quot;systemctl stop httpd&quot; \</span>
+<span class="s">    --post-hook &quot;systemctl start httpd&quot; \</span>
+<span class="s">    --quiet</span>
+
+<span class="s">exit 0</span>
+<span class="s">EOF</span>
+
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/bin/certbot-renew.sh
+
+<span class="c1"># Add cron job (runs twice daily at 3:30 AM and 3:30 PM)</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/cron.d/certbot-renew<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">30 3,15 * * * root /usr/local/bin/certbot-renew.sh</span>
+<span class="s">EOF</span>
+</code></pre></div>
+<details class="info">
+<summary>Renewal frequency and timing</summary>
+<ul>
+<li>Certbot automatically checks certificates and only renews those expiring within 30 days</li>
+<li>Running renewal checks twice daily ensures timely renewal even if one attempt fails</li>
+<li>The <code>--quiet</code> flag suppresses output unless there's an error</li>
+<li>Pre/post hooks stop and start Apache to free port 80 for the standalone authenticator</li>
+</ul>
+</details>
+<p><strong>Verify automatic renewal is configured:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># For snap installation</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>snap.certbot.renew.timer
+
+<span class="c1"># For EPEL installation</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>certbot-renew.timer
+
+<span class="c1"># For cron-based renewal</span>
+crontab<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>certbot
+<span class="c1"># or</span>
+cat<span class="w"> </span>/etc/cron.d/certbot-renew
+</code></pre></div>
+<h3 id="step-66-monitor-certificate-expiration">Step 6.6 – Monitor Certificate Expiration<a class="headerlink" href="#step-66-monitor-certificate-expiration" title="Permanent link">&para;</a></h3>
+<p>Even with automatic renewal, monitor certificate expiration to catch renewal failures:</p>
+<p><strong>Check certificate expiration date:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check all certificates</span>
+certbot<span class="w"> </span>certificates
+
+<span class="c1"># Check specific certificate via OpenSSL</span>
+<span class="nb">echo</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;your-fqdn&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;your-fqdn&gt;<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-dates
+</code></pre></div>
+<p><strong>Set up expiration monitoring (optional):</strong></p>
+<details class="tip">
+<summary>Email alerts for expiration</summary>
+<p>Let's Encrypt sends expiration warning emails to the address provided during certificate issuance. Ensure this email
+address is monitored:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check configured email</span>
+grep<span class="w"> </span>email<span class="w"> </span>/etc/letsencrypt/renewal/&lt;your-fqdn&gt;.conf
+</code></pre></div>
+<p>You can also set up local monitoring using nagios, icinga, or a simple script:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># check-cert-expiry.sh - Alert if certificate expires within 14 days</span>
+
+<span class="nv">DOMAIN</span><span class="o">=</span><span class="s2">&quot;&lt;your-fqdn&gt;&quot;</span>
+<span class="nv">WARN_DAYS</span><span class="o">=</span><span class="m">14</span>
+
+<span class="nv">EXPIRY</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span>:443<span class="w"> </span>-servername<span class="w"> </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-enddate<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="o">=</span><span class="w"> </span>-f2<span class="k">)</span>
+
+<span class="nv">EXPIRY_EPOCH</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">EXPIRY</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>+%s<span class="k">)</span>
+<span class="nv">NOW_EPOCH</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
+<span class="nv">DAYS_LEFT</span><span class="o">=</span><span class="k">$((</span><span class="w"> </span><span class="o">(</span><span class="nv">EXPIRY_EPOCH</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">NOW_EPOCH</span><span class="o">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="m">86400</span><span class="w"> </span><span class="k">))</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$DAYS_LEFT</span><span class="w"> </span>-lt<span class="w"> </span><span class="nv">$WARN_DAYS</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;WARNING: Certificate for </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span><span class="s2"> expires in </span><span class="si">${</span><span class="nv">DAYS_LEFT</span><span class="si">}</span><span class="s2"> days!&quot;</span>
+<span class="w">    </span><span class="c1"># Send alert via email, Slack, etc.</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK: Certificate valid for </span><span class="si">${</span><span class="nv">DAYS_LEFT</span><span class="si">}</span><span class="s2"> more days&quot;</span>
+<span class="k">fi</span>
+</code></pre></div>
+</details>
+<h3 id="troubleshooting-lets-encrypt">Troubleshooting Let's Encrypt<a class="headerlink" href="#troubleshooting-lets-encrypt" title="Permanent link">&para;</a></h3>
+<details class="failure">
+<summary>Certificate issuance fails with 'Connection refused'</summary>
+<p><strong>Symptoms:</strong> Certbot fails with "Failed to authenticate" or "Connection refused" errors during HTTP-01 challenge.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Verify port 80 is open in firewall</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;dport 80&quot;</span>
+
+<span class="c1"># Test port 80 accessibility from external host</span>
+curl<span class="w"> </span>-v<span class="w"> </span>http://&lt;your-fqdn&gt;/
+
+<span class="c1"># Check nothing is listening on port 80</span>
+ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:80
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Add port 80 to nftables: <code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-nftables.sh --ports=80,443 --yes</code></li>
+<li>Ensure Apache is not listening on port 80 (should only listen on 443)</li>
+<li>Verify DNS resolves correctly from public internet</li>
+<li>Check network firewall/router allows inbound port 80</li>
+</ul>
+</details>
+<details class="failure">
+<summary>Certificate renewal fails</summary>
+<p><strong>Symptoms:</strong> Certificate expires or renewal fails with errors in logs.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check renewal logs</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>snap.certbot.renew.timer<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+<span class="c1"># or</span>
+grep<span class="w"> </span>certbot<span class="w"> </span>/var/log/syslog<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-50
+
+<span class="c1"># Test renewal manually</span>
+certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run<span class="w"> </span>--pre-hook<span class="w"> </span><span class="s2">&quot;systemctl stop httpd&quot;</span><span class="w"> </span>--post-hook<span class="w"> </span><span class="s2">&quot;systemctl start httpd&quot;</span><span class="w"> </span>-vvv
+
+<span class="c1"># Check certificate status</span>
+certbot<span class="w"> </span>certificates
+</code></pre></div>
+<p><strong>Common causes:</strong></p>
+<ul>
+<li>Port 80 blocked: Verify firewall allows HTTP during renewal</li>
+<li>Apache failed to stop/start: Check Apache service status</li>
+<li>DNS changes: Verify hostname still resolves correctly</li>
+<li>Rate limiting: Let's Encrypt has rate limits (5 renewals per 7 days per domain)</li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Fix firewall or DNS issues</li>
+<li>Manually renew: <code>certbot renew --force-renewal</code></li>
+<li>If rate limited, wait 7 days before retrying</li>
+</ul>
+</details>
+<details class="failure">
+<summary>Browser shows old certificate after renewal</summary>
+<p><strong>Symptoms:</strong> Certificate renewed successfully but browser still shows old/expired certificate.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check certificate files are updated</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/etc/letsencrypt/live/&lt;your-fqdn&gt;/
+
+<span class="c1"># Verify Apache configuration points to correct files</span>
+grep<span class="w"> </span>SSLCertificate<span class="w"> </span>/etc/httpd/conf.d/ssl.conf
+
+<span class="c1"># Check Apache loaded the new certificate</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>httpd
+</code></pre></div>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Reload or restart Apache: <code>systemctl restart httpd</code></li>
+<li>Clear browser cache and hard refresh (Ctrl+Shift+R)</li>
+<li>Verify SSL configuration: <code>apachectl -t -D DUMP_VHOSTS</code></li>
+</ul>
+</details>
+<hr />
+<h2 id="step-7-configure-and-enroll-in-psconfig">Step 7 – Configure and Enroll in pSConfig<a class="headerlink" href="#step-7-configure-and-enroll-in-psconfig" title="Permanent link">&para;</a></h2>
 <p>Enroll your toolkit host with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN
 you expose for perfSONAR (one or two depending on whether you split latency/throughput by hostname).</p>
 <h3 id="option-a-web-ui-configuration-recommended">Option A: Web UI Configuration (Recommended)<a class="headerlink" href="#option-a-web-ui-configuration-recommended" title="Permanent link">&para;</a></h3>
@@ -3530,7 +3961,7 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
 </details>
 <hr />
-<h2 id="step-7-register-and-configure-with-wlcgosg">Step 7 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-7-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
+<h2 id="step-8-register-and-configure-with-wlcgosg">Step 8 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-8-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
 <p><strong>OSG/WLCG registration workflow:</strong></p>
@@ -3608,7 +4039,7 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregi
 </li>
 </ol>
 <hr />
-<h2 id="step-8-post-install-validation">Step 8 – Post-Install Validation<a class="headerlink" href="#step-8-post-install-validation" title="Permanent link">&para;</a></h2>
+<h2 id="step-9-post-install-validation">Step 9 – Post-Install Validation<a class="headerlink" href="#step-9-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
 <ol>
 <li>
