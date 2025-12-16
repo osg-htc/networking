@@ -2470,8 +2470,12 @@ do_diff_state() {
 import json
 import sys
 
-with open(sys.argv[1], 'r') as f:
-    print(json.dumps(json.load(f)))
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8', errors='replace') as f:
+    content = f.read()
+    # Sanitize legacy files: escape raw control characters (tabs, carriage returns)
+    content = content.replace('\t', '\\t').replace('\r', '\\r')
+    print(json.dumps(json.loads(content)))
 PY
   )
   
@@ -2579,8 +2583,11 @@ do_restore_state() {
 import json
 import sys
 
-with open(sys.argv[1], 'r') as f:
-    print(json.dumps(json.load(f)))
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8', errors='replace') as f:
+    content = f.read()
+    content = content.replace('\t', '\\t').replace('\r', '\\r')
+    print(json.dumps(json.loads(content)))
 PY
   ); then
     echo "ERROR: Invalid JSON in state file" >&2

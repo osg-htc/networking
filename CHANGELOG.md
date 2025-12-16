@@ -6,6 +6,12 @@
 All notable changes to this repository will be documented in this file.
 
 ## [1.3.3] - 2025-12-16
+## [1.3.5] - 2025-12-16
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.5: Sanitize legacy saved-state files during diff/restore by escaping raw tabs/carriage returns before JSON parsing. This allows `--diff-state` and `--restore-state` to consume single-line JSON files created with older versions that contain control characters.
+
 ## [1.3.4] - 2025-12-16
 ## [1.3.5] - 2025-12-16
 
