@@ -115,127 +115,20 @@ Phase 4: Cost/Risk (Week 8)
 Phase 5: Analysis (Week 9–10)
 - Aggregate, compare (CI/95%); report per-site and aggregate; recommend deployment.
 
-## Measurements
+## Measurements (Summary)
+- Primary WAN: GridFTP/FTS, XRootD, HTTP/WebDAV throughput; perfSONAR utilization; completion time; CPU and %iowait; retransmits.
+- Secondary Network: iperf3 single/multi-flow; RTT; memory overhead.
+- Secondary Storage: fio read/write; latency; queue depth.
+- Operational: compatibility, persistence across reboot, rollback, deployment time, hardware coverage, NUMA impact.
+- Monitoring: transfer logs, perfSONAR, iperf3/fio, sar, ethtool/iostat/ss, journal.
 
-### Primary WAN Metrics
-| Metric | Method | Target | Success Criterion |
-|--------|--------|--------|-------------------|
-| **GridFTP/FTS throughput** | Real transfers to remote sites | Baseline + 10–15% | Significant improvement |
-| **XRootD transfer throughput** | XRootD read/write to remote endpoint | Baseline + 10% | Improvement or stable |
-| **HTTP/WebDAV throughput** | Upload/download to remote storage | Baseline + 10% | Improvement or stable |
-| **perfSONAR throughput** | Automated tests to remote nodes | Link capacity - 5% | Near-line-rate utilization |
-| **Transfer completion time** | GridFTP/FTS transfer duration | Baseline - 10% | Faster transfers |
-| **CPU utilization during transfer** | top, sar (during WAN transfer) | <70% at saturation | Improved efficiency |
-| **I/O wait during transfer** | iostat, sar (%iowait) | <20% during transfer | Storage not bottleneck |
-| **Network retransmits** | ss -ti, ethtool -S | <0.01% of packets | Stable or improved |
+Full metric tables and thresholds: see [details](mini-capability-host-tuning-details.md#measurements).
 
-### Secondary Network Metrics
-| Metric | Method | Target | Success Criterion |
-|--------|--------|--------|-------------------|
-| **Single-flow throughput** | iperf3 -t 3600 (1 hour) | Baseline + 10% | Improvement or no regression |
-| **Multi-flow throughput** | iperf3 -P 10 (10 parallel) | Baseline + 5% | Improvement or no regression |
-| **RTT latency** | perfSONAR ping, iperf3 | Stable vs. baseline | No degradation |
-| **Memory usage (TCP buffers)** | /proc/meminfo | <5% of system RAM | Acceptable overhead |
+## Cost–Benefit (Brief)
+- Benefits: +10–25% WAN throughput; lower latency/jitter; improved efficiency; fewer failures.
+- Costs: Personnel effort (~60–70 hours across sites); existing infra; few hours per phase.
 
-### Secondary Storage Metrics
-| Metric | Method | Target | Success Criterion |
-|--------|--------|--------|-------------------|
-| **Sequential read throughput** | fio (seq-read, direct I/O) | Baseline + 5% | Improvement or stable |
-| **Sequential write throughput** | fio (seq-write, direct I/O) | Baseline + 5% | Improvement or stable |
-| **I/O latency (p50, p99)** | fio (latency histogram) | <10ms (p50) | Stable or improved |
-| **I/O queue depth utilization** | iostat -x (avgqu-sz) | Optimized per scheduler | No bottleneck |
-
-### Operational Metrics
-- **Data transfer software compatibility**: GridFTP, XRootD, FTS, dCache, EOS operate correctly with tuning
-- **Reboot safety**: Tuning persists correctly post-reboot; transfers resume without manual intervention
-- **Rollback success**: State restore returns system to baseline; data transfer performance returns to baseline
-- **Deployment time**: Minutes to complete audit and apply tuning on a data transfer node
-- **Hardware compatibility**: Pass audit on 100% of tested NIC types (Broadcom, Mellanox, Intel) and storage backends
-- **Storage I/O scheduler selection**: Optimal scheduler documented for dCache, XRootD, EOS on different storage hardware
-- **NUMA affinity impact**: Measure WAN transfer performance change with I/O process affinity to storage controller NUMA node
-
-### Monitoring
-- **Data transfer logs**: GridFTP transfer logs, XRootD monitoring, FTS dashboard, dCache/EOS admin logs
-- **perfSONAR**: Automated throughput tests and historical performance data
-- **iperf3/netperf**: Network diagnostic tests for troubleshooting
-- **fio**: Storage diagnostic tests for troubleshooting I/O bottlenecks
-- **sysstat** (sar): CPU, memory, I/O wait, context switches during transfers
-- **ethtool -S**: NIC statistics (errors, drops, retransmits)
-- **iostat -x**: Storage I/O queue depth, service time, utilization
-- **ss -ti**: TCP connection statistics (retransmits, congestion window)
-- **systemd journal**: ethtool-persist service logs and tuning application errors
-
-## Cost–Benefit
-
-### Benefit (Examples)
-1. **WAN data transfer throughput improvement**: If baseline GridFTP transfer is 15 Gbps and tuning achieves 18 Gbps (20% gain on 100 Gbps link):
-   - Benefit = `(18 - 15) / 15 × 100 = 20% faster WAN transfers`
-   - Operational impact: For a site transferring 10 PB/year, this saves ~60 days of transfer time annually
-   - Cost savings: Reduced transfer duration = lower risk of transfer failures, faster job turnaround
-2. **Host efficiency improvement**: Lower CPU utilization and I/O wait during transfers:
-   - Benefit: More headroom for concurrent transfers and batch jobs on same host
-   - Operational impact: Can increase number of concurrent FTS transfers per node by 10–15%
-3. **Storage-bound workload improvement**: If storage I/O is bottleneck, tuning can improve WAN transfer by reducing I/O wait:
-   - Benefit: Transfers no longer stalled waiting for storage read/write
-   - Example: XRootD reads complete faster → higher sustained transfer rate
-4. **Latency reduction**: Lower jitter and fewer retransmissions enable more stable high-speed transfers:
-   - Benefit: Fewer transfer failures and restarts
-   - Operational impact: Improved success rate for large (multi-TB) file transfers
-5. **Combined impact (network + storage)**: For sites with both network and storage tuning, WAN transfer improvements of 15–25% are achievable
-
-### Cost (Estimate)
-1. **Personnel**: 
-   - Site admins (network tuning): 3–4 hours per site for tuning application and WAN transfer testing
-   - Site storage operations (storage tuning): 2–3 hours per site for I/O scheduler selection and validation
-   - Site data transfer team: 2–3 hours per site for GridFTP/XRootD/FTS testing and log analysis
-   - Central team: 8–12 hours for test coordination, perfSONAR setup, result analysis
-   - **Total: ~60–70 site-hours across 4 sites**
-2. **Infrastructure**: 
-   - Use existing production or pre-production data transfer nodes (GridFTP, XRootD, dCache, EOS)
-   - Use existing perfSONAR nodes for baseline validation
-   - Use existing WAN connectivity to remote WLCG sites
-   - Storage for transfer logs and baseline captures (~500 MB per site)
-   - **No new hardware or network infrastructure required**
-3. **Runtime**: 
-   - WAN transfer baseline testing: 3–4 hours per site (includes multiple transfer tests)
-   - Network and storage diagnostic baseline: 2 hours per site
-   - Tuning application and reboot validation: 1 hour per site
-   - Tuned WAN transfer testing: 4–5 hours per site (includes multiple transfer iterations)
-   - Total test runtime: ~4 weeks (overlapping phases, allowing time for scheduled WAN transfers)
-
-### Tools and Cost
-- **Network tuning tools**: `fasterdata-tuning.sh` (open-source, free)
-- **Storage benchmarking tools**: `fio`, `iozone`, `bonnie++` (open-source, free)
-- **System analysis tools**: `iostat`, `ethtool`, `numactl` (standard RHEL 9, free)
-- **Automation**: Ansible playbooks for storage tuning (to be developed; ~4 hours effort)
-
-### Cost-Benefit Comparison
-- **Scenario A (WAN transfer 15–20% improvement, 10 PB/year site)**:
-  - Benefit: 15–20% faster WAN transfers = 1.5–2 PB more data transferred in same time window OR 50–60 days saved annually
-  - Cost: ~60–70 site-hours for testing + tuning deployment; amortized over 1 year = negligible
-  - **Recommendation: Deploy to production data transfer nodes**
-  
-- **Scenario B (WAN transfer 5–10% improvement, storage software compatibility concerns)**:
-  - Benefit: Modest WAN transfer improvement; may require monitoring for dCache/XRootD stability
-  - Cost: As above + ongoing monitoring overhead
-  - **Recommendation: Selective deployment; document constraints (e.g., "dCache pool nodes need specific fq settings"); deploy where stable**
-
-- **Scenario C (No WAN transfer improvement observed, but diagnostic tests show gains)**:
-  - Benefit: iperf3 shows improvement but real transfers don’t → bottleneck elsewhere (application layer, remote site, storage backend)
-  - Cost: As above
-  - **Recommendation: Document findings; investigate application-layer bottlenecks; defer host tuning until root cause identified**
-
-- **Scenario D (Site-specific hardware issue: regression observed)**:
-  - Benefit: None; specific NIC or storage controller incompatible with tuning
-  - Cost: As above + troubleshooting time
-  - **Recommendation: Rollback immediately; document hardware constraint; share with community for awareness**
-
-### Contingency
-If a site observes instability, performance regression, or compatibility issues:
-- **Immediate action**: Restore baseline state using `--restore-state` feature of fasterdata-tuning.sh and storage rollback playbook
-- **Investigation**: Capture logs and hardware details (NIC model, storage device, firmware versions) for root cause analysis
-- **Fallback**: Tuning is optional; sites can defer deployment until issue is resolved or workaround is identified
-- **Knowledge sharing**: Document site-specific constraints (e.g., "Broadcom BCM5719 driver does not support fq pacing") for the community
+Detailed calculations, scenarios, and contingencies: see [details](mini-capability-host-tuning-details.md#cost-benefit).
 
 
 ## Schedule-1: Timeline (January 2026)
