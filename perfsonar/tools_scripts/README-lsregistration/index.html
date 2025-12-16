@@ -2481,6 +2481,9 @@ inside the container.</p>
 <li>
 <p>Attempts a best-effort restart of <code>lsregistrationdaemon</code> on the host.</p>
 </li>
+<li>
+<p>Restart behavior: the script now attempts to restart the <code>perfsonar-lsregistrationdaemon</code> unit first (common in RPM installs), falls back to <code>lsregistrationdaemon</code> if that unit is not present, and finally falls back to signalling the process via <code>pkill -HUP</code> when <code>systemctl</code> is not available.</p>
+</li>
 </ul>
 <p>Examples:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Update a few fields inside the container (from installed tools path)</span>

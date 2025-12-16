@@ -2982,7 +2982,7 @@ extract/save/restore registration config that you may want to use.</p>
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-lsreg.sh
 </code></pre></div>
 Use the downloaded tool to extract a restore script:
-<div class="highlight"><pre><span></span><code>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh
+<div class="highlight"><pre><span></span><code>/tmp/update-lsreg.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh<span class="w"> </span>--local
 </code></pre></div>
 Note: Repository clone instructions are in Step 2.
 <strong>Note:</strong> All shell commands assume an interactive root shell.</p>
@@ -3035,8 +3035,12 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <div class="highlight"><pre><span></span><code><span class="c1"># Install EPEL repository</span>
 dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>epel-release
 
-<span class="c1"># Enable CRB (CodeReady Builder) repository</span>
-dnf<span class="w"> </span>config-manager<span class="w"> </span>--set-enabled<span class="w"> </span>crb
+<span class="c1"># Non-RHEL Enable CRB (CodeReady Builder) repository</span>
+dnf<span class="w"> </span>config-manager<span class="w"> </span>--set-enabled<span class="w"> </span>crb<span class="w">  </span>
+<span class="c1"># --OR--</span>
+<span class="c1"># For RHEL Enable access to codeready-builder. </span>
+<span class="c1"># NOTE auto-install script from perfSONAR doesn&#39;t set this (tries &quot;crb&quot; above which fails for RHEL)</span>
+subscription-manager<span class="w"> </span>repos<span class="w"> </span>--enable<span class="w"> </span>codeready-builder-for-rhel-9-x86_64-rpms
 
 <span class="c1"># Install perfSONAR repository for EL9</span>
 dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>http://software.internet2.edu/rpms/el9/x86_64/latest/packages/perfsonar-repo-0.11-1.noarch.rpm
@@ -3112,10 +3116,10 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p><strong>Verify bootstrap completed successfully:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check that all helper scripts were downloaded</span>
 ls<span class="w"> </span>-1<span class="w"> </span>/opt/perfsonar-toolkit/tools_scripts/*.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
-<span class="c1"># Should show 11 shell scripts</span>
+<span class="c1"># Should show 17 shell scripts</span>
 
 <span class="c1"># Verify key scripts are present and executable</span>
-ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-toolkit/tools_scripts/<span class="o">{</span>perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,check-perfsonar-dns.sh<span class="o">}</span>
+ls<span class="w"> </span>-l<span class="w"> </span>/opt/perfsonar-toolkit/tools_scripts/<span class="o">{</span>perfSONAR-pbr-nm.sh,perfSONAR-install-nftables.sh,check-perfsonar-dns.sh,fasterdata-tuning.sh<span class="o">}</span>
 </code></pre></div>
 <details class="info">
 <summary>Why install helper scripts?</summary>
@@ -3580,6 +3584,9 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregi
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
+
+<span class="c1"># Save current config</span>
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>save<span class="w"> </span>--output<span class="w"> </span>my-lsreg.sh<span class="w"> </span>--local<span class="w"> </span>
 </code></pre></div></p>
 <p><strong>For container-based installs:</strong>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only</span>

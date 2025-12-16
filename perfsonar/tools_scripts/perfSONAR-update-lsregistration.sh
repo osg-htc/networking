@@ -227,7 +227,7 @@ do_restore() {
 		cp -a "$tmp" "$CONF_PATH"
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon on host (best-effort)"
-			bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+			restart_lsregistration_local
 		fi
 	else
 		ENG=$(pick_engine)
@@ -236,7 +236,7 @@ do_restore() {
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon inside container (best-effort)"
-			exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+			restart_lsregistration_container "$ENG" "$CONTAINER"
 		fi
 	fi
 	log "Restore complete"
@@ -294,14 +294,14 @@ do_update() {
 		cp -a "$tmp" "$CONF_PATH"
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon on host (best-effort)"
-			bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+			restart_lsregistration_local
 		fi
 	else
 		log "Copying updated file back to container"
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon inside container (best-effort)"
-			exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+			restart_lsregistration_container "$ENG" "$CONTAINER"
 		fi
 	fi
 	log "Update complete"
@@ -341,7 +341,7 @@ EOF
 		cp -a "$tmp" "$CONF_PATH"
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon on host (best-effort)"
-			bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+			restart_lsregistration_local
 		fi
 	else
 		ENG=$(pick_engine)
@@ -349,7 +349,7 @@ EOF
 		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
 		if [[ "$NO_RESTART" != true ]]; then
-			exec_in_container "$ENG" "$CONTAINER" bash -lc 'systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon || true'
+			restart_lsregistration_container "$ENG" "$CONTAINER"
 		fi
 	fi
 	log "Create/install complete"
@@ -389,7 +389,7 @@ SCRIPT_EOF
 cp "$TMPFILE" "$CONF_PATH"
 rm -f "$TMPFILE"
 if command -v systemctl >/dev/null 2>&1; then
-	systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || true
+	systemctl restart perfsonar-lsregistrationdaemon 2>/dev/null || systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart perfsonar-lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || true
 else
 	pkill -HUP -f lsregistrationdaemon || true
 fi

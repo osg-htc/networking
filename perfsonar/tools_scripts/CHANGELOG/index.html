@@ -2348,12 +2348,22 @@
 <li>Users with existing corrupted state files can repair them using <code>repair-state-json.sh &lt;file.json&gt;</code></li>
 <li>The script creates backups before repair and validates output with <code>jq</code> or Python</li>
 </ul>
+<h2 id="unreleased-2025-12-16">[Unreleased] - 2025-12-16<a class="headerlink" href="#unreleased-2025-12-16" title="Permanent link">&para;</a></h2>
+<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Installer:</strong> <code>install_tools_scripts.sh</code> bumped to <code>1.0.1</code> and updated to fetch a fuller set of helper scripts and docs, and attempt to fetch accompanying <code>.sha256</code> checksum files when available.</li>
+<li><strong>lsregistration helper:</strong> <code>perfSONAR-update-lsregistration.sh</code> now supports non-container (RPM) installs more robustly by attempting to restart the <code>perfsonar-lsregistrationdaemon</code> service name where present and falling back to <code>lsregistrationdaemon</code>, and will prefer the <code>perfsonar-</code> prefixed unit when restarting.</li>
+</ul>
+<h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The <code>docs/perfsonar/tools_scripts</code> directory now includes updated <code>.sha256</code> checksum files for modified scripts. See the PR for details.</li>
+</ul>
 <h2 id="113-2025-12-06">[1.1.3] - 2025-12-06<a class="headerlink" href="#113-2025-12-06" title="Permanent link">&para;</a></h2>
 <h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Corrected IOMMU audit messaging to suggest <code>grubby</code> for BLS systems (EL9+) and <code>grub2-mkconfig</code>/<code>update-grub</code> for legacy systems. Also bumped <code>fasterdata-tuning.sh</code> to v1.1.3 and updated site copy + checksums.</li>
 </ul>
-<h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
+<h3 id="notes_2">Notes<a class="headerlink" href="#notes_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>This is a minor documentation &amp; diagnostic improvement; no new behavioral changes beyond clearer messaging and version bump.</li>
 </ul>
