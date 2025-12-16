@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.4
+# Version: 1.3.5
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -20,6 +20,8 @@
 #                escaped control characters).
 # NEW in v1.3.4: Eliminate newline corruption in saved-state JSON by quoting/sanitizing all
 #                string fields and robustly parsing tuned active profile.
+# NEW in v1.3.5: Escape tabs in sysctl values (e.g., tcp_rmem/tcp_wmem) so JSON is valid and
+#                --diff-state/--restore-state can parse saved files reliably.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -2044,7 +2046,8 @@ capture_sysctl_state() {
     value=$(sysctl -n "$key" 2>/dev/null || echo "")
     if [[ -n "$value" ]]; then
       [[ $first -eq 0 ]] && json+=","
-      json+="\"$key\":\"$value\""
+      # Quote and escape the value to ensure control characters (e.g., tabs) are encoded
+      json+="\"$key\":$(json_quote "$value")"
       first=0
     fi
   done
@@ -2467,8 +2470,12 @@ do_diff_state() {
 import json
 import sys
 
-with open(sys.argv[1], 'r') as f:
-    print(json.dumps(json.load(f)))
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8', errors='replace') as f:
+    content = f.read()
+    # Sanitize legacy files: escape raw control characters (tabs, carriage returns)
+    content = content.replace('\t', '\\t').replace('\r', '\\r')
+    print(json.dumps(json.loads(content)))
 PY
   )
   
@@ -2576,8 +2583,11 @@ do_restore_state() {
 import json
 import sys
 
-with open(sys.argv[1], 'r') as f:
-    print(json.dumps(json.load(f)))
+path = sys.argv[1]
+with open(path, 'r', encoding='utf-8', errors='replace') as f:
+    content = f.read()
+    content = content.replace('\t', '\\t').replace('\r', '\\r')
+    print(json.dumps(json.loads(content)))
 PY
   ); then
     echo "ERROR: Invalid JSON in state file" >&2
