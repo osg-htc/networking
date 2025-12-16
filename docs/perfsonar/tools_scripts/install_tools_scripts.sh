@@ -106,11 +106,8 @@ files=(
     docker-compose.testpoint-le.yml
     docker-compose.testpoint-le-auto.yml
 
-    # docs / READMEs and design notes
+    # docs / README (keep primary README only)
     README.md
-    README-lsregistration.md
-    CHANGELOG.md
-    SAVE_RESTORE_DESIGN.md
 )
 
 echo "[INFO] Fetching helper files into $TOOLS_DIR"
