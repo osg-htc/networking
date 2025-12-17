@@ -1218,6 +1218,145 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
 ---
 
+## Step 9 – SELinux Troubleshooting (If Enabled)
+
+If you've enabled SELinux in enforcing mode, certain perfSONAR operations may generate audit log alerts. This section explains common issues and their fixes.
+
+### SELinux Basics for perfSONAR
+
+SELinux enforces mandatory access controls based on file labels and process contexts. perfSONAR services run under specific contexts (e.g., `lsregistrationdaemon_t`, `httpd_t`), and accessed files must have compatible labels.
+
+**Check SELinux status:**
+
+```bash
+sestatus
+# Expected output: "SELinux status:  enabled" and "Current mode:  enforcing"
+```
+
+### Common SELinux Issues and Fixes
+
+#### Issue 1: `/etc/perfsonar/lsregistrationdaemon.conf` Has Wrong Label
+
+**Symptom:** Audit log shows:
+```
+SELinux is preventing /usr/bin/perl from getattr access on the file /etc/perfsonar/lsregistrationdaemon.conf.
+```
+
+**Root cause:** The configuration file was created or modified (e.g., via restore or manual edit) and has an incorrect SELinux label. The file should be labeled `lsregistrationdaemon_etc_t` but may be labeled `admin_home_t` or have no label.
+
+**Fix: Apply `restorecon` to relabel the file:**
+
+```bash
+# Restore the default SELinux context for the file
+sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf
+
+# Verify the label is now correct
+ls -Z /etc/perfsonar/lsregistrationdaemon.conf
+# Expected: system_u:object_r:lsregistrationdaemon_etc_t:s0
+```
+
+**Automatic fix during restore:**
+
+Our `perfSONAR-update-lsregistration.sh` helper attempts to automatically apply `restorecon` after writing the configuration file. If `restorecon` is available on your system, it runs without user intervention:
+
+```bash
+# Use the helper to restore config (with automatic restorecon attempt)
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh restore --local \
+    --input ./my-lsreg.conf
+
+# Or extract and run a self-contained restore script
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh extract --local \
+    --output ./restore-lsreg.sh
+./restore-lsreg.sh  # This script includes a restorecon attempt
+```
+
+**Preventing the issue:**
+
+- Always use the helper script (`perfSONAR-update-lsregistration.sh`) for configuration changes, as it handles `restorecon` automatically.
+- After any manual edits to `/etc/perfsonar/lsregistrationdaemon.conf`, explicitly run `restorecon`:
+  ```bash
+  sudo vi /etc/perfsonar/lsregistrationdaemon.conf
+  sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf  # Fix labels immediately
+  sudo systemctl restart perfsonar-lsregistrationdaemon
+  ```
+
+#### Issue 2: Other Services (ethtool, df, python3, etc.) Generating Audit Alerts
+
+**Symptoms:** Audit log shows alerts for `ethtool`, `df`, `python3.9`, `collect2`, etc.:
+```
+SELinux is preventing /usr/sbin/ethtool from setopt access on netlink_generic_socket labeled httpd_t.
+```
+
+**Root cause:** These are typically due to:
+- Overly restrictive SELinux policies for third-party tools
+- Legitimate operations that conflict with SELinux policy defaults
+- Tools running in unexpected contexts (e.g., under `httpd_t` or `postgresql_t` instead of intended domain)
+
+**Assessment:**
+
+1. **Determine if the alert is a real security issue:**
+   - If the operation is expected and safe, the alert can usually be ignored or a local policy module can be created.
+   - If the operation is unexpected, investigate why the process is running in that context.
+
+2. **Check the audit log for details:**
+   ```bash
+   # View recent audit alerts
+   tail -50 /var/log/audit/audit.log
+   
+   # Filter by specific service
+   grep "ethtool" /var/log/audit/audit.log | tail -10
+   ```
+
+3. **Generate a local policy module (if needed):**
+   ```bash
+   # Create a policy module for a specific alert (example: ethtool)
+   sudo ausearch -c 'ethtool' --raw | audit2allow -M my-ethtool
+   
+   # Review the generated policy
+   cat my-ethtool.te
+   
+   # Install the module (if the policy is acceptable)
+   sudo semodule -i my-ethtool.pp
+   ```
+
+**Mitigation strategies:**
+
+- **Monitor periodically:** Run `ausearch -m AVC -ts recent` weekly to catch emerging issues
+- **Create local policies sparingly:** Only add modules for verified, safe operations
+- **Contact perfSONAR maintainers:** If alerts affect core perfSONAR functionality, report the issue to the perfSONAR project
+
+#### Issue 3: Audit Log Flooding
+
+**Symptom:** Audit log grows very large due to repeated identical alerts.
+
+**Mitigation:**
+
+```bash
+# View count of each AVC alert type
+ausearch -m AVC | awk -F'avc:' '{print $2}' | sort | uniq -c | sort -rn | head -20
+
+# Suppress specific alerts (if they are verified as safe):
+# Add rules to /etc/audit/audit.rules or /etc/audit/rules.d/
+# (requires audit service restart and SELinux expertise)
+```
+
+### Best Practices for SELinux with perfSONAR
+
+1. **Use automated tools:** Always use the helper scripts (`perfSONAR-update-lsregistration.sh`, `perfSONAR-install-nftables.sh`) which handle SELinux contexts automatically.
+
+2. **Run `restorecon` after manual edits:** If you manually edit any perfSONAR configuration file, immediately restore the SELinux context:
+   ```bash
+   sudo /sbin/restorecon -v /path/to/file
+   ```
+
+3. **Monitor audit logs regularly:** Check `/var/log/audit/audit.log` weekly to catch new issues early.
+
+4. **Document exceptions:** If you create local SELinux policy modules, document them in your change log so future admins understand why they exist.
+
+5. **Keep policies minimal:** Only add local policy modules for operations that are verified as safe and necessary. Overly permissive policies increase security risk.
+
+---
+
 ## Step 9 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
