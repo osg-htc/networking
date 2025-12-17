@@ -28,6 +28,7 @@
 
 - **Installer:** `install_tools_scripts.sh` bumped to `1.0.1` and updated to fetch a fuller set of helper scripts and docs, and attempt to fetch accompanying `.sha256` checksum files when available.
 - **lsregistration helper:** `perfSONAR-update-lsregistration.sh` now supports non-container (RPM) installs more robustly by attempting to restart the `perfsonar-lsregistrationdaemon` service name where present and falling back to `lsregistrationdaemon`, and will prefer the `perfsonar-` prefixed unit when restarting.
+- **lsregistration helper:** Clarified `save` vs `extract` usage (save writes a raw `.conf` file; extract produces an executable restore script), and the `extract` output now attempts to apply `restorecon` to fix SELinux labels when run on hosts. The updater will attempt a `restorecon` after writing configuration locally or into a container when `restorecon` is available.
 
 ### Notes
 

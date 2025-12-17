@@ -91,7 +91,6 @@ files=(
     install-systemd-units.sh
 
     # perfSONAR utilities
-    perfSONAR-extract-lsregistration.sh
     # tooling added recently
     fasterdata-tuning.sh
     repair-state-json.sh

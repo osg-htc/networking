@@ -1190,8 +1190,11 @@ podman exec -it perfsonar-testpoint psconfig remote list
         --latitude 37.5 --longitude -121.7469 \
         --admin-name "pS Admin" --admin-email admin@example.org
 
-    # Save current config
-    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh save --output my-lsreg.sh --local 
+    # Save current config (raw conf file)
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh save --output my-lsreg.conf --local
+
+    # Or produce a self-contained executable restore script
+    /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh extract --output /root/restore-lsreg.sh --local
     ```
 
     **For container-based installs:**

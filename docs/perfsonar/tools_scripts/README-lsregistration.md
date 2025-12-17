@@ -26,6 +26,10 @@ inside the container.
 
 - Restart behavior: the script now attempts to restart the `perfsonar-lsregistrationdaemon` unit first (common in RPM installs), falls back to `lsregistrationdaemon` if that unit is not present, and finally falls back to signalling the process via `pkill -HUP` when `systemctl` is not available.
 
+- SELinux: when writing configuration to a host or into a container the updater will attempt to apply `restorecon` (if available) to the target path to ensure SELinux labels are usable after an automated restore. For manual restores that fail due to SELinux, run: `sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf`.
+
+- Save vs Extract: `save --output FILE` writes the raw `lsregistrationdaemon.conf` to `FILE` (recommended suffix `.conf`). `extract --output SCRIPT` produces a self-contained, executable restore script that writes the conf into `/etc/perfsonar/lsregistrationdaemon.conf` and tries to apply `restorecon` when executed on a host (recommended suffix `.sh`).
+
 Examples:
 
 ```bash
@@ -46,10 +50,17 @@ Examples:
 
 Script: `perfSONAR-update-lsregistration.sh` (see above)
 
-The combined helper contains an `extract` command that produces a self-contained restore script. Use
-`--output`/`--input` to control paths. Example:
+The combined helper contains an `extract` command that produces a self-contained restore script. Note the distinction:
+
+- `save --output FILE` writes the raw `lsregistrationdaemon.conf` content to `FILE` (recommended suffix: `.conf`).
+- `extract --output FILE` produces an executable script that will write the conf to `/etc/perfsonar/lsregistrationdaemon.conf` and attempt to fix SELinux labels (recommended suffix: `.sh`).
+
+Examples:
 
 ```bash
+# Save the raw conf file
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh save --output /tmp/lsreg.conf
+
 # Produce a self-contained restore script suitable for host restore
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
 /tmp/restore-lsreg.sh
