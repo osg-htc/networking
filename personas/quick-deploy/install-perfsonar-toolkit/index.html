@@ -1495,17 +1495,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#container-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Container Issues
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#networking-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4111,19 +4100,6 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregi
 <span class="c1"># Or produce a self-contained executable restore script</span>
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh<span class="w"> </span>--local
 </code></pre></div></p>
-<p><strong>For container-based installs:</strong>
-<div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only</span>
-/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span>--container<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
-
-<span class="c1"># Apply new settings and restart the daemon in the container</span>
-/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>create<span class="w"> </span>--container<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
-</code></pre></div></p>
 </li>
 <li>
 <p><strong>Automatic updates</strong></p>
@@ -4458,171 +4434,6 @@ curl<span class="w"> </span>-k<span class="w"> </span>https://localhost:9200/_ca
 </ul>
 <hr />
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="container-issues">Container Issues<a class="headerlink" href="#container-issues" title="Permanent link">&para;</a></h3>
-<details class="failure">
-<summary>Container won't start or exits immediately</summary>
-<p><strong>Symptoms:</strong> <code>podman ps</code> shows no running containers, or container exits shortly after starting.</p>
-<p><strong>Diagnostic steps:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check container logs</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
-
-<span class="c1"># Check for systemd initialization errors</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;failed\|error&quot;</span>
-
-<span class="c1"># Verify compose file syntax</span>
-<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-toolkit
-podman-compose<span class="w"> </span>config
-</code></pre></div>
-<p><strong>Common causes:</strong></p>
-<ul>
-<li>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-toolkit/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</li>
-<li>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</li>
-<li>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</li>
-<li>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</li>
-</ul>
-</details>
-<details class="failure">
-<summary>Container won't start or exits immediately</summary>
-<p><strong>Symptoms:</strong> <code>podman ps</code> shows no running containers, or container exits shortly after starting.</p>
-<p><strong>Diagnostic steps:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check container logs</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
-
-<span class="c1"># Check for systemd initialization errors</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;failed\|error&quot;</span>
-
-<span class="c1"># Verify compose file syntax</span>
-<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-toolkit
-podman-compose<span class="w"> </span>config
-</code></pre></div>
-<p><strong>Common causes:</strong></p>
-<ul>
-<li>Missing entrypoint wrapper: Ensure <code>/opt/perfsonar-toolkit/tools_scripts/testpoint-entrypoint-wrapper.sh</code> exists</li>
-<li>SELinux denials: Check <code>ausearch -m avc -ts recent</code> and consider temporarily setting to permissive mode for testing</li>
-<li>Incorrect bind-mount paths: Verify all host directories exist and have correct permissions</li>
-<li>Cgroup issues: Ensure <code>cgroupns: private</code> is set and no manual cgroup bind-mounts exist</li>
-</ul>
-</details>
-<details class="failure">
-<summary>Container crashes after reboot with exit code 255</summary>
-<p><strong>Symptoms:</strong> Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts
-with exit code 255.</p>
-<p><strong>Cause:</strong> The perfSONAR testpoint image runs systemd internally but podman-compose doesn't support the
-<code>--systemd=always</code> flag required for proper systemd operation in containers.</p>
-<p><strong>Diagnostic steps:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check container status</span>
-podman<span class="w"> </span>ps<span class="w"> </span>-a
-
-<span class="c1"># Check systemd service status</span>
-systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service
-
-<span class="c1"># View recent container logs</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span>
-
-<span class="c1"># Check if using compose-based service (BAD)</span>
-grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;ExecStart&quot;</span><span class="w"> </span>/etc/systemd/system/perfsonar-testpoint.service
-</code></pre></div>
-<p><strong>Solution:</strong></p>
-<p>Replace the compose-based systemd service with proper systemd units that use <code>podman run --systemd=always</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Stop and disable old service</span>
-systemctl<span class="w"> </span>stop<span class="w"> </span>perfsonar-testpoint.service
-systemctl<span class="w"> </span>disable<span class="w"> </span>perfsonar-testpoint.service
-
-<span class="c1"># Install new systemd units</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
-
-<span class="c1"># For testpoint only:</span>
-/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-toolkit
-
-<span class="c1"># For testpoint + certbot:</span>
-/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-toolkit<span class="w"> </span>--with-certbot
-
-<span class="c1"># Enable and start</span>
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
-
-<span class="c1"># If using certbot:</span>
-systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-certbot.service
-
-<span class="c1"># Verify containers are running</span>
-podman<span class="w"> </span>ps
-curl<span class="w"> </span>-kI<span class="w"> </span>https://127.0.0.1/
-</code></pre></div>
-<p><strong>Verification:</strong></p>
-<p>After installing the new units, the testpoint should:
-- Start successfully on boot
-- Run systemd properly inside the container
-- Maintain state across reboots
-- Show "Up" status in <code>podman ps</code> (not "Exited" or crash-looping)</p>
-</details>
-<details class="failure">
-<summary>Certbot service fails with 'Unable to open config file' error</summary>
-<p><strong>Symptoms:</strong> <code>perfsonar-certbot.service</code> fails immediately after starting with exit code 2. Logs show: <code>certbot: error:
-Unable to open config file: trap exit TERM; while...</code></p>
-<p><strong>Cause:</strong> The certbot container image has a built-in entrypoint that expects certbot commands directly. When using a
-shell loop for renewal, the entrypoint tries to parse the shell command as a certbot config file, causing this error.</p>
-<p><strong>Diagnostic steps:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check certbot service status</span>
-systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-certbot.service
-
-<span class="c1"># View detailed logs</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
-
-<span class="c1"># Check for the error in logs</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Unable to open config file&quot;</span>
-
-<span class="c1"># Verify service file configuration</span>
-grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;ExecStart&quot;</span><span class="w"> </span>/etc/systemd/system/perfsonar-certbot.service
-</code></pre></div>
-<p><strong>Solution:</strong></p>
-<p>The certbot service needs two flags:
-- <code>--systemd=always</code> for proper systemd integration and reboot persistence
-- <code>--entrypoint=/bin/sh</code> to override the built-in entrypoint</p>
-<p>Re-run the installation script to get the fixed version:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Stop current service</span>
-systemctl<span class="w"> </span>stop<span class="w"> </span>perfsonar-certbot.service
-
-<span class="c1"># Download and install updated systemd units</span>
-curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
-
-<span class="c1"># Install with certbot support</span>
-/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-toolkit<span class="w"> </span>--with-certbot
-
-<span class="c1"># Start the fixed service</span>
-systemctl<span class="w"> </span>daemon-reload
-systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-certbot.service
-
-<span class="c1"># Verify it&#39;s running</span>
-systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-certbot.service
-podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>certbot
-</code></pre></div>
-<p><strong>Expected result:</strong> The certbot container should be running (not exiting) and the service should be in "active (running)" state.</p>
-</details>
-<details class="failure">
-<summary>SELinux denials blocking container operations</summary>
-<p><strong>Symptoms:</strong> Container starts but services fail, permission denied errors in logs.</p>
-<p><strong>Diagnostic steps:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check for recent SELinux denials</span>
-ausearch<span class="w"> </span>-m<span class="w"> </span>avc<span class="w"> </span>-ts<span class="w"> </span>recent
-
-<span class="c1"># Temporarily set to permissive for testing</span>
-setenforce<span class="w"> </span><span class="m">0</span>
-
-<span class="c1"># Test if issue resolves, then check audit log</span>
-ausearch<span class="w"> </span>-m<span class="w"> </span>avc<span class="w"> </span>-ts<span class="w"> </span>recent<span class="w"> </span>&gt;<span class="w"> </span>/tmp/selinux-denials.txt
-</code></pre></div>
-<p><strong>Solutions:</strong></p>
-<ul>
-<li>Verify volume labels are correct (<code>:Z</code> for exclusive, <code>:z</code> for shared)</li>
-<li>Recreate containers to reapply SELinux labels: <code>podman-compose down &amp;&amp; podman-compose up -d</code></li>
-<li>If persistent issues, consider creating custom SELinux policy or running in permissive mode</li>
-</ul>
-</details>
 <h3 id="networking-issues">Networking Issues<a class="headerlink" href="#networking-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>Policy-based routing not working correctly</summary>
