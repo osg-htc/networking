@@ -2484,6 +2484,12 @@ inside the container.</p>
 <li>
 <p>Restart behavior: the script now attempts to restart the <code>perfsonar-lsregistrationdaemon</code> unit first (common in RPM installs), falls back to <code>lsregistrationdaemon</code> if that unit is not present, and finally falls back to signalling the process via <code>pkill -HUP</code> when <code>systemctl</code> is not available.</p>
 </li>
+<li>
+<p>SELinux: when writing configuration to a host or into a container the updater will attempt to apply <code>restorecon</code> (if available) to the target path to ensure SELinux labels are usable after an automated restore. For manual restores that fail due to SELinux, run: <code>sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf</code>.</p>
+</li>
+<li>
+<p>Save vs Extract: <code>save --output FILE</code> writes the raw <code>lsregistrationdaemon.conf</code> to <code>FILE</code> (recommended suffix <code>.conf</code>). <code>extract --output SCRIPT</code> produces a self-contained, executable restore script that writes the conf into <code>/etc/perfsonar/lsregistrationdaemon.conf</code> and tries to apply <code>restorecon</code> when executed on a host (recommended suffix <code>.sh</code>).</p>
+</li>
 </ul>
 <p>Examples:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Update a few fields inside the container (from installed tools path)</span>
@@ -2500,9 +2506,16 @@ inside the container.</p>
 </code></pre></div>
 <h2 id="generate-a-restore-script-from-an-existing-conf">Generate a restore script from an existing conf<a class="headerlink" href="#generate-a-restore-script-from-an-existing-conf" title="Permanent link">&para;</a></h2>
 <p>Script: <code>perfSONAR-update-lsregistration.sh</code> (see above)</p>
-<p>The combined helper contains an <code>extract</code> command that produces a self-contained restore script. Use
-<code>--output</code>/<code>--input</code> to control paths. Example:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Produce a self-contained restore script suitable for host restore</span>
+<p>The combined helper contains an <code>extract</code> command that produces a self-contained restore script. Note the distinction:</p>
+<ul>
+<li><code>save --output FILE</code> writes the raw <code>lsregistrationdaemon.conf</code> content to <code>FILE</code> (recommended suffix: <code>.conf</code>).</li>
+<li><code>extract --output FILE</code> produces an executable script that will write the conf to <code>/etc/perfsonar/lsregistrationdaemon.conf</code> and attempt to fix SELinux labels (recommended suffix: <code>.sh</code>).</li>
+</ul>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Save the raw conf file</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>save<span class="w"> </span>--output<span class="w"> </span>/tmp/lsreg.conf
+
+<span class="c1"># Produce a self-contained restore script suitable for host restore</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/tmp/restore-lsreg.sh
 /tmp/restore-lsreg.sh
 </code></pre></div>

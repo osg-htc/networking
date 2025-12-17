@@ -4016,8 +4016,11 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregi
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 
-<span class="c1"># Save current config</span>
-/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>save<span class="w"> </span>--output<span class="w"> </span>my-lsreg.sh<span class="w"> </span>--local<span class="w"> </span>
+<span class="c1"># Save current config (raw conf file)</span>
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>save<span class="w"> </span>--output<span class="w"> </span>my-lsreg.conf<span class="w"> </span>--local
+
+<span class="c1"># Or produce a self-contained executable restore script</span>
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--output<span class="w"> </span>/root/restore-lsreg.sh<span class="w"> </span>--local
 </code></pre></div></p>
 <p><strong>For container-based installs:</strong>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only</span>

@@ -2353,6 +2353,7 @@
 <ul>
 <li><strong>Installer:</strong> <code>install_tools_scripts.sh</code> bumped to <code>1.0.1</code> and updated to fetch a fuller set of helper scripts and docs, and attempt to fetch accompanying <code>.sha256</code> checksum files when available.</li>
 <li><strong>lsregistration helper:</strong> <code>perfSONAR-update-lsregistration.sh</code> now supports non-container (RPM) installs more robustly by attempting to restart the <code>perfsonar-lsregistrationdaemon</code> service name where present and falling back to <code>lsregistrationdaemon</code>, and will prefer the <code>perfsonar-</code> prefixed unit when restarting.</li>
+<li><strong>lsregistration helper:</strong> Clarified <code>save</code> vs <code>extract</code> usage (save writes a raw <code>.conf</code> file; extract produces an executable restore script), and the <code>extract</code> output now attempts to apply <code>restorecon</code> to fix SELinux labels when run on hosts. The updater will attempt a <code>restorecon</code> after writing configuration locally or into a container when <code>restorecon</code> is available.</li>
 </ul>
 <h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
 <ul>
