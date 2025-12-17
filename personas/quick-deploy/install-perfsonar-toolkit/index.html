@@ -1372,6 +1372,95 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#step-9-selinux-troubleshooting-if-enabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9 – SELinux Troubleshooting (If Enabled)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9 – SELinux Troubleshooting (If Enabled)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selinux-basics-for-perfsonar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SELinux Basics for perfSONAR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-selinux-issues-and-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common SELinux Issues and Fixes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common SELinux Issues and Fixes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-1-etcperfsonarlsregistrationdaemonconf-has-wrong-label" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 1: /etc/perfsonar/lsregistrationdaemon.conf Has Wrong Label
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-2-other-services-ethtool-df-python3-postgresql-collect2-generating-audit-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 2: Other Services (ethtool, df, python3, postgresql, collect2) Generating Audit Alerts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-3-audit-log-flooding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 3: Audit Log Flooding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices-for-selinux-with-perfsonar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices for SELinux with perfSONAR
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#step-9-post-install-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4039,6 +4128,187 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregi
 <li>
 <p><strong>Automatic updates</strong></p>
 <p>The perfSONAR Toolkit uses <code>dnf-automatic</code> for automatic updates (already configured in Step 5).</p>
+</li>
+</ol>
+<hr />
+<h2 id="step-9-selinux-troubleshooting-if-enabled">Step 9 – SELinux Troubleshooting (If Enabled)<a class="headerlink" href="#step-9-selinux-troubleshooting-if-enabled" title="Permanent link">&para;</a></h2>
+<p>If you've enabled SELinux in enforcing mode, certain perfSONAR operations may generate audit log alerts. This section explains common issues and their fixes.</p>
+<h3 id="selinux-basics-for-perfsonar">SELinux Basics for perfSONAR<a class="headerlink" href="#selinux-basics-for-perfsonar" title="Permanent link">&para;</a></h3>
+<p>SELinux enforces mandatory access controls based on file labels and process contexts. perfSONAR services run under specific contexts (e.g., <code>lsregistrationdaemon_t</code>, <code>httpd_t</code>), and accessed files must have compatible labels.</p>
+<p><strong>Check SELinux status:</strong></p>
+<div class="highlight"><pre><span></span><code>sestatus
+<span class="c1"># Expected output: &quot;SELinux status:  enabled&quot; and &quot;Current mode:  enforcing&quot;</span>
+</code></pre></div>
+<h3 id="common-selinux-issues-and-fixes">Common SELinux Issues and Fixes<a class="headerlink" href="#common-selinux-issues-and-fixes" title="Permanent link">&para;</a></h3>
+<h4 id="issue-1-etcperfsonarlsregistrationdaemonconf-has-wrong-label">Issue 1: <code>/etc/perfsonar/lsregistrationdaemon.conf</code> Has Wrong Label<a class="headerlink" href="#issue-1-etcperfsonarlsregistrationdaemonconf-has-wrong-label" title="Permanent link">&para;</a></h4>
+<p><strong>Symptom:</strong> Audit log shows:
+<div class="highlight"><pre><span></span><code>SELinux is preventing /usr/bin/perl from getattr access on the file /etc/perfsonar/lsregistrationdaemon.conf.
+</code></pre></div></p>
+<p><strong>Root cause:</strong> The configuration file was created or modified (e.g., via restore or manual edit) and has an incorrect SELinux label. The file should be labeled <code>lsregistrationdaemon_etc_t</code> but may be labeled <code>admin_home_t</code> or have no label.</p>
+<p><strong>Fix: Apply <code>restorecon</code> to relabel the file:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Restore the default SELinux context for the file</span>
+sudo<span class="w"> </span>/sbin/restorecon<span class="w"> </span>-v<span class="w"> </span>/etc/perfsonar/lsregistrationdaemon.conf
+
+<span class="c1"># Verify the label is now correct</span>
+ls<span class="w"> </span>-Z<span class="w"> </span>/etc/perfsonar/lsregistrationdaemon.conf
+<span class="c1"># Expected: system_u:object_r:lsregistrationdaemon_etc_t:s0</span>
+</code></pre></div>
+<p><strong>Automatic fix during restore:</strong></p>
+<p>Our <code>perfSONAR-update-lsregistration.sh</code> helper attempts to automatically apply <code>restorecon</code> after writing the configuration file. If <code>restorecon</code> is available on your system, it runs without user intervention:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use the helper to restore config (with automatic restorecon attempt)</span>
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>restore<span class="w"> </span>--local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--input<span class="w"> </span>./my-lsreg.conf
+
+<span class="c1"># Or extract and run a self-contained restore script</span>
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>extract<span class="w"> </span>--local<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output<span class="w"> </span>./restore-lsreg.sh
+./restore-lsreg.sh<span class="w">  </span><span class="c1"># This script includes a restorecon attempt</span>
+</code></pre></div>
+<p><strong>Preventing the issue:</strong></p>
+<ul>
+<li>Always use the helper script (<code>perfSONAR-update-lsregistration.sh</code>) for configuration changes, as it handles <code>restorecon</code> automatically.</li>
+<li>After any manual edits to <code>/etc/perfsonar/lsregistrationdaemon.conf</code>, explicitly run <code>restorecon</code>:
+  <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>vi<span class="w"> </span>/etc/perfsonar/lsregistrationdaemon.conf
+sudo<span class="w"> </span>/sbin/restorecon<span class="w"> </span>-v<span class="w"> </span>/etc/perfsonar/lsregistrationdaemon.conf<span class="w">  </span><span class="c1"># Fix labels immediately</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregistrationdaemon
+</code></pre></div></li>
+</ul>
+<h4 id="issue-2-other-services-ethtool-df-python3-postgresql-collect2-generating-audit-alerts">Issue 2: Other Services (ethtool, df, python3, postgresql, collect2) Generating Audit Alerts<a class="headerlink" href="#issue-2-other-services-ethtool-df-python3-postgresql-collect2-generating-audit-alerts" title="Permanent link">&para;</a></h4>
+<p><strong>Symptoms:</strong> Audit log shows alerts for various tools running in unexpected SELinux contexts:
+<div class="highlight"><pre><span></span><code>SELinux is preventing /usr/sbin/ethtool from setopt access on netlink_generic_socket labeled httpd_t.
+SELinux is preventing /usr/bin/df from getattr access on the directory /var/cache/openafs.
+SELinux is preventing /usr/bin/python3.9 from execute access on the file ldconfig.
+SELinux is preventing /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 from search access on the directory snapd.
+</code></pre></div></p>
+<p><strong>Root cause:</strong> These alerts typically stem from:
+- Tools invoked from web interfaces or services running in different SELinux contexts (e.g., <code>httpd_t</code>, <code>postgresql_t</code>)
+- Third-party or system utilities that lack complete SELinux policy coverage
+- Legitimate operations conflicting with default policy rules
+- Build/compilation tools invoked during package installation (usually transient)</p>
+<p><strong>Assessment and diagnosis:</strong></p>
+<ol>
+<li><strong>Check if the alert is related to perfSONAR functionality:</strong></li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># View recent audit alerts</span>
+tail<span class="w"> </span>-100<span class="w"> </span>/var/log/audit/audit.log
+
+<span class="c1"># Filter by command name to see context</span>
+grep<span class="w"> </span><span class="s2">&quot;ethtool\|df\|python\|collect2\|ldconfig&quot;</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+
+<span class="c1"># Count alert types to identify patterns</span>
+ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">&#39;avc:&#39;</span><span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-10
+</code></pre></div>
+<ol>
+<li>
+<p><strong>Determine the source process and context:</strong></p>
+</li>
+<li>
+<p>Alerts mentioning <code>httpd_t</code> usually indicate the web UI triggered the operation (typically safe to allow)</p>
+</li>
+<li>Alerts from <code>postgresql_t</code> indicate database tools being invoked (context boundary may not be required)</li>
+<li>Alerts from <code>lsregistrationdaemon_t</code> indicate the registration daemon needs access (fix labels first, not policies)</li>
+<li>
+<p>Alerts from <code>gcc/collect2</code> during package install are usually transient (monitor periodically)</p>
+</li>
+<li>
+<p><strong>Create a local SELinux policy module</strong> (if operation is verified as safe)</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate policy module for a specific alert (example: ethtool)</span>
+sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;ethtool&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-ethtool
+
+<span class="c1"># Review the generated module to ensure it&#39;s safe</span>
+cat<span class="w"> </span>my-ethtool.te
+
+<span class="c1"># Install the module (if approved and safe)</span>
+sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> </span>my-ethtool.pp
+
+<span class="c1"># Verify installation</span>
+semodule<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>my-ethtool
+</code></pre></div>
+<p><strong>Specific service fixes:</strong></p>
+<p><strong>ethtool netlink access (from httpd_t or lsregistrationdaemon_t):</strong>
+   - <strong>Operation:</strong> Checking NIC link status, speed, duplex (safe)
+   - <strong>Source:</strong> Web UI health checks or daemon monitoring
+   - <strong>Fix:</strong>
+     <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;ethtool&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-ethtool
+sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> </span>my-ethtool.pp
+</code></pre></div></p>
+<p><strong>df/stat on /var/cache/openafs (from lsregistrationdaemon_t):</strong>
+   - <strong>Operation:</strong> Checking available disk space (safe)
+   - <strong>Source:</strong> Registration daemon system health queries
+   - <strong>Fix:</strong>
+     <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;df&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-df
+sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> </span>my-df.pp
+</code></pre></div></p>
+<p><strong>python3/postgresql context issues (collect2, ldconfig):</strong>
+   - <strong>Operation:</strong> Build tools, library checks during package installation (usually transient)
+   - <strong>Assessment:</strong> These are typically safe but may be ephemeral
+   - <strong>Fix (if persistent):</strong>
+     <div class="highlight"><pre><span></span><code><span class="c1"># For postgresql-related alerts</span>
+sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;validate-config&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-postgresql
+sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> </span>my-postgresql.pp
+</code></pre></div></p>
+<p><strong>Audit log monitoring (prevents future surprises):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check for recent AVC denials</span>
+sudo<span class="w"> </span>ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span>-ts<span class="w"> </span>recent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-50
+
+<span class="c1"># Create a daily monitoring script</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/check-selinux-alerts.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">#!/bin/bash</span>
+<span class="s"># Check for recent SELinux audit alerts</span>
+
+<span class="s">RECENT_ALERTS=$(ausearch -m AVC -ts recent 2&gt;/dev/null | wc -l)</span>
+
+<span class="s">if [ $RECENT_ALERTS -gt 0 ]; then</span>
+<span class="s">    echo &quot;WARNING: Found $RECENT_ALERTS recent SELinux alerts:&quot;</span>
+<span class="s">    ausearch -m AVC -ts recent | tail -20</span>
+<span class="s">else</span>
+<span class="s">    echo &quot;OK: No recent SELinux audit alerts&quot;</span>
+<span class="s">fi</span>
+<span class="s">EOF</span>
+
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/bin/check-selinux-alerts.sh
+
+<span class="c1"># Add to cron (runs daily at 9 AM)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;0 9 * * * root /usr/local/bin/check-selinux-alerts.sh&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/cron.d/selinux-alert-check
+</code></pre></div>
+<p><strong>Best practice for handling alerts:</strong></p>
+<ol>
+<li>Log all alerts for 1-2 weeks to establish a baseline</li>
+<li>Review and categorize (safe vs. unsafe operations)</li>
+<li>Create local policy modules only for verified, safe operations</li>
+<li>Document each module in your change log</li>
+<li>Monitor weekly for new or unexpected alerts</li>
+</ol>
+<h4 id="issue-3-audit-log-flooding">Issue 3: Audit Log Flooding<a class="headerlink" href="#issue-3-audit-log-flooding" title="Permanent link">&para;</a></h4>
+<p><strong>Symptom:</strong> Audit log grows very large due to repeated identical alerts.</p>
+<p><strong>Mitigation:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># View count of each AVC alert type</span>
+ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">&#39;avc:&#39;</span><span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+
+<span class="c1"># Suppress specific alerts (if they are verified as safe):</span>
+<span class="c1"># Add rules to /etc/audit/audit.rules or /etc/audit/rules.d/</span>
+<span class="c1"># (requires audit service restart and SELinux expertise)</span>
+</code></pre></div>
+<h3 id="best-practices-for-selinux-with-perfsonar">Best Practices for SELinux with perfSONAR<a class="headerlink" href="#best-practices-for-selinux-with-perfsonar" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Use automated tools:</strong> Always use the helper scripts (<code>perfSONAR-update-lsregistration.sh</code>, <code>perfSONAR-install-nftables.sh</code>) which handle SELinux contexts automatically.</p>
+</li>
+<li>
+<p><strong>Run <code>restorecon</code> after manual edits:</strong> If you manually edit any perfSONAR configuration file, immediately restore the SELinux context:
+   <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/sbin/restorecon<span class="w"> </span>-v<span class="w"> </span>/path/to/file
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Monitor audit logs regularly:</strong> Check <code>/var/log/audit/audit.log</code> weekly to catch new issues early.</p>
+</li>
+<li>
+<p><strong>Document exceptions:</strong> If you create local SELinux policy modules, document them in your change log so future admins understand why they exist.</p>
+</li>
+<li>
+<p><strong>Keep policies minimal:</strong> Only add local policy modules for operations that are verified as safe and necessary. Overly permissive policies increase security risk.</p>
 </li>
 </ol>
 <hr />
