@@ -1432,7 +1432,7 @@ ausearch -m AVC | awk -F'avc:' '{print $2}' | sort | uniq -c | sort -rn | head -
 
 ---
 
-## Step 9 – Post-Install Validation
+## Step 10 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
 
