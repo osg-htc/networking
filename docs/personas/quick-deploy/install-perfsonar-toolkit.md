@@ -1280,50 +1280,125 @@ Our `perfSONAR-update-lsregistration.sh` helper attempts to automatically apply 
   sudo systemctl restart perfsonar-lsregistrationdaemon
   ```
 
-#### Issue 2: Other Services (ethtool, df, python3, etc.) Generating Audit Alerts
+#### Issue 2: Other Services (ethtool, df, python3, postgresql, collect2) Generating Audit Alerts
 
-**Symptoms:** Audit log shows alerts for `ethtool`, `df`, `python3.9`, `collect2`, etc.:
+**Symptoms:** Audit log shows alerts for various tools running in unexpected SELinux contexts:
 ```
 SELinux is preventing /usr/sbin/ethtool from setopt access on netlink_generic_socket labeled httpd_t.
+SELinux is preventing /usr/bin/df from getattr access on the directory /var/cache/openafs.
+SELinux is preventing /usr/bin/python3.9 from execute access on the file ldconfig.
+SELinux is preventing /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 from search access on the directory snapd.
 ```
 
-**Root cause:** These are typically due to:
-- Overly restrictive SELinux policies for third-party tools
-- Legitimate operations that conflict with SELinux policy defaults
-- Tools running in unexpected contexts (e.g., under `httpd_t` or `postgresql_t` instead of intended domain)
+**Root cause:** These alerts typically stem from:
+- Tools invoked from web interfaces or services running in different SELinux contexts (e.g., `httpd_t`, `postgresql_t`)
+- Third-party or system utilities that lack complete SELinux policy coverage
+- Legitimate operations conflicting with default policy rules
+- Build/compilation tools invoked during package installation (usually transient)
 
-**Assessment:**
+**Assessment and diagnosis:**
 
-1. **Determine if the alert is a real security issue:**
-   - If the operation is expected and safe, the alert can usually be ignored or a local policy module can be created.
-   - If the operation is unexpected, investigate why the process is running in that context.
-
-2. **Check the audit log for details:**
+1. **Check if the alert is related to perfSONAR functionality:**
+   
    ```bash
    # View recent audit alerts
-   tail -50 /var/log/audit/audit.log
+   tail -100 /var/log/audit/audit.log
    
-   # Filter by specific service
-   grep "ethtool" /var/log/audit/audit.log | tail -10
+   # Filter by command name to see context
+   grep "ethtool\|df\|python\|collect2\|ldconfig" /var/log/audit/audit.log | head -20
+   
+   # Count alert types to identify patterns
+   ausearch -m AVC | awk -F'avc:' '{print $2}' | sort | uniq -c | sort -rn | head -10
    ```
 
-3. **Generate a local policy module (if needed):**
+2. **Determine the source process and context:**
+   
+   - Alerts mentioning `httpd_t` usually indicate the web UI triggered the operation (typically safe to allow)
+   - Alerts from `postgresql_t` indicate database tools being invoked (context boundary may not be required)
+   - Alerts from `lsregistrationdaemon_t` indicate the registration daemon needs access (fix labels first, not policies)
+   - Alerts from `gcc/collect2` during package install are usually transient (monitor periodically)
+
+3. **Create a local SELinux policy module** (if operation is verified as safe)
+   
    ```bash
-   # Create a policy module for a specific alert (example: ethtool)
+   # Generate policy module for a specific alert (example: ethtool)
    sudo ausearch -c 'ethtool' --raw | audit2allow -M my-ethtool
    
-   # Review the generated policy
+   # Review the generated module to ensure it's safe
    cat my-ethtool.te
    
-   # Install the module (if the policy is acceptable)
+   # Install the module (if approved and safe)
    sudo semodule -i my-ethtool.pp
+   
+   # Verify installation
+   semodule -l | grep my-ethtool
    ```
 
-**Mitigation strategies:**
+**Specific service fixes:**
 
-- **Monitor periodically:** Run `ausearch -m AVC -ts recent` weekly to catch emerging issues
-- **Create local policies sparingly:** Only add modules for verified, safe operations
-- **Contact perfSONAR maintainers:** If alerts affect core perfSONAR functionality, report the issue to the perfSONAR project
+**ethtool netlink access (from httpd_t or lsregistrationdaemon_t):**
+   - **Operation:** Checking NIC link status, speed, duplex (safe)
+   - **Source:** Web UI health checks or daemon monitoring
+   - **Fix:**
+     ```bash
+     sudo ausearch -c 'ethtool' --raw | audit2allow -M my-ethtool
+     sudo semodule -i my-ethtool.pp
+     ```
+
+**df/stat on /var/cache/openafs (from lsregistrationdaemon_t):**
+   - **Operation:** Checking available disk space (safe)
+   - **Source:** Registration daemon system health queries
+   - **Fix:**
+     ```bash
+     sudo ausearch -c 'df' --raw | audit2allow -M my-df
+     sudo semodule -i my-df.pp
+     ```
+
+**python3/postgresql context issues (collect2, ldconfig):**
+   - **Operation:** Build tools, library checks during package installation (usually transient)
+   - **Assessment:** These are typically safe but may be ephemeral
+   - **Fix (if persistent):**
+     ```bash
+     # For postgresql-related alerts
+     sudo ausearch -c 'validate-config' --raw | audit2allow -M my-postgresql
+     sudo semodule -i my-postgresql.pp
+     ```
+
+**Audit log monitoring (prevents future surprises):**
+
+```bash
+# Check for recent AVC denials
+sudo ausearch -m AVC -ts recent | tail -50
+
+# Create a daily monitoring script
+cat > /usr/local/bin/check-selinux-alerts.sh << 'EOF'
+#!/bin/bash
+# Check for recent SELinux audit alerts
+
+RECENT_ALERTS=$(ausearch -m AVC -ts recent 2>/dev/null | wc -l)
+
+if [ $RECENT_ALERTS -gt 0 ]; then
+    echo "WARNING: Found $RECENT_ALERTS recent SELinux alerts:"
+    ausearch -m AVC -ts recent | tail -20
+else
+    echo "OK: No recent SELinux audit alerts"
+fi
+EOF
+
+chmod 0755 /usr/local/bin/check-selinux-alerts.sh
+
+# Add to cron (runs daily at 9 AM)
+echo "0 9 * * * root /usr/local/bin/check-selinux-alerts.sh" | sudo tee /etc/cron.d/selinux-alert-check
+```
+
+**Best practice for handling alerts:**
+
+1. Log all alerts for 1-2 weeks to establish a baseline
+2. Review and categorize (safe vs. unsafe operations)
+3. Create local policy modules only for verified, safe operations
+4. Document each module in your change log
+5. Monitor weekly for new or unexpected alerts
+
 
 #### Issue 3: Audit Log Flooding
 
