@@ -26,6 +26,10 @@ inside the container.
 
 - Restart behavior: the script now attempts to restart the `perfsonar-lsregistrationdaemon` unit first (common in RPM installs), falls back to `lsregistrationdaemon` if that unit is not present, and finally falls back to signalling the process via `pkill -HUP` when `systemctl` is not available.
 
+- SELinux: when writing configuration to a host or into a container the updater will attempt to apply `restorecon` (if available) to the target path to ensure SELinux labels are usable after an automated restore. For manual restores that fail due to SELinux, run: `sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf`.
+
+- Save vs Extract: `save --output FILE` writes the raw `lsregistrationdaemon.conf` to `FILE` (recommended suffix `.conf`). `extract --output SCRIPT` produces a self-contained, executable restore script that writes the conf into `/etc/perfsonar/lsregistrationdaemon.conf` and tries to apply `restorecon` when executed on a host (recommended suffix `.sh`).
+
 Examples:
 
 ```bash
