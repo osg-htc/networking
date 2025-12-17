@@ -46,10 +46,17 @@ Examples:
 
 Script: `perfSONAR-update-lsregistration.sh` (see above)
 
-The combined helper contains an `extract` command that produces a self-contained restore script. Use
-`--output`/`--input` to control paths. Example:
+The combined helper contains an `extract` command that produces a self-contained restore script. Note the distinction:
+
+- `save --output FILE` writes the raw `lsregistrationdaemon.conf` content to `FILE` (recommended suffix: `.conf`).
+- `extract --output FILE` produces an executable script that will write the conf to `/etc/perfsonar/lsregistrationdaemon.conf` and attempt to fix SELinux labels (recommended suffix: `.sh`).
+
+Examples:
 
 ```bash
+# Save the raw conf file
+/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh save --output /tmp/lsreg.conf
+
 # Produce a self-contained restore script suitable for host restore
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
 /tmp/restore-lsreg.sh

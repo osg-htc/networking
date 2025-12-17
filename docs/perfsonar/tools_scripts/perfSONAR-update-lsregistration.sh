@@ -44,11 +44,11 @@ usage() {
 Usage: $PROG_NAME <command> [OPTIONS]
 
 Commands:
-	save    --output FILE       Save current lsregistrationdaemon.conf to FILE
+	save    --output FILE       Save current lsregistrationdaemon.conf to FILE (raw conf; recommended suffix: .conf)
 	restore --input FILE        Restore FILE into target (container or local)
 	create  --input FILE|--build Build a fresh conf from options and install
 	update  [options]           Update existing conf in-place (fields below)
-	extract --output FILE       Produce a self-contained restore script (host-targeted)
+	extract --output FILE       Produce a self-contained, executable restore script (recommended suffix: .sh)
 
 Global options:
 	--container NAME            Container name (default: $DEFAULT_CONTAINER)
@@ -86,7 +86,7 @@ Examples:
 	$PROG_NAME create --site-name "Acme" --domain example.org --project OSG
 
 	# Produce a self-contained restore script for host use
-	$PROG_NAME extract --output restore-lsreg.sh
+	$PROG_NAME extract --output restore-lsreg.sh  # produces an executable script that writes to /etc/perfsonar/lsregistrationdaemon.conf and tries to fix SELinux labels
 
 EOF
 }
@@ -94,6 +94,30 @@ EOF
 log() { printf '%s %s\n' "$(date +'%F %T')" "$*"; }
 
 need_cmd() { command -v "$1" >/dev/null 2>&1 || { echo "Missing required command: $1" >&2; exit 2; }; }
+
+try_restorecon_local() {
+	local path=$1
+	if command -v restorecon >/dev/null 2>&1; then
+		if restorecon -v "$path" >/dev/null 2>&1; then
+			log "restorecon applied to $path"
+		else
+			log "restorecon attempted for $path (command returned non-zero)"
+		fi
+	else
+		log "restorecon not available on host; skipping SELinux relabel"
+	fi
+}
+
+try_restorecon_container() {
+	local eng=$1 name=$2 path=$3
+	# Check if restorecon exists in the container and attempt it if present
+	if exec_in_container "$eng" "$name" sh -c 'command -v restorecon >/dev/null 2>&1' >/dev/null 2>&1; then
+		exec_in_container "$eng" "$name" restorecon -v "$path" >/dev/null 2>&1 || true
+		log "restorecon applied inside container to $path"
+	else
+		log "restorecon not available inside container; skipping SELinux relabel"
+	fi
+}
 
 pick_engine() {
 	if [[ "$ENGINE" == "docker" || "$ENGINE" == "podman" ]]; then
@@ -225,6 +249,8 @@ do_restore() {
 	if [[ "$LOCAL_MODE" == true ]]; then
 		log "Writing $inpath to $CONF_PATH"
 		cp -a "$tmp" "$CONF_PATH"
+		# If SELinux is enabled the restored file may need relabeling
+		try_restorecon_local "$CONF_PATH" || true
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon on host (best-effort)"
 			restart_lsregistration_local
@@ -234,6 +260,8 @@ do_restore() {
 		need_cmd "$ENG"
 		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
+		# Attempt to relabel in-container if necessary
+		try_restorecon_container "$ENG" "$CONTAINER" "$CONF_PATH" || true
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon inside container (best-effort)"
 			restart_lsregistration_container "$ENG" "$CONTAINER"
@@ -292,6 +320,8 @@ do_update() {
 	if [[ "$LOCAL_MODE" == true ]]; then
 		log "Writing updated file to $CONF_PATH"
 		cp -a "$tmp" "$CONF_PATH"
+		# If SELinux is enabled the updated file may need relabeling
+		try_restorecon_local "$CONF_PATH" || true
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon on host (best-effort)"
 			restart_lsregistration_local
@@ -299,6 +329,8 @@ do_update() {
 	else
 		log "Copying updated file back to container"
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
+		# Attempt to relabel in-container if necessary
+		try_restorecon_container "$ENG" "$CONTAINER" "$CONF_PATH" || true
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon inside container (best-effort)"
 			restart_lsregistration_container "$ENG" "$CONTAINER"
@@ -339,6 +371,8 @@ EOF
 
 	if [[ "$LOCAL_MODE" == true ]]; then
 		cp -a "$tmp" "$CONF_PATH"
+		# If SELinux is enabled the created file may need relabeling
+		try_restorecon_local "$CONF_PATH" || true
 		if [[ "$NO_RESTART" != true ]]; then
 			log "Restarting lsregistrationdaemon on host (best-effort)"
 			restart_lsregistration_local
@@ -348,6 +382,8 @@ EOF
 		need_cmd "$ENG"
 		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
+		# Attempt to relabel in-container if necessary
+		try_restorecon_container "$ENG" "$CONTAINER" "$CONF_PATH" || true
 		if [[ "$NO_RESTART" != true ]]; then
 			restart_lsregistration_container "$ENG" "$CONTAINER"
 		fi
@@ -376,22 +412,19 @@ IFS=$'\n\t'
 CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"
 TMPFILE=$(mktemp)
 cat > "$TMPFILE" <<'CONF_CONTENT'
-SCRIPT_EOF
-	# append the conf, escaping EOF delimiting
-	# shellcheck disable=SC2129
-	sed 's/^/ /' "$tmp" >> "$out"
-	cat >> "$out" <<'SCRIPT_EOF'
+$(sed 's/^/ /' "$tmp")
 CONF_CONTENT
-$(cat "$tmp")
-CONF_CONTENT
-SCRIPT_EOF
-	cat >> "$out" <<'SCRIPT_EOF'
+
 cp "$TMPFILE" "$CONF_PATH"
 rm -f "$TMPFILE"
+# Attempt to fix SELinux labels if possible (no-op if not enabled)
+if command -v restorecon >/dev/null 2>&1; then
+    restorecon -v "$CONF_PATH" || true
+fi
 if command -v systemctl >/dev/null 2>&1; then
-	systemctl restart perfsonar-lsregistrationdaemon 2>/dev/null || systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart perfsonar-lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || true
+    systemctl restart perfsonar-lsregistrationdaemon 2>/dev/null || systemctl restart lsregistrationdaemon 2>/dev/null || systemctl try-restart perfsonar-lsregistrationdaemon 2>/dev/null || systemctl try-restart lsregistrationdaemon 2>/dev/null || true
 else
-	pkill -HUP -f lsregistrationdaemon || true
+    pkill -HUP -f lsregistrationdaemon || true
 fi
 SCRIPT_EOF
 	chmod a+x "$out"
