@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.5
+# Version: 1.3.6
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -1271,36 +1271,39 @@ iface_apply() {
 iface_packet_pacing_audit() {
   local iface="$1"
   local pacing_rate="$2"
-  
+
   # Only audit packet pacing for DTN nodes
   if [[ "$TARGET_TYPE" != "dtn" ]]; then
     return 0
   fi
-  
+
   # Check current qdisc - fq enables Linux TCP pacing; tbf indicates explicit rate cap
   local current_qdisc
-  current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1)
-  
-  # If we're not applying pacing, just report current state
-  if [[ $APPLY_PACKET_PACING -eq 0 ]]; then
-    # Accept either fq (TCP pacing) or tbf (explicit cap) as "pacing applied"
-    if [[ "$current_qdisc" == *" fq"* || "$current_qdisc" == fq* || "$current_qdisc" == *" tbf"* ]]; then
-      return 0
-    fi
-    return 1
+  current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 || echo "")
+
+  # Accept either fq (TCP pacing) or tbf (explicit cap) as "pacing applied"
+  if [[ "$current_qdisc" == *" fq"* || "$current_qdisc" == fq* || "$current_qdisc" == *" tbf"* ]]; then
+    return 0
   fi
-  
-  return 0
+
+  # Not found
+  return 1
 }
 
 iface_apply_packet_pacing() {
   local iface="$1"
   local pacing_rate="$2"
-  
+
+  # Respect DRY_RUN and target type / feature flag
+  if [[ $DRY_RUN -eq 1 ]]; then
+    log_info "Dry-run: would apply packet pacing to $iface (skipped)"
+    return
+  fi
+
   if [[ "$TARGET_TYPE" != "dtn" ]] || [[ $APPLY_PACKET_PACING -eq 0 ]]; then
     return
   fi
-  
+
   # Decide on tbf vs fq: use tbf if explicitly requested or a cap rate is provided; otherwise fq
   if [[ $USE_TBF_CAP -eq 1 || -n "$TBF_CAP_RATE" ]]; then
     # Determine effective rate: explicit cap wins; else compute fraction of iface speed
