@@ -3,6 +3,7 @@
 ### Fixed
 
 - **Critical JSON state save corruption fix**: Fixed invalid JSON generation in `--save-state` that caused `--restore-state` to fail
+- **Fix (1.3.6)**: Respect `--dry-run` in packet pacing application and ensure audit logic checks actual qdisc state; prevent `--mode apply --dry-run` from changing system qdisc or sysctl state.
   - Properly quote non-numeric ring buffer values (e.g., `Mini:`, `push`, `n/a`)
   - Properly quote non-numeric `nm_mtu` values (e.g., `auto`)
   - Sanitize ring buffer values to ensure numeric-only or properly quoted strings
