@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.6
+# Version: 1.3.7
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -22,6 +22,8 @@
 #                string fields and robustly parsing tuned active profile.
 # NEW in v1.3.5: Escape tabs in sysctl values (e.g., tcp_rmem/tcp_wmem) so JSON is valid and
 #                --diff-state/--restore-state can parse saved files reliably.
+# NEW in v1.3.6: Respect --dry-run for packet pacing; audit checks actual qdisc.
+# NEW in v1.3.7: Fix summary display of packet pacing status to correctly detect applied qdisc.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -3098,12 +3100,11 @@ print_summary() {
     ifs=$(get_ifaces)
     for iface in $ifs; do
       current_qdisc=$(tc qdisc show dev "$iface" 2>/dev/null | head -n1 || echo "")
-      local qdisc_type="${current_qdisc%% *}"
-      if [[ "$qdisc_type" == "fq" ]]; then
+      if [[ "$current_qdisc" == *" fq"* || "$current_qdisc" == fq* ]]; then
         has_pacing=1
         pacing_type="fq"
         break
-      elif [[ "$qdisc_type" == "tbf" ]]; then
+      elif [[ "$current_qdisc" == *" tbf"* ]]; then
         has_pacing=1
         pacing_type="tbf"
         break

@@ -5,6 +5,18 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.3.7] - 2025-12-19
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.7: Fix summary display of packet pacing status to correctly detect applied qdisc (fq/tbf) instead of incorrectly reporting "not applied" when pacing was enabled.
+
+## [1.3.6] - 2025-12-18
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.6: Respect --dry-run for packet pacing; audit checks actual qdisc.
+
 ## [1.3.3] - 2025-12-16
 ## [1.3.5] - 2025-12-16
 
