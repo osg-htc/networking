@@ -24,7 +24,7 @@ If replacing an existing instance, you may want to back up `/etc/perfsonar/` fil
 `lsregistrationdaemon.conf`, and any container volumes. We have a script named`perfSONAR-update-lsregistration.sh` to
 extract/save/restore registration config that you may want to use.
 
-??? info "Quick capture of existing lsregistration config (if you have a src)"
+??? info "Quick capture of existing lsregistration config (if you have a prior installation)"
     
     Download a temp copy:   
     ```bash
@@ -33,10 +33,17 @@ extract/save/restore registration config that you may want to use.
       -o /tmp/update-lsreg.sh
     chmod 0755 /tmp/update-lsreg.sh
     ```
-    Use the downloaded tool to extract a restore script:
+    
+    **For container-based installations (testpoint):**
     ```bash
     /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh
     ```
+    
+    **For RPM-based/local installations (toolkit or older hosts):**
+    ```bash
+    /tmp/update-lsreg.sh extract --output /root/restore-lsreg.sh --local
+    ```
+    
     Note: Repository clone instructions are in Step 2.
     **Note:** All shell commands assume an interactive root shell.
     
@@ -123,13 +130,21 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 
 **Flags:**
 
-- `--option {A|B}` — A = testpoint only; B = testpoint + Let's Encrypt
-- `--fqdn NAME` — primary FQDN for certificates (Option B)
-- `--email ADDRESS` — email for Let's Encrypt (Option B)
+- `--option {A|B}` — **Deployment mode:** A = testpoint only (default); B = testpoint with Let's Encrypt certificate automation
+- `--fqdn NAME` — primary FQDN for certificates (required for `--option B`)
+- `--email ADDRESS` — email for Let's Encrypt notifications (required for `--option B`)
 - `--non-interactive` — skip pauses, auto-confirm
 - `--yes` — auto-confirm internal script prompts
 - `--dry-run` — preview steps without executing
 - `--auto-update` — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates `/usr/local/bin/perfsonar-auto-update.sh`, a systemd service and timer)
+
+!!! tip "Deployment Mode Terminology"
+    The orchestrator uses `--option A` or `--option B` to select the deployment mode:
+    
+    - **Option A**: Testpoint only (no automatic certificate management)
+    - **Option B**: Testpoint with Let's Encrypt automation (requires `--fqdn` and `--email`)
+    
+    This is the same as "Path A" and "Path B" mentioned in other sections of this guide.
 
 **If you choose this path, skip to [Step 7](#step-7-register-and-configure-with-wlcgosg)** (the orchestrator completes Steps 2–6 for you).
 
