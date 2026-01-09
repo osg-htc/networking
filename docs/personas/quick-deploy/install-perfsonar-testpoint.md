@@ -138,13 +138,16 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 - `--dry-run` — preview steps without executing
 - `--auto-update` — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates `/usr/local/bin/perfsonar-auto-update.sh`, a systemd service and timer)
 
-!!! tip "Deployment Mode Terminology"
-    The orchestrator uses `--option A` or `--option B` to select the deployment mode:
-    
+!!! tip "Paths vs. Orchestrator Options"
+    **Paths = how you install the testpoint**
+    - **Path A (Automated Install Path)**: Use the orchestrator script (guided/automated).
+    - **Path B (Manual Install Path)**: Follow the manual, step-by-step commands.
+
+    **Orchestrator Options = what the orchestrator deploys** (only used when you choose Path A)
     - **Option A**: Testpoint only (no automatic certificate management)
     - **Option B**: Testpoint with Let's Encrypt automation (requires `--fqdn` and `--email`)
-    
-    This is the same as "Path A" and "Path B" mentioned in other sections of this guide.
+
+    Remember: choose Path A or Path B first. If you pick Path A, then choose Option A or B for certificate handling.
 
 **If you choose this path, skip to [Step 7](#step-7-register-and-configure-with-wlcgosg)** (the orchestrator completes Steps 2–6 for you).
 
