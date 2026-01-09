@@ -3026,13 +3026,14 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <li><code>--auto-update</code> — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates <code>/usr/local/bin/perfsonar-auto-update.sh</code>, a systemd service and timer)</li>
 </ul>
 <div class="admonition tip">
-<p class="admonition-title">Deployment Mode Terminology</p>
-<p>The orchestrator uses <code>--option A</code> or <code>--option B</code> to select the deployment mode:</p>
-<ul>
-<li><strong>Option A</strong>: Testpoint only (no automatic certificate management)</li>
-<li><strong>Option B</strong>: Testpoint with Let's Encrypt automation (requires <code>--fqdn</code> and <code>--email</code>)</li>
-</ul>
-<p>This is the same as "Path A" and "Path B" mentioned in other sections of this guide.</p>
+<p class="admonition-title">Paths vs. Orchestrator Options</p>
+<p><strong>Paths = how you install the testpoint</strong>
+- <strong>Path A (Automated Install Path)</strong>: Use the orchestrator script (guided/automated).
+- <strong>Path B (Manual Install Path)</strong>: Follow the manual, step-by-step commands.</p>
+<p><strong>Orchestrator Options = what the orchestrator deploys</strong> (only used when you choose Path A)
+- <strong>Option A</strong>: Testpoint only (no automatic certificate management)
+- <strong>Option B</strong>: Testpoint with Let's Encrypt automation (requires <code>--fqdn</code> and <code>--email</code>)</p>
+<p>Remember: choose Path A or Path B first. If you pick Path A, then choose Option A or B for certificate handling.</p>
 </div>
 <p><strong>If you choose this path, skip to <a href="#step-7-register-and-configure-with-wlcgosg">Step 7</a></strong> (the orchestrator completes Steps 2–6 for you).</p>
 <hr />
