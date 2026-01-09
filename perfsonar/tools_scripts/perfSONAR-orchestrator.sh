@@ -208,13 +208,13 @@ step_auto_update_compose() {
 set -e
 COMPOSE_DIR=/opt/perfsonar-tp
 LOGFILE=/var/log/perfsonar-auto-update.log
-log() { echo \"$(date -Iseconds) $*\" | tee -a \"$LOGFILE\"; }
-cd \"$COMPOSE_DIR\"
+log() { echo \"\$(date -Iseconds) \$*\" | tee -a \"\$LOGFILE\"; }
+cd \"\$COMPOSE_DIR\"
 log \"Checking for image updates...\"
 # Pull latest images and detect if any were actually updated
-if podman-compose pull 2>&1 | tee -a \"$LOGFILE\" | grep -q -E 'Downloaded newer image|Pulling from'; then
+if podman-compose pull 2>&1 | tee -a \"\$LOGFILE\" | grep -q -E 'Downloaded newer image|Pulling from'; then
   log \"New images found - recreating containers...\"
-  podman-compose up -d 2>&1 | tee -a \"$LOGFILE\"
+  podman-compose up -d 2>&1 | tee -a \"\$LOGFILE\"
   log \"Containers updated successfully\"
 else
   log \"No updates available\"

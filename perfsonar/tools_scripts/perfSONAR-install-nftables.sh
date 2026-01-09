@@ -94,6 +94,7 @@ PY
 
 # Colors
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 usage() {
@@ -627,6 +628,42 @@ derive_subnets_and_hosts_from_config() {
 
     log "Derived SUBNETS: ${SUBNETS[*]:-none}"
     log "Derived HOSTS: ${HOSTS[*]:-none}"
+    
+    # Safety check: warn if no SSH access will be allowed
+    if [ "${#SUBNETS[@]}" -eq 0 ] && [ "${#HOSTS[@]}" -eq 0 ]; then
+        log ""
+        log "${RED}WARNING: No SSH access subnets or hosts configured!${NC}"
+        log "${RED}This will BLOCK all SSH access to this host.${NC}"
+        log ""
+        log "The nftables rules derive SSH access from /etc/perfSONAR-multi-nic-config.conf"
+        log "No valid IPv4/IPv6 addresses with subnets were found in the configuration."
+        log ""
+        log "To allow SSH access, you must either:"
+        log "  1. Configure /etc/perfSONAR-multi-nic-config.conf with proper IP addresses and prefixes"
+        log "  2. Manually edit /etc/nftables.d/perfsonar.nft after it's created"
+        log "  3. Use --dry-run to preview without applying changes"
+        log ""
+        log "If you proceed, SSH will be BLOCKED and you may lose access to this host!"
+        log "Ensure you have console access before continuing."
+        log ""
+        
+        if [ "$AUTO_YES" != true ]; then
+            read -r -p "Do you want to proceed anyway? [y/N]: " ans
+            case "$ans" in
+                [Yy]|[Yy][Ee][Ss]) 
+                    log "User confirmed proceeding despite SSH lockout risk"
+                    ;;
+                *) 
+                    log "Aborted by user to prevent SSH lockout"
+                    exit 1
+                    ;;
+            esac
+        else
+            log "${RED}AUTO_YES enabled but no SSH access configured - ABORTING to prevent lockout${NC}"
+            log "Configure /etc/perfSONAR-multi-nic-config.conf first or run without --yes"
+            exit 1
+        fi
+    fi
 }
 
 confirm_or_exit() {
