@@ -82,6 +82,10 @@ extract/save/restore registration config that you may want to use.
 
     ```bash
     systemctl disable --now firewalld NetworkManager-wait-online
+
+    Keep `NetworkManager` running. The command above disables only the `NetworkManager-wait-online` unit to prevent
+    long boot delays while services start. If your environment depends on `network-online.target` for storage or
+    bonded/uplink bring-up, leave `NetworkManager-wait-online` enabled.
     dnf remove -y rsyslog
     ```
 
@@ -292,8 +296,53 @@ Generate and **write** the config file:
 ```
 
 The script writes the config file to `/etc/perfSONAR-multi-nic-config.conf`. Edit to adjust site-specific values (e.g.,
-confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries.  Next step is to apply the network
-changes...
+confirm `DEFAULT_ROUTE_NIC`, add `NIC_IPV4_ADDROUTE` entries) and verify the entries. Include every NIC/subnet that should
+retain SSH access; the nftables helper derives allow-lists from this file.
+
+Example: adding a management network alongside the data VLAN
+
+```bash
+NIC_NAMES=(
+    "bond0.2900"
+    "bond0"
+)
+
+NIC_IPV4_ADDRS=(
+    "192.41.236.32"
+    "10.10.128.32"
+)
+
+NIC_IPV4_PREFIXES=(
+    "/23"
+    "/20"
+)
+
+NIC_IPV4_GWS=(
+    "192.41.236.1"
+    "10.10.128.1"
+)
+
+NIC_IPV4_ADDROUTE=(
+    "-"
+    "10.10.0.0/22"
+)
+
+NIC_IPV6_ADDRS=(
+    "2001:48a8:68f7:8001:192:41:236:32"
+)
+
+NIC_IPV6_PREFIXES=(
+    "/64"
+)
+
+NIC_IPV6_GWS=(
+    "2001:48a8:68f7:8001::1"
+)
+
+DEFAULT_ROUTE_NIC="bond0.2900"
+```
+
+Use plain ASCII quotes and keep array lengths aligned across sections.
         
 ### Apply changes (in-place default)
 

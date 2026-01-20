@@ -1,9 +1,9 @@
 #!/bin/bash
-# Version: 1.0.0
+# Version: 0.1.2
 # Author: Shank McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # perfSONAR nftables installer and helper
-# Version: 1.0.0
+# Version: 0.1.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # --------------------------------------
@@ -27,8 +27,8 @@
 #     are already installed; otherwise related configuration steps are skipped.
 #
 # Author: Generated based on existing perfSONAR helper scripts
-# Version: 0.1.1 - 2025-11-09
-VERSION="0.1.1"
+# Version: 0.1.2 - 2026-01-20
+VERSION="0.1.2"
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -265,8 +265,11 @@ write_nft_rules() {
     
     # Check if Let's Encrypt is deployed (certbot container or /etc/letsencrypt exists)
     # If so, add port 80 for HTTP-01 challenges and renewals
-    if [ -d /etc/letsencrypt ] || podman ps --format '{{.Names}}' 2>/dev/null | grep -q certbot; then
-        log "Let's Encrypt deployment detected; adding port 80 for HTTP-01 challenges"
+    if [ -d /etc/letsencrypt ]; then
+        log "Let's Encrypt deployment detected via /etc/letsencrypt; adding port 80 for HTTP-01 challenges"
+        baseline_tcp_ports+=(80)
+    elif command -v podman >/dev/null 2>&1 && podman ps --format '{{.Names}}' 2>/dev/null | grep -q certbot; then
+        log "Let's Encrypt deployment detected via certbot container; adding port 80 for HTTP-01 challenges"
         baseline_tcp_ports+=(80)
     fi
 
@@ -557,6 +560,17 @@ derive_subnets_and_hosts_from_config() {
     # Populate SUBNETS and HOSTS arrays from the perfSONAR multi-nic config
     SUBNETS=()
     HOSTS=()
+    local -a ssh_sources=()
+
+    # Capture the current SSH client as a safety allow-list to avoid lockout during rollout
+    if [ -n "${SSH_CONNECTION:-}" ]; then
+        ssh_sources+=("$(printf '%s' "$SSH_CONNECTION" | awk '{print $1}')")
+    fi
+    if command -v ss >/dev/null 2>&1; then
+        while IFS= read -r peer; do
+            ssh_sources+=("$peer")
+        done < <(ss -tn sport = :22 2>/dev/null | awk 'NR>1 {print $5}' | cut -d':' -f1)
+    fi
     if [ -f "$CONFIG_FILE" ]; then
         # Temporarily disable nounset while sourcing user file
         set +u
@@ -622,6 +636,16 @@ derive_subnets_and_hosts_from_config() {
     if [ "${#SUBNETS[@]}" -gt 0 ]; then
         mapfile -t SUBNETS < <(printf '%s\n' "${SUBNETS[@]}" | awk '!seen[$0]++')
     fi
+
+    # Merge in SSH client sources (validated) so the current session stays reachable
+    for src in "${ssh_sources[@]}"; do
+        [ -z "$src" ] && continue
+        if is_valid_ip "$src"; then
+            HOSTS+=("$src")
+        else
+            log "Skipping non-IP SSH source candidate: $src"
+        fi
+    done
     if [ "${#HOSTS[@]}" -gt 0 ]; then
         mapfile -t HOSTS < <(printf '%s\n' "${HOSTS[@]}" | awk '!seen[$0]++')
     fi
