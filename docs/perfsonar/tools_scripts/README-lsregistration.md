@@ -28,7 +28,7 @@ inside the container.
 
 - SELinux: when writing configuration to a host or into a container the updater will attempt to apply `restorecon` (if available) to the target path to ensure SELinux labels are usable after an automated restore. For manual restores that fail due to SELinux, run: `sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf`.
 
-- Save vs Extract: `save --output FILE` writes the raw `lsregistrationdaemon.conf` to `FILE` (recommended suffix `.conf`). `extract --output SCRIPT` produces a self-contained, executable restore script that writes the conf into `/etc/perfsonar/lsregistrationdaemon.conf` and tries to apply `restorecon` when executed on a host (recommended suffix `.sh`).
+- **Save vs Extract:** `save --output FILE` writes the raw `lsregistrationdaemon.conf` to `FILE` (recommended suffix `.conf`). `extract --output SCRIPT` produces an **executable restore script that embeds the full configuration**—when run, the script writes the conf into `/etc/perfsonar/lsregistrationdaemon.conf` and applies `restorecon` if available. The extracted script is portable and can be used to restore the configuration on any system (recommended suffix `.sh`).
 
 Examples:
 
@@ -52,16 +52,16 @@ Script: `perfSONAR-update-lsregistration.sh` (see above)
 
 The combined helper contains an `extract` command that produces a self-contained restore script. Note the distinction:
 
-- `save --output FILE` writes the raw `lsregistrationdaemon.conf` content to `FILE` (recommended suffix: `.conf`).
-- `extract --output FILE` produces an executable script that will write the conf to `/etc/perfsonar/lsregistrationdaemon.conf` and attempt to fix SELinux labels (recommended suffix: `.sh`).
+- `save --output FILE` writes the raw `lsregistrationdaemon.conf` content to `FILE` (recommended suffix: `.conf`). The output is a plain configuration file that must be manually installed.
+- `extract --output FILE` produces an **executable script** that **embeds the full configuration** and will write the conf to `/etc/perfsonar/lsregistrationdaemon.conf` and attempt to fix SELinux labels when executed (recommended suffix: `.sh`). The generated script is portable and can be run on any system to restore the configuration.
 
 Examples:
 
 ```bash
-# Save the raw conf file
+# Save the raw conf file (must be manually placed and configured)
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh save --output /tmp/lsreg.conf
 
-# Produce a self-contained restore script suitable for host restore
+# Produce a self-contained restore script that embeds the configuration (can be run directly)
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh extract --output /tmp/restore-lsreg.sh
 /tmp/restore-lsreg.sh
 ```

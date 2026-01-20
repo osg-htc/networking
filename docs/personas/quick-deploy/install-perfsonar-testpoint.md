@@ -427,9 +427,12 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
 
 ??? info "SSH allow-lists and validation"
         
-    - Derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf` (CIDR prefixes and addresses).
-    - Validates nftables rules before writing.
-    - Outputs: rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
+    - **Auto-detects current SSH clients:** The script captures the IP address of your current SSH connection (via `$SSH_CONNECTION`) and active SSH connections (via `ss`) to ensure your SSH access is not interrupted when the firewall is applied.
+    - **Derives allow-lists from config:** In addition to auto-detection, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-config.conf` (CIDR prefixes and addresses).
+    - **Prevents lockout:** By combining auto-detected clients with configured subnets, the script prevents accidental SSH lockout during deployment on multi-NIC systems.
+    - **Validates nftables rules** before writing.
+    - **Outputs:** rules to `/etc/nftables.d/perfsonar.nft`, log to `/var/log/perfSONAR-install-nftables.log`, backups to `/var/backups/`.
+    - **Check logs:** Review `/var/log/perfSONAR-install-nftables.log` to see the derived SSH allow-lists and confirm your current session was included.
 
 ??? tip "Preview nftables rules before applying"
     
