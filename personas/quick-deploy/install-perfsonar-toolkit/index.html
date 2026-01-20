@@ -4589,77 +4589,71 @@ renewed. Do not use <code>--deploy-hook</code> parameter with full paths ending 
 <h3 id="perfsonar-service-issues">perfSONAR Service Issues<a class="headerlink" href="#perfsonar-service-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>perfSONAR services not running</summary>
-<p><strong>Symptoms:</strong> Web interface not accessible, tests not running.</p>
-<p><strong>Diagnostic steps:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check service status inside container</span>
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>apache2
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>pscheduler-ticker
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>owamp-server
+<p><strong>Symptoms:</strong> Web interface not accessible, pScheduler tests not running.</p>
+<p><strong>Diagnostic steps (RPM install):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check key services</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>httpd<span class="w"> </span>pscheduler-scheduler<span class="w"> </span>pscheduler-runner<span class="w"> </span>pscheduler-ticker
 
-<span class="c1"># Check for errors in service logs</span>
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>apache2<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>pscheduler-ticker<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+<span class="c1"># Check for recent errors in service logs</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>httpd<span class="w"> </span>-u<span class="w"> </span>pscheduler-scheduler<span class="w"> </span>-u<span class="w"> </span>pscheduler-runner<span class="w"> </span>-u<span class="w"> </span>pscheduler-ticker<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+
+<span class="c1"># pScheduler diagnostics</span>
+pscheduler<span class="w"> </span>troubleshoot
 </code></pre></div>
 <p><strong>Solutions:</strong></p>
 <ul>
-<li>Restart services inside container: <code>podman exec perfsonar-testpoint systemctl restart apache2</code></li>
-<li>Check Apache SSL configuration was patched correctly</li>
-<li>Verify certificates are in place: <code>ls -la /etc/letsencrypt/live/</code></li>
-<li>Restart container: <code>podman restart perfsonar-testpoint</code></li>
+<li>Restart services: <code>systemctl restart httpd pscheduler-scheduler pscheduler-runner pscheduler-ticker</code></li>
+<li>Verify certificates are in place (if using HTTPS): <code>ls -la /etc/letsencrypt/live/</code></li>
+<li>Check Apache SSL configuration and vhost</li>
 </ul>
 </details>
 <h3 id="auto-update-issues">Auto-Update Issues<a class="headerlink" href="#auto-update-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>Auto-update not working</summary>
-<p><strong>Symptoms:</strong> Containers not updating despite new images available.</p>
-<p><strong>Diagnostic steps:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check timer status</span>
-systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-auto-update.timer
-systemctl<span class="w"> </span>list-timers<span class="w"> </span>perfsonar-auto-update.timer
+<p><strong>Symptoms:</strong> <code>yum update</code>/<code>dnf update</code> not picking up perfSONAR updates or cron/Ansible automation failing.</p>
+<p><strong>Diagnostic steps (RPM install):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check when repo metadata was last refreshed</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>repolist<span class="w"> </span>-v<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span>
 
-<span class="c1"># Check service logs</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-auto-update.service<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+<span class="c1"># Check for available perfSONAR updates</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>list<span class="w"> </span>updates<span class="w"> </span><span class="s1">&#39;perfsonar*&#39;</span>
 
-<span class="c1"># Check update log</span>
-tail<span class="w"> </span>-50<span class="w"> </span>/var/log/perfsonar-auto-update.log
-
-<span class="c1"># Manually test update</span>
-systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-auto-update.service
+<span class="c1"># If you have a local cron/automation script, review its logs</span>
+sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>cron<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span>
 </code></pre></div>
 <p><strong>Solutions:</strong></p>
 <ul>
-<li>Enable timer if not active: <code>systemctl enable --now perfsonar-auto-update.timer</code></li>
-<li>Verify script exists and is executable: <code>ls -la /usr/local/bin/perfsonar-auto-update.sh</code></li>
-<li>Check podman-compose is installed and working</li>
-<li>Review script for errors and update if needed</li>
+<li>Refresh metadata: <code>sudo dnf clean all &amp;&amp; sudo dnf makecache</code></li>
+<li>Update packages: <code>sudo dnf update -y 'perfsonar*'</code></li>
+<li>Verify repositories are enabled and reachable (perfSONAR, EPEL, CRB)</li>
+<li>If using site automation, confirm the job is scheduled and succeeds</li>
 </ul>
 </details>
 <h3 id="general-debugging-tips">General Debugging Tips<a class="headerlink" href="#general-debugging-tips" title="Permanent link">&para;</a></h3>
 <details class="tip">
 <summary>Useful debugging commands</summary>
-<p><strong>Container management:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># View all containers (running and stopped)</span>
-podman<span class="w"> </span>ps<span class="w"> </span>-a
+<p><strong>Service management (RPM install):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check key services</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>httpd<span class="w"> </span>pscheduler-scheduler<span class="w"> </span>pscheduler-runner<span class="w"> </span>pscheduler-ticker
 
-<span class="c1"># View container resource usage</span>
-podman<span class="w"> </span>stats
+<span class="c1"># Restart key services</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>httpd<span class="w"> </span>pscheduler-scheduler<span class="w"> </span>pscheduler-runner<span class="w"> </span>pscheduler-ticker
 
-<span class="c1"># Enter container for interactive debugging</span>
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>/bin/bash
-
-<span class="c1"># View compose configuration</span>
-<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-toolkit<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>podman-compose<span class="w"> </span>config
+<span class="c1"># pScheduler diagnostics</span>
+pscheduler<span class="w"> </span>troubleshoot
 </code></pre></div>
 <p><strong>Networking:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check which process is listening on a port</span>
 ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>&lt;port&gt;
 
-<span class="c1"># Test connectivity to remote testpoint</span>
+<span class="c1"># Test connectivity to remote host</span>
 ping<span class="w"> </span>&lt;remote-ip&gt;
 traceroute<span class="w"> </span>&lt;remote-ip&gt;
 
-<span class="c1"># Check nftables rules</span>
+<span class="c1"># Check nftables rules (or firewalld if used)</span>
 nft<span class="w"> </span>list<span class="w"> </span>ruleset
+<span class="c1"># or</span>
+firewall-cmd<span class="w"> </span>--list-all
 </code></pre></div>
 </details>
 <details class="note">
@@ -4676,15 +4670,17 @@ nft<span class="w"> </span>list<span class="w"> </span>ruleset
 <li>Contact info: your name, site, and a callback email.</li>
 </ul>
 <p>Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix <code>[perfSONAR toolkit install issue]</code>.</p>
-<p><strong>Logs:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># System journal for container runtime</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>podman<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+<p><strong>Logs (RPM install):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Web server errors</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>httpd<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span>
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span><span class="w"> </span>/var/log/httpd/error_log
 
-<span class="c1"># All logs from a container</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span>
+<span class="c1"># pScheduler services</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>pscheduler-scheduler<span class="w"> </span>-u<span class="w"> </span>pscheduler-runner<span class="w"> </span>-u<span class="w"> </span>pscheduler-ticker<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span>
 
-<span class="c1"># Follow logs in real-time</span>
-podman<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>perfsonar-testpoint
+<span class="c1"># perfSONAR application logs (if present)</span>
+ls<span class="w"> </span>/var/log/perfsonar
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span><span class="w"> </span>/var/log/perfsonar/pscheduler.log<span class="w"> </span><span class="m">2</span>&gt;/dev/null
 </code></pre></div>
 </details>
 <hr />
