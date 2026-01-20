@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Combined lsregistration helper
-# Version: 1.0.1
+# Version: 1.0.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Supports: save, restore, create, update, extract
@@ -402,6 +402,7 @@ do_extract() {
 	else
 		ENG=$(pick_engine)
 		need_cmd "$ENG"
+		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
 		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$tmp"
 	fi
 	# Emit a self-contained restore script that writes the conf to /etc/perfsonar/lsregistrationdaemon.conf
@@ -412,7 +413,10 @@ IFS=$'\n\t'
 CONF_PATH="/etc/perfsonar/lsregistrationdaemon.conf"
 TMPFILE=$(mktemp)
 cat > "$TMPFILE" <<'CONF_CONTENT'
-$(sed 's/^/ /' "$tmp")
+SCRIPT_EOF
+	cat "$tmp" >> "$out"
+	printf '\n' >> "$out"
+	cat >> "$out" <<'SCRIPT_EOF'
 CONF_CONTENT
 
 cp "$TMPFILE" "$CONF_PATH"

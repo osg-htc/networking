@@ -2970,6 +2970,11 @@ timedatectl<span class="w"> </span>set-timezone<span class="w"> </span>&lt;Regio
 <li>
 <p><strong>Disable unused services:</strong></p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>firewalld<span class="w"> </span>NetworkManager-wait-online
+
+Keep<span class="w"> </span><span class="sb">`</span>NetworkManager<span class="sb">`</span><span class="w"> </span>running.<span class="w"> </span>The<span class="w"> </span><span class="nb">command</span><span class="w"> </span>above<span class="w"> </span>disables<span class="w"> </span>only<span class="w"> </span>the<span class="w"> </span><span class="sb">`</span>NetworkManager-wait-online<span class="sb">`</span><span class="w"> </span>unit<span class="w"> </span>to<span class="w"> </span>prevent
+long<span class="w"> </span>boot<span class="w"> </span>delays<span class="w"> </span><span class="k">while</span><span class="w"> </span>containers<span class="w"> </span>and<span class="w"> </span>policy-based<span class="w"> </span>routing<span class="w"> </span>come<span class="w"> </span>up.<span class="w"> </span>If<span class="w"> </span>your<span class="w"> </span>site<span class="w"> </span>depends<span class="w"> </span>on
+<span class="sb">`</span>network-online.target<span class="sb">`</span><span class="w"> </span><span class="o">(</span><span class="k">for</span><span class="w"> </span>example,<span class="w"> </span>iSCSI/NFS<span class="w"> </span>root<span class="w"> </span>or<span class="w"> </span>bonded<span class="w"> </span>links<span class="w"> </span>that<span class="w"> </span>must<span class="w"> </span>be<span class="w"> </span>up<span class="w"> </span>before<span class="w"> </span>services<span class="w"> </span>start<span class="o">)</span>,<span class="w"> </span>leave
+<span class="sb">`</span>NetworkManager-wait-online<span class="sb">`</span><span class="w"> </span>enabled.
 dnf<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>rsyslog
 </code></pre></div>
 <details class="info">
@@ -3135,8 +3140,49 @@ in non-interactive sessions or when you use <code>--yes</code>. Note, NICs witho
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--generate-config-auto<span class="w"> </span>
 </code></pre></div>
 <p>The script writes the config file to <code>/etc/perfSONAR-multi-nic-config.conf</code>. Edit to adjust site-specific values (e.g.,
-confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entries) and verify the entries.  Next step is to apply the network
-changes...</p>
+confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entries) and verify the entries. Include every NIC/subnet that should
+retain SSH access; the nftables helper derives allow-lists from this file.</p>
+<p>Example: adding a management network alongside the data VLAN</p>
+<div class="highlight"><pre><span></span><code><span class="nv">NIC_NAMES</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;bond0.2900&quot;</span>
+<span class="w">    </span><span class="s2">&quot;bond0&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV4_ADDRS</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;192.41.236.32&quot;</span>
+<span class="w">    </span><span class="s2">&quot;10.10.128.32&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV4_PREFIXES</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;/23&quot;</span>
+<span class="w">    </span><span class="s2">&quot;/20&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV4_GWS</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;192.41.236.1&quot;</span>
+<span class="w">    </span><span class="s2">&quot;10.10.128.1&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV4_ADDROUTE</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;-&quot;</span>
+<span class="w">    </span><span class="s2">&quot;10.10.0.0/22&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV6_ADDRS</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;2001:48a8:68f7:8001:192:41:236:32&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV6_PREFIXES</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;/64&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">NIC_IPV6_GWS</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;2001:48a8:68f7:8001::1&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">DEFAULT_ROUTE_NIC</span><span class="o">=</span><span class="s2">&quot;bond0.2900&quot;</span>
+</code></pre></div>
+<p>Use plain ASCII quotes and keep array lengths aligned across sections.</p>
 <h3 id="apply-changes-in-place-default">Apply changes (in-place default)<a class="headerlink" href="#apply-changes-in-place-default" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Connect via console for network changes</p>

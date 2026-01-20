@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.0
+# Version: 1.0.1
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -118,7 +118,7 @@ step_packages() {
 }
 
 step_disable_conflicts() {
-  if ! confirm "Step 2: Disable firewalld and NetworkManager-wait-online?"; then
+  if ! confirm "Step 2: Disable firewalld and NetworkManager-wait-online (safe to skip if already disabled in Step 1)?"; then
     log "Skipping disable services."
     return
   fi
