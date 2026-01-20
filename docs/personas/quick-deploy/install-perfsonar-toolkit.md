@@ -1837,6 +1837,20 @@ Perform these checks before handing the host over to operations:
     nft list ruleset
     ```
 
+??? note "What to include when reporting issues via email"
+
+    To help us diagnose install problems quickly, please include:
+
+    - Host details: OS version (e.g., `cat /etc/os-release`), kernel (`uname -r`), and whether this is testpoint or toolkit.
+    - Script/log context: which script/step failed and the exact command you ran.
+    - Timestamps: approximate time of failure and timezone.
+    - Outputs/logs: relevant console output and excerpts from `journalctl -u podman -n 200`, `tail -200 /var/log/perfSONAR-install-nftables.log`, and any script-specific log mentioned in the error.
+    - Network state: `ip -br addr`, `ip rule show`, `nmcli connection show`, and whether port 80/443 should be open externally.
+    - Certificates (if LE): whether port 80 was reachable from the Internet and the contents of `/var/log/letsencrypt/letsencrypt.log` around the failure.
+    - Contact info: your name, site, and a callback email.
+
+    Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix `[perfSONAR install issue]`.
+
     **Logs:**
 
     ```bash
