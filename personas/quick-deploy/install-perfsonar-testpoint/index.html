@@ -3280,9 +3280,12 @@ config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—onl
 <details class="info">
 <summary>SSH allow-lists and validation</summary>
 <ul>
-<li>Derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-config.conf</code> (CIDR prefixes and addresses).</li>
-<li>Validates nftables rules before writing.</li>
-<li>Outputs: rules to <code>/etc/nftables.d/perfsonar.nft</code>, log to <code>/var/log/perfSONAR-install-nftables.log</code>, backups to <code>/var/backups/</code>.</li>
+<li><strong>Auto-detects current SSH clients:</strong> The script captures the IP address of your current SSH connection (via <code>$SSH_CONNECTION</code>) and active SSH connections (via <code>ss</code>) to ensure your SSH access is not interrupted when the firewall is applied.</li>
+<li><strong>Derives allow-lists from config:</strong> In addition to auto-detection, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-config.conf</code> (CIDR prefixes and addresses).</li>
+<li><strong>Prevents lockout:</strong> By combining auto-detected clients with configured subnets, the script prevents accidental SSH lockout during deployment on multi-NIC systems.</li>
+<li><strong>Validates nftables rules</strong> before writing.</li>
+<li><strong>Outputs:</strong> rules to <code>/etc/nftables.d/perfsonar.nft</code>, log to <code>/var/log/perfSONAR-install-nftables.log</code>, backups to <code>/var/backups/</code>.</li>
+<li><strong>Check logs:</strong> Review <code>/var/log/perfSONAR-install-nftables.log</code> to see the derived SSH allow-lists and confirm your current session was included.</li>
 </ul>
 </details>
 <details class="tip">
