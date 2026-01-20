@@ -1748,79 +1748,68 @@ Perform these checks before handing the host over to operations:
 
 ??? failure "perfSONAR services not running"
     
-    **Symptoms:** Web interface not accessible, tests not running.
+    **Symptoms:** Web interface not accessible, pScheduler tests not running.
     
-    **Diagnostic steps:**
+    **Diagnostic steps (RPM install):**
     
     ```bash
-    # Check service status inside container
-    podman exec perfsonar-testpoint systemctl status apache2
-    podman exec perfsonar-testpoint systemctl status pscheduler-ticker
-    podman exec perfsonar-testpoint systemctl status owamp-server
+    # Check key services
+    systemctl status httpd pscheduler-scheduler pscheduler-runner pscheduler-ticker
 
-    # Check for errors in service logs
-    podman exec perfsonar-testpoint journalctl -u apache2 -n 50
-    podman exec perfsonar-testpoint journalctl -u pscheduler-ticker -n 50
+    # Check for recent errors in service logs
+    journalctl -u httpd -u pscheduler-scheduler -u pscheduler-runner -u pscheduler-ticker -n 100
 
+    # pScheduler diagnostics
+    pscheduler troubleshoot
     ```
 
     **Solutions:**
 
-    - Restart services inside container: `podman exec perfsonar-testpoint systemctl restart apache2`
-    - Check Apache SSL configuration was patched correctly
-    - Verify certificates are in place: `ls -la /etc/letsencrypt/live/`
-    - Restart container: `podman restart perfsonar-testpoint`
+    - Restart services: `systemctl restart httpd pscheduler-scheduler pscheduler-runner pscheduler-ticker`
+    - Verify certificates are in place (if using HTTPS): `ls -la /etc/letsencrypt/live/`
+    - Check Apache SSL configuration and vhost
 
 ### Auto-Update Issues
 
 ??? failure "Auto-update not working"
     
-    **Symptoms:** Containers not updating despite new images available.
+    **Symptoms:** `yum update`/`dnf update` not picking up perfSONAR updates or cron/Ansible automation failing.
     
-    **Diagnostic steps:**
+    **Diagnostic steps (RPM install):**
     
     ```bash
-    # Check timer status
-    systemctl status perfsonar-auto-update.timer
-    systemctl list-timers perfsonar-auto-update.timer
+    # Check when repo metadata was last refreshed
+    sudo dnf repolist -v | head -n 20
 
-    # Check service logs
-    journalctl -u perfsonar-auto-update.service -n 100
+    # Check for available perfSONAR updates
+    sudo dnf list updates 'perfsonar*'
 
-    # Check update log
-    tail -50 /var/log/perfsonar-auto-update.log
-
-    # Manually test update
-    systemctl start perfsonar-auto-update.service
-
+    # If you have a local cron/automation script, review its logs
+    sudo journalctl -u cron -n 200
     ```
 
     **Solutions:**
 
-    - Enable timer if not active: `systemctl enable --now perfsonar-auto-update.timer`
-    - Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
-    - Check podman-compose is installed and working
-    - Review script for errors and update if needed
+    - Refresh metadata: `sudo dnf clean all && sudo dnf makecache`
+    - Update packages: `sudo dnf update -y 'perfsonar*'`
+    - Verify repositories are enabled and reachable (perfSONAR, EPEL, CRB)
+    - If using site automation, confirm the job is scheduled and succeeds
 
 ### General Debugging Tips
 
 ??? tip "Useful debugging commands"
     
-    **Container management:**
+    **Service management (RPM install):**
     
     ```bash
-    # View all containers (running and stopped)
-    podman ps -a
+    # Check key services
+    systemctl status httpd pscheduler-scheduler pscheduler-runner pscheduler-ticker
 
-    # View container resource usage
-    podman stats
+    # Restart key services
+    systemctl restart httpd pscheduler-scheduler pscheduler-runner pscheduler-ticker
 
-    # Enter container for interactive debugging
-    podman exec -it perfsonar-testpoint /bin/bash
-
-    # View compose configuration
-    cd /opt/perfsonar-toolkit && podman-compose config
-
+    # pScheduler diagnostics
+    pscheduler troubleshoot
     ```
 
     **Networking:**
@@ -1829,12 +1818,14 @@ Perform these checks before handing the host over to operations:
     # Check which process is listening on a port
     ss -tlnp | grep <port>
 
-    # Test connectivity to remote testpoint
+    # Test connectivity to remote host
     ping <remote-ip>
     traceroute <remote-ip>
 
-    # Check nftables rules
+    # Check nftables rules (or firewalld if used)
     nft list ruleset
+    # or
+    firewall-cmd --list-all
     ```
 
 ??? note "What to include when reporting issues via email"
@@ -1852,17 +1843,19 @@ Perform these checks before handing the host over to operations:
 
     Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix `[perfSONAR toolkit install issue]`.
 
-    **Logs:**
+    **Logs (RPM install):**
 
     ```bash
-    # System journal for container runtime
-    journalctl -u podman -n 100
+    # Web server errors
+    journalctl -u httpd -n 200
+    tail -n 200 /var/log/httpd/error_log
 
-    # All logs from a container
-    podman logs perfsonar-testpoint --tail=100
+    # pScheduler services
+    journalctl -u pscheduler-scheduler -u pscheduler-runner -u pscheduler-ticker -n 200
 
-    # Follow logs in real-time
-    podman logs -f perfsonar-testpoint
+    # perfSONAR application logs (if present)
+    ls /var/log/perfsonar
+    tail -n 200 /var/log/perfsonar/pscheduler.log 2>/dev/null
     ```
 
 ---
