@@ -4664,17 +4664,18 @@ nft<span class="w"> </span>list<span class="w"> </span>ruleset
 </details>
 <details class="note">
 <summary>What to include when reporting issues via email</summary>
-<p>To help us diagnose install problems quickly, please include:</p>
+<p>To help us diagnose toolkit (RPM) install problems quickly, please include:</p>
 <ul>
-<li>Host details: OS version (e.g., <code>cat /etc/os-release</code>), kernel (<code>uname -r</code>), and whether this is testpoint or toolkit.</li>
-<li>Script/log context: which script/step failed and the exact command you ran.</li>
+<li>Host details: OS version (<code>cat /etc/os-release</code>), kernel (<code>uname -r</code>), and that this is a <strong>Toolkit/RPM</strong> install.</li>
+<li>What failed: which step/command you ran and the exact error output (paste the terminal snippet).</li>
 <li>Timestamps: approximate time of failure and timezone.</li>
-<li>Outputs/logs: relevant console output and excerpts from <code>journalctl -u podman -n 200</code>, <code>tail -200 /var/log/perfSONAR-install-nftables.log</code>, and any script-specific log mentioned in the error.</li>
-<li>Network state: <code>ip -br addr</code>, <code>ip rule show</code>, <code>nmcli connection show</code>, and whether port 80/443 should be open externally.</li>
-<li>Certificates (if LE): whether port 80 was reachable from the Internet and the contents of <code>/var/log/letsencrypt/letsencrypt.log</code> around the failure.</li>
+<li>Packages/services: <code>rpm -qa 'perfsonar*' | sort | head -n 30</code>, and <code>systemctl status pscheduler-scheduler pscheduler-runner pscheduler-ticker httpd</code>.</li>
+<li>Logs: <code>journalctl -u pscheduler-scheduler -u pscheduler-runner -u pscheduler-ticker -u httpd -n 200</code>, plus any relevant <code>/var/log/perfsonar/*.log</code> excerpts.</li>
+<li>Network state: <code>ip -br addr</code>, <code>ip rule show</code>, <code>nmcli connection show</code>, and <code>nft list ruleset</code> (or <code>firewall-cmd --list-all</code> if firewalld is used).</li>
+<li>Certificates (if Let’s Encrypt or custom HTTPS involved): whether port 80/443 are reachable externally and excerpts from <code>/var/log/httpd/error_log</code> and <code>/var/log/letsencrypt/letsencrypt.log</code>.</li>
 <li>Contact info: your name, site, and a callback email.</li>
 </ul>
-<p>Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix <code>[perfSONAR install issue]</code>.</p>
+<p>Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix <code>[perfSONAR toolkit install issue]</code>.</p>
 <p><strong>Logs:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># System journal for container runtime</span>
 journalctl<span class="w"> </span>-u<span class="w"> </span>podman<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
