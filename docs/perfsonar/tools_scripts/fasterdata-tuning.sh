@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.7
+# Version: 1.3.8
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -24,6 +24,7 @@
 #                --diff-state/--restore-state can parse saved files reliably.
 # NEW in v1.3.6: Respect --dry-run for packet pacing; audit checks actual qdisc.
 # NEW in v1.3.7: Fix summary display of packet pacing status to correctly detect applied qdisc.
+# NEW in v1.3.8: Validate required option arguments up front to avoid unbound-variable errors and provide clearer CLI feedback.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -127,6 +128,17 @@ State Management Options:
   --help                  Show this help
   --version               Show script version
 EOF
+}
+
+# Ensure required option arguments are present; fail fast with a helpful message
+require_arg() {
+  local flag="$1"
+  local val="${2-}"
+  if [[ -z "$val" || "$val" == -* ]]; then
+    echo "ERROR: $flag requires an argument" >&2
+    usage
+    exit 1
+  fi
 }
 
 # Speed-specific tuning recommendations from ESnet fasterdata.es.net
@@ -3184,30 +3196,30 @@ print_summary() {
 main() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --mode) MODE="$2"; shift 2;;
-      --ifaces) IFACES="$2"; shift 2;;
-      --target) TARGET_TYPE="$2"; shift 2;;
-      --tbf-cap-rate) TBF_CAP_RATE="$2"; USE_TBF_CAP=1; shift 2;;
-      --packet-pacing-rate) TBF_CAP_RATE="$2"; USE_TBF_CAP=1; log_warn "--packet-pacing-rate is deprecated; use --tbf-cap-rate"; shift 2;;
+      --mode) require_arg "$1" "${2-}"; MODE="$2"; shift 2;;
+      --ifaces) require_arg "$1" "${2-}"; IFACES="$2"; shift 2;;
+      --target) require_arg "$1" "${2-}"; TARGET_TYPE="$2"; shift 2;;
+      --tbf-cap-rate) require_arg "$1" "${2-}"; TBF_CAP_RATE="$2"; USE_TBF_CAP=1; shift 2;;
+      --packet-pacing-rate) require_arg "$1" "${2-}"; TBF_CAP_RATE="$2"; USE_TBF_CAP=1; log_warn "--packet-pacing-rate is deprecated; use --tbf-cap-rate"; shift 2;;
       --apply-packet-pacing) APPLY_PACKET_PACING=1; shift;;
       --use-tbf-cap) USE_TBF_CAP=1; shift;;
       --color) USE_COLOR=1; shift;;
       --nocolor) USE_COLOR=0; shift;;
         --apply-iommu) APPLY_IOMMU=1; shift;;
-        --iommu-args) IOMMU_ARGS="$2"; shift 2;;
-      --apply-smt) APPLY_SMT="$2"; shift 2;;
+        --iommu-args) require_arg "$1" "${2-}"; IOMMU_ARGS="$2"; shift 2;;
+      --apply-smt) require_arg "$1" "${2-}"; APPLY_SMT="$2"; shift 2;;
       --persist-smt) PERSIST_SMT=1; shift;;
-      --apply-tcp-cc) APPLY_TCP_CC="$2"; shift 2;;
+      --apply-tcp-cc) require_arg "$1" "${2-}"; APPLY_TCP_CC="$2"; shift 2;;
       --apply-jumbo) APPLY_JUMBO=1; shift;;
       --yes) AUTO_YES=1; shift;;
       --dry-run) DRY_RUN=1; shift;;
           --json) OUTPUT_JSON=1; shift;;
       --save-state) SAVE_STATE=1; shift;;
-      --label) STATE_LABEL="$2"; shift 2;;
-      --restore-state) RESTORE_STATE="$2"; shift 2;;
+      --label) require_arg "$1" "${2-}"; STATE_LABEL="$2"; shift 2;;
+      --restore-state) require_arg "$1" "${2-}"; RESTORE_STATE="$2"; shift 2;;
       --list-states) LIST_STATES=1; shift;;
-      --diff-state) DIFF_STATE="$2"; shift 2;;
-      --delete-state) DELETE_STATE="$2"; shift 2;;
+      --diff-state) require_arg "$1" "${2-}"; DIFF_STATE="$2"; shift 2;;
+      --delete-state) require_arg "$1" "${2-}"; DELETE_STATE="$2"; shift 2;;
       --auto-save-before) AUTO_SAVE_BEFORE=1; shift;;
       -h|--help) usage; exit 0;;
       -v|--version) echo "fasterdata-tuning.sh v$(get_script_version)"; exit 0;;

@@ -5,6 +5,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.3.8] - 2026-01-26
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.8: Guard all flags that require a value so missing arguments fail fast with a helpful error instead of triggering `set -u` unbound variable crashes (e.g., `--restore-state`).
+
 ## [1.3.7] - 2025-12-19
 
 ### Fixed
