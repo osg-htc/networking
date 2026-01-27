@@ -1119,10 +1119,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required" class="md-nav__link">
+  <a href="#1-seed-required-host-directories-required-before-first-compose-up" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)
+        1) Seed required host directories (REQUIRED before first compose up)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-deploy-the-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2) Deploy the container
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3) Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)
       
     </span>
   </a>
@@ -1147,7 +1169,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-seed-required-host-directories-required-before-first-compose-up" class="md-nav__link">
+  <a href="#1-seed-required-host-directories-required-before-first-compose-up_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         1) Seed required host directories (REQUIRED before first compose up)
@@ -3343,7 +3365,7 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 <p>Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:</p>
 <ul>
 <li>
-<p><strong>Option A:</strong> Testpoint only (simplest) — only bind-mount <code>/opt/perfsonar-tp/psconfig</code> for pSConfig.</p>
+<p><strong>Option A:</strong> Testpoint only (simplest) — bind-mounts <code>/opt/perfsonar-tp/psconfig</code>, <code>/var/www/html</code>, and <code>/etc/apache2</code> for Apache and pSConfig.</p>
 </li>
 <li>
 <p><strong>Option B:</strong> Testpoint + Let’s Encrypt — two containers that share Apache files and certs via host bind mounts.</p>
@@ -3351,9 +3373,51 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 </ul>
 <p>Use <code>podman-compose</code> (or <code>docker-compose</code>) in the examples below.</p>
 <h3 id="option-a-testpoint-only-simplest">Option A — Testpoint only (simplest)<a class="headerlink" href="#option-a-testpoint-only-simplest" title="Permanent link">&para;</a></h3>
-<p>Prepare the pSConfig directory and a minimal compose file. No other host bind-mounts are required.</p>
-<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/psconfig
+<h4 id="1-seed-required-host-directories-required-before-first-compose-up">1) Seed required host directories (REQUIRED before first compose up)<a class="headerlink" href="#1-seed-required-host-directories-required-before-first-compose-up" title="Permanent link">&para;</a></h4>
+<p><strong>Why seed?</strong> The perfsonar-testpoint container requires baseline configuration files from the image to be present on
+the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services
+to fail.</p>
+<p><strong>What's seeded:</strong></p>
+<ul>
+<li>
+<p><code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)</p>
+</li>
+<li>
+<p><code>/var/www/html</code> — Apache webroot with index.html (required for healthcheck)</p>
+</li>
+<li>
+<p><code>/etc/apache2</code> — Apache config including <code>sites-available/default-ssl.conf</code></p>
+</li>
+</ul>
+<p>Run the bundled seeding helper script (automatically installed in Step 2):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 </code></pre></div>
+<details class="info">
+<summary>Seed script details</summary>
+<ul>
+<li>Pulls the latest perfSONAR testpoint image</li>
+<li>Creates temporary containers to extract baseline files</li>
+<li>Copies content to host directories</li>
+<li>Verifies seeding was successful</li>
+<li>Skips seeding if directories already have content (idempotent)</li>
+</ul>
+</details>
+<p>Verify seeding succeeded:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Should show config files</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
+
+<span class="c1"># Should show index.html and perfsonar/ directory</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/var/www/html
+
+<span class="c1"># Should show sites-available/, sites-enabled/, etc.</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2
+</code></pre></div>
+<details class="tip">
+<summary>SELinux labeling handled automatically</summary>
+<p>If SELinux is enforcing, the <code>:Z</code> and <code>:z</code> options in the compose files will cause Podman to relabel the host paths when
+containers start. No manual <code>chcon</code> commands are required.</p>
+</details>
+<h4 id="2-deploy-the-container">2) Deploy the container<a class="headerlink" href="#2-deploy-the-container" title="Permanent link">&para;</a></h4>
 <p>Download a ready-made compose file (or copy it manually): Browse: <a href="https://github.com/osghtc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml">repo
 view</a></p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
@@ -3369,7 +3433,7 @@ view</a></p>
 </code></pre></div>
 <p>The container should show <code>healthy</code> status. The healthcheck monitors Apache HTTPS availability.</p>
 <p>Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>. </p>
-<h4 id="ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required">Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)<a class="headerlink" href="#ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required" title="Permanent link">&para;</a></h4>
+<h4 id="3-ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required">3) Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)<a class="headerlink" href="#3-ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required" title="Permanent link">&para;</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">podman-compose limitation with systemd containers</p>
 <p>The perfSONAR testpoint image runs <strong>systemd internally</strong> and requires the <code>--systemd=always</code> flag to function
@@ -3421,7 +3485,7 @@ content and certificates persist on the host and are shared between containers:<
 <p><code>/etc/letsencrypt</code> → <code>/etc/letsencrypt</code> — Let's Encrypt certificates and state</p>
 </li>
 </ul>
-<h4 id="1-seed-required-host-directories-required-before-first-compose-up">1) Seed required host directories (REQUIRED before first compose up)<a class="headerlink" href="#1-seed-required-host-directories-required-before-first-compose-up" title="Permanent link">&para;</a></h4>
+<h4 id="1-seed-required-host-directories-required-before-first-compose-up_1">1) Seed required host directories (REQUIRED before first compose up)<a class="headerlink" href="#1-seed-required-host-directories-required-before-first-compose-up_1" title="Permanent link">&para;</a></h4>
 <p><strong>Why seed?</strong> The perfsonar-testpoint container requires baseline configuration files from the image to be present on
 the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services
 to fail.</p>

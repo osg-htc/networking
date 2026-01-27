@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.1
+# Version: 1.0.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -255,7 +255,7 @@ EOF"
 }
 
 step_deploy_option_a() {
-  run mkdir -p /opt/perfsonar-tp/psconfig
+  run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml -o /opt/perfsonar-tp/docker-compose.yml"
   run bash -c "cd /opt/perfsonar-tp && podman-compose up -d"
   run podman ps
