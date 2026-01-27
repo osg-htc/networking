@@ -5,6 +5,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.3.10] - 2026-01-27
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.10: Ensure all state management functions (`--restore-state`, `--diff-state`, `--list-states`) explicitly return 0 on successful completion so they exit with code 0 instead of inheriting non-zero exit codes from sub-commands.
+
 ## [1.3.9] - 2026-01-27
 
 ### Fixed

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.9
+# Version: 1.3.10
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -26,6 +26,7 @@
 # NEW in v1.3.7: Fix summary display of packet pacing status to correctly detect applied qdisc.
 # NEW in v1.3.8: Validate required option arguments up front to avoid unbound-variable errors and provide clearer CLI feedback.
 # NEW in v1.3.9: Fix qdisc state restoration: properly reset interface qdisc to pfifo_fast when saved state lacks qdisc or has unknown qdisc (fixes packet pacing not being disabled after restore).
+# NEW in v1.3.10: Ensure all state management functions return 0 on successful completion so --restore-state/--diff-state/--list-states exit cleanly with code 0.
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -2432,6 +2433,7 @@ do_list_states() {
   done <<< "$states"
   
   echo ""
+  return 0
 }
 
 do_delete_state() {
@@ -2573,6 +2575,7 @@ PY
   echo ""
   echo "Use --restore-state to restore the saved configuration"
   echo ""
+  return 0
 }
 
 do_restore_state() {
@@ -2890,6 +2893,7 @@ PY
   echo "Note: Some settings may require a reboot to take full effect."
   echo "Run with --mode audit to verify the restored state."
   echo ""
+  return 0
 }
 
 print_host_info() {
