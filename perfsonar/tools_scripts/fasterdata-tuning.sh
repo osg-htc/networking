@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fasterdata-tuning.sh
 # --------------------
-# Version: 1.3.8
+# Version: 1.3.9
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -25,6 +25,7 @@
 # NEW in v1.3.6: Respect --dry-run for packet pacing; audit checks actual qdisc.
 # NEW in v1.3.7: Fix summary display of packet pacing status to correctly detect applied qdisc.
 # NEW in v1.3.8: Validate required option arguments up front to avoid unbound-variable errors and provide clearer CLI feedback.
+# NEW in v1.3.9: Fix qdisc state restoration: properly reset interface qdisc to pfifo_fast when saved state lacks qdisc or has unknown qdisc (fixes packet pacing not being disabled after restore).
 #
 # Sources: https://fasterdata.es.net/host-tuning/ , /network-tuning/ , /DTN/
 #
@@ -2761,7 +2762,7 @@ PY
     # Restore qdisc
     local saved_qdisc
     saved_qdisc=$(python3 -c "import json,sys; print(json.loads(r'''$saved_state''').get('interfaces',{}).get('$iface',{}).get('qdisc',''))" 2>/dev/null || echo "")
-    if [[ -n "$saved_qdisc" ]]; then
+    if [[ -n "$saved_qdisc" && "$saved_qdisc" != "unknown" ]]; then
       # Extract qdisc type (first word)
       local qdisc_type="${saved_qdisc%% *}"
       if [[ "$qdisc_type" =~ ^(fq|fq_codel|pfifo_fast|mq|tbf)$ ]]; then
@@ -2770,6 +2771,20 @@ PY
         else
           log_warn "Failed to restore qdisc for $iface"
         fi
+      else
+        # Unsupported qdisc type in saved state; reset to pfifo_fast (kernel default)
+        if tc qdisc replace dev "$iface" root pfifo_fast >/dev/null 2>&1; then
+          echo "    ✓ qdisc: pfifo_fast (saved qdisc '$qdisc_type' not supported)"
+        else
+          log_warn "Failed to restore default qdisc for $iface"
+        fi
+      fi
+    else
+      # No qdisc in saved state (empty or "unknown"); reset to pfifo_fast (kernel default)
+      if tc qdisc replace dev "$iface" root pfifo_fast >/dev/null 2>&1; then
+        echo "    ✓ qdisc: pfifo_fast (reset to default)"
+      else
+        log_warn "Failed to reset qdisc to default for $iface"
       fi
     fi
   done
