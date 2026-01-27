@@ -5,6 +5,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.3.9] - 2026-01-27
+
+### Fixed
+
+- `fasterdata-tuning.sh` v1.3.9: Fix `--restore-state` to properly reset interface qdisc settings when saved state lacks qdisc or has "unknown" qdisc. Ensures packet pacing is disabled when restoring to pre-apply state (fixes issue where qdisc=fq remains active after restore).
+
 ## [1.3.8] - 2026-01-26
 
 ### Fixed
