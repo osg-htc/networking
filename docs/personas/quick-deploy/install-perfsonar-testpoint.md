@@ -500,7 +500,7 @@ You may want to document any site-specific exceptions (e.g., additional allowed 
     
 Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:
 
-- **Option A:** Testpoint only (simplest) — only bind-mount `/opt/perfsonar-tp/psconfig` for pSConfig.
+- **Option A:** Testpoint only (simplest) — bind-mounts `/opt/perfsonar-tp/psconfig`, `/var/www/html`, and `/etc/apache2` for Apache and pSConfig.
 
 - **Option B:** Testpoint + Let’s Encrypt — two containers that share Apache files and certs via host bind mounts.
 
@@ -508,11 +508,53 @@ Use `podman-compose` (or `docker-compose`) in the examples below.
 
 ### Option A — Testpoint only (simplest)
 
-Prepare the pSConfig directory and a minimal compose file. No other host bind-mounts are required.
+#### 1) Seed required host directories (REQUIRED before first compose up)
+
+**Why seed?** The perfsonar-testpoint container requires baseline configuration files from the image to be present on
+the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services
+to fail.
+
+**What's seeded:**
+
+- `/opt/perfsonar-tp/psconfig` — perfSONAR pSConfig files (baseline remotes and archives)
+
+- `/var/www/html` — Apache webroot with index.html (required for healthcheck)
+
+- `/etc/apache2` — Apache config including `sites-available/default-ssl.conf`
+
+Run the bundled seeding helper script (automatically installed in Step 2):
 
 ```bash
-mkdir -p /opt/perfsonar-tp/psconfig
+/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
 ```
+
+??? info "Seed script details"
+
+    - Pulls the latest perfSONAR testpoint image
+    - Creates temporary containers to extract baseline files
+    - Copies content to host directories
+    - Verifies seeding was successful
+    - Skips seeding if directories already have content (idempotent)
+
+Verify seeding succeeded:
+
+```bash
+# Should show config files
+ls -la /opt/perfsonar-tp/psconfig
+
+# Should show index.html and perfsonar/ directory
+ls -la /var/www/html
+
+# Should show sites-available/, sites-enabled/, etc.
+ls -la /etc/apache2
+```
+
+??? tip "SELinux labeling handled automatically"
+    
+    If SELinux is enforcing, the `:Z` and `:z` options in the compose files will cause Podman to relabel the host paths when
+    containers start. No manual `chcon` commands are required.
+
+#### 2) Deploy the container
 
 Download a ready-made compose file (or copy it manually): Browse: [repo
 view](https://github.com/osghtc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml)
@@ -541,7 +583,7 @@ The container should show `healthy` status. The healthcheck monitors Apache HTTP
 
 Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`. 
 
-#### Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)
+#### 3) Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)
 
 !!! warning "podman-compose limitation with systemd containers"
     
