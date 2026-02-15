@@ -59,4 +59,4 @@ jobs:
           htmlproofer ./site \
             --assume-extension \
             --check-external-hash \
-            --url-ignore "$URL_IGNORE"
+            --ignore-urls "$URL_IGNORE"
