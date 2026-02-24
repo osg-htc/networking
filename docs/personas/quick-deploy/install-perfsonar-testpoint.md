@@ -141,7 +141,8 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 - `--non-interactive` — skip pauses, auto-confirm
 - `--yes` — auto-confirm internal script prompts
 - `--dry-run` — preview steps without executing
-- `--auto-update` — install and enable a systemd timer that pulls container images daily and restarts containers only if updated (creates `/usr/local/bin/perfsonar-auto-update.sh`, a systemd service and timer)
+- `--auto-update` — install and enable a daily systemd timer that pulls new container images and restarts services **only when the image digest has changed** (runs `install-systemd-units.sh --auto-update`, placing `perfSONAR-auto-update.sh` in `/usr/local/bin/`)  
+  > **Note:** Uses image digest comparison, not Docker-specific output strings, so it works correctly with Podman.
 
 !!! tip "Paths vs. Orchestrator Options"
     **Paths = how you install the testpoint**
@@ -1018,104 +1019,49 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
     Keep containers current and only restart them when their image actually changes.
 
-    ??? info "Auto-update for compose-managed containers"
-        
-        Since these containers are managed by `podman-compose`, we use a different approach than systemd-managed containers.
-        Create a simple script and systemd timer to periodically pull new images and restart containers if updates are available.
-        
-        1. Create an update script:
+    Run the bundled `install-systemd-units.sh` with the `--auto-update` flag (it was already downloaded to `tools_scripts` in Step 2):
 
-            ```bash
-            cat > /usr/local/bin/perfsonar-auto-update.sh << 'EOF'
-            #!/bin/bash
-            # perfsonar-auto-update.sh - Check for and apply container image updates
-            set -e
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
+        --install-dir /opt/perfsonar-tp \
+        --auto-update
+    ```
 
-            COMPOSE_DIR="/opt/perfsonar-tp"
-            LOGFILE="/var/log/perfsonar-auto-update.log"
+    This installs `/usr/local/bin/perfsonar-auto-update.sh` (from `tools_scripts/`) and creates a
+    systemd service + timer that runs daily at 03:00 (plus a random delay up to 1 hour).
 
-            log() {
-                echo "$(date -Iseconds) $*" | tee -a "$LOGFILE"
-            }
+    ??? info "What `--auto-update` installs"
 
-            cd "$COMPOSE_DIR"
+        - **`/usr/local/bin/perfsonar-auto-update.sh`** — copies `perfSONAR-auto-update.sh` from
+          `tools_scripts/`.  The script records the local image digest *before* the pull and
+          compares it to the digest *after*. Only if they differ does it restart
+          `perfsonar-testpoint.service`.  This approach uses Podman image inspection (`podman
+          image inspect … --format '{{.Id}}'`) and is **not** dependent on Docker-specific output
+          strings like `"Downloaded newer image"`, which Podman never emits.
+        - **`/etc/systemd/system/perfsonar-auto-update.service`** — oneshot service to run the
+          script.
+        - **`/etc/systemd/system/perfsonar-auto-update.timer`** — daily trigger with a 1-hour
+          randomised delay and `Persistent=true` (catches up if the host was off).
+        - Enables and starts the timer immediately.
 
-            log "Checking for image updates..."
+    Verify the timer is active:
 
-            # Pull latest images
-            if podman-compose pull 2>&1 | tee -a "$LOGFILE" | grep -q "Downloaded newer image"; then
-                log "New images found - recreating containers..."
-                podman-compose up -d
-                log "Containers updated successfully"
-            else
-                log "No updates available"
-            fi
-            EOF
+    ```bash
+    systemctl list-timers perfsonar-auto-update.timer
+    ```
 
-            chmod +x /usr/local/bin/perfsonar-auto-update.sh
-            ```
+    Test manually:
 
-        1. Create a systemd service:
+    ```bash
+    systemctl start perfsonar-auto-update.service
+    journalctl -u perfsonar-auto-update.service -n 50
+    ```
 
-            ```bash
+    Monitor the update log:
 
-            cat > /etc/systemd/system/perfsonar-auto-update.service << 'EOF'
-            [Unit]
-            Description=perfSONAR Container Auto-Update
-            After=network-online.target
-
-            [Service]
-            Type=oneshot
-            ExecStart=/usr/local/bin/perfsonar-auto-update.sh
-
-            [Install]
-            WantedBy=multi-user.target
-            EOF
-            ```
-
-        1. Create a systemd timer (runs daily at 3 AM):
-
-            ```bash
-            cat > /etc/systemd/system/perfsonar-auto-update.timer << 'EOF'
-
-            [Unit]
-            Description=perfSONAR Container Auto-Update Timer
-
-            [Timer]
-            OnCalendar=daily
-            RandomizedDelaySec=1h
-            Persistent=true
-
-            [Install]
-            WantedBy=timers.target
-            EOF
-            ```
-
-        1. Enable and start the timer:
-
-            ```bash
-            systemctl daemon-reload
-            systemctl enable --now perfsonar-auto-update.timer
-            ```
-
-        1. Verify the timer is active:
-
-            ```bash
-            systemctl list-timers perfsonar-auto-update.timer
-            ```
-
-        1. Test manually (optional):
-
-            ```bash
-            systemctl start perfsonar-auto-update.service
-            journalctl -u perfsonar-auto-update.service -n 50
-            ```
-
-        1. Monitor the update log:
-
-            ```bash
-            tail -f /var/log/perfsonar-auto-update.log
-            ```
+    ```bash
+    tail -f /var/log/perfsonar-auto-update.log
+    ```
 
 This approach ensures containers are updated only when new images are available, minimizing unnecessary restarts while
 keeping your deployment current.
@@ -1629,8 +1575,31 @@ Perform these checks before handing the host over to operations:
 
     - Enable timer if not active: `systemctl enable --now perfsonar-auto-update.timer`
     - Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
-    - Check podman-compose is installed and working
-    - Review script for errors and update if needed
+    - If script is missing, reinstall from `tools_scripts/`:
+
+      ```bash
+      /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
+          --install-dir /opt/perfsonar-tp \
+          --auto-update
+      ```
+
+    - Manually check whether a newer image exists by comparing digests:
+
+      ```bash
+      # Digest of currently running container
+      podman inspect perfsonar-testpoint --format "{{.Image}}"
+      # Digest of what's in the registry
+      podman pull hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production
+      podman image inspect hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production --format "{{.Id}}"
+      ```
+
+    - If digests differ but the service didn't restart, run the update manually, then check the log:
+
+      ```bash
+      systemctl start perfsonar-auto-update.service
+      journalctl -u perfsonar-auto-update.service -n 100
+      tail -50 /var/log/perfsonar-auto-update.log
+      ```
 
 ### General Debugging Tips
 

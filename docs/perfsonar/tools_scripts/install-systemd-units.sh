@@ -13,6 +13,10 @@
 # Options:
 #   --install-dir PATH    Installation directory (default: /opt/perfsonar-tp)
 #   --with-certbot        Install certbot service alongside testpoint
+#   --auto-update         Install perfsonar-auto-update.sh and a daily systemd
+#                         timer that pulls new images and restarts services only
+#                         when an image digest has changed (Podman-compatible;
+#                         does not rely on Docker-specific output strings)
 #   --help                Show this help message
 #
 # Requirements:
@@ -21,7 +25,7 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.0.0
+# Version: 1.1.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 set -e
@@ -29,6 +33,7 @@ set -e
 # Default values
 INSTALL_DIR="/opt/perfsonar-tp"
 WITH_CERTBOT=false
+AUTO_UPDATE=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -41,8 +46,12 @@ while [[ $# -gt 0 ]]; do
             WITH_CERTBOT=true
             shift
             ;;
+        --auto-update)
+            AUTO_UPDATE=true
+            shift
+            ;;
         --help)
-            head -n 20 "$0" | grep "^#" | sed 's/^# \?//'
+            head -n 25 "$0" | grep "^#" | sed 's/^# \?//'
             exit 0
             ;;
         *)
@@ -85,7 +94,16 @@ fi
 echo "==> Installing systemd units for perfSONAR testpoint"
 echo "    Installation directory: $INSTALL_DIR"
 
-# Create perfsonar-testpoint service
+# When --auto-update is the only goal (service already exists), skip rewriting
+# the testpoint/certbot service units to avoid disrupting a running deployment.
+SKIP_SERVICE_UNITS=false
+if [[ "$AUTO_UPDATE" == "true" && -f "$TESTPOINT_SERVICE" ]]; then
+    echo "==> Existing $TESTPOINT_SERVICE detected — skipping service unit rewrite (use without --auto-update to reinstall)"
+    SKIP_SERVICE_UNITS=true
+fi
+
+# Create perfsonar-testpoint service (skip if already present and only --auto-update was requested)
+if [[ "$SKIP_SERVICE_UNITS" == "false" ]]; then
 cat > "$TESTPOINT_SERVICE" << EOF
 [Unit]
 Description=perfSONAR Testpoint Container
@@ -158,43 +176,133 @@ EOF
     echo "==> ✓ Created $CERTBOT_SERVICE"
 fi
 
+fi  # end SKIP_SERVICE_UNITS guard
+
 # Reload systemd
 echo "==> Reloading systemd daemon"
 systemctl daemon-reload
 
-# Enable services
-echo "==> Enabling perfsonar-testpoint service"
-systemctl enable perfsonar-testpoint.service
+# Enable services (only if service units were written)
+if [[ "$SKIP_SERVICE_UNITS" == "false" ]]; then
+    echo "==> Enabling perfsonar-testpoint service"
+    systemctl enable perfsonar-testpoint.service
 
-if [[ "$WITH_CERTBOT" == "true" ]]; then
-    echo "==> Enabling perfsonar-certbot service"
-    systemctl enable perfsonar-certbot.service
+    if [[ "$WITH_CERTBOT" == "true" ]]; then
+        echo "==> Enabling perfsonar-certbot service"
+        systemctl enable perfsonar-certbot.service
+    fi
+
+    echo ""
+    echo "==> ✓ Systemd units installed and enabled successfully"
+    echo ""
+    echo "Useful commands:"
+    echo "  Start services:   systemctl start perfsonar-testpoint.service"
+    if [[ "$WITH_CERTBOT" == "true" ]]; then
+        echo "                    systemctl start perfsonar-certbot.service"
+    fi
+    echo "  Stop services:    systemctl stop perfsonar-testpoint.service"
+    if [[ "$WITH_CERTBOT" == "true" ]]; then
+        echo "                    systemctl stop perfsonar-certbot.service"
+    fi
+    echo "  Check status:     systemctl status perfsonar-testpoint.service"
+    if [[ "$WITH_CERTBOT" == "true" ]]; then
+        echo "                    systemctl status perfsonar-certbot.service"
+    fi
+    echo "  View logs:        journalctl -u perfsonar-testpoint.service -f"
+    if [[ "$WITH_CERTBOT" == "true" ]]; then
+        echo "                    journalctl -u perfsonar-certbot.service -f"
+    fi
+    echo "  Check containers: podman ps"
+    echo ""
+    echo "The services will automatically start containers on boot."
+    echo ""
+    echo "Note: These units use 'podman run --systemd=always' for proper systemd"
+    echo "      support inside the container. This is required for the testpoint"
+    echo "      image which runs systemd internally."
 fi
 
-echo ""
-echo "==> ✓ Systemd units installed and enabled successfully"
-echo ""
-echo "Useful commands:"
-echo "  Start services:   systemctl start perfsonar-testpoint.service"
-if [[ "$WITH_CERTBOT" == "true" ]]; then
-    echo "                    systemctl start perfsonar-certbot.service"
+# ── Optional: auto-update timer ────────────────────────────────────────────────
+if [[ "$AUTO_UPDATE" == "true" ]]; then
+    AUTO_UPDATE_SCRIPT="$INSTALL_DIR/tools_scripts/perfSONAR-auto-update.sh"
+    AUTO_UPDATE_BIN="/usr/local/bin/perfsonar-auto-update.sh"
+    AUTO_UPDATE_SVC="/etc/systemd/system/perfsonar-auto-update.service"
+    AUTO_UPDATE_TIMER="/etc/systemd/system/perfsonar-auto-update.timer"
+
+    echo ""
+    echo "==> Installing auto-update timer"
+
+    # Use the versioned script from tools_scripts if present, else fall back to a
+    # minimal inline version.
+    if [[ -f "$AUTO_UPDATE_SCRIPT" ]]; then
+        cp "$AUTO_UPDATE_SCRIPT" "$AUTO_UPDATE_BIN"
+    else
+        echo "WARNING: $AUTO_UPDATE_SCRIPT not found; writing minimal inline script."
+        cat > "$AUTO_UPDATE_BIN" << 'AUTOUPDATE_EOF'
+#!/bin/bash
+# perfsonar-auto-update.sh (minimal inline fallback)
+# For the full versioned script, re-run bootstrap (install_tools_scripts.sh).
+set -euo pipefail
+LOGFILE="/var/log/perfsonar-auto-update.log"
+TESTPOINT_IMAGE="hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production"
+CERTBOT_IMAGE="docker.io/certbot/certbot:latest"
+log() { echo "$(date -Iseconds) $*" | tee -a "$LOGFILE"; }
+get_id() { podman image inspect "$1" --format '{{.Id}}' 2>/dev/null || echo none; }
+check_pull() {
+    local img=$1 before after
+    before=$(get_id "$img")
+    podman pull "$img" >> "$LOGFILE" 2>&1 || { log "WARNING: pull failed for $img"; echo unchanged; return; }
+    after=$(get_id "$img")
+    [[ "$before" == "none" || "$before" != "$after" ]] && echo updated || echo unchanged
+}
+log '=== perfSONAR auto-update check ==='
+ANY=false
+[[ $(check_pull "$TESTPOINT_IMAGE") == updated ]] && ANY=true
+podman ps -a --format '{{.Names}}' 2>/dev/null | grep -q '^certbot$' && \
+    [[ $(check_pull "$CERTBOT_IMAGE") == updated ]] && ANY=true
+$ANY && systemctl restart perfsonar-testpoint.service && log 'Restarted testpoint.service' || log 'No updates'
+log '=== done ==='
+AUTOUPDATE_EOF
+    fi
+    chmod 0755 "$AUTO_UPDATE_BIN"
+    echo "==> ✓ Installed $AUTO_UPDATE_BIN"
+
+    cat > "$AUTO_UPDATE_SVC" << 'EOF'
+[Unit]
+Description=perfSONAR Container Auto-Update
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/perfsonar-auto-update.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    echo "==> ✓ Created $AUTO_UPDATE_SVC"
+
+    cat > "$AUTO_UPDATE_TIMER" << 'EOF'
+[Unit]
+Description=perfSONAR Container Auto-Update Timer
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+    echo "==> ✓ Created $AUTO_UPDATE_TIMER"
+
+    systemctl daemon-reload
+    systemctl enable --now perfsonar-auto-update.timer
+    echo "==> ✓ Enabled perfsonar-auto-update.timer (runs daily at 03:00 + up to 1h random delay)"
+    echo ""
+    echo "Useful auto-update commands:"
+    echo "  Check timer:      systemctl list-timers perfsonar-auto-update.timer"
+    echo "  Run now (test):   systemctl start perfsonar-auto-update.service"
+    echo "  View log:         journalctl -u perfsonar-auto-update.service -f"
+    echo "  Update log file:  tail -f /var/log/perfsonar-auto-update.log"
 fi
-echo "  Stop services:    systemctl stop perfsonar-testpoint.service"
-if [[ "$WITH_CERTBOT" == "true" ]]; then
-    echo "                    systemctl stop perfsonar-certbot.service"
-fi
-echo "  Check status:     systemctl status perfsonar-testpoint.service"
-if [[ "$WITH_CERTBOT" == "true" ]]; then
-    echo "                    systemctl status perfsonar-certbot.service"
-fi
-echo "  View logs:        journalctl -u perfsonar-testpoint.service -f"
-if [[ "$WITH_CERTBOT" == "true" ]]; then
-    echo "                    journalctl -u perfsonar-certbot.service -f"
-fi
-echo "  Check containers: podman ps"
-echo ""
-echo "The services will automatically start containers on boot."
-echo ""
-echo "Note: These units use 'podman run --systemd=always' for proper systemd"
-echo "      support inside the container. This is required for the testpoint"
-echo "      image which runs systemd internally."
