@@ -847,11 +847,13 @@ podman start certbot
 
 The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.
 
-**Automatic Container Restart:** After each successful certificate renewal, certbot automatically runs a deploy hook
-script (`certbot-deploy-hook.sh`) that gracefully restarts the `perfsonar-testpoint` container. This ensures the new
-certificates are loaded without manual intervention. The deploy hook uses the mounted Podman socket
-
-(`/run/podman/podman.sock`) to communicate with the host's container runtime.
+**Automatic Container Restart:** After each successful certificate renewal, certbot automatically runs
+a deploy hook script (`certbot-deploy-hook.sh`) that gracefully restarts the `perfsonar-testpoint`
+container. This ensures the new certificates are loaded without manual intervention. The deploy hook
+uses the mounted Podman socket (`/run/podman/podman.sock`) to communicate with the host's container
+runtime via the Podman REST API (using Python, since the `podman` CLI is not present in the certbot
+image). On EL9 hosts with SELinux enforcing, the certbot service requires `security_opt: label=disable`
+to access the socket.
 
 **Note:** The certbot container in this setup uses **host networking mode** (via `network_mode: host` in the compose
 file) so it can bind directly to port 80 for HTTP-01 challenges during renewals. This works because the perfsonar-
@@ -1564,12 +1566,13 @@ Perform these checks before handing the host over to operations:
 
     - Verify deploy hook script exists and is executable: `/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh`
     - Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
-    - Verify Podman socket is mounted in certbot container: `/run/podman/podman.sock`
+    - Verify Podman socket is mounted in certbot container: `podman exec certbot ls /run/podman/podman.sock`
+    - Verify `security_opt: label=disable` is set on the certbot service in `docker-compose.yml` (required on EL9/SELinux hosts)
     - Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
     - Manually restart testpoint after renewals if deploy hook fails: `podman restart perfsonar-testpoint`
 
     **Note:** Certbot automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are
-    renewed. Do not use `--deploy-hook` parameter with full paths ending in `.sh` as certbot will append `-hook` to the filename.
+    renewed. The deploy hook uses the Podman REST API via Python (not the `podman` CLI, which is absent from the Alpine-based certbot image).
 
 ### perfSONAR Service Issues
 
