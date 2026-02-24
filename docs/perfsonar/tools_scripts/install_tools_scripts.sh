@@ -5,11 +5,11 @@ set -euo pipefail
 # Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
 #
-# Version: 1.0.1 - 2025-12-16
+# Version: 1.0.2 - 2026-02-24
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
-VERSION="1.0.1"
+VERSION="1.0.2"
 PROG_NAME="$(basename "$0")"
 
 # Check for --version or --help flags
@@ -84,6 +84,7 @@ files=(
     perfSONAR-install-nftables.sh
     perfSONAR-update-lsregistration.sh
     perfSONAR-auto-enroll-psconfig.sh
+    perfSONAR-auto-update.sh
     seed_testpoint_host_dirs.sh
     perfSONAR-orchestrator.sh
     install_tools_scripts.sh

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.2
+# Version: 1.0.3
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -182,76 +182,26 @@ step_security() {
   fi
   local sec_cmd=(/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes)
   run "${sec_cmd[@]}" || true
-  # Optional: setup auto-update timer for compose-managed containers (Step 7.4)
-  if command -v podman-compose >/dev/null 2>&1; then
-    if confirm "Step 7.4: Install auto-update timer for compose-managed containers (daily pull + restart if updated)?"; then
-      step_auto_update_compose
-    else
-      log "Skipping auto-update setup."
-    fi
+  # Optional: setup auto-update timer (Step 7.4)
+  if confirm "Step 7.4: Install auto-update timer (daily image pull + restart if new image found)?"; then
+    step_auto_update_compose
   else
-    log "podman-compose not present; skipping auto-update setup."
+    log "Skipping auto-update setup."
   fi
 }
 
 # shellcheck disable=SC2120
 step_auto_update_compose() {
-  # Create update script, systemd service and timer to run daily
-  if ! confirm "Create /usr/local/bin/perfsonar-auto-update.sh and enable systemd timer?"; then
-    log "User skipped creating auto-update artifacts."
-    return
+  # Delegate to install-systemd-units.sh --auto-update which installs
+  # perfSONAR-auto-update.sh (from tools_scripts/) plus systemd service + timer.
+  # That script uses image digest comparison (Podman-compatible) instead of
+  # grepping for Docker-specific output strings like 'Downloaded newer image'.
+  local install_dir="/opt/perfsonar-tp"
+  if [[ -f "$install_dir/tools_scripts/install-systemd-units.sh" ]]; then
+    run bash "$install_dir/tools_scripts/install-systemd-units.sh" --install-dir "$install_dir" --auto-update
+  else
+    log "WARNING: install-systemd-units.sh not found in $install_dir/tools_scripts; run bootstrap first."
   fi
-
-    # shellcheck disable=SC2153
-  run bash -c "cat > /usr/local/bin/perfsonar-auto-update.sh <<'EOF'
-#!/bin/bash
-set -e
-COMPOSE_DIR=/opt/perfsonar-tp
-LOGFILE=/var/log/perfsonar-auto-update.log
-log() { echo \"\$(date -Iseconds) \$*\" | tee -a \"\$LOGFILE\"; }
-cd \"\$COMPOSE_DIR\"
-log \"Checking for image updates...\"
-# Pull latest images and detect if any were actually updated
-if podman-compose pull 2>&1 | tee -a \"\$LOGFILE\" | grep -q -E 'Downloaded newer image|Pulling from'; then
-  log \"New images found - recreating containers...\"
-  podman-compose up -d 2>&1 | tee -a \"\$LOGFILE\"
-  log \"Containers updated successfully\"
-else
-  log \"No updates available\"
-fi
-EOF"
-
-  run chmod 0755 /usr/local/bin/perfsonar-auto-update.sh
-
-  run bash -c "cat > /etc/systemd/system/perfsonar-auto-update.service <<'EOF'
-[Unit]
-Description=perfSONAR Container Auto-Update
-After=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/perfsonar-auto-update.sh
-
-[Install]
-WantedBy=multi-user.target
-EOF"
-
-  run bash -c "cat > /etc/systemd/system/perfsonar-auto-update.timer <<'EOF'
-[Unit]
-Description=perfSONAR Container Auto-Update Timer
-
-[Timer]
-OnCalendar=daily
-RandomizedDelaySec=1h
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF"
-
-  run systemctl daemon-reload
-  run systemctl enable --now perfsonar-auto-update.timer
-  log "Installed and enabled perfsonar-auto-update.timer"
 }
 
 step_deploy_option_a() {
