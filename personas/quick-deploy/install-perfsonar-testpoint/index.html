@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
@@ -3649,10 +3649,13 @@ listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>start<span class="w"> </span>certbot
 </code></pre></div>
 <p>The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.</p>
-<p><strong>Automatic Container Restart:</strong> After each successful certificate renewal, certbot automatically runs a deploy hook
-script (<code>certbot-deploy-hook.sh</code>) that gracefully restarts the <code>perfsonar-testpoint</code> container. This ensures the new
-certificates are loaded without manual intervention. The deploy hook uses the mounted Podman socket</p>
-<p>(<code>/run/podman/podman.sock</code>) to communicate with the host's container runtime.</p>
+<p><strong>Automatic Container Restart:</strong> After each successful certificate renewal, certbot automatically runs
+a deploy hook script (<code>certbot-deploy-hook.sh</code>) that gracefully restarts the <code>perfsonar-testpoint</code>
+container. This ensures the new certificates are loaded without manual intervention. The deploy hook
+uses the mounted Podman socket (<code>/run/podman/podman.sock</code>) to communicate with the host's container
+runtime via the Podman REST API (using Python, since the <code>podman</code> CLI is not present in the certbot
+image). On EL9 hosts with SELinux enforcing, the certbot service requires <code>security_opt: label=disable</code>
+to access the socket.</p>
 <p><strong>Note:</strong> The certbot container in this setup uses <strong>host networking mode</strong> (via <code>network_mode: host</code> in the compose
 file) so it can bind directly to port 80 for HTTP-01 challenges during renewals. This works because the perfsonar-
 testpoint Apache is patched to NOT listen on port 80. Both containers share the host network namespace without conflict.</p>
@@ -4266,12 +4269,13 @@ podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
 <ul>
 <li>Verify deploy hook script exists and is executable: <code>/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh</code></li>
 <li>Ensure deploy hook is mounted in container at: <code>/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh</code></li>
-<li>Verify Podman socket is mounted in certbot container: <code>/run/podman/podman.sock</code></li>
+<li>Verify Podman socket is mounted in certbot container: <code>podman exec certbot ls /run/podman/podman.sock</code></li>
+<li>Verify <code>security_opt: label=disable</code> is set on the certbot service in <code>docker-compose.yml</code> (required on EL9/SELinux hosts)</li>
 <li>Check deploy hook logs: <code>journalctl -u perfsonar-certbot.service | grep deploy</code></li>
 <li>Manually restart testpoint after renewals if deploy hook fails: <code>podman restart perfsonar-testpoint</code></li>
 </ul>
 <p><strong>Note:</strong> Certbot automatically executes scripts in <code>/etc/letsencrypt/renewal-hooks/deploy/</code> when certificates are
-renewed. Do not use <code>--deploy-hook</code> parameter with full paths ending in <code>.sh</code> as certbot will append <code>-hook</code> to the filename.</p>
+renewed. The deploy hook uses the Podman REST API via Python (not the <code>podman</code> CLI, which is absent from the Alpine-based certbot image).</p>
 </details>
 <h3 id="perfsonar-service-issues">perfSONAR Service Issues<a class="headerlink" href="#perfsonar-service-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
