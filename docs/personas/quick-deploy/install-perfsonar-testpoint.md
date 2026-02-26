@@ -603,7 +603,7 @@ Verify the container is running and healthy:
 podman ps
 ```
 
-The container should show `healthy` status. The healthcheck monitors Apache HTTPS availability.
+The container should show `healthy` status. The healthcheck runs `pscheduler troubleshoot --quick` to validate the full pScheduler service stack (API, Ticker, Scheduler, Runner, Archiver) in under one second. Allow up to 120 seconds after startup for the healthcheck to first pass.
 
 Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are consumed by the container at `/etc/perfsonar/psconfig`.
 
@@ -618,7 +618,7 @@ Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are c
     You **must** use the systemd unit approach below instead of relying on compose alone.
     
     Install the provided systemd units to manage containers with proper systemd support:
-    
+
 ```bash
 curl -fsSL \
     https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
@@ -635,6 +635,17 @@ systemctl enable --now perfsonar-testpoint.service
 systemctl status perfsonar-testpoint.service --no-pager
 podman ps
 ```
+
+!!! tip "Optional: install the health-monitor watchdog at the same time"
+    The compose healthcheck marks the container `unhealthy` after three consecutive failures, but `restart: unless-stopped` does **not** auto-restart on health failures — a separate watchdog is needed.
+
+    Run `install-systemd-units.sh` with `--health-monitor` to install a systemd timer that checks the container health every 5 minutes and restarts `perfsonar-testpoint.service` if the container is `unhealthy`:
+
+    ```bash
+    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --health-monitor
+    ```
+
+    This creates `perfsonar-health-monitor.service` + `perfsonar-health-monitor.timer` and logs to `/var/log/perfsonar-health-monitor.log`. Expected recovery time from pScheduler failure: ≤8 minutes.
 
 ??? info "Notes on podman/systemd"
 
@@ -1099,6 +1110,45 @@ podman exec -it perfsonar-testpoint psconfig remote list
 This approach ensures containers are updated only when new images are available, minimizing unnecessary restarts while
 keeping your deployment current.
 
+1. **Automatic health monitoring and recovery**
+
+    The compose healthcheck (`pscheduler troubleshoot --quick`) marks the container `unhealthy` after three consecutive failures, but `restart: unless-stopped` does **not** automatically restart an unhealthy container — you need an external watchdog.
+
+    Install the health-monitor systemd timer using the already-downloaded `install-systemd-units.sh`:
+
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
+        --install-dir /opt/perfsonar-tp \
+        --health-monitor
+    ```
+
+    ??? info "What `--health-monitor` installs"
+
+        - **`/usr/local/bin/perfsonar-health-monitor.sh`** — copies `perfSONAR-health-monitor.sh` from `tools_scripts/`. Checks `podman inspect` health state and restarts `perfsonar-testpoint.service` when `unhealthy`.
+        - **`/etc/systemd/system/perfsonar-health-monitor.service`** — oneshot service that runs the watchdog.
+        - **`/etc/systemd/system/perfsonar-health-monitor.timer`** — fires 3 minutes after boot, then every 5 minutes. Enables and starts immediately.
+        - Logs to `/var/log/perfsonar-health-monitor.log`.
+        - Expected recovery window: ~3 min (3 × 60 s failed checks) + ≤5 min (next watchdog run) ≈ **≤8 minutes**.
+
+    Verify the timer is active:
+
+    ```bash
+    systemctl list-timers perfsonar-health-monitor.timer
+    ```
+
+    Test manually:
+
+    ```bash
+    systemctl start perfsonar-health-monitor.service
+    journalctl -u perfsonar-health-monitor.service -n 20
+    ```
+
+    Monitor the log:
+
+    ```bash
+    tail -f /var/log/perfsonar-health-monitor.log
+    ```
+
 ---
 
 ## Step 8 – Post-Install Validation
@@ -1222,6 +1272,8 @@ Perform these checks before handing the host over to operations:
 - Review container logs periodically for errors: `podman logs perfsonar-testpoint` and `podman logs certbot`.
 
 - Verify auto-update timer is active: `systemctl list-timers perfsonar-auto-update.timer`.
+
+- Verify health-monitor timer is active: `systemctl list-timers perfsonar-health-monitor.timer`.
 
 ---
 
