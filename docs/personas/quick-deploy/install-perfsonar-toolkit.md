@@ -1619,6 +1619,80 @@ Perform these checks before handing the host over to operations:
 
 ---
 
+## Updating an Existing Deployment
+
+The **dnf-automatic** service (Step 5.3) keeps perfSONAR RPM packages current on a
+daily schedule, but it does not update the **helper scripts** installed during
+Step 2.4 (PBR generator, fasterdata tuning, DNS checker, nftables helpers, etc.).
+When the repository publishes bug fixes or new features that touch these scripts you
+need to run the **deployment updater** to bring your installation in sync.
+
+### Quick update (one-liner)
+
+If you already have the tools installed under `/opt/perfsonar-toolkit/tools_scripts`:
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/update-testpoint-deployment.sh --type toolkit --apply --restart --yes
+```
+
+If the script is not yet present (older installations), bootstrap it first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-testpoint-deployment.sh \
+  -o /tmp/update-testpoint-deployment.sh
+chmod 0755 /tmp/update-testpoint-deployment.sh
+/tmp/update-testpoint-deployment.sh --type toolkit --apply --restart --yes
+```
+
+### What the updater does
+
+| Phase | Action | Default |
+| ----- | ------ | ------- |
+| 1 — Scripts | Re-downloads all helper scripts from the repository | Always |
+| 2 — Config files | Installs or updates host configuration overrides (if any) | Report only; `--apply` to write |
+| 3 — RPM packages | Checks for `perfsonar*` package updates via `dnf` | Report only; `--apply` to install |
+| 4 — Services | Restarts perfSONAR daemons if packages or configs changed | Only with `--restart` |
+
+!!! note "Phase 5 (systemd units) is skipped for toolkit deployments"
+    Toolkit installations manage their own systemd services via RPM scriptlets.
+    The `--update-systemd` flag only applies to container deployments.
+
+### Report-only mode (safe, no changes)
+
+Run without flags to see what would change:
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/update-testpoint-deployment.sh --type toolkit
+```
+
+### Full update with restart
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/update-testpoint-deployment.sh \
+    --type toolkit --apply --restart --yes
+```
+
+??? info "Updater flags reference"
+
+    | Flag | Description |
+    | ---- | ----------- |
+    | `--type TYPE` | Deployment type: `container` or `toolkit` (auto-detected if omitted) |
+    | `--base DIR` | Base directory (default: auto-detected) |
+    | `--apply` | Apply changes (default: report only) |
+    | `--restart` | Restart services after updates (implies `--apply`) |
+    | `--update-systemd` | Re-run `install-systemd-units.sh` (container only, ignored for toolkit) |
+    | `--yes` | Skip interactive confirmations |
+    | `--dry-run` | Show what would change without modifying anything |
+
+??? tip "When should I run the updater?"
+
+    - After the repository announces bug fixes or new features affecting helper scripts
+    - When you see a new release in the [CHANGELOG](https://github.com/osg-htc/networking/blob/master/CHANGELOG.md)
+    - If you encounter a known issue that has been fixed in a newer script version
+    - After a major perfSONAR version upgrade to ensure helper scripts are compatible
+
+---
+
 ## Troubleshooting
 
 ### Networking Issues
