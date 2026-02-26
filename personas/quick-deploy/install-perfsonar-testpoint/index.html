@@ -3065,6 +3065,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 - <strong>Option B</strong>: Testpoint with Let's Encrypt automation (requires <code>--fqdn</code> and <code>--email</code>)</p>
 <p>Remember: choose Path A or Path B first. If you pick Path A, then choose Option A or B for certificate handling.</p>
 </div>
+<!-- markdownlint-disable-next-line MD051 -->
 <p><strong>If you choose this path, skip to <a href="#step-7-register-and-configure-with-wlcgosg">Step 7</a></strong> (the orchestrator completes Steps 2–6 for you).</p>
 <hr />
 <h3 id="path-b-manual-step-by-step">Path B: Manual Step-by-Step<a class="headerlink" href="#path-b-manual-step-by-step" title="Permanent link">&para;</a></h3>
@@ -3291,9 +3292,9 @@ optional SELinux and Fail2Ban support. No staging or copy step is required.</p>
 </ul>
 <p>If any prerequisite is missing, the script skips that component and continues.</p>
 <h3 id="installconfigure-the-desired-options">Install/configure the desired options<a class="headerlink" href="#installconfigure-the-desired-options" title="Permanent link">&para;</a></h3>
-<p>You can use the install script to install the options you want (selinux, fail2ban)
+<p>You can use the install script to install the options you want (selinux, fail2ban)</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh<span class="w"> </span>--selinux<span class="w"> </span>--fail2ban<span class="w"> </span>--yes
-</code></pre></div></p>
+</code></pre></div>
 <div class="codehilite"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="nv">Use</span><span class="w"> </span>`<span class="o">--</span><span class="nv">yes</span>`<span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">skip</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">interactive</span><span class="w"> </span><span class="nv">confirmation</span><span class="w"> </span><span class="nv">prompt</span><span class="w"> </span><span class="ss">(</span><span class="nv">omit</span><span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">you</span><span class="w"> </span><span class="nv">prefer</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">review</span><span class="w"> </span><span class="nv">the</span>
 <span class="w">  </span><span class="nv">summary</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">answer</span><span class="w"> </span><span class="nv">manually</span><span class="ss">)</span>.
 
@@ -3386,6 +3387,10 @@ to fail.</p>
 <p><code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)</p>
 </li>
 <li>
+<p><code>/opt/perfsonar-tp/conf/node_exporter.defaults</code> — node_exporter options override; disables the
+  <code>cpufreq</code> collector that panics on hosts with offline CPUs (procfs v0.10.0 bug)</p>
+</li>
+<li>
 <p><code>/var/www/html</code> — Apache webroot with index.html (required for healthcheck)</p>
 </li>
 <li>
@@ -3401,6 +3406,7 @@ to fail.</p>
 <li>Pulls the latest perfSONAR testpoint image</li>
 <li>Creates temporary containers to extract baseline files</li>
 <li>Copies content to host directories</li>
+<li>Installs <code>node_exporter.defaults</code> into <code>/opt/perfsonar-tp/conf/</code></li>
 <li>Verifies seeding was successful</li>
 <li>Skips seeding if directories already have content (idempotent)</li>
 </ul>
@@ -3408,6 +3414,9 @@ to fail.</p>
 <p>Verify seeding succeeded:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Should show config files</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
+
+<span class="c1"># Should show node_exporter.defaults</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
 
 <span class="c1"># Should show index.html and perfsonar/ directory</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/var/www/html
@@ -3419,6 +3428,18 @@ ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2
 <summary>SELinux labeling handled automatically</summary>
 <p>If SELinux is enforcing, the <code>:Z</code> and <code>:z</code> options in the compose files will cause Podman to relabel the host paths when
 containers start. No manual <code>chcon</code> commands are required.</p>
+</details>
+<details class="tip">
+<summary>node_exporter D-Bus access on EL9/SELinux</summary>
+<p>The compose file bind-mounts <code>/run/dbus:/run/dbus:ro</code> so that node_exporter can use
+<code>--collector.systemd</code> to expose perfSONAR service states as Prometheus metrics.
+On EL9 hosts with SELinux in <strong>Enforcing</strong> mode the <code>system_dbusd_var_run_t</code> label may
+block access. Enable with:</p>
+<div class="highlight"><pre><span></span><code>setsebool<span class="w"> </span>-P<span class="w"> </span>container_use_dbusd<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+<p>If the boolean is not available on your policy version, add <code>security_opt: label=disable</code>
+to the testpoint service in <code>docker-compose.yml</code> (less preferred — disables all SELinux
+confinement for the container).</p>
 </details>
 <h4 id="2-deploy-the-container">2) Deploy the container<a class="headerlink" href="#2-deploy-the-container" title="Permanent link">&para;</a></h4>
 <p>Download a ready-made compose file (or copy it manually): Browse: <a href="https://github.com/osghtc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml">repo
@@ -3435,7 +3456,7 @@ view</a></p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps
 </code></pre></div>
 <p>The container should show <code>healthy</code> status. The healthcheck monitors Apache HTTPS availability.</p>
-<p>Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>. </p>
+<p>Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>.</p>
 <h4 id="3-ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required">3) Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)<a class="headerlink" href="#3-ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required" title="Permanent link">&para;</a></h4>
 <div class="admonition warning">
 <p class="admonition-title">podman-compose limitation with systemd containers</p>
@@ -3469,6 +3490,7 @@ podman<span class="w"> </span>ps
 <li>After editing the unit file, reload and restart: <code>systemctl daemon-reload &amp;&amp; systemctl restart perfsonar-testpoint.service</code></li>
 </ul>
 </details>
+<!-- markdownlint-disable-next-line MD051 -->
 <p>Jump to <a href="#step-6-configure-and-enroll-in-psconfig">Step 6</a> below.</p>
 <hr />
 <h3 id="option-b-testpoint-lets-encrypt-shared-apache-and-certs">Option B — Testpoint + Let's Encrypt (shared Apache and certs)<a class="headerlink" href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" title="Permanent link">&para;</a></h3>
@@ -3488,6 +3510,7 @@ content and certificates persist on the host and are shared between containers:<
 <p><code>/etc/letsencrypt</code> → <code>/etc/letsencrypt</code> — Let's Encrypt certificates and state</p>
 </li>
 </ul>
+<!-- markdownlint-disable-next-line MD024 -->
 <h4 id="1-seed-required-host-directories-required-before-first-compose-up_1">1) Seed required host directories (REQUIRED before first compose up)<a class="headerlink" href="#1-seed-required-host-directories-required-before-first-compose-up_1" title="Permanent link">&para;</a></h4>
 <p><strong>Why seed?</strong> The perfsonar-testpoint container requires baseline configuration files from the image to be present on
 the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services
@@ -3498,6 +3521,10 @@ to fail.</p>
 <p><code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)</p>
 </li>
 <li>
+<p><code>/opt/perfsonar-tp/conf/node_exporter.defaults</code> — node_exporter options override; disables the
+  <code>cpufreq</code> collector that panics on hosts with offline CPUs (procfs v0.10.0 bug)</p>
+</li>
+<li>
 <p><code>/var/www/html</code> — Apache webroot with index.html (required for healthcheck)</p>
 </li>
 <li>
@@ -3506,7 +3533,12 @@ to fail.</p>
 </ul>
 <p><strong>What's NOT seeded:</strong></p>
 <ul>
-<li><code>/etc/letsencrypt</code> — Certbot creates this automatically; no pre-seeding needed</li>
+<li>
+<p><code>/etc/letsencrypt</code> — Certbot creates this automatically; no pre-seeding needed</p>
+</li>
+<li>
+<p><code>/run/dbus</code> — Host D-Bus socket mount; exists at runtime, no seeding needed</p>
+</li>
 </ul>
 <p>Run the bundled seeding helper script (automatically installed in Step 2):</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
@@ -3517,6 +3549,7 @@ to fail.</p>
 <li>Pulls the latest perfSONAR testpoint image</li>
 <li>Creates temporary containers to extract baseline files</li>
 <li>Copies content to host directories</li>
+<li>Installs <code>node_exporter.defaults</code> into <code>/opt/perfsonar-tp/conf/</code></li>
 <li>Verifies seeding was successful</li>
 <li>Skips seeding if directories already have content (idempotent)</li>
 </ul>
@@ -3524,6 +3557,9 @@ to fail.</p>
 <p>Verify seeding succeeded:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Should show config files</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
+
+<span class="c1"># Should show node_exporter.defaults</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
 
 <span class="c1"># Should show index.html and perfsonar/ directory</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/var/www/html
@@ -3710,7 +3746,7 @@ podman-compose<span class="w"> </span>up<span class="w"> </span>-d
 <p class="admonition-title">Skip this step if you used the orchestrator (Path A)</p>
 <p>The orchestrator automates pSConfig enrollment. If you ran it in Step 2, skip to <a href="#step-7-register-and-configure-with-wlcgosg">Step 7</a>.</p>
 </div>
-<p>We need to enroll your testpoint with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for 
+<p>We need to enroll your testpoint with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for
 perfSONAR (one or two depending on whether you split latency/throughput by hostname).</p>
 <p>Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add auto URLs (configures archives too) and show configured remotes</span>
@@ -4241,6 +4277,57 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <li>Verify certificates are in place: <code>ls -la /etc/letsencrypt/live/</code></li>
 <li>Restart container: <code>podman restart perfsonar-testpoint</code></li>
 </ul>
+</details>
+<details class="failure">
+<summary>node_exporter metrics returning 502 / Service Unavailable</summary>
+<p><strong>Symptoms:</strong> <code>https://&lt;host&gt;/node_exporter/metrics</code> returns 502 Proxy Error or Service
+Unavailable. Apache is running but the backend on port 9100 is not responding.</p>
+<p><strong>Root cause — cpufreq panic (procfs v0.10.0):</strong>
+The <code>cpufreq</code> collector in <code>prometheus/procfs v0.10.0</code> panics with
+<code>slice bounds out of range</code> on the first HTTP scrape when any CPU is offline.
+node_exporter exits with code 2 immediately after each scrape attempt,
+so port 9100 briefly accepts connections and then returns an empty reply.</p>
+<p><strong>Diagnostic steps:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if node_exporter is crash-looping (Active will flip to activating rapidly)</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>node_exporter<span class="w"> </span>--no-pager<span class="w"> </span>-l
+
+<span class="c1"># Reproduce the crash manually</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>/usr/bin/node_exporter<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--web.listen-address<span class="o">=</span><span class="m">127</span>.0.0.1:9102<span class="w"> </span>--collector.cpufreq<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">&amp;</span>
+sleep<span class="w"> </span><span class="m">2</span>
+curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:9102/metrics<span class="w">   </span><span class="c1"># triggers panic</span>
+<span class="c1"># Look for: panic: runtime error: slice bounds out of range</span>
+
+<span class="c1"># Verify the workaround file is in place</span>
+cat<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>no-collector.cpufreq
+</code></pre></div>
+<p><strong>Solution:</strong></p>
+<p>Run the seed script (which installs <code>node_exporter.defaults</code>) then restart:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>node_exporter
+<span class="c1"># Verify</span>
+curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:9100/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-5
+</code></pre></div>
+<p>Or apply manually:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add --no-collector.cpufreq to the options inside the container</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s1">&#39;s|NODE_EXPORTER_OPTS=&quot;|NODE_EXPORTER_OPTS=&quot;--no-collector.cpufreq |&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/etc/default/node_exporter
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>node_exporter
+</code></pre></div>
+<p>Save the fix persistently by ensuring
+<code>/opt/perfsonar-tp/conf/node_exporter.defaults</code> is mounted in <code>docker-compose.yml</code>
+(already present in the compose files from this repo).</p>
+<p><strong>Root cause — D-Bus / SELinux (--collector.systemd):</strong>
+node_exporter uses <code>--collector.systemd</code> which connects to D-Bus. The compose file
+mounts <code>/run/dbus:/run/dbus:ro</code>, but on EL9 with SELinux <strong>Enforcing</strong> the socket
+label <code>system_dbusd_var_run_t</code> blocks the container process.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check for permission denied on the D-Bus socket</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>ls<span class="w"> </span>/run/dbus/system_bus_socket
+
+<span class="c1"># Fix: enable the SELinux boolean</span>
+setsebool<span class="w"> </span>-P<span class="w"> </span>container_use_dbusd<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
 </details>
 <h3 id="auto-update-issues">Auto-Update Issues<a class="headerlink" href="#auto-update-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
