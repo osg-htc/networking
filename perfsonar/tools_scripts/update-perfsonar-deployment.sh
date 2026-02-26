@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.3.0 - 2026-02-26
+# Version: 1.4.0 - 2026-02-26
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -31,6 +31,14 @@ set -euo pipefail
 #     continuing with the old version. This prevents the prior behaviour where
 #     bash would read from an overwritten file and crash mid-run with a syntax
 #     error on the first line of new content.
+# Version: 1.4.0 - 2026-02-26
+#   - Detect and patch stale systemd service files missing the /run/dbus and
+#     node_exporter.defaults volume mounts. The service unit written by older
+#     versions of install-systemd-units.sh omitted these mounts, causing
+#     node_exporter to crash-loop on first scrape (cpufreq panic: "slice bounds
+#     out of range") and D-Bus metrics to be unavailable. The update script
+#     now detects missing mounts, patches the service file, reloads systemd,
+#     and restarts the container to apply the fix automatically.
 #
 # This script is the recommended way to apply bug fixes, new features, and
 # configuration improvements from the osg-htc/networking repository to an
@@ -75,7 +83,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.3.0"
+VERSION="1.4.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -93,6 +101,7 @@ TOOLS_SRC="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perf
 CHANGES_FOUND=0
 COMPOSE_CHANGED=false
 CONFIG_CHANGED=false
+SERVICE_FILE_CHANGED=false
 RPM_UPDATES_AVAILABLE=false
 
 # --- Colours (disabled when piped) ----------------------------------------
@@ -672,6 +681,71 @@ fix_container_selinux_labels() {
     echo
 }
 
+# --- Fix stale systemd service file (container only) -----------------------
+#
+# Older versions of install-systemd-units.sh omitted two volume mounts from
+# the perfsonar-testpoint.service unit:
+#   1. /run/dbus:/run/dbus:ro  — required for --collector.systemd in node_exporter
+#   2. <base>/conf/node_exporter.defaults:/etc/default/node_exporter:z
+#        — required for the --no-collector.cpufreq workaround; without it,
+#          node_exporter panics on its first scrape (procfs v0.10.0 bug:
+#          "slice bounds out of range [13:12]").
+#
+# This function detects and patches the deployed service file in-place.
+# phase4_container_restart handles daemon-reload + service restart.
+
+fix_stale_service_file() {
+    if [[ "$DEPLOY_TYPE" != "container" ]]; then
+        return
+    fi
+
+    local svc="/etc/systemd/system/perfsonar-testpoint.service"
+    if [[ ! -f "$svc" ]]; then
+        return
+    fi
+
+    info "Checking systemd service file for required volume mounts..."
+
+    local missing=()
+    grep -q '/run/dbus:/run/dbus' "$svc" || missing+=("/run/dbus")
+    grep -q 'node_exporter.defaults' "$svc" || missing+=("node_exporter.defaults")
+
+    if [[ ${#missing[@]} -eq 0 ]]; then
+        ok "  Service file has all required volume mounts"
+        echo
+        return
+    fi
+
+    changed "  Service file missing volume mounts: ${missing[*]}"
+    CHANGES_FOUND=1
+
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would patch: $svc"
+        echo
+        return
+    fi
+
+    if [[ "$APPLY" != true ]]; then
+        echo
+        return
+    fi
+
+    # Patch in-place with awk: insert missing mounts after the tools_scripts volume line
+    if ! grep -q '/run/dbus:/run/dbus' "$svc"; then
+        awk '/tools_scripts.*:ro/{print; print "  -v /run/dbus:/run/dbus:ro \\\\"; next}1' \
+            "$svc" > "${svc}.tmp" && mv "${svc}.tmp" "$svc"
+    fi
+    if ! grep -q 'node_exporter.defaults' "$svc"; then
+        awk -v base="$BASE_DIR" \
+            '/tools_scripts.*:ro/{print; print "  -v " base "/conf/node_exporter.defaults:/etc/default/node_exporter:z \\\\"; next}1' \
+            "$svc" > "${svc}.tmp" && mv "${svc}.tmp" "$svc"
+    fi
+
+    ok "  ✓ Patched $svc with missing volume mounts"
+    SERVICE_FILE_CHANGED=true
+    echo
+}
+
 # --- Phase 4: Restart services ---------------------------------------------
 
 # perfSONAR toolkit services to restart after RPM updates
@@ -689,33 +763,49 @@ TOOLKIT_SERVICES=(
 phase4_container_restart() {
     info "Phase 4: Container management..."
 
-    if [[ "$COMPOSE_CHANGED" != true && "$CONFIG_CHANGED" != true ]]; then
-        ok "  No compose or config changes detected — container restart not needed"
+    if [[ "$COMPOSE_CHANGED" != true && "$CONFIG_CHANGED" != true && "$SERVICE_FILE_CHANGED" != true ]]; then
+        ok "  No compose, config, or service file changes detected — container restart not needed"
         echo
         return
     fi
 
     if [[ "$RESTART" != true ]]; then
-        if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true ]]; then
+        if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true ]]; then
             warn "  Changes were applied but container was NOT restarted."
             warn "  Run with --restart to recreate the container, or manually:"
-            warn "    cd $BASE_DIR && $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+            if [[ "$SERVICE_FILE_CHANGED" == true && "$COMPOSE_CHANGED" != true ]]; then
+                warn "    systemctl daemon-reload && systemctl restart perfsonar-testpoint.service"
+            else
+                warn "    cd $BASE_DIR && $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+            fi
         fi
         echo
         return
     fi
 
     if [[ "$DRY_RUN" == true ]]; then
-        info "  [DRY-RUN] Would recreate containers via: $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+        if [[ "$SERVICE_FILE_CHANGED" == true && "$COMPOSE_CHANGED" != true ]]; then
+            info "  [DRY-RUN] Would run: systemctl daemon-reload && systemctl restart perfsonar-testpoint.service"
+        else
+            info "  [DRY-RUN] Would recreate containers via: $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+        fi
         echo
         return
     fi
 
     if confirm "  Recreate containers now? This will briefly interrupt perfSONAR services."; then
-        info "  Stopping containers..."
-        (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /')
-        info "  Starting containers with updated compose..."
-        (cd "$BASE_DIR" && $COMPOSE_CMD up -d 2>&1 | sed 's/^/    /')
+        if [[ "$SERVICE_FILE_CHANGED" == true && "$COMPOSE_CHANGED" != true ]]; then
+            # Service file was patched but compose is unchanged: reload unit and restart service
+            info "  Reloading systemd configuration..."
+            systemctl daemon-reload 2>&1 | sed 's/^/    /' || true
+            info "  Restarting perfsonar-testpoint service..."
+            systemctl restart perfsonar-testpoint.service 2>&1 | sed 's/^/    /'
+        else
+            info "  Stopping containers..."
+            (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /')
+            info "  Starting containers with updated compose..."
+            (cd "$BASE_DIR" && $COMPOSE_CMD up -d 2>&1 | sed 's/^/    /')
+        fi
 
         info "  Waiting 15s for container startup..."
         sleep 15
@@ -897,6 +987,7 @@ main() {
     phase1_update_scripts
     maybe_relaunch_if_self_updated
     phase2_update_configs
+    fix_stale_service_file
     phase3_update
     fix_container_selinux_labels
     phase4_restart
