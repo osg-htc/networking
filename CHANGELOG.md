@@ -5,6 +5,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.5.1] - 2026-02-26
+
+### Fixed
+
+- **`docker-compose.testpoint-le.yml` and `docker-compose.testpoint-le-auto.yml`**: Changed the `certbot` service volume mounts for `/etc/letsencrypt` and `/var/www/html` from `:Z` (private SELinux MCS relabeling) to `:z` (shared). The `:Z` flag stamped the certbot container's MCS categories onto those host directories on every container recreation. `/etc/letsencrypt:Z` caused Apache to fail (`SSLCertificateFile does not exist`, connection refused on port 443). `/var/www/html:Z` caused Apache to return 403 on all endpoints (`Permission denied: search permissions are missing on a component of the path`). Immediate recovery on affected hosts: `chcon -R -t container_file_t -l s0 /etc/letsencrypt /var/www/html`, then `podman exec perfsonar-testpoint systemctl start apache2`.
+
 ## [1.5.0] - 2026-02-26
 
 ### Added
