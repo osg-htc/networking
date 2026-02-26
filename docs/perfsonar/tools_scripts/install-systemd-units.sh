@@ -17,6 +17,9 @@
 #                         timer that pulls new images and restarts services only
 #                         when an image digest has changed (Podman-compatible;
 #                         does not rely on Docker-specific output strings)
+#   --health-monitor      Install perfSONAR-health-monitor.sh and a systemd
+#                         timer that runs every 5 minutes to detect an
+#                         'unhealthy' container and restart it automatically
 #   --help                Show this help message
 #
 # Requirements:
@@ -25,7 +28,7 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.1.0
+# Version: 1.2.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
 set -e
@@ -34,6 +37,7 @@ set -e
 INSTALL_DIR="/opt/perfsonar-tp"
 WITH_CERTBOT=false
 AUTO_UPDATE=false
+HEALTH_MONITOR=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -48,6 +52,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --auto-update)
             AUTO_UPDATE=true
+            shift
+            ;;
+        --health-monitor)
+            HEALTH_MONITOR=true
             shift
             ;;
         --help)
@@ -305,4 +313,62 @@ EOF
     echo "  Run now (test):   systemctl start perfsonar-auto-update.service"
     echo "  View log:         journalctl -u perfsonar-auto-update.service -f"
     echo "  Update log file:  tail -f /var/log/perfsonar-auto-update.log"
+fi
+
+# ── Optional: health-monitor timer ────────────────────────────────────────────
+if [[ "$HEALTH_MONITOR" == "true" ]]; then
+    HEALTH_MONITOR_SCRIPT="$INSTALL_DIR/tools_scripts/perfSONAR-health-monitor.sh"
+    HEALTH_MONITOR_BIN="/usr/local/bin/perfsonar-health-monitor.sh"
+    HEALTH_MONITOR_SVC="/etc/systemd/system/perfsonar-health-monitor.service"
+    HEALTH_MONITOR_TIMER="/etc/systemd/system/perfsonar-health-monitor.timer"
+
+    echo ""
+    echo "==> Installing health-monitor timer"
+
+    if [[ -f "$HEALTH_MONITOR_SCRIPT" ]]; then
+        cp "$HEALTH_MONITOR_SCRIPT" "$HEALTH_MONITOR_BIN"
+        chmod 0755 "$HEALTH_MONITOR_BIN"
+        echo "==> ✓ Installed $HEALTH_MONITOR_BIN"
+    else
+        echo "WARNING: $HEALTH_MONITOR_SCRIPT not found — re-run bootstrap (install_tools_scripts.sh) first"
+    fi
+
+    cat > "$HEALTH_MONITOR_SVC" << 'EOF'
+[Unit]
+Description=perfSONAR Container Health Monitor
+After=perfsonar-testpoint.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/perfsonar-health-monitor.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    echo "==> ✓ Created $HEALTH_MONITOR_SVC"
+
+    cat > "$HEALTH_MONITOR_TIMER" << 'EOF'
+[Unit]
+Description=perfSONAR Container Health Monitor Timer
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+EOF
+    echo "==> ✓ Created $HEALTH_MONITOR_TIMER"
+
+    systemctl daemon-reload
+    systemctl enable --now perfsonar-health-monitor.timer
+    echo "==> ✓ Enabled perfsonar-health-monitor.timer (runs every 5 minutes)"
+    echo ""
+    echo "Useful health-monitor commands:"
+    echo "  Check timer:      systemctl list-timers perfsonar-health-monitor.timer"
+    echo "  Run now (test):   systemctl start perfsonar-health-monitor.service"
+    echo "  View log:         journalctl -u perfsonar-health-monitor.service -f"
+    echo "  Monitor log file: tail -f /var/log/perfsonar-health-monitor.log"
 fi
