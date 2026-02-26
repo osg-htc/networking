@@ -5,6 +5,8 @@ set -euo pipefail
 # Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
 #
+# Version: 1.0.5 - 2026-02-26
+#   - Add perfSONAR-diagnostic-report.sh to download list.
 # Version: 1.0.4 - 2026-02-26
 #   - Add perfSONAR-health-monitor.sh to download list.
 # Version: 1.0.3 - 2026-02-26
@@ -14,7 +16,7 @@ set -euo pipefail
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
-VERSION="1.0.4"
+VERSION="1.0.5"
 PROG_NAME="$(basename "$0")"
 
 # Check for --version or --help flags
@@ -91,6 +93,7 @@ files=(
     perfSONAR-auto-enroll-psconfig.sh
     perfSONAR-auto-update.sh
     perfSONAR-health-monitor.sh
+    perfSONAR-diagnostic-report.sh
     seed_testpoint_host_dirs.sh
     update-perfsonar-deployment.sh
     perfSONAR-orchestrator.sh

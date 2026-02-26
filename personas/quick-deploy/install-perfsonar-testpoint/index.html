@@ -4686,28 +4686,26 @@ nft<span class="w"> </span>list<span class="w"> </span>ruleset
 </code></pre></div>
 </details>
 <details class="note">
-<summary>What to include when reporting issues via email</summary>
-<p>To help us diagnose install problems quickly, please include:</p>
-<ul>
-<li>Host details: OS version (e.g., <code>cat /etc/os-release</code>), kernel (<code>uname -r</code>), and whether this is testpoint or toolkit.</li>
-<li>Script/log context: which script/step failed and the exact command you ran.</li>
-<li>Timestamps: approximate time of failure and timezone.</li>
-<li>Outputs/logs: relevant console output and excerpts from <code>journalctl -u podman -n 200</code>, <code>tail -200 /var/log/perfSONAR-install-nftables.log</code>, and any script-specific log mentioned in the error.</li>
-<li>Network state: <code>ip -br addr</code>, <code>ip rule show</code>, <code>nmcli connection show</code>, and whether port 80/443 should be open externally.</li>
-<li>Certificates (if LE): whether port 80 was reachable from the Internet and the contents of <code>/var/log/letsencrypt/letsencrypt.log</code> around the failure.</li>
-<li>Contact info: your name, site, and a callback email.</li>
-</ul>
-<p>Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix <code>[perfSONAR install issue]</code>.</p>
-<p><strong>Logs:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># System journal for container runtime</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>podman<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+<summary>Generating a diagnostic report for support</summary>
+<p>The <strong><code>perfSONAR-diagnostic-report.sh</code></strong> script collects all diagnostic
+information needed for remote troubleshooting into a single self-contained
+report file. It supports both container and toolkit deployments.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run the diagnostic report (auto-detects deployment type)</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh
 
-<span class="c1"># All logs from a container</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="o">=</span><span class="m">100</span>
-
-<span class="c1"># Follow logs in real-time</span>
-podman<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>perfsonar-testpoint
+<span class="c1"># Or with --brief for a shorter terminal summary</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh<span class="w"> </span>--brief
 </code></pre></div>
+<p>The report is saved to <code>/tmp/perfsonar-diag-&lt;hostname&gt;-&lt;date&gt;.txt</code>.
+Send this file to your support contact:</p>
+<div class="highlight"><pre><span></span><code>scp<span class="w"> </span>/tmp/perfsonar-diag-*.txt<span class="w"> </span>user@support-host:/tmp/
+</code></pre></div>
+<p>The script checks 12 diagnostic areas: host environment, network config,
+SELinux, container runtime, configuration files, endpoints, TLS certificates,
+systemd units, network tuning, and known issues. Run with <code>--help</code> for all
+options.</p>
+<p>Send reports to your usual perfSONAR support contact or project mailing list
+with the subject prefix <code>[perfSONAR diagnostic]</code>.</p>
 </details>
 <hr />
 
