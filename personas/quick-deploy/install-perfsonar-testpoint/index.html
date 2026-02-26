@@ -1278,6 +1278,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#updating-an-existing-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating an Existing Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Updating an Existing Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-update-one-liner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick update (one-liner)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-updater-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the updater does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#report-only-mode-safe-no-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Report-only mode (safe, no changes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-update-with-systemd-refresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full update with systemd refresh
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3981,6 +4042,118 @@ sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> 
 <p>Verify auto-update timer is active: <code>systemctl list-timers perfsonar-auto-update.timer</code>.</p>
 </li>
 </ul>
+<hr />
+<h2 id="updating-an-existing-deployment">Updating an Existing Deployment<a class="headerlink" href="#updating-an-existing-deployment" title="Permanent link">&para;</a></h2>
+<p>The automatic image updater (Step 7) keeps the <strong>container image</strong> current, but it
+does not update <strong>helper scripts</strong>, <strong>compose templates</strong>, or <strong>host configuration
+files</strong> (e.g. <code>node_exporter.defaults</code>).  When the repository publishes bug fixes
+or new features that touch these files you need to run the <strong>deployment updater</strong>
+to bring your installation in sync.</p>
+<h3 id="quick-update-one-liner">Quick update (one-liner)<a class="headerlink" href="#quick-update-one-liner" title="Permanent link">&para;</a></h3>
+<p>If you already have the tools installed under <code>/opt/perfsonar-tp/tools_scripts</code>:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--yes
+</code></pre></div>
+<p>If the script is not yet present (older installations), bootstrap it first:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>/tmp/update-perfsonar-deployment.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-perfsonar-deployment.sh
+/tmp/update-perfsonar-deployment.sh<span class="w"> </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--yes
+</code></pre></div>
+<h3 id="what-the-updater-does">What the updater does<a class="headerlink" href="#what-the-updater-does" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Action</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 — Scripts</td>
+<td>Re-downloads all helper scripts from the repository</td>
+<td>Always</td>
+</tr>
+<tr>
+<td>2 — Config files</td>
+<td>Installs or updates <code>conf/node_exporter.defaults</code> (and future config files)</td>
+<td>Report only; <code>--apply</code> to write</td>
+</tr>
+<tr>
+<td>3 — Compose file</td>
+<td>Detects your compose variant and compares with the latest template</td>
+<td>Report only; <code>--apply</code> to replace</td>
+</tr>
+<tr>
+<td>4 — Container</td>
+<td>Recreates the container if compose or config changed</td>
+<td>Only with <code>--restart</code></td>
+</tr>
+<tr>
+<td>5 — Systemd</td>
+<td>Refreshes systemd units and auto-update timer</td>
+<td>Only with <code>--update-systemd</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="report-only-mode-safe-no-changes">Report-only mode (safe, no changes)<a class="headerlink" href="#report-only-mode-safe-no-changes" title="Permanent link">&para;</a></h3>
+<p>Run without flags to see what would change:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh
+</code></pre></div>
+<h3 id="full-update-with-systemd-refresh">Full update with systemd refresh<a class="headerlink" href="#full-update-with-systemd-refresh" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--update-systemd<span class="w"> </span>--yes
+</code></pre></div>
+<details class="info">
+<summary>Updater flags reference</summary>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--type TYPE</code></td>
+<td>Deployment type: <code>container</code> or <code>toolkit</code> (auto-detected if omitted)</td>
+</tr>
+<tr>
+<td><code>--base DIR</code></td>
+<td>Base directory (default: <code>/opt/perfsonar-tp</code>)</td>
+</tr>
+<tr>
+<td><code>--apply</code></td>
+<td>Apply compose and config changes (default: report only)</td>
+</tr>
+<tr>
+<td><code>--restart</code></td>
+<td>Recreate container after compose update (implies <code>--apply</code>)</td>
+</tr>
+<tr>
+<td><code>--update-systemd</code></td>
+<td>Re-run <code>install-systemd-units.sh</code> to refresh systemd units</td>
+</tr>
+<tr>
+<td><code>--yes</code></td>
+<td>Skip interactive confirmations</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Show what would change without modifying anything</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="tip">
+<summary>When should I run the updater?</summary>
+<ul>
+<li>After the repository announces bug fixes or new features affecting scripts</li>
+<li>When you see a new release in the <a href="https://github.com/osg-htc/networking/blob/master/CHANGELOG.md">CHANGELOG</a></li>
+<li>If you encounter a known issue that has been fixed in a newer script version</li>
+<li>After the container image auto-updater pulls a new image that requires new host-side configuration</li>
+</ul>
+</details>
 <hr />
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="container-issues">Container Issues<a class="headerlink" href="#container-issues" title="Permanent link">&para;</a></h3>

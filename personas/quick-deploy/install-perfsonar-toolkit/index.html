@@ -1483,6 +1483,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#updating-an-existing-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating an Existing Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Updating an Existing Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-update-one-liner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick update (one-liner)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-updater-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the updater does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#report-only-mode-safe-no-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Report-only mode (safe, no changes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-update-with-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full update with restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4480,6 +4541,118 @@ curl<span class="w"> </span>-k<span class="w"> </span>https://localhost:9200/_ca
 <p>Verify auto-update timer is active: <code>systemctl list-timers perfsonar-auto-update.timer</code>.</p>
 </li>
 </ul>
+<hr />
+<h2 id="updating-an-existing-deployment">Updating an Existing Deployment<a class="headerlink" href="#updating-an-existing-deployment" title="Permanent link">&para;</a></h2>
+<p>The <strong>dnf-automatic</strong> service (Step 5.3) keeps perfSONAR RPM packages current on a
+daily schedule, but it does not update the <strong>helper scripts</strong> installed during
+Step 2.4 (PBR generator, fasterdata tuning, DNS checker, nftables helpers, etc.).
+When the repository publishes bug fixes or new features that touch these scripts you
+need to run the <strong>deployment updater</strong> to bring your installation in sync.</p>
+<h3 id="quick-update-one-liner">Quick update (one-liner)<a class="headerlink" href="#quick-update-one-liner" title="Permanent link">&para;</a></h3>
+<p>If you already have the tools installed under <code>/opt/perfsonar-toolkit/tools_scripts</code>:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span>--type<span class="w"> </span>toolkit<span class="w"> </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--yes
+</code></pre></div>
+<p>If the script is not yet present (older installations), bootstrap it first:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>/tmp/update-perfsonar-deployment.sh
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/update-perfsonar-deployment.sh
+/tmp/update-perfsonar-deployment.sh<span class="w"> </span>--type<span class="w"> </span>toolkit<span class="w"> </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--yes
+</code></pre></div>
+<h3 id="what-the-updater-does">What the updater does<a class="headerlink" href="#what-the-updater-does" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Action</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 — Scripts</td>
+<td>Re-downloads all helper scripts from the repository</td>
+<td>Always</td>
+</tr>
+<tr>
+<td>2 — Config files</td>
+<td>Installs or updates host configuration overrides (if any)</td>
+<td>Report only; <code>--apply</code> to write</td>
+</tr>
+<tr>
+<td>3 — RPM packages</td>
+<td>Checks for <code>perfsonar*</code> package updates via <code>dnf</code></td>
+<td>Report only; <code>--apply</code> to install</td>
+</tr>
+<tr>
+<td>4 — Services</td>
+<td>Restarts perfSONAR daemons if packages or configs changed</td>
+<td>Only with <code>--restart</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Phase 5 (systemd units) is skipped for toolkit deployments</p>
+<p>Toolkit installations manage their own systemd services via RPM scriptlets.
+The <code>--update-systemd</code> flag only applies to container deployments.</p>
+</div>
+<h3 id="report-only-mode-safe-no-changes">Report-only mode (safe, no changes)<a class="headerlink" href="#report-only-mode-safe-no-changes" title="Permanent link">&para;</a></h3>
+<p>Run without flags to see what would change:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span>--type<span class="w"> </span>toolkit
+</code></pre></div>
+<h3 id="full-update-with-restart">Full update with restart<a class="headerlink" href="#full-update-with-restart" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--type<span class="w"> </span>toolkit<span class="w"> </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--yes
+</code></pre></div>
+<details class="info">
+<summary>Updater flags reference</summary>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--type TYPE</code></td>
+<td>Deployment type: <code>container</code> or <code>toolkit</code> (auto-detected if omitted)</td>
+</tr>
+<tr>
+<td><code>--base DIR</code></td>
+<td>Base directory (default: auto-detected)</td>
+</tr>
+<tr>
+<td><code>--apply</code></td>
+<td>Apply changes (default: report only)</td>
+</tr>
+<tr>
+<td><code>--restart</code></td>
+<td>Restart services after updates (implies <code>--apply</code>)</td>
+</tr>
+<tr>
+<td><code>--update-systemd</code></td>
+<td>Re-run <code>install-systemd-units.sh</code> (container only, ignored for toolkit)</td>
+</tr>
+<tr>
+<td><code>--yes</code></td>
+<td>Skip interactive confirmations</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Show what would change without modifying anything</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="tip">
+<summary>When should I run the updater?</summary>
+<ul>
+<li>After the repository announces bug fixes or new features affecting helper scripts</li>
+<li>When you see a new release in the <a href="https://github.com/osg-htc/networking/blob/master/CHANGELOG.md">CHANGELOG</a></li>
+<li>If you encounter a known issue that has been fixed in a newer script version</li>
+<li>After a major perfSONAR version upgrade to ensure helper scripts are compatible</li>
+</ul>
+</details>
 <hr />
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="networking-issues">Networking Issues<a class="headerlink" href="#networking-issues" title="Permanent link">&para;</a></h3>
