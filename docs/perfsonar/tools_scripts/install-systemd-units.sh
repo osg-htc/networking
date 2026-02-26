@@ -28,8 +28,13 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.2.0
+# Version: 1.3.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
+#
+# Version history:
+#   1.3.0 - Add /run/dbus and node_exporter.defaults volume mounts to the
+#           generated service unit; create conf/ dir and seed defaults file.
+#   1.2.0 - Add --health-monitor flag for perfSONAR health watchdog.
 
 set -e
 
@@ -102,6 +107,13 @@ fi
 echo "==> Installing systemd units for perfSONAR testpoint"
 echo "    Installation directory: $INSTALL_DIR"
 
+# Ensure conf directory exists and seed node_exporter defaults if not already present
+mkdir -p "$INSTALL_DIR/conf"
+if [[ ! -f "$INSTALL_DIR/conf/node_exporter.defaults" && -f "$INSTALL_DIR/tools_scripts/node_exporter.defaults" ]]; then
+    cp "$INSTALL_DIR/tools_scripts/node_exporter.defaults" "$INSTALL_DIR/conf/node_exporter.defaults"
+    echo "==> ✓ Seeded $INSTALL_DIR/conf/node_exporter.defaults"
+fi
+
 # When --auto-update is the only goal (service already exists), skip rewriting
 # the testpoint/certbot service units to avoid disrupting a running deployment.
 SKIP_SERVICE_UNITS=false
@@ -136,6 +148,8 @@ ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   -v /sys/fs/cgroup:/sys/fs/cgroup:ro \\
   -v /etc/letsencrypt:/etc/letsencrypt:z \\
   -v $INSTALL_DIR/tools_scripts:$INSTALL_DIR/tools_scripts:ro \\
+  -v /run/dbus:/run/dbus:ro \\
+  -v $INSTALL_DIR/conf/node_exporter.defaults:/etc/default/node_exporter:z \\
   --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
   --label=io.containers.autoupdate=registry \\
   hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production \\
