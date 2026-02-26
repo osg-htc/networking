@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.2.0 - 2026-02-26
+# Version: 1.3.0 - 2026-02-26
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -25,6 +25,12 @@ set -euo pipefail
 #     corrects stale MCS labels (chcon -R -t container_file_t -l s0) with
 #     --apply, and immediately restarts Apache inside the running container
 #     when possible to restore service without a full container restart.
+# Version: 1.3.0 - 2026-02-26
+#   - Self-update relaunch: after Phase 1 downloads a newer version of this
+#     script, exec() the new version with the original arguments instead of
+#     continuing with the old version. This prevents the prior behaviour where
+#     bash would read from an overwritten file and crash mid-run with a syntax
+#     error on the first line of new content.
 #
 # This script is the recommended way to apply bug fixes, new features, and
 # configuration improvements from the osg-htc/networking repository to an
@@ -69,7 +75,10 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.2.0"
+VERSION="1.3.0"
+
+# Captured before parse_args so exec-relaunch can pass identical arguments.
+ORIGINAL_ARGS=()
 PROG_NAME="$(basename "$0")"
 
 BASE_DIR=""
@@ -849,12 +858,44 @@ print_summary() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
+# --- Self-update relaunch --------------------------------------------------
+#
+# Phase 1 may download a newer version of this very script into tools_scripts/.
+# If the running script is then an older version, bash could:
+#   a) continue executing with stale logic (features missing), or
+#   b) crash with a syntax error if bash buffered old file contents and
+#      then re-reads from the overwritten file at an unexpected offset.
+#
+# Solution: after Phase 1, compare the version embedded in the newly-installed
+# tools_scripts copy with $VERSION. If they differ, exec() the new script with
+# the original arguments. exec() replaces this process entirely — the new
+# script starts cleanly from line 1 with no risk of reading stale content.
+maybe_relaunch_if_self_updated() {
+    local new_script="$TOOLS_DIR/update-perfsonar-deployment.sh"
+    [[ -f "$new_script" ]] || return 0
+
+    # Extract the leading semver from the first '# Version:' line.
+    local new_version
+    new_version=$(grep -m1 '^# Version:' "$new_script" 2>/dev/null \
+        | awk '{print $3}' || true)
+    [[ -n "$new_version" ]] || return 0
+    [[ "$new_version" != "$VERSION" ]] || return 0
+
+    echo
+    info "This script was updated ($VERSION → $new_version) during Phase 1."
+    info "Re-launching updated script to continue with remaining phases..."
+    echo
+    exec "$new_script" "${ORIGINAL_ARGS[@]}"
+}
+
 # --- Main ------------------------------------------------------------------
 
 main() {
+    ORIGINAL_ARGS=("$@")
     parse_args "$@"
     preflight
     phase1_update_scripts
+    maybe_relaunch_if_self_updated
     phase2_update_configs
     phase3_update
     fix_container_selinux_labels
