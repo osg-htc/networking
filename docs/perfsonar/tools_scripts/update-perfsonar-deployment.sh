@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# update-testpoint-deployment.sh
+# update-perfsonar-deployment.sh
 # --------------------------------
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
@@ -35,7 +35,7 @@ set -euo pipefail
 #   Phase 5  Systemd units    → re-run install-systemd-units.sh (container only)
 #
 # Usage:
-#   update-testpoint-deployment.sh [OPTIONS]
+#   update-perfsonar-deployment.sh [OPTIONS]
 #
 # Options:
 #   --base DIR          Base directory (default: auto-detect)
@@ -50,16 +50,16 @@ set -euo pipefail
 #
 # Examples:
 #   # See what's changed (safe, read-only):
-#   update-testpoint-deployment.sh
+#   update-perfsonar-deployment.sh
 #
 #   # Apply all updates and restart (container):
-#   update-testpoint-deployment.sh --apply --restart
+#   update-perfsonar-deployment.sh --apply --restart
 #
 #   # Apply all updates and restart (RPM toolkit):
-#   update-testpoint-deployment.sh --type toolkit --apply --restart
+#   update-perfsonar-deployment.sh --type toolkit --apply --restart
 #
 #   # Non-interactive full update:
-#   update-testpoint-deployment.sh --apply --restart --yes
+#   update-perfsonar-deployment.sh --apply --restart --yes
 
 VERSION="1.1.0"
 PROG_NAME="$(basename "$0")"
@@ -111,7 +111,7 @@ confirm() {
 # --- CLI -------------------------------------------------------------------
 usage() {
     cat <<'EOF'
-Usage: update-testpoint-deployment.sh [OPTIONS]
+Usage: update-perfsonar-deployment.sh [OPTIONS]
 
 Update an existing perfSONAR deployment (container or RPM toolkit) to the
 latest helper scripts, configuration files, and templates.

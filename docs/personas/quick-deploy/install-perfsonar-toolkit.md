@@ -1632,16 +1632,16 @@ need to run the **deployment updater** to bring your installation in sync.
 If you already have the tools installed under `/opt/perfsonar-toolkit/tools_scripts`:
 
 ```bash
-/opt/perfsonar-toolkit/tools_scripts/update-testpoint-deployment.sh --type toolkit --apply --restart --yes
+/opt/perfsonar-toolkit/tools_scripts/update-perfsonar-deployment.sh --type toolkit --apply --restart --yes
 ```
 
 If the script is not yet present (older installations), bootstrap it first:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-testpoint-deployment.sh \
-  -o /tmp/update-testpoint-deployment.sh
-chmod 0755 /tmp/update-testpoint-deployment.sh
-/tmp/update-testpoint-deployment.sh --type toolkit --apply --restart --yes
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-perfsonar-deployment.sh \
+  -o /tmp/update-perfsonar-deployment.sh
+chmod 0755 /tmp/update-perfsonar-deployment.sh
+/tmp/update-perfsonar-deployment.sh --type toolkit --apply --restart --yes
 ```
 
 ### What the updater does
@@ -1662,13 +1662,13 @@ chmod 0755 /tmp/update-testpoint-deployment.sh
 Run without flags to see what would change:
 
 ```bash
-/opt/perfsonar-toolkit/tools_scripts/update-testpoint-deployment.sh --type toolkit
+/opt/perfsonar-toolkit/tools_scripts/update-perfsonar-deployment.sh --type toolkit
 ```
 
 ### Full update with restart
 
 ```bash
-/opt/perfsonar-toolkit/tools_scripts/update-testpoint-deployment.sh \
+/opt/perfsonar-toolkit/tools_scripts/update-perfsonar-deployment.sh \
     --type toolkit --apply --restart --yes
 ```
 

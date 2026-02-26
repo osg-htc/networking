@@ -9,9 +9,9 @@ All notable changes to this repository will be documented in this file.
 
 ### Added
 
-- **`update-testpoint-deployment.sh` v1.1.0**: Update script now supports both **container** and **RPM toolkit** deployments. New `--type` flag (`container` | `toolkit`) with auto-detection when omitted. Toolkit mode adds Phase 3 RPM updates via `dnf`, Phase 4 native service restarts (pscheduler, httpd, etc.), and skips Phase 5 (systemd units). Container mode unchanged from v1.0.0.
+- **`update-perfsonar-deployment.sh` v1.1.0**: Update script now supports both **container** and **RPM toolkit** deployments. New `--type` flag (`container` | `toolkit`) with auto-detection when omitted. Toolkit mode adds Phase 3 RPM updates via `dnf`, Phase 4 native service restarts (pscheduler, httpd, etc.), and skips Phase 5 (systemd units). Container mode unchanged from v1.0.0.
 - Documentation: "Updating an Existing Deployment" section added to both the container and toolkit Quick Deploy install guides with quick-start one-liners, phase tables, and flags references.
-- `install_tools_scripts.sh` v1.0.3: Bootstrap now downloads `update-testpoint-deployment.sh` and `node_exporter.defaults` so the full deployment toolkit is available after initial install.
+- `install_tools_scripts.sh` v1.0.3: Bootstrap now downloads `update-perfsonar-deployment.sh` and `node_exporter.defaults` so the full deployment toolkit is available after initial install.
 
 ## [1.3.10] - 2026-01-27
 

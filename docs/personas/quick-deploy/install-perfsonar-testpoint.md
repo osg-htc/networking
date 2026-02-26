@@ -1238,16 +1238,16 @@ to bring your installation in sync.
 If you already have the tools installed under `/opt/perfsonar-tp/tools_scripts`:
 
 ```bash
-/opt/perfsonar-tp/tools_scripts/update-testpoint-deployment.sh --apply --restart --yes
+/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply --restart --yes
 ```
 
 If the script is not yet present (older installations), bootstrap it first:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-testpoint-deployment.sh \
-  -o /tmp/update-testpoint-deployment.sh
-chmod 0755 /tmp/update-testpoint-deployment.sh
-/tmp/update-testpoint-deployment.sh --apply --restart --yes
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-perfsonar-deployment.sh \
+  -o /tmp/update-perfsonar-deployment.sh
+chmod 0755 /tmp/update-perfsonar-deployment.sh
+/tmp/update-perfsonar-deployment.sh --apply --restart --yes
 ```
 
 ### What the updater does
@@ -1265,13 +1265,13 @@ chmod 0755 /tmp/update-testpoint-deployment.sh
 Run without flags to see what would change:
 
 ```bash
-/opt/perfsonar-tp/tools_scripts/update-testpoint-deployment.sh
+/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh
 ```
 
 ### Full update with systemd refresh
 
 ```bash
-/opt/perfsonar-tp/tools_scripts/update-testpoint-deployment.sh \
+/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh \
     --apply --restart --update-systemd --yes
 ```
 
