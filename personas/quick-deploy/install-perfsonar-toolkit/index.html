@@ -4513,7 +4513,13 @@ curl<span class="w"> </span>-k<span class="w"> </span>https://localhost:9200/_ca
 <p><strong>Reporting:</strong></p>
 <details class="info">
 <summary>Run perfSONAR diagnostic reports</summary>
-<p>Run the perfSONAR troubleshoot command and send outputs to operations:
+<p>Run the diagnostic report script to collect all troubleshooting
+information into a single file:
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh
+</code></pre></div>
+The report is saved to <code>/tmp/perfsonar-diag-&lt;hostname&gt;-&lt;date&gt;.txt</code>.
+Send this file to your support contact for remote analysis.</p>
+<p>For a quick pScheduler-only check:
 <div class="highlight"><pre><span></span><code>pscheduler<span class="w"> </span>troubleshoot
 </code></pre></div></p>
 </details>
@@ -4826,38 +4832,32 @@ ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><
 ping<span class="w"> </span>&lt;remote-ip&gt;
 traceroute<span class="w"> </span>&lt;remote-ip&gt;
 
-<span class="c1"># Check nftables rules (or firewalld if used)</span>
+<span class="c1"># Check nftables rules</span>
 nft<span class="w"> </span>list<span class="w"> </span>ruleset
-<span class="c1"># or</span>
-firewall-cmd<span class="w"> </span>--list-all
 </code></pre></div>
 </details>
 <details class="note">
-<summary>What to include when reporting issues via email</summary>
-<p>To help us diagnose toolkit (RPM) install problems quickly, please include:</p>
-<ul>
-<li>Host details: OS version (<code>cat /etc/os-release</code>), kernel (<code>uname -r</code>), and that this is a <strong>Toolkit/RPM</strong> install.</li>
-<li>What failed: which step/command you ran and the exact error output (paste the terminal snippet).</li>
-<li>Timestamps: approximate time of failure and timezone.</li>
-<li>Packages/services: <code>rpm -qa 'perfsonar*' | sort | head -n 30</code>, and <code>systemctl status pscheduler-scheduler pscheduler-runner pscheduler-ticker httpd</code>.</li>
-<li>Logs: <code>journalctl -u pscheduler-scheduler -u pscheduler-runner -u pscheduler-ticker -u httpd -n 200</code>, plus any relevant <code>/var/log/perfsonar/*.log</code> excerpts.</li>
-<li>Network state: <code>ip -br addr</code>, <code>ip rule show</code>, <code>nmcli connection show</code>, and <code>nft list ruleset</code> (or <code>firewall-cmd --list-all</code> if firewalld is used).</li>
-<li>Certificates (if Let’s Encrypt or custom HTTPS involved): whether port 80/443 are reachable externally and excerpts from <code>/var/log/httpd/error_log</code> and <code>/var/log/letsencrypt/letsencrypt.log</code>.</li>
-<li>Contact info: your name, site, and a callback email.</li>
-</ul>
-<p>Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix <code>[perfSONAR toolkit install issue]</code>.</p>
-<p><strong>Logs (RPM install):</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Web server errors</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>httpd<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span>
-tail<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span><span class="w"> </span>/var/log/httpd/error_log
+<summary>Generating a diagnostic report for support</summary>
+<p>The <strong><code>perfSONAR-diagnostic-report.sh</code></strong> script collects all diagnostic
+information needed for remote troubleshooting into a single self-contained
+report file. It supports both container and toolkit (RPM) deployments.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run the diagnostic report (auto-detects deployment type)</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh
 
-<span class="c1"># pScheduler services</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>pscheduler-scheduler<span class="w"> </span>-u<span class="w"> </span>pscheduler-runner<span class="w"> </span>-u<span class="w"> </span>pscheduler-ticker<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span>
-
-<span class="c1"># perfSONAR application logs (if present)</span>
-ls<span class="w"> </span>/var/log/perfsonar
-tail<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span><span class="w"> </span>/var/log/perfsonar/pscheduler.log<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+<span class="c1"># Or with --brief for a shorter terminal summary</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh<span class="w"> </span>--brief
 </code></pre></div>
+<p>The report is saved to <code>/tmp/perfsonar-diag-&lt;hostname&gt;-&lt;date&gt;.txt</code>.
+Send this file to your support contact:</p>
+<div class="highlight"><pre><span></span><code>scp<span class="w"> </span>/tmp/perfsonar-diag-*.txt<span class="w"> </span>user@support-host:/tmp/
+</code></pre></div>
+<p>For toolkit deployments the script collects: installed RPM packages,
+native service status (httpd, pscheduler-*, owamp-server, postgresql),
+node_exporter config, Apache SSL config, pScheduler database checks,
+plus all shared sections (host environment, network, SELinux, endpoints,
+TLS, tuning, known issues). Run with <code>--help</code> for all options.</p>
+<p>Send reports to your usual perfSONAR support contact or project mailing list
+with the subject prefix <code>[perfSONAR diagnostic]</code>.</p>
 </details>
 <hr />
 
