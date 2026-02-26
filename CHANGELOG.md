@@ -5,6 +5,15 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.5.0] - 2026-02-26
+
+### Added
+
+- **Container healthchecks upgraded** in all four compose templates (`docker-compose.yml`, `docker-compose.testpoint.yml`, `docker-compose.testpoint-le.yml`, `docker-compose.testpoint-le-auto.yml`): replaced the shallow `curl https://localhost/` test with `pscheduler troubleshoot --quick`, which validates the full pScheduler service stack (Ticker, Scheduler, Runner, Archiver) in under 1 second. Interval reduced from 30 s to 60 s; `start_period` increased to 120 s for reliable pScheduler startup; `timeout` set to 30 s.
+- **`perfSONAR-health-monitor.sh` v1.0.0**: New watchdog script that inspects the container health state every 5 minutes via a systemd timer and automatically restarts `perfsonar-testpoint.service` when the container is marked `unhealthy` (after 3 consecutive failed health checks). Logs to `/var/log/perfsonar-health-monitor.log`. Also restarts if the container is missing while the service is active.
+- **`install-systemd-units.sh` v1.2.0**: New `--health-monitor` flag installs `perfSONAR-health-monitor.sh` to `/usr/local/bin/` and creates `perfsonar-health-monitor.service` + `perfsonar-health-monitor.timer` (runs 3 minutes after boot, then every 5 minutes).
+- `install_tools_scripts.sh` v1.0.4: Bootstrap now also downloads `perfSONAR-health-monitor.sh`.
+
 ## [1.4.0] - 2026-02-26
 
 ### Added
