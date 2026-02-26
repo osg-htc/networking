@@ -5,6 +5,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.5.2] - 2026-02-26
+
+### Fixed
+
+- **`update-perfsonar-deployment.sh` v1.2.0**: Automatically detects and corrects stale SELinux MCS labels on `/etc/letsencrypt` and `/var/www/html` for Let's Encrypt container deployments when run with `--apply`. A prior certbot `:Z` volume mount bug (fixed in v1.5.1) stamped private MCS categories onto these shared directories on every certbot container recreation. The script now runs `chcon -R -t container_file_t -l s0` to restore shared `container_file_t:s0` labels, then restarts Apache inside the running container immediately when possible — eliminating the need for a full container restart to restore service.
+- **`install-perfsonar-testpoint.md`**: Corrected the SELinux volume label reference table in the LE deployment section (`:Z` → `:z` for certbot-shared paths); added `??? failure` troubleshooting entry for the Apache 403 / connection-refused-after-update scenario; added SELinux auto-fix row to the "What the updater does" table.
+
 ## [1.5.1] - 2026-02-26
 
 ### Fixed
