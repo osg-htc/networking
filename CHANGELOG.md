@@ -5,6 +5,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.5.4] - 2026-02-26
+
+### Fixed
+
+- **`update-perfsonar-deployment.sh` v1.4.0**: Detects and patches stale systemd service files missing required volume mounts. Older versions of `install-systemd-units.sh` omitted `/run/dbus:/run/dbus:ro` (needed by `--collector.systemd`) and `<base>/conf/node_exporter.defaults:/etc/default/node_exporter:z` (needed for the `--no-collector.cpufreq` workaround). Without the defaults file mount, node_exporter crashes on first scrape with `panic: runtime error: slice bounds out of range [13:12]` (procfs v0.10.0 bug). The script now detects missing mounts, patches the service file in-place using `awk`, and — when `--restart` is given — runs `systemctl daemon-reload && systemctl restart perfsonar-testpoint.service` instead of a compose down/up to apply the fix.
+- **`install-systemd-units.sh` v1.3.0**: Added `/run/dbus:/run/dbus:ro` and `<base>/conf/node_exporter.defaults:/etc/default/node_exporter:z` to the generated service unit template. Also creates `<base>/conf/` and seeds `node_exporter.defaults` from `tools_scripts/` on fresh installs so the bind mount is never missing at start.
+
 ## [1.5.3] - 2026-02-26
 
 ### Fixed
