@@ -727,19 +727,30 @@ ls -la /var/www/html
 ls -la /etc/apache2
 ```
 
-??? tip "SELinux labeling handled automatically"
+??? tip "SELinux volume labels: `:z` vs `:Z`"
 
-    If SELinux is enforcing, the `:Z` and `:z` options in the compose files will cause Podman to relabel the host paths when
-    containers start. No manual `chcon` commands are required.
-    
-    **SELinux Volume Labels:**
-    
-    - `:Z` (uppercase) - Exclusive access. Podman creates a unique SELinux label for this volume that only this specific container can access. Use for volumes that should not be shared between containers.
-    - `:z` (lowercase) - Shared access. Podman uses a shared SELinux label that multiple containers can access. Use for volumes that need to be accessed by multiple containers.
-    In our compose files:
-    - `/etc/letsencrypt:/etc/letsencrypt:Z` - Exclusive to testpoint container
-    - `/var/www/html:/var/www/html:z` - Shared between testpoint and certbot containers
-    - `/etc/apache2:/etc/apache2:Z` - Exclusive to testpoint container
+    Podman uses two SELinux relabeling suffixes on bind-mounts:
+
+    - `:z` (lowercase) — **Shared.** Applies `container_file_t:s0` (no MCS restriction); any container can access the path.
+    - `:Z` (uppercase) — **Private.** Stamps the current container's unique random MCS categories onto the host path. Only that exact container instance can access the files — **and those labels change on every container recreation.**
+
+    !!! warning "Never use `:Z` on a directory shared between two containers"
+        If two containers mount the same host path and one uses `:Z`, whichever
+        container was most recently recreated will lock the other out. In LE
+        deployments, `certbot` and `perfsonar-testpoint` both mount `/etc/letsencrypt`
+        and `/var/www/html`, so both services use `:z` (shared). A prior bug
+        used `:Z` for certbot — corrected in v1.5.1. The `update-perfsonar-deployment.sh`
+        script (v1.2.0+) automatically detects and corrects stale MCS labels on
+        these paths when run with `--apply`.
+
+    Paths in the LE compose files:
+
+    | Path | Label | Reason |
+    | ---- | ----- | ------ |
+    | `/etc/letsencrypt` | `:z` | Shared — both testpoint (Apache SSL) and certbot need access |
+    | `/var/www/html` | `:z` | Shared — certbot writes ACME challenges; Apache serves them |
+    | `/etc/apache2` | `:z` | Shared `container_file_t:s0`; no competing container |
+    | psconfig volume | `:Z` | Private — only testpoint accesses this |
 
 #### 2) Deploy the testpoint with automatic SSL patching (recommended)
 
@@ -1309,6 +1320,7 @@ chmod 0755 /tmp/update-perfsonar-deployment.sh
 | 1 — Scripts | Re-downloads all helper scripts from the repository | Always |
 | 2 — Config files | Installs or updates `conf/node_exporter.defaults` (and future config files) | Report only; `--apply` to write |
 | 3 — Compose file | Detects your compose variant and compares with the latest template | Report only; `--apply` to replace |
+| SELinux fix | On LE deployments with SELinux Enforcing: detects stale private MCS labels on `/etc/letsencrypt` and `/var/www/html` and resets them to shared `container_file_t:s0`; immediately restarts Apache inside the container if needed | Only with `--apply` |
 | 4 — Container | Recreates the container if compose or config changed | Only with `--restart` |
 | 5 — Systemd | Refreshes systemd units and auto-update timer | Only with `--update-systemd` |
 
@@ -1524,6 +1536,44 @@ Run without flags to see what would change:
 
     **Expected result:** The certbot container should be running (not exiting) and the service should be in "active (running)" state.
 
+??? failure "Apache returns 403 or connection refused after container update (SELinux MCS labels)"
+
+    **Symptoms** (Let's Encrypt deployments only): After running the update script or manually recreating containers, the `node_exporter` and `perfsonar_host_exporter` endpoints return HTTP 403 or refuse connections entirely.
+
+    **Root cause:** The certbot container used `:Z` (private MCS relabeling) on `/etc/letsencrypt` and `/var/www/html`. Each container recreation stamps new random MCS categories onto those host directories, locking the `perfsonar-testpoint` container out. Apache inside the testpoint container either fails to start (`SSLCertificateFile does not exist`) or returns 403 (`Permission denied: search permissions are missing on a component of the path`).
+
+    **Automatic fix (v1.2.0+):** Run the update script with `--apply` — it detects stale MCS labels and corrects them automatically:
+
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply --yes
+    ```
+
+    **Manual fix:**
+
+    ```bash
+    # Clear the stale private MCS labels from both shared directories
+    chcon -R -t container_file_t -l s0 /etc/letsencrypt /var/www/html
+
+    # Restart Apache inside the running container
+    podman exec perfsonar-testpoint systemctl start apache2
+
+    # Verify both endpoints respond
+    curl -sk -o /dev/null -w "%{http_code}\n" https://$(hostname -f)/node_exporter/metrics
+    curl -sk -o /dev/null -w "%{http_code}\n" https://$(hostname -f)/perfsonar_host_exporter/
+    ```
+
+    **Diagnosis:**
+
+    ```bash
+    # Check Apache error log inside container
+    podman exec perfsonar-testpoint tail -20 /var/log/apache2/error.log
+
+    # Check SELinux context on shared directories (stale if it shows :s0:c<N>)
+    ls -dZ /etc/letsencrypt /var/www/html
+    ```
+
+    The compose files were corrected in v1.5.1 to use `:z` (shared) for certbot mounts. This issue only recurs on hosts that have not yet run the update script.
+
 ??? failure "SELinux denials blocking container operations"
 
     **Symptoms:** Container starts but services fail, permission denied errors in logs.
@@ -1545,7 +1595,7 @@ Run without flags to see what would change:
 
     **Solutions:**
 
-    - Verify volume labels are correct (`:Z` for exclusive, `:z` for shared)
+    - Verify volume labels are correct (`:z` for shared paths, `:Z` only for paths exclusive to one container)
     - Recreate containers to reapply SELinux labels: `podman-compose down && podman-compose up -d`
     - If persistent issues, consider creating custom SELinux policy or running in permissive mode
 
