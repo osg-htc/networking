@@ -1225,6 +1225,77 @@ Perform these checks before handing the host over to operations:
 
 ---
 
+## Updating an Existing Deployment
+
+The automatic image updater (Step 7) keeps the **container image** current, but it
+does not update **helper scripts**, **compose templates**, or **host configuration
+files** (e.g. `node_exporter.defaults`).  When the repository publishes bug fixes
+or new features that touch these files you need to run the **deployment updater**
+to bring your installation in sync.
+
+### Quick update (one-liner)
+
+If you already have the tools installed under `/opt/perfsonar-tp/tools_scripts`:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply --restart --yes
+```
+
+If the script is not yet present (older installations), bootstrap it first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/update-perfsonar-deployment.sh \
+  -o /tmp/update-perfsonar-deployment.sh
+chmod 0755 /tmp/update-perfsonar-deployment.sh
+/tmp/update-perfsonar-deployment.sh --apply --restart --yes
+```
+
+### What the updater does
+
+| Phase | Action | Default |
+| ----- | ------ | ------- |
+| 1 — Scripts | Re-downloads all helper scripts from the repository | Always |
+| 2 — Config files | Installs or updates `conf/node_exporter.defaults` (and future config files) | Report only; `--apply` to write |
+| 3 — Compose file | Detects your compose variant and compares with the latest template | Report only; `--apply` to replace |
+| 4 — Container | Recreates the container if compose or config changed | Only with `--restart` |
+| 5 — Systemd | Refreshes systemd units and auto-update timer | Only with `--update-systemd` |
+
+### Report-only mode (safe, no changes)
+
+Run without flags to see what would change:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh
+```
+
+### Full update with systemd refresh
+
+```bash
+/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh \
+    --apply --restart --update-systemd --yes
+```
+
+??? info "Updater flags reference"
+
+    | Flag | Description |
+    | ---- | ----------- |
+    | `--type TYPE` | Deployment type: `container` or `toolkit` (auto-detected if omitted) |
+    | `--base DIR` | Base directory (default: `/opt/perfsonar-tp`) |
+    | `--apply` | Apply compose and config changes (default: report only) |
+    | `--restart` | Recreate container after compose update (implies `--apply`) |
+    | `--update-systemd` | Re-run `install-systemd-units.sh` to refresh systemd units |
+    | `--yes` | Skip interactive confirmations |
+    | `--dry-run` | Show what would change without modifying anything |
+
+??? tip "When should I run the updater?"
+
+    - After the repository announces bug fixes or new features affecting scripts
+    - When you see a new release in the [CHANGELOG](https://github.com/osg-htc/networking/blob/master/CHANGELOG.md)
+    - If you encounter a known issue that has been fixed in a newer script version
+    - After the container image auto-updater pulls a new image that requires new host-side configuration
+
+---
+
 ## Troubleshooting
 
 ### Container Issues
