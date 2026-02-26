@@ -1908,31 +1908,33 @@ Run without flags to see what would change:
     nft list ruleset
     ```
 
-??? note "What to include when reporting issues via email"
+??? note "Generating a diagnostic report for support"
 
-    To help us diagnose install problems quickly, please include:
-
-    - Host details: OS version (e.g., `cat /etc/os-release`), kernel (`uname -r`), and whether this is testpoint or toolkit.
-    - Script/log context: which script/step failed and the exact command you ran.
-    - Timestamps: approximate time of failure and timezone.
-    - Outputs/logs: relevant console output and excerpts from `journalctl -u podman -n 200`, `tail -200 /var/log/perfSONAR-install-nftables.log`, and any script-specific log mentioned in the error.
-    - Network state: `ip -br addr`, `ip rule show`, `nmcli connection show`, and whether port 80/443 should be open externally.
-    - Certificates (if LE): whether port 80 was reachable from the Internet and the contents of `/var/log/letsencrypt/letsencrypt.log` around the failure.
-    - Contact info: your name, site, and a callback email.
-
-    Send reports to your usual perfSONAR support contact or project mailing list with the subject prefix `[perfSONAR install issue]`.
-
-    **Logs:**
+    The **`perfSONAR-diagnostic-report.sh`** script collects all diagnostic
+    information needed for remote troubleshooting into a single self-contained
+    report file. It supports both container and toolkit deployments.
 
     ```bash
-    # System journal for container runtime
-    journalctl -u podman -n 100
+    # Run the diagnostic report (auto-detects deployment type)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh
 
-    # All logs from a container
-    podman logs perfsonar-testpoint --tail=100
-
-    # Follow logs in real-time
-    podman logs -f perfsonar-testpoint
+    # Or with --brief for a shorter terminal summary
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh --brief
     ```
+
+    The report is saved to `/tmp/perfsonar-diag-<hostname>-<date>.txt`.
+    Send this file to your support contact:
+
+    ```bash
+    scp /tmp/perfsonar-diag-*.txt user@support-host:/tmp/
+    ```
+
+    The script checks 12 diagnostic areas: host environment, network config,
+    SELinux, container runtime, configuration files, endpoints, TLS certificates,
+    systemd units, network tuning, and known issues. Run with `--help` for all
+    options.
+
+    Send reports to your usual perfSONAR support contact or project mailing list
+    with the subject prefix `[perfSONAR diagnostic]`.
 
 ---

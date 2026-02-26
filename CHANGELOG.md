@@ -5,6 +5,13 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.5.5] - 2026-02-26
+
+### Added
+
+- **`perfSONAR-diagnostic-report.sh` v1.0.0**: New read-only diagnostic collection script for remote troubleshooting. Runs 12 diagnostic sections (Host Environment, Network, SELinux, Container Runtime, Configuration Files, Toolkit, Endpoint Connectivity, TLS/Certificates, Systemd Units, Network Tuning, Known Issues, Quick Health Summary) and writes a self-contained report file to `/tmp/perfsonar-diag-<hostname>-<date>.txt`. Supports both container (Podman) and RPM toolkit deployments with auto-detection. Includes targeted checks for all previously-fixed bugs (cpufreq panic, certbot `:Z` mount, D-Bus SELinux boolean, stale service file mounts, container Initialized state). CLI flags: `--base DIR`, `--type TYPE`, `--output FILE`, `--no-color`, `--brief`, `--version`, `--help`.
+- **`install_tools_scripts.sh` v1.0.5**: Bootstrap now also downloads `perfSONAR-diagnostic-report.sh`.
+
 ## [1.5.4] - 2026-02-26
 
 ### Fixed
