@@ -1,0 +1,15 @@
+# node_exporter options for perfSONAR testpoint container
+#
+# This file is mounted into the container by docker-compose at:
+#   /opt/perfsonar-tp/conf/node_exporter.defaults → /etc/default/node_exporter
+#
+# WORKAROUND: --no-collector.cpufreq
+#   The cpufreq collector in prometheus/procfs v0.10.0 panics with
+#   "slice bounds out of range" on the first scrape when any CPU is offline.
+#   This disables that collector until the container image ships a fixed version.
+#   Bug: https://github.com/prometheus/procfs/issues/537
+#
+# --collector.systemd requires /run/dbus:/run/dbus:ro to be volume-mounted
+# into the container (see the docker-compose volumes section).
+#
+NODE_EXPORTER_OPTS="--no-collector.cpufreq --web.listen-address localhost:9100 --collector.netdev.address-info --collector.sysctl --collector.sysctl.include=net.core.rmem_max --collector.sysctl.include=net.core.rmem_default --collector.sysctl.include=net.core.wmem_max --collector.sysctl.include=net.core.wmem_default --collector.sysctl.include=net.ipv4.tcp_rmem:min,default,max --collector.sysctl.include=net.ipv4.tcp_wmem:min,default,max --collector.sysctl.include=net.ipv4.tcp_no_metrics_save --collector.sysctl.include=net.ipv4.tcp_mtu_probing --collector.sysctl.include-info=net.core.default_qdisc --collector.sysctl.include-info=net.ipv4.tcp_congestion_control --collector.sysctl.include-info=net.ipv4.tcp_available_congestion_control --collector.sysctl.include-info=net.ipv4.tcp_allowed_congestion_control --collector.sysctl.include=net.ipv4.conf.all.arp_ignore --collector.sysctl.include=net.ipv4.conf.all.arp_announce --collector.sysctl.include=net.ipv4.conf.default.arp_filter --collector.sysctl.include=net.ipv4.conf.all.arp_filter --collector.sysctl.include=net.core.netdev_max_backlog --collector.systemd --collector.systemd.unit-include=^(elmond|grafana-server|httpd|logstash|node_exporter|opensearch-dashboards|opensearch|owamp|(perfsonar-.+)|postgresql|(pscheduler-.+)|(psconfig-.+))\.service"
