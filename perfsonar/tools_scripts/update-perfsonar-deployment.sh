@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.1.0 - 2026-02-26
+# Version: 1.2.0 - 2026-02-26
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -17,6 +17,14 @@ set -euo pipefail
 #   - Auto-detect deployment type when --type is not specified.
 #   - Phase 3 now checks RPM package updates for toolkit deployments.
 #   - Phase 4 restarts native perfSONAR services instead of containers.
+# Version: 1.2.0 - 2026-02-26
+#   - Add automatic SELinux MCS label fix for LE container variants.
+#     Certbot's prior :Z volume mounts stamped private MCS categories onto
+#     /etc/letsencrypt and /var/www/html, locking out the perfsonar-testpoint
+#     container (Apache 403 / connection refused). The script now detects and
+#     corrects stale MCS labels (chcon -R -t container_file_t -l s0) with
+#     --apply, and immediately restarts Apache inside the running container
+#     when possible to restore service without a full container restart.
 #
 # This script is the recommended way to apply bug fixes, new features, and
 # configuration improvements from the osg-htc/networking repository to an
@@ -61,7 +69,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 PROG_NAME="$(basename "$0")"
 
 BASE_DIR=""
@@ -561,6 +569,100 @@ phase3_update() {
     fi
 }
 
+# --- SELinux MCS label auto-fix (container LE variants) --------------------
+#
+# When a container mounts a host directory with :Z (private MCS relabeling)
+# it stamps that container's random MCS categories onto the host path.  If
+# two containers share the same host directory and one uses :Z, every
+# recreation of that container locks the other container out with a 'Permission
+# denied' or 'file does not exist' error from Apache.
+#
+# The compose files were fixed (v1.5.1) to use :z (shared) for certbot, but
+# hosts that ran the old :Z compose will have stale MCS labels on disk.  This
+# function detects and corrects them with --apply before any container restart.
+fix_container_selinux_labels() {
+    [[ "$DEPLOY_TYPE" == "container" ]] || return 0
+
+    # Only relevant if SELinux is present and enforcing
+    command -v getenforce >/dev/null 2>&1 || return 0
+    [[ "$(getenforce 2>/dev/null)" == "Enforcing" ]] || return 0
+
+    # Only applies to LE variants that use certbot
+    grep -q 'certbot' "$COMPOSE_FILE" 2>/dev/null || return 0
+
+    info "SELinux label check (shared directories in LE deployment)..."
+
+    local dirs_to_fix=()
+    for dir in /etc/letsencrypt /var/www/html; do
+        [[ -d "$dir" ]] || continue
+        # Private MCS categories appear as :s0:c<N> on the directory itself
+        local ctx
+        ctx=$(ls -dZ "$dir" 2>/dev/null | awk '{print $1}' || echo "")
+        if echo "$ctx" | grep -qE ':s0:c[0-9]'; then
+            dirs_to_fix+=("$dir")
+        fi
+    done
+
+    if [[ ${#dirs_to_fix[@]} -eq 0 ]]; then
+        ok "  SELinux labels on shared directories are correct"
+        echo
+        return 0
+    fi
+
+    warn "  Stale private SELinux MCS labels detected on shared directories:"
+    for dir in "${dirs_to_fix[@]}"; do
+        local ctx
+        ctx=$(ls -dZ "$dir" 2>/dev/null | awk '{print $1}')
+        warn "    $dir  [$ctx]"
+    done
+    warn "  These prevent Apache inside the container from reading TLS certificates"
+    warn "  or serving web content (symptoms: connection refused / HTTP 403)."
+
+    if [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to automatically correct these labels."
+        echo
+        return 0
+    fi
+
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would run: chcon -R -t container_file_t -l s0 ${dirs_to_fix[*]}"
+        echo
+        return 0
+    fi
+
+    info "  Correcting labels to shared container_file_t:s0 (no MCS restriction)..."
+    local fixed=0
+    for dir in "${dirs_to_fix[@]}"; do
+        if chcon -R -t container_file_t -l s0 "$dir"; then
+            ok "    Fixed: $dir"
+            fixed=$((fixed + 1))
+        else
+            warn "    Failed to fix labels on $dir — check SELinux policy"
+        fi
+    done
+
+    # If Apache failed inside an already-running container, restart it now so
+    # service is restored immediately without needing a full container restart.
+    if [[ $fixed -gt 0 ]] && command -v "$RUNTIME" >/dev/null 2>&1; then
+        if "$RUNTIME" inspect perfsonar-testpoint &>/dev/null 2>&1; then
+            local apache_state
+            apache_state=$("$RUNTIME" exec perfsonar-testpoint \
+                systemctl is-active apache2 2>/dev/null || echo "inactive")
+            if [[ "$apache_state" != "active" ]]; then
+                info "  Apache is not running inside container — restarting now..."
+                if "$RUNTIME" exec perfsonar-testpoint systemctl start apache2 &>/dev/null; then
+                    ok "    Apache started inside perfsonar-testpoint"
+                else
+                    warn "    Apache start failed — a container restart (--restart) will attempt recovery"
+                fi
+            else
+                ok "    Apache is already running inside container"
+            fi
+        fi
+    fi
+    echo
+}
+
 # --- Phase 4: Restart services ---------------------------------------------
 
 # perfSONAR toolkit services to restart after RPM updates
@@ -755,6 +857,7 @@ main() {
     phase1_update_scripts
     phase2_update_configs
     phase3_update
+    fix_container_selinux_labels
     phase4_restart
     phase5_systemd
     print_summary
