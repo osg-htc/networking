@@ -3516,7 +3516,7 @@ view</a></p>
 <p>Verify the container is running and healthy:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>ps
 </code></pre></div>
-<p>The container should show <code>healthy</code> status. The healthcheck monitors Apache HTTPS availability.</p>
+<p>The container should show <code>healthy</code> status. The healthcheck runs <code>pscheduler troubleshoot --quick</code> to validate the full pScheduler service stack (API, Ticker, Scheduler, Runner, Archiver) in under one second. Allow up to 120 seconds after startup for the healthcheck to first pass.</p>
 <p>Manage pSConfig files under <code>/opt/perfsonar-tp/psconfig</code> on the host; they are consumed by the container at <code>/etc/perfsonar/psconfig</code>.</p>
 <h4 id="3-ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required">3) Ensure containers restart automatically on reboot (systemd unit for testpoint - REQUIRED)<a class="headerlink" href="#3-ensure-containers-restart-automatically-on-reboot-systemd-unit-for-testpoint-required" title="Permanent link">&para;</a></h4>
 <div class="admonition warning">
@@ -3542,6 +3542,14 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>--no-pager
 podman<span class="w"> </span>ps
 </code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Optional: install the health-monitor watchdog at the same time</p>
+<p>The compose healthcheck marks the container <code>unhealthy</code> after three consecutive failures, but <code>restart: unless-stopped</code> does <strong>not</strong> auto-restart on health failures — a separate watchdog is needed.</p>
+<p>Run <code>install-systemd-units.sh</code> with <code>--health-monitor</code> to install a systemd timer that checks the container health every 5 minutes and restarts <code>perfsonar-testpoint.service</code> if the container is <code>unhealthy</code>:</p>
+<div class="highlight"><pre><span></span><code>/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span>--health-monitor
+</code></pre></div>
+<p>This creates <code>perfsonar-health-monitor.service</code> + <code>perfsonar-health-monitor.timer</code> and logs to <code>/var/log/perfsonar-health-monitor.log</code>. Expected recovery time from pScheduler failure: ≤8 minutes.</p>
+</div>
 <details class="info">
 <summary>Notes on podman/systemd</summary>
 <ul>
@@ -3919,6 +3927,37 @@ journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-auto-updat
 </ol>
 <p>This approach ensures containers are updated only when new images are available, minimizing unnecessary restarts while
 keeping your deployment current.</p>
+<ol>
+<li>
+<p><strong>Automatic health monitoring and recovery</strong></p>
+<p>The compose healthcheck (<code>pscheduler troubleshoot --quick</code>) marks the container <code>unhealthy</code> after three consecutive failures, but <code>restart: unless-stopped</code> does <strong>not</strong> automatically restart an unhealthy container — you need an external watchdog.</p>
+<p>Install the health-monitor systemd timer using the already-downloaded <code>install-systemd-units.sh</code>:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--health-monitor
+</code></pre></div>
+<details class="info">
+<summary>What <code>--health-monitor</code> installs</summary>
+<ul>
+<li><strong><code>/usr/local/bin/perfsonar-health-monitor.sh</code></strong> — copies <code>perfSONAR-health-monitor.sh</code> from <code>tools_scripts/</code>. Checks <code>podman inspect</code> health state and restarts <code>perfsonar-testpoint.service</code> when <code>unhealthy</code>.</li>
+<li><strong><code>/etc/systemd/system/perfsonar-health-monitor.service</code></strong> — oneshot service that runs the watchdog.</li>
+<li><strong><code>/etc/systemd/system/perfsonar-health-monitor.timer</code></strong> — fires 3 minutes after boot, then every 5 minutes. Enables and starts immediately.</li>
+<li>Logs to <code>/var/log/perfsonar-health-monitor.log</code>.</li>
+<li>Expected recovery window: ~3 min (3 × 60 s failed checks) + ≤5 min (next watchdog run) ≈ <strong>≤8 minutes</strong>.</li>
+</ul>
+</details>
+<p>Verify the timer is active:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>list-timers<span class="w"> </span>perfsonar-health-monitor.timer
+</code></pre></div>
+<p>Test manually:</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-health-monitor.service
+journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-health-monitor.service<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span>
+</code></pre></div>
+<p>Monitor the log:</p>
+<div class="highlight"><pre><span></span><code>tail<span class="w"> </span>-f<span class="w"> </span>/var/log/perfsonar-health-monitor.log
+</code></pre></div>
+</li>
+</ol>
 <hr />
 <h2 id="step-8-post-install-validation">Step 8 – Post-Install Validation<a class="headerlink" href="#step-8-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
@@ -4040,6 +4079,9 @@ sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> 
 </li>
 <li>
 <p>Verify auto-update timer is active: <code>systemctl list-timers perfsonar-auto-update.timer</code>.</p>
+</li>
+<li>
+<p>Verify health-monitor timer is active: <code>systemctl list-timers perfsonar-health-monitor.timer</code>.</p>
 </li>
 </ul>
 <hr />
