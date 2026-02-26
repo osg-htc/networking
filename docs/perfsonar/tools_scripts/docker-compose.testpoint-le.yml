@@ -56,8 +56,8 @@ services:
     # API to restart the testpoint container after renewal.
     volumes:
       - /run/podman/podman.sock:/run/podman/podman.sock:ro
-      - /var/www/html:/var/www/html:Z
-      - /etc/letsencrypt:/etc/letsencrypt:Z
+      - /var/www/html:/var/www/html:z
+      - /etc/letsencrypt:/etc/letsencrypt:z
       # Mount the deploy hook script into the container
       - ./tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro
     healthcheck:
