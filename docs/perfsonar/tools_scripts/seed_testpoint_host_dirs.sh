@@ -5,12 +5,16 @@ set -euo pipefail
 # Seed host directories from perfSONAR testpoint image.
 # Intended to be run on the host as root (or with sudo) BEFORE first compose up.
 #
+# Version: 1.0.1 - 2026-02-26
+#   - Create $BASE_DIR/conf/ and install node_exporter.defaults (adds
+#     --no-collector.cpufreq workaround for procfs v0.10.0 cpufreq panic)
+#   - Add /run/dbus volume note in output
 # Version: 1.0.0 - 2025-11-09
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp] [--version|--help]
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 PROG_NAME="$(basename "$0")"
 RUNTIME=""
 BASE_DIR="/opt/perfsonar-tp"
@@ -31,10 +35,16 @@ the first 'podman-compose up' command.
 
 Creates and populates:
   - $BASE_DIR/psconfig        → mounted to /etc/perfsonar/psconfig (perfSONAR config)
+  - $BASE_DIR/conf/           → host-managed config overrides
+    node_exporter.defaults    → /etc/default/node_exporter (adds --no-collector.cpufreq
+                                workaround for procfs v0.10.0 cpufreq panic)
   - /var/www/html             → mounted to /var/www/html (Apache webroot)
   - /etc/apache2              → mounted to /etc/apache2 (Apache config for SSL patching)
 
 Note: /etc/letsencrypt does NOT need seeding - certbot creates it automatically.
+Note: /run/dbus is mounted read-only for node_exporter --collector.systemd;
+      on EL9 with SELinux enforcing you may need to enable the
+      container_use_dbusd boolean: setsebool -P container_use_dbusd 1
 
 Options:
   --runtime RUNTIME   Specify container runtime (docker or podman)
@@ -103,6 +113,12 @@ check_already_seeded() {
         all_exist=false
     fi
     
+    if [ -f "$BASE_DIR/conf/node_exporter.defaults" ]; then
+        echo "    $BASE_DIR/conf/node_exporter.defaults already present"
+    else
+        all_exist=false
+    fi
+
     if [ "$all_exist" = "true" ]; then
         echo
         echo "==> All directories already seeded. Skipping."
@@ -113,8 +129,8 @@ check_already_seeded() {
 
 check_already_seeded
 
-echo "==> Creating host directories: $PSCONFIG_DIR /var/www/html /etc/apache2"
-mkdir -p "$PSCONFIG_DIR" /var/www/html /etc/apache2
+echo "==> Creating host directories: $PSCONFIG_DIR $BASE_DIR/conf /var/www/html /etc/apache2"
+mkdir -p "$PSCONFIG_DIR" "$BASE_DIR/conf" /var/www/html /etc/apache2
 echo
 
 cleanup_container() {
@@ -165,6 +181,21 @@ copy_from_image "$TP_IMAGE" "/etc/perfsonar/psconfig" "$PSCONFIG_DIR" "perfSONAR
 copy_from_image "$TP_IMAGE" "/var/www/html" "/var/www/html" "Apache webroot"
 copy_from_image "$TP_IMAGE" "/etc/apache2" "/etc/apache2" "Apache configuration"
 
+# Install node_exporter.defaults from the tools_scripts directory
+NE_DEFAULTS_SRC="$(dirname "$0")/node_exporter.defaults"
+NE_DEFAULTS_DST="$BASE_DIR/conf/node_exporter.defaults"
+echo "==> Installing node_exporter options override"
+echo "    Source: $NE_DEFAULTS_SRC"
+echo "    Destination: $NE_DEFAULTS_DST"
+if [ -f "$NE_DEFAULTS_SRC" ]; then
+    cp -p "$NE_DEFAULTS_SRC" "$NE_DEFAULTS_DST"
+    echo "    ✓ Installed node_exporter.defaults"
+else
+    echo "    WARNING: $NE_DEFAULTS_SRC not found; $NE_DEFAULTS_DST will not be created."
+    echo "    node_exporter may panic on first scrape (procfs v0.10.0 cpufreq bug)."
+fi
+echo
+
 echo "==> Verifying seeded content..."
 for dir in "$PSCONFIG_DIR" "/var/www/html" "/etc/apache2"; do
     if [ -d "$dir" ] && [ "$(ls -A "$dir" 2>/dev/null)" ]; then
@@ -174,10 +205,19 @@ for dir in "$PSCONFIG_DIR" "/var/www/html" "/etc/apache2"; do
         echo "    ✗ $dir (EMPTY - seeding may have failed!)" >&2
     fi
 done
+if [ -f "$NE_DEFAULTS_DST" ]; then
+    echo "    ✓ $NE_DEFAULTS_DST"
+else
+    echo "    ✗ $NE_DEFAULTS_DST (MISSING - node_exporter may crash on scrape!)" >&2
+fi
 echo
 
 echo "==> SELinux labels will be applied automatically by Podman when containers start"
 echo "    (compose file uses :z and :Z flags on bind mounts)"
+echo
+echo "==> Note: /run/dbus is bind-mounted read-only for node_exporter --collector.systemd."
+echo "    On EL9 hosts with SELinux enforcing, enable access with:"
+echo "      setsebool -P container_use_dbusd 1"
 echo
 
 echo "==> Done! Host directories are ready for compose deployment."
