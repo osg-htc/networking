@@ -5,6 +5,12 @@
 
 All notable changes to this repository will be documented in this file.
 
+## [1.5.3] - 2026-02-26
+
+### Fixed
+
+- **`update-perfsonar-deployment.sh` v1.3.0**: Fixes a crash-on-self-update bug. When Phase 1 downloaded a newer version of the script into `tools_scripts/`, bash would continue executing from the overwritten file at the wrong offset, producing `syntax error near unexpected token '('` on the first line of new content. The script now captures its original arguments before parsing, and after Phase 1 compares the version embedded in the newly-installed `tools_scripts/` copy against `$VERSION`. If they differ, it calls `exec` on the new script with the original arguments — replacing the current process entirely so the updated version runs cleanly from line 1. The user no longer needs to re-run manually.
+
 ## [1.5.2] - 2026-02-26
 
 ### Fixed
