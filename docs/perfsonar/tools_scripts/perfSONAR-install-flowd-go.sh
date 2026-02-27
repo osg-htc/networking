@@ -133,7 +133,7 @@ detect_interfaces() {
         log "Auto-detecting interfaces from $MULTI_NIC_CONF"
         # shellcheck disable=SC1090
         source "$MULTI_NIC_CONF" 2>/dev/null || true
-        if [ ${#NIC_NAMES[@]:-0} -gt 0 ]; then
+        if [[ -v NIC_NAMES && ${#NIC_NAMES[@]} -gt 0 ]]; then
             INTERFACES=$(IFS=,; echo "${NIC_NAMES[*]}")
             log "Detected interfaces: $INTERFACES"
             return
