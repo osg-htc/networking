@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.1.1
+# Version: 1.1.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -218,14 +218,24 @@ step_auto_update_compose() {
 step_deploy_option_a() {
   run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml -o /opt/perfsonar-tp/docker-compose.yml"
-  run bash -c "cd /opt/perfsonar-tp && podman-compose up -d"
+  # Start via the systemd unit (which has --systemd=always --cgroupns host needed
+  # for systemd inside the container); podman-compose up -d lacks these flags.
+  run systemctl daemon-reload
+  run systemctl start perfsonar-testpoint
+  log "Waiting 30s for container to initialise..."
+  sleep 30
   run podman ps
 }
 
 step_deploy_option_b() {
   run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le-auto.yml -o /opt/perfsonar-tp/docker-compose.yml"
-  run bash -c "cd /opt/perfsonar-tp && podman-compose up -d"
+  # Start via the systemd unit (which has --systemd=always --cgroupns host needed
+  # for systemd inside the container); podman-compose up -d lacks these flags.
+  run systemctl daemon-reload
+  run systemctl start perfsonar-testpoint
+  log "Waiting 30s for container to initialise..."
+  sleep 30
   run podman ps
   
   # Auto-detect FQDNs from reverse DNS of all configured IPs
@@ -318,8 +328,19 @@ step_deploy_option_b() {
       log "Continuing installation — certificate can be obtained later."
     fi
     
-    run podman restart perfsonar-testpoint || true
-    run podman start certbot || true
+    run systemctl restart perfsonar-testpoint || true
+    # Start the certbot renewal container with Podman socket for the deploy hook
+    run podman rm -f certbot || true
+    run podman run -d --name certbot --net=host \
+      --security-opt label=disable \
+      -v /etc/letsencrypt:/etc/letsencrypt:Z \
+      -v /var/www/html:/var/www/html:z \
+      -v /run/podman/podman.sock:/run/podman/podman.sock:ro \
+      -v "/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro" \
+      --entrypoint /bin/sh \
+      docker.io/certbot/certbot:latest \
+      '-c' 'trap exit TERM; while :; do certbot renew --deploy-hook /etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh; sleep 12h & wait ${!}; done' \
+      || log "WARNING: certbot renewal container failed to start; set it up manually."
     run podman exec certbot certbot renew --dry-run || true
   else
     log "Skipping certificate issuance (missing --fqdn/--email or no FQDNs detected). You can do this later."
