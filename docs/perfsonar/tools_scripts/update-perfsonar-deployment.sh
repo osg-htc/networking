@@ -732,12 +732,12 @@ fix_stale_service_file() {
 
     # Patch in-place with awk: insert missing mounts after the tools_scripts volume line
     if ! grep -q '/run/dbus:/run/dbus' "$svc"; then
-        awk '/tools_scripts.*:ro/{print; print "  -v /run/dbus:/run/dbus:ro \\\\"; next}1' \
+        awk '/tools_scripts.*:ro/{print; print "  -v /run/dbus:/run/dbus:ro \\"; next}1' \
             "$svc" > "${svc}.tmp" && mv "${svc}.tmp" "$svc"
     fi
     if ! grep -q 'node_exporter.defaults' "$svc"; then
         awk -v base="$BASE_DIR" \
-            '/tools_scripts.*:ro/{print; print "  -v " base "/conf/node_exporter.defaults:/etc/default/node_exporter:z \\\\"; next}1' \
+            '/tools_scripts.*:ro/{print; print "  -v " base "/conf/node_exporter.defaults:/etc/default/node_exporter:z \\"; next}1' \
             "$svc" > "${svc}.tmp" && mv "${svc}.tmp" "$svc"
     fi
 
