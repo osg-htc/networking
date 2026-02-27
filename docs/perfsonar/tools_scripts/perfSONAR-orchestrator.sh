@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.1.0
+# Version: 1.1.1
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -187,6 +187,11 @@ step_security() {
     return
   fi
   local sec_cmd=(/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --selinux --fail2ban --yes)
+  # Option B (Let's Encrypt) requires port 80 open for certbot HTTP-01 challenges
+  if [[ "$DEPLOY_OPTION" =~ ^[Bb]$ ]]; then
+    log "Option B selected: adding port 80 to nftables for Let's Encrypt HTTP-01 validation"
+    sec_cmd+=(--perf-ports 80)
+  fi
   run "${sec_cmd[@]}" || true
   # Optional: setup auto-update timer (Step 7.4)
   if confirm "Step 7.4: Install auto-update timer (daily image pull + restart if new image found)?"; then
@@ -299,12 +304,18 @@ step_deploy_option_b() {
     done
     
     if ! run "${certbot_cmd[@]}"; then
-      log "ERROR: Certificate issuance failed. Common issues:"
-      log "  1. Port 80 blocked by firewall/nftables (check nft list ruleset)"
+      log "WARNING: Certificate issuance failed. Common issues:"
+      log "  1. Port 80 blocked by firewall/nftables (check: nft list ruleset | grep -A5 tcp)"
       log "  2. Network ACLs blocking inbound HTTP from Let's Encrypt CAs"
       log "  3. DNS not properly configured (verify: dig +short <fqdn>)"
-      log "You can retry manually or skip and configure certificates later."
-      return 1
+      log "You can retry manually later with:"
+      log "  podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:Z \\"
+      log "    certbot/certbot certonly --standalone --agree-tos --non-interactive \\"
+      for fqdn in "${fqdns[@]}"; do
+        log "    -d $fqdn \\"
+      done
+      log "    -m $LE_EMAIL"
+      log "Continuing installation — certificate can be obtained later."
     fi
     
     run podman restart perfsonar-testpoint || true
