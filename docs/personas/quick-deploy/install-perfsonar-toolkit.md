@@ -165,13 +165,23 @@ This bundle automatically includes:
 Installation takes approximately 5-10 minutes depending on network speed.
 
 ??? info "Alternative automated installation"
-    
-    perfSONAR provides a one-line automated installer script:
+
+    The OSG toolkit install script automates Steps 2.1–10 in a single run.
+    It handles RHEL/AlmaLinux CRB detection, installs all prerequisites,
+    runs post-install configuration, and optionally installs flowd-go:
+
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
+        | sudo bash -s -- --experiment-id 1 --non-interactive
+    ```
+
+    See the [tools_scripts README](../../perfsonar/tools_scripts/README.md) for full
+    flag documentation and the pre-installation checklist.
+
+    If you prefer the upstream perfSONAR minimal installer (repos + bundle only):
     ```bash
     curl -s https://downloads.perfsonar.net/install | sh -s - toolkit
     ```
-    
-    This script performs the same steps as above (configure repos + install bundle).
 
 ### Step 2.3 – Run Post-Install Configuration Scripts
 
@@ -1519,8 +1529,41 @@ service:
     1. Downloads and installs the `flowd-go` RPM from the SciTags repository
     2. Prompts for the SciTags experiment ID (ATLAS, CMS, LHCb, etc.)
     3. Auto-detects target interfaces from `/etc/perfSONAR-multi-nic-config.conf` or the routing table
-    4. Writes `/etc/flowd-go/conf.yaml` with the `perfsonar` plugin and `marker` backend
+    4. Writes `/etc/flowd-go/conf.yaml` with the `perfsonar` plugin, `marker` backend, and (if supported) the `fireflyp` plugin
     5. Enables and starts the `flowd-go` systemd service
+
+### ESnet Stardust Integration (fireflyp plugin)
+
+The `fireflyp` plugin is an optional flowd-go component that **forwards IPv6 firefly datagrams** to a
+central SciTags collector. The default target is `global.scitags.org:10514`, the authoritative global
+aggregation service operated by the SciTags project. Flows forwarded there become visible in
+[ESnet Stardust](https://stardust.es.net/), ESnet's network-level flow visualization platform, allowing
+collaborators and network operators to attribute traffic to specific experiments.
+
+!!! warning "fireflyp requires flowd-go ≥ 2.5.0"
+
+    The `fireflyp` plugin is only available in flowd-go builds that include
+    [scitags/flowd-go#49](https://github.com/scitags/flowd-go/issues/49).
+    The current RPM release (2.4.2) does **not** include this plugin.
+
+    - If you are running **2.4.2**, pass `--no-firefly-receiver` to the install script to disable
+      the fireflyp stanza (eBPF flow marking still works; datagrams just are not forwarded upstream).
+    - Once a ≥ 2.5.0 RPM is published, re-run the install script or manually add the `fireflyp`
+      stanza to `/etc/flowd-go/conf.yaml`.
+
+**Install with fireflyp enabled** (flowd-go ≥ 2.5.0):
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh \
+    --experiment-id 1 --firefly-receiver global.scitags.org --yes
+```
+
+**Install without fireflyp** (current 2.4.2 RPM):
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh \
+    --experiment-id 1 --no-firefly-receiver --yes
+```
 
 ??? info "Flags reference"
 
@@ -1530,6 +1573,9 @@ service:
     | `--activity-id N` | Activity ID (default: 2 = network testing) |
     | `--interfaces LIST` | Comma-separated NIC names (auto-detected if omitted) |
     | `--list-experiments` | Show experiment IDs and exit |
+    | `--firefly-receiver HOST` | Firefly collector address (default: `global.scitags.org`) |
+    | `--firefly-receiver-port N` | UDP port on the collector (default: 10514) |
+    | `--no-firefly-receiver` | Disable fireflyp plugin (eBPF marking only; use with flowd-go 2.4.x) |
     | `--yes` | Skip interactive prompts |
     | `--dry-run` | Preview without changes |
     | `--uninstall` | Remove flowd-go and configuration |
@@ -1704,7 +1750,7 @@ Perform these checks before handing the host over to operations:
 
 - Track certificate expiry with `certbot renew --dry-run` if you rely on Let's Encrypt (automatic renewal is configured but monitoring is recommended).
 
-- Review container logs periodically for errors: `podman logs perfsonar-testpoint` and `podman logs certbot`.
+- Review service logs periodically for errors: `journalctl -u pscheduler-scheduler -n 50` and `journalctl -u flowd-go -n 50`.
 
 - Verify auto-update timer is active: `systemctl list-timers perfsonar-auto-update.timer`.
 
