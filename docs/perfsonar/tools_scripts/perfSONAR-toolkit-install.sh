@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.1
+# Version: 1.0.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -110,8 +110,8 @@ preflight() {
   log "=== perfSONAR Toolkit Installer started on $(hostname -f) ==="
   log "Kernel: $(uname -r)  Date: $(date -u)"
   log "Bundle: perfsonar-${BUNDLE}"
-  [ -n "$LE_FQDN" ]  && log "LE FQDN:  $LE_FQDN"
-  [ -n "$LE_EMAIL" ] && log "LE Email: $LE_EMAIL"
+  if [ -n "$LE_FQDN" ];  then log "LE FQDN:  $LE_FQDN";  fi
+  if [ -n "$LE_EMAIL" ]; then log "LE Email: $LE_EMAIL"; fi
 }
 
 # ---------------------------------------------------------------------------
