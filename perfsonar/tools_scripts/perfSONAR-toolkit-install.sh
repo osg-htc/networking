@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.0
+# Version: 1.0.1
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -32,6 +32,8 @@ set -euo pipefail
 #   --dry-run              Print steps but do not execute destructive operations
 #   --no-flowd-go          Skip flowd-go (SciTags) installation (installed by default)
 #   --experiment-id N      SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
+#   --no-firefly-receiver  Disable fireflyp plugin in flowd-go config (use with flowd-go 2.4.x RPM)
+#                          Requires flowd-go >= 2.5.0; omit with current 2.4.2 RPM to avoid errors
 #
 # Log:
 #   /var/log/perfsonar-toolkit-install.log
@@ -42,6 +44,7 @@ AUTO_YES=false
 NON_INTERACTIVE=false
 INSTALL_FLOWD_GO=true
 FLOWD_GO_EXPERIMENT_ID=""
+NO_FIREFLY_RECEIVER=false
 BUNDLE="toolkit"
 LE_FQDN=""
 LE_EMAIL=""
@@ -94,8 +97,9 @@ parse_cli() {
       --bundle)         BUNDLE="${2:-toolkit}"; shift 2;;
       --fqdn)           LE_FQDN="${2:-}"; shift 2;;
       --email)          LE_EMAIL="${2:-}"; shift 2;;
-      --no-flowd-go)    INSTALL_FLOWD_GO=false; shift;;
-      --experiment-id)  FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
+      --no-flowd-go)         INSTALL_FLOWD_GO=false; shift;;
+      --experiment-id)       FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
+      --no-firefly-receiver) NO_FIREFLY_RECEIVER=true; shift;;
       --help|-h)        sed -n '1,80p' "$0"; exit 0;;
       *) echo "Unknown argument: $1" >&2; exit 2;;
     esac
@@ -307,6 +311,7 @@ step_flowd_go() {
   local flowd_cmd=("$HELPER_DIR/tools_scripts/perfSONAR-install-flowd-go.sh")
   [ "$AUTO_YES" = true ]             && flowd_cmd+=(--yes)
   [ -n "$FLOWD_GO_EXPERIMENT_ID" ]   && flowd_cmd+=(--experiment-id "$FLOWD_GO_EXPERIMENT_ID")
+  [ "$NO_FIREFLY_RECEIVER" = true ]  && flowd_cmd+=(--no-firefly-receiver)
 
   if [ -x "$HELPER_DIR/tools_scripts/perfSONAR-install-flowd-go.sh" ]; then
     run "${flowd_cmd[@]}" || true
