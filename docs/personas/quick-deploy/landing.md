@@ -41,6 +41,14 @@ Get perfSONAR running on OSG/WLCG in **1-2 hours** with guided installation.
 
 ## Post-Deploy Configuration
 
+### SciTags / flowd-go Flow Marking (Recommended)
+
+Tag perfSONAR measurement traffic with experiment metadata using [flowd-go](https://github.com/scitags/flowd-go):
+
+- **[SciTags, Fireflies, and perfSONAR](../../perfsonar/scitags-fireflies.md)** — What SciTags are, how fireflies work, and why they matter
+- Both install guides include a dedicated flowd-go step (installed by default; opt out with `--no-flowd-go` when using the orchestrator)
+- Tool: `perfSONAR-install-flowd-go.sh` (interactive or scripted, ~2 minutes)
+
 ### Host Tuning (Optional but Recommended)
 
 Optimize kernel and NIC settings for network throughput:

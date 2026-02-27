@@ -143,6 +143,8 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
 - `--dry-run` — preview steps without executing
 - `--auto-update` — install and enable a daily systemd timer that pulls new container images and restarts services **only when the image digest has changed** (runs `install-systemd-units.sh --auto-update`, placing `perfSONAR-auto-update.sh` in `/usr/local/bin/`)  
   > **Note:** Uses image digest comparison, not Docker-specific output strings, so it works correctly with Podman.
+- `--no-flowd-go` — skip flowd-go (SciTags) installation (installed by default)
+- `--experiment-id N` — SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
 
 !!! tip "Paths vs. Orchestrator Options"
     **Paths = how you install the testpoint**
@@ -156,7 +158,7 @@ chmod 0755 /tmp/perfSONAR-orchestrator.sh
     Remember: choose Path A or Path B first. If you pick Path A, then choose Option A or B for certificate handling.
 
 <!-- markdownlint-disable-next-line MD051 -->
-**If you choose this path, skip to [Step 7](#step-7-register-and-configure-with-wlcgosg)** (the orchestrator completes Steps 2–6 for you).
+**If you choose this path, skip to [Step 7](#step-7-register-and-configure-with-wlcgosg)** (the orchestrator completes Steps 2–6 and Step 8 flowd-go for you; pass `--no-flowd-go` to skip SciTags).
 
 ---
 
@@ -1162,7 +1164,96 @@ keeping your deployment current.
 
 ---
 
-## Step 8 – Post-Install Validation
+## Step 8 – Install flowd-go for SciTags Flow Marking (Recommended)
+
+[flowd-go](https://github.com/scitags/flowd-go) is a lightweight daemon from the
+[SciTags](https://www.scitags.org/) initiative that tags perfSONAR network flows with experiment and
+activity metadata. When enabled, every egress packet is stamped with an IPv6 Flow Label identifying the
+generating experiment, allowing network operators to attribute and monitor measurement traffic.
+
+For background on SciTags and fireflies, see
+[SciTags, Fireflies, and perfSONAR](../../perfsonar/scitags-fireflies.md).
+
+!!! note "Skip this step if you used the orchestrator (Path A)"
+
+    The orchestrator includes flowd-go installation by default. If you ran it in Step 2, skip to
+    [Step 9](#step-9-post-install-validation). To skip flowd-go with the orchestrator, pass
+    `--no-flowd-go`.
+
+!!! tip "flowd-go is optional but recommended"
+
+    flowd-go installation is the default for new deployments. If you do not want SciTags flow marking,
+    simply skip this step.
+
+### Install using the helper script
+
+The helper script installs the flowd-go RPM, prompts for your experiment affiliation, auto-detects
+network interfaces from `/etc/perfSONAR-multi-nic-config.conf`, writes the configuration, and enables the
+service:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh
+```
+
+**Non-interactive mode** (auto-confirm, specify experiment on command line):
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh \
+    --experiment-id 2 --yes
+```
+
+**List available experiment IDs:**
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh --list-experiments
+```
+
+**Specify interfaces manually** (overrides auto-detection):
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh \
+    --experiment-id 3 --interfaces ens4f0np0,ens4f1np1 --yes
+```
+
+??? info "What the script does"
+
+    1. Downloads and installs the `flowd-go` RPM from the SciTags repository
+    2. Prompts for the SciTags experiment ID (ATLAS, CMS, LHCb, etc.)
+    3. Auto-detects target interfaces from `/etc/perfSONAR-multi-nic-config.conf` or the routing table
+    4. Writes `/etc/flowd-go/conf.yaml` with the `perfsonar` plugin and `marker` backend
+    5. Enables and starts the `flowd-go` systemd service
+
+??? info "Flags reference"
+
+    | Flag | Description |
+    | ---- | ----------- |
+    | `--experiment-id N` | SciTags experiment ID (1-14) |
+    | `--activity-id N` | Activity ID (default: 2 = network testing) |
+    | `--interfaces LIST` | Comma-separated NIC names (auto-detected if omitted) |
+    | `--list-experiments` | Show experiment IDs and exit |
+    | `--yes` | Skip interactive prompts |
+    | `--dry-run` | Preview without changes |
+    | `--uninstall` | Remove flowd-go and configuration |
+
+### Verify flowd-go is running
+
+```bash
+systemctl status flowd-go
+journalctl -u flowd-go --no-pager -n 20
+tc qdisc show
+```
+
+### Removing flowd-go
+
+If you later decide to remove flowd-go:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh --uninstall
+```
+
+---
+
+## Step 9 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
 

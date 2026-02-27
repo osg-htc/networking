@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.3
+# Version: 1.1.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -22,6 +22,8 @@ set -euo pipefail
 #   --yes                  Auto-confirm internal script prompts
 #  --auto-update           Install and enable auto-update timer for compose-managed containers
 #   --dry-run              Print steps but do not execute destructive operations
+#   --no-flowd-go          Skip flowd-go (SciTags) installation (installed by default)
+#   --experiment-id N       SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
 #
 # Log:
 #   /var/log/perfsonar-orchestrator.log
@@ -32,6 +34,8 @@ AUTO_YES=false
 NON_INTERACTIVE=false
 # shellcheck disable=SC2034
 AUTO_UPDATE=false
+INSTALL_FLOWD_GO=true
+FLOWD_GO_EXPERIMENT_ID=""
 DEPLOY_OPTION="A"         # A or B
 LE_FQDN=""
 LE_EMAIL=""
@@ -92,6 +96,8 @@ parse_cli() {
         sed -n '1,80p' "$0" | sed -n '1,80p'
         exit 0;;
       --auto-update) AUTO_UPDATE=true; shift;;
+      --no-flowd-go) INSTALL_FLOWD_GO=false; shift;;
+      --experiment-id) FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
   done
@@ -321,6 +327,25 @@ step_deploy() {
   esac
 }
 
+step_flowd_go() {
+  if [ "$INSTALL_FLOWD_GO" != true ]; then
+    log "Skipping flowd-go installation (--no-flowd-go specified)."
+    return
+  fi
+  if ! confirm "Step 8.5: Install and configure flowd-go (SciTags flow marking)?"; then
+    log "Skipping flowd-go."
+    return
+  fi
+  local flowd_cmd=(/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh)
+  [ "$AUTO_YES" = true ] && flowd_cmd+=(--yes)
+  [ -n "$FLOWD_GO_EXPERIMENT_ID" ] && flowd_cmd+=(--experiment-id "$FLOWD_GO_EXPERIMENT_ID")
+  if [ -x /opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh ]; then
+    run "${flowd_cmd[@]}" || true
+  else
+    log "WARNING: perfSONAR-install-flowd-go.sh not found; run bootstrap first."
+  fi
+}
+
 step_psconfig() {
   if ! confirm "Step 9: Enroll pSConfig feeds automatically?"; then
     log "Skipping pSConfig."
@@ -370,6 +395,7 @@ main() {
   step_dns_check
   step_security
   step_deploy
+  step_flowd_go
   step_psconfig
   step_validate
   log "=== Orchestrator complete ==="

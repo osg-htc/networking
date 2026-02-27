@@ -12,6 +12,7 @@ This directory contains helper scripts for perfSONAR deployment, configuration, 
 | **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment | [Installation Guides](../../personas/quick-deploy/landing.md) |
 | **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
 | **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
+| **perfSONAR-install-flowd-go.sh** | v1.0.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
 
 **Latest Updates**: v1.2.0 (Dec 2025) adds save/restore state management to fasterdata-tuning.sh
 
