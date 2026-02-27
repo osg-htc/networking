@@ -1780,6 +1780,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../scitags-fireflies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SciTags, Fireflies & perfSONAR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tools_scripts/fasterdata-tuning/" class="md-nav__link">
         
   
@@ -2593,6 +2621,12 @@ described in the official guide:</p>
 </li>
 <li>
 <p>Once installation is finished, please <strong>reboot</strong> the node.</p>
+</li>
+<li>
+<p><strong>SciTags / flowd-go (Recommended):</strong> We recommend installing <a href="https://github.com/scitags/flowd-go">flowd-go</a> to tag perfSONAR measurement traffic with <a href="https://www.scitags.org/">SciTags</a> experiment metadata. See <a href="../scitags-fireflies/">SciTags, Fireflies, and perfSONAR</a> for details. Use the helper script:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh
+</code></pre></div>
+<p>To skip this step, simply omit it. The modern install guides (<a href="../../personas/quick-deploy/install-perfsonar-testpoint/">Testpoint</a>, <a href="../../personas/quick-deploy/install-perfsonar-toolkit/">Toolkit</a>) include flowd-go as a default step.</p>
 </li>
 </ul>
 <p>For any further questions, please consult official <a href="http://docs.perfsonar.net/troubleshooting_overview.html">Troubleshooting

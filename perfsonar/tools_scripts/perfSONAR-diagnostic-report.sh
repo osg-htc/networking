@@ -52,10 +52,9 @@ setup_colors() {
         C_YELLOW='\033[0;33m'
         C_RED='\033[0;31m'
         C_CYAN='\033[1;36m'
-        C_BOLD='\033[1m'
         C_RESET='\033[0m'
     else
-        C_GREEN='' C_YELLOW='' C_RED='' C_CYAN='' C_BOLD='' C_RESET=''
+        C_GREEN='' C_YELLOW='' C_RED='' C_CYAN='' C_RESET=''
     fi
 }
 
@@ -68,8 +67,6 @@ ok()    { printf "${C_GREEN}[OK]${C_RESET} %s\n" "$*"; }
 # Section header (terminal + report)
 section() {
     local title="$1"
-    local bar
-    bar=$(printf '=%.0s' $(seq 1 ${#title}))
     {
         echo ""
         echo "========================================================================"
@@ -215,14 +212,12 @@ preflight() {
     CONF_DIR="$BASE_DIR/conf"
 
     # Container runtime detection
-    RUNTIME="" COMPOSE_CMD=""
+    RUNTIME=""
     if [[ "$DEPLOY_TYPE" == "container" ]]; then
         if command -v podman >/dev/null 2>&1; then
             RUNTIME="podman"
-            COMPOSE_CMD="podman-compose"
         elif command -v docker >/dev/null 2>&1; then
             RUNTIME="docker"
-            COMPOSE_CMD="docker compose"
         fi
     fi
 

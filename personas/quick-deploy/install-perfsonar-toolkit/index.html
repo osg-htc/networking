@@ -1461,10 +1461,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-10-post-install-validation" class="md-nav__link">
+  <a href="#step-10-install-flowd-go-for-scitags-flow-marking-recommended" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 10 – Post-Install Validation
+        Step 10 – Install flowd-go for SciTags Flow Marking (Recommended)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10 – Install flowd-go for SciTags Flow Marking (Recommended)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-using-the-helper-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install using the helper script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-flowd-go-is-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify flowd-go is running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removing-flowd-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Removing flowd-go
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-post-install-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11 – Post-Install Validation
       
     </span>
   </a>
@@ -2415,6 +2465,34 @@
     
   
     Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../perfsonar/scitags-fireflies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SciTags, Fireflies & perfSONAR
   
 
     
@@ -4397,7 +4475,97 @@ ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </
 </li>
 </ol>
 <hr />
-<h2 id="step-10-post-install-validation">Step 10 – Post-Install Validation<a class="headerlink" href="#step-10-post-install-validation" title="Permanent link">&para;</a></h2>
+<h2 id="step-10-install-flowd-go-for-scitags-flow-marking-recommended">Step 10 – Install flowd-go for SciTags Flow Marking (Recommended)<a class="headerlink" href="#step-10-install-flowd-go-for-scitags-flow-marking-recommended" title="Permanent link">&para;</a></h2>
+<p><a href="https://github.com/scitags/flowd-go">flowd-go</a> is a lightweight daemon from the
+<a href="https://www.scitags.org/">SciTags</a> initiative that tags perfSONAR network flows with experiment and
+activity metadata. When enabled, every egress packet is stamped with an IPv6 Flow Label identifying the
+generating experiment, allowing network operators to attribute and monitor measurement traffic.</p>
+<p>For background on SciTags and fireflies, see
+<a href="../../../perfsonar/scitags-fireflies/">SciTags, Fireflies, and perfSONAR</a>.</p>
+<div class="admonition tip">
+<p class="admonition-title">flowd-go is optional but recommended</p>
+<p>flowd-go installation is the default for new deployments. If you do not want SciTags flow marking,
+simply skip this step.</p>
+</div>
+<h3 id="install-using-the-helper-script">Install using the helper script<a class="headerlink" href="#install-using-the-helper-script" title="Permanent link">&para;</a></h3>
+<p>The helper script installs the flowd-go RPM, prompts for your experiment affiliation, auto-detects
+network interfaces from <code>/etc/perfSONAR-multi-nic-config.conf</code>, writes the configuration, and enables the
+service:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh
+</code></pre></div>
+<p><strong>Non-interactive mode</strong> (auto-confirm, specify experiment on command line):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--experiment-id<span class="w"> </span><span class="m">2</span><span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>List available experiment IDs:</strong></p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh<span class="w"> </span>--list-experiments
+</code></pre></div>
+<p><strong>Specify interfaces manually</strong> (overrides auto-detection):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--experiment-id<span class="w"> </span><span class="m">3</span><span class="w"> </span>--interfaces<span class="w"> </span>ens4f0np0,ens4f1np1<span class="w"> </span>--yes
+</code></pre></div>
+<details class="info">
+<summary>What the script does</summary>
+<ol>
+<li>Downloads and installs the <code>flowd-go</code> RPM from the SciTags repository</li>
+<li>Prompts for the SciTags experiment ID (ATLAS, CMS, LHCb, etc.)</li>
+<li>Auto-detects target interfaces from <code>/etc/perfSONAR-multi-nic-config.conf</code> or the routing table</li>
+<li>Writes <code>/etc/flowd-go/conf.yaml</code> with the <code>perfsonar</code> plugin and <code>marker</code> backend</li>
+<li>Enables and starts the <code>flowd-go</code> systemd service</li>
+</ol>
+</details>
+<details class="info">
+<summary>Flags reference</summary>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--experiment-id N</code></td>
+<td>SciTags experiment ID (1-14)</td>
+</tr>
+<tr>
+<td><code>--activity-id N</code></td>
+<td>Activity ID (default: 2 = network testing)</td>
+</tr>
+<tr>
+<td><code>--interfaces LIST</code></td>
+<td>Comma-separated NIC names (auto-detected if omitted)</td>
+</tr>
+<tr>
+<td><code>--list-experiments</code></td>
+<td>Show experiment IDs and exit</td>
+</tr>
+<tr>
+<td><code>--yes</code></td>
+<td>Skip interactive prompts</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>Preview without changes</td>
+</tr>
+<tr>
+<td><code>--uninstall</code></td>
+<td>Remove flowd-go and configuration</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="verify-flowd-go-is-running">Verify flowd-go is running<a class="headerlink" href="#verify-flowd-go-is-running" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>status<span class="w"> </span>flowd-go
+journalctl<span class="w"> </span>-u<span class="w"> </span>flowd-go<span class="w"> </span>--no-pager<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>show
+</code></pre></div>
+<h3 id="removing-flowd-go">Removing flowd-go<a class="headerlink" href="#removing-flowd-go" title="Permanent link">&para;</a></h3>
+<p>If you later decide to remove flowd-go:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh<span class="w"> </span>--uninstall
+</code></pre></div>
+<hr />
+<h2 id="step-11-post-install-validation">Step 11 – Post-Install Validation<a class="headerlink" href="#step-11-post-install-validation" title="Permanent link">&para;</a></h2>
 <p>Perform these checks before handing the host over to operations:</p>
 <ol>
 <li>

@@ -6,32 +6,30 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Diagnostics and fixes for high latency, low bandwidth, or slow test execution.">
       
       
-      
-        <link rel="canonical" href="https://osg-htc.org/networking/personas/troubleshoot/playbooks/performance-issues/">
-      
-      
-        <link rel="prev" href="../tests-not-running/">
+        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/scitags-fireflies/">
       
       
-        <link rel="next" href="../firewall-issues/">
+        <link rel="prev" href="../tools_scripts/">
+      
+      
+        <link rel="next" href="../tools_scripts/fasterdata-tuning/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
     
     
       
-        <title>Playbook: Performance Issues - OSG Networking Area</title>
+        <title>SciTags, Fireflies & perfSONAR - OSG Networking Area</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
       
 
@@ -50,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../../css/extra.css">
+      <link rel="stylesheet" href="../../css/extra.css">
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -80,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#playbook-performance-issues" class="md-skip">
+        <a href="#scitags-fireflies-and-perfsonar" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +92,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href="../.." title="OSG Networking Area" class="md-header__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -114,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Playbook: Performance Issues
+              SciTags, Fireflies & perfSONAR
             
           </span>
         </div>
@@ -199,7 +197,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -220,7 +218,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../quick-deploy/landing/" class="md-tabs__link">
+        <a href="../../personas/quick-deploy/landing/" class="md-tabs__link">
           
   
   
@@ -240,7 +238,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../perfsonar-in-osg/" class="md-tabs__link">
+        <a href="../../perfsonar-in-osg/" class="md-tabs__link">
           
   
   
@@ -260,7 +258,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../perfsonar/tools_scripts/fasterdata-tuning/" class="md-tabs__link">
+        <a href="../tools_scripts/fasterdata-tuning/" class="md-tabs__link">
           
   
   
@@ -276,13 +274,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../triage-checklist/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../personas/troubleshoot/triage-checklist/" class="md-tabs__link">
           
   
   
@@ -302,7 +298,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../perfsonar/psetf/" class="md-tabs__link">
+        <a href="../psetf/" class="md-tabs__link">
           
   
   
@@ -318,11 +314,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../../perfsonar/tools_scripts/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../tools_scripts/" class="md-tabs__link">
           
   
   
@@ -349,7 +347,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../features/fail2ban/" class="md-tabs__link">
+        <a href="../../features/fail2ban/" class="md-tabs__link">
           
   
   
@@ -388,7 +386,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
+    <a href="../.." title="OSG Networking Area" class="md-nav__button md-logo" aria-label="OSG Networking Area" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -418,7 +416,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -499,7 +497,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quick-deploy/landing/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/landing/" class="md-nav__link">
         
   
   
@@ -534,7 +532,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../landing/" class="md-nav__link">
+      <a href="../../personas/troubleshoot/landing/" class="md-nav__link">
         
   
   
@@ -562,7 +560,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../research/landing/" class="md-nav__link">
+      <a href="../../personas/research/landing/" class="md-nav__link">
         
   
   
@@ -658,7 +656,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar-in-osg/" class="md-nav__link">
+      <a href="../../perfsonar-in-osg/" class="md-nav__link">
         
   
   
@@ -686,7 +684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/deployment-models/" class="md-nav__link">
+      <a href="../deployment-models/" class="md-nav__link">
         
   
   
@@ -768,7 +766,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quick-deploy/landing/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/landing/" class="md-nav__link">
         
   
   
@@ -803,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/install-perfsonar-testpoint/" class="md-nav__link">
         
   
   
@@ -831,7 +829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quick-deploy/install-perfsonar-toolkit/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/install-perfsonar-toolkit/" class="md-nav__link">
         
   
   
@@ -867,7 +865,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quick-deploy/automated-setup/" class="md-nav__link">
+      <a href="../../personas/quick-deploy/automated-setup/" class="md-nav__link">
         
   
   
@@ -902,7 +900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -930,7 +928,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   
@@ -1019,7 +1017,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
+      <a href="../tools_scripts/fasterdata-tuning/" class="md-nav__link">
         
   
   
@@ -1047,7 +1045,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/multiple-nic-guidance/" class="md-nav__link">
+      <a href="../multiple-nic-guidance/" class="md-nav__link">
         
   
   
@@ -1075,7 +1073,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/packet-pacing/" class="md-nav__link">
+      <a href="../packet-pacing/" class="md-nav__link">
         
   
   
@@ -1107,31 +1105,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1149,7 +1144,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1167,7 +1162,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../triage-checklist/" class="md-nav__link">
+      <a href="../../personas/troubleshoot/triage-checklist/" class="md-nav__link">
         
   
   
@@ -1202,7 +1197,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../network-troubleshooting/" class="md-nav__link">
+      <a href="../../network-troubleshooting/" class="md-nav__link">
         
   
   
@@ -1230,7 +1225,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
+      <a href="../../network-troubleshooting/osg-debugging-document/" class="md-nav__link">
         
   
   
@@ -1255,31 +1250,28 @@
                 
   
   
-    
   
   
-  
     
     
     
     
       
       
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
         
           
-          
         
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" checked>
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
             
   
   
@@ -1297,7 +1289,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1315,7 +1307,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../container-startup/" class="md-nav__link">
+      <a href="../../personas/troubleshoot/playbooks/container-startup/" class="md-nav__link">
         
   
   
@@ -1343,7 +1335,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tests-not-running/" class="md-nav__link">
+      <a href="../../personas/troubleshoot/playbooks/tests-not-running/" class="md-nav__link">
         
   
   
@@ -1368,35 +1360,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Performance Issues
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../personas/troubleshoot/playbooks/performance-issues/" class="md-nav__link">
         
   
   
@@ -1412,179 +1379,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#playbook-performance-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Playbook: Performance Issues
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-diagnosis" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick Diagnosis
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Quick Diagnosis">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-audit-host-tuning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: Audit Host Tuning
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-2-check-nic-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: Check NIC Settings
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3-monitor-during-test" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: Monitor During Test
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-identify-bottlenecks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Identify Bottlenecks
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-5-escalate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 5: Escalate
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-solutions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common Solutions
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Common Solutions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#kernel-buffers-too-small" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Kernel Buffers Too Small
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#nic-ring-buffers-too-small" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        NIC Ring Buffers Too Small
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mtu-mismatch" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        MTU Mismatch
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#competing-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Competing Tests
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        See Also
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1597,7 +1391,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../firewall-issues/" class="md-nav__link">
+      <a href="../../personas/troubleshoot/playbooks/firewall-issues/" class="md-nav__link">
         
   
   
@@ -1694,7 +1488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/psetf/" class="md-nav__link">
+      <a href="../psetf/" class="md-nav__link">
         
   
   
@@ -1722,7 +1516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../osg-network-services/" class="md-nav__link">
+      <a href="../../osg-network-services/" class="md-nav__link">
         
   
   
@@ -1750,7 +1544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../osg-network-analytics/" class="md-nav__link">
+      <a href="../../osg-network-analytics/" class="md-nav__link">
         
   
   
@@ -1782,28 +1576,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
-        
-          
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -1821,7 +1618,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1839,7 +1636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/tools_scripts/" class="md-nav__link">
+      <a href="../tools_scripts/" class="md-nav__link">
         
   
   
@@ -1864,10 +1661,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../../perfsonar/scitags-fireflies/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SciTags, Fireflies & perfSONAR
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1883,6 +1707,142 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-scitags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are SciTags?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-fireflies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are Fireflies?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-flowd-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is flowd-go?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Is flowd-go?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-use-flowd-go-with-perfsonar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Use flowd-go with perfSONAR?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experiment-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experiment IDs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-the-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifying the Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Further Reading
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1895,7 +1855,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/tools_scripts/fasterdata-tuning/" class="md-nav__link">
+      <a href="../tools_scripts/fasterdata-tuning/" class="md-nav__link">
         
   
   
@@ -1923,7 +1883,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/tools_scripts/README-lsregistration/" class="md-nav__link">
+      <a href="../tools_scripts/README-lsregistration/" class="md-nav__link">
         
   
   
@@ -1951,7 +1911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
+      <a href="../tools_scripts/perfSONAR-update-lsregistration.sh" class="md-nav__link">
         
   
   
@@ -1979,7 +1939,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../perfsonar/tools_scripts/docker-compose.yml" class="md-nav__link">
+      <a href="../tools_scripts/docker-compose.yml" class="md-nav__link">
         
   
   
@@ -2007,7 +1967,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../tools/" class="md-nav__link">
+      <a href="../../tools/" class="md-nav__link">
         
   
   
@@ -2150,7 +2110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../features/fail2ban/" class="md-nav__link">
+      <a href="../../features/fail2ban/" class="md-nav__link">
         
   
   
@@ -2178,7 +2138,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../features/selinux/" class="md-nav__link">
+      <a href="../../features/selinux/" class="md-nav__link">
         
   
   
@@ -2206,7 +2166,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../features/nftables/" class="md-nav__link">
+      <a href="../../features/nftables/" class="md-nav__link">
         
   
   
@@ -2242,7 +2202,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../research/architecture/" class="md-nav__link">
+      <a href="../../personas/research/architecture/" class="md-nav__link">
         
   
   
@@ -2277,7 +2237,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../quick-reference/" class="md-nav__link">
+      <a href="../../quick-reference/" class="md-nav__link">
         
   
   
@@ -2359,7 +2319,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../release-notes/quick-deploy-1.4.0/" class="md-nav__link">
+      <a href="../../release-notes/quick-deploy-1.4.0/" class="md-nav__link">
         
   
   
@@ -2387,7 +2347,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../release-notes/quick-deploy-1.3.0/" class="md-nav__link">
+      <a href="../../release-notes/quick-deploy-1.3.0/" class="md-nav__link">
         
   
   
@@ -2415,7 +2375,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../release-notes/quick-deploy-1.1.0/" class="md-nav__link">
+      <a href="../../release-notes/quick-deploy-1.1.0/" class="md-nav__link">
         
   
   
@@ -2443,7 +2403,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../release-notes/quick-deploy-1.0.1/" class="md-nav__link">
+      <a href="../../release-notes/quick-deploy-1.0.1/" class="md-nav__link">
         
   
   
@@ -2471,7 +2431,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../release-notes/quick-deploy-1.0.0/" class="md-nav__link">
+      <a href="../../release-notes/quick-deploy-1.0.0/" class="md-nav__link">
         
   
   
@@ -2507,7 +2467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../web-site-management/" class="md-nav__link">
+      <a href="../../web-site-management/" class="md-nav__link">
         
   
   
@@ -2560,7 +2520,7 @@
   
   
     <li class="md-path__item">
-      <a href="../../../.." class="md-path__link">
+      <a href="../.." class="md-path__link">
         
   <span class="md-ellipsis">
     Home
@@ -2578,28 +2538,10 @@
     
     
       <li class="md-path__item">
-        <a href="../../triage-checklist/" class="md-path__link">
+        <a href="../tools_scripts/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Troubleshooting
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../container-startup/" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    Playbooks
+    Tools & Scripts
   </span>
 
         </a>
@@ -2621,198 +2563,274 @@
   
 
 
-  <h1>Performance Issues</h1>
-
-<h2 id="playbook-performance-issues">Playbook: Performance Issues<a class="headerlink" href="#playbook-performance-issues" title="Permanent link">&para;</a></h2>
-<p>!!! info "Status" This playbook is a placeholder for the <a href="../../landing/">troubleshooter persona</a>. Detailed step-by-step
-diagnostics coming soon.</p>
-<h2 id="quick-diagnosis">Quick Diagnosis<a class="headerlink" href="#quick-diagnosis" title="Permanent link">&para;</a></h2>
-<p><strong>When to use this playbook:</strong> Tests run but show high latency, low bandwidth, or slow execution times.</p>
-<h3 id="step-1-audit-host-tuning">Step 1: Audit Host Tuning<a class="headerlink" href="#step-1-audit-host-tuning" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Download and run audit</span>
-
-curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/main/docs/perfsonar/tools_scripts/fasterdata-tuning.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-o<span class="w"> </span>/tmp/fasterdata-tuning.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/fasterdata-tuning.sh
-
-<span class="c1"># Run audit (no changes)</span>
-
-/tmp/fasterdata-tuning.sh<span class="w"> </span>audit
-
-<span class="c1"># Look for yellow (warnings) and red (critical) items</span>
-</code></pre></div>
-<h3 id="step-2-check-nic-settings">Step 2: Check NIC Settings<a class="headerlink" href="#step-2-check-nic-settings" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># View interface statistics</span>
-
-ip<span class="w"> </span>-s<span class="w"> </span>link<span class="w"> </span>show
-
-<span class="c1"># Check ring buffers</span>
-
-ethtool<span class="w"> </span>-g<span class="w"> </span>eth0
-ethtool<span class="w"> </span>-g<span class="w"> </span>eth1
-
-<span class="c1"># Check offload settings (should be ON)</span>
-
-ethtool<span class="w"> </span>-k<span class="w"> </span>eth0<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;gro|gso|tso|rx-offload&#39;</span>
-
-<span class="c1"># Check MTU (should be 1500 or higher if supported)</span>
-
-ip<span class="w"> </span>link<span class="w"> </span>show<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>mtu
-</code></pre></div>
-<h3 id="step-3-monitor-during-test">Step 3: Monitor During Test<a class="headerlink" href="#step-3-monitor-during-test" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Watch CPU and memory</span>
-
-watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="s1">&#39;top -b -n 1 | head -20&#39;</span>
-
-<span class="c1"># Monitor network traffic</span>
-
-iftop<span class="w"> </span>-i<span class="w"> </span>eth0
-
-<span class="c1"># Check for packet loss/errors</span>
-
-watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="s1">&#39;ip -s link show eth0&#39;</span>
-</code></pre></div>
-<h3 id="step-4-identify-bottlenecks">Step 4: Identify Bottlenecks<a class="headerlink" href="#step-4-identify-bottlenecks" title="Permanent link">&para;</a></h3>
-<p><strong>Is it the testpoint?</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Local bandwidth test</span>
-
-iperf3<span class="w"> </span>-s
-
-<span class="c1"># (from another host)</span>
-
-iperf3<span class="w"> </span>-c<span class="w"> </span>&lt;testpoint_ip&gt;
-
-<span class="c1"># Should reach near link speed (1Gbps, 10Gbps, 100Gbps)</span>
-</code></pre></div>
-<p><strong>Is it the network path?</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Traceroute to remote testpoint</span>
-
-traceroute<span class="w"> </span>-n<span class="w"> </span>&lt;remote_testpoint&gt;
-
-<span class="c1"># MTU path discovery</span>
-
-ping<span class="w"> </span>-M<span class="w"> </span><span class="k">do</span><span class="w"> </span>-s<span class="w"> </span><span class="m">1472</span><span class="w"> </span>&lt;remote_testpoint&gt;
-
-<span class="c1"># Check for ECMP load balancing</span>
-
-mtr<span class="w"> </span>-r<span class="w"> </span>-c<span class="w"> </span><span class="m">100</span><span class="w"> </span>&lt;remote_testpoint&gt;
-</code></pre></div>
-<p><strong>Is it contention?</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check for competing traffic</span>
-
-iftop<span class="w"> </span>-i<span class="w"> </span>eth0
-
-<span class="c1"># Check qdisc</span>
-
-tc<span class="w"> </span>qdisc<span class="w"> </span>show
-
-<span class="c1"># Look at interface queue depth</span>
-
-watch<span class="w"> </span>-n<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="s1">&#39;cat /proc/net/dev | head -5&#39;</span>
-</code></pre></div>
-<h3 id="step-5-escalate">Step 5: Escalate<a class="headerlink" href="#step-5-escalate" title="Permanent link">&para;</a></h3>
-<p>If still slow, collect:</p>
+<h1 id="scitags-fireflies-and-perfsonar">SciTags, Fireflies, and perfSONAR<a class="headerlink" href="#scitags-fireflies-and-perfsonar" title="Permanent link">&para;</a></h1>
+<h2 id="what-are-scitags">What Are SciTags?<a class="headerlink" href="#what-are-scitags" title="Permanent link">&para;</a></h2>
+<p><a href="https://www.scitags.org/">SciTags</a> is an initiative by the HEP/WLCG networking community to improve
+network visibility by <strong>tagging</strong> network flows with metadata that identifies the experiment and activity
+generating them. By embedding compact identifiers — an <em>experiment ID</em> and an <em>activity ID</em> — into every
+packet of a tagged flow, network operators, site administrators, and researchers can:</p>
 <ul>
-<li>
-<p>Tuning audit: <code>/tmp/fasterdata-tuning.sh audit &gt; /tmp/audit.txt</code></p>
-</li>
-<li>
-<p>NIC stats: <code>ethtool -i eth0</code> and <code>ethtool -g eth0</code></p>
-</li>
-<li>
-<p>Local iperf results</p>
-</li>
-<li>
-<p>Test results from measurement archive</p>
-</li>
-<li>
-<p>perfSONAR logs: <code>podman logs perfsonar-testpoint | tail -100 &gt; /tmp/logs.txt</code></p>
-</li>
+<li><strong>Attribute traffic</strong> to specific scientific experiments (ATLAS, CMS, LHCb, ALICE, Belle II, DUNE, etc.).</li>
+<li><strong>Distinguish activity types</strong> such as production data transfers, analysis jobs, or network measurements.</li>
+<li><strong>Correlate</strong> network metrics with application-level behavior for faster root-cause analysis.</li>
+<li><strong>Enable smarter traffic engineering</strong> by providing information that routers, firewalls, and monitoring
+  systems can act on.</li>
 </ul>
-<p>Then contact:</p>
-<ul>
-<li>
-<p><a href="https://support.opensciencegrid.org/">OSG GOC</a> (OSG sites)</p>
-</li>
-<li>
-<p><a href="https://ggus.eu/">WLCG GGUS</a> (WLCG sites)</p>
-</li>
-</ul>
+<p>The technical specification is maintained by the
+<a href="https://www.scitags.org/">SciTags Organization</a> and documented in the
+<a href="https://docs.google.com/document/d/1x9JsZ7iTj44Ta06IHdkwpv5Q2u4U2QGLWnUeN2Zf5ts/edit">SciTags Technical Specification</a>.</p>
 <hr />
-<h2 id="common-solutions">Common Solutions<a class="headerlink" href="#common-solutions" title="Permanent link">&para;</a></h2>
-<h3 id="kernel-buffers-too-small">Kernel Buffers Too Small<a class="headerlink" href="#kernel-buffers-too-small" title="Permanent link">&para;</a></h3>
-<p><strong>Problem:</strong> <code>fasterdata-tuning.sh audit</code> shows red for <code>net.core.rmem_max</code> or <code>net.core.wmem_max</code></p>
-<p><strong>Solution:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Apply tuning</span>
-
-sudo<span class="w"> </span>/tmp/fasterdata-tuning.sh<span class="w"> </span>apply
-
-<span class="c1"># Reboot to apply qdisc changes</span>
-
-sudo<span class="w"> </span>reboot
+<h2 id="what-are-fireflies">What Are Fireflies?<a class="headerlink" href="#what-are-fireflies" title="Permanent link">&para;</a></h2>
+<p>A <strong>firefly</strong> is a lightweight UDP packet that carries metadata about a network flow. When a tagged
+application (or a daemon acting on its behalf) starts or stops a network transfer, it emits a firefly to a
+designated collector. Each firefly contains:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Experiment ID</strong></td>
+<td>Numeric identifier for the experiment or project (e.g. ATLAS = 2, CMS = 3)</td>
+</tr>
+<tr>
+<td><strong>Activity ID</strong></td>
+<td>Numeric identifier for the type of activity (e.g. data transfer, network test)</td>
+</tr>
+<tr>
+<td><strong>Source IP:port</strong></td>
+<td>Origin of the network flow</td>
+</tr>
+<tr>
+<td><strong>Destination IP:port</strong></td>
+<td>Target of the network flow</td>
+</tr>
+<tr>
+<td><strong>Protocol</strong></td>
+<td>Transport protocol (TCP, UDP)</td>
+</tr>
+<tr>
+<td><strong>State</strong></td>
+<td>Flow state: <em>start</em>, <em>ongoing</em>, or <em>end</em></td>
+</tr>
+</tbody>
+</table>
+<p>Fireflies serve two complementary purposes:</p>
+<ol>
+<li><strong>Flow announcement</strong> — Notify collectors and monitoring infrastructure that a tagged flow exists so it
+   can be tracked from start to finish.</li>
+<li><strong>Packet marking</strong> — On hosts that support it, the same metadata can be encoded into the IPv6 Flow Label
+   or IPv4 DSCP/TOS field of every packet, enabling in-network identification without deep packet
+   inspection.</li>
+</ol>
+<hr />
+<h2 id="what-is-flowd-go">What Is flowd-go?<a class="headerlink" href="#what-is-flowd-go" title="Permanent link">&para;</a></h2>
+<p><a href="https://github.com/scitags/flowd-go"><strong>flowd-go</strong></a> is a lightweight, high-performance daemon that
+implements the SciTags flow-marking and firefly-sending infrastructure. It is written in Go and ships as a
+single statically-linked binary (with embedded eBPF programs for packet marking on Linux ≥ 5.x kernels).</p>
+<h3 id="key-capabilities">Key capabilities<a class="headerlink" href="#key-capabilities" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Packet marking</strong></td>
+<td>Uses eBPF to stamp the IPv6 Flow Label on egress packets matching tracked flows</td>
+</tr>
+<tr>
+<td><strong>Firefly emission</strong></td>
+<td>Sends UDP fireflies to local or remote collectors when flows start, continue, or end</td>
+</tr>
+<tr>
+<td><strong>perfSONAR plugin</strong></td>
+<td>Built-in plugin that marks <em>all</em> egress traffic with a configured experiment/activity ID — ideal for dedicated measurement hosts</td>
+</tr>
+<tr>
+<td><strong>Low overhead</strong></td>
+<td>Statically compiled Go binary; no Python, no containers, no runtime dependencies beyond <code>libz</code> and <code>libelf</code> (typically already present)</td>
+</tr>
+<tr>
+<td><strong>RPM packaged</strong></td>
+<td>Available from the SciTags repository for EL9 (<code>x86_64</code> and <code>aarch64</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h3>
+<p>flowd-go follows a <strong>plugin → backend</strong> pipeline:</p>
+<div class="highlight"><pre><span></span><code>  ┌──────────┐       ┌──────────┐
+  │ Plugins  │──────▶│ Backends │
+  │ (sources)│       │ (sinks)  │
+  └──────────┘       └──────────┘
 </code></pre></div>
-<h3 id="nic-ring-buffers-too-small">NIC Ring Buffers Too Small<a class="headerlink" href="#nic-ring-buffers-too-small" title="Permanent link">&para;</a></h3>
-<p><strong>Problem:</strong> Packet drops during bandwidth tests</p>
-<p><strong>Solution:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check current</span>
+<ul>
+<li><strong>Plugins</strong> detect or receive flow events (API calls, eBPF socket monitoring, perfSONAR catch-all, etc.).</li>
+<li><strong>Backends</strong> act on those events: mark packets via eBPF, send fireflies, export Prometheus metrics.</li>
+</ul>
+<p>For perfSONAR deployments the recommended configuration uses the <strong>perfsonar</strong> plugin (marks all egress
+traffic) together with the <strong>marker</strong> backend (eBPF-based IPv6 Flow Label stamping).</p>
+<hr />
+<h2 id="why-use-flowd-go-with-perfsonar">Why Use flowd-go with perfSONAR?<a class="headerlink" href="#why-use-flowd-go-with-perfsonar" title="Permanent link">&para;</a></h2>
+<p>perfSONAR measurement hosts generate a significant amount of network traffic for latency, throughput, and
+traceroute tests. Without tagging, this traffic is indistinguishable from other flows traversing the same
+links. By running flowd-go alongside perfSONAR:</p>
+<ul>
+<li><strong>Network operators</strong> can instantly identify perfSONAR measurement traffic on their infrastructure.</li>
+<li><strong>Experiment coordinators</strong> can attribute network test results to specific projects.</li>
+<li><strong>Troubleshooters</strong> can correlate measurement anomalies with flow-level metadata in packet captures or
+  NetFlow/sFlow records.</li>
+</ul>
+<p>The integration is intentionally lightweight:</p>
+<ol>
+<li>Install the <code>flowd-go</code> RPM (a single package, ~5 MB).</li>
+<li>Write a small YAML configuration selecting your experiment.</li>
+<li>Enable and start the <code>flowd-go</code> systemd service.</li>
+</ol>
+<p>The helper scripts in this repository automate all three steps.</p>
+<hr />
+<h2 id="experiment-ids">Experiment IDs<a class="headerlink" href="#experiment-ids" title="Permanent link">&para;</a></h2>
+<p>The following experiment IDs are defined in the SciTags registry. Select the one that matches your site's
+primary experiment affiliation:</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Experiment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Default (no specific experiment)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ATLAS</td>
+</tr>
+<tr>
+<td>3</td>
+<td>CMS</td>
+</tr>
+<tr>
+<td>4</td>
+<td>LHCb</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ALICE</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Belle II</td>
+</tr>
+<tr>
+<td>7</td>
+<td>SKA</td>
+</tr>
+<tr>
+<td>8</td>
+<td>DUNE</td>
+</tr>
+<tr>
+<td>9</td>
+<td>LSST / Rubin Observatory</td>
+</tr>
+<tr>
+<td>10</td>
+<td>ILC</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Auger</td>
+</tr>
+<tr>
+<td>12</td>
+<td>JUNO</td>
+</tr>
+<tr>
+<td>13</td>
+<td>NOvA</td>
+</tr>
+<tr>
+<td>14</td>
+<td>XENON</td>
+</tr>
+</tbody>
+</table>
+<p>Activity ID <strong>2</strong> (network testing / perfSONAR) is used by default for perfSONAR deployments.</p>
+<hr />
+<h2 id="configuration-reference">Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permanent link">&para;</a></h2>
+<p>A minimal <code>/etc/flowd-go/conf.yaml</code> for a perfSONAR host affiliated with ATLAS:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">plugins</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">perfsonar</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">activityId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">experimentId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 
-ethtool<span class="w"> </span>-g<span class="w"> </span>eth0
-
-<span class="c1"># Increase (example for 1Gbps)</span>
-
-sudo<span class="w"> </span>ethtool<span class="w"> </span>-G<span class="w"> </span>eth0<span class="w"> </span>rx<span class="w"> </span><span class="m">4096</span><span class="w"> </span>tx<span class="w"> </span><span class="m">4096</span>
-
-<span class="c1"># Verify</span>
-
-ethtool<span class="w"> </span>-g<span class="w"> </span>eth0
-
-<span class="c1"># Make persistent (add to network config or startup script)</span>
+<span class="nt">backends</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">marker</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">targetInterfaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">ens4f0np0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ens4f1np1</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">markingStrategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">label</span>
+<span class="w">    </span><span class="nt">forceHookRemoval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
-<h3 id="mtu-mismatch">MTU Mismatch<a class="headerlink" href="#mtu-mismatch" title="Permanent link">&para;</a></h3>
-<p><strong>Problem:</strong> Path MTU discovery failing or fragmentation</p>
-<p><strong>Solution:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check MTU on all hops</span>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>plugins.perfsonar.activityId</code></td>
+<td>Activity type — use <strong>2</strong> for network testing</td>
+</tr>
+<tr>
+<td><code>plugins.perfsonar.experimentId</code></td>
+<td>Experiment affiliation (see table above)</td>
+</tr>
+<tr>
+<td><code>backends.marker.targetInterfaces</code></td>
+<td>List of NIC names whose egress traffic should be marked</td>
+</tr>
+<tr>
+<td><code>backends.marker.markingStrategy</code></td>
+<td><code>label</code> = IPv6 Flow Label (recommended)</td>
+</tr>
+<tr>
+<td><code>backends.marker.forceHookRemoval</code></td>
+<td>Remove eBPF hooks cleanly on daemon stop</td>
+</tr>
+</tbody>
+</table>
+<p>For the full set of options see the
+<a href="https://github.com/scitags/flowd-go/blob/main/rpm/flowd-go.1.md">flowd-go man page</a> and the
+<a href="https://github.com/scitags/flowd-go/blob/main/rpm/conf.yaml">default conf.yaml</a>.</p>
+<hr />
+<h2 id="verifying-the-installation">Verifying the Installation<a class="headerlink" href="#verifying-the-installation" title="Permanent link">&para;</a></h2>
+<p>After starting flowd-go, verify it is running and marking traffic:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check service status</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>flowd-go
 
-ping<span class="w"> </span>-M<span class="w"> </span><span class="k">do</span><span class="w"> </span>-s<span class="w"> </span><span class="m">1472</span><span class="w"> </span>&lt;remote_testpoint&gt;
+<span class="c1"># View recent log output</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>flowd-go<span class="w"> </span>--no-pager<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span>
 
-<span class="c1"># Adjust testpoint MTU if needed</span>
-
-sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>mtu<span class="w"> </span><span class="m">9000</span>
-
-<span class="c1"># Update interface config for persistence</span>
-
-<span class="c1"># (varies by OS/network manager)</span>
-</code></pre></div>
-<h3 id="competing-tests">Competing Tests<a class="headerlink" href="#competing-tests" title="Permanent link">&para;</a></h3>
-<p><strong>Problem:</strong> Multiple tests running simultaneously, causing slowdown</p>
-<p><strong>Solution:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check scheduled tests</span>
-
-pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class="w"> </span>localhost
-
-<span class="c1"># View test execution schedule</span>
-
-pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class="w"> </span>localhost<span class="w"> </span>--format<span class="w"> </span>json
-
-<span class="c1"># Space out high-bandwidth tests via pSConfig</span>
-
-<span class="c1"># (contact mesh administrators)</span>
+<span class="c1"># Confirm eBPF programs are attached (should show tc/qdisc entries)</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>&lt;NIC_NAME&gt;
 </code></pre></div>
 <hr />
-<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<h2 id="further-reading">Further Reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
 <ul>
-<li>
-<p><a href="../../../../host-network-tuning/">Host Tuning Guide</a></p>
-</li>
-<li>
-<p><a href="../../../../perfsonar/multiple-nic-guidance/">Multiple NIC Setup</a></p>
-</li>
-<li>
-<p><a href="../../../quick-deploy/install-perfsonar-testpoint/">Installation Guide</a></p>
-</li>
-<li>
-<p><a href="../../landing/">Troubleshooter Landing</a></p>
-</li>
+<li><a href="https://www.scitags.org/">SciTags Organization</a></li>
+<li><a href="https://docs.google.com/document/d/1x9JsZ7iTj44Ta06IHdkwpv5Q2u4U2QGLWnUeN2Zf5ts/edit">SciTags Technical Specification</a></li>
+<li><a href="https://github.com/scitags/flowd-go">flowd-go GitHub Repository</a></li>
+<li><a href="https://github.com/scitags/flowd-go/blob/main/rpm/flowd-go.1.md">flowd-go Man Page</a></li>
+<li><a href="https://docs.perfsonar.net/">perfSONAR Documentation</a></li>
 </ul>
 
 
@@ -2820,9 +2838,6 @@ pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class
 
 
 
-
-  
-  
 
 
 
@@ -2874,10 +2889,10 @@ pscheduler<span class="w"> </span>tasks<span class="w"> </span>--host<span class
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
