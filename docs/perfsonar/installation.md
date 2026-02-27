@@ -98,6 +98,14 @@ Until your host is added on https://psconfig.opensciencegrid.org to one or more 
 
 * Once installation is finished, please **reboot** the node.
 
+* **SciTags / flowd-go (Recommended):** We recommend installing [flowd-go](https://github.com/scitags/flowd-go) to tag perfSONAR measurement traffic with [SciTags](https://www.scitags.org/) experiment metadata. See [SciTags, Fireflies, and perfSONAR](scitags-fireflies.md) for details. Use the helper script:
+
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh
+    ```
+
+    To skip this step, simply omit it. The modern install guides ([Testpoint](../personas/quick-deploy/install-perfsonar-testpoint.md), [Toolkit](../personas/quick-deploy/install-perfsonar-toolkit.md)) include flowd-go as a default step.
+
 For any further questions, please consult official [Troubleshooting
 Guide](http://docs.perfsonar.net/troubleshooting_overview.html), [FAQ](http://docs.perfsonar.net/FAQ.html) as well as
 WLCG/OSG specific [FAQ](faq.md) or contact directly WLCG or OSG perfSONAR support units.

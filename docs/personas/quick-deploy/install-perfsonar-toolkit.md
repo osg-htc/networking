@@ -1469,7 +1469,90 @@ ausearch -m AVC | awk -F'avc:' '{print $2}' | sort | uniq -c | sort -rn | head -
 
 ---
 
-## Step 10 – Post-Install Validation
+## Step 10 – Install flowd-go for SciTags Flow Marking (Recommended)
+
+[flowd-go](https://github.com/scitags/flowd-go) is a lightweight daemon from the
+[SciTags](https://www.scitags.org/) initiative that tags perfSONAR network flows with experiment and
+activity metadata. When enabled, every egress packet is stamped with an IPv6 Flow Label identifying the
+generating experiment, allowing network operators to attribute and monitor measurement traffic.
+
+For background on SciTags and fireflies, see
+[SciTags, Fireflies, and perfSONAR](../../perfsonar/scitags-fireflies.md).
+
+!!! tip "flowd-go is optional but recommended"
+
+    flowd-go installation is the default for new deployments. If you do not want SciTags flow marking,
+    simply skip this step.
+
+### Install using the helper script
+
+The helper script installs the flowd-go RPM, prompts for your experiment affiliation, auto-detects
+network interfaces from `/etc/perfSONAR-multi-nic-config.conf`, writes the configuration, and enables the
+service:
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh
+```
+
+**Non-interactive mode** (auto-confirm, specify experiment on command line):
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh \
+    --experiment-id 2 --yes
+```
+
+**List available experiment IDs:**
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh --list-experiments
+```
+
+**Specify interfaces manually** (overrides auto-detection):
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh \
+    --experiment-id 3 --interfaces ens4f0np0,ens4f1np1 --yes
+```
+
+??? info "What the script does"
+
+    1. Downloads and installs the `flowd-go` RPM from the SciTags repository
+    2. Prompts for the SciTags experiment ID (ATLAS, CMS, LHCb, etc.)
+    3. Auto-detects target interfaces from `/etc/perfSONAR-multi-nic-config.conf` or the routing table
+    4. Writes `/etc/flowd-go/conf.yaml` with the `perfsonar` plugin and `marker` backend
+    5. Enables and starts the `flowd-go` systemd service
+
+??? info "Flags reference"
+
+    | Flag | Description |
+    | ---- | ----------- |
+    | `--experiment-id N` | SciTags experiment ID (1-14) |
+    | `--activity-id N` | Activity ID (default: 2 = network testing) |
+    | `--interfaces LIST` | Comma-separated NIC names (auto-detected if omitted) |
+    | `--list-experiments` | Show experiment IDs and exit |
+    | `--yes` | Skip interactive prompts |
+    | `--dry-run` | Preview without changes |
+    | `--uninstall` | Remove flowd-go and configuration |
+
+### Verify flowd-go is running
+
+```bash
+systemctl status flowd-go
+journalctl -u flowd-go --no-pager -n 20
+tc qdisc show
+```
+
+### Removing flowd-go
+
+If you later decide to remove flowd-go:
+
+```bash
+/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh --uninstall
+```
+
+---
+
+## Step 11 – Post-Install Validation
 
 Perform these checks before handing the host over to operations:
 

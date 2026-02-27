@@ -56,6 +56,7 @@ nav:
     - 'Analytics Platform': 'osg-network-analytics.md'
   - Tools & Scripts:
     - 'Overview': 'perfsonar/tools_scripts/README.md'
+    - 'SciTags, Fireflies & perfSONAR': 'perfsonar/scitags-fireflies.md'
     - 'Fasterdata Tuning Script': 'perfsonar/tools_scripts/fasterdata-tuning.md'
     - 'LS Registration Tools': 'perfsonar/tools_scripts/README-lsregistration.md'
     - 'LS Registration Updater': 'perfsonar/tools_scripts/perfSONAR-update-lsregistration.sh'
