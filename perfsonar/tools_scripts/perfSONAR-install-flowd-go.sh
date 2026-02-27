@@ -4,7 +4,7 @@ set -euo pipefail
 # perfSONAR-install-flowd-go.sh
 # Install and configure flowd-go (SciTags flow-marking daemon) for perfSONAR hosts.
 #
-# Version: 1.0.0 - 2026-02-27
+# Version: 1.1.0 - 2026-02-27
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -12,18 +12,31 @@ set -euo pipefail
 #   perfSONAR-install-flowd-go.sh [OPTIONS]
 #
 # Options:
-#   --experiment-id N   Set the SciTags experiment ID (1-14, see --list-experiments)
-#   --activity-id N     Set the SciTags activity ID (default: 2 = network testing)
-#   --interfaces LIST   Comma-separated list of NIC names for packet marking
-#                       (auto-detected from /etc/perfSONAR-multi-nic-config.conf if omitted)
-#   --list-experiments  Show available experiment IDs and exit
-#   --yes               Skip interactive prompts
-#   --dry-run           Preview actions without making changes
-#   --uninstall         Remove flowd-go and its configuration
-#   --version           Show script version
-#   --help, -h          Show this help message
+#   --experiment-id N          Set the SciTags experiment ID (1-14, see --list-experiments)
+#   --activity-id N            Set the SciTags activity ID (default: 2 = network testing)
+#   --interfaces LIST          Comma-separated list of NIC names for packet marking
+#                              (auto-detected from /etc/perfSONAR-multi-nic-config.conf if omitted)
+#   --firefly-receiver HOST    Firefly collector address for the fireflyp plugin
+#                              (default: global.scitags.org; set to empty to disable)
+#   --firefly-receiver-port N  UDP port on the firefly collector (default: 10514)
+#   --firefly-bind-port N      Local UDP port flowd-go listens on for fireflies (default: 10514)
+#   --no-firefly-receiver      Disable the fireflyp plugin entirely (eBPF marking only)
+#   --list-experiments         Show available experiment IDs and exit
+#   --yes                      Skip interactive prompts
+#   --dry-run                  Preview actions without making changes
+#   --uninstall                Remove flowd-go and its configuration
+#   --version                  Show script version
+#   --help, -h                 Show this help message
+#
+# Firefly Receiver:
+#   When --firefly-receiver is set (the default), flowd-go will also run the
+#   'fireflyp' plugin which listens for locally-emitted firefly UDP datagrams
+#   and forwards them verbatim to the configured collector. This requires
+#   flowd-go >= 2.5.0 (built after scitags/flowd-go#49 is merged). Older
+#   versions will ignore or reject the 'fireflyp' stanza; use --no-firefly-
+#   receiver if you are running an older RPM.
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 PROG_NAME="$(basename "$0")"
 LOG_FILE="/var/log/perfSONAR-install-flowd-go.log"
 
@@ -37,6 +50,13 @@ UNINSTALL=false
 MULTI_NIC_CONF="/etc/perfSONAR-multi-nic-config.conf"
 FLOWD_GO_CONF="/etc/flowd-go/conf.yaml"
 FLOWD_GO_RPM_URL="https://linuxsoft.cern.ch/repos/scitags9al-testing/x86_64/os/Packages/f/flowd-go-2.4.2-1.x86_64.rpm"
+
+# Firefly receiver defaults
+# global.scitags.org is the authoritative global SciTags firefly collector.
+# Regional DNS aliases (e.g. us-east.scitags.org) may be used in future.
+FIREFLY_RECEIVER="global.scitags.org"
+FIREFLY_RECEIVER_PORT=10514
+FIREFLY_BIND_PORT=10514
 
 # Experiment name lookup
 declare -A EXPERIMENT_NAMES=(
@@ -171,18 +191,25 @@ build_config() {
     done
     iface_yaml+="]"
 
-    cat <<EOF
-plugins:
-  perfsonar:
-    activityId: $ACTIVITY_ID
-    experimentId: $EXPERIMENT_ID
+    # Build optional fireflyp plugin block
+    # Requires flowd-go >= 2.5.0 (scitags/flowd-go#49).
+    local fireflyp_block=""
+    if [ -n "$FIREFLY_RECEIVER" ]; then
+        fireflyp_block=$(printf '  fireflyp:\n    bindAddress: "127.0.0.1"\n    bindPort: %s\n    fireflyReceivers:\n      - address: "%s"\n        port: %s\n' \
+            "$FIREFLY_BIND_PORT" "$FIREFLY_RECEIVER" "$FIREFLY_RECEIVER_PORT")
+    fi
 
-backends:
-  marker:
-    targetInterfaces: $iface_yaml
-    markingStrategy: label
-    forceHookRemoval: true
-EOF
+    local plugins_block
+    if [ -n "$fireflyp_block" ]; then
+        plugins_block=$(printf 'plugins:\n  perfsonar:\n    activityId: %s\n    experimentId: %s\n%s' \
+            "$ACTIVITY_ID" "$EXPERIMENT_ID" "$fireflyp_block")
+    else
+        plugins_block=$(printf 'plugins:\n  perfsonar:\n    activityId: %s\n    experimentId: %s' \
+            "$ACTIVITY_ID" "$EXPERIMENT_ID")
+    fi
+
+    printf '%s\n\nbackends:\n  marker:\n    targetInterfaces: %s\n    markingStrategy: label\n    forceHookRemoval: true\n' \
+        "$plugins_block" "$iface_yaml"
 }
 
 install_flowd_go() {
@@ -254,6 +281,12 @@ install_flowd_go() {
     echo "flowd-go is now marking egress traffic on interfaces: $INTERFACES"
     echo "  Experiment: ${EXPERIMENT_NAMES[$EXPERIMENT_ID]} (ID=$EXPERIMENT_ID)"
     echo "  Activity:   network testing (ID=$ACTIVITY_ID)"
+    if [ -n "$FIREFLY_RECEIVER" ]; then
+        echo "  Firefly collector: $FIREFLY_RECEIVER:$FIREFLY_RECEIVER_PORT"
+        echo "  (fireflyp plugin forwards locally-received fireflies to the collector)"
+    else
+        echo "  Firefly collector: disabled (eBPF packet marking only)"
+    fi
     echo
     echo "Verify with:"
     echo "  systemctl status flowd-go"
@@ -309,6 +342,18 @@ parse_cli() {
             --interfaces)
                 INTERFACES="${2:-}"
                 shift 2 ;;
+            --firefly-receiver)
+                FIREFLY_RECEIVER="${2:-}"
+                shift 2 ;;
+            --firefly-receiver-port)
+                FIREFLY_RECEIVER_PORT="${2:-10514}"
+                shift 2 ;;
+            --firefly-bind-port)
+                FIREFLY_BIND_PORT="${2:-10514}"
+                shift 2 ;;
+            --no-firefly-receiver)
+                FIREFLY_RECEIVER=""
+                shift ;;
             --list-experiments)
                 list_experiments
                 exit 0 ;;

@@ -1785,6 +1785,45 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#firefly-collectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firefly Collectors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Firefly Collectors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#esnet-stardust-the-global-scitags-monitoring-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESnet Stardust — the global SciTags monitoring platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-aliases-for-collectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS Aliases for Collectors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-use-flowd-go-with-perfsonar" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1814,6 +1853,45 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Configuration Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-configuration-flowd-go-24x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current configuration (flowd-go ≤ 2.4.x)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-configuration-flowd-go-250-after-scitagsflowd-go49" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended configuration (flowd-go ≥ 2.5.0, after scitags/flowd-go#49)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-key-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration key reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2653,6 +2731,10 @@ single statically-linked binary (with embedded eBPF programs for packet marking 
 <td>Built-in plugin that marks <em>all</em> egress traffic with a configured experiment/activity ID — ideal for dedicated measurement hosts</td>
 </tr>
 <tr>
+<td><strong>fireflyp plugin</strong></td>
+<td>Listens for incoming firefly UDP datagrams and relays them verbatim to one or more upstream collectors (global or regional) before processing them locally — requires flowd-go ≥ 2.5.0</td>
+</tr>
+<tr>
 <td><strong>Low overhead</strong></td>
 <td>Statically compiled Go binary; no Python, no containers, no runtime dependencies beyond <code>libz</code> and <code>libelf</code> (typically already present)</td>
 </tr>
@@ -2670,11 +2752,76 @@ single statically-linked binary (with embedded eBPF programs for packet marking 
   └──────────┘       └──────────┘
 </code></pre></div>
 <ul>
-<li><strong>Plugins</strong> detect or receive flow events (API calls, eBPF socket monitoring, perfSONAR catch-all, etc.).</li>
+<li><strong>Plugins</strong> detect or receive flow events (API calls, eBPF socket monitoring, perfSONAR catch-all,
+  incoming firefly datagrams, etc.).</li>
 <li><strong>Backends</strong> act on those events: mark packets via eBPF, send fireflies, export Prometheus metrics.</li>
 </ul>
+<p>For perfSONAR deployments the full pipeline is:</p>
+<div class="highlight"><pre><span></span><code>  perfSONAR tests
+       │
+       ▼
+  ┌──────────────┐   all flows    ┌──────────────────────┐
+  │ perfsonar    │──────────────▶ │ marker backend       │
+  │ plugin       │                │ (eBPF IPv6 label)    │
+  └──────────────┘                └──────────────────────┘
+
+  Local applications
+  (pScheduler etc.)
+       │ UDP firefly
+       ▼
+  ┌──────────────┐   forward      ┌──────────────────────┐
+  │ fireflyp     │──────────────▶ │ global.scitags.org   │
+  │ plugin       │                │ (UDP collector)      │
+  └──────────────┘                └──────────────────────┘
+</code></pre></div>
 <p>For perfSONAR deployments the recommended configuration uses the <strong>perfsonar</strong> plugin (marks all egress
-traffic) together with the <strong>marker</strong> backend (eBPF-based IPv6 Flow Label stamping).</p>
+traffic) together with the <strong>marker</strong> backend (eBPF-based IPv6 Flow Label stamping) and the <strong>fireflyp</strong>
+plugin (forwarding firefly announcements to regional or global collectors).</p>
+<hr />
+<h2 id="firefly-collectors">Firefly Collectors<a class="headerlink" href="#firefly-collectors" title="Permanent link">&para;</a></h2>
+<p>A <strong>firefly collector</strong> is a UDP service that receives firefly datagrams and uses them to build a real-time
+view of active flows across the network. Collectors can be operated at site, regional, or global scope.</p>
+<h3 id="esnet-stardust-the-global-scitags-monitoring-platform">ESnet Stardust — the global SciTags monitoring platform<a class="headerlink" href="#esnet-stardust-the-global-scitags-monitoring-platform" title="Permanent link">&para;</a></h3>
+<p>Firefly datagrams sent to <code>global.scitags.org</code> are ingested by the
+<strong><a href="https://stardust.es.net/">ESnet Stardust</a></strong> platform, which provides a
+<a href="https://dashboard.stardust.es.net/goto/dfejd22wk1k3kb?orgId=2">Scientific Network Tags dashboard</a>
+showing real-time and historical flow counts broken down by experiment and activity across all
+participating sites.</p>
+<blockquote>
+<p><strong>The <code>fireflyp</code> plugin is the only mechanism by which perfSONAR measurement flows appear in
+Stardust.</strong> eBPF packet marking alone (the <code>marker</code> backend) stamps packets in-flight but does
+<em>not</em> notify any collector. Only when flowd-go also runs the <code>fireflyp</code> plugin — forwarding
+locally-emitted firefly datagrams to <code>global.scitags.org</code> — will the flows be visible in the
+Stardust monitoring system.</p>
+</blockquote>
+<h3 id="dns-aliases-for-collectors">DNS Aliases for Collectors<a class="headerlink" href="#dns-aliases-for-collectors" title="Permanent link">&para;</a></h3>
+<p>The SciTags community maintains DNS aliases that abstract the physical location of collectors:</p>
+<table>
+<thead>
+<tr>
+<th>DNS Name</th>
+<th>Scope</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>global.scitags.org</code></td>
+<td>Global</td>
+<td>Authoritative collector; <strong>default for new deployments</strong></td>
+</tr>
+<tr>
+<td>Regional aliases</td>
+<td>Regional</td>
+<td>Future DNS aliases (e.g. <code>us-east.scitags.org</code>) for lower-latency forwarding</td>
+</tr>
+</tbody>
+</table>
+<p>Using DNS aliases rather than hard-coded IPs allows seamless collector migrations and regional
+redirection without reconfiguring every participating host.</p>
+<p><strong>Default recommendation</strong>: configure <code>global.scitags.org</code> as the firefly receiver. When regional
+collectors are operational they will be announced as new DNS aliases; updating a single configuration
+key is all that will be required to switch.</p>
 <hr />
 <h2 id="why-use-flowd-go-with-perfsonar">Why Use flowd-go with perfSONAR?<a class="headerlink" href="#why-use-flowd-go-with-perfsonar" title="Permanent link">&para;</a></h2>
 <p>perfSONAR measurement hosts generate a significant amount of network traffic for latency, throughput, and
@@ -2685,6 +2832,9 @@ links. By running flowd-go alongside perfSONAR:</p>
 <li><strong>Experiment coordinators</strong> can attribute network test results to specific projects.</li>
 <li><strong>Troubleshooters</strong> can correlate measurement anomalies with flow-level metadata in packet captures or
   NetFlow/sFlow records.</li>
+<li><strong>ESnet Stardust</strong> will display perfSONAR measurement flows in its
+  <a href="https://dashboard.stardust.es.net/goto/dfejd22wk1k3kb?orgId=2">SciTags dashboard</a>
+  — but <strong>only if the fireflyp plugin is configured and forwarding to <code>global.scitags.org</code></strong>.</li>
 </ul>
 <p>The integration is intentionally lightweight:</p>
 <ol>
@@ -2692,7 +2842,8 @@ links. By running flowd-go alongside perfSONAR:</p>
 <li>Write a small YAML configuration selecting your experiment.</li>
 <li>Enable and start the <code>flowd-go</code> systemd service.</li>
 </ol>
-<p>The helper scripts in this repository automate all three steps.</p>
+<p>The helper scripts in this repository automate all three steps and configure the <code>fireflyp</code> plugin with
+<code>global.scitags.org</code> as the firefly collector by default.</p>
 <hr />
 <h2 id="experiment-ids">Experiment IDs<a class="headerlink" href="#experiment-ids" title="Permanent link">&para;</a></h2>
 <p>The following experiment IDs are defined in the SciTags registry. Select the one that matches your site's
@@ -2766,11 +2917,54 @@ primary experiment affiliation:</p>
 <p>Activity ID <strong>2</strong> (network testing / perfSONAR) is used by default for perfSONAR deployments.</p>
 <hr />
 <h2 id="configuration-reference">Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permanent link">&para;</a></h2>
-<p>A minimal <code>/etc/flowd-go/conf.yaml</code> for a perfSONAR host affiliated with ATLAS:</p>
+<h3 id="current-configuration-flowd-go-24x">Current configuration (flowd-go ≤ 2.4.x)<a class="headerlink" href="#current-configuration-flowd-go-24x" title="Permanent link">&para;</a></h3>
+<p>A minimal <code>/etc/flowd-go/conf.yaml</code> for a perfSONAR host affiliated with ATLAS using the current
+released RPM:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">plugins</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">perfsonar</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">activityId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">    </span><span class="nt">experimentId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+
+<span class="nt">backends</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">marker</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">targetInterfaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">ens4f0np0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ens4f1np1</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">markingStrategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">label</span>
+<span class="w">    </span><span class="nt">forceHookRemoval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h3 id="recommended-configuration-flowd-go-250-after-scitagsflowd-go49">Recommended configuration (flowd-go ≥ 2.5.0, after scitags/flowd-go#49)<a class="headerlink" href="#recommended-configuration-flowd-go-250-after-scitagsflowd-go49" title="Permanent link">&para;</a></h3>
+<p>Once the updated RPM is available, the preferred configuration adds the <strong><code>fireflyp</code></strong> plugin so that
+locally-emitted firefly datagrams (from perfSONAR tools, pScheduler, or any application) are forwarded
+to the global SciTags collector:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">plugins</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">perfsonar</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">activityId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">experimentId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">fireflyp</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bindAddress</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
+<span class="w">    </span><span class="nt">bindPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10514</span>
+<span class="w">    </span><span class="nt">fireflyReceivers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;global.scitags.org&quot;</span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10514</span>
+
+<span class="nt">backends</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">marker</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">targetInterfaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">ens4f0np0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">ens4f1np1</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">markingStrategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">label</span>
+<span class="w">    </span><span class="nt">forceHookRemoval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<p>For a regional collector instead of the global one, replace the <code>address</code> value with the relevant
+regional DNS alias.</p>
+<h3 id="configuration-key-reference">Configuration key reference<a class="headerlink" href="#configuration-key-reference" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">plugins</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">perfsonar</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">activityId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">experimentId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">fireflyp</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">bindAddress</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;127.0.0.1&quot;</span>
+<span class="w">    </span><span class="nt">bindPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10514</span>
+<span class="w">    </span><span class="nt">fireflyReceivers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;global.scitags.org&quot;</span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10514</span>
 
 <span class="nt">backends</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">marker</span><span class="p">:</span>
@@ -2795,6 +2989,26 @@ primary experiment affiliation:</p>
 <td>Experiment affiliation (see table above)</td>
 </tr>
 <tr>
+<td><code>plugins.fireflyp.bindAddress</code></td>
+<td>Address the firefly listener binds to (<code>127.0.0.1</code> for local-only)</td>
+</tr>
+<tr>
+<td><code>plugins.fireflyp.bindPort</code></td>
+<td>UDP port flowd-go listens on for incoming fireflies (default: 10514)</td>
+</tr>
+<tr>
+<td><code>plugins.fireflyp.fireflyReceivers</code></td>
+<td>List of upstream collectors to forward fireflies to</td>
+</tr>
+<tr>
+<td><code>plugins.fireflyp.fireflyReceivers[].address</code></td>
+<td>Collector hostname or IP (use <code>global.scitags.org</code> for the default global collector)</td>
+</tr>
+<tr>
+<td><code>plugins.fireflyp.fireflyReceivers[].port</code></td>
+<td>Collector UDP port (default: 10514)</td>
+</tr>
+<tr>
 <td><code>backends.marker.targetInterfaces</code></td>
 <td>List of NIC names whose egress traffic should be marked</td>
 </tr>
@@ -2808,6 +3022,12 @@ primary experiment affiliation:</p>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p><strong>Note</strong>: The <code>fireflyp.fireflyReceivers</code> key requires <strong>flowd-go ≥ 2.5.0</strong>.
+The <code>perfSONAR-install-flowd-go.sh</code> helper script automatically includes this stanza
+and defaults to <code>global.scitags.org</code>. Pass <code>--no-firefly-receiver</code> when using an
+older RPM.</p>
+</blockquote>
 <p>For the full set of options see the
 <a href="https://github.com/scitags/flowd-go/blob/main/rpm/flowd-go.1.md">flowd-go man page</a> and the
 <a href="https://github.com/scitags/flowd-go/blob/main/rpm/conf.yaml">default conf.yaml</a>.</p>
@@ -2830,6 +3050,9 @@ tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </sp
 <li><a href="https://docs.google.com/document/d/1x9JsZ7iTj44Ta06IHdkwpv5Q2u4U2QGLWnUeN2Zf5ts/edit">SciTags Technical Specification</a></li>
 <li><a href="https://github.com/scitags/flowd-go">flowd-go GitHub Repository</a></li>
 <li><a href="https://github.com/scitags/flowd-go/blob/main/rpm/flowd-go.1.md">flowd-go Man Page</a></li>
+<li><a href="https://github.com/scitags/flowd-go/pull/49">fireflyp plugin PR — configurable UDP forwarding</a></li>
+<li><a href="https://stardust.es.net/">ESnet Stardust Platform</a></li>
+<li><a href="https://dashboard.stardust.es.net/goto/dfejd22wk1k3kb?orgId=2">ESnet Stardust SciTags Dashboard</a></li>
 <li><a href="https://docs.perfsonar.net/">perfSONAR Documentation</a></li>
 </ul>
 
