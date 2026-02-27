@@ -4,17 +4,93 @@ This directory contains helper scripts for perfSONAR deployment, configuration, 
 
 ## Available tools
 
+### Deployment orchestrators
+
+Two orchestrator scripts cover the two perfSONAR deployment models. Choose the right one
+for your site — they are not interchangeable:
+
+| Script | Deployment model | When to use |
+|--------|-----------------|-------------|
+| **[perfSONAR-orchestrator.sh](#container-based-deployment-orchestrator)** | Container (podman) | New hosts; preferred for RHEL 9 minimal installs; full Let's Encrypt automation |
+| **[perfSONAR-toolkit-install.sh](#rpm-toolkit-installer)** | RPM (dnf / perfsonar-toolkit) | Sites that require the full web GUI; existing RPM-managed infrastructure |
+
+### Helper and utility scripts
+
 | Tool | Version | Purpose | Documentation |
 |------|---------|---------|---------------|
+| **perfSONAR-orchestrator.sh** | v1.1.2 | Container testpoint orchestrator | [Container deployment](#container-based-deployment-orchestrator) |
+| **perfSONAR-toolkit-install.sh** | v1.0.0 | RPM toolkit guided installer | [RPM toolkit deployment](#rpm-toolkit-installer) |
 | **fasterdata-tuning.sh** | v1.3.1 | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
 | **perfSONAR-pbr-nm.sh** | — | Multi-NIC policy-based routing | [Multiple NIC Guidance](../multiple-nic-guidance.md) |
 | **perfSONAR-update-lsregistration.sh** | — | LS registration management | [LS Registration Tools](README-lsregistration.md) |
-| **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment | [Installation Guides](../../personas/quick-deploy/landing.md) |
+| **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment (container + RPM) | [Installation Guides](../../personas/quick-deploy/landing.md) |
 | **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
 | **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
-| **perfSONAR-install-flowd-go.sh** | v1.0.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
+| **perfSONAR-install-flowd-go.sh** | v1.1.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
 
-**Latest Updates**: v1.2.0 (Dec 2025) adds save/restore state management to fasterdata-tuning.sh
+**Latest Updates**: v1.0.0 (Feb 2026) adds `perfSONAR-toolkit-install.sh` for RPM-based toolkit deployments.
+
+---
+
+## Container-based deployment (Orchestrator)
+
+`perfSONAR-orchestrator.sh` installs the perfSONAR testpoint **as a container** (podman) on a
+minimal EL9 host. It handles podman installation, opt-in Let's Encrypt (standalone certbot container),
+multi-NIC PBR, nftables, flowd-go, and pSConfig enrollment.
+
+```bash
+# Option A — testpoint only (self-signed cert)
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh \
+  | sudo bash -s -- --option A --experiment-id 2 --non-interactive
+
+# Option B — testpoint + Let's Encrypt
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh \
+  | sudo bash -s -- --option B --fqdn ps.example.org --email admin@example.org \
+      --experiment-id 2 --non-interactive
+```
+
+Flags: `--option {A|B}`, `--fqdn`, `--email`, `--experiment-id N`, `--no-flowd-go`,
+`--non-interactive`, `--yes`, `--dry-run`, `--auto-update`
+
+---
+
+## RPM Toolkit Installer
+
+`perfSONAR-toolkit-install.sh` installs the perfSONAR **RPM toolkit bundle** (`perfsonar-toolkit`
+or another bundle) directly on EL9 via dnf. This gives the full web-based admin GUI and is the
+correct path for sites that want a traditional package-managed deployment.
+
+Differences from the container orchestrator:
+
+| | Container (orchestrator) | RPM Toolkit (toolkit-install) |
+|-|--------------------------|--------------------------------|
+| perfSONAR delivery | podman image | RPM packages |
+| Web GUI | No (testpoint only) | Yes (Apache + PHP) |
+| Let's Encrypt | certbot container + Apache patch | certbot RPM + apache RPM module |
+| pSConfig exec | `podman exec … psconfig` | `psconfig` directly on host |
+| Auto-update | Podman image pull timer | dnf-automatic |
+
+```bash
+# Quick start — full toolkit, ATLAS (experiment 1), no LE cert
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
+  | sudo bash -s -- --experiment-id 1 --non-interactive
+
+# With Let's Encrypt
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
+  | sudo bash -s -- --fqdn ps.example.org --email admin@example.org \
+      --experiment-id 1 --non-interactive
+
+# testpoint bundle only (no web GUI), dry-run first
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
+  | sudo bash -s -- --bundle testpoint --dry-run
+```
+
+Flags: `--bundle {toolkit|testpoint|core|tools}`, `--fqdn`, `--email`, `--experiment-id N`,
+`--no-flowd-go`, `--non-interactive`, `--yes`, `--dry-run`
+
+> **RHEL 9 note**: The perfSONAR automated install script (`downloads.perfsonar.net/install`)
+> does not enable CodeReady Builder on Satellite-managed RHEL systems.  
+> `perfSONAR-toolkit-install.sh` handles this automatically via `subscription-manager`.
 
 ---
 
