@@ -1484,6 +1484,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#esnet-stardust-integration-fireflyp-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESnet Stardust Integration (fireflyp plugin)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#verify-flowd-go-is-running" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3387,10 +3398,17 @@ dnf<span class="w"> </span>clean<span class="w"> </span>all
 <p>Installation takes approximately 5-10 minutes depending on network speed.</p>
 <details class="info">
 <summary>Alternative automated installation</summary>
-<p>perfSONAR provides a one-line automated installer script:
+<p>The OSG toolkit install script automates Steps 2.1–10 in a single run.
+It handles RHEL/AlmaLinux CRB detection, installs all prerequisites,
+runs post-install configuration, and optionally installs flowd-go:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive
+</code></pre></div>
+<p>See the <a href="../../../perfsonar/tools_scripts/">tools_scripts README</a> for full
+flag documentation and the pre-installation checklist.</p>
+<p>If you prefer the upstream perfSONAR minimal installer (repos + bundle only):
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>https://downloads.perfsonar.net/install<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span>-s<span class="w"> </span>-<span class="w"> </span>toolkit
 </code></pre></div></p>
-<p>This script performs the same steps as above (configure repos + install bundle).</p>
 </details>
 <h3 id="step-23-run-post-install-configuration-scripts">Step 2.3 – Run Post-Install Configuration Scripts<a class="headerlink" href="#step-23-run-post-install-configuration-scripts" title="Permanent link">&para;</a></h3>
 <p>The toolkit bundle includes configuration scripts that must be run after installation:</p>
@@ -4510,10 +4528,36 @@ service:</p>
 <li>Downloads and installs the <code>flowd-go</code> RPM from the SciTags repository</li>
 <li>Prompts for the SciTags experiment ID (ATLAS, CMS, LHCb, etc.)</li>
 <li>Auto-detects target interfaces from <code>/etc/perfSONAR-multi-nic-config.conf</code> or the routing table</li>
-<li>Writes <code>/etc/flowd-go/conf.yaml</code> with the <code>perfsonar</code> plugin and <code>marker</code> backend</li>
+<li>Writes <code>/etc/flowd-go/conf.yaml</code> with the <code>perfsonar</code> plugin, <code>marker</code> backend, and (if supported) the <code>fireflyp</code> plugin</li>
 <li>Enables and starts the <code>flowd-go</code> systemd service</li>
 </ol>
 </details>
+<h3 id="esnet-stardust-integration-fireflyp-plugin">ESnet Stardust Integration (fireflyp plugin)<a class="headerlink" href="#esnet-stardust-integration-fireflyp-plugin" title="Permanent link">&para;</a></h3>
+<p>The <code>fireflyp</code> plugin is an optional flowd-go component that <strong>forwards IPv6 firefly datagrams</strong> to a
+central SciTags collector. The default target is <code>global.scitags.org:10514</code>, the authoritative global
+aggregation service operated by the SciTags project. Flows forwarded there become visible in
+<a href="https://stardust.es.net/">ESnet Stardust</a>, ESnet's network-level flow visualization platform, allowing
+collaborators and network operators to attribute traffic to specific experiments.</p>
+<div class="admonition warning">
+<p class="admonition-title">fireflyp requires flowd-go ≥ 2.5.0</p>
+<p>The <code>fireflyp</code> plugin is only available in flowd-go builds that include
+<a href="https://github.com/scitags/flowd-go/issues/49">scitags/flowd-go#49</a>.
+The current RPM release (2.4.2) does <strong>not</strong> include this plugin.</p>
+<ul>
+<li>If you are running <strong>2.4.2</strong>, pass <code>--no-firefly-receiver</code> to the install script to disable
+  the fireflyp stanza (eBPF flow marking still works; datagrams just are not forwarded upstream).</li>
+<li>Once a ≥ 2.5.0 RPM is published, re-run the install script or manually add the <code>fireflyp</code>
+  stanza to <code>/etc/flowd-go/conf.yaml</code>.</li>
+</ul>
+</div>
+<p><strong>Install with fireflyp enabled</strong> (flowd-go ≥ 2.5.0):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--firefly-receiver<span class="w"> </span>global.scitags.org<span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>Install without fireflyp</strong> (current 2.4.2 RPM):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--no-firefly-receiver<span class="w"> </span>--yes
+</code></pre></div>
 <details class="info">
 <summary>Flags reference</summary>
 <table>
@@ -4539,6 +4583,18 @@ service:</p>
 <tr>
 <td><code>--list-experiments</code></td>
 <td>Show experiment IDs and exit</td>
+</tr>
+<tr>
+<td><code>--firefly-receiver HOST</code></td>
+<td>Firefly collector address (default: <code>global.scitags.org</code>)</td>
+</tr>
+<tr>
+<td><code>--firefly-receiver-port N</code></td>
+<td>UDP port on the collector (default: 10514)</td>
+</tr>
+<tr>
+<td><code>--no-firefly-receiver</code></td>
+<td>Disable fireflyp plugin (eBPF marking only; use with flowd-go 2.4.x)</td>
 </tr>
 <tr>
 <td><code>--yes</code></td>
@@ -4709,7 +4765,7 @@ Send this file to your support contact for remote analysis.</p>
 <p>Track certificate expiry with <code>certbot renew --dry-run</code> if you rely on Let's Encrypt (automatic renewal is configured but monitoring is recommended).</p>
 </li>
 <li>
-<p>Review container logs periodically for errors: <code>podman logs perfsonar-testpoint</code> and <code>podman logs certbot</code>.</p>
+<p>Review service logs periodically for errors: <code>journalctl -u pscheduler-scheduler -n 50</code> and <code>journalctl -u flowd-go -n 50</code>.</p>
 </li>
 <li>
 <p>Verify auto-update timer is active: <code>systemctl list-timers perfsonar-auto-update.timer</code>.</p>

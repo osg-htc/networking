@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.1.2
+# Version: 1.1.3
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -117,6 +117,19 @@ step_packages() {
     return
   fi
   if command -v dnf >/dev/null 2>&1; then
+    # Enable CodeReady Builder (CRB) — required on EL9 for several deps.
+    # RHEL uses subscription-manager; Alma/Rocky/CentOS use dnf config-manager.
+    # The perfSONAR auto-install script only attempts the dnf config-manager path,
+    # which silently fails on Satellite-managed RHEL systems.
+    if grep -qsi 'Red Hat Enterprise Linux' /etc/os-release; then
+      log "RHEL detected — enabling CodeReady Builder via subscription-manager"
+      run subscription-manager repos --enable "codeready-builder-for-rhel-9-$(uname -m)-rpms" || \
+        log "WARNING: subscription-manager CRB enable failed (may already be enabled, or system not registered)"
+    else
+      log "Non-RHEL EL9 detected — enabling CRB via dnf config-manager"
+      run dnf config-manager --set-enabled crb || \
+        log "WARNING: 'crb' repo not found; continuing anyway"
+    fi
     run dnf -y install "${RECOMMENDED_PACKAGES[@]}"
   else
     log "dnf not found; please install packages manually."
