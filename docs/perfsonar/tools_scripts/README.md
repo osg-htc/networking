@@ -73,13 +73,18 @@ Differences from the container orchestrator:
 
 ```bash
 # Quick start — full toolkit, ATLAS (experiment 1), no LE cert
+# (Includes exporter endpoint ACL protection by default for AGLT2 + CERN)
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
   | sudo bash -s -- --experiment-id 1 --non-interactive
 
-# With exporter endpoint protection (recommended: AGLT2 + CERN subnets, matches container model)
+# Override default exporter allow-list with custom subnets
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
   | sudo bash -s -- --experiment-id 1 --non-interactive \
-      --exporter-allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48"
+      --exporter-allowlist "YOUR_SUBNET_1,YOUR_SUBNET_2"
+
+# Disable exporter endpoint ACL protection (not recommended)
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
+  | sudo bash -s -- --experiment-id 1 --non-interactive --no-exporter-acls
 
 # With Let's Encrypt
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
@@ -92,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perf
 ```
 
 Flags: `--bundle {toolkit|testpoint|core|tools}`, `--fqdn`, `--email`, `--experiment-id N`,
-`--no-flowd-go`, `--exporter-allowlist "CIDR1,CIDR2,..."`, `--non-interactive`, `--yes`, `--dry-run`
+`--no-flowd-go`, `--exporter-allowlist "CIDR1,CIDR2,..."` (override defaults), `--no-exporter-acls` (disable protection), `--non-interactive`, `--yes`, `--dry-run`
 
 > **RHEL 9 note**: The perfSONAR automated install script (`downloads.perfsonar.net/install`)
 > does not enable CodeReady Builder on Satellite-managed RHEL systems.  

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.3
+# Version: 1.1.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -34,8 +34,10 @@ set -euo pipefail
 #   --experiment-id N      SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
 #   --no-firefly-receiver  Disable fireflyp plugin in flowd-go config (use with flowd-go 2.4.x RPM)
 #                          Requires flowd-go >= 2.5.0; omit with current 2.4.2 RPM to avoid errors
-#   --exporter-allowlist   Comma-separated CIDRs/IPs allowed to access exporter endpoints
+#   --exporter-allowlist   Override default exporter endpoint allow-list (comma-separated CIDRs/IPs)
+#                          Default: AGLT2 + CERN monitoring subnets (matching container protection)
 #                          (/node_exporter/metrics and /perfsonar_host_exporter/)
+#   --no-exporter-acls     Disable exporter endpoint ACL protection (not recommended)
 #
 # Log:
 #   /var/log/perfsonar-toolkit-install.log
@@ -47,10 +49,14 @@ NON_INTERACTIVE=false
 INSTALL_FLOWD_GO=true
 FLOWD_GO_EXPERIMENT_ID=""
 NO_FIREFLY_RECEIVER=false
-EXPORTER_ALLOWLIST=""
+NO_EXPORTER_ACLS=false
 BUNDLE="toolkit"
 LE_FQDN=""
 LE_EMAIL=""
+
+# Default exporter endpoint ACL allow-list (AGLT2 + CERN, matching container)
+DEFAULT_EXPORTER_ALLOWLIST="192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48"
+EXPORTER_ALLOWLIST="$DEFAULT_EXPORTER_ALLOWLIST"
 
 # Repo + package constants
 PERFSONA_REPO_URL="http://software.internet2.edu/rpms/el9/x86_64/latest/packages/perfsonar-repo-0.11-1.noarch.rpm"
@@ -104,6 +110,7 @@ parse_cli() {
       --experiment-id)       FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
       --no-firefly-receiver) NO_FIREFLY_RECEIVER=true; shift;;
       --exporter-allowlist)  EXPORTER_ALLOWLIST="${2:-}"; shift 2;;
+      --no-exporter-acls)    NO_EXPORTER_ACLS=true; EXPORTER_ALLOWLIST=""; shift;;
       --help|-h)        sed -n '1,80p' "$0"; exit 0;;
       *) echo "Unknown argument: $1" >&2; exit 2;;
     esac
@@ -243,8 +250,10 @@ step_security() {
   fi
   run "${sec_cmd[@]}" || true
 
-  if [ -n "$EXPORTER_ALLOWLIST" ]; then
-    log "Restricting exporter endpoints (/node_exporter/metrics, /perfsonar_host_exporter/) to monitoring subnets: $EXPORTER_ALLOWLIST"
+  if [ "$NO_EXPORTER_ACLS" = true ]; then
+    log "WARNING: Exporter endpoint ACL protection is DISABLED (--no-exporter-acls). Both /node_exporter/metrics and /perfsonar_host_exporter/ will be accessible from any HTTPS client. This is not recommended."
+  else
+    log "Protecting exporter endpoints (/node_exporter/metrics, /perfsonar_host_exporter/) with ACLs for: $EXPORTER_ALLOWLIST"
     if [ -x "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" ]; then
       run "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" \
         --allowlist "$EXPORTER_ALLOWLIST" --yes || true
@@ -252,8 +261,6 @@ step_security() {
     else
       log "WARNING: perfSONAR-configure-exporter-acls.sh not found; skipping exporter ACL configuration."
     fi
-  else
-    log "Exporter endpoint ACL protection not configured. Use --exporter-allowlist to restrict access (e.g., --exporter-allowlist \"192.41.230.0/23,2001:48a8:68f7::/50\")."
   fi
 }
 
