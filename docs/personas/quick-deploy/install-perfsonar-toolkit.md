@@ -175,11 +175,11 @@ Installation takes approximately 5-10 minutes depending on network speed.
         | sudo bash -s -- --experiment-id 1 --non-interactive
     ```
 
-    To harden exporter endpoints with explicit monitoring subnets at install time:
+    To protect exporter endpoints by restricting access to monitoring subnets (AGLT2 and CERN):
     ```bash
     curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
         | sudo bash -s -- --experiment-id 1 --non-interactive \
-            --exporter-allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50"
+            --exporter-allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48"
     ```
 
     See the [tools_scripts README](../../perfsonar/tools_scripts/README.md) for full
@@ -486,22 +486,28 @@ You can use the install script to install the options you want (selinux, fail2ba
 The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-
 config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.
 
-### Optional: Restrict exporter endpoints to monitoring subnets
+### Restricting exporter endpoints to monitoring subnets
 
-By default, perfSONAR toolkit Apache configs expose both exporter URLs to any client that can reach HTTPS:
+The toolkit exposes two exporter endpoints via HTTPS:
 
-- `/node_exporter/metrics`
-- `/perfsonar_host_exporter/`
+- `/node_exporter/metrics` (system metrics from Node Exporter, proxied via `localhost:9100`)
+- `/perfsonar_host_exporter/` (host-specific metrics from perfSONAR)
 
-If you want container-style subnet ACL protection for these endpoints, apply explicit allow-lists:
+**We are protecting these endpoints** by allowing access only from designated monitoring subnets, matching the container deployment model. By default, if you specify `--exporter-allowlist` during installation, these endpoints are restricted by Apache `Require ip` rules to the CIDRs you provide.
+
+**Recommended default subnets** (AGLT2 and CERN, matching the container image):
 
 ```bash
 /opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh \
-    --allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,2001:1458:d00::/48" --yes
+    --allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48" --yes
 ```
 
-If your site keeps helper scripts under `/opt/perfsonar-toolkit/tools_scripts`, use that path instead.
-This writes `/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf` and reloads Apache.
+**To customize the IPs:** If you want to change or add monitoring subnets, you can either:
+
+1. **At install time:** pass a different `--exporter-allowlist` value to the toolkit installer
+2. **Post-install:** Run the helper script with your custom CIDR list (paths may differ; check where helper scripts are installed)
+
+The helper script writes `/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf` with Apache `<Location>` blocks using `Require ip` directives, and reloads the web server.
 
 ??? info "SSH allow-lists and validation"
         
