@@ -2908,13 +2908,18 @@ correct path for sites that want a traditional package-managed deployment.</p>
 </tbody>
 </table>
 <div class="highlight"><pre><span></span><code><span class="c1"># Quick start — full toolkit, ATLAS (experiment 1), no LE cert</span>
+<span class="c1"># (Includes exporter endpoint ACL protection by default for AGLT2 + CERN)</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive
 
-<span class="c1"># With exporter endpoint protection (recommended: AGLT2 + CERN subnets, matches container model)</span>
+<span class="c1"># Override default exporter allow-list with custom subnets</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span><span class="se">\</span>
-<span class="w">      </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48&quot;</span>
+<span class="w">      </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;YOUR_SUBNET_1,YOUR_SUBNET_2&quot;</span>
+
+<span class="c1"># Disable exporter endpoint ACL protection (not recommended)</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span>--no-exporter-acls
 
 <span class="c1"># With Let&#39;s Encrypt</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
@@ -2926,7 +2931,7 @@ curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubuserc
 <span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--bundle<span class="w"> </span>testpoint<span class="w"> </span>--dry-run
 </code></pre></div>
 <p>Flags: <code>--bundle {toolkit|testpoint|core|tools}</code>, <code>--fqdn</code>, <code>--email</code>, <code>--experiment-id N</code>,
-<code>--no-flowd-go</code>, <code>--exporter-allowlist "CIDR1,CIDR2,..."</code>, <code>--non-interactive</code>, <code>--yes</code>, <code>--dry-run</code></p>
+<code>--no-flowd-go</code>, <code>--exporter-allowlist "CIDR1,CIDR2,..."</code> (override defaults), <code>--no-exporter-acls</code> (disable protection), <code>--non-interactive</code>, <code>--yes</code>, <code>--dry-run</code></p>
 <blockquote>
 <p><strong>RHEL 9 note</strong>: The perfSONAR automated install script (<code>downloads.perfsonar.net/install</code>)
 does not enable CodeReady Builder on Satellite-managed RHEL systems.<br />

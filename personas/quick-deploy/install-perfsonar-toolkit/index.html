@@ -1151,10 +1151,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#restricting-exporter-endpoints-to-monitoring-subnets" class="md-nav__link">
+  <a href="#exporter-endpoint-protection-on-by-default" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Restricting exporter endpoints to monitoring subnets
+        Exporter endpoint protection (on by default)
       
     </span>
   </a>
@@ -3412,14 +3412,20 @@ dnf<span class="w"> </span>clean<span class="w"> </span>all
 <p>The OSG toolkit install script automates Steps 2.1–10 in a single run.
 It handles RHEL/AlmaLinux CRB detection, installs all prerequisites,
 runs post-install configuration, and optionally installs flowd-go:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Standard installation (includes exporter ACL protection by default for AGLT2 + CERN)</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive
 </code></pre></div>
-<p>To protect exporter endpoints by restricting access to monitoring subnets (AGLT2 and CERN):
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<p>The exporter endpoints are <strong>protected by default</strong> with Apache <code>Require ip</code> ACLs for AGLT2 and CERN monitoring subnets, matching the container deployment model. To customize the allow-list:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Override the default allow-list with your own subnets</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48&quot;</span>
-</code></pre></div></p>
+<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;YOUR_SUBNET_1,YOUR_SUBNET_2&quot;</span>
+</code></pre></div>
+<p>To disable ACL protection on exporter endpoints (not recommended):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span>--no-exporter-acls
+</code></pre></div>
 <p>See the <a href="../../../perfsonar/tools_scripts/">tools_scripts README</a> for full
 flag documentation and the pre-installation checklist.</p>
 <p>If you prefer the upstream perfSONAR minimal installer (repos + bundle only):
@@ -3685,23 +3691,33 @@ integrated with your PBR configuration. This script can derive SSH allow-lists f
 
 <p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-
 config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.</p>
-<h3 id="restricting-exporter-endpoints-to-monitoring-subnets">Restricting exporter endpoints to monitoring subnets<a class="headerlink" href="#restricting-exporter-endpoints-to-monitoring-subnets" title="Permanent link">&para;</a></h3>
+<h3 id="exporter-endpoint-protection-on-by-default">Exporter endpoint protection (on by default)<a class="headerlink" href="#exporter-endpoint-protection-on-by-default" title="Permanent link">&para;</a></h3>
 <p>The toolkit exposes two exporter endpoints via HTTPS:</p>
 <ul>
 <li><code>/node_exporter/metrics</code> (system metrics from Node Exporter, proxied via <code>localhost:9100</code>)</li>
 <li><code>/perfsonar_host_exporter/</code> (host-specific metrics from perfSONAR)</li>
 </ul>
-<p><strong>We are protecting these endpoints</strong> by allowing access only from designated monitoring subnets, matching the container deployment model. By default, if you specify <code>--exporter-allowlist</code> during installation, these endpoints are restricted by Apache <code>Require ip</code> rules to the CIDRs you provide.</p>
-<p><strong>Recommended default subnets</strong> (AGLT2 and CERN, matching the container image):</p>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--allowlist<span class="w"> </span><span class="s2">&quot;192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48&quot;</span><span class="w"> </span>--yes
+<p><strong>These endpoints are protected by default</strong> with Apache <code>Require ip</code> ACLs that restrict access to AGLT2 and CERN monitoring subnets, matching the container deployment protection model. This happens automatically during installation without any additional flags required.</p>
+<p><strong>Default protected subnets</strong> (same as container image):
+- AGLT2 IPv4: <code>192.41.230.0/23</code>, <code>192.41.236.0/23</code>
+- AGLT2 IPv6: <code>2001:48a8:68f7::/50</code>
+- CERN IPv4: <code>188.184.0.0/17</code>, <code>188.185.0.0/17</code>, <code>188.185.128.0/18</code>, <code>128.142.0.0/16</code>
+- CERN IPv6: <code>2001:1458:d00::/48</code>, <code>2001:1458:d03::/48</code>, <code>2001:1458:301::/48</code>, <code>2001:1458:302::/48</code>, <code>2001:1458:303::/48</code></p>
+<p><strong>To customize the allow-list:</strong></p>
+<p>If your site needs different monitoring subnets, override the defaults at install time:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;YOUR_SUBNET_1,YOUR_SUBNET_2,YOUR_SUBNET_3&quot;</span>
 </code></pre></div>
-<p><strong>To customize the IPs:</strong> If you want to change or add monitoring subnets, you can either:</p>
-<ol>
-<li><strong>At install time:</strong> pass a different <code>--exporter-allowlist</code> value to the toolkit installer</li>
-<li><strong>Post-install:</strong> Run the helper script with your custom CIDR list (paths may differ; check where helper scripts are installed)</li>
-</ol>
-<p>The helper script writes <code>/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf</code> with Apache <code>&lt;Location&gt;</code> blocks using <code>Require ip</code> directives, and reloads the web server.</p>
+<p>Or, if the toolkit is already installed, use the helper script directly:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--allowlist<span class="w"> </span><span class="s2">&quot;YOUR_SUBNET_1,YOUR_SUBNET_2,YOUR_SUBNET_3&quot;</span><span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>To disable protection</strong> (not recommended—exposing exporter metrics to any HTTPS client):</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span>--no-exporter-acls
+</code></pre></div>
+<p>The ACL configuration writes to <code>/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf</code> with Apache <code>&lt;Location&gt;</code> blocks using <code>Require ip</code> directives, and reloads the web server.</p>
 <details class="info">
 <summary>SSH allow-lists and validation</summary>
 <ul>
