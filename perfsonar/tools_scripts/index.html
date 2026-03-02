@@ -2840,6 +2840,12 @@ for your site — they are not interchangeable:</p>
 <td>SciTags flowd-go installer</td>
 <td><a href="../scitags-fireflies/">SciTags &amp; Fireflies</a></td>
 </tr>
+<tr>
+<td><strong>perfSONAR-configure-exporter-acls.sh</strong></td>
+<td>v0.1.0</td>
+<td>Restrict exporter endpoints to monitoring CIDRs</td>
+<td><a href="#rpm-toolkit-installer">RPM toolkit deployment</a></td>
+</tr>
 </tbody>
 </table>
 <p><strong>Latest Updates</strong>: v1.0.0 (Feb 2026) adds <code>perfSONAR-toolkit-install.sh</code> for RPM-based toolkit deployments.</p>
@@ -2905,6 +2911,11 @@ correct path for sites that want a traditional package-managed deployment.</p>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive
 
+<span class="c1"># Restrict exporter endpoints to monitoring CIDRs</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50&quot;</span>
+
 <span class="c1"># With Let&#39;s Encrypt</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--fqdn<span class="w"> </span>ps.example.org<span class="w"> </span>--email<span class="w"> </span>admin@example.org<span class="w"> </span><span class="se">\</span>
@@ -2915,7 +2926,7 @@ curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubuserc
 <span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--bundle<span class="w"> </span>testpoint<span class="w"> </span>--dry-run
 </code></pre></div>
 <p>Flags: <code>--bundle {toolkit|testpoint|core|tools}</code>, <code>--fqdn</code>, <code>--email</code>, <code>--experiment-id N</code>,
-<code>--no-flowd-go</code>, <code>--non-interactive</code>, <code>--yes</code>, <code>--dry-run</code></p>
+<code>--no-flowd-go</code>, <code>--exporter-allowlist "CIDR1,CIDR2,..."</code>, <code>--non-interactive</code>, <code>--yes</code>, <code>--dry-run</code></p>
 <blockquote>
 <p><strong>RHEL 9 note</strong>: The perfSONAR automated install script (<code>downloads.perfsonar.net/install</code>)
 does not enable CodeReady Builder on Satellite-managed RHEL systems.<br />

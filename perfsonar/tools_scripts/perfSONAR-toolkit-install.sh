@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Version: 1.0.2
+# Version: 1.0.3
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -34,6 +34,8 @@ set -euo pipefail
 #   --experiment-id N      SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
 #   --no-firefly-receiver  Disable fireflyp plugin in flowd-go config (use with flowd-go 2.4.x RPM)
 #                          Requires flowd-go >= 2.5.0; omit with current 2.4.2 RPM to avoid errors
+#   --exporter-allowlist   Comma-separated CIDRs/IPs allowed to access exporter endpoints
+#                          (/node_exporter/metrics and /perfsonar_host_exporter/)
 #
 # Log:
 #   /var/log/perfsonar-toolkit-install.log
@@ -45,6 +47,7 @@ NON_INTERACTIVE=false
 INSTALL_FLOWD_GO=true
 FLOWD_GO_EXPERIMENT_ID=""
 NO_FIREFLY_RECEIVER=false
+EXPORTER_ALLOWLIST=""
 BUNDLE="toolkit"
 LE_FQDN=""
 LE_EMAIL=""
@@ -100,6 +103,7 @@ parse_cli() {
       --no-flowd-go)         INSTALL_FLOWD_GO=false; shift;;
       --experiment-id)       FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
       --no-firefly-receiver) NO_FIREFLY_RECEIVER=true; shift;;
+      --exporter-allowlist)  EXPORTER_ALLOWLIST="${2:-}"; shift 2;;
       --help|-h)        sed -n '1,80p' "$0"; exit 0;;
       *) echo "Unknown argument: $1" >&2; exit 2;;
     esac
@@ -238,6 +242,19 @@ step_security() {
     sec_cmd+=(--perf-ports 80)
   fi
   run "${sec_cmd[@]}" || true
+
+  if [ -n "$EXPORTER_ALLOWLIST" ]; then
+    log "Applying exporter endpoint ACLs to Apache using allow-list: $EXPORTER_ALLOWLIST"
+    if [ -x "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" ]; then
+      run "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" \
+        --allowlist "$EXPORTER_ALLOWLIST" --yes || true
+      run systemctl reload httpd || run systemctl reload apache2 || true
+    else
+      log "WARNING: perfSONAR-configure-exporter-acls.sh not found; skipping exporter ACL configuration."
+    fi
+  else
+    log "Exporter ACL hardening not requested (use --exporter-allowlist to restrict exporter endpoints)."
+  fi
 }
 
 # ---------------------------------------------------------------------------

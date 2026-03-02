@@ -1151,6 +1151,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#optional-restrict-exporter-endpoints-to-monitoring-subnets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: Restrict exporter endpoints to monitoring subnets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#confirm-nftables-state-and-security-services" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3404,6 +3415,11 @@ runs post-install configuration, and optionally installs flowd-go:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive
 </code></pre></div>
+<p>To harden exporter endpoints with explicit monitoring subnets at install time:
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50&quot;</span>
+</code></pre></div></p>
 <p>See the <a href="../../../perfsonar/tools_scripts/">tools_scripts README</a> for full
 flag documentation and the pre-installation checklist.</p>
 <p>If you prefer the upstream perfSONAR minimal installer (repos + bundle only):
@@ -3669,6 +3685,18 @@ integrated with your PBR configuration. This script can derive SSH allow-lists f
 
 <p>The script writes nftables rules for perfSONAR services, derives SSH allow-lists from <code>/etc/perfSONAR-multi-nic-
 config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.</p>
+<h3 id="optional-restrict-exporter-endpoints-to-monitoring-subnets">Optional: Restrict exporter endpoints to monitoring subnets<a class="headerlink" href="#optional-restrict-exporter-endpoints-to-monitoring-subnets" title="Permanent link">&para;</a></h3>
+<p>By default, perfSONAR toolkit Apache configs expose both exporter URLs to any client that can reach HTTPS:</p>
+<ul>
+<li><code>/node_exporter/metrics</code></li>
+<li><code>/perfsonar_host_exporter/</code></li>
+</ul>
+<p>If you want container-style subnet ACL protection for these endpoints, apply explicit allow-lists:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--allowlist<span class="w"> </span><span class="s2">&quot;192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,2001:1458:d00::/48&quot;</span><span class="w"> </span>--yes
+</code></pre></div>
+<p>If your site keeps helper scripts under <code>/opt/perfsonar-toolkit/tools_scripts</code>, use that path instead.
+This writes <code>/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf</code> and reloads Apache.</p>
 <details class="info">
 <summary>SSH allow-lists and validation</summary>
 <ul>
