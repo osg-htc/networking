@@ -175,6 +175,13 @@ Installation takes approximately 5-10 minutes depending on network speed.
         | sudo bash -s -- --experiment-id 1 --non-interactive
     ```
 
+    To harden exporter endpoints with explicit monitoring subnets at install time:
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
+        | sudo bash -s -- --experiment-id 1 --non-interactive \
+            --exporter-allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50"
+    ```
+
     See the [tools_scripts README](../../perfsonar/tools_scripts/README.md) for full
     flag documentation and the pre-installation checklist.
 
@@ -478,6 +485,23 @@ You can use the install script to install the options you want (selinux, fail2ba
 
 The script writes nftables rules for perfSONAR services, derives SSH allow-lists from `/etc/perfSONAR-multi-nic-
 config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if those components are already installed.
+
+### Optional: Restrict exporter endpoints to monitoring subnets
+
+By default, perfSONAR toolkit Apache configs expose both exporter URLs to any client that can reach HTTPS:
+
+- `/node_exporter/metrics`
+- `/perfsonar_host_exporter/`
+
+If you want container-style subnet ACL protection for these endpoints, apply explicit allow-lists:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh \
+    --allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,2001:1458:d00::/48" --yes
+```
+
+If your site keeps helper scripts under `/opt/perfsonar-toolkit/tools_scripts`, use that path instead.
+This writes `/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf` and reloads Apache.
 
 ??? info "SSH allow-lists and validation"
         

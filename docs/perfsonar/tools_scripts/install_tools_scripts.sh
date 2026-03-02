@@ -5,6 +5,8 @@ set -euo pipefail
 # Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
 #
+# Version: 1.0.7 - 2026-03-02
+#   - Add perfSONAR-configure-exporter-acls.sh to download list for toolkit/container exporter ACL hardening.
 # Version: 1.0.6 - 2026-02-27
 #   - Add perfSONAR-install-flowd-go.sh to download list for SciTags/flowd-go integration.
 # Version: 1.0.5 - 2026-02-26
@@ -18,7 +20,7 @@ set -euo pipefail
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
-VERSION="1.0.6"
+VERSION="1.0.7"
 PROG_NAME="$(basename "$0")"
 
 # Check for --version or --help flags
@@ -97,6 +99,7 @@ files=(
     perfSONAR-health-monitor.sh
     perfSONAR-diagnostic-report.sh
     perfSONAR-install-flowd-go.sh
+    perfSONAR-configure-exporter-acls.sh
     seed_testpoint_host_dirs.sh
     update-perfsonar-deployment.sh
     perfSONAR-orchestrator.sh

@@ -27,6 +27,7 @@ for your site — they are not interchangeable:
 | **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
 | **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
 | **perfSONAR-install-flowd-go.sh** | v1.1.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
+| **perfSONAR-configure-exporter-acls.sh** | v0.1.0 | Restrict exporter endpoints to monitoring CIDRs | [RPM toolkit deployment](#rpm-toolkit-installer) |
 
 **Latest Updates**: v1.0.0 (Feb 2026) adds `perfSONAR-toolkit-install.sh` for RPM-based toolkit deployments.
 
@@ -75,6 +76,11 @@ Differences from the container orchestrator:
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
   | sudo bash -s -- --experiment-id 1 --non-interactive
 
+# Restrict exporter endpoints to monitoring CIDRs
+curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
+  | sudo bash -s -- --experiment-id 1 --non-interactive \
+      --exporter-allowlist "192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50"
+
 # With Let's Encrypt
 curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh \
   | sudo bash -s -- --fqdn ps.example.org --email admin@example.org \
@@ -86,7 +92,7 @@ curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perf
 ```
 
 Flags: `--bundle {toolkit|testpoint|core|tools}`, `--fqdn`, `--email`, `--experiment-id N`,
-`--no-flowd-go`, `--non-interactive`, `--yes`, `--dry-run`
+`--no-flowd-go`, `--exporter-allowlist "CIDR1,CIDR2,..."`, `--non-interactive`, `--yes`, `--dry-run`
 
 > **RHEL 9 note**: The perfSONAR automated install script (`downloads.perfsonar.net/install`)
 > does not enable CodeReady Builder on Satellite-managed RHEL systems.  
