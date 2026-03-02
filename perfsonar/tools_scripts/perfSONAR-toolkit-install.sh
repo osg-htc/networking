@@ -244,7 +244,7 @@ step_security() {
   run "${sec_cmd[@]}" || true
 
   if [ -n "$EXPORTER_ALLOWLIST" ]; then
-    log "Applying exporter endpoint ACLs to Apache using allow-list: $EXPORTER_ALLOWLIST"
+    log "Restricting exporter endpoints (/node_exporter/metrics, /perfsonar_host_exporter/) to monitoring subnets: $EXPORTER_ALLOWLIST"
     if [ -x "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" ]; then
       run "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" \
         --allowlist "$EXPORTER_ALLOWLIST" --yes || true
@@ -253,7 +253,7 @@ step_security() {
       log "WARNING: perfSONAR-configure-exporter-acls.sh not found; skipping exporter ACL configuration."
     fi
   else
-    log "Exporter ACL hardening not requested (use --exporter-allowlist to restrict exporter endpoints)."
+    log "Exporter endpoint ACL protection not configured. Use --exporter-allowlist to restrict access (e.g., --exporter-allowlist \"192.41.230.0/23,2001:48a8:68f7::/50\")."
   fi
 }
 
