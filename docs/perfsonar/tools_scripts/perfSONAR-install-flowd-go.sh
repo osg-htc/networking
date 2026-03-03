@@ -191,11 +191,12 @@ build_config() {
     done
     iface_yaml+="]"
 
-    # Build optional fireflyp plugin block
+    # Build optional firefly plugin block
     # Requires flowd-go >= 2.5.0 (scitags/flowd-go#49).
+    # Note: In flowd-go 2.5.0+, the YAML key is 'firefly' (not 'fireflyp').
     local fireflyp_block=""
     if [ -n "$FIREFLY_RECEIVER" ]; then
-        fireflyp_block=$(printf '  fireflyp:\n    bindAddress: "127.0.0.1"\n    bindPort: %s\n    fireflyReceivers:\n      - address: "%s"\n        port: %s\n' \
+        fireflyp_block=$(printf '  firefly:\n    bindAddress: "127.0.0.1"\n    bindPort: %s\n    fireflyReceivers:\n      - address: "%s"\n        port: %s\n' \
             "$FIREFLY_BIND_PORT" "$FIREFLY_RECEIVER" "$FIREFLY_RECEIVER_PORT")
     fi
 
