@@ -4,10 +4,10 @@ set -euo pipefail
 # perfSONAR-install-flowd-go.sh
 # Install and configure flowd-go (SciTags flow-marking daemon) for perfSONAR hosts.
 #
-# Version: 1.3.0 - 2026-03-04
-#   - Enable TCP enrichment: periodic fireflies with TCP metrics every 15 seconds
-#   - Firefly backend now sends START, periodic (TCP data), and END fireflies
-#   - Measurement flows appear in ESnet Stardust with detailed TCP state information
+# Version: 1.4.0 - 2026-03-04
+#   - Reduce TCP enrichment sampling interval from 15 to 60 seconds for lower overhead
+#   - Firefly backend now sends START, periodic (every 60s) + END fireflies
+#   - Optimal for long-running flows while maintaining TCP state visibility
 # 
 # Previous version (1.2.0) changes:
 #   - Switch from fireflyp plugin to firefly backend for emitting flow start/end events
@@ -220,10 +220,10 @@ build_config() {
         backends_block=$(printf 'backends:\n%s' "$marker_backend")
     fi
 
-    # Enrichers configuration for TCP metrics (15-second interval)
+    # Enrichers configuration for TCP metrics (60-second interval)
     local enrichers_block
     if [ -n "$FIREFLY_RECEIVER" ]; then
-        enrichers_block=$(printf 'enrichers:\n  period: 15000\n  netlink: {}\n  skops: {}')
+        enrichers_block=$(printf 'enrichers:\n  period: 60000\n  netlink: {}\n  skops: {}')
     fi
 
     if [ -n "$enrichers_block" ]; then
@@ -304,7 +304,7 @@ install_flowd_go() {
     echo "  Activity:   network testing (ID=$ACTIVITY_ID)"
     if [ -n "$FIREFLY_RECEIVER" ]; then
         echo "  Firefly collector: $FIREFLY_RECEIVER:$FIREFLY_RECEIVER_PORT"
-        echo "  (fireflyb backend with TCP enrichment: START + periodic (every 15s) + END fireflies)"
+        echo "  (fireflyb backend with TCP enrichment: START + periodic (every 60s) + END fireflies)"
     else
         echo "  Firefly collector: disabled (eBPF packet marking only)"
     fi
