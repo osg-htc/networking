@@ -1587,40 +1587,32 @@ service:
     1. Downloads and installs the `flowd-go` RPM from the SciTags repository
     2. Prompts for the SciTags experiment ID (ATLAS, CMS, LHCb, etc.)
     3. Auto-detects target interfaces from `/etc/perfSONAR-multi-nic-config.conf` or the routing table
-    4. Writes `/etc/flowd-go/conf.yaml` with the `perfsonar` plugin, `marker` backend, and (if supported) the `fireflyp` plugin
+    4. Writes `/etc/flowd-go/conf.yaml` with the `perfsonar` plugin, `firefly` backend, and `marker` backend
     5. Enables and starts the `flowd-go` systemd service
 
-### ESnet Stardust Integration (fireflyp plugin)
+### ESnet Stardust Integration (firefly backend)
 
-The `fireflyp` plugin is an optional flowd-go component that **forwards IPv6 firefly datagrams** to a
-central SciTags collector. The default target is `global.scitags.org:10514`, the authoritative global
-aggregation service operated by the SciTags project. Flows forwarded there become visible in
-[ESnet Stardust](https://stardust.es.net/), ESnet's network-level flow visualization platform, allowing
+The `firefly` backend is a flowd-go component that **emits SciTags firefly datagrams at the start and end of each flow**, sending them to a central SciTags collector. The default target is `global.scitags.org:10514`, the authoritative global aggregation service operated by the SciTags project. Fireflies sent there become visible in
+[ESnet Stardust](https://dashboard.stardust.es.net/d/b8dddac0-5b24-4739-9c8d-e88a05c1344f/scientific-network-tags3a-rande-dashboard?orgId=2&from=now-12h&to=now&timezone=browser), ESnet's network-level flow visualization platform, allowing
 collaborators and network operators to attribute traffic to specific experiments.
 
-!!! warning "fireflyp requires flowd-go ≥ 2.5.0"
+!!! note "flowd-go 2.5.0 or later required"
 
-    The `fireflyp` plugin is only available in flowd-go builds that include
-    [scitags/flowd-go#49](https://github.com/scitags/flowd-go/issues/49).
-    The current RPM release (2.4.2) does **not** include this plugin.
+    The `firefly` backend requires flowd-go >= 2.5.0. This version is the current standard
+    and is installed by default by all perfSONAR installation methods.
 
-    - If you are running **2.4.2**, pass `--no-firefly-receiver` to the install script to disable
-      the fireflyp stanza (eBPF flow marking still works; datagrams just are not forwarded upstream).
-    - Once a ≥ 2.5.0 RPM is published, re-run the install script or manually add the `fireflyp`
-      stanza to `/etc/flowd-go/conf.yaml`.
-
-**Install with fireflyp enabled** (flowd-go ≥ 2.5.0):
+**Standard installation with firefly backend enabled**:
 
 ```bash
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh \
-    --experiment-id 1 --firefly-receiver global.scitags.org --yes
+    --experiment-id 1 --yes
 ```
 
-**Install without fireflyp** (current 2.4.2 RPM):
+**Install with custom firefly collector address**:
 
 ```bash
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-install-flowd-go.sh \
-    --experiment-id 1 --no-firefly-receiver --yes
+    --experiment-id 1 --firefly-receiver collector.example.org --yes
 ```
 
 ??? info "Flags reference"
@@ -1633,7 +1625,6 @@ collaborators and network operators to attribute traffic to specific experiments
     | `--list-experiments` | Show experiment IDs and exit |
     | `--firefly-receiver HOST` | Firefly collector address (default: `global.scitags.org`) |
     | `--firefly-receiver-port N` | UDP port on the collector (default: 10514) |
-    | `--no-firefly-receiver` | Disable fireflyp plugin (eBPF marking only; use with flowd-go 2.4.x) |
     | `--yes` | Skip interactive prompts |
     | `--dry-run` | Preview without changes |
     | `--uninstall` | Remove flowd-go and configuration |
