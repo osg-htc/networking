@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.1.4 - 2026-03-04
+#   - Pass --with-le to seed_testpoint_host_dirs.sh in step_deploy_option_b
+#     (seeds webroot + single Apache SSL conf file; Option A seeds psconfig only)
 # Version: 1.1.3
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
@@ -241,7 +244,7 @@ step_deploy_option_a() {
 }
 
 step_deploy_option_b() {
-  run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
+  run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh --with-le
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le-auto.yml -o /opt/perfsonar-tp/docker-compose.yml"
   # Start via the systemd unit (which has --systemd=always --cgroupns host needed
   # for systemd inside the container); podman-compose up -d lacks these flags.

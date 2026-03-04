@@ -18,7 +18,7 @@ for your site — they are not interchangeable:
 
 | Tool | Version | Purpose | Documentation |
 |------|---------|---------|---------------|
-| **perfSONAR-orchestrator.sh** | v1.1.2 | Container testpoint orchestrator | [Container deployment](#container-based-deployment-orchestrator) |
+| **perfSONAR-orchestrator.sh** | v1.1.4 | Container testpoint orchestrator | [Container deployment](#container-based-deployment-orchestrator) |
 | **perfSONAR-toolkit-install.sh** | v1.0.0 | RPM toolkit guided installer | [RPM toolkit deployment](#rpm-toolkit-installer) |
 | **fasterdata-tuning.sh** | v1.3.1 | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
 | **perfSONAR-pbr-nm.sh** | — | Multi-NIC policy-based routing | [Multiple NIC Guidance](../multiple-nic-guidance.md) |
@@ -26,7 +26,7 @@ for your site — they are not interchangeable:
 | **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment (container + RPM) | [Installation Guides](../../personas/quick-deploy/landing.md) |
 | **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
 | **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
-| **perfSONAR-install-flowd-go.sh** | v1.1.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
+| **perfSONAR-install-flowd-go.sh** | v1.4.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
 | **perfSONAR-configure-exporter-acls.sh** | v0.1.0 | Restrict exporter endpoints to monitoring CIDRs | [RPM toolkit deployment](#rpm-toolkit-installer) |
 
 **Latest Updates**: v1.0.0 (Feb 2026) adds `perfSONAR-toolkit-install.sh` for RPM-based toolkit deployments.
