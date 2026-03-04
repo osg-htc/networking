@@ -3510,10 +3510,10 @@ systemctl<span class="w"> </span>status<span class="w"> </span>fail2ban
 <p>Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:</p>
 <ul>
 <li>
-<p><strong>Option A:</strong> Testpoint only (simplest) — bind-mounts <code>/opt/perfsonar-tp/psconfig</code>, <code>/var/www/html</code>, and <code>/etc/apache2</code> for Apache and pSConfig.</p>
+<p><strong>Option A:</strong> Testpoint only (simplest) — bind-mounts <code>/opt/perfsonar-tp/psconfig</code> only. The container uses its own internal Apache webroot and config; no <code>/var/www/html</code> or <code>/etc/apache2</code> mount is needed.</p>
 </li>
 <li>
-<p><strong>Option B:</strong> Testpoint + Let’s Encrypt — two containers that share Apache files and certs via host bind mounts.</p>
+<p><strong>Option B:</strong> Testpoint + Let’s Encrypt — two containers that share a webroot and certificate state via host bind mounts. Only the single file <code>/etc/apache2/sites-available/default-ssl.conf</code> is mounted from the host (the entrypoint wrapper patches only that file with LE cert paths).</p>
 </li>
 </ul>
 <p>Use <code>podman-compose</code> (or <code>docker-compose</code>) in the examples below.</p>
@@ -3524,19 +3524,14 @@ the host filesystem. Without seeding, the bind-mounted directories would be empt
 to fail.</p>
 <p><strong>What's seeded:</strong></p>
 <ul>
-<li>
-<p><code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)</p>
-</li>
-<li>
-<p><code>/opt/perfsonar-tp/conf/node_exporter.defaults</code> — node_exporter options override; disables the
-  <code>cpufreq</code> collector that panics on hosts with offline CPUs (procfs v0.10.0 bug)</p>
-</li>
-<li>
-<p><code>/var/www/html</code> — Apache webroot with index.html (required for healthcheck)</p>
-</li>
-<li>
-<p><code>/etc/apache2</code> — Apache config including <code>sites-available/default-ssl.conf</code></p>
-</li>
+<li><code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)</li>
+</ul>
+<p><strong>What's NOT seeded (not needed for Option A):</strong></p>
+<ul>
+<li><code>/var/www/html</code> — not mounted; the container uses its own Apache webroot internally</li>
+<li><code>/etc/apache2</code> — not mounted; the container uses its own Apache config internally</li>
+<li><code>node_exporter.defaults</code> — the container ships its own complete <code>/etc/default/node_exporter</code>
+  with all needed collectors; no host override is required in the normal case</li>
 </ul>
 <p>Run the bundled seeding helper script (automatically installed in Step 2):</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
@@ -3545,26 +3540,31 @@ to fail.</p>
 <summary>Seed script details</summary>
 <ul>
 <li>Pulls the latest perfSONAR testpoint image</li>
-<li>Creates temporary containers to extract baseline files</li>
-<li>Copies content to host directories</li>
-<li>Installs <code>node_exporter.defaults</code> into <code>/opt/perfsonar-tp/conf/</code></li>
+<li>Creates a temporary container to extract baseline files</li>
+<li>Copies <code>/etc/perfsonar/psconfig</code> content to <code>/opt/perfsonar-tp/psconfig</code> on the host</li>
 <li>Verifies seeding was successful</li>
-<li>Skips seeding if directories already have content (idempotent)</li>
+<li>Skips seeding if the directory already has content (idempotent)</li>
 </ul>
 </details>
 <p>Verify seeding succeeded:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Should show config files</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Should show psconfig files</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
-
-<span class="c1"># Should show node_exporter.defaults</span>
-ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
-
-<span class="c1"># Should show index.html and perfsonar/ directory</span>
-ls<span class="w"> </span>-la<span class="w"> </span>/var/www/html
-
-<span class="c1"># Should show sites-available/, sites-enabled/, etc.</span>
-ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2
 </code></pre></div>
+<details class="tip">
+<summary>node_exporter cpufreq crash workaround (hosts with offline/unpopulated CPU sockets)</summary>
+<p>On bare-metal hosts where some CPU sockets are not populated, procfs v0.10.0 has a bug in the
+<code>cpufreq</code> collector that causes a <code>slice bounds out of range</code> panic on first scrape.
+The container ships a complete <code>/etc/default/node_exporter</code>, but it does <strong>not</strong> include
+<code>--no-collector.cpufreq</code> by default. If you hit this crash, create an override:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/conf
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;NODE_EXPORTER_OPTS=&quot;--no-collector.cpufreq&quot;&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
+</code></pre></div>
+<p>Then uncomment the <code>node_exporter.defaults</code> volume line in <code>docker-compose.yml</code> and restart the container:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Uncomment this line in docker-compose.yml:</span>
+<span class="c1"># - /opt/perfsonar-tp/conf/node_exporter.defaults:/etc/default/node_exporter:z</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+</code></pre></div>
+</details>
 <details class="tip">
 <summary>SELinux labeling handled automatically</summary>
 <p>If SELinux is enforcing, the <code>:Z</code> and <code>:z</code> options in the compose files will cause Podman to relabel the host paths when
@@ -3643,17 +3643,18 @@ podman<span class="w"> </span>ps
 <p>Jump to <a href="#step-6-configure-and-enroll-in-psconfig">Step 6</a> below.</p>
 <hr />
 <h3 id="option-b-testpoint-lets-encrypt-shared-apache-and-certs">Option B — Testpoint + Let's Encrypt (shared Apache and certs)<a class="headerlink" href="#option-b-testpoint-lets-encrypt-shared-apache-and-certs" title="Permanent link">&para;</a></h3>
-<p>This mode runs two containers (<code>perfsonar-testpoint</code> and <code>certbot</code>) and bind-mounts the following host paths so Apache
-content and certificates persist on the host and are shared between containers:</p>
+<p>This mode runs two containers (<code>perfsonar-testpoint</code> and <code>certbot</code>) and bind-mounts the following host paths so pSConfig, webroot content, the Apache SSL config, and certificates persist on the host and are shared between containers:</p>
 <ul>
 <li>
 <p><code>/opt/perfsonar-tp/psconfig</code> → <code>/etc/perfsonar/psconfig</code> — perfSONAR configuration</p>
 </li>
 <li>
-<p><code>/var/www/html</code> → <code>/var/www/html</code> — Apache webroot (shared for HTTP-01 challenges)</p>
+<p><code>/var/www/html</code> → <code>/var/www/html</code> — Apache webroot (shared for HTTP-01 ACME challenges)</p>
 </li>
 <li>
-<p><code>/etc/apache2</code> → <code>/etc/apache2</code> — Apache configuration (for SSL certificate patching)</p>
+<p><code>/etc/apache2/sites-available/default-ssl.conf</code> → same path inside container — the single Apache
+  SSL virtual-host file patched by the entrypoint wrapper with LE cert paths; the rest of the Apache
+  config stays inside the container</p>
 </li>
 <li>
 <p><code>/etc/letsencrypt</code> → <code>/etc/letsencrypt</code> — Let's Encrypt certificates and state</p>
@@ -3670,14 +3671,11 @@ to fail.</p>
 <p><code>/opt/perfsonar-tp/psconfig</code> — perfSONAR pSConfig files (baseline remotes and archives)</p>
 </li>
 <li>
-<p><code>/opt/perfsonar-tp/conf/node_exporter.defaults</code> — node_exporter options override; disables the
-  <code>cpufreq</code> collector that panics on hosts with offline CPUs (procfs v0.10.0 bug)</p>
+<p><code>/var/www/html</code> — Apache webroot (needed for certbot HTTP-01 ACME challenges)</p>
 </li>
 <li>
-<p><code>/var/www/html</code> — Apache webroot with index.html (required for healthcheck)</p>
-</li>
-<li>
-<p><code>/etc/apache2</code> — Apache config including <code>sites-available/default-ssl.conf</code> (patched by entrypoint wrapper)</p>
+<p><code>/etc/apache2/sites-available/default-ssl.conf</code> — the one Apache file the entrypoint wrapper
+  patches to point at LE certs; the rest of Apache config stays inside the container</p>
 </li>
 </ul>
 <p><strong>What's NOT seeded:</strong></p>
@@ -3688,33 +3686,35 @@ to fail.</p>
 <li>
 <p><code>/run/dbus</code> — Host D-Bus socket mount; exists at runtime, no seeding needed</p>
 </li>
+<li>
+<p><code>node_exporter.defaults</code> — the container ships its own complete copy with all needed collectors;
+  see the Option A cpufreq workaround tip if you need to override it</p>
+</li>
 </ul>
-<p>Run the bundled seeding helper script (automatically installed in Step 2):</p>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
+<p>Run the bundled seeding helper script with the <code>--with-le</code> flag (automatically installed in Step 2):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh<span class="w"> </span>--with-le
 </code></pre></div>
 <details class="info">
 <summary>Seed script details</summary>
 <ul>
 <li>Pulls the latest perfSONAR testpoint image</li>
 <li>Creates temporary containers to extract baseline files</li>
-<li>Copies content to host directories</li>
-<li>Installs <code>node_exporter.defaults</code> into <code>/opt/perfsonar-tp/conf/</code></li>
+<li>Copies <code>/etc/perfsonar/psconfig</code> content to <code>/opt/perfsonar-tp/psconfig</code></li>
+<li>Copies <code>/var/www/html</code> content to host <code>/var/www/html</code></li>
+<li>Extracts the single file <code>/etc/apache2/sites-available/default-ssl.conf</code> to the host</li>
 <li>Verifies seeding was successful</li>
-<li>Skips seeding if directories already have content (idempotent)</li>
+<li>Skips seeding if all paths already have content (idempotent)</li>
 </ul>
 </details>
 <p>Verify seeding succeeded:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Should show config files</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Should show psconfig files</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
-
-<span class="c1"># Should show node_exporter.defaults</span>
-ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
 
 <span class="c1"># Should show index.html and perfsonar/ directory</span>
 ls<span class="w"> </span>-la<span class="w"> </span>/var/www/html
 
-<span class="c1"># Should show sites-available/, sites-enabled/, etc.</span>
-ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2
+<span class="c1"># Should show the single patched SSL config file</span>
+ls<span class="w"> </span>-la<span class="w"> </span>/etc/apache2/sites-available/default-ssl.conf
 </code></pre></div>
 <details class="tip">
 <summary>SELinux volume labels: <code>:z</code> vs <code>:Z</code></summary>
@@ -3754,9 +3754,9 @@ these paths when run with <code>--apply</code>.</p>
 <td>Shared — certbot writes ACME challenges; Apache serves them</td>
 </tr>
 <tr>
-<td><code>/etc/apache2</code></td>
+<td><code>/etc/apache2/sites-available/default-ssl.conf</code></td>
 <td><code>:z</code></td>
-<td>Shared <code>container_file_t:s0</code>; no competing container</td>
+<td>Single file mount — entrypoint wrapper patches it with LE cert paths</td>
 </tr>
 <tr>
 <td>psconfig volume</td>
@@ -4757,26 +4757,32 @@ sleep<span class="w"> </span><span class="m">2</span>
 curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:9102/metrics<span class="w">   </span><span class="c1"># triggers panic</span>
 <span class="c1"># Look for: panic: runtime error: slice bounds out of range</span>
 
-<span class="c1"># Verify the workaround file is in place</span>
+<span class="c1"># Verify the workaround file is in place (if you&#39;ve already created it)</span>
 cat<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>no-collector.cpufreq
 </code></pre></div>
 <p><strong>Solution:</strong></p>
-<p>Run the seed script (which installs <code>node_exporter.defaults</code>) then restart:</p>
-<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>node_exporter
+<p>Create the override file and enable the optional volume mount, then restart:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/conf
+<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;NODE_EXPORTER_OPTS=&quot;--no-collector.cpufreq&quot;&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
+
+<span class="c1"># Uncomment the node_exporter.defaults volume line in /opt/perfsonar-tp/docker-compose.yml:</span>
+<span class="c1"># - /opt/perfsonar-tp/conf/node_exporter.defaults:/etc/default/node_exporter:z</span>
+sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s|# - /opt/perfsonar-tp/conf/node_exporter.defaults|  - /opt/perfsonar-tp/conf/node_exporter.defaults|&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/opt/perfsonar-tp/docker-compose.yml
+
+systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
 <span class="c1"># Verify</span>
 curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:9100/metrics<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-5
 </code></pre></div>
-<p>Or apply manually:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Add --no-collector.cpufreq to the options inside the container</span>
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
+<p>Or apply just inside the running container (temporary — lost on container recreate):</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="s1">&#39;s|NODE_EXPORTER_OPTS=&quot;|NODE_EXPORTER_OPTS=&quot;--no-collector.cpufreq |&#39;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>/etc/default/node_exporter
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>node_exporter
 </code></pre></div>
-<p>Save the fix persistently by ensuring
-<code>/opt/perfsonar-tp/conf/node_exporter.defaults</code> is mounted in <code>docker-compose.yml</code>
-(already present in the compose files from this repo).</p>
+<p>For a permanent fix, use the override file + volume mount approach above.
+The compose files in this repo have the volume line commented out by default;
+uncomment it after creating <code>/opt/perfsonar-tp/conf/node_exporter.defaults</code>.</p>
 <p><strong>Root cause — D-Bus / SELinux (--collector.systemd):</strong>
 node_exporter uses <code>--collector.systemd</code> which connects to D-Bus. The compose file
 mounts <code>/run/dbus:/run/dbus:ro</code>, but on EL9 with SELinux <strong>Enforcing</strong> the socket
