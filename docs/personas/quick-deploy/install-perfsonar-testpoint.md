@@ -632,13 +632,11 @@ Manage pSConfig files under `/opt/perfsonar-tp/psconfig` on the host; they are c
     Install the provided systemd units to manage containers with proper systemd support:
 
 ```bash
-curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
-    -o /tmp/install-systemd-units.sh
-chmod 0755 /tmp/install-systemd-units.sh
-
-# Install testpoint-only systemd unit
-/tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp
+# install-systemd-units.sh was already downloaded to tools_scripts/ in Step 2
+# --health-monitor also installs the health watchdog timer (recommended — see note below)
+/opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
+    --install-dir /opt/perfsonar-tp \
+    --health-monitor
 
 # Enable and start now
 systemctl enable --now perfsonar-testpoint.service
@@ -648,14 +646,10 @@ systemctl status perfsonar-testpoint.service --no-pager
 podman ps
 ```
 
-!!! tip "Optional: install the health-monitor watchdog at the same time"
+!!! warning "Install the health-monitor watchdog (included above)"
     The compose healthcheck marks the container `unhealthy` after three consecutive failures, but `restart: unless-stopped` does **not** auto-restart on health failures — a separate watchdog is needed.
 
-    Run `install-systemd-units.sh` with `--health-monitor` to install a systemd timer that checks the container health every 5 minutes and restarts `perfsonar-testpoint.service` if the container is `unhealthy`:
-
-    ```bash
-    /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --health-monitor
-    ```
+    `--health-monitor` installs a systemd timer that checks container health every 5 minutes and restarts `perfsonar-testpoint.service` if the container is `unhealthy`. Without it, a pScheduler failure will leave the container stuck in `unhealthy` state indefinitely.
 
     This creates `perfsonar-health-monitor.service` + `perfsonar-health-monitor.timer` and logs to `/var/log/perfsonar-health-monitor.log`. Expected recovery time from pScheduler failure: ≤8 minutes.
 
@@ -826,13 +820,12 @@ renew anything until you obtain the initial certificates.
     Install and enable the systemd units so containers start on boot with proper systemd support:
     
 ```bash
-curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
-    -o /tmp/install-systemd-units.sh
-chmod 0755 /tmp/install-systemd-units.sh
-
-# Install both testpoint and certbot systemd units
-/tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp --with-certbot
+# install-systemd-units.sh was already downloaded to tools_scripts/ in Step 2
+# --with-certbot adds the certbot renewal unit; --health-monitor adds the health watchdog
+/opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
+    --install-dir /opt/perfsonar-tp \
+    --with-certbot \
+    --health-monitor
 
 # Enable and start services
 systemctl enable --now perfsonar-testpoint.service perfsonar-certbot.service
