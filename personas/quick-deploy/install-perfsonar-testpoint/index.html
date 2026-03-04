@@ -3607,13 +3607,11 @@ code 255.</p>
 <p>You <strong>must</strong> use the systemd unit approach below instead of relying on compose alone.</p>
 <p>Install the provided systemd units to manage containers with proper systemd support:</p>
 </div>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
-
-<span class="c1"># Install testpoint-only systemd unit</span>
-/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp
+<div class="highlight"><pre><span></span><code><span class="c1"># install-systemd-units.sh was already downloaded to tools_scripts/ in Step 2</span>
+<span class="c1"># --health-monitor also installs the health watchdog timer (recommended — see note below)</span>
+/opt/perfsonar-tp/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--health-monitor
 
 <span class="c1"># Enable and start now</span>
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service
@@ -3622,12 +3620,10 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>--no-pager
 podman<span class="w"> </span>ps
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Optional: install the health-monitor watchdog at the same time</p>
+<div class="admonition warning">
+<p class="admonition-title">Install the health-monitor watchdog (included above)</p>
 <p>The compose healthcheck marks the container <code>unhealthy</code> after three consecutive failures, but <code>restart: unless-stopped</code> does <strong>not</strong> auto-restart on health failures — a separate watchdog is needed.</p>
-<p>Run <code>install-systemd-units.sh</code> with <code>--health-monitor</code> to install a systemd timer that checks the container health every 5 minutes and restarts <code>perfsonar-testpoint.service</code> if the container is <code>unhealthy</code>:</p>
-<div class="highlight"><pre><span></span><code>/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span>--health-monitor
-</code></pre></div>
+<p><code>--health-monitor</code> installs a systemd timer that checks container health every 5 minutes and restarts <code>perfsonar-testpoint.service</code> if the container is <code>unhealthy</code>. Without it, a pScheduler failure will leave the container stuck in <code>unhealthy</code> state indefinitely.</p>
 <p>This creates <code>perfsonar-health-monitor.service</code> + <code>perfsonar-health-monitor.timer</code> and logs to <code>/var/log/perfsonar-health-monitor.log</code>. Expected recovery time from pScheduler failure: ≤8 minutes.</p>
 </div>
 <details class="info">
@@ -3806,13 +3802,12 @@ code 255.</p>
 <p>You <strong>must</strong> use the systemd unit approach below instead of relying on compose alone.</p>
 <p>Install and enable the systemd units so containers start on boot with proper systemd support:</p>
 </div>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
-chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/install-systemd-units.sh
-
-<span class="c1"># Install both testpoint and certbot systemd units</span>
-/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span>--with-certbot
+<div class="highlight"><pre><span></span><code><span class="c1"># install-systemd-units.sh was already downloaded to tools_scripts/ in Step 2</span>
+<span class="c1"># --with-certbot adds the certbot renewal unit; --health-monitor adds the health watchdog</span>
+/opt/perfsonar-tp/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--with-certbot<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--health-monitor
 
 <span class="c1"># Enable and start services</span>
 systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>perfsonar-testpoint.service<span class="w"> </span>perfsonar-certbot.service

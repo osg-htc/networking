@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.1.5 - 2026-03-04
+#   - Add install-systemd-units.sh --health-monitor to step_deploy_option_a and
+#     step_deploy_option_b so the health watchdog is always installed alongside
+#     the testpoint unit (previously undocumented optional step)
+#   - Fix step_validate tip: remove stale reference to install-systemd-service.sh
+#     (superseded by install-systemd-units.sh in v1.1.x)
 # Version: 1.1.4 - 2026-03-04
 #   - Pass --with-le to seed_testpoint_host_dirs.sh in step_deploy_option_b
 #     (seeds webroot + single Apache SSL conf file; Option A seeds psconfig only)
@@ -234,8 +240,13 @@ step_auto_update_compose() {
 step_deploy_option_a() {
   run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml -o /opt/perfsonar-tp/docker-compose.yml"
-  # Start via the systemd unit (which has --systemd=always --cgroupns host needed
-  # for systemd inside the container); podman-compose up -d lacks these flags.
+  # Install systemd unit + health-monitor watchdog. The unit uses
+  # --systemd=always --cgroupns host (required for systemd inside the container);
+  # podman-compose up -d lacks these flags. The health-monitor timer restarts
+  # the container if pScheduler becomes unhealthy.
+  run /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
+      --install-dir /opt/perfsonar-tp \
+      --health-monitor
   run systemctl daemon-reload
   run systemctl start perfsonar-testpoint
   log "Waiting 30s for container to initialise..."
@@ -246,8 +257,11 @@ step_deploy_option_a() {
 step_deploy_option_b() {
   run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh --with-le
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le-auto.yml -o /opt/perfsonar-tp/docker-compose.yml"
-  # Start via the systemd unit (which has --systemd=always --cgroupns host needed
-  # for systemd inside the container); podman-compose up -d lacks these flags.
+  # Install systemd units (testpoint + certbot) + health-monitor watchdog.
+  run /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
+      --install-dir /opt/perfsonar-tp \
+      --with-certbot \
+      --health-monitor
   run systemctl daemon-reload
   run systemctl start perfsonar-testpoint
   log "Waiting 30s for container to initialise..."
@@ -420,10 +434,8 @@ step_validate() {
     run bash -c "openssl s_client -connect $LE_FQDN:443 -servername $LE_FQDN -showcerts </dev/null 2>/dev/null | openssl x509 -noout -issuer -subject -dates" || true
   fi
 
-  # Recommend installing the systemd service for reboot persistence
-  log "Tip: Enable auto-restart on reboot by installing the systemd service:"
-  log "  /opt/perfsonar-tp/tools_scripts/install-systemd-service.sh /opt/perfsonar-tp"
-  log "  systemctl enable --now perfsonar-testpoint.service"
+  log "Tip: Verify the health-monitor watchdog is active:"
+  log "  systemctl status perfsonar-health-monitor.timer --no-pager"
 }
 
 main() {
