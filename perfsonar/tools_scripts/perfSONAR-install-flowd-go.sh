@@ -4,12 +4,15 @@ set -euo pipefail
 # perfSONAR-install-flowd-go.sh
 # Install and configure flowd-go (SciTags flow-marking daemon) for perfSONAR hosts.
 #
-# Version: 1.2.0 - 2026-03-04
+# Version: 1.3.0 - 2026-03-04
+#   - Enable TCP enrichment: periodic fireflies with TCP metrics every 15 seconds
+#   - Firefly backend now sends START, periodic (TCP data), and END fireflies
+#   - Measurement flows appear in ESnet Stardust with detailed TCP state information
+# 
+# Previous version (1.2.0) changes:
 #   - Switch from fireflyp plugin to firefly backend for emitting flow start/end events
 #   - Update to flowd-go 2.5.0+ (requires flowd-go >= 2.5.0)
 #   - Remove support for flowd-go 2.4.x (use v1.1.0 of this script for 2.4.x support)
-#   - Simplify configuration: firefly backend replaces fireflyp plugin for main flow emission
-#   - Update ESnet Stardust documentation links
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -200,7 +203,7 @@ build_config() {
     # Build firefly backend block
     local firefly_backend=""
     if [ -n "$FIREFLY_RECEIVER" ]; then
-        firefly_backend=$(printf '  firefly:\n    sendToCollector: true\n    collectorAddress: "%s"\n    collectorPort: %s\n    prependSyslog: false\n    enrich: false' \
+        firefly_backend=$(printf '  firefly:\n    sendToCollector: true\n    collectorAddress: "%s"\n    collectorPort: %s\n    prependSyslog: false\n    enrich: true' \
             "$FIREFLY_RECEIVER" "$FIREFLY_RECEIVER_PORT")
     fi
 
@@ -217,7 +220,17 @@ build_config() {
         backends_block=$(printf 'backends:\n%s' "$marker_backend")
     fi
 
-    printf '%s\n\n%s\n' "$plugins_block" "$backends_block"
+    # Enrichers configuration for TCP metrics (15-second interval)
+    local enrichers_block
+    if [ -n "$FIREFLY_RECEIVER" ]; then
+        enrichers_block=$(printf 'enrichers:\n  period: 15000\n  netlink: {}\n  skops: {}')
+    fi
+
+    if [ -n "$enrichers_block" ]; then
+        printf '%s\n\n%s\n\n%s\n' "$plugins_block" "$backends_block" "$enrichers_block"
+    else
+        printf '%s\n\n%s\n' "$plugins_block" "$backends_block"
+    fi
 }
 
 install_flowd_go() {
@@ -291,7 +304,7 @@ install_flowd_go() {
     echo "  Activity:   network testing (ID=$ACTIVITY_ID)"
     if [ -n "$FIREFLY_RECEIVER" ]; then
         echo "  Firefly collector: $FIREFLY_RECEIVER:$FIREFLY_RECEIVER_PORT"
-        echo "  (fireflyb backend sends fireflies at start and end of measurement flows)"
+        echo "  (fireflyb backend with TCP enrichment: START + periodic (every 15s) + END fireflies)"
     else
         echo "  Firefly collector: disabled (eBPF packet marking only)"
     fi
