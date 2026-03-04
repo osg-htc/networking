@@ -2731,8 +2731,8 @@ single statically-linked binary (with embedded eBPF programs for packet marking 
 <td>Built-in plugin that marks <em>all</em> egress traffic with a configured experiment/activity ID — ideal for dedicated measurement hosts</td>
 </tr>
 <tr>
-<td><strong>fireflyp plugin</strong></td>
-<td>Listens for incoming firefly UDP datagrams and relays them verbatim to one or more upstream collectors (global or regional) before processing them locally — requires flowd-go ≥ 2.5.0</td>
+<td><strong>firefly backend</strong></td>
+<td>Sends JSON firefly datagrams at the start, during, and end of flows to a collector (default: global.scitags.org) — requires flowd-go &gt;= 2.5.0</td>
 </tr>
 <tr>
 <td><strong>Low overhead</strong></td>
@@ -2760,36 +2760,37 @@ single statically-linked binary (with embedded eBPF programs for packet marking 
 <div class="highlight"><pre><span></span><code>  perfSONAR tests
        │
        ▼
-  ┌──────────────┐   all flows    ┌──────────────────────┐
-  │ perfsonar    │──────────────▶ │ marker backend       │
-  │ plugin       │                │ (eBPF IPv6 label)    │
-  └──────────────┘                └──────────────────────┘
-
-  Local applications
-  (pScheduler etc.)
-       │ UDP firefly
-       ▼
-  ┌──────────────┐   forward      ┌──────────────────────┐
-  │ fireflyp     │──────────────▶ │ global.scitags.org   │
-  │ plugin       │                │ (UDP collector)      │
-  └──────────────┘                └──────────────────────┘
+  ┌──────────────┐   all flows    ┌──────────────────────────┐
+  │ perfsonar    │──────────────▶ │ marker backend           │
+  │ plugin       │                │ (eBPF IPv6 Flow Label)   │
+  └──────────────┘                └──────────────────────────┘
+       │
+       ├─────────────────────┐
+       │ (start/end events)  │
+       ▼                     ▼
+  ┌──────────────────────────────────────────┐
+  │ firefly backend                          │
+  │ (generates flow event notifications)     │
+  │                                          │
+  │ → global.scitags.org (UDP), collected in │
+  │   ESnet Stardust dashboard               │
+  └──────────────────────────────────────────┘
 </code></pre></div>
 <p>For perfSONAR deployments the recommended configuration uses the <strong>perfsonar</strong> plugin (marks all egress
-traffic) together with the <strong>marker</strong> backend (eBPF-based IPv6 Flow Label stamping) and the <strong>fireflyp</strong>
-plugin (forwarding firefly announcements to regional or global collectors).</p>
+traffic), the <strong>marker</strong> backend (eBPF-based IPv6 Flow Label stamping), and the <strong>firefly</strong> backend
+(emitting flow start/end notifications to a global or regional collector).</p>
 <hr />
 <h2 id="firefly-collectors">Firefly Collectors<a class="headerlink" href="#firefly-collectors" title="Permanent link">&para;</a></h2>
 <p>A <strong>firefly collector</strong> is a UDP service that receives firefly datagrams and uses them to build a real-time
 view of active flows across the network. Collectors can be operated at site, regional, or global scope.</p>
 <h3 id="esnet-stardust-the-global-scitags-monitoring-platform">ESnet Stardust — the global SciTags monitoring platform<a class="headerlink" href="#esnet-stardust-the-global-scitags-monitoring-platform" title="Permanent link">&para;</a></h3>
 <p>Firefly datagrams sent to <code>global.scitags.org</code> are ingested by the
-<strong><a href="https://stardust.es.net/">ESnet Stardust</a></strong> platform, which provides a
-<a href="https://dashboard.stardust.es.net/goto/dfejd22wk1k3kb?orgId=2">Scientific Network Tags dashboard</a>
+<strong><a href="https://dashboard.stardust.es.net/d/b8dddac0-5b24-4739-9c8d-e88a05c1344f/scientific-network-tags3a-rande-dashboard?orgId=2&amp;from=now-12h&amp;to=now&amp;timezone=browser">ESnet Stardust</a></strong> platform, which provides a dashboard
 showing real-time and historical flow counts broken down by experiment and activity across all
 participating sites.</p>
 <blockquote>
-<p><strong>The <code>fireflyp</code> plugin is the only mechanism by which perfSONAR measurement flows appear in
-Stardust.</strong> eBPF packet marking alone (the <code>marker</code> backend) stamps packets in-flight but does
+<p><strong>The <code>firefly</code> backend is the primary mechanism by which perfSONAR measurement flows appear in
+Stardust.</strong> The <code>marker</code> backend stamps packets in-flight but does not generate flow event notifications.
 <em>not</em> notify any collector. Only when flowd-go also runs the <code>fireflyp</code> plugin — forwarding
 locally-emitted firefly datagrams to <code>global.scitags.org</code> — will the flows be visible in the
 Stardust monitoring system.</p>
