@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-22 (flowd-go firefly forwarding, no TCP enrichment)
+
+### Fixed
+
+- **flowd-go logged a netlink warning every minute**: with the 1.4.0/1.5.0 configuration (TCP enrichment on), flowd-go
+  2.5.0 on EL9 logs `error getting TCP information ... net type 19 not implemented` every 60 seconds (seen on
+  psum01.aglt2.org).
+  - `perfSONAR-install-flowd-go.sh` v1.6.0 turns enrichment off and forwards fireflies through a local firefly
+    listener (`127.0.0.1:10514`) plus the firefly backend, keeping perfsonar-plugin packet marking. New
+    `--firefly-bind-port` and `--no-firefly-receiver` options. First proposed as PR #84, rebuilt on top of v1.5.0.
+  - Existing hosts keep their old `/etc/flowd-go/conf.yaml` until the installer is rerun with `--yes`.
+
 ## [Unreleased] - 2026-10-20 (lsregistration helper must run as root)
 
 ### Fixed
