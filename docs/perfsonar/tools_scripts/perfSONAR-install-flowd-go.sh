@@ -4,10 +4,10 @@ set -euo pipefail
 # perfSONAR-install-flowd-go.sh
 # Install and configure flowd-go (SciTags flow-marking daemon) for perfSONAR hosts.
 #
-# Version: 1.4.0 - 2026-03-04
-#   - Reduce TCP enrichment sampling interval from 15 to 60 seconds for lower overhead
-#   - Firefly backend now sends START, periodic (every 60s) + END fireflies
-#   - Optimal for long-running flows while maintaining TCP state visibility
+# Version: 1.5.0 - 2026-03-09
+#   - Restore collector forwarding via local firefly listener + firefly backend
+#   - Keep perfSONAR marker behaviour while avoiding synthetic wildcard collector events
+#   - Disable enrichment by default to avoid unsupported netlink warnings on EL9 hosts
 # 
 # Previous version (1.2.0) changes:
 #   - Switch from fireflyp plugin to firefly backend for emitting flow start/end events
@@ -24,9 +24,11 @@ set -euo pipefail
 #   --activity-id N            Set the SciTags activity ID (default: 2 = network testing)
 #   --interfaces LIST          Comma-separated list of NIC names for packet marking
 #                              (auto-detected from /etc/perfSONAR-multi-nic-config.conf if omitted)
-#   --firefly-receiver HOST    Collector address for the fireflyb backend
+#   --firefly-receiver HOST    Collector address for forwarded fireflies
 #                              (default: global.scitags.org; set to empty to disable)
 #   --firefly-receiver-port N  UDP port on the firefly collector (default: 10514)
+#   --firefly-bind-port N      Local UDP port flowd-go listens on for fireflies (default: 10514)
+#   --no-firefly-receiver      Disable collector forwarding (eBPF packet marking only)
 #   --list-experiments         Show available experiment IDs and exit
 #   --yes                      Skip interactive prompts
 #   --dry-run                  Preview actions without making changes
@@ -34,13 +36,13 @@ set -euo pipefail
 #   --version                  Show script version
 #   --help, -h                 Show this help message
 #
-# Firefly Backend:
-#   When --firefly-receiver is set (the default), the 'firefly' backend in flowd-go
-#   will emit firefly JSON datagrams at the start and end of each flow, sending them
-#   to the configured collector. This allows perfSONAR measurement flows to be tracked
-#   by ESnet Stardust and other SciTags-aware systems. Requires flowd-go >= 2.5.0.
+# Firefly Forwarding:
+#   When --firefly-receiver is set (the default), flowd-go listens on 127.0.0.1:10514
+#   for local firefly datagrams and forwards valid flow events to the configured collector.
+#   This is the supported way to publish perfSONAR fireflies to global.scitags.org while
+#   still using the perfsonar plugin for packet marking.
 
-VERSION="1.2.0"
+VERSION="1.5.0"
 PROG_NAME="$(basename "$0")"
 LOG_FILE="/var/log/perfSONAR-install-flowd-go.log"
 
@@ -61,6 +63,7 @@ FLOWD_GO_RPM_URL="https://linuxsoft.cern.ch/repos/scitags9al-testing/x86_64/os/P
 # Regional DNS aliases (e.g. us-east.scitags.org) may be used in future.
 FIREFLY_RECEIVER="global.scitags.org"
 FIREFLY_RECEIVER_PORT=10514
+FIREFLY_BIND_PORT=10514
 
 # Experiment name lookup
 declare -A EXPERIMENT_NAMES=(
@@ -195,15 +198,20 @@ build_config() {
     done
     iface_yaml+="]"
 
-    # Build perfsonar plugin block (always included)
+    # Build plugin block: perfsonar for marking + optional firefly listener for forwarding.
     local plugins_block
     plugins_block=$(printf 'plugins:\n  perfsonar:\n    activityId: %s\n    experimentId: %s' \
         "$ACTIVITY_ID" "$EXPERIMENT_ID")
 
-    # Build firefly backend block
+    if [ -n "$FIREFLY_RECEIVER" ]; then
+        plugins_block=$(printf '%s\n  firefly:\n    bindAddress: "127.0.0.1"\n    bindPort: %s\n    hasSyslogHeader: false' \
+            "$plugins_block" "$FIREFLY_BIND_PORT")
+    fi
+
+    # Build firefly backend block for collector forwarding.
     local firefly_backend=""
     if [ -n "$FIREFLY_RECEIVER" ]; then
-        firefly_backend=$(printf '  firefly:\n    sendToCollector: true\n    collectorAddress: "%s"\n    collectorPort: %s\n    prependSyslog: false\n    enrich: true' \
+        firefly_backend=$(printf '  firefly:\n    sendToCollector: true\n    collectorAddress: "%s"\n    collectorPort: %s\n    prependSyslog: false\n    enrich: false' \
             "$FIREFLY_RECEIVER" "$FIREFLY_RECEIVER_PORT")
     fi
 
@@ -220,17 +228,7 @@ build_config() {
         backends_block=$(printf 'backends:\n%s' "$marker_backend")
     fi
 
-    # Enrichers configuration for TCP metrics (60-second interval)
-    local enrichers_block
-    if [ -n "$FIREFLY_RECEIVER" ]; then
-        enrichers_block=$(printf 'enrichers:\n  period: 60000\n  netlink: {}\n  skops: {}')
-    fi
-
-    if [ -n "$enrichers_block" ]; then
-        printf '%s\n\n%s\n\n%s\n' "$plugins_block" "$backends_block" "$enrichers_block"
-    else
-        printf '%s\n\n%s\n' "$plugins_block" "$backends_block"
-    fi
+    printf '%s\n\n%s\n' "$plugins_block" "$backends_block"
 }
 
 install_flowd_go() {
@@ -304,7 +302,8 @@ install_flowd_go() {
     echo "  Activity:   network testing (ID=$ACTIVITY_ID)"
     if [ -n "$FIREFLY_RECEIVER" ]; then
         echo "  Firefly collector: $FIREFLY_RECEIVER:$FIREFLY_RECEIVER_PORT"
-        echo "  (fireflyb backend with TCP enrichment: START + periodic (every 60s) + END fireflies)"
+        echo "  Local listener:   127.0.0.1:$FIREFLY_BIND_PORT"
+        echo "  (forwarding valid local fireflies to the collector)"
     else
         echo "  Firefly collector: disabled (eBPF packet marking only)"
     fi
@@ -369,6 +368,12 @@ parse_cli() {
             --firefly-receiver-port)
                 FIREFLY_RECEIVER_PORT="${2:-10514}"
                 shift 2 ;;
+            --firefly-bind-port)
+                FIREFLY_BIND_PORT="${2:-10514}"
+                shift 2 ;;
+            --no-firefly-receiver)
+                FIREFLY_RECEIVER=""
+                shift ;;
 
             --list-experiments)
                 list_experiments
