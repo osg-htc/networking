@@ -23,7 +23,11 @@
 - Users with existing corrupted state files can repair them using `repair-state-json.sh <file.json>`
 - The script creates backups before repair and validates output with `jq` or Python
 
-## [Unreleased] - 2025-12-16
+## [Unreleased] - 2026-03-20
+
+### Fixed
+
+- **Apache configuration initialization** (testpoint-entrypoint-wrapper.sh v1.2.0): Fixed container startup failure when using bind-mounted `/etc/apache2` with Let's Encrypt certificates. The wrapper script now initializes missing Apache configuration files on container startup, ensuring Apache can start properly. Includes automatic directory structure creation, module enablement, and configuration validation. Resolves issue where fresh deployments would fail with "Could not open configuration file /etc/apache2/apache2.conf: No such file or directory".
 
 ### Changed
 
@@ -34,6 +38,7 @@
 ### Notes
 
 - The `docs/perfsonar/tools_scripts` directory now includes updated `.sha256` checksum files for modified scripts. See the PR for details.
+- testpoint-entrypoint-wrapper.sh checksum updated: `76f49ce6... → abf71262...`
 
 ## [1.1.3] - 2025-12-06
 
