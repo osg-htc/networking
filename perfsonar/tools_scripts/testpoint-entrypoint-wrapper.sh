@@ -3,13 +3,14 @@
 # Author: Shank McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # testpoint-entrypoint-wrapper.sh
-# Version: 1.0.0
+# Version: 1.2.0  # UPDATED: Now initializes Apache config on first run
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # --------------------------------
 # Purpose:
 #   Wrapper entrypoint for the perfsonar-testpoint container that automatically
-#   patches Apache SSL configuration to use Let's Encrypt certificates on startup.
+#   ensures Apache configuration exists and patches SSL configuration to use 
+#   Let's Encrypt certificates on startup.
 #
 # Usage:
 #   Use this script as the entrypoint in your docker-compose.yml or podman run command.
@@ -26,17 +27,117 @@
 #         - /opt/perfsonar-tp/tools_scripts:/opt/perfsonar-tp/tools_scripts:ro
 #
 # Notes:
+#   - Initializes Apache configuration from container image on first run
 #   - SERVER_FQDN is optional; script auto-discovers first cert in /etc/letsencrypt/live
 #   - Patches Apache config if Let's Encrypt certs are found
 #   - Falls back to default certificates if certs don't exist (allows first-time deployment)
 #   - After patching, delegates to the container's original entrypoint (systemd)
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.1.0
+# Version: 1.2.0
 
 set -e
 
-APACHE_SSL_CONF="/etc/apache2/sites-available/default-ssl.conf"
+APACHE_CONF_DIR="/etc/apache2"
+APACHE_MAIN_CONF="${APACHE_CONF_DIR}/apache2.conf"
+APACHE_SSL_CONF="${APACHE_CONF_DIR}/sites-available/default-ssl.conf"
+APACHE_INIT_MARKER="${APACHE_CONF_DIR}/.initialized"
+
+# Function to initialize Apache configuration from container image
+initialize_apache_config() {
+    echo "==> Checking Apache configuration..."
+    
+    # Check if we've already initialized (in case of container restart)
+    if [[ -f "$APACHE_INIT_MARKER" ]]; then
+        echo "==> Apache already initialized (skipping init, marker found)"
+        return 0
+    fi
+    
+    # Create apache2 directory if it doesn't exist
+    mkdir -p "$APACHE_CONF_DIR"
+    
+    # If apache2.conf is missing from the bind-mounted volume, restore it
+    if [[ ! -f "$APACHE_MAIN_CONF" ]]; then
+        echo "==> Apache main configuration missing, restoring..."
+        
+        # Try method 1: Use dpkg --configure to restore files
+        if command -v dpkg --version >/dev/null 2>&1; then
+            echo "    Attempting to restore via dpkg..."
+            dpkg --configure -a 2>/dev/null || true
+        fi
+        
+        # If still missing, create minimal but valid configuration
+        if [[ ! -f "$APACHE_MAIN_CONF" ]]; then
+            echo "    Creating minimal apache2.conf..."
+            cat > "$APACHE_MAIN_CONF" << 'EOF'
+# Apache2 configuration file - auto-generated
+DefaultRuntimeDir ${APACHE_RUN_DIR}
+PidFile ${APACHE_PID_FILE}
+Timeout 300
+KeepAlive On
+KeepAliveTimeout 5
+MaxConnectionsPerChild 0
+User www-data
+Group www-data
+HostnameLookups Off
+ErrorLog ${APACHE_LOG_DIR}/error.log
+LogLevel warn
+
+# Include module configuration
+IncludeOptional mods-enabled/*.load
+IncludeOptional mods-enabled/*.conf
+
+# Include config snippets
+IncludeOptional conf-enabled/*.conf
+
+# Include virtual host configuration
+IncludeOptional sites-enabled/*.conf
+EOF
+            echo "    Created: $APACHE_MAIN_CONF"
+        fi
+    else
+        echo "==> Apache main configuration found"
+    fi
+    
+    # Create necessary subdirectories
+    mkdir -p "${APACHE_CONF_DIR}/sites-available"
+    mkdir -p "${APACHE_CONF_DIR}/sites-enabled"
+    mkdir -p "${APACHE_CONF_DIR}/conf-available"
+    mkdir -p "${APACHE_CONF_DIR}/conf-enabled"
+    mkdir -p "${APACHE_CONF_DIR}/mods-available"
+    mkdir -p "${APACHE_CONF_DIR}/mods-enabled"
+    
+    # Enable required modules for pScheduler proxy
+    for mod in proxy proxy_http ssl; do
+        if [[ -f "${APACHE_CONF_DIR}/mods-available/${mod}.load" ]]; then
+            link_target="${APACHE_CONF_DIR}/mods-enabled/${mod}.load"
+            if [[ ! -L "$link_target" && ! -f "$link_target" ]]; then
+                ln -sf "../mods-available/${mod}.load" "$link_target"
+            fi
+        fi
+    done
+    
+    # Verify apache configuration syntax if apache2ctl available
+    if command -v apache2ctl >/dev/null 2>&1; then
+        if apache2ctl -t 2>/dev/null; then
+            echo "==> Apache configuration: OK"
+        else
+            echo "WARNING: Apache configuration test failed"
+        fi
+    fi
+    
+    # Mark as initialized to avoid re-running on restarts
+    touch "$APACHE_INIT_MARKER"
+    echo "==> Apache initialization complete"
+    return 0
+}
+
+# First, initialize Apache configuration from container image
+echo "==> perfSONAR testpoint container startup"
+initialize_apache_config
+
+echo ""
+echo "==> Processing Let's Encrypt SSL certificates..."
 
 # Auto-discover Let's Encrypt certificate directory or use SERVER_FQDN if set
 if [[ -n "${SERVER_FQDN:-}" ]]; then

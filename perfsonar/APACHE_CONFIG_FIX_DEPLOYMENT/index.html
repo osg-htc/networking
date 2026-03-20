@@ -8,7 +8,7 @@
       
       
       
-        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/perfSONAR-and-rp_filter-EL9/">
+        <link rel="canonical" href="https://osg-htc.org/networking/perfsonar/APACHE_CONFIG_FIX_DEPLOYMENT/">
       
       
       
@@ -21,7 +21,7 @@
     
     
       
-        <title>perfSONAR use of Policy Based Routing and rp_filter on EL9 - OSG Networking Area</title>
+        <title>perfSONAR Apache Configuration Fix - Deployment Guide - OSG Networking Area</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#perfsonar-use-of-policy-based-routing-and-rp_filter-on-el9" class="md-skip">
+        <a href="#perfsonar-apache-configuration-fix-deployment-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              perfSONAR use of Policy Based Routing and rp_filter on EL9
+              perfSONAR Apache Configuration Fix - Deployment Guide
             
           </span>
         </div>
@@ -2351,80 +2351,394 @@
   
 
 
-<h1 id="perfsonar-use-of-policy-based-routing-and-rp_filter-on-el9">perfSONAR use of Policy Based Routing and rp_filter on EL9<a class="headerlink" href="#perfsonar-use-of-policy-based-routing-and-rp_filter-on-el9" title="Permanent link">&para;</a></h1>
-<p>In a multihome setup on EL9, <code>sysctl rp_filter</code> and policy-based routing (PBR) address two different layers of network
-traffic handling and can conflict with each other. PBR determines the outbound path for traffic based on criteria, while
-<code>rp_filter</code> is a security feature that validates the source address of inbound traffic. If not configured properly,
-strict <code>rp_filter</code> can block legitimate traffic in a PBR setup.</p>
-<h2 id="sysctl-rp_filter-overview"><code>sysctl rp_filter</code> overview<a class="headerlink" href="#sysctl-rp_filter-overview" title="Permanent link">&para;</a></h2>
-<p>The Reverse Path Filtering (<code>rp_filter</code>) kernel parameter is a security measure designed to prevent IP spoofing, often
-associated with Denial of Service (DoS) attacks. When enabled, it checks the source IP address of an incoming packet to
-ensure the return path for a response would exit through the same interface that received the packet. It can be
-configured with three values:</p>
+<h1 id="perfsonar-apache-configuration-fix-deployment-guide">perfSONAR Apache Configuration Fix - Deployment Guide<a class="headerlink" href="#perfsonar-apache-configuration-fix-deployment-guide" title="Permanent link">&para;</a></h1>
+<p><strong>Issue Date</strong>: March 20, 2026<br />
+<strong>Fix Version</strong>: testpoint-entrypoint-wrapper.sh v1.2.0<br />
+<strong>Severity</strong>: Critical (affects all new Let's Encrypt deployments)<br />
+<strong>Status</strong>: Available in networking repository</p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This guide helps perfSONAR administrators deploy a critical fix for container-based testpoint installations that use Let's Encrypt certificates. The fix resolves Apache startup failures in fresh deployments.</p>
+<h3 id="whats-fixed">What's Fixed<a class="headerlink" href="#whats-fixed" title="Permanent link">&para;</a></h3>
+<p>Container installations using bind-mounted Apache configuration with Let's Encrypt fail on first startup with:</p>
+<div class="highlight"><pre><span></span><code>apache2: Could not open configuration file /etc/apache2/apache2.conf: No such file or directory
+</code></pre></div>
+<p><strong>This fix ensures Apache configuration is properly initialized automatically on container startup.</strong></p>
+<h3 id="who-needs-this">Who Needs This<a class="headerlink" href="#who-needs-this" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>You need this fix if:</strong>
+- Running perfSONAR testpoint as a <strong>container</strong> (podman/docker)
+- Using <strong>Let's Encrypt</strong> certificates for HTTPS
+- Deployment <strong>fails to start</strong> or Apache service won't start
+- Fresh installations on new hosts
+- Using automated deployment scripts</p>
+<p>❌ <strong>You do NOT need this if:</strong>
+- Running perfSONAR as an <strong>RPM toolkit</strong> (not containerized)
+- Using only self-signed certificates (though updating is still recommended)
+- Apache already starts successfully</p>
+<hr />
+<h2 id="quick-start-5-minutes">Quick Start (5 minutes)<a class="headerlink" href="#quick-start-5-minutes" title="Permanent link">&para;</a></h2>
+<h3 id="option-1-automatic-update-recommended">Option 1: Automatic Update (Recommended)<a class="headerlink" href="#option-1-automatic-update-recommended" title="Permanent link">&para;</a></h3>
+<p>If you have an <strong>existing, running deployment</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># SSH to your perfSONAR host</span>
+ssh<span class="w"> </span>user@perfsonar-host
+
+<span class="c1"># Run the update script (interactive, shows what will change)</span>
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span>--apply<span class="w"> </span>--restart
+
+<span class="c1"># Or non-interactive</span>
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>What this does:</strong>
+1. Downloads latest helper scripts (including the fix)
+2. Updates Apache configuration if needed
+3. Restarts the container to apply changes
+4. Apache will initialize properly on next startup</p>
+<h3 id="option-2-manual-update-if-preferred">Option 2: Manual Update (If Preferred)<a class="headerlink" href="#option-2-manual-update-if-preferred" title="Permanent link">&para;</a></h3>
+<p>For more control, update just the wrapper script:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Download the fixed script</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/
+sudo<span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/testpoint-entrypoint-wrapper.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>testpoint-entrypoint-wrapper.sh.new
+
+<span class="c1"># 2. Verify checksum</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;abf71262bc87d410b2e4ac528fad2c0dcb6237b0cd392b0c50a1b3d4b2619777  testpoint-entrypoint-wrapper.sh.new&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sha256sum<span class="w"> </span>-c<span class="w"> </span>-
+
+<span class="c1"># 3. Install the script</span>
+sudo<span class="w"> </span>mv<span class="w"> </span>testpoint-entrypoint-wrapper.sh.new<span class="w"> </span>testpoint-entrypoint-wrapper.sh
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>testpoint-entrypoint-wrapper.sh
+
+<span class="c1"># 4. Restart the container</span>
+sudo<span class="w"> </span>podman-compose<span class="w"> </span>-f<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+<span class="c1"># OR</span>
+sudo<span class="w"> </span>docker-compose<span class="w"> </span>-f<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+</code></pre></div>
+<h3 id="option-3-new-installation">Option 3: New Installation<a class="headerlink" href="#option-3-new-installation" title="Permanent link">&para;</a></h3>
+<p>If you're doing a <strong>fresh installation</strong>, the fix is already in place:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Use the standard orchestrator for new installations</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--option<span class="w"> </span>B<span class="w"> </span>--fqdn<span class="w"> </span>ps.example.org<span class="w"> </span>--email<span class="w"> </span>admin@example.org<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>--experiment-id<span class="w"> </span><span class="m">2</span><span class="w"> </span>--non-interactive
+</code></pre></div>
+<hr />
+<h2 id="deployment-steps-detailed">Deployment Steps (Detailed)<a class="headerlink" href="#deployment-steps-detailed" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-verify-you-need-the-fix">Step 1: Verify You Need The Fix<a class="headerlink" href="#step-1-verify-you-need-the-fix" title="Permanent link">&para;</a></h3>
+<p>Check if Apache is running:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># On your host</span>
+sudo<span class="w"> </span>podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar-testpoint
+
+<span class="c1"># Inside the container</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>apache2
+
+<span class="c1"># Check if initialization already completed</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-f<span class="w"> </span>/etc/apache2/.initialized<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Already fixed!&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Needs fix&quot;</span>
+</code></pre></div>
+<p>If you see:
+- ✅ Apache is running and initialized marker exists → <strong>No action needed</strong>
+- ❌ Apache failed to start → <strong>Apply the fix immediately</strong>
+- ⚠️ Apache running but no marker → <strong>Apply the fix to ensure robustness</strong></p>
+<h3 id="step-2-choose-your-update-method">Step 2: Choose Your Update Method<a class="headerlink" href="#step-2-choose-your-update-method" title="Permanent link">&para;</a></h3>
+<h4 id="method-a-full-update-recommended">Method A: Full Update (Recommended)<a class="headerlink" href="#method-a-full-update-recommended" title="Permanent link">&para;</a></h4>
+<p>This updates all helper scripts and ensures everything is current:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh
+</code></pre></div>
+<p>Review the output to see what will change:</p>
+<div class="highlight"><pre><span></span><code>[INFO] perfSONAR Deployment Updater v1.4.0
+[INFO] Mode: REPORT only (use --apply to make changes)
+[INFO] Auto-detected deployment type: container
+[INFO] Base directory:    /opt/perfsonar-tp
+[INFO] Compose file:      /opt/perfsonar-tp/docker-compose.yml
+[INFO] Container runtime: podman
+
+[CHANGED] UPDATED: testpoint-entrypoint-wrapper.sh (1.0.0 → 1.2.0)
+...
+</code></pre></div>
+<p>If satisfied, apply:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span>--apply<span class="w"> </span>--restart
+</code></pre></div>
+<h4 id="method-b-script-only-update-faster">Method B: Script-Only Update (Faster)<a class="headerlink" href="#method-b-script-only-update-faster" title="Permanent link">&para;</a></h4>
+<p>Update just the entrypoint wrapper if you're confident in other components:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Make a backup</span>
+sudo<span class="w"> </span>cp<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh.<span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
+
+<span class="c1"># 2. Download the fixed version</span>
+sudo<span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/testpoint-entrypoint-wrapper.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh.tmp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>mv<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh.tmp<span class="w"> </span><span class="se">\</span>
+<span class="w">         </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+
+<span class="c1"># 3. Make executable</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+
+<span class="c1"># 4. Restart container</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp
+sudo<span class="w"> </span>podman-compose<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+</code></pre></div>
+<h3 id="step-3-verify-the-fix-was-applied">Step 3: Verify The Fix Was Applied<a class="headerlink" href="#step-3-verify-the-fix-was-applied" title="Permanent link">&para;</a></h3>
+<p>After restarting, verify the fix:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Wait for container to restart (30-60 seconds)</span>
+sleep<span class="w"> </span><span class="m">60</span>
+
+<span class="c1"># Check 1: Apache should be running</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>apache2
+<span class="c1"># Should show: ● apache2.service - The Apache HTTP Server ... Active: active (running)</span>
+
+<span class="c1"># Check 2: Apache listening on 443</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">443</span>
+<span class="c1"># Should show: LISTEN ... 443/ssl</span>
+
+<span class="c1"># Check 3: Initialization marker should exist</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-f<span class="w"> </span>/etc/apache2/.initialized<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ Fixed&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✗ Not fixed&quot;</span>
+
+<span class="c1"># Check 4: Configuration is valid</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>apache2ctl<span class="w"> </span>-t
+<span class="c1"># Should show: &quot;AH00558: apache2: Could not reliably determine the server&#39;s fully qualified domain name, using...&quot;</span>
+<span class="c1"># ^ This is a WARNING (expected), not an ERROR</span>
+
+<span class="c1"># Check 5: Let&#39;s Encrypt certificates in use (if configured)</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;/etc/letsencrypt&quot;</span><span class="w"> </span>/etc/apache2/sites-available/default-ssl.conf
+<span class="c1"># Should show paths to: fullchain.pem, privkey.pem, chain.pem</span>
+</code></pre></div>
+<h3 id="step-4-test-https-access">Step 4: Test HTTPS Access<a class="headerlink" href="#step-4-test-https-access" title="Permanent link">&para;</a></h3>
+<p>Test that the web interface is accessible:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Get your server&#39;s FQDN</span>
+<span class="nv">FQDN</span><span class="o">=</span><span class="s2">&quot;your-perfsonar-host.example.org&quot;</span>
+
+<span class="c1"># Test HTTPS (ignore self-signed cert warning if using default certs)</span>
+curl<span class="w"> </span>-kv<span class="w"> </span>https://<span class="si">${</span><span class="nv">FQDN</span><span class="si">}</span>/<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+
+<span class="c1"># Should show: HTTP/1.1 200 OK or similar success responses</span>
+</code></pre></div>
+<hr />
+<h2 id="understanding-what-the-fix-does">Understanding What The Fix Does<a class="headerlink" href="#understanding-what-the-fix-does" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem-technical-details">The Problem (Technical Details)<a class="headerlink" href="#the-problem-technical-details" title="Permanent link">&para;</a></h3>
+<p>When you use bind mounts for persistent configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/apache2:/etc/apache2:z</span><span class="w">        </span><span class="c1"># Host dir empty on fresh install</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/etc/letsencrypt:/etc/letsencrypt:z</span>
+</code></pre></div>
+<p>On first run:
+1. Host's empty <code>/etc/apache2</code> is mounted into container
+2. Container's original Apache configs are hidden behind the empty mount
+3. Apache tries to read <code>/etc/apache2/apache2.conf</code> → <strong>not found</strong> → startup fails</p>
+<h3 id="the-solution-whats-fixed">The Solution (What's Fixed)<a class="headerlink" href="#the-solution-whats-fixed" title="Permanent link">&para;</a></h3>
+<p>The updated <code>testpoint-entrypoint-wrapper.sh</code> (v1.2.0) now:</p>
+<ol>
+<li><strong>Initializes Apache</strong> before starting services:</li>
+<li>Checks if <code>/etc/apache2/apache2.conf</code> exists</li>
+<li>
+<p>If missing, restores it or creates a valid default</p>
+</li>
+<li>
+<p><strong>Creates required directories</strong>:</p>
+</li>
+<li><code>sites-available</code>, <code>sites-enabled</code></li>
+<li><code>mods-available</code>, <code>mods-enabled</code></li>
+<li>
+<p><code>conf-available</code>, <code>conf-enabled</code></p>
+</li>
+<li>
+<p><strong>Enables required modules</strong>:</p>
+</li>
+<li><code>proxy</code>, <code>proxy_http</code>, <code>ssl</code></li>
+<li>
+<p>Needed for pScheduler forwarding and HTTPS</p>
+</li>
+<li>
+<p><strong>Validates configuration</strong>:</p>
+</li>
+<li>Runs <code>apache2ctl -t</code> to ensure syntax is valid</li>
+<li>
+<p>Provides clear error messages if problems found</p>
+</li>
+<li>
+<p><strong>Prevents re-initialization</strong>:</p>
+</li>
+<li>Uses marker file <code>/etc/apache2/.initialized</code></li>
+<li>No re-initialization on container restarts</li>
+<li>Safe to restart container multiple times</li>
+</ol>
+<h3 id="backward-compatibility">Backward Compatibility<a class="headerlink" href="#backward-compatibility" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>Fully backward compatible:</strong>
+- Existing valid Apache configs are left untouched
+- Only initializes missing components
+- Marker file prevents redundant operations
+- Works with or without Let's Encrypt</p>
+<hr />
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="problem-apache-still-wont-start">Problem: Apache Still Won't Start<a class="headerlink" href="#problem-apache-still-wont-start" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Check Apache configuration syntax</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>apache2ctl<span class="w"> </span>-t
+</code></pre></div>
+<p><strong>If error shown:</strong>
+- Look for specific errors in output
+- Check config files for syntax issues
+- See "Manual Repair" section below</p>
+<p><strong>If warning but no error (AH00558):</strong>
+- This is normal and expected for testpoint
+- Apache should still be running</p>
+<h3 id="problem-lets-encrypt-certificates-not-being-used">Problem: Let's Encrypt Certificates Not Being Used<a class="headerlink" href="#problem-lets-encrypt-certificates-not-being-used" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if certificates exist</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>ls<span class="w"> </span>-la<span class="w"> </span>/etc/letsencrypt/live/
+
+<span class="c1"># Check if Apache config was patched</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>fullchain<span class="w"> </span>/etc/apache2/sites-available/default-ssl.conf
+</code></pre></div>
+<p><strong>If certificates not found:</strong>
+- Ensure certbot has obtained certificates
+- Run Let's Encrypt setup again if needed
+- Verify certificate path in wrapper script: <code>SERVER_FQDN</code> variable</p>
+<p><strong>If Apache config not patched:</strong>
+- Check wrapper script output: <code>sudo podman logs perfsonar-testpoint 2&gt;&amp;1 | grep -i letsencrypt</code>
+- Re-run wrapper script: <code>sudo podman-compose restart</code></p>
+<h3 id="problem-permission-denied-on-script-update">Problem: Permission Denied on Script Update<a class="headerlink" href="#problem-permission-denied-on-script-update" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># If you get permission errors, use sudo</span>
+sudo<span class="w"> </span>su<span class="w"> </span>-<span class="w">  </span><span class="c1"># Become root</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp/tools_scripts/
+
+<span class="c1"># Then run update commands above</span>
+</code></pre></div>
+<h3 id="problem-container-wont-restart">Problem: Container Won't Restart<a class="headerlink" href="#problem-container-wont-restart" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check container status</span>
+sudo<span class="w"> </span>podman<span class="w"> </span>ps<span class="w"> </span>-a<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>perfsonar
+
+<span class="c1"># Check logs for errors</span>
+sudo<span class="w"> </span>podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-50
+
+<span class="c1"># Force restart (more aggressive)</span>
+sudo<span class="w"> </span>podman-compose<span class="w"> </span>-f<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml<span class="w"> </span>down
+sudo<span class="w"> </span>podman-compose<span class="w"> </span>-f<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+
+<span class="c1"># Or with docker-compose</span>
+sudo<span class="w"> </span>docker-compose<span class="w"> </span>-f<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml<span class="w"> </span>down
+sudo<span class="w"> </span>docker-compose<span class="w"> </span>-f<span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml<span class="w"> </span>up<span class="w"> </span>-d
+</code></pre></div>
+<h3 id="manual-repair-if-needed">Manual Repair (If Needed)<a class="headerlink" href="#manual-repair-if-needed" title="Permanent link">&para;</a></h3>
+<p>If automatic fix doesn't work, manually restore Apache config:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Option 1: Use the container&#39;s original config (if available)</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1">  if [[ -f /tmp/apache2.conf.orig ]]; then</span>
+<span class="s1">    cp /tmp/apache2.conf.orig /etc/apache2/apache2.conf</span>
+<span class="s1">  fi</span>
+<span class="s1">&#39;</span>
+
+<span class="c1"># Option 2: Generate minimal config inside container</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1">  cat &gt; /etc/apache2/apache2.conf &lt;&lt; &quot;EOF&quot;</span>
+<span class="s1">DefaultRuntimeDir ${APACHE_RUN_DIR}</span>
+<span class="s1">PidFile ${APACHE_PID_FILE}</span>
+<span class="s1">Timeout 300</span>
+<span class="s1">KeepAlive On</span>
+<span class="s1">KeepAliveTimeout 5</span>
+<span class="s1">User www-data</span>
+<span class="s1">Group www-data</span>
+<span class="s1">ErrorLog ${APACHE_LOG_DIR}/error.log</span>
+<span class="s1">LogLevel warn</span>
+<span class="s1">IncludeOptional mods-enabled/*.load</span>
+<span class="s1">IncludeOptional mods-enabled/*.conf</span>
+<span class="s1">IncludeOptional conf-enabled/*.conf</span>
+<span class="s1">IncludeOptional sites-enabled/*.conf</span>
+<span class="s1">EOF</span>
+<span class="s1">&#39;</span>
+
+<span class="c1"># Option 3: Restart Apache after manual fix</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>apache2
+</code></pre></div>
+<hr />
+<h2 id="verification-checklist">Verification Checklist<a class="headerlink" href="#verification-checklist" title="Permanent link">&para;</a></h2>
+<p>After deployment, verify each item:</p>
 <ul>
-<li>
-<p><code>0</code>: <strong>Disabled.</strong> No source validation is performed. This is required for asymmetric routing setups.</p>
-</li>
-<li>
-<p><code>1</code>: <strong>Strict mode.</strong> The kernel performs a reverse-path lookup. If the best return path for the packet's source address is not the interface on which the packet was received, the packet is dropped.</p>
-</li>
-<li>
-<p><code>2</code>: <strong>Loose mode.</strong> The kernel only validates that the source IP is routable via <em>any</em> interface, not necessarily the one it arrived on.</p>
-</li>
+<li>[ ] Apache is running: <code>sudo podman exec perfsonar-testpoint systemctl status apache2</code> shows active</li>
+<li>[ ] HTTPS port 443 listening: <code>sudo podman exec perfsonar-testpoint ss -tlnp | grep 443</code></li>
+<li>[ ] Apache config valid: <code>sudo podman exec perfsonar-testpoint apache2ctl -t</code> shows no errors</li>
+<li>[ ] Initialization marker exists: <code>sudo podman exec perfsonar-testpoint test -f /etc/apache2/.initialized</code></li>
+<li>[ ] Let's Encrypt patched (if using LE): <code>sudo podman exec perfsonar-testpoint grep /etc/letsencrypt /etc/apache2/sites-available/default-ssl.conf</code></li>
+<li>[ ] Can access HTTPS: <code>curl -kv https://your-fqdn/</code> returns 200 OK</li>
+<li>[ ] pScheduler accessible: Check web interface or pScheduler API endpoints</li>
 </ul>
-<h2 id="policy-based-routing-pbr-overview">Policy-based routing (PBR) overview<a class="headerlink" href="#policy-based-routing-pbr-overview" title="Permanent link">&para;</a></h2>
-<p>PBR is a technique for overriding the standard Linux routing behavior, which is typically based solely on the
-destination IP address. It allows administrators to route traffic based on other criteria, such as the source IP
-address, application, protocol, or firewall marks (<code>fwmark</code>). A PBR setup involves these key steps:</p>
-<ol>
-<li>
-<p><strong>Create custom routing tables.</strong> Additional tables beyond the main routing table are defined, often in <code>/etc/iproute2/rt_tables</code>.</p>
-</li>
-<li>
-<p><strong>Define rules.</strong> The <code>ip rule</code> command is used to add rules that select a specific routing table. Rules are matched against packets based on criteria like source address or firewall mark.</p>
-</li>
-<li>
-<p><strong>Add routes to custom tables.</strong> Use the <code>ip route</code> command to add routes to the new tables.</p>
-</li>
-</ol>
-<h2 id="the-conflict-and-solution">The conflict and solution<a class="headerlink" href="#the-conflict-and-solution" title="Permanent link">&para;</a></h2>
-<p>The conflict arises when using <strong>strict <code>rp_filter</code> (value 1)</strong> in a multihomed network configured with PBR.</p>
-<ol>
-<li>
-<p>A server is configured with PBR to send traffic from a specific service (e.g., source IP A1) out through network interface <code>eth0</code>.</p>
-</li>
-<li>
-<p>The server's PBR rules also dictate that another service (e.g., source IP A2) sends traffic out through interface <code>eth1</code>.</p>
-</li>
-<li>
-<p>An external client sends a packet to the service on source IP A2.</p>
-</li>
-<li>
-<p>The server's PBR rules correctly select the route on <code>eth1</code> to send the response.</p>
-</li>
-<li>
-<p>However, if strict <code>rp_filter</code> is enabled, the kernel checks the incoming packet's source address and performs a reverse-path lookup. This lookup would likely find the best return path is through <code>eth0</code> (the primary default gateway) rather than the <code>eth1</code> interface where the packet arrived.</p>
-</li>
-<li>
-<p>The kernel drops the packet because of the <code>rp_filter</code> check, even though the PBR configuration would have correctly handled the outbound response.</p>
-</li>
-</ol>
-<h2 id="solution-for-el9-multihome"><strong>Solution for EL9 multihome:</strong><a class="headerlink" href="#solution-for-el9-multihome" title="Permanent link">&para;</a></h2>
-<p>To enable asymmetric routing with PBR, you must relax the <code>rp_filter</code> setting, as strict mode will cause legitimate
-packets to be dropped.</p>
-<p>The best practice is to use a value of <code>2</code> (loose mode) or <code>0</code> (disabled). The loose mode is safer as it still provides
-some protection against spoofing, while <code>0</code> completely disables the check.</p>
-<p>You can configure this persistently by editing a file in <code>/etc/sysctl.d/</code>, for example <code>/etc/sysctl.d/99-network.conf</code>:</p>
-<p># Disable strict reverse path filtering for asymmetric routing net.ipv4.conf.all.rp_filter=2</p>
-<p>After saving the file, apply the changes with <code>sysctl -p</code>.</p>
-<h2 id="summary-of-differences">Summary of differences<a class="headerlink" href="#summary-of-differences" title="Permanent link">&para;</a></h2>
-<p>| Feature  | <code>sysctl rp_filter</code> | Policy-Based Routing (PBR) | | ----- | ----- | ----- | | <strong>Purpose</strong> | Security
-mechanism to prevent IP spoofing by checking inbound packet source addresses. | Advanced routing method to control
-outbound traffic path based on policies. | | <strong>Traffic direction</strong> | Checks incoming traffic. | Explicitly directs
-outgoing traffic. | | <strong>Mechanism</strong> | A single kernel parameter with three states (<code>0</code>, <code>1</code>, <code>2</code>) that applies globally
-or per-interface. | Uses multiple routing tables and rules (<code>ip rule</code>) to select the appropriate table for a given
-packet. | | <strong>Compatibility</strong> | Strict mode (<code>1</code>) conflicts with multihome setups involving asymmetric routing. | Is
-designed for multihome setups but requires loosening or disabling <code>rp_filter</code> to function correctly |</p>
+<hr />
+<h2 id="rollback-instructions">Rollback Instructions<a class="headerlink" href="#rollback-instructions" title="Permanent link">&para;</a></h2>
+<p>If you need to revert to the previous version:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Restore from backup</span>
+sudo<span class="w"> </span>cp<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh.XXXXXXXX<span class="w"> </span><span class="se">\</span>
+<span class="w">       </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+
+<span class="c1"># 2. Clean Apache state</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/etc/apache2/.initialized
+
+<span class="c1"># 3. Restart container</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp
+sudo<span class="w"> </span>podman-compose<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
+</code></pre></div>
+<hr />
+<h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
+<h3 id="collect-diagnostic-information">Collect Diagnostic Information<a class="headerlink" href="#collect-diagnostic-information" title="Permanent link">&para;</a></h3>
+<p>If you need help from the perfSONAR team:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate diagnostic report</span>
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh<span class="w"> </span>&gt;<span class="w"> </span>/tmp/diag.txt
+
+<span class="c1"># Check container logs</span>
+sudo<span class="w"> </span>podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/container-logs.txt
+
+<span class="c1"># Check Apache error log</span>
+sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>cat<span class="w"> </span>/var/log/apache2/error.log<span class="w"> </span>&gt;<span class="w"> </span>/tmp/apache-error.log
+
+<span class="c1"># Include in your support request</span>
+</code></pre></div>
+<h3 id="key-information-to-report">Key Information to Report<a class="headerlink" href="#key-information-to-report" title="Permanent link">&para;</a></h3>
+<p>When asking for help, include:
+- Output of diagnostic report
+- Apache error logs
+- Container logs from startup
+- Docker-compose or podman run command you used
+- Error messages you're seeing
+- What you've already tried</p>
+<h3 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="https://docs.perfsonar.net/">perfSONAR Documentation</a></li>
+<li><a href="https://github.com/osg-htc/networking">OSG/HTC Networking docs</a></li>
+<li><a href="https://httpd.apache.org/docs/2.4/">Apache HTTP Server</a></li>
+<li><a href="https://letsencrypt.org/">Let's Encrypt SSL Certificates</a></li>
+</ul>
+<hr />
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What's Fixed</strong></td>
+<td>Apache configuration initialization on container startup</td>
+</tr>
+<tr>
+<td><strong>How to Apply</strong></td>
+<td>Run <code>update-perfsonar-deployment.sh --apply --restart</code></td>
+</tr>
+<tr>
+<td><strong>Time to Apply</strong></td>
+<td>5-10 minutes</td>
+</tr>
+<tr>
+<td><strong>Risk Level</strong></td>
+<td>Low (no changes unless needed, fully reversible)</td>
+</tr>
+<tr>
+<td><strong>Downtime</strong></td>
+<td>1-2 minutes (container restart)</td>
+</tr>
+<tr>
+<td><strong>Verification</strong></td>
+<td>See verification checklist above</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Last Updated</strong>: March 20, 2026<br />
+<strong>For latest updates</strong>: Check <a href="https://github.com/osg-htc/networking/blob/master/docs/perfsonar/tools_scripts/CHANGELOG.md">networking repository CHANGELOG</a></p>
 
 
 

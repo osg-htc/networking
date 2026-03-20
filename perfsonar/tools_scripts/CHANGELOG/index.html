@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -2377,7 +2377,11 @@
 <li>Users with existing corrupted state files can repair them using <code>repair-state-json.sh &lt;file.json&gt;</code></li>
 <li>The script creates backups before repair and validates output with <code>jq</code> or Python</li>
 </ul>
-<h2 id="unreleased-2025-12-16">[Unreleased] - 2025-12-16<a class="headerlink" href="#unreleased-2025-12-16" title="Permanent link">&para;</a></h2>
+<h2 id="unreleased-2026-03-20">[Unreleased] - 2026-03-20<a class="headerlink" href="#unreleased-2026-03-20" title="Permanent link">&para;</a></h2>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Apache configuration initialization</strong> (testpoint-entrypoint-wrapper.sh v1.2.0): Fixed container startup failure when using bind-mounted <code>/etc/apache2</code> with Let's Encrypt certificates. The wrapper script now initializes missing Apache configuration files on container startup, ensuring Apache can start properly. Includes automatic directory structure creation, module enablement, and configuration validation. Resolves issue where fresh deployments would fail with "Could not open configuration file /etc/apache2/apache2.conf: No such file or directory".</li>
+</ul>
 <h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Installer:</strong> <code>install_tools_scripts.sh</code> bumped to <code>1.0.1</code> and updated to fetch a fuller set of helper scripts and docs, and attempt to fetch accompanying <code>.sha256</code> checksum files when available.</li>
@@ -2387,9 +2391,10 @@
 <h3 id="notes_1">Notes<a class="headerlink" href="#notes_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>The <code>docs/perfsonar/tools_scripts</code> directory now includes updated <code>.sha256</code> checksum files for modified scripts. See the PR for details.</li>
+<li>testpoint-entrypoint-wrapper.sh checksum updated: <code>76f49ce6... → abf71262...</code></li>
 </ul>
 <h2 id="113-2025-12-06">[1.1.3] - 2025-12-06<a class="headerlink" href="#113-2025-12-06" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Corrected IOMMU audit messaging to suggest <code>grubby</code> for BLS systems (EL9+) and <code>grub2-mkconfig</code>/<code>update-grub</code> for legacy systems. Also bumped <code>fasterdata-tuning.sh</code> to v1.1.3 and updated site copy + checksums.</li>
 </ul>
