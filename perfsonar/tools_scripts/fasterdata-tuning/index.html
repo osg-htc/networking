@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -3056,13 +3056,13 @@ sha256sum<span class="w"> </span>-c<span class="w"> </span>/tmp/fasterdata-tunin
 <div class="highlight"><pre><span></span><code># Sysctl
 sysctl net.core.rmem_max net.core.wmem_max net.core.netdev_max_backlog net.core.default_qdisc
 # Tuned active profile
-tuned-adm active || echo &quot;tuned-adm not present&quot;
+tuned-adm active || echo "tuned-adm not present"
 # Per NIC checks
 ethtool -k &lt;iface&gt; # offload features
 ethtool -g &lt;iface&gt; # ring buffer sizes
 tc qdisc show dev &lt;iface&gt;
 # Verify IOMMU in kernel cmdline
-cat /proc/cmdline | grep -E &quot;iommu=pt|intel_iommu=on|amd_iommu=on&quot;
+cat /proc/cmdline | grep -E "iommu=pt|intel_iommu=on|amd_iommu=on"
 </code></pre></div>
 <h2 id="security-safety">Security &amp; safety<a class="headerlink" href="#security-safety" title="Permanent link">&para;</a></h2>
 <ul>
@@ -3085,7 +3085,7 @@ cat /proc/cmdline | grep -E &quot;iommu=pt|intel_iommu=on|amd_iommu=on&quot;
 sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn
 
 <span class="c1"># Apply with specific interfaces</span>
-sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--ifaces<span class="w"> </span><span class="s2">&quot;ens1f0np0,ens1f1np1&quot;</span>
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>measurement<span class="w"> </span>--ifaces<span class="w"> </span><span class="s2">"ens1f0np0,ens1f1np1"</span>
 
 <span class="c1"># Apply with packet pacing (fq by default)</span>
 sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--target<span class="w"> </span>dtn<span class="w"> </span>--apply-packet-pacing
@@ -3120,7 +3120,7 @@ sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> 
 sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--dry-run
 
 <span class="c1"># Apply with custom IOMMU args</span>
-sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--iommu-args<span class="w"> </span><span class="s2">&quot;intel_iommu=on iommu=pt&quot;</span><span class="w"> </span>--yes
+sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> </span>--mode<span class="w"> </span>apply<span class="w"> </span>--apply-iommu<span class="w"> </span>--iommu-args<span class="w"> </span><span class="s2">"intel_iommu=on iommu=pt"</span><span class="w"> </span>--yes
 </code></pre></div>
 <h2 id="state-management-save--restore-configurations">State Management: Save &amp; Restore Configurations<a class="headerlink" href="#state-management-save--restore-configurations" title="Permanent link">&para;</a></h2>
 <p><strong>NEW in v1.2.0</strong>: The script now supports saving and restoring system state for testing different tuning configurations.</p>
@@ -3410,7 +3410,7 @@ sudo<span class="w"> </span>/usr/local/bin/fasterdata-tuning.sh<span class="w"> 
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

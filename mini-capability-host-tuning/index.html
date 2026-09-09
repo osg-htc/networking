@@ -17,7 +17,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -25,7 +25,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -2623,7 +2623,7 @@
    - <code>sudo /usr/local/bin/fasterdata-tuning.sh --save-state --label baseline</code>
    - Use <code>sudo /usr/local/bin/fasterdata-tuning.sh --list-states</code> and save the returned filenames centrally (one per host).
 3. <strong>Apply configuration to all hosts</strong>: Use an orchestration tool (Ansible recommended) to run the apply on all data-transfer nodes simultaneously or in a controlled batch. Example Ansible ad-hoc:</p>
-<div class="highlight"><pre><span></span><code>ansible<span class="w"> </span>data-transfer<span class="w"> </span>-i<span class="w"> </span>inventory<span class="w"> </span>-m<span class="w"> </span>shell<span class="w"> </span>-a<span class="w"> </span><span class="s2">&quot;sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-packet-pacing --yes&quot;</span>
+<div class="highlight"><pre><span></span><code>ansible<span class="w"> </span>data-transfer<span class="w"> </span>-i<span class="w"> </span>inventory<span class="w"> </span>-m<span class="w"> </span>shell<span class="w"> </span>-a<span class="w"> </span><span class="s2">"sudo /usr/local/bin/fasterdata-tuning.sh --mode apply --apply-packet-pacing --yes"</span>
 </code></pre></div>
 <p>For storage changes use an Ansible playbook that sets <code>/sys/block/*/queue/scheduler</code> and any NUMA affinity settings.
 4. <strong>Confirm successful apply</strong>: On all hosts, run an audit to verify the expected changes are in place and collect JSON output to central logging:
@@ -3199,7 +3199,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

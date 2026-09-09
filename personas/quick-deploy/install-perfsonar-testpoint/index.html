@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -3311,43 +3311,43 @@ confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entri
 retain SSH access; the nftables helper derives allow-lists from this file.</p>
 <p>Example: adding a management network alongside the data VLAN</p>
 <div class="highlight"><pre><span></span><code><span class="nv">NIC_NAMES</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;bond0.2900&quot;</span>
-<span class="w">    </span><span class="s2">&quot;bond0&quot;</span>
+<span class="w">    </span><span class="s2">"bond0.2900"</span>
+<span class="w">    </span><span class="s2">"bond0"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_ADDRS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;192.41.236.32&quot;</span>
-<span class="w">    </span><span class="s2">&quot;10.10.128.32&quot;</span>
+<span class="w">    </span><span class="s2">"192.41.236.32"</span>
+<span class="w">    </span><span class="s2">"10.10.128.32"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_PREFIXES</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;/23&quot;</span>
-<span class="w">    </span><span class="s2">&quot;/20&quot;</span>
+<span class="w">    </span><span class="s2">"/23"</span>
+<span class="w">    </span><span class="s2">"/20"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_GWS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;192.41.236.1&quot;</span>
-<span class="w">    </span><span class="s2">&quot;10.10.128.1&quot;</span>
+<span class="w">    </span><span class="s2">"192.41.236.1"</span>
+<span class="w">    </span><span class="s2">"10.10.128.1"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_ADDROUTE</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;-&quot;</span>
-<span class="w">    </span><span class="s2">&quot;10.10.0.0/22&quot;</span>
+<span class="w">    </span><span class="s2">"-"</span>
+<span class="w">    </span><span class="s2">"10.10.0.0/22"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV6_ADDRS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;2001:48a8:68f7:8001:192:41:236:32&quot;</span>
+<span class="w">    </span><span class="s2">"2001:48a8:68f7:8001:192:41:236:32"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV6_PREFIXES</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;/64&quot;</span>
+<span class="w">    </span><span class="s2">"/64"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV6_GWS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;2001:48a8:68f7:8001::1&quot;</span>
+<span class="w">    </span><span class="s2">"2001:48a8:68f7:8001::1"</span>
 <span class="o">)</span>
 
-<span class="nv">DEFAULT_ROUTE_NIC</span><span class="o">=</span><span class="s2">&quot;bond0.2900&quot;</span>
+<span class="nv">DEFAULT_ROUTE_NIC</span><span class="o">=</span><span class="s2">"bond0.2900"</span>
 </code></pre></div>
 <p>Use plain ASCII quotes and keep array lengths aligned across sections.</p>
 <h3 id="apply-changes-in-place-default">Apply changes (in-place default)<a class="headerlink" href="#apply-changes-in-place-default" title="Permanent link">&para;</a></h3>
@@ -3557,7 +3557,7 @@ ls<span class="w"> </span>-la<span class="w"> </span>/opt/perfsonar-tp/psconfig
 The container ships a complete <code>/etc/default/node_exporter</code>, but it does <strong>not</strong> include
 <code>--no-collector.cpufreq</code> by default. If you hit this crash, create an override:</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/conf
-<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;NODE_EXPORTER_OPTS=&quot;--no-collector.cpufreq&quot;&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
+<span class="nb">echo</span><span class="w"> </span><span class="s1">'NODE_EXPORTER_OPTS="--no-collector.cpufreq"'</span><span class="w"> </span>&gt;<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
 </code></pre></div>
 <p>Then uncomment the <code>node_exporter.defaults</code> volume line in <code>docker-compose.yml</code> and restart the container:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Uncomment this line in docker-compose.yml:</span>
@@ -3784,7 +3784,7 @@ that auto-discovers Let's Encrypt certificates on container startup and automati
 and use the first one found. Only set <code>SERVER_FQDN</code> if you have multiple certificates and need to specify which one to use.</p>
 <p>If you want to explicitly set the FQDN (optional):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Optional: only needed if you have multiple certificates</span>
-sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/# - SERVER_FQDN=.*/- SERVER_FQDN=&lt;YOUR_FQDN&gt;/&#39;</span><span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
+sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">'s/# - SERVER_FQDN=.*/- SERVER_FQDN=&lt;YOUR_FQDN&gt;/'</span><span class="w"> </span>/opt/perfsonar-tp/docker-compose.yml
 </code></pre></div>
 </details>
 <p>Start the containers:</p>
@@ -3860,7 +3860,7 @@ listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
 </code></pre></div>
 <p>Check the logs to verify the SSL config was patched:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;Patching Apache&quot;</span>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">"Patching Apache"</span>
 </code></pre></div>
 <p>You should see output confirming the certificate paths were updated.</p>
 <h4 id="4-restart-the-certbot-sidecar-for-automatic-renewals">4) Restart the certbot sidecar for automatic renewals<a class="headerlink" href="#4-restart-the-certbot-sidecar-for-automatic-renewals" title="Permanent link">&para;</a></h4>
@@ -3883,7 +3883,7 @@ testpoint Apache is patched to NOT listen on port 80. Both containers share the 
 </code></pre></div>
 <p>If successful, certificates will auto-renew before expiry, and the testpoint will be automatically restarted to load the
 new certificates. You can verify this behavior by checking the certbot logs after a renewal:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;deploy hook&quot;</span>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">"deploy hook"</span>
 </code></pre></div>
 <hr />
 <details class="info">
@@ -3931,12 +3931,12 @@ perfSONAR (one or two depending on whether you split latency/throughput by hostn
 <p>Basic enroll (interactive root on the host; runs inside the container) if you have only one entry to make (automation alternative below):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add auto URLs (configures archives too) and show configured remotes</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu&quot;</span>
+<span class="w">    </span><span class="s2">"https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"</span>
 
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>list
 </code></pre></div>
 <p>If there are any stale/old/incorrect entries, you can remove them:</p>
-<div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>delete<span class="w"> </span><span class="s2">&quot;&lt;old-url&gt;&quot;</span>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>psconfig<span class="w"> </span>remote<span class="w"> </span>delete<span class="w"> </span><span class="s2">"&lt;old-url&gt;"</span>
 </code></pre></div>
 <p>Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before
 applying.</p>
@@ -3967,10 +3967,11 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <details class="info">
 <summary>Registration steps and portals</summary>
 <ul>
-<li>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</li>
-<li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</li>
-<li>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint
-        <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</li>
+<li>Add or update the perfSONAR instance in the WLCG CRIC portal at
+  <a href="https://wlcg-cric.cern.ch">https://wlcg-cric.cern.ch</a> under the site's
+  "Associated Services" entries.</li>
+<li>If your site already has a perfSONAR entry, update the existing record rather than creating a duplicate.</li>
+<li>No OSG topology registration, GOCDB service endpoint, or GGUS ticket is required for this workflow.</li>
 </ul>
 </details>
 </li>
@@ -3984,18 +3985,18 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 container and restart the daemon only if needed. Install and run examples below, pick which type you want (root shell):</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
+<span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">"Acme Co."</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">"pS Admin"</span>
 
 <span class="c1"># Restore previously saved settings from the Prerequisites extract (if you saved a restore script earlier)</span>
 bash<span class="w"> </span>/root/restore-lsreg.sh
 
 <span class="c1"># Apply new settings and restart the daemon inside the container</span>
 /opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--site-name<span class="w"> </span><span class="s2">"Acme Co."</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
+<span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">"pS Admin"</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 </code></pre></div>
 </li>
 <li>
@@ -4190,13 +4191,13 @@ podman<span class="w"> </span>ps<span class="w"> </span>--filter<span class="w">
 <details class="info">
 <summary>Check container status and logs</summary>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check all containers are running and healthy</span>
-podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}\t{{.Ports}}&#39;</span>
+podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">'table {{.Names}}\t{{.Status}}\t{{.Ports}}'</span>
 
 <span class="c1"># Check perfsonar-testpoint logs for errors</span>
 podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="w"> </span><span class="m">50</span>
 
-<span class="c1"># If using Let&#39;s Encrypt, check certbot logs</span>
-podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span>--tail<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Certbot container not present (testpoint-only mode)&quot;</span>
+<span class="c1"># If using Let's Encrypt, check certbot logs</span>
+podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span>--tail<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"Certbot container not present (testpoint-only mode)"</span>
 
 <span class="c1"># Verify services inside container are running</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>apache2<span class="w"> </span>psconfig-pscheduler-agent<span class="w"> </span>--no-pager
@@ -4228,16 +4229,16 @@ nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> <
 <span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>fail2ban-client<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
 <span class="w">    </span>fail2ban-client<span class="w"> </span>status
 <span class="k">else</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;fail2ban not installed (optional)&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"fail2ban not installed (optional)"</span>
 <span class="k">fi</span>
 
 <span class="c1"># Check for recent SELinux denials</span>
 <span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>ausearch<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
 <span class="w">    </span>ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class="w"> </span>--just-one
 <span class="k">elif</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-f<span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">    </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;avc.*denied&quot;</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+<span class="w">    </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">"avc.*denied"</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
 <span class="k">else</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;SELinux audit tools not available&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"SELinux audit tools not available"</span>
 <span class="k">fi</span>
 </code></pre></div>
 </details>
@@ -4419,7 +4420,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
 
 <span class="c1"># Check for systemd initialization errors</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;failed\|error&quot;</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">"failed\|error"</span>
 
 <span class="c1"># Verify compose file syntax</span>
 <span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp
@@ -4441,7 +4442,7 @@ podman-compose<span class="w"> </span>config
 podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint
 
 <span class="c1"># Check for systemd initialization errors</span>
-podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;failed\|error&quot;</span>
+podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">"failed\|error"</span>
 
 <span class="c1"># Verify compose file syntax</span>
 <span class="nb">cd</span><span class="w"> </span>/opt/perfsonar-tp
@@ -4472,7 +4473,7 @@ systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-testpoi
 podman<span class="w"> </span>logs<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span>
 
 <span class="c1"># Check if using compose-based service (BAD)</span>
-grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;ExecStart&quot;</span><span class="w"> </span>/etc/systemd/system/perfsonar-testpoint.service
+grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">"ExecStart"</span><span class="w"> </span>/etc/systemd/system/perfsonar-testpoint.service
 </code></pre></div>
 <p><strong>Solution:</strong></p>
 <p>Replace the compose-based systemd service with proper systemd units that use <code>podman run --systemd=always</code>:</p>
@@ -4523,10 +4524,10 @@ systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-certbot
 journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
 
 <span class="c1"># Check for the error in logs</span>
-journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;Unable to open config file&quot;</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>perfsonar-certbot.service<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"Unable to open config file"</span>
 
 <span class="c1"># Verify service file configuration</span>
-grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">&quot;ExecStart&quot;</span><span class="w"> </span>/etc/systemd/system/perfsonar-certbot.service
+grep<span class="w"> </span>-A5<span class="w"> </span><span class="s2">"ExecStart"</span><span class="w"> </span>/etc/systemd/system/perfsonar-certbot.service
 </code></pre></div>
 <p><strong>Solution:</strong></p>
 <p>The certbot service needs two flags:
@@ -4549,7 +4550,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 systemctl<span class="w"> </span>daemon-reload
 systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-certbot.service
 
-<span class="c1"># Verify it&#39;s running</span>
+<span class="c1"># Verify it's running</span>
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-certbot.service
 podman<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>certbot
 </code></pre></div>
@@ -4570,8 +4571,8 @@ chcon<span class="w"> </span>-R<span class="w"> </span>-t<span class="w"> </span
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>apache2
 
 <span class="c1"># Verify both endpoints respond</span>
-curl<span class="w"> </span>-sk<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">&quot;%{http_code}\n&quot;</span><span class="w"> </span>https://<span class="k">$(</span>hostname<span class="w"> </span>-f<span class="k">)</span>/node_exporter/metrics
-curl<span class="w"> </span>-sk<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">&quot;%{http_code}\n&quot;</span><span class="w"> </span>https://<span class="k">$(</span>hostname<span class="w"> </span>-f<span class="k">)</span>/perfsonar_host_exporter/
+curl<span class="w"> </span>-sk<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">"%{http_code}\n"</span><span class="w"> </span>https://<span class="k">$(</span>hostname<span class="w"> </span>-f<span class="k">)</span>/node_exporter/metrics
+curl<span class="w"> </span>-sk<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">"%{http_code}\n"</span><span class="w"> </span>https://<span class="k">$(</span>hostname<span class="w"> </span>-f<span class="k">)</span>/perfsonar_host_exporter/
 </code></pre></div>
 <p><strong>Diagnosis:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check Apache error log inside container</span>
@@ -4638,7 +4639,7 @@ tail<span class="w"> </span>-100<span class="w"> </span>/var/log/perfSONAR-multi
 <div class="highlight"><pre><span></span><code><span class="c1"># Test DNS resolution from container</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>dig<span class="w"> </span>&lt;remote-testpoint&gt;
 
-<span class="c1"># Check container&#39;s resolv.conf</span>
+<span class="c1"># Check container's resolv.conf</span>
 
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>cat<span class="w"> </span>/etc/resolv.conf
 
@@ -4658,7 +4659,7 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p><strong>Symptoms:</strong> Certbot fails with "Failed to authenticate" or "Connection refused" errors.</p>
 <p><strong>Diagnostic steps:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check if port 80 is open</span>
-nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;80&quot;</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"80"</span>
 
 <span class="c1"># Verify Apache is NOT listening on port 80 in container</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>netstat<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:80
@@ -4690,10 +4691,10 @@ podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 ls<span class="w"> </span>-la<span class="w"> </span>/etc/letsencrypt/live/&lt;fqdn&gt;/
 
 <span class="c1"># Verify deploy hook is configured</span>
-podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;deploy hook&quot;</span>
+podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"deploy hook"</span>
 
 <span class="c1"># Check if container restarted</span>
-podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}&#39;</span>
+podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">'table {{.Names}}\t{{.Status}}'</span>
 
 <span class="c1"># Manually restart testpoint</span>
 podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
@@ -4752,17 +4753,17 @@ sleep<span class="w"> </span><span class="m">2</span>
 curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:9102/metrics<span class="w">   </span><span class="c1"># triggers panic</span>
 <span class="c1"># Look for: panic: runtime error: slice bounds out of range</span>
 
-<span class="c1"># Verify the workaround file is in place (if you&#39;ve already created it)</span>
+<span class="c1"># Verify the workaround file is in place (if you've already created it)</span>
 cat<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>no-collector.cpufreq
 </code></pre></div>
 <p><strong>Solution:</strong></p>
 <p>Create the override file and enable the optional volume mount, then restart:</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/perfsonar-tp/conf
-<span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;NODE_EXPORTER_OPTS=&quot;--no-collector.cpufreq&quot;&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
+<span class="nb">echo</span><span class="w"> </span><span class="s1">'NODE_EXPORTER_OPTS="--no-collector.cpufreq"'</span><span class="w"> </span>&gt;<span class="w"> </span>/opt/perfsonar-tp/conf/node_exporter.defaults
 
 <span class="c1"># Uncomment the node_exporter.defaults volume line in /opt/perfsonar-tp/docker-compose.yml:</span>
 <span class="c1"># - /opt/perfsonar-tp/conf/node_exporter.defaults:/etc/default/node_exporter:z</span>
-sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s|# - /opt/perfsonar-tp/conf/node_exporter.defaults|  - /opt/perfsonar-tp/conf/node_exporter.defaults|&#39;</span><span class="w"> </span><span class="se">\</span>
+sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">'s|# - /opt/perfsonar-tp/conf/node_exporter.defaults|  - /opt/perfsonar-tp/conf/node_exporter.defaults|'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>/opt/perfsonar-tp/docker-compose.yml
 
 systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
@@ -4771,7 +4772,7 @@ curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:9100/metr
 </code></pre></div>
 <p>Or apply just inside the running container (temporary — lost on container recreate):</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span><span class="s1">&#39;s|NODE_EXPORTER_OPTS=&quot;|NODE_EXPORTER_OPTS=&quot;--no-collector.cpufreq |&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s1">'s|NODE_EXPORTER_OPTS="|NODE_EXPORTER_OPTS="--no-collector.cpufreq |'</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>/etc/default/node_exporter
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>node_exporter
 </code></pre></div>
@@ -4821,10 +4822,10 @@ systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-auto-upd
 <li>Manually check whether a newer image exists by comparing digests:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># Digest of currently running container</span>
-podman<span class="w"> </span>inspect<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--format<span class="w"> </span><span class="s2">&quot;{{.Image}}&quot;</span>
-<span class="c1"># Digest of what&#39;s in the registry</span>
+podman<span class="w"> </span>inspect<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>--format<span class="w"> </span><span class="s2">"{{.Image}}"</span>
+<span class="c1"># Digest of what's in the registry</span>
 podman<span class="w"> </span>pull<span class="w"> </span>hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production
-podman<span class="w"> </span>image<span class="w"> </span>inspect<span class="w"> </span>hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production<span class="w"> </span>--format<span class="w"> </span><span class="s2">&quot;{{.Id}}&quot;</span>
+podman<span class="w"> </span>image<span class="w"> </span>inspect<span class="w"> </span>hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production<span class="w"> </span>--format<span class="w"> </span><span class="s2">"{{.Id}}"</span>
 </code></pre></div>
 <ul>
 <li>If digests differ but the service didn't restart, run the update manually, then check the log:</li>
@@ -4945,7 +4946,7 @@ with the subject prefix <code>[perfSONAR diagnostic]</code>.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

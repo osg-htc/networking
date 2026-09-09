@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -3376,7 +3376,7 @@ dnf<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </s
 dnf<span class="w"> </span>config-manager<span class="w"> </span>--set-enabled<span class="w"> </span>crb<span class="w">  </span>
 <span class="c1"># --OR--</span>
 <span class="c1"># For RHEL Enable access to codeready-builder. </span>
-<span class="c1"># NOTE auto-install script from perfSONAR doesn&#39;t set this (tries &quot;crb&quot; above which fails for RHEL)</span>
+<span class="c1"># NOTE auto-install script from perfSONAR doesn't set this (tries "crb" above which fails for RHEL)</span>
 subscription-manager<span class="w"> </span>repos<span class="w"> </span>--enable<span class="w"> </span>codeready-builder-for-rhel-9-x86_64-rpms
 
 <span class="c1"># Install perfSONAR repository for EL9</span>
@@ -3420,7 +3420,7 @@ curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubuserc
 <div class="highlight"><pre><span></span><code><span class="c1"># Override the default allow-list with your own subnets</span>
 curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;YOUR_SUBNET_1,YOUR_SUBNET_2&quot;</span>
+<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">"YOUR_SUBNET_1,YOUR_SUBNET_2"</span>
 </code></pre></div>
 <p>To disable ACL protection on exporter endpoints (not recommended):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
@@ -3554,43 +3554,43 @@ confirm <code>DEFAULT_ROUTE_NIC</code>, add <code>NIC_IPV4_ADDROUTE</code> entri
 retain SSH access; the nftables helper derives allow-lists from this file.</p>
 <p>Example: adding a management network alongside the data VLAN</p>
 <div class="highlight"><pre><span></span><code><span class="nv">NIC_NAMES</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;bond0.2900&quot;</span>
-<span class="w">    </span><span class="s2">&quot;bond0&quot;</span>
+<span class="w">    </span><span class="s2">"bond0.2900"</span>
+<span class="w">    </span><span class="s2">"bond0"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_ADDRS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;192.41.236.32&quot;</span>
-<span class="w">    </span><span class="s2">&quot;10.10.128.32&quot;</span>
+<span class="w">    </span><span class="s2">"192.41.236.32"</span>
+<span class="w">    </span><span class="s2">"10.10.128.32"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_PREFIXES</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;/23&quot;</span>
-<span class="w">    </span><span class="s2">&quot;/20&quot;</span>
+<span class="w">    </span><span class="s2">"/23"</span>
+<span class="w">    </span><span class="s2">"/20"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_GWS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;192.41.236.1&quot;</span>
-<span class="w">    </span><span class="s2">&quot;10.10.128.1&quot;</span>
+<span class="w">    </span><span class="s2">"192.41.236.1"</span>
+<span class="w">    </span><span class="s2">"10.10.128.1"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV4_ADDROUTE</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;-&quot;</span>
-<span class="w">    </span><span class="s2">&quot;10.10.0.0/22&quot;</span>
+<span class="w">    </span><span class="s2">"-"</span>
+<span class="w">    </span><span class="s2">"10.10.0.0/22"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV6_ADDRS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;2001:48a8:68f7:8001:192:41:236:32&quot;</span>
+<span class="w">    </span><span class="s2">"2001:48a8:68f7:8001:192:41:236:32"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV6_PREFIXES</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;/64&quot;</span>
+<span class="w">    </span><span class="s2">"/64"</span>
 <span class="o">)</span>
 
 <span class="nv">NIC_IPV6_GWS</span><span class="o">=(</span>
-<span class="w">    </span><span class="s2">&quot;2001:48a8:68f7:8001::1&quot;</span>
+<span class="w">    </span><span class="s2">"2001:48a8:68f7:8001::1"</span>
 <span class="o">)</span>
 
-<span class="nv">DEFAULT_ROUTE_NIC</span><span class="o">=</span><span class="s2">&quot;bond0.2900&quot;</span>
+<span class="nv">DEFAULT_ROUTE_NIC</span><span class="o">=</span><span class="s2">"bond0.2900"</span>
 </code></pre></div>
 <p>Use plain ASCII quotes and keep array lengths aligned across sections.</p>
 <h3 id="apply-changes-in-place-default">Apply changes (in-place default)<a class="headerlink" href="#apply-changes-in-place-default" title="Permanent link">&para;</a></h3>
@@ -3707,11 +3707,11 @@ config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—onl
 <p>If your site needs different monitoring subnets, override the defaults at install time:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span><span class="se">\</span>
-<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">&quot;YOUR_SUBNET_1,YOUR_SUBNET_2,YOUR_SUBNET_3&quot;</span>
+<span class="w">        </span>--exporter-allowlist<span class="w"> </span><span class="s2">"YOUR_SUBNET_1,YOUR_SUBNET_2,YOUR_SUBNET_3"</span>
 </code></pre></div>
 <p>Or, if the toolkit is already installed, use the helper script directly:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--allowlist<span class="w"> </span><span class="s2">&quot;YOUR_SUBNET_1,YOUR_SUBNET_2,YOUR_SUBNET_3&quot;</span><span class="w"> </span>--yes
+<span class="w">    </span>--allowlist<span class="w"> </span><span class="s2">"YOUR_SUBNET_1,YOUR_SUBNET_2,YOUR_SUBNET_3"</span><span class="w"> </span>--yes
 </code></pre></div>
 <p><strong>To disable protection</strong> (not recommended—exposing exporter metrics to any HTTPS client):</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-toolkit-install.sh<span class="w"> </span><span class="se">\</span>
@@ -3939,7 +3939,7 @@ ss<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><
 <p>The Toolkit's Apache configuration should not bind to port 80. If it is, check <code>/etc/httpd/conf/httpd.conf</code> and
 <code>/etc/httpd/conf.d/*.conf</code> for <code>Listen 80</code> directives and comment them out:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Find Listen directives</span>
-grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;^Listen 80&quot;</span><span class="w"> </span>/etc/httpd/
+grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">"^Listen 80"</span><span class="w"> </span>/etc/httpd/
 
 <span class="c1"># Edit the file(s) and comment out or change to Listen 443</span>
 vi<span class="w"> </span>/etc/httpd/conf/httpd.conf
@@ -4053,7 +4053,7 @@ symlinks to the latest versions.</p>
 <span class="nb">echo</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span>&lt;your-fqdn&gt;:443<span class="w"> </span>-servername<span class="w"> </span>&lt;your-fqdn&gt;<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-issuer<span class="w"> </span>-dates
 
 <span class="c1"># Should show:</span>
-<span class="c1"># issuer=C=US, O=Let&#39;s Encrypt, CN=...</span>
+<span class="c1"># issuer=C=US, O=Let's Encrypt, CN=...</span>
 <span class="c1"># notBefore=...</span>
 <span class="c1"># notAfter=...</span>
 </code></pre></div>
@@ -4068,7 +4068,7 @@ symlinks to the latest versions.</p>
 <p>Let's Encrypt certificates expire after 90 days. Configure automatic renewal to avoid expiration.</p>
 <p><strong>Test renewal process (dry run):</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Perform a test renewal without actually renewing</span>
-certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run<span class="w"> </span>--pre-hook<span class="w"> </span><span class="s2">&quot;systemctl stop httpd&quot;</span><span class="w"> </span>--post-hook<span class="w"> </span><span class="s2">&quot;systemctl start httpd&quot;</span>
+certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run<span class="w"> </span>--pre-hook<span class="w"> </span><span class="s2">"systemctl stop httpd"</span><span class="w"> </span>--post-hook<span class="w"> </span><span class="s2">"systemctl start httpd"</span>
 </code></pre></div>
 <p>If the dry run succeeds, configure automatic renewal:</p>
 <p><strong>Option A: Using Certbot Timer (Recommended)</strong></p>
@@ -4085,13 +4085,13 @@ systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> 
 <p><strong>Option B: Using Cron (Alternative)</strong></p>
 <p>Add a cron job for automatic renewal:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Create renewal script</span>
-cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/certbot-renew.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/certbot-renew.sh<span class="w"> </span><span class="s">&lt;&lt; 'EOF'</span>
 <span class="s">#!/bin/bash</span>
-<span class="s"># Renew Let&#39;s Encrypt certificates and reload Apache</span>
+<span class="s"># Renew Let's Encrypt certificates and reload Apache</span>
 
 <span class="s">certbot renew \</span>
-<span class="s">    --pre-hook &quot;systemctl stop httpd&quot; \</span>
-<span class="s">    --post-hook &quot;systemctl start httpd&quot; \</span>
+<span class="s">    --pre-hook "systemctl stop httpd" \</span>
+<span class="s">    --post-hook "systemctl start httpd" \</span>
 <span class="s">    --quiet</span>
 
 <span class="s">exit 0</span>
@@ -4100,7 +4100,7 @@ cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/certbot-re
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/bin/certbot-renew.sh
 
 <span class="c1"># Add cron job (runs twice daily at 3:30 AM and 3:30 PM)</span>
-cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/cron.d/certbot-renew<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/etc/cron.d/certbot-renew<span class="w"> </span><span class="s">&lt;&lt; 'EOF'</span>
 <span class="s">30 3,15 * * * root /usr/local/bin/certbot-renew.sh</span>
 <span class="s">EOF</span>
 </code></pre></div>
@@ -4146,21 +4146,21 @@ grep<span class="w"> </span>email<span class="w"> </span>/etc/letsencrypt/renewa
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># check-cert-expiry.sh - Alert if certificate expires within 14 days</span>
 
-<span class="nv">DOMAIN</span><span class="o">=</span><span class="s2">&quot;&lt;your-fqdn&gt;&quot;</span>
+<span class="nv">DOMAIN</span><span class="o">=</span><span class="s2">"&lt;your-fqdn&gt;"</span>
 <span class="nv">WARN_DAYS</span><span class="o">=</span><span class="m">14</span>
 
 <span class="nv">EXPIRY</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>openssl<span class="w"> </span>s_client<span class="w"> </span>-connect<span class="w"> </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span>:443<span class="w"> </span>-servername<span class="w"> </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
 <span class="w">         </span>openssl<span class="w"> </span>x509<span class="w"> </span>-noout<span class="w"> </span>-enddate<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="o">=</span><span class="w"> </span>-f2<span class="k">)</span>
 
-<span class="nv">EXPIRY_EPOCH</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">EXPIRY</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>+%s<span class="k">)</span>
+<span class="nv">EXPIRY_EPOCH</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-d<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">EXPIRY</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>+%s<span class="k">)</span>
 <span class="nv">NOW_EPOCH</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
 <span class="nv">DAYS_LEFT</span><span class="o">=</span><span class="k">$((</span><span class="w"> </span><span class="o">(</span><span class="nv">EXPIRY_EPOCH</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">NOW_EPOCH</span><span class="o">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="m">86400</span><span class="w"> </span><span class="k">))</span>
 
 <span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$DAYS_LEFT</span><span class="w"> </span>-lt<span class="w"> </span><span class="nv">$WARN_DAYS</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;WARNING: Certificate for </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span><span class="s2"> expires in </span><span class="si">${</span><span class="nv">DAYS_LEFT</span><span class="si">}</span><span class="s2"> days!&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"WARNING: Certificate for </span><span class="si">${</span><span class="nv">DOMAIN</span><span class="si">}</span><span class="s2"> expires in </span><span class="si">${</span><span class="nv">DAYS_LEFT</span><span class="si">}</span><span class="s2"> days!"</span>
 <span class="w">    </span><span class="c1"># Send alert via email, Slack, etc.</span>
 <span class="k">else</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;OK: Certificate valid for </span><span class="si">${</span><span class="nv">DAYS_LEFT</span><span class="si">}</span><span class="s2"> more days&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"OK: Certificate valid for </span><span class="si">${</span><span class="nv">DAYS_LEFT</span><span class="si">}</span><span class="s2"> more days"</span>
 <span class="k">fi</span>
 </code></pre></div>
 </details>
@@ -4170,7 +4170,7 @@ grep<span class="w"> </span>email<span class="w"> </span>/etc/letsencrypt/renewa
 <p><strong>Symptoms:</strong> Certbot fails with "Failed to authenticate" or "Connection refused" errors during HTTP-01 challenge.</p>
 <p><strong>Diagnostic steps:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Verify port 80 is open in firewall</span>
-nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;dport 80&quot;</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"dport 80"</span>
 
 <span class="c1"># Test port 80 accessibility from external host</span>
 curl<span class="w"> </span>-v<span class="w"> </span>http://&lt;your-fqdn&gt;/
@@ -4196,7 +4196,7 @@ journalctl<span class="w"> </span>-u<span class="w"> </span>snap.certbot.renew.t
 grep<span class="w"> </span>certbot<span class="w"> </span>/var/log/syslog<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-50
 
 <span class="c1"># Test renewal manually</span>
-certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run<span class="w"> </span>--pre-hook<span class="w"> </span><span class="s2">&quot;systemctl stop httpd&quot;</span><span class="w"> </span>--post-hook<span class="w"> </span><span class="s2">&quot;systemctl start httpd&quot;</span><span class="w"> </span>-vvv
+certbot<span class="w"> </span>renew<span class="w"> </span>--dry-run<span class="w"> </span>--pre-hook<span class="w"> </span><span class="s2">"systemctl stop httpd"</span><span class="w"> </span>--post-hook<span class="w"> </span><span class="s2">"systemctl start httpd"</span><span class="w"> </span>-vvv
 
 <span class="c1"># Check certificate status</span>
 certbot<span class="w"> </span>certificates
@@ -4252,12 +4252,12 @@ you expose for perfSONAR (one or two depending on whether you split latency/thro
 <p>Basic enrollment via command line:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add auto URLs (configures archives too) and show configured remotes</span>
 psconfig<span class="w"> </span>remote<span class="w"> </span>--configure-archives<span class="w"> </span>add<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span><span class="s2">&quot;https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu&quot;</span>
+<span class="w">    </span><span class="s2">"https://psconfig.opensciencegrid.org/pub/auto/ps-lat-example.my.edu"</span>
 
 psconfig<span class="w"> </span>remote<span class="w"> </span>list
 </code></pre></div>
 <p>If there are any stale/old/incorrect entries, you can remove them:</p>
-<div class="highlight"><pre><span></span><code>psconfig<span class="w"> </span>remote<span class="w"> </span>delete<span class="w"> </span><span class="s2">&quot;&lt;old-url&gt;&quot;</span>
+<div class="highlight"><pre><span></span><code>psconfig<span class="w"> </span>remote<span class="w"> </span>delete<span class="w"> </span><span class="s2">"&lt;old-url&gt;"</span>
 </code></pre></div>
 <h3 id="option-c-automated-enrollment-script">Option C: Automated Enrollment Script<a class="headerlink" href="#option-c-automated-enrollment-script" title="Permanent link">&para;</a></h3>
 <p>Automation tip: derive FQDNs from your configured IPs (PTR lookup) and enroll automatically. Review the list before applying.</p>
@@ -4300,10 +4300,11 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <details class="info">
 <summary>Registration steps and portals</summary>
 <ul>
-<li>Register the host in <a href="https://topology.opensciencegrid.org/host">OSG topology</a>.</li>
-<li>Create or update a <a href="https://ggus.eu/">GGUS</a> ticket announcing the new measurement point.</li>
-<li>In <a href="https://goc.egi.eu/portal/">GOCDB</a>, add the service endpoint
-        <code>org.opensciencegrid.crc.perfsonar-testpoint</code> bound to this host.</li>
+<li>Add or update the perfSONAR instance in the WLCG CRIC portal at
+  <a href="https://wlcg-cric.cern.ch">https://wlcg-cric.cern.ch</a> under the site's
+  "Associated Services" entries.</li>
+<li>If your site already has a perfSONAR entry, update the existing record rather than creating a duplicate.</li>
+<li>No OSG topology registration, GOCDB service endpoint, or GGUS ticket is required for this workflow.</li>
 </ul>
 </details>
 </li>
@@ -4338,15 +4339,15 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregi
 <p><strong>For RPM Toolkit installs (non-container):</strong>
 <div class="highlight"><pre><span></span><code><span class="c1"># Preview changes only</span>
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>update<span class="w"> </span>--local<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span>
+<span class="w">    </span>--dry-run<span class="w"> </span>--site-name<span class="w"> </span><span class="s2">"Acme Co."</span><span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--admin-email<span class="w"> </span>admin@example.org<span class="w"> </span>--admin-name<span class="w"> </span><span class="s2">"pS Admin"</span>
 
 <span class="c1"># Apply new settings and restart the daemon</span>
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>create<span class="w"> </span>--local<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--site-name<span class="w"> </span><span class="s2">&quot;Acme Co.&quot;</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--site-name<span class="w"> </span><span class="s2">"Acme Co."</span><span class="w"> </span>--domain<span class="w"> </span>example.org<span class="w"> </span>--project<span class="w"> </span>WLCG<span class="w"> </span>--project<span class="w"> </span>OSG<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--city<span class="w"> </span>Berkeley<span class="w"> </span>--region<span class="w"> </span>CA<span class="w"> </span>--country<span class="w"> </span>US<span class="w"> </span>--zip<span class="w"> </span><span class="m">94720</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--latitude<span class="w"> </span><span class="m">37</span>.5<span class="w"> </span>--longitude<span class="w"> </span>-121.7469<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">&quot;pS Admin&quot;</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
+<span class="w">    </span>--admin-name<span class="w"> </span><span class="s2">"pS Admin"</span><span class="w"> </span>--admin-email<span class="w"> </span>admin@example.org
 
 <span class="c1"># Save current config (raw conf file)</span>
 /opt/perfsonar-toolkit/tools_scripts/perfSONAR-update-lsregistration.sh<span class="w"> </span>save<span class="w"> </span>--output<span class="w"> </span>my-lsreg.conf<span class="w"> </span>--local
@@ -4367,7 +4368,7 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-lsregi
 <p>SELinux enforces mandatory access controls based on file labels and process contexts. perfSONAR services run under specific contexts (e.g., <code>lsregistrationdaemon_t</code>, <code>httpd_t</code>), and accessed files must have compatible labels.</p>
 <p><strong>Check SELinux status:</strong></p>
 <div class="highlight"><pre><span></span><code>sestatus
-<span class="c1"># Expected output: &quot;SELinux status:  enabled&quot; and &quot;Current mode:  enforcing&quot;</span>
+<span class="c1"># Expected output: "SELinux status:  enabled" and "Current mode:  enforcing"</span>
 </code></pre></div>
 <h3 id="common-selinux-issues-and-fixes">Common SELinux Issues and Fixes<a class="headerlink" href="#common-selinux-issues-and-fixes" title="Permanent link">&para;</a></h3>
 <h4 id="issue-1-etcperfsonarlsregistrationdaemonconf-has-wrong-label">Issue 1: <code>/etc/perfsonar/lsregistrationdaemon.conf</code> Has Wrong Label<a class="headerlink" href="#issue-1-etcperfsonarlsregistrationdaemonconf-has-wrong-label" title="Permanent link">&para;</a></h4>
@@ -4423,10 +4424,10 @@ SELinux is preventing /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 from sear
 tail<span class="w"> </span>-100<span class="w"> </span>/var/log/audit/audit.log
 
 <span class="c1"># Filter by command name to see context</span>
-grep<span class="w"> </span><span class="s2">&quot;ethtool\|df\|python\|collect2\|ldconfig&quot;</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+grep<span class="w"> </span><span class="s2">"ethtool\|df\|python\|collect2\|ldconfig"</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
 
 <span class="c1"># Count alert types to identify patterns</span>
-ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">&#39;avc:&#39;</span><span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-10
+ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">'avc:'</span><span class="w"> </span><span class="s1">'{print $2}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-10
 </code></pre></div>
 <ol>
 <li>
@@ -4445,9 +4446,9 @@ ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </
 </li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="c1"># Generate policy module for a specific alert (example: ethtool)</span>
-sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;ethtool&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-ethtool
+sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">'ethtool'</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-ethtool
 
-<span class="c1"># Review the generated module to ensure it&#39;s safe</span>
+<span class="c1"># Review the generated module to ensure it's safe</span>
 cat<span class="w"> </span>my-ethtool.te
 
 <span class="c1"># Install the module (if approved and safe)</span>
@@ -4461,14 +4462,14 @@ semodule<span class="w"> </span>-l<span class="w"> </span><span class="p">|</spa
    - <strong>Operation:</strong> Checking NIC link status, speed, duplex (safe)
    - <strong>Source:</strong> Web UI health checks or daemon monitoring
    - <strong>Fix:</strong>
-     <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;ethtool&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-ethtool
+     <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">'ethtool'</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-ethtool
 sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> </span>my-ethtool.pp
 </code></pre></div></p>
 <p><strong>df/stat on /var/cache/openafs (from lsregistrationdaemon_t):</strong>
    - <strong>Operation:</strong> Checking available disk space (safe)
    - <strong>Source:</strong> Registration daemon system health queries
    - <strong>Fix:</strong>
-     <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;df&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-df
+     <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">'df'</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-df
 sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> </span>my-df.pp
 </code></pre></div></p>
 <p><strong>python3/postgresql context issues (collect2, ldconfig):</strong>
@@ -4476,7 +4477,7 @@ sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> <
    - <strong>Assessment:</strong> These are typically safe but may be ephemeral
    - <strong>Fix (if persistent):</strong>
      <div class="highlight"><pre><span></span><code><span class="c1"># For postgresql-related alerts</span>
-sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;validate-config&#39;</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-postgresql
+sudo<span class="w"> </span>ausearch<span class="w"> </span>-c<span class="w"> </span><span class="s1">'validate-config'</span><span class="w"> </span>--raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>audit2allow<span class="w"> </span>-M<span class="w"> </span>my-postgresql
 sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> </span>my-postgresql.pp
 </code></pre></div></p>
 <p><strong>Audit log monitoring (prevents future surprises):</strong></p>
@@ -4484,24 +4485,24 @@ sudo<span class="w"> </span>semodule<span class="w"> </span>-i<span class="w"> <
 sudo<span class="w"> </span>ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span>-ts<span class="w"> </span>recent<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-50
 
 <span class="c1"># Create a daily monitoring script</span>
-cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/check-selinux-alerts.sh<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/usr/local/bin/check-selinux-alerts.sh<span class="w"> </span><span class="s">&lt;&lt; 'EOF'</span>
 <span class="s">#!/bin/bash</span>
 <span class="s"># Check for recent SELinux audit alerts</span>
 
 <span class="s">RECENT_ALERTS=$(ausearch -m AVC -ts recent 2&gt;/dev/null | wc -l)</span>
 
 <span class="s">if [ $RECENT_ALERTS -gt 0 ]; then</span>
-<span class="s">    echo &quot;WARNING: Found $RECENT_ALERTS recent SELinux alerts:&quot;</span>
+<span class="s">    echo "WARNING: Found $RECENT_ALERTS recent SELinux alerts:"</span>
 <span class="s">    ausearch -m AVC -ts recent | tail -20</span>
 <span class="s">else</span>
-<span class="s">    echo &quot;OK: No recent SELinux audit alerts&quot;</span>
+<span class="s">    echo "OK: No recent SELinux audit alerts"</span>
 <span class="s">fi</span>
 <span class="s">EOF</span>
 
 chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/usr/local/bin/check-selinux-alerts.sh
 
 <span class="c1"># Add to cron (runs daily at 9 AM)</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;0 9 * * * root /usr/local/bin/check-selinux-alerts.sh&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/cron.d/selinux-alert-check
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"0 9 * * * root /usr/local/bin/check-selinux-alerts.sh"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/cron.d/selinux-alert-check
 </code></pre></div>
 <p><strong>Best practice for handling alerts:</strong></p>
 <ol>
@@ -4515,7 +4516,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p><strong>Symptom:</strong> Audit log grows very large due to repeated identical alerts.</p>
 <p><strong>Mitigation:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># View count of each AVC alert type</span>
-ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">&#39;avc:&#39;</span><span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
+ausearch<span class="w"> </span>-m<span class="w"> </span>AVC<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span>-F<span class="s1">'avc:'</span><span class="w"> </span><span class="s1">'{print $2}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-rn<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-20
 
 <span class="c1"># Suppress specific alerts (if they are verified as safe):</span>
 <span class="c1"># Add rules to /etc/audit/audit.rules or /etc/audit/rules.d/</span>
@@ -4682,7 +4683,7 @@ systemctl<span class="w"> </span>status<span class="w"> </span>opensearch<span c
 <details class="info">
 <summary>Verify web UI is accessible</summary>
 <div class="highlight"><pre><span></span><code><span class="c1"># Test HTTPS connectivity to web UI</span>
-curl<span class="w"> </span>-k<span class="w"> </span>-s<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">&quot;%{http_code}&quot;</span><span class="w"> </span>https://localhost/toolkit
+curl<span class="w"> </span>-k<span class="w"> </span>-s<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">"%{http_code}"</span><span class="w"> </span>https://localhost/toolkit
 <span class="c1"># Should return 200</span>
 
 <span class="c1"># Check Apache error logs if issues</span>
@@ -4737,9 +4738,9 @@ fail2ban-client<span class="w"> </span>status
 <span class="k">if</span><span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>ausearch<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
 <span class="w">    </span>ausearch<span class="w"> </span>--message<span class="w"> </span>AVC<span class="w"> </span>--just-one
 <span class="k">elif</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-f<span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
-<span class="w">    </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;avc.*denied&quot;</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
+<span class="w">    </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">"avc.*denied"</span><span class="w"> </span>/var/log/audit/audit.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-5
 <span class="k">else</span>
-<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;SELinux audit tools not available&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"SELinux audit tools not available"</span>
 <span class="k">fi</span>
 </code></pre></div>
 </details>
@@ -4957,7 +4958,7 @@ tail<span class="w"> </span>-100<span class="w"> </span>/var/log/perfSONAR-multi
 <div class="highlight"><pre><span></span><code><span class="c1"># Test DNS resolution from container</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>dig<span class="w"> </span>&lt;remote-testpoint&gt;
 
-<span class="c1"># Check container&#39;s resolv.conf</span>
+<span class="c1"># Check container's resolv.conf</span>
 
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>perfsonar-testpoint<span class="w"> </span>cat<span class="w"> </span>/etc/resolv.conf
 
@@ -4977,7 +4978,7 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p><strong>Symptoms:</strong> Certbot fails with "Failed to authenticate" or "Connection refused" errors.</p>
 <p><strong>Diagnostic steps:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check if port 80 is open</span>
-nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;80&quot;</span>
+nft<span class="w"> </span>list<span class="w"> </span>ruleset<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"80"</span>
 
 <span class="c1"># Verify Apache is NOT listening on port 80 in container</span>
 podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>netstat<span class="w"> </span>-tlnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>:80
@@ -5009,10 +5010,10 @@ podman<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 ls<span class="w"> </span>-la<span class="w"> </span>/etc/letsencrypt/live/&lt;fqdn&gt;/
 
 <span class="c1"># Verify deploy hook is configured</span>
-podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;deploy hook&quot;</span>
+podman<span class="w"> </span>logs<span class="w"> </span>certbot<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">"deploy hook"</span>
 
 <span class="c1"># Check if container restarted</span>
-podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;table {{.Names}}\t{{.Status}}&#39;</span>
+podman<span class="w"> </span>ps<span class="w"> </span>--format<span class="w"> </span><span class="s1">'table {{.Names}}\t{{.Status}}'</span>
 
 <span class="c1"># Manually restart testpoint</span>
 podman<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpoint
@@ -5058,7 +5059,7 @@ pscheduler<span class="w"> </span>troubleshoot
 sudo<span class="w"> </span>dnf<span class="w"> </span>repolist<span class="w"> </span>-v<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span>
 
 <span class="c1"># Check for available perfSONAR updates</span>
-sudo<span class="w"> </span>dnf<span class="w"> </span>list<span class="w"> </span>updates<span class="w"> </span><span class="s1">&#39;perfsonar*&#39;</span>
+sudo<span class="w"> </span>dnf<span class="w"> </span>list<span class="w"> </span>updates<span class="w"> </span><span class="s1">'perfsonar*'</span>
 
 <span class="c1"># If you have a local cron/automation script, review its logs</span>
 sudo<span class="w"> </span>journalctl<span class="w"> </span>-u<span class="w"> </span>cron<span class="w"> </span>-n<span class="w"> </span><span class="m">200</span>
@@ -5180,7 +5181,7 @@ with the subject prefix <code>[perfSONAR diagnostic]</code>.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
