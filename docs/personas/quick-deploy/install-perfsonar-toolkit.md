@@ -1256,11 +1256,12 @@ podman exec -it perfsonar-testpoint psconfig remote list
 1. **OSG/WLCG registration workflow:**
 
     ??? info "Registration steps and portals"
-        
-        - Register the host in [OSG topology](https://topology.opensciencegrid.org/host).
-        - Create or update a [GGUS](https://ggus.eu/) ticket announcing the new measurement point.
-        - In [GOCDB](https://goc.egi.eu/portal/), add the service endpoint
-                `org.opensciencegrid.crc.perfsonar-testpoint` bound to this host.
+
+        - Add or update the perfSONAR instance in the WLCG CRIC portal at
+          [https://wlcg-cric.cern.ch](https://wlcg-cric.cern.ch) under the site's
+          "Associated Services" entries.
+        - If your site already has a perfSONAR entry, update the existing record rather than creating a duplicate.
+        - No OSG topology registration, GOCDB service endpoint, or GGUS ticket is required for this workflow.
 
 1. **Document memberships:**
 
