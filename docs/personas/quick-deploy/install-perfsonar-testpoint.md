@@ -1049,6 +1049,9 @@ podman exec -it perfsonar-testpoint psconfig remote list
           "Associated Services" entries.
         - If your site already has a perfSONAR entry, update the existing record rather than creating a duplicate.
         - No OSG topology registration, GOCDB service endpoint, or GGUS ticket is required for this workflow.
+        - If your site is not a WLCG member and therefore cannot access WLCG CRIC, email
+          [wlcg-perfsonar-support@cern.ch](mailto:wlcg-perfsonar-support@cern.ch)
+          with the perfSONAR FQDN and whether it is a latency or throughput host.
 
 1. **Document memberships:**
 
