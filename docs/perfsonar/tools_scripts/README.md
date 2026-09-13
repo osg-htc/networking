@@ -26,7 +26,7 @@ for your site — they are not interchangeable:
 | **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment (container + RPM) | [Installation Guides](../../personas/quick-deploy/landing.md) |
 | **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
 | **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
-| **perfSONAR-install-flowd-go.sh** | v1.4.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
+| **perfSONAR-install-flowd-go.sh** | v1.5.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
 | **perfSONAR-configure-exporter-acls.sh** | v0.1.0 | Restrict exporter endpoints to monitoring CIDRs | [RPM toolkit deployment](#rpm-toolkit-installer) |
 
 **Latest Updates**: v1.0.0 (Feb 2026) adds `perfSONAR-toolkit-install.sh` for RPM-based toolkit deployments.
