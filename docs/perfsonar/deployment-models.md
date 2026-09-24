@@ -109,7 +109,7 @@ required in order to configure the node with multiple network cards:
 
 * Please setup source routing as described in the [official documentation](http://docs.perfsonar.net/manage_dual_xface.html).
 
-* You'll need to register two hostnames in [OIM](installation.md)/[GOCDB](installation.md) (and have two reverse DNS entries) as you would normally for two separate nodes.
+* You'll need to register two hostnames as perfSONAR services in [WLCG CRIC](https://cric.docs.cern.ch/how-to/register-perfsonar/) (and have two reverse DNS entries) as you would normally for two separate nodes.
 
 * Instead of configuring just one auto-URL in for the remote URL, please add both, so you'll end up having something like this:
 

@@ -55,7 +55,11 @@ You can see more details about EL supported installs at <<https://docs.perfsonar
 The following *additional* steps are needed to configure the toolkit to be used in OSG/WLCG in addition to the steps
 described in the official guide:
 
-* Please register your nodes in GOCDB/OIM. For OSG sites, follow the details in OSG Topology below. For non-OSG sites, follow the details in [GOCDB](#register-perfsonar-service-in-gocdb)
+* Please register your perfSONAR services in WLCG CRIC using
+    [How to register a perfSONAR service](https://cric.docs.cern.ch/how-to/register-perfsonar/).
+    If your site is not a WLCG member and cannot access WLCG CRIC, email
+    `wlcg-perfsonar-support@cern.ch` with the perfSONAR FQDN and whether the host is
+    a latency or throughput node.
 
 * Please ensure you have added or updated your [administrative information](http://docs.perfsonar.net/manage_admin_info.html)
 
@@ -155,50 +159,22 @@ captured and stored in the local measurement archive. This is currently a [beta
 feature](http://www.perfsonar.net/release-notes/version-4-0-2/) that needs further testing and we're looking for
 volunteers willing to test, please let us know in case you would be interested.
 
-## Register perfSONAR Service in GOCDB
+## Register perfSONAR service in WLCG CRIC
 
-This section describes how to register the perfSONAR service in GOCDB.
+Use the official CRIC guide to add or update perfSONAR service entries:
 
-In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service
-Endpoint
+* <https://cric.docs.cern.ch/how-to/register-perfsonar/>
 
-* <https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint>
+Key points:
 
-You might not be able to access the page if you are not properly registered in GOC, so a snapshot can be found below. In
-filling the information please follow those simple guidelines:
+* Register one service per role (`Latency` and/or `Bandwidth`) for your host.
+* Update existing records when hostnames or service roles change; do not create duplicates.
+* Set service state to `ACTIVE`.
+* GOCDB and OSG Topology registration are not required for this registration workflow.
 
-* There are two service types for perfSONAR: net.perfSONAR.Bandwidth and net.perfSONAR.Latency. This is because we suggest to install two perfSONAR boxes at the site (one for latency tests and one for bandwidth tests).
+If your site is not a WLCG member and cannot access WLCG CRIC, email
+`wlcg-perfsonar-support@cern.ch` with the host FQDN and whether it is a latency
+or throughput service.
 
-* Because we recommend separate boxes, two distinct service endpoints should be published with two distinct service types. If a site cannot afford additional hardware, it can install a single perfSONAR box but should still publish both service types (using the same host in the "host name" field of the form).
-
-* For each form (service type) fill at least:
-
-    <!-- markdownlint-disable MD040 -->
-    * Hosting Site
-    * Service Type
-    * Host Name
-    * Host IP (optional)
-    * Description (optional label used in MaDDash; keep short and unique)
-    <!-- markdownlint-enable MD040 -->
-
-* Check "N" when asked "Is it a beta service"
-
-* Check "Y" when asked "Is this service in production"
-
-* Check "Y" when asked "Is this service monitored"
-
-<!-- -->
-
-* GOCDB screen shot for creating a Service Endpoint:
-![GOCDB screen shot for creating a Service Endpoint](../img/Screen_shot_2013-02-19_at_15.26.52.png)
-
-## Register perfSONAR in OSG Topology
-
-Each *OSG site* should have two perfSONAR instances (one for Latency and one for Bandwidth) installed to enable network
-monitoring. These instances should be located as "close" (in a network-sense) as possible to the site's storage. If a
-logical site is comprised of more than one physical site, each physical site should be instrumented with perfSONAR
-instances.
-
-To add hosts to OSG Topology, please follow the instructions at <<https://osg-htc.org/docs/common/registration/>>
-
-If you have problems or questions please consult our [FAQ](faq.md) or alternatively open a ticket with GOC.
+If you have problems or questions, consult our [FAQ](faq.md) or contact
+`wlcg-perfsonar-support@cern.ch`.
