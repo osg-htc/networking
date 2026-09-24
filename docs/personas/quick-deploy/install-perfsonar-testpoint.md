@@ -1044,9 +1044,9 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
     ??? info "Registration steps and portals"
 
-        - Add or update the perfSONAR instance in the WLCG CRIC portal at
-          [https://wlcg-cric.cern.ch](https://wlcg-cric.cern.ch) under the site's
-          "Associated Services" entries.
+        - Follow the official WLCG CRIC guide:
+          [How to register a perfSONAR service](https://cric.docs.cern.ch/how-to/register-perfsonar/).
+        - In WLCG CRIC, add or update the perfSONAR service entry for your host.
         - If your site already has a perfSONAR entry, update the existing record rather than creating a duplicate.
         - No OSG topology registration, GOCDB service endpoint, or GGUS ticket is required for this workflow.
         - If your site is not a WLCG member and therefore cannot access WLCG CRIC, email
