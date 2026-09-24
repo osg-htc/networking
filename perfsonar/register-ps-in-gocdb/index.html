@@ -21,7 +21,7 @@
     
     
       
-        <title>Register perfSONAR Service in GOCDB - OSG Networking Area</title>
+        <title>Register perfSONAR service in WLCG CRIC - OSG Networking Area</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#register-perfsonar-service-in-gocdb" class="md-skip">
+        <a href="#register-perfsonar-service-in-wlcg-cric" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Register perfSONAR Service in GOCDB
+              Register perfSONAR service in WLCG CRIC
             
           </span>
         </div>
@@ -2351,45 +2351,22 @@
   
 
 
-<h1 id="register-perfsonar-service-in-gocdb">Register perfSONAR Service in GOCDB<a class="headerlink" href="#register-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h1>
-<h2 id="this-section-describes-how-to-register-the-perfsonar-service-in-gocdb">This section describes how to register the perfSONAR service in GOCDB<a class="headerlink" href="#this-section-describes-how-to-register-the-perfsonar-service-in-gocdb" title="Permanent link">&para;</a></h2>
-<p>In order to register you perfSONAR services in GOCDB, you should access the proper section of GOC for adding a Service
-Endpoint</p>
+<h1 id="register-perfsonar-service-in-wlcg-cric">Register perfSONAR service in WLCG CRIC<a class="headerlink" href="#register-perfsonar-service-in-wlcg-cric" title="Permanent link">&para;</a></h1>
+<p>The registration workflow is managed in WLCG CRIC.</p>
+<p>Use the official instructions:</p>
 <ul>
-<li><a href="https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint">https://goc.egi.eu/portal/index.php?Page_Type=New_Service_Endpoint</a></li>
+<li><a href="https://cric.docs.cern.ch/how-to/register-perfsonar/">https://cric.docs.cern.ch/how-to/register-perfsonar/</a></li>
 </ul>
-<p>You might not be able to access the page if you are not properly registered in GOC, so a snapshot can be found below. In
-filling the information please follow those simple guidelines:</p>
+<p>Quick notes:</p>
 <ul>
-<li>
-<p>There are two service types for perfSONAR: <code>net.perfSONAR.Bandwidth</code> and <code>net.perfSONAR.Latency</code>.
-This is because we suggest installing two perfSONAR boxes at the site (one for latency tests and one for bandwidth
-tests) and therefore two distinct service endpoints should be published with two distinct service types. If the site
-cannot afford sufficient hardware for this setup, you may install a single perfSONAR node, but you should still publish
-both service types (use the same hostname in the "host name" field).</p>
-</li>
-<li>
-<p>For each form (i.e. for each service type) fill at least the important informations:</p>
-</li>
+<li>Register one service per role (<code>Latency</code> and/or <code>Bandwidth</code>) per host.</li>
+<li>Update existing entries when service role or hostname changes; avoid duplicates.</li>
+<li>Ensure service state is <code>ACTIVE</code>.</li>
+<li>GOCDB and OSG Topology registration are not required for this registration workflow.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>- Hosting Site (drop-down menu, mandatory)
-- Service Type (drop-down menu, mandatory)
-- Host Name (free text, mandatory)
-- Host IP (free text, optional)
-- Description: (free text, optional) This field has a default value of your site name. It is used to "Label" your host in our MaDDash GUI. If you want to use this field please use something as short as possible uniquely identifying this instance.
-- Check "N" when asked "Is it a beta service"
-- Check "Y" when asked "Is this service in production"
-- Check "Y" when asked "Is this service monitored"
-</code></pre></div>
-<!-- -->
-
-<ul>
-<li>
-<p>GOCDB screen shot for creating a Service Endpoint:</p>
-<p><img alt="Screenshot" src="../../img/Screen_shot_2013-02-19_at_15.26.52.png" /></p>
-</li>
-</ul>
-<p>-- Main.ShawnMcKee - 21 Oct 2014</p>
+<p>If your site is not a WLCG member and cannot access WLCG CRIC, email
+<code>wlcg-perfsonar-support@cern.ch</code> with the host FQDN and whether it is a latency
+or throughput service.</p>
 
 
 
