@@ -1,3 +1,30 @@
+## [Unreleased] - 2026-09-29
+
+### Fixed
+
+- **Fresh-host container start failure (EL9/EL10)** (`install-systemd-units.sh` v1.4.0): the generated
+  `perfsonar-testpoint.service` bind-mounted `/var/www/html`, the whole `/etc/apache2` and `/etc/letsencrypt`
+  for every deployment, but `seed_testpoint_host_dirs.sh` v2 (Option A) no longer creates them. On a fresh
+  host podman exited 125 (`Error: statfs /var/www/html: no such file or directory`), systemd restart-looped,
+  and the orchestrator's pSConfig enrollment failed with `no such container`. Mounts now match the compose
+  files: Option A mounts psconfig/tools_scripts/cgroup/dbus/node_exporter only; Option B (`--with-certbot`)
+  adds `/var/www/html`, `/etc/letsencrypt` and only `/etc/apache2/sites-available/default-ssl.conf`. The
+  installer pre-creates/seeds every host path and refuses to write a unit whose mount sources are missing.
+  New `--force` and `--no-certbot` options; LE mode is preserved automatically on re-runs.
+- **LE SSL patch killed the container with a single-file mount** (`testpoint-entrypoint-wrapper.sh` v1.3.0):
+  `sed -i`/`mv` cannot replace a bind-mounted file ("Device or resource busy"), which under `set -e` exited
+  the wrapper. The file is now rewritten in place.
+- **SELinux MCS lockout**: certbot unit and orchestrator certbot runs use `:z` instead of `:Z` on
+  `/etc/letsencrypt` and `/var/www/html`; the installer resets stale private MCS labels.
+- **EL10**: orchestrator enables CodeReady Builder for the running RHEL major version (was hard-coded to 9).
+
+### Changed
+
+- `perfSONAR-orchestrator.sh` v1.1.6: waits for the testpoint container to be running and prints the service
+  journal on failure; skips enrollment with a clear message if the container does not exist.
+- `update-perfsonar-deployment.sh` v1.5.0: detects stale unit mounts and regenerates the unit with `--apply`.
+- `perfSONAR-diagnostic-report.sh` v1.1.0: new known-issue check for missing bind-mount sources.
+
 ## [1.3.2] - 2025-12-16
 
 ### Fixed

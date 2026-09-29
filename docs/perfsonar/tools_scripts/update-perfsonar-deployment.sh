@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.4.0 - 2026-02-26
+# Version: 1.5.0 - 2026-09-29
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -39,6 +39,13 @@ set -euo pipefail
 #     out of range") and D-Bus metrics to be unavailable. The update script
 #     now detects missing mounts, patches the service file, reloads systemd,
 #     and restarts the container to apply the fix automatically.
+# Version: 1.5.0 - 2026-09-29
+#   - Detect perfsonar-testpoint.service units that cannot start because a
+#     bind-mount source is missing on the host (podman exit 125, "statfs ...
+#     no such file or directory") or that mount the whole host /etc/apache2
+#     over the container's Apache config. With --apply the unit is regenerated
+#     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
+#     Option A / Option B mounts, and the container is restarted.
 #
 # This script is the recommended way to apply bug fixes, new features, and
 # configuration improvements from the osg-htc/networking repository to an
@@ -83,7 +90,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.4.0"
+VERSION="1.5.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -705,6 +712,49 @@ fix_stale_service_file() {
     fi
 
     info "Checking systemd service file for required volume mounts..."
+
+    # Stale mounts from install-systemd-units.sh < 1.4.0: sources that do not
+    # exist on the host make podman refuse to start (exit 125), and a whole
+    # /etc/apache2 bind mount hides the container's own Apache configuration.
+    local stale=() src
+    if grep -qE -- '-v /etc/apache2:/etc/apache2(:|[[:space:]])' "$svc"; then
+        stale+=("whole /etc/apache2 bind mount")
+    fi
+    while IFS= read -r src; do
+        [[ -n "$src" && ! -e "$src" ]] && stale+=("missing host path $src")
+    done < <(grep -oE -- '-v [^ :]+:' "$svc" | sed -e 's/^-v //' -e 's/:$//')
+
+    if [[ ${#stale[@]} -gt 0 ]]; then
+        changed "  Service file has stale volume mounts:"
+        for src in "${stale[@]}"; do
+            changed "    - $src"
+        done
+        CHANGES_FOUND=1
+        local installer="$TOOLS_DIR/install-systemd-units.sh"
+        if [[ "$DRY_RUN" == true ]]; then
+            info "  [DRY-RUN] Would run: $installer --install-dir $BASE_DIR --force"
+            echo
+            return
+        fi
+        if [[ "$APPLY" != true ]]; then
+            warn "  Run with --apply to regenerate the unit with correct mounts."
+            echo
+            return
+        fi
+        if [[ ! -f "$installer" ]]; then
+            warn "  install-systemd-units.sh not found in $TOOLS_DIR; cannot regenerate unit"
+            echo
+            return
+        fi
+        if bash "$installer" --install-dir "$BASE_DIR" --force 2>&1 | sed 's/^/    /'; then
+            ok "  ✓ Regenerated $svc with correct volume mounts"
+            SERVICE_FILE_CHANGED=true
+        else
+            warn "  install-systemd-units.sh failed; see output above"
+        fi
+        echo
+        return
+    fi
 
     local missing=()
     grep -q '/run/dbus:/run/dbus' "$svc" || missing+=("/run/dbus")
