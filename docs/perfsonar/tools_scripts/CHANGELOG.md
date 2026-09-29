@@ -23,6 +23,10 @@
 - `perfSONAR-orchestrator.sh` v1.1.6: waits for the testpoint container to be running and prints the service
   journal on failure; skips enrollment with a clear message if the container does not exist.
 - `update-perfsonar-deployment.sh` v1.5.0: detects stale unit mounts and regenerates the unit with `--apply`.
+- `update-perfsonar-deployment.sh` v1.6.0: on hosts managed by systemd (`perfsonar-testpoint.service` present),
+  `--restart` always restarts through systemd instead of `podman-compose down/up`, which started the testpoint
+  without `--systemd=always`/`--cgroupns host` and competed with the unit for the container. It waits for the
+  container to be running and shows the journal on failure; restart hints print the systemd commands.
 - `perfSONAR-diagnostic-report.sh` v1.1.0: new known-issue check for missing bind-mount sources.
 
 ## [1.3.2] - 2025-12-16
