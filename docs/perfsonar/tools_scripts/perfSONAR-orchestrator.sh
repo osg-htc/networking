@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.1.6 - 2026-09-29
+#   - EL10 support: enable CodeReady Builder for the running RHEL major version
+#     (was hard-coded to rhel-9).
+#   - After starting perfsonar-testpoint, wait for the container to be running
+#     and, if it is not, log the service journal instead of continuing into
+#     enrollment with a cryptic "no such container" error.
+#   - Certbot containers use :z (shared) rather than :Z (private MCS) on
+#     /etc/letsencrypt and /var/www/html so the testpoint container keeps
+#     access under SELinux enforcing; create both directories first.
+#   - Requires install-systemd-units.sh >= 1.4.0 (Option A no longer mounts
+#     /var/www/html, /etc/apache2 or /etc/letsencrypt, which do not exist on a
+#     fresh host and made podman exit 125).
 # Version: 1.1.5 - 2026-03-04
 #   - Add install-systemd-units.sh --health-monitor to step_deploy_option_a and
 #     step_deploy_option_b so the health watchdog is always installed alongside
@@ -15,7 +27,7 @@ set -euo pipefail
 
 # perfSONAR-orchestrator.sh
 # Guided installer with interactive pauses for deploying a containerized perfSONAR Testpoint
-# on RHEL 9 minimal systems. Defaults to non-disruptive PBR in-place mode.
+# on EL9 / EL10 (RHEL, AlmaLinux, Rocky) minimal systems. Defaults to non-disruptive PBR in-place mode.
 #
 # Usage:
 #   Run as root on the target host. The script will prompt before each step.
@@ -126,16 +138,19 @@ step_packages() {
     return
   fi
   if command -v dnf >/dev/null 2>&1; then
-    # Enable CodeReady Builder (CRB) — required on EL9 for several deps.
+    # Enable CodeReady Builder (CRB) — required on EL9/EL10 for several deps.
     # RHEL uses subscription-manager; Alma/Rocky/CentOS use dnf config-manager.
     # The perfSONAR auto-install script only attempts the dnf config-manager path,
     # which silently fails on Satellite-managed RHEL systems.
+    local el_major
+    el_major=$(. /etc/os-release 2>/dev/null && echo "${VERSION_ID%%.*}")
+    el_major=${el_major:-9}
     if grep -qsi 'Red Hat Enterprise Linux' /etc/os-release; then
-      log "RHEL detected — enabling CodeReady Builder via subscription-manager"
-      run subscription-manager repos --enable "codeready-builder-for-rhel-9-$(uname -m)-rpms" || \
+      log "RHEL ${el_major} detected — enabling CodeReady Builder via subscription-manager"
+      run subscription-manager repos --enable "codeready-builder-for-rhel-${el_major}-$(uname -m)-rpms" || \
         log "WARNING: subscription-manager CRB enable failed (may already be enabled, or system not registered)"
     else
-      log "Non-RHEL EL9 detected — enabling CRB via dnf config-manager"
+      log "Non-RHEL EL${el_major} detected — enabling CRB via dnf config-manager"
       run dnf config-manager --set-enabled crb || \
         log "WARNING: 'crb' repo not found; continuing anyway"
     fi
@@ -237,6 +252,29 @@ step_auto_update_compose() {
   fi
 }
 
+# Wait for the testpoint container to be running after 'systemctl start'.
+# On failure, surface the reason (typically in the podman output captured by
+# the journal) rather than letting later steps fail with "no such container".
+wait_for_testpoint() {
+  [ "$DRY_RUN" = true ] && return 0
+  local i state
+  log "Waiting up to 90s for perfsonar-testpoint container to be running..."
+  for i in $(seq 1 18); do
+    state=$(podman inspect -f '{{.State.Status}}' perfsonar-testpoint 2>/dev/null || true)
+    if [ "$state" = "running" ]; then
+      log "perfsonar-testpoint is running (after $((i * 5))s)"
+      return 0
+    fi
+    sleep 5
+  done
+  log "ERROR: perfsonar-testpoint container is not running."
+  log "Last service log lines (look for podman 'Error:' messages):"
+  journalctl -u perfsonar-testpoint.service -n 30 --no-pager 2>&1 | tee -a "$LOG_FILE" || true
+  log "Fix the error above, then: systemctl restart perfsonar-testpoint"
+  log "Diagnostics: /opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh --type container"
+  return 1
+}
+
 step_deploy_option_a() {
   run /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh
   run bash -c "curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml -o /opt/perfsonar-tp/docker-compose.yml"
@@ -249,8 +287,7 @@ step_deploy_option_a() {
       --health-monitor
   run systemctl daemon-reload
   run systemctl start perfsonar-testpoint
-  log "Waiting 30s for container to initialise..."
-  sleep 30
+  wait_for_testpoint || true
   run podman ps
 }
 
@@ -264,8 +301,7 @@ step_deploy_option_b() {
       --health-monitor
   run systemctl daemon-reload
   run systemctl start perfsonar-testpoint
-  log "Waiting 30s for container to initialise..."
-  sleep 30
+  wait_for_testpoint || true
   run podman ps
   
   # Auto-detect FQDNs from reverse DNS of all configured IPs
@@ -329,12 +365,13 @@ step_deploy_option_b() {
     fi
     
     run podman stop certbot || true
+    run mkdir -p /etc/letsencrypt /var/www/html
     
     # Build certbot command with all FQDNs as SANs
     local certbot_cmd=(
       podman run --rm --net=host
-      -v /etc/letsencrypt:/etc/letsencrypt:Z
-      -v /var/www/html:/var/www/html:Z
+      -v /etc/letsencrypt:/etc/letsencrypt:z
+      -v /var/www/html:/var/www/html:z
       docker.io/certbot/certbot:latest certonly
       --standalone --agree-tos --non-interactive
       -m "$LE_EMAIL"
@@ -349,7 +386,7 @@ step_deploy_option_b() {
       log "  2. Network ACLs blocking inbound HTTP from Let's Encrypt CAs"
       log "  3. DNS not properly configured (verify: dig +short <fqdn>)"
       log "You can retry manually later with:"
-      log "  podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:Z \\"
+      log "  podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:z \\"
       log "    certbot/certbot certonly --standalone --agree-tos --non-interactive \\"
       for fqdn in "${fqdns[@]}"; do
         log "    -d $fqdn \\"
@@ -363,7 +400,7 @@ step_deploy_option_b() {
     run podman rm -f certbot || true
     run podman run -d --name certbot --net=host \
       --security-opt label=disable \
-      -v /etc/letsencrypt:/etc/letsencrypt:Z \
+      -v /etc/letsencrypt:/etc/letsencrypt:z \
       -v /var/www/html:/var/www/html:z \
       -v /run/podman/podman.sock:/run/podman/podman.sock:ro \
       -v "/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro" \
@@ -411,6 +448,12 @@ step_flowd_go() {
 step_psconfig() {
   if ! confirm "Step 9: Enroll pSConfig feeds automatically?"; then
     log "Skipping pSConfig."
+    return
+  fi
+  if [ "$DRY_RUN" != true ] && ! podman container exists perfsonar-testpoint 2>/dev/null; then
+    log "ERROR: perfsonar-testpoint container does not exist; skipping pSConfig enrollment."
+    log "  Check: systemctl status perfsonar-testpoint; journalctl -u perfsonar-testpoint -n 50"
+    log "  Once it is running: /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y -v"
     return
   fi
   if [ -x /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh ]; then

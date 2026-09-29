@@ -3,7 +3,8 @@
 # Author: Shank McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # testpoint-entrypoint-wrapper.sh
-# Version: 1.2.0  # UPDATED: Now initializes Apache config on first run
+# Version: 1.3.0  # UPDATED: SSL patch works when default-ssl.conf is a
+#                  single-file bind mount (Option B / LE deployments)
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # --------------------------------
@@ -32,6 +33,10 @@
 #   - Patches Apache config if Let's Encrypt certs are found
 #   - Falls back to default certificates if certs don't exist (allows first-time deployment)
 #   - After patching, delegates to the container's original entrypoint (systemd)
+#   - default-ssl.conf is usually a single-file bind mount from the host. Such a
+#     file cannot be replaced by rename (sed -i / mv fail with "Device or
+#     resource busy", which under set -e killed the container), so it is edited
+#     by rewriting its contents in place (v1.3.0).
 #
 # Author: OSG perfSONAR deployment tools
 # Version: 1.2.0
@@ -180,25 +185,37 @@ if [[ -n "$CERT_DIR" ]]; then
                 cp -a "$APACHE_SSL_CONF" "${APACHE_SSL_CONF}.original"
             fi
 
-            # Patch the SSL certificate paths
-            sed -i \
+            # Patch the SSL certificate paths. Build the new content in a temp
+            # file (outside the bind-mounted directory) and write it back into
+            # the existing inode: default-ssl.conf is typically a single-file
+            # bind mount, which cannot be replaced via rename (sed -i / mv).
+            SSL_TMP=$(mktemp /tmp/default-ssl.conf.XXXXXX)
+            sed \
                 -e "s|SSLCertificateFile\s\+/etc/ssl/certs/ssl-cert-snakeoil.pem|SSLCertificateFile      ${FULLCHAIN}|g" \
                 -e "s|SSLCertificateKeyFile\s\+/etc/ssl/private/ssl-cert-snakeoil.key|SSLCertificateKeyFile ${PRIVKEY}|g" \
-                "$APACHE_SSL_CONF"
+                "$APACHE_SSL_CONF" > "$SSL_TMP"
 
             # Add or update SSLCertificateChainFile
-            if grep -q "^\s*SSLCertificateChainFile" "$APACHE_SSL_CONF"; then
+            if grep -q "^\s*SSLCertificateChainFile" "$SSL_TMP"; then
                 # Update existing SSLCertificateChainFile line
-                sed -i \
-                    -e "s|SSLCertificateChainFile\s\+.*|SSLCertificateChainFile ${CHAIN}|g" \
-                    "$APACHE_SSL_CONF"
+                SSL_TMP2=$(mktemp /tmp/default-ssl.conf.XXXXXX)
+                sed -e "s|SSLCertificateChainFile\s\+.*|SSLCertificateChainFile ${CHAIN}|g" \
+                    "$SSL_TMP" > "$SSL_TMP2"
+                mv -f "$SSL_TMP2" "$SSL_TMP"
             else
                 # Add SSLCertificateChainFile after SSLCertificateKeyFile line
                 # Use awk to insert the line to avoid sed escaping issues
+                SSL_TMP2=$(mktemp /tmp/default-ssl.conf.XXXXXX)
                 awk -v chain="$CHAIN" '/SSLCertificateKeyFile/ {print; print "                SSLCertificateChainFile " chain; next}1' \
-                    "$APACHE_SSL_CONF" > "${APACHE_SSL_CONF}.tmp" && \
-                    mv "${APACHE_SSL_CONF}.tmp" "$APACHE_SSL_CONF"
+                    "$SSL_TMP" > "$SSL_TMP2"
+                mv -f "$SSL_TMP2" "$SSL_TMP"
             fi
+
+            # Write back in place (preserves inode, owner, mode and SELinux label)
+            if ! cmp -s "$SSL_TMP" "$APACHE_SSL_CONF"; then
+                cat "$SSL_TMP" > "$APACHE_SSL_CONF"
+            fi
+            rm -f "$SSL_TMP"
 
             # Create marker file to indicate patching was done
             touch "${APACHE_SSL_CONF}.patched"

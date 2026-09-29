@@ -14,6 +14,9 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.1.0 - 2026-09-29
+#   - Known-issue check: bind-mount sources in perfsonar-testpoint.service that
+#     are missing on the host (podman exit 125) or a whole /etc/apache2 mount.
 # Version: 1.0.0 - 2026-02-26
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
@@ -35,7 +38,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------
@@ -744,6 +747,32 @@ collect_known_issues() {
         else
             emit "  OK: No dangerous :Z mounts on shared certbot directories"
             printf "  ${C_GREEN}✓${C_RESET} certbot volume labels OK\n"
+        fi
+        emit ""
+    fi
+
+    # Check 2b: systemd unit bind-mount sources exist on the host
+    local tp_unit="/etc/systemd/system/perfsonar-testpoint.service"
+    if [[ "$DEPLOY_TYPE" == "container" && -f "$tp_unit" ]]; then
+        emit "--- Check: perfsonar-testpoint.service bind-mount sources ---"
+        local src missing_src=()
+        while IFS= read -r src; do
+            [[ -n "$src" && ! -e "$src" ]] && missing_src+=("$src")
+        done < <(grep -oE -- '-v [^ :]+:' "$tp_unit" | sed -e 's/^-v //' -e 's/:$//')
+        if [[ ${#missing_src[@]} -gt 0 ]]; then
+            emit "  WARNING: bind-mount source(s) missing on host: ${missing_src[*]}"
+            emit "  podman will refuse to start the container (exit 125, 'statfs ... no such file')"
+            emit "  Fix: update-perfsonar-deployment.sh --apply --restart --yes"
+            emit "       (or: install-systemd-units.sh --force, then systemctl restart perfsonar-testpoint)"
+            printf "  ${C_RED}✗${C_RESET} unit references missing host paths\n"
+        else
+            emit "  OK: all bind-mount sources exist"
+            printf "  ${C_GREEN}✓${C_RESET} unit bind-mount sources present\n"
+        fi
+        if grep -qE -- '-v /etc/apache2:/etc/apache2(:|[[:space:]])' "$tp_unit"; then
+            emit "  WARNING: unit bind-mounts the whole host /etc/apache2 (hides container Apache config)"
+            emit "  Fix: update-perfsonar-deployment.sh --apply --restart --yes"
+            printf "  ${C_YELLOW}✗${C_RESET} whole /etc/apache2 mounted\n"
         fi
         emit ""
     fi

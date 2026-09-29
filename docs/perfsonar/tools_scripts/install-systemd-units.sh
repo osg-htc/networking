@@ -12,8 +12,20 @@
 #
 # Options:
 #   --install-dir PATH    Installation directory (default: /opt/perfsonar-tp)
-#   --with-certbot        Install certbot service alongside testpoint
-#   --auto-update         Install perfsonar-auto-update.sh and a daily systemd
+#   --with-certbot        Let's Encrypt deployment (Option B): install the certbot
+#                         service and add the LE bind mounts (/var/www/html,
+#                         /etc/letsencrypt and the single Apache default-ssl.conf
+#                         file) to the testpoint unit. Without this flag the
+#                         testpoint unit mounts only what Option A needs.
+#                         If perfsonar-certbot.service already exists, LE mode
+#                         is kept automatically unless --no-certbot is given.
+#   --no-certbot          Force Option A (testpoint-only) mounts even if a
+#                         certbot unit from a previous install is present.
+#   --force               Rewrite the service units even when only
+#                         --auto-update was requested and a unit already exists
+#                         (used by update-perfsonar-deployment.sh to repair
+#                         stale units).
+#   --auto-update        Install perfsonar-auto-update.sh and a daily systemd
 #                         timer that pulls new images and restarts services only
 #                         when an image digest has changed (Podman-compatible;
 #                         does not rely on Docker-specific output strings)
@@ -28,10 +40,26 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.3.0
+# Version: 1.4.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.4.0 - Fix fresh-host start failure ("statfs /var/www/html: no such file
+#           or directory", podman exit 125). The unit previously bind-mounted
+#           /var/www/html, the whole /etc/apache2 and /etc/letsencrypt for
+#           every deployment, but seed_testpoint_host_dirs.sh v2 (Option A)
+#           no longer creates them. Mounts now match the compose files:
+#             Option A: psconfig, tools_scripts, cgroup, dbus, node_exporter
+#             Option B: + /var/www/html, /etc/letsencrypt and only
+#                       /etc/apache2/sites-available/default-ssl.conf
+#           Mounting the whole host /etc/apache2 hid the container's Apache
+#           config, so it is no longer done in either mode.
+#         - Pre-flight: create/seed every host path the unit mounts and refuse
+#           to write a unit whose bind-mount sources are missing.
+#         - Certbot unit uses :z (shared) instead of :Z (private MCS) on
+#           /var/www/html and /etc/letsencrypt to avoid the SELinux lockout
+#           of the testpoint container on EL9/EL10 hosts.
+#         - Add --no-certbot and --force options; auto-detect existing LE mode.
 #   1.3.0 - Add /run/dbus and node_exporter.defaults volume mounts to the
 #           generated service unit; create conf/ dir and seed defaults file.
 #   1.2.0 - Add --health-monitor flag for perfSONAR health watchdog.
@@ -41,8 +69,12 @@ set -e
 # Default values
 INSTALL_DIR="/opt/perfsonar-tp"
 WITH_CERTBOT=false
+NO_CERTBOT=false
+FORCE=false
 AUTO_UPDATE=false
 HEALTH_MONITOR=false
+TP_IMAGE="hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production"
+LE_SSL_CONF="/etc/apache2/sites-available/default-ssl.conf"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -55,6 +87,14 @@ while [[ $# -gt 0 ]]; do
             WITH_CERTBOT=true
             shift
             ;;
+        --no-certbot)
+            NO_CERTBOT=true
+            shift
+            ;;
+        --force)
+            FORCE=true
+            shift
+            ;;
         --auto-update)
             AUTO_UPDATE=true
             shift
@@ -64,7 +104,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help)
-            head -n 25 "$0" | grep "^#" | sed 's/^# \?//'
+            sed -n '2,/^# Requirements:/p' "$0" | grep "^#" | sed 's/^# \?//'
             exit 0
             ;;
         *)
@@ -114,16 +154,174 @@ if [[ ! -f "$INSTALL_DIR/conf/node_exporter.defaults" && -f "$INSTALL_DIR/tools_
     echo "==> ✓ Seeded $INSTALL_DIR/conf/node_exporter.defaults"
 fi
 
+# Keep Let's Encrypt mode on re-runs: if a certbot unit from a previous LE
+# install exists and the caller did not say otherwise, keep the LE mounts so a
+# plain re-run (e.g. from update-perfsonar-deployment.sh) does not silently
+# drop them.
+if [[ "$WITH_CERTBOT" != "true" && "$NO_CERTBOT" != "true" && -f "$CERTBOT_SERVICE" ]]; then
+    echo "==> Existing $CERTBOT_SERVICE detected — keeping Let's Encrypt (Option B) mounts"
+    echo "    (pass --no-certbot to switch this host to testpoint-only mounts)"
+    WITH_CERTBOT=true
+fi
+if [[ "$NO_CERTBOT" == "true" ]]; then
+    WITH_CERTBOT=false
+    if [[ -f "$CERTBOT_SERVICE" ]]; then
+        echo "==> NOTE: $CERTBOT_SERVICE still exists; disable it if no longer needed:"
+        echo "      systemctl disable --now perfsonar-certbot.service"
+    fi
+fi
+
 # When --auto-update is the only goal (service already exists), skip rewriting
 # the testpoint/certbot service units to avoid disrupting a running deployment.
 SKIP_SERVICE_UNITS=false
-if [[ "$AUTO_UPDATE" == "true" && -f "$TESTPOINT_SERVICE" ]]; then
-    echo "==> Existing $TESTPOINT_SERVICE detected — skipping service unit rewrite (use without --auto-update to reinstall)"
+if [[ "$AUTO_UPDATE" == "true" && -f "$TESTPOINT_SERVICE" && "$FORCE" != "true" ]]; then
+    echo "==> Existing $TESTPOINT_SERVICE detected — skipping service unit rewrite (use --force or omit --auto-update to reinstall)"
     SKIP_SERVICE_UNITS=true
 fi
 
+# Copy a single file out of the testpoint image (used when the seed script is
+# unavailable). Returns non-zero if the copy fails.
+copy_file_from_image() {
+    local src="$1" dst="$2" cname
+    cname="perfsonar-unit-seed-$$"
+    podman image exists "$TP_IMAGE" 2>/dev/null || podman pull -q "$TP_IMAGE" >/dev/null || return 1
+    podman create --name "$cname" "$TP_IMAGE" >/dev/null 2>&1 || return 1
+    if podman cp "$cname:$src" "$dst" >/dev/null 2>&1; then
+        podman rm -f "$cname" >/dev/null 2>&1 || true
+        return 0
+    fi
+    podman rm -f "$cname" >/dev/null 2>&1 || true
+    return 1
+}
+
+# Reset private SELinux MCS categories (left behind by earlier :Z mounts, e.g.
+# from an old certbot unit) so that both containers can share the directory.
+fix_shared_selinux_label() {
+    local dir="$1" ctx
+    command -v getenforce >/dev/null 2>&1 || return 0
+    [[ "$(getenforce 2>/dev/null)" == "Disabled" ]] && return 0
+    ctx=$(ls -dZ "$dir" 2>/dev/null | awk '{print $1}')
+    if echo "$ctx" | grep -qE ':s0:c[0-9]'; then
+        echo "    Resetting private SELinux MCS label on $dir ($ctx)"
+        chcon -R -t container_file_t -l s0 "$dir" || \
+            echo "    WARNING: chcon failed on $dir — check SELinux policy"
+    fi
+}
+
+# Pre-flight: make sure every host path the unit will bind-mount exists.
+# podman refuses to start a container whose bind-mount source is missing
+# ("Error: statfs <path>: no such file or directory", exit 125), and systemd
+# would then restart it forever. We build the mount list from what actually
+# exists so that the generated unit can always start.
+prepare_host_mounts() {
+    local seed="$INSTALL_DIR/tools_scripts/seed_testpoint_host_dirs.sh"
+    local seed_args=()
+    [[ "$WITH_CERTBOT" == "true" ]] && seed_args+=(--with-le)
+
+    echo "==> Pre-flight: checking host paths for bind mounts"
+
+    # psconfig must be populated, otherwise an empty host dir would hide the
+    # container's own /etc/perfsonar/psconfig. Only run the seed script on an
+    # empty psconfig: it copies image defaults over existing files, which would
+    # clobber a configured host. LE paths are handled separately below.
+    if [[ ! -d "$INSTALL_DIR/psconfig" || -z "$(ls -A "$INSTALL_DIR/psconfig" 2>/dev/null)" ]]; then
+        if [[ -f "$seed" ]]; then
+            echo "    Seeding host directories with $(basename "$seed") ${seed_args[*]}"
+            bash "$seed" --runtime podman --base "$INSTALL_DIR" "${seed_args[@]}" 2>&1 | grep -E '✓|✗|WARNING|ERROR' | sed 's/^ */    /'
+        else
+            echo "    WARNING: $seed not found; creating directories only"
+        fi
+    fi
+    mkdir -p "$INSTALL_DIR/psconfig"
+
+    if [[ "$WITH_CERTBOT" == "true" ]]; then
+        mkdir -p /var/www/html /etc/letsencrypt "$(dirname "$LE_SSL_CONF")"
+        if [[ ! -f "$LE_SSL_CONF" ]]; then
+            echo "    Copying $LE_SSL_CONF from $TP_IMAGE"
+            copy_file_from_image "$LE_SSL_CONF" "$LE_SSL_CONF" || true
+        fi
+        if [[ ! -f "$LE_SSL_CONF" ]]; then
+            echo "ERROR: $LE_SSL_CONF is missing and could not be seeded from the image." >&2
+            echo "       Run: sudo $seed --with-le   and re-run this script." >&2
+            exit 1
+        fi
+        fix_shared_selinux_label /var/www/html
+        fix_shared_selinux_label /etc/letsencrypt
+    fi
+
+    if [[ ! -x "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh" ]]; then
+        if [[ -f "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh" ]]; then
+            chmod 0755 "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh"
+        else
+            echo "ERROR: $INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh not found." >&2
+            echo "       Run install_tools_scripts.sh first." >&2
+            exit 1
+        fi
+    fi
+}
+
+# Assemble the -v options for the testpoint unit. Only paths that exist on
+# the host are included; required paths abort the install if missing.
+build_testpoint_mounts() {
+    TP_MOUNTS=()
+    TP_MOUNTS+=("-v $INSTALL_DIR/psconfig:/etc/perfsonar/psconfig:Z")
+    TP_MOUNTS+=("-v /sys/fs/cgroup:/sys/fs/cgroup:ro")
+    TP_MOUNTS+=("-v $INSTALL_DIR/tools_scripts:$INSTALL_DIR/tools_scripts:ro")
+
+    # D-Bus socket for node_exporter --collector.systemd (present on EL9/EL10
+    # with dbus-broker; skip rather than fail if the host has no system bus).
+    if [[ -d /run/dbus ]]; then
+        TP_MOUNTS+=("-v /run/dbus:/run/dbus:ro")
+    else
+        echo "    NOTE: /run/dbus not present on host; skipping D-Bus mount"
+    fi
+
+    if [[ -f "$INSTALL_DIR/conf/node_exporter.defaults" ]]; then
+        TP_MOUNTS+=("-v $INSTALL_DIR/conf/node_exporter.defaults:/etc/default/node_exporter:z")
+    else
+        echo "    NOTE: $INSTALL_DIR/conf/node_exporter.defaults not present; using container defaults"
+    fi
+
+    if [[ "$WITH_CERTBOT" == "true" ]]; then
+        # Option B: webroot for HTTP-01 challenges, certificates, and ONLY the
+        # SSL vhost file the entrypoint wrapper patches. The rest of Apache's
+        # configuration stays inside the container image.
+        TP_MOUNTS+=("-v /var/www/html:/var/www/html:z")
+        TP_MOUNTS+=("-v /etc/letsencrypt:/etc/letsencrypt:z")
+        TP_MOUNTS+=("-v $LE_SSL_CONF:$LE_SSL_CONF:z")
+    fi
+
+    # Final safety net: every bind-mount source must exist.
+    local m src missing=0
+    for m in "${TP_MOUNTS[@]}"; do
+        src="${m#-v }"; src="${src%%:*}"
+        if [[ ! -e "$src" ]]; then
+            echo "ERROR: bind-mount source missing on host: $src" >&2
+            missing=1
+        fi
+    done
+    if [[ $missing -ne 0 ]]; then
+        echo "ERROR: refusing to write a unit that cannot start (podman exit 125)." >&2
+        exit 1
+    fi
+}
+
 # Create perfsonar-testpoint service (skip if already present and only --auto-update was requested)
 if [[ "$SKIP_SERVICE_UNITS" == "false" ]]; then
+prepare_host_mounts
+build_testpoint_mounts
+
+if [[ "$WITH_CERTBOT" == "true" ]]; then
+    echo "==> Mode: Let's Encrypt (Option B) — testpoint + certbot"
+else
+    echo "==> Mode: testpoint only (Option A)"
+fi
+
+MOUNT_LINES=""
+for m in "${TP_MOUNTS[@]}"; do
+    MOUNT_LINES+="  $m \\"$'\n'
+done
+
 cat > "$TESTPOINT_SERVICE" << EOF
 [Unit]
 Description=perfSONAR Testpoint Container
@@ -142,17 +340,9 @@ ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   --privileged \\
   --cgroupns host \\
   --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \\
-  -v $INSTALL_DIR/psconfig:/etc/perfsonar/psconfig:Z \\
-  -v /var/www/html:/var/www/html:z \\
-  -v /etc/apache2:/etc/apache2:z \\
-  -v /sys/fs/cgroup:/sys/fs/cgroup:ro \\
-  -v /etc/letsencrypt:/etc/letsencrypt:z \\
-  -v $INSTALL_DIR/tools_scripts:$INSTALL_DIR/tools_scripts:ro \\
-  -v /run/dbus:/run/dbus:ro \\
-  -v $INSTALL_DIR/conf/node_exporter.defaults:/etc/default/node_exporter:z \\
-  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
+${MOUNT_LINES}  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
   --label=io.containers.autoupdate=registry \\
-  hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production \\
+  $TP_IMAGE \\
   $INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh
 ExecStop=/usr/bin/podman stop -t 10 perfsonar-testpoint
 ExecStopPost=/usr/bin/podman rm -f perfsonar-testpoint
@@ -182,8 +372,8 @@ ExecStart=/usr/bin/podman run --name certbot \\
   --network host \\
   --entrypoint=/bin/sh \\
   -v /run/podman/podman.sock:/run/podman/podman.sock:ro \\
-  -v /var/www/html:/var/www/html:Z \\
-  -v /etc/letsencrypt:/etc/letsencrypt:Z \\
+  -v /var/www/html:/var/www/html:z \\
+  -v /etc/letsencrypt:/etc/letsencrypt:z \\
   -v $INSTALL_DIR/tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro \\
   --label=io.containers.autoupdate=registry \\
   docker.io/certbot/certbot:latest \\
