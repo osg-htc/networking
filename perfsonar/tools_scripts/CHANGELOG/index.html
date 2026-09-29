@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#132-2025-12-16" class="md-skip">
+        <a href="#unreleased-2026-09-29" class="md-skip">
           Skip to content
         </a>
       
@@ -2353,8 +2353,34 @@
 
   <h1>CHANGELOG</h1>
 
-<h2 id="132-2025-12-16">[1.3.2] - 2025-12-16<a class="headerlink" href="#132-2025-12-16" title="Permanent link">&para;</a></h2>
+<h2 id="unreleased-2026-09-29">[Unreleased] - 2026-09-29<a class="headerlink" href="#unreleased-2026-09-29" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Fresh-host container start failure (EL9/EL10)</strong> (<code>install-systemd-units.sh</code> v1.4.0): the generated
+  <code>perfsonar-testpoint.service</code> bind-mounted <code>/var/www/html</code>, the whole <code>/etc/apache2</code> and <code>/etc/letsencrypt</code>
+  for every deployment, but <code>seed_testpoint_host_dirs.sh</code> v2 (Option A) no longer creates them. On a fresh
+  host podman exited 125 (<code>Error: statfs /var/www/html: no such file or directory</code>), systemd restart-looped,
+  and the orchestrator's pSConfig enrollment failed with <code>no such container</code>. Mounts now match the compose
+  files: Option A mounts psconfig/tools_scripts/cgroup/dbus/node_exporter only; Option B (<code>--with-certbot</code>)
+  adds <code>/var/www/html</code>, <code>/etc/letsencrypt</code> and only <code>/etc/apache2/sites-available/default-ssl.conf</code>. The
+  installer pre-creates/seeds every host path and refuses to write a unit whose mount sources are missing.
+  New <code>--force</code> and <code>--no-certbot</code> options; LE mode is preserved automatically on re-runs.</li>
+<li><strong>LE SSL patch killed the container with a single-file mount</strong> (<code>testpoint-entrypoint-wrapper.sh</code> v1.3.0):
+  <code>sed -i</code>/<code>mv</code> cannot replace a bind-mounted file ("Device or resource busy"), which under <code>set -e</code> exited
+  the wrapper. The file is now rewritten in place.</li>
+<li><strong>SELinux MCS lockout</strong>: certbot unit and orchestrator certbot runs use <code>:z</code> instead of <code>:Z</code> on
+  <code>/etc/letsencrypt</code> and <code>/var/www/html</code>; the installer resets stale private MCS labels.</li>
+<li><strong>EL10</strong>: orchestrator enables CodeReady Builder for the running RHEL major version (was hard-coded to 9).</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>perfSONAR-orchestrator.sh</code> v1.1.6: waits for the testpoint container to be running and prints the service
+  journal on failure; skips enrollment with a clear message if the container does not exist.</li>
+<li><code>update-perfsonar-deployment.sh</code> v1.5.0: detects stale unit mounts and regenerates the unit with <code>--apply</code>.</li>
+<li><code>perfSONAR-diagnostic-report.sh</code> v1.1.0: new known-issue check for missing bind-mount sources.</li>
+</ul>
+<h2 id="132-2025-12-16">[1.3.2] - 2025-12-16<a class="headerlink" href="#132-2025-12-16" title="Permanent link">&para;</a></h2>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Critical JSON state save corruption fix</strong>: Fixed invalid JSON generation in <code>--save-state</code> that caused <code>--restore-state</code> to fail</li>
 <li><strong>Fix (1.3.6)</strong>: Respect <code>--dry-run</code> in packet pacing application and ensure audit logic checks actual qdisc state; prevent <code>--mode apply --dry-run</code> from changing system qdisc or sysctl state.</li>
@@ -2365,7 +2391,7 @@
 <li><strong>Fixed packet pacing audit detection</strong>: <code>--mode audit</code> now correctly detects if packet pacing is already applied by checking actual qdisc state instead of relying on command-line flags</li>
 <li>Added <code>repair-state-json.sh</code> utility script to repair existing corrupted JSON state files</li>
 </ul>
-<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Enhanced JSON generation in <code>capture_interface_state()</code> with proper type validation</li>
 <li>Ring buffer values now validated as numeric before embedding in JSON</li>
@@ -2378,11 +2404,11 @@
 <li>The script creates backups before repair and validates output with <code>jq</code> or Python</li>
 </ul>
 <h2 id="unreleased-2026-03-20">[Unreleased] - 2026-03-20<a class="headerlink" href="#unreleased-2026-03-20" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Apache configuration initialization</strong> (testpoint-entrypoint-wrapper.sh v1.2.0): Fixed container startup failure when using bind-mounted <code>/etc/apache2</code> with Let's Encrypt certificates. The wrapper script now initializes missing Apache configuration files on container startup, ensuring Apache can start properly. Includes automatic directory structure creation, module enablement, and configuration validation. Resolves issue where fresh deployments would fail with "Could not open configuration file /etc/apache2/apache2.conf: No such file or directory".</li>
 </ul>
-<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
+<h3 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Installer:</strong> <code>install_tools_scripts.sh</code> bumped to <code>1.0.1</code> and updated to fetch a fuller set of helper scripts and docs, and attempt to fetch accompanying <code>.sha256</code> checksum files when available.</li>
 <li><strong>lsregistration helper:</strong> <code>perfSONAR-update-lsregistration.sh</code> now supports non-container (RPM) installs more robustly by attempting to restart the <code>perfsonar-lsregistrationdaemon</code> service name where present and falling back to <code>lsregistrationdaemon</code>, and will prefer the <code>perfsonar-</code> prefixed unit when restarting.</li>
@@ -2394,7 +2420,7 @@
 <li>testpoint-entrypoint-wrapper.sh checksum updated: <code>76f49ce6... → abf71262...</code></li>
 </ul>
 <h2 id="113-2025-12-06">[1.1.3] - 2025-12-06<a class="headerlink" href="#113-2025-12-06" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_3">Fixed<a class="headerlink" href="#fixed_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Corrected IOMMU audit messaging to suggest <code>grubby</code> for BLS systems (EL9+) and <code>grub2-mkconfig</code>/<code>update-grub</code> for legacy systems. Also bumped <code>fasterdata-tuning.sh</code> to v1.1.3 and updated site copy + checksums.</li>
 </ul>
