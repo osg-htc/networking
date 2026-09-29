@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.5.0 - 2026-09-29
+# Version: 1.6.0 - 2026-09-29
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,18 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.6.0 - 2026-09-29
+#   - Hosts managed by systemd (perfsonar-testpoint.service present, as
+#     installed by the orchestrator / install-systemd-units.sh) are now always
+#     restarted through systemd. Previously a changed docker-compose.yml made
+#     --restart run 'podman-compose down/up', which starts the testpoint
+#     without --systemd=always / --cgroupns host (the image runs systemd
+#     inside and does not come up correctly that way), competes with the
+#     unit for the container name, and leaves the unit to fight it.
+#   - After a systemd restart, wait up to 120s for the container to be
+#     running and show the service journal if it is not.
+#   - Manual-restart hints and the summary print the systemd commands on
+#     systemd-managed hosts.
 #
 # This script is the recommended way to apply bug fixes, new features, and
 # configuration improvements from the osg-htc/networking repository to an
@@ -90,7 +102,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.5.0"
+VERSION="1.6.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -106,6 +118,9 @@ DRY_RUN=false
 
 TOOLS_SRC="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts"
 CHANGES_FOUND=0
+SYSTEMD_MANAGED=false
+TESTPOINT_UNIT="/etc/systemd/system/perfsonar-testpoint.service"
+CERTBOT_UNIT="/etc/systemd/system/perfsonar-certbot.service"
 COMPOSE_CHANGED=false
 CONFIG_CHANGED=false
 SERVICE_FILE_CHANGED=false
@@ -309,6 +324,17 @@ preflight() {
         info "Base directory:    $BASE_DIR"
         info "Compose file:      $COMPOSE_FILE"
         info "Container runtime: $RUNTIME"
+
+        # The orchestrator and install-systemd-units.sh run the testpoint from
+        # a systemd unit (podman run --systemd=always ...). On such hosts the
+        # compose file is NOT what runs the container, and restarts must go
+        # through systemd.
+        if [[ -f "$TESTPOINT_UNIT" ]]; then
+            SYSTEMD_MANAGED=true
+            info "Managed by:        systemd ($(basename "$TESTPOINT_UNIT"))"
+        else
+            info "Managed by:        $COMPOSE_CMD"
+        fi
     else
         COMPOSE_FILE=""
         RUNTIME=""
@@ -810,6 +836,48 @@ TOOLKIT_SERVICES=(
     httpd
 )
 
+# Print the commands to restart the container the right way for this host.
+print_container_restart_hint() {
+    local prefix="${1:-    }"
+    if [[ "$SYSTEMD_MANAGED" == true ]]; then
+        echo "${prefix}systemctl daemon-reload && systemctl restart perfsonar-testpoint.service"
+        if [[ -f "$CERTBOT_UNIT" ]]; then
+            echo "${prefix}systemctl restart perfsonar-certbot.service"
+        fi
+    else
+        echo "${prefix}cd $BASE_DIR && $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+    fi
+}
+
+# Restart via systemd and wait for the container to come up.
+restart_via_systemd() {
+    info "  Reloading systemd configuration..."
+    systemctl daemon-reload 2>&1 | sed 's/^/    /' || true
+    # Clear a restart-loop/failed state so the restart is attempted cleanly.
+    systemctl reset-failed perfsonar-testpoint.service >/dev/null 2>&1 || true
+    info "  Restarting perfsonar-testpoint.service..."
+    systemctl restart perfsonar-testpoint.service 2>&1 | sed 's/^/    /' || true
+    if [[ -f "$CERTBOT_UNIT" ]]; then
+        info "  Restarting perfsonar-certbot.service..."
+        systemctl restart perfsonar-certbot.service 2>&1 | sed 's/^/    /' || true
+    fi
+
+    info "  Waiting up to 120s for perfsonar-testpoint to be running..."
+    local i state=""
+    for i in $(seq 1 24); do
+        state=$($RUNTIME inspect -f '{{.State.Status}}' perfsonar-testpoint 2>/dev/null || true)
+        if [[ "$state" == "running" ]]; then
+            ok "  Container is running (after $((i * 5))s)"
+            return 0
+        fi
+        sleep 5
+    done
+    warn "  perfsonar-testpoint is not running (state: ${state:-absent})."
+    warn "  Last service log lines:"
+    journalctl -u perfsonar-testpoint.service -n 20 --no-pager 2>&1 | sed 's/^/    /' || true
+    return 1
+}
+
 phase4_container_restart() {
     info "Phase 4: Container management..."
 
@@ -823,18 +891,14 @@ phase4_container_restart() {
         if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true ]]; then
             warn "  Changes were applied but container was NOT restarted."
             warn "  Run with --restart to recreate the container, or manually:"
-            if [[ "$SERVICE_FILE_CHANGED" == true && "$COMPOSE_CHANGED" != true ]]; then
-                warn "    systemctl daemon-reload && systemctl restart perfsonar-testpoint.service"
-            else
-                warn "    cd $BASE_DIR && $COMPOSE_CMD down && $COMPOSE_CMD up -d"
-            fi
+            print_container_restart_hint "    " | while IFS= read -r line; do warn "$line"; done
         fi
         echo
         return
     fi
 
     if [[ "$DRY_RUN" == true ]]; then
-        if [[ "$SERVICE_FILE_CHANGED" == true && "$COMPOSE_CHANGED" != true ]]; then
+        if [[ "$SYSTEMD_MANAGED" == true ]]; then
             info "  [DRY-RUN] Would run: systemctl daemon-reload && systemctl restart perfsonar-testpoint.service"
         else
             info "  [DRY-RUN] Would recreate containers via: $COMPOSE_CMD down && $COMPOSE_CMD up -d"
@@ -844,25 +908,27 @@ phase4_container_restart() {
     fi
 
     if confirm "  Recreate containers now? This will briefly interrupt perfSONAR services."; then
-        if [[ "$SERVICE_FILE_CHANGED" == true && "$COMPOSE_CHANGED" != true ]]; then
-            # Service file was patched but compose is unchanged: reload unit and restart service
-            info "  Reloading systemd configuration..."
-            systemctl daemon-reload 2>&1 | sed 's/^/    /' || true
-            info "  Restarting perfsonar-testpoint service..."
-            systemctl restart perfsonar-testpoint.service 2>&1 | sed 's/^/    /'
+        if [[ "$SYSTEMD_MANAGED" == true ]]; then
+            # Never use compose on a systemd-managed host: the unit owns the
+            # container and supplies the flags the testpoint image needs.
+            if [[ "$COMPOSE_CHANGED" == true ]]; then
+                info "  Note: docker-compose.yml was updated, but this host runs the testpoint"
+                info "        from $(basename "$TESTPOINT_UNIT"); compose is not used to start it."
+            fi
+            restart_via_systemd || warn "  Check: systemctl status perfsonar-testpoint --no-pager"
         else
             info "  Stopping containers..."
             (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /')
             info "  Starting containers with updated compose..."
             (cd "$BASE_DIR" && $COMPOSE_CMD up -d 2>&1 | sed 's/^/    /')
-        fi
 
-        info "  Waiting 15s for container startup..."
-        sleep 15
-        if $RUNTIME ps --filter name=perfsonar-testpoint --format '{{.Status}}' 2>/dev/null | grep -qi "up\|healthy"; then
-            ok "  Container is running"
-        else
-            warn "  Container may not be fully ready yet — check with: $RUNTIME ps"
+            info "  Waiting 15s for container startup..."
+            sleep 15
+            if $RUNTIME ps --filter name=perfsonar-testpoint --format '{{.Status}}' 2>/dev/null | grep -qi "up\|healthy"; then
+                ok "  Container is running"
+            else
+                warn "  Container may not be fully ready yet — check with: $RUNTIME ps"
+            fi
         fi
     else
         info "  Container restart skipped"
@@ -974,7 +1040,7 @@ print_summary() {
         info "Update complete. Changes were applied."
         local needs_restart=false
         if [[ "$DEPLOY_TYPE" == "container" ]]; then
-            if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true ]]; then
+            if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true ]]; then
                 needs_restart=true
             fi
         else
@@ -985,7 +1051,7 @@ print_summary() {
         if [[ "$needs_restart" == true && "$RESTART" != true ]]; then
             warn "Service restart pending. Run with --restart or manually:"
             if [[ "$DEPLOY_TYPE" == "container" ]]; then
-                echo "  cd $BASE_DIR && $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+                print_container_restart_hint "  "
             else
                 echo "  systemctl restart ${TOOLKIT_SERVICES[*]}"
             fi

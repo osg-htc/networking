@@ -4344,7 +4344,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </tr>
 <tr>
 <td>4 — Container</td>
-<td>Recreates the container if compose or config changed</td>
+<td>Restarts the testpoint if compose, config or the service unit changed. On hosts with <code>perfsonar-testpoint.service</code> (orchestrator / <code>install-systemd-units.sh</code> installs) this is always <code>systemctl restart</code>, never <code>podman-compose</code></td>
 <td>Only with <code>--restart</code></td>
 </tr>
 <tr>
@@ -4386,7 +4386,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </tr>
 <tr>
 <td><code>--restart</code></td>
-<td>Recreate container after compose update (implies <code>--apply</code>)</td>
+<td>Restart the container after changes (implies <code>--apply</code>); uses systemd when <code>perfsonar-testpoint.service</code> exists</td>
 </tr>
 <tr>
 <td><code>--update-systemd</code></td>
@@ -4438,7 +4438,7 @@ podman-compose<span class="w"> </span>config
 </ul>
 </details>
 <details class="failure">
-<summary>Service restart loop with 'Error: statfs <path>: no such file or directory' (exit 125)</summary>
+<summary>Service restart loop with 'Error: statfs /var/www/html: no such file or directory' (exit 125)</summary>
 <p><strong>Symptoms:</strong> <code>systemctl status perfsonar-testpoint</code> shows <code>activating (auto-restart)</code> with
 <code>status=125</code>, <code>podman ps -a</code> is empty, and <code>journalctl -u perfsonar-testpoint</code> repeats lines like
 <code>Error: statfs /var/www/html: no such file or directory</code> (or <code>/etc/apache2</code>, <code>/etc/letsencrypt</code>).
