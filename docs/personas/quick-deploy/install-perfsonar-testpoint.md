@@ -46,7 +46,7 @@ extract/save/restore registration config that you may want to use.
     
     Note: Repository clone instructions are in Step 2.
     **Note:** All shell commands assume an interactive root shell.
-    
+
 ---
 
 ## Step 1 – Install and Harden EL9
@@ -81,7 +81,7 @@ extract/save/restore registration config that you may want to use.
         performed by the helper scripts. Disabling non-essential services makes the install deterministic, reduces the host
         attack surface, and avoids delays or race conditions while configuring policy-based routing, nftables rules, and        
         container networking.
-        
+
 1. **Update the system:**
 
     ```bash
@@ -214,7 +214,7 @@ ls -l /opt/perfsonar-tp/tools_scripts/{perfSONAR-pbr-nm.sh,perfSONAR-install-nft
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
     The orchestrator automates PBR configuration. If you ran it in Step 2, skip to [Step 4](#step-4-configure-nftables-selinux-and-fail2ban).
-    
+
 The script `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh` automates NetworkManager profiles and routing rule
 setup. It fills out and consumes the network configuration in `/etc/perfSONAR-multi-nic-config.conf`.
 
@@ -247,13 +247,13 @@ setup. It fills out and consumes the network configuration in `/etc/perfSONAR-mu
     Any NIC with an IPv4 address must also have an IPv4 gateway, and any NIC with an IPv6 address must have an IPv6 gateway.
     If the generator cannot detect a gateway, it adds a WARNING block to the generated file listing affected NICs. Edit
     `NIC_IPV4_GWS`/`NIC_IPV6_GWS` accordingly before applying changes.
-        
+
 ??? note "Gateway prompts"
 
     During generation, the script attempts to detect gateways per-NIC. If a NIC has an IP address but no gateway could be
     determined, it will prompt you interactively to enter an IPv4 and/or IPv6 gateway (or `-` to skip). Prompts are skipped
     in non-interactive sessions or when you use `--yes`. Note, NICs without gateways are assumed to NOT be used for perfSONAR.
-        
+
 Preview generation (**no changes**):
 
 ```bash
@@ -399,7 +399,7 @@ route.
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
     The orchestrator automates security hardening. If you ran it in Step 2, skip to [Step 5](#step-5-deploy-the-containerized-perfsonar-testpoint).
-    
+
 Use `/opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh` to configure a hardened nftables profile with
 optional SELinux and Fail2Ban support. No staging or copy step is required.
 
@@ -445,7 +445,7 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
     ```bash
     /opt/perfsonar-tp/tools_scripts/perfSONAR-install-nftables.sh --print-rules
     ```
-    
+
 ??? tip "Manually add extra management hosts/subnets"
 
     If you need to allow additional SSH sources not represented by your NIC-derived prefixes, edit
@@ -481,7 +481,7 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
     nft -c -f /etc/nftables.d/perfsonar.nft
     systemctl reload nftables || systemctl restart nftables
     ```
-        
+
 ### Confirm nftables state and security services
 
 ??? info "Verification commands"
@@ -491,7 +491,7 @@ config.conf`, optionally adjusts SELinux, and enables Fail2ban jails—only if t
     sestatus
     systemctl status fail2ban
     ```
-        
+
 You may want to document any site-specific exceptions (e.g., additional allowed management hosts) in your change log.
 
 ---
@@ -501,7 +501,7 @@ You may want to document any site-specific exceptions (e.g., additional allowed 
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
     The orchestrator automates container deployment and certificate issuance. If you ran it in Step 2, skip to [Step 6](#step-6-configure-and-enroll-in-psconfig).
-    
+
 Run the official testpoint image using Podman (or Docker). Choose one of the two deployment modes:
 
 - **Option A:** Testpoint only (simplest) — bind-mounts `/opt/perfsonar-tp/psconfig` only. The container uses its own internal Apache webroot and config; no `/var/www/html` or `/etc/apache2` mount is needed.
@@ -818,7 +818,7 @@ renew anything until you obtain the initial certificates.
     You **must** use the systemd unit approach below instead of relying on compose alone.
     
     Install and enable the systemd units so containers start on boot with proper systemd support:
-    
+
 ```bash
 # install-systemd-units.sh was already downloaded to tools_scripts/ in Step 2
 # --with-certbot adds the certbot renewal unit; --health-monitor adds the health watchdog
@@ -985,7 +985,7 @@ The automatic approach (using the entrypoint wrapper) eliminates this manual ste
     podman-compose up -d
     
     ```
-    
+
 ---
 
 ## Step 6 – Configure and Enroll in pSConfig
@@ -993,7 +993,7 @@ The automatic approach (using the entrypoint wrapper) eliminates this manual ste
 !!! note "Skip this step if you used the orchestrator (Path A)"
 
     The orchestrator automates pSConfig enrollment. If you ran it in Step 2, skip to [Step 7](#step-7-register-and-configure-with-wlcgosg).
-    
+
 We need to enroll your testpoint with the OSG/WLCG pSConfig service so tests are auto-configured. Use the "auto URL" for each FQDN you expose for
 perfSONAR (one or two depending on whether you split latency/throughput by hostname).
 
@@ -1315,7 +1315,7 @@ Perform these checks before handing the host over to operations:
         ```
         
         Confirm traffic uses the intended policy-based routes (check `ip route get <dest>`).
-        
+
 1. **Security posture:**
 
     ??? info "Check firewall, fail2ban, and SELinux"
@@ -1419,7 +1419,7 @@ chmod 0755 /tmp/update-perfsonar-deployment.sh
 | 2 — Config files | Installs or updates `conf/node_exporter.defaults` (and future config files) | Report only; `--apply` to write |
 | 3 — Compose file | Detects your compose variant and compares with the latest template | Report only; `--apply` to replace |
 | SELinux fix | On LE deployments with SELinux Enforcing: detects stale private MCS labels on `/etc/letsencrypt` and `/var/www/html` and resets them to shared `container_file_t:s0`; immediately restarts Apache inside the container if needed | Only with `--apply` |
-| 4 — Container | Recreates the container if compose or config changed | Only with `--restart` |
+| 4 — Container | Restarts the testpoint if compose, config or the service unit changed. On hosts with `perfsonar-testpoint.service` (orchestrator / `install-systemd-units.sh` installs) this is always `systemctl restart`, never `podman-compose` | Only with `--restart` |
 | 5 — Systemd | Refreshes systemd units and auto-update timer | Only with `--update-systemd` |
 
 ### Report-only mode (safe, no changes)
@@ -1444,7 +1444,7 @@ Run without flags to see what would change:
     | `--type TYPE` | Deployment type: `container` or `toolkit` (auto-detected if omitted) |
     | `--base DIR` | Base directory (default: `/opt/perfsonar-tp`) |
     | `--apply` | Apply compose and config changes (default: report only) |
-    | `--restart` | Recreate container after compose update (implies `--apply`) |
+    | `--restart` | Restart the container after changes (implies `--apply`); uses systemd when `perfsonar-testpoint.service` exists |
     | `--update-systemd` | Re-run `install-systemd-units.sh` to refresh systemd units |
     | `--yes` | Skip interactive confirmations |
     | `--dry-run` | Show what would change without modifying anything |
@@ -1488,7 +1488,7 @@ Run without flags to see what would change:
     - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
     - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
 
-??? failure "Service restart loop with 'Error: statfs <path>: no such file or directory' (exit 125)"
+??? failure "Service restart loop with 'Error: statfs /var/www/html: no such file or directory' (exit 125)"
 
     **Symptoms:** `systemctl status perfsonar-testpoint` shows `activating (auto-restart)` with
     `status=125`, `podman ps -a` is empty, and `journalctl -u perfsonar-testpoint` repeats lines like
