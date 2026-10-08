@@ -1514,6 +1514,31 @@ Run without flags to see what would change:
     Do **not** just create empty `/etc/apache2` — mounting an empty directory there hides the
     container's own Apache configuration.
 
+??? failure "pscheduler troubleshoot: 'Not resolvable or timed out' although the host's DNS is correct"
+
+    **Symptoms:** `pscheduler troubleshoot --quick` reports `Checking that host "<fqdn>" resolves... Failed`
+    or `Looking for pScheduler... Failed. Resolving timed out after 3000 milliseconds`, while `dig` and
+    `getent ahosts <fqdn>` answer instantly. A dual-stack lookup takes about 5 seconds:
+
+    ```bash
+    python3 -c "import socket,time; t=time.time(); socket.getaddrinfo('$(hostname -f)', 0); print(round(time.time()-t, 3), 'seconds')"
+    ```
+
+    **Cause:** glibc sends the A and AAAA queries in parallel from one socket and one reply is dropped
+    (typically a connection-tracking race in a stateful firewall), so every lookup waits for the 5 s
+    resolver timeout. pScheduler gives up after 2–3 s. `getent ahosts` is not affected on IPv4-only hosts
+    because it skips the AAAA query.
+
+    **Fix:** detect and fix it persistently (sets `single-request-reopen` on the active NetworkManager
+    connections and restarts the testpoint container so it picks up the new `/etc/resolv.conf`):
+
+    ```bash
+    sudo /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh --fix-resolver
+    ```
+
+    Use `--check-resolver` to only report. The orchestrator (step 7.5) and
+    `update-perfsonar-deployment.sh --apply` run this check automatically.
+
 ??? failure "Container crashes after reboot with exit code 255"
 
     **Symptoms:** Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts

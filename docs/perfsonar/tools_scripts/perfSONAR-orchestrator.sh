@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.1.7 - 2026-10-08
+#   - New step 7.5 (after nftables/SELinux): check-perfsonar-dns.sh
+#     --fix-resolver detects the parallel A/AAAA DNS query stall (one reply
+#     dropped, lookups wait 5 s, pScheduler reports the host unresolvable)
+#     and sets single-request-reopen persistently via NetworkManager.
 # Version: 1.1.6 - 2026-09-29
 #   - EL10 support: enable CodeReady Builder for the running RHEL major version
 #     (was hard-coded to rhel-9).
@@ -215,6 +220,33 @@ step_dns_check() {
     run /opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh || true
   else
     log "DNS checker not present; skipping."
+  fi
+}
+
+step_resolver_check() {
+  # Runs after step_security: the stall is typically caused by a stateful
+  # firewall dropping one of two parallel DNS replies, so it can only be
+  # detected once the nftables rules are in place.
+  if ! confirm "Step 7.5: Check DNS resolver for the parallel A/AAAA query stall (and fix it)?"; then
+    log "Skipping resolver check."
+    return
+  fi
+  local checker=/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+  if [ -x "$checker" ] && grep -q -- '--fix-resolver' "$checker"; then
+    if [ "$DRY_RUN" = true ]; then
+      "$checker" --check-resolver 2>&1 | tee -a "$LOG_FILE" || true
+    else
+      # Container is not deployed yet at this point; no restart needed.
+      local rc=0
+      run "$checker" --fix-resolver --no-restart || rc=$?
+      case "$rc" in
+        0|10) ;;
+        5) log "WARNING: DNS lookups are slow (not the parallel-query stall); check /etc/resolv.conf nameservers." ;;
+        *) log "WARNING: resolver check/fix returned $rc; see output above." ;;
+      esac
+    fi
+  else
+    log "Resolver checker not present (re-run bootstrap); skipping."
   fi
 }
 
@@ -497,6 +529,7 @@ main() {
   step_apply_pbr
   step_dns_check
   step_security
+  step_resolver_check
   step_deploy
   step_flowd_go
   step_psconfig

@@ -14,6 +14,9 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.2.0 - 2026-10-08
+#   - Known-issue check: parallel A/AAAA DNS query stall (lookups wait for
+#     the 5 s resolver timeout; pScheduler reports the host unresolvable).
 # Version: 1.1.0 - 2026-09-29
 #   - Known-issue check: bind-mount sources in perfsonar-testpoint.service that
 #     are missing on the host (podman exit 125) or a whole /etc/apache2 mount.
@@ -38,7 +41,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------
@@ -774,6 +777,23 @@ collect_known_issues() {
             emit "  Fix: update-perfsonar-deployment.sh --apply --restart --yes"
             printf "  ${C_YELLOW}✗${C_RESET} whole /etc/apache2 mounted\n"
         fi
+        emit ""
+    fi
+
+    # Check 2c: parallel A/AAAA DNS query stall
+    if command -v python3 &>/dev/null && [[ -f "$TOOLS_DIR/check-perfsonar-dns.sh" ]] && \
+       grep -q -- '--check-resolver' "$TOOLS_DIR/check-perfsonar-dns.sh" 2>/dev/null; then
+        emit "--- Check: DNS resolver (parallel A/AAAA query stall) ---"
+        local rsv_out rsv_rc=0
+        rsv_out=$(bash "$TOOLS_DIR/check-perfsonar-dns.sh" --check-resolver 2>&1) || rsv_rc=$?
+        while IFS= read -r line; do emit "  $line"; done <<< "$rsv_out"
+        case "$rsv_rc" in
+            0) printf "  ${C_GREEN}✓${C_RESET} DNS lookups fast\n" ;;
+            1) emit "  Fix: $TOOLS_DIR/check-perfsonar-dns.sh --fix-resolver"
+               printf "  ${C_RED}✗${C_RESET} parallel A/AAAA DNS stall\n" ;;
+            5) printf "  ${C_YELLOW}✗${C_RESET} DNS lookups slow (check nameservers)\n" ;;
+            *) emit "  INFO: resolver check returned $rsv_rc" ;;
+        esac
         emit ""
     fi
 
