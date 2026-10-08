@@ -14,8 +14,10 @@
 #   - Output: Writes/overwrites NetworkManager connection files under
 #     `/etc/NetworkManager/system-connections/`. May also create routing table
 #     mappings under `/etc/iproute2/rt_tables.d/` or append `/etc/iproute2/rt_tables`.
-#   - Safety: This script will REMOVE ALL existing NetworkManager connections
-#     unless you run it in dry-run mode. Backups are created automatically.
+#   - Safety: the default in-place mode keeps existing NetworkManager
+#     connections and adjusts addresses, routes and rules on them. Only
+#     --rebuild-all removes ALL existing NetworkManager connections first.
+#     Use --dry-run to preview. Backups are created automatically.
 #
 # Important notes / success criteria:
 #   - Run as root on a machine managed by NetworkManager. Test in a VM/console
@@ -24,6 +26,12 @@
 #     configured with their own routing tables and source-based rules.
 #
 # Author: Shawn McKee - University of Michigan <smckee@umich.edu>
+# Version: 1.0.1 - Oct 8 2026
+#   - Show the "REMOVE ALL existing NetworkManager connections" warning only
+#     for --rebuild-all; in-place mode (the default) gets an accurate note.
+#   - Colour output: use real ANSI escapes, only when stdout is a terminal
+#     (and NO_COLOR is unset); the log file never contains escape codes.
+#     Previously the escapes were printed literally ("\033[0;31m...").
 # Version: 1.0.0 - Oct 30 2025
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
@@ -40,9 +48,17 @@ IFS=$'\n\t'
 
 # -------- Color Output (for terminal messages) --------
 # Small visual hints when printing warnings/summary to interactive console/log.
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-NC='\033[0m'
+# Real escape characters, only for an interactive terminal; log() strips them
+# from the log file.
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    GREEN=$'\033[0;32m'
+    RED=$'\033[0;31m'
+    NC=$'\033[0m'
+else
+    GREEN=''
+    RED=''
+    NC=''
+fi
 # -----------------------------------------------------
 
 # -------- Logging and runtime flags (defaults) --------
@@ -98,12 +114,15 @@ EOF
 # functions are defined before any of them may be invoked by flags.
 
 log() {
-    # Timestamped logging helper (appends to LOG_FILE). Uses `tee -a` so
-    # the message is written both to stdout and to the configured log file.
+    # Timestamped logging helper: prints to stdout (with colour when it is a
+    # terminal) and appends the same line, without colour codes, to LOG_FILE.
     local ts
     ts="$(date +'%Y-%m-%d %H:%M:%S')"
-    # shellcheck disable=SC2086
-    printf '%s %s\n' "$ts" "$*" | tee -a "$LOG_FILE"
+    local line
+    line=$(printf '%s %s' "$ts" "$*")
+    printf '%s\n' "$line"
+    # Keep the log file free of colour escape sequences
+    printf '%s\n' "$line" | sed $'s/\033\\[[0-9;]*m//g' >> "$LOG_FILE"
 }
 
 # Determine the interface carrying the current SSH session (if any)
@@ -1241,10 +1260,12 @@ configure_nic() {
 
     # Ensure routing table exists for non-default NICs
     if [[ "$nic" != "$DEFAULT_ROUTE_NIC" ]]; then
-        log "\n${GREEN}Configuring NIC $nic ($ipv4_addr$ipv4_prefix) with table $rt_table_name ($table_id)${NC}"
+        log ""
+        log "${GREEN}Configuring NIC $nic ($ipv4_addr$ipv4_prefix) with table $rt_table_name ($table_id)${NC}"
         add_routing_table "$table_id" "$rt_table_name"
     else
-        log "\n${GREEN}Configuring NIC $nic ($ipv4_addr$ipv4_prefix) for DEFAULT route${NC}"
+        log ""
+        log "${GREEN}Configuring NIC $nic ($ipv4_addr$ipv4_prefix) for DEFAULT route${NC}"
     fi
 
     # Ensure the NIC's NetworkManager connection exists and is set to autoconnect
@@ -1466,9 +1487,9 @@ prompt_missing_gateways_from_config
 validate_config
 
 # -------- Warning Prompt --------
-log "${RED}WARNING: This script will REMOVE ALL existing NetworkManager connections and apply new configurations.${NC}"
-log "${RED}  - You may wish to run this via a directly connected console since the network will drop briefly${NC}"
 if [ "$REBUILD_ALL" = true ]; then
+    log "${RED}WARNING: --rebuild-all will REMOVE ALL existing NetworkManager connections and apply new configurations.${NC}"
+    log "${RED}  - Run this from a directly connected console: the network will drop.${NC}"
     log "Full rebuild requested (--rebuild-all). Existing NM connections will be removed."
     if [ "$AUTO_YES" != true ]; then
         echo "Proceed with DESTRUCTIVE full rebuild? (type: yes)"
@@ -1481,7 +1502,8 @@ if [ "$REBUILD_ALL" = true ]; then
         log "Auto-confirm enabled; continuing with destructive rebuild without prompt."
     fi
 else
-    log "In-place mode selected (default). Existing NM connections retained; routes/rules adjusted non-destructively." 
+    log "In-place mode selected (default). Existing NM connections retained; routes/rules adjusted non-destructively."
+    log "  Note: addresses, routes and rules on the configured NICs are re-applied; connectivity may blip briefly."
     if [ "$AUTO_YES" != true ]; then
         echo "Proceed with in-place apply? (yes/no)"
         read -r response
@@ -1546,5 +1568,6 @@ for ((i = 0; i < count; i++)); do
     fi
 done
 
-printf "\n%sAll NICs configured. Done at %s.%s\n\n" "$GREEN" "$(date)" "$NC" | tee -a "$LOG_FILE"
+log ""
+log "${GREEN}All NICs configured. Done at $(date).${NC}"
 exit 0

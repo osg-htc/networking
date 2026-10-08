@@ -1,3 +1,13 @@
+## [Unreleased] - 2026-10-08 (perfSONAR-pbr-nm.sh)
+
+### Fixed
+
+- `perfSONAR-pbr-nm.sh` v1.0.1: the "WARNING: This script will REMOVE ALL existing NetworkManager connections" banner
+  was printed in the default in-place mode, which keeps existing connections. It is now shown only with
+  `--rebuild-all`; in-place mode prints an accurate note instead.
+- `perfSONAR-pbr-nm.sh` v1.0.1: colour codes were written literally (`\033[0;31m...`) to the terminal and log. Colours
+  now use real escape characters, only when stdout is a terminal and `NO_COLOR` is unset, and the log file never
+  contains escape codes. The literal `\n` in "Configuring NIC" lines is replaced by a blank log line.
 ## [Unreleased] - 2026-10-08
 
 ### Fixed
