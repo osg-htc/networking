@@ -4328,7 +4328,7 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </tr>
 <tr>
 <td>3 — Compose file</td>
-<td>Detects your compose variant and compares with the latest template</td>
+<td>Detects your compose variant and compares with the latest template. Volume lines you enabled that the template leaves commented out (e.g. the <code>node_exporter.defaults</code> workaround) are kept; the file is not replaced if a bind-mount source is missing on the host</td>
 <td>Report only; <code>--apply</code> to replace</td>
 </tr>
 <tr>
@@ -4348,6 +4348,9 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </tr>
 </tbody>
 </table>
+<p>Hosts whose <code>perfsonar-testpoint.service</code> runs <code>podman-compose up</code> (installed with the older
+<code>install-systemd-service.sh</code>) stay compose-managed: the updater keeps that unit and restarts through it,
+and <code>install-systemd-units.sh</code> refuses to replace it unless you pass <code>--convert-from-compose</code>.</p>
 <h3 id="report-only-mode-safe-no-changes">Report-only mode (safe, no changes)<a class="headerlink" href="#report-only-mode-safe-no-changes" title="Permanent link">&para;</a></h3>
 <p>Run without flags to see what would change:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh

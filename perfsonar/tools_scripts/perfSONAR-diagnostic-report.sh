@@ -14,6 +14,10 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.4.0 - 2026-10-09
+#   - Service-unit check distinguishes a direct 'podman run' unit from the
+#     older compose-wrapper unit (podman-compose up); for the latter, mounts
+#     and health check are checked in docker-compose.yml instead.
 # Version: 1.3.0 - 2026-10-09
 #   - Service-unit check: flag a host /run/dbus bind mount (breaks the
 #     container's dbus.socket) and a missing container health check instead
@@ -46,7 +50,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.3.0"
+VERSION="1.4.0"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------
@@ -467,7 +471,19 @@ collect_config_files() {
 
     # Check for missing volume mounts in the service file (known v1.5.4 bug)
     local svc="/etc/systemd/system/perfsonar-testpoint.service"
-    if [[ -f "$svc" ]]; then
+    if [[ -f "$svc" ]] && ! grep -q 'podman run' "$svc"; then
+        emit ""
+        emit "--- Service file check ---"
+        emit "  Unit runs podman-compose; containers, mounts and health check come from docker-compose.yml"
+        local cf="$BASE_DIR/docker-compose.yml"
+        if [[ -f "$cf" ]] && grep -qE '^[[:space:]]*-[[:space:]]*/run/dbus:/run/dbus' "$cf"; then
+            emit "  OUT OF DATE: docker-compose.yml bind-mounts the host /run/dbus (breaks the container's dbus.socket)"
+            emit "  Fix: run update-perfsonar-deployment.sh --apply --restart --yes"
+            printf "  ${C_RED}✗${C_RESET} docker-compose.yml mounts host /run/dbus\n"
+        else
+            printf "  ${C_GREEN}✓${C_RESET} compose-managed unit\n"
+        fi
+    elif [[ -f "$svc" ]]; then
         emit ""
         emit "--- Service file volume mount check ---"
         local missing=()
