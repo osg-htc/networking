@@ -3571,16 +3571,13 @@ systemctl<span class="w"> </span>restart<span class="w"> </span>perfsonar-testpo
 containers start. No manual <code>chcon</code> commands are required.</p>
 </details>
 <details class="tip">
-<summary>node_exporter D-Bus access on EL9/SELinux</summary>
-<p>The compose file bind-mounts <code>/run/dbus:/run/dbus:ro</code> so that node_exporter can use
-<code>--collector.systemd</code> to expose perfSONAR service states as Prometheus metrics.
-On EL9 hosts with SELinux in <strong>Enforcing</strong> mode the <code>system_dbusd_var_run_t</code> label may
-block access. Enable with:</p>
-<div class="highlight"><pre><span></span><code>setsebool<span class="w"> </span>-P<span class="w"> </span>container_use_dbusd<span class="w"> </span><span class="m">1</span>
-</code></pre></div>
-<p>If the boolean is not available on your policy version, add <code>security_opt: label=disable</code>
-to the testpoint service in <code>docker-compose.yml</code> (less preferred — disables all SELinux
-confinement for the container).</p>
+<summary>node_exporter and D-Bus</summary>
+<p>node_exporter's <code>--collector.systemd</code> exposes perfSONAR service states as Prometheus metrics.
+The perfSONAR services run <strong>inside</strong> the container, so the collector uses the container's own
+D-Bus. Current compose files and systemd units therefore do <strong>not</strong> bind-mount the host's
+<code>/run/dbus</code> (older versions did; that read-only mount made the container's <code>dbus.socket</code> fail),
+and the <code>container_use_dbusd</code> SELinux boolean is no longer needed. To remove the old mount from an
+existing deployment, run <code>update-perfsonar-deployment.sh --apply --restart --yes</code>.</p>
 </details>
 <h4 id="2-deploy-the-container">2) Deploy the container<a class="headerlink" href="#2-deploy-the-container" title="Permanent link">&para;</a></h4>
 <p>Download a ready-made compose file (or copy it manually): Browse: <a href="https://github.com/osghtc/networking/blob/master/docs/perfsonar/tools_scripts/docker-compose.testpoint.yml">repo
@@ -3623,7 +3620,7 @@ podman<span class="w"> </span>ps
 <div class="admonition warning">
 <p class="admonition-title">Install the health-monitor watchdog (included above)</p>
 <p>The compose healthcheck marks the container <code>unhealthy</code> after three consecutive failures, but <code>restart: unless-stopped</code> does <strong>not</strong> auto-restart on health failures — a separate watchdog is needed.</p>
-<p><code>--health-monitor</code> installs a systemd timer that checks container health every 5 minutes and restarts <code>perfsonar-testpoint.service</code> if the container is <code>unhealthy</code>. Without it, a pScheduler failure will leave the container stuck in <code>unhealthy</code> state indefinitely.</p>
+<p><code>--health-monitor</code> installs a systemd timer that checks container health every 5 minutes and restarts <code>perfsonar-testpoint.service</code> if the container is <code>unhealthy</code>. Without it, a pScheduler failure will leave the container stuck in <code>unhealthy</code> state indefinitely. The systemd unit written by <code>install-systemd-units.sh</code> (1.5.0 and later) carries the same health check as the compose files. The monitor restarts at most 3 times per hour; if that does not help it logs an ALERT (with what to check, e.g. DNS or time sync) instead of restarting again.</p>
 <p>This creates <code>perfsonar-health-monitor.service</code> + <code>perfsonar-health-monitor.timer</code> and logs to <code>/var/log/perfsonar-health-monitor.log</code>. Expected recovery time from pScheduler failure: ≤8 minutes.</p>
 </div>
 <details class="info">
@@ -3678,9 +3675,6 @@ to fail.</p>
 <ul>
 <li>
 <p><code>/etc/letsencrypt</code> — Certbot creates this automatically; no pre-seeding needed</p>
-</li>
-<li>
-<p><code>/run/dbus</code> — Host D-Bus socket mount; exists at runtime, no seeding needed</p>
 </li>
 <li>
 <p><code>node_exporter.defaults</code> — the container ships its own complete copy with all needed collectors;
@@ -4814,15 +4808,12 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <p>For a permanent fix, use the override file + volume mount approach above.
 The compose files in this repo have the volume line commented out by default;
 uncomment it after creating <code>/opt/perfsonar-tp/conf/node_exporter.defaults</code>.</p>
-<p><strong>Root cause — D-Bus / SELinux (--collector.systemd):</strong>
-node_exporter uses <code>--collector.systemd</code> which connects to D-Bus. The compose file
-mounts <code>/run/dbus:/run/dbus:ro</code>, but on EL9 with SELinux <strong>Enforcing</strong> the socket
-label <code>system_dbusd_var_run_t</code> blocks the container process.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Check for permission denied on the D-Bus socket</span>
-podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>ls<span class="w"> </span>/run/dbus/system_bus_socket
-
-<span class="c1"># Fix: enable the SELinux boolean</span>
-setsebool<span class="w"> </span>-P<span class="w"> </span>container_use_dbusd<span class="w"> </span><span class="m">1</span>
+<p><strong>Root cause — D-Bus (--collector.systemd):</strong>
+node_exporter's <code>--collector.systemd</code> connects to the container's own D-Bus. Older deployments
+bind-mounted the host's <code>/run/dbus</code> read-only, which makes the container's <code>dbus.socket</code> fail
+(<code>systemctl --failed</code> inside the container shows it). Remove that mount:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>--failed<span class="w"> </span>--no-pager
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh<span class="w"> </span>--apply<span class="w"> </span>--restart<span class="w"> </span>--yes
 </code></pre></div>
 </details>
 <h3 id="auto-update-issues">Auto-Update Issues<a class="headerlink" href="#auto-update-issues" title="Permanent link">&para;</a></h3>

@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#unreleased-2026-10-08-perfsonar-pbr-nmsh" class="md-skip">
+        <a href="#unreleased-2026-10-09-health-check-and-d-bus" class="md-skip">
           Skip to content
         </a>
       
@@ -2353,8 +2353,31 @@
 
   <h1>CHANGELOG</h1>
 
-<h2 id="unreleased-2026-10-08-perfsonar-pbr-nmsh">[Unreleased] - 2026-10-08 (perfSONAR-pbr-nm.sh)<a class="headerlink" href="#unreleased-2026-10-08-perfsonar-pbr-nmsh" title="Permanent link">&para;</a></h2>
+<h2 id="unreleased-2026-10-09-health-check-and-d-bus">[Unreleased] - 2026-10-09 (health check and D-Bus)<a class="headerlink" href="#unreleased-2026-10-09-health-check-and-d-bus" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>No container health check on systemd-managed testpoints</strong> (<code>install-systemd-units.sh</code> v1.5.0): the unit now runs
+  podman with <code>--health-cmd "pscheduler troubleshoot --quick"</code> (60s interval, 30s timeout, 3 retries, 120s start
+  period, the same as the compose files). Previously <code>perfSONAR-health-monitor.sh</code> only ever logged "no healthcheck
+  defined" on these hosts and never restarted a broken container.</li>
+<li><strong>Container <code>dbus.socket</code> failed</strong> (<code>install-systemd-units.sh</code> v1.5.0, compose files): the host's <code>/run/dbus</code> is no
+  longer bind-mounted read-only over the container's. The perfSONAR services that node_exporter's systemd collector
+  watches run inside the container, so the collector needs the container's own D-Bus; the <code>container_use_dbusd</code>
+  SELinux boolean is no longer needed.</li>
+<li><strong>Restart loops</strong> (<code>perfSONAR-health-monitor.sh</code> v1.1.0): at most 3 restarts per hour (<code>MAX_RESTARTS</code>,
+  <code>RESTART_WINDOW</code>), then an ALERT with what to check (DNS, time sync) instead of restarting again; the output of the
+  failed health check is logged. <code>install-systemd-units.sh</code> refreshes an installed monitor on every run.</li>
+</ul>
+<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>update-perfsonar-deployment.sh</code> v1.8.0: a unit with the host <code>/run/dbus</code> mount or without <code>--health-cmd</code> is treated
+  as stale and regenerated with <code>--apply</code>; the <code>/run/dbus</code> mount is no longer required or patched in.</li>
+<li><code>perfSONAR-diagnostic-report.sh</code> v1.3.0: service-unit check updated accordingly; the SELinux D-Bus boolean is only
+  reported where the old mount is still present.</li>
+<li><code>seed_testpoint_host_dirs.sh</code> v2.0.1, <code>node_exporter.defaults</code>, testpoint guide: notes updated.</li>
+</ul>
+<h2 id="unreleased-2026-10-08-perfsonar-pbr-nmsh">[Unreleased] - 2026-10-08 (perfSONAR-pbr-nm.sh)<a class="headerlink" href="#unreleased-2026-10-08-perfsonar-pbr-nmsh" title="Permanent link">&para;</a></h2>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>DNS lost after static conversion</strong> (<code>perfSONAR-pbr-nm.sh</code> v1.0.2): the script switched connections to
   <code>ipv4.method manual</code> with address and gateway but never set <code>ipv4.dns</code>. On hosts whose DNS came from DHCP, the
@@ -2371,7 +2394,7 @@
   contains escape codes. The literal <code>\n</code> in "Configuring NIC" lines is replaced by a blank log line.</li>
 </ul>
 <h2 id="unreleased-2026-10-08">[Unreleased] - 2026-10-08<a class="headerlink" href="#unreleased-2026-10-08" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Parallel A/AAAA DNS query stall</strong> (<code>check-perfsonar-dns.sh</code> v1.1.0): new <code>--check-resolver</code> and <code>--fix-resolver</code>
   modes. On some hosts (seen on AlmaLinux 10 behind our nftables ruleset) one of the two parallel DNS replies is
@@ -2392,7 +2415,7 @@
   diagnostic report and orchestrator step 6 pick this up automatically.</li>
 </ul>
 <h2 id="unreleased-2026-09-29">[Unreleased] - 2026-09-29<a class="headerlink" href="#unreleased-2026-09-29" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_2">Fixed<a class="headerlink" href="#fixed_2" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_3">Fixed<a class="headerlink" href="#fixed_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Fresh-host container start failure (EL9/EL10)</strong> (<code>install-systemd-units.sh</code> v1.4.0): the generated
   <code>perfsonar-testpoint.service</code> bind-mounted <code>/var/www/html</code>, the whole <code>/etc/apache2</code> and <code>/etc/letsencrypt</code>
@@ -2410,7 +2433,7 @@
   <code>/etc/letsencrypt</code> and <code>/var/www/html</code>; the installer resets stale private MCS labels.</li>
 <li><strong>EL10</strong>: orchestrator enables CodeReady Builder for the running RHEL major version (was hard-coded to 9).</li>
 </ul>
-<h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
+<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>perfSONAR-orchestrator.sh</code> v1.1.6: waits for the testpoint container to be running and prints the service
   journal on failure; skips enrollment with a clear message if the container does not exist.</li>
@@ -2422,7 +2445,7 @@
 <li><code>perfSONAR-diagnostic-report.sh</code> v1.1.0: new known-issue check for missing bind-mount sources.</li>
 </ul>
 <h2 id="132-2025-12-16">[1.3.2] - 2025-12-16<a class="headerlink" href="#132-2025-12-16" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_3">Fixed<a class="headerlink" href="#fixed_3" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_4">Fixed<a class="headerlink" href="#fixed_4" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Critical JSON state save corruption fix</strong>: Fixed invalid JSON generation in <code>--save-state</code> that caused <code>--restore-state</code> to fail</li>
 <li><strong>Fix (1.3.6)</strong>: Respect <code>--dry-run</code> in packet pacing application and ensure audit logic checks actual qdisc state; prevent <code>--mode apply --dry-run</code> from changing system qdisc or sysctl state.</li>
@@ -2433,7 +2456,7 @@
 <li><strong>Fixed packet pacing audit detection</strong>: <code>--mode audit</code> now correctly detects if packet pacing is already applied by checking actual qdisc state instead of relying on command-line flags</li>
 <li>Added <code>repair-state-json.sh</code> utility script to repair existing corrupted JSON state files</li>
 </ul>
-<h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
+<h3 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Enhanced JSON generation in <code>capture_interface_state()</code> with proper type validation</li>
 <li>Ring buffer values now validated as numeric before embedding in JSON</li>
@@ -2446,11 +2469,11 @@
 <li>The script creates backups before repair and validates output with <code>jq</code> or Python</li>
 </ul>
 <h2 id="unreleased-2026-03-20">[Unreleased] - 2026-03-20<a class="headerlink" href="#unreleased-2026-03-20" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_4">Fixed<a class="headerlink" href="#fixed_4" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_5">Fixed<a class="headerlink" href="#fixed_5" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Apache configuration initialization</strong> (testpoint-entrypoint-wrapper.sh v1.2.0): Fixed container startup failure when using bind-mounted <code>/etc/apache2</code> with Let's Encrypt certificates. The wrapper script now initializes missing Apache configuration files on container startup, ensuring Apache can start properly. Includes automatic directory structure creation, module enablement, and configuration validation. Resolves issue where fresh deployments would fail with "Could not open configuration file /etc/apache2/apache2.conf: No such file or directory".</li>
 </ul>
-<h3 id="changed_2">Changed<a class="headerlink" href="#changed_2" title="Permanent link">&para;</a></h3>
+<h3 id="changed_3">Changed<a class="headerlink" href="#changed_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Installer:</strong> <code>install_tools_scripts.sh</code> bumped to <code>1.0.1</code> and updated to fetch a fuller set of helper scripts and docs, and attempt to fetch accompanying <code>.sha256</code> checksum files when available.</li>
 <li><strong>lsregistration helper:</strong> <code>perfSONAR-update-lsregistration.sh</code> now supports non-container (RPM) installs more robustly by attempting to restart the <code>perfsonar-lsregistrationdaemon</code> service name where present and falling back to <code>lsregistrationdaemon</code>, and will prefer the <code>perfsonar-</code> prefixed unit when restarting.</li>
@@ -2462,7 +2485,7 @@
 <li>testpoint-entrypoint-wrapper.sh checksum updated: <code>76f49ce6... → abf71262...</code></li>
 </ul>
 <h2 id="113-2025-12-06">[1.1.3] - 2025-12-06<a class="headerlink" href="#113-2025-12-06" title="Permanent link">&para;</a></h2>
-<h3 id="fixed_5">Fixed<a class="headerlink" href="#fixed_5" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_6">Fixed<a class="headerlink" href="#fixed_6" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Corrected IOMMU audit messaging to suggest <code>grubby</code> for BLS systems (EL9+) and <code>grub2-mkconfig</code>/<code>update-grub</code> for legacy systems. Also bumped <code>fasterdata-tuning.sh</code> to v1.1.3 and updated site copy + checksums.</li>
 </ul>
