@@ -4350,7 +4350,13 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 </table>
 <p>Hosts whose <code>perfsonar-testpoint.service</code> runs <code>podman-compose up</code> (installed with the older
 <code>install-systemd-service.sh</code>) stay compose-managed: the updater keeps that unit and restarts through it,
-and <code>install-systemd-units.sh</code> refuses to replace it unless you pass <code>--convert-from-compose</code>.</p>
+and <code>install-systemd-units.sh</code> refuses to replace it unless you pass <code>--convert-from-compose</code>.
+The updater also checks that unit's <code>ExecStart</code> against the installed podman-compose (podman-compose 1.5.0
+rejects options such as <code>--shm-size</code> on <code>up</code>, so the unit fails on every start and the testpoint does not come
+back after a reboot); with <code>--apply</code> it moves <code>--shm-size</code> into <code>docker-compose.yml</code> as <code>shm_size</code>. After a
+restart it confirms the container was actually recreated.</p>
+<p>The testpoint runs with 512 MB of shared memory (<code>shm_size: 512m</code> in the compose files, <code>--shm-size=512m</code> in
+the systemd unit) because PostgreSQL inside the container needs more than the 64 MB default.</p>
 <h3 id="report-only-mode-safe-no-changes">Report-only mode (safe, no changes)<a class="headerlink" href="#report-only-mode-safe-no-changes" title="Permanent link">&para;</a></h3>
 <p>Run without flags to see what would change:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh

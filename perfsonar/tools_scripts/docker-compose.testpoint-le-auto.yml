@@ -39,6 +39,8 @@ services:
       - /opt/perfsonar-tp/tools_scripts:/opt/perfsonar-tp/tools_scripts:ro
     tty: true
     pids_limit: 8192
+    # PostgreSQL inside the testpoint (pScheduler) needs more than the 64 MB default
+    shm_size: 512m
     cap_add:
       - CAP_NET_RAW
     healthcheck:
