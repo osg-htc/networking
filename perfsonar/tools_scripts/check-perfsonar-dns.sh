@@ -6,6 +6,12 @@ IFS=$'\n\t'
 # Quick forward/reverse DNS consistency check for addresses in
 # /etc/perfSONAR-multi-nic-config.conf
 #
+# Version: 1.2.0 - 2026-10-08
+#   - Default mode also checks the published DNS records of the host's names
+#     (PTR names of configured addresses + hostname -f): every A/AAAA record
+#     must point to an address configured on this host (error otherwise,
+#     e.g. an AAAA record for IPv6 that was never configured), and a host
+#     with global IPv6 should publish an AAAA record (warning).
 # Version: 1.1.0 - 2026-10-08
 #   - Add --check-resolver / --fix-resolver: detect the glibc parallel A/AAAA
 #     query stall (one reply dropped, typically by a stateful firewall /
@@ -24,7 +30,7 @@ IFS=$'\n\t'
 # Depends on: dig (bind-utils on EL, dnsutils on Debian/Ubuntu); python3 and
 #             nmcli for the resolver checks
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 PROG_NAME="$(basename "$0")"
 
 usage() {
@@ -34,7 +40,12 @@ Usage: $PROG_NAME [--version|--help]
        $PROG_NAME --fix-resolver   [--host FQDN] [--threshold SECONDS] [--no-restart]
 
 Default mode: validates forward and reverse DNS consistency for all IP
-addresses configured in /etc/perfSONAR-multi-nic-config.conf.
+addresses configured in /etc/perfSONAR-multi-nic-config.conf, then checks
+that every A/AAAA record published for this host's names (their PTR names
+and 'hostname -f') points to an address configured on this host, and warns
+if the host has global IPv6 but no AAAA record. Remote perfSONAR hosts test
+to every published address, so a record for an address the host does not
+have makes those tests fail.
 
 --check-resolver
     Time a dual-stack (A + AAAA) lookup of this host's FQDN the way
@@ -298,6 +309,7 @@ check_ip() {
     return 1
   fi
   ptr=${ptr%.}
+  add_host_name "$ptr"
 
   if [ "$RESOLVER" = dig ]; then
     if [ "$family" = "4" ]; then
@@ -321,6 +333,84 @@ check_ip() {
   return 0
 }
 
+# Names whose published records are checked below (PTR names + hostname -f)
+HOST_NAMES=()
+add_host_name() {
+  local n=${1%.}
+  [ -z "$n" ] && return 0
+  case "$n" in *.*) ;; *) return 0 ;; esac
+  local e
+  for e in "${HOST_NAMES[@]:-}"; do [ "$e" = "$n" ] && return 0; done
+  HOST_NAMES+=("$n")
+}
+
+# Normalize IP addresses (one per line on stdin) so IPv6 spellings compare
+# equal; non-IP lines (e.g. CNAME targets from dig +short) are dropped.
+normalize_ips() {
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -I -c '
+import ipaddress, sys
+for line in sys.stdin:
+    line = line.strip()
+    try:
+        print(ipaddress.ip_address(line).compressed)
+    except ValueError:
+        pass
+'
+  else
+    grep -E '^[0-9a-fA-F:.]+$' | tr 'A-F' 'a-f'
+  fi
+}
+
+# Published records of type $2 (A|AAAA) for name $1, normalized
+lookup_records() {
+  if [ "$RESOLVER" = dig ]; then
+    dig +short "$2" "$1" 2>/dev/null | normalize_ips || true
+  elif [ "$2" = A ]; then
+    host -t A "$1" 2>/dev/null | awk '/has address/ {print $4}' | normalize_ips || true
+  else
+    host -t AAAA "$1" 2>/dev/null | awk '/has IPv6 address/ {print $5}' | normalize_ips || true
+  fi
+}
+
+# Check that published A/AAAA records match addresses configured here.
+check_published_records() {
+  local local_addrs local_v6 name rtype addr found_aaaa problems=0
+  local_addrs=$(ip -o addr show scope global 2>/dev/null | awk '{print $4}' | cut -d/ -f1 | normalize_ips | sort -u)
+  local_v6=$(echo "$local_addrs" | grep ':' || true)
+
+  for name in "${HOST_NAMES[@]:-}"; do
+    [ -z "$name" ] && continue
+    found_aaaa=0
+    for rtype in A AAAA; do
+      while IFS= read -r addr; do
+        [ -z "$addr" ] && continue
+        [ "$rtype" = AAAA ] && found_aaaa=1
+        if echo "$local_addrs" | grep -qxF "$addr"; then
+          echo "OK: $name $rtype $addr is configured on this host"
+        else
+          echo "MISMATCH: $name has $rtype record $addr, but no interface on this host has that address."
+          echo "  Remote perfSONAR hosts will try to test to $addr and fail. Either configure $addr on"
+          if [ "$rtype" = AAAA ]; then
+            echo "  this host (add it to NIC_IPV6_ADDRS / NIC_IPV6_PREFIXES / NIC_IPV6_GWS in $CONFIG and"
+            echo "  re-run perfSONAR-pbr-nm.sh --yes), or ask your DNS admins to remove the AAAA record."
+          else
+            echo "  this host (add it to NIC_IPV4_ADDRS / NIC_IPV4_PREFIXES / NIC_IPV4_GWS in $CONFIG and"
+            echo "  re-run perfSONAR-pbr-nm.sh --yes), or ask your DNS admins to remove the A record."
+            echo "  (If the host is behind 1:1 NAT this is expected, but perfSONAR should not be behind NAT.)"
+          fi
+          problems=$((problems+1))
+        fi
+      done < <(lookup_records "$name" "$rtype")
+    done
+    if [ -n "$local_v6" ] && [ "$found_aaaa" -eq 0 ]; then
+      echo "WARNING: this host has global IPv6 ($(echo "$local_v6" | paste -sd' ' -)) but $name has no AAAA record;"
+      echo "  remote hosts will only test to it over IPv4. Ask your DNS admins to add the AAAA record."
+    fi
+  done
+  return "$problems"
+}
+
 errors=0
 for ip in "${NIC_IPV4_ADDRS[@]:-}"; do
   if [ "$ip" != "-" ]; then
@@ -333,9 +423,19 @@ for ip in "${NIC_IPV6_ADDRS[@]:-}"; do
   fi
 done
 
+# Published records vs. configured addresses
+add_host_name "$(hostname -f 2>/dev/null || true)"
+if [ "${#HOST_NAMES[@]}" -gt 0 ]; then
+  echo
+  echo "Published DNS records for: ${HOST_NAMES[*]}"
+  rec_problems=0
+  check_published_records || rec_problems=$?
+  errors=$((errors + rec_problems))
+fi
+
 if (( errors > 0 )); then
-  echo "DNS verification failed ($errors problem(s)). Fix DNS (forward/reverse) before running tests." >&2
+  echo "DNS verification failed ($errors problem(s)). Fix DNS records or the address configuration before running tests." >&2
   exit 1
 fi
 
-echo "DNS forward/reverse checks passed for configured addresses."
+echo "DNS checks passed (forward/reverse and published records)."

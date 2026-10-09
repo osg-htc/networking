@@ -4477,6 +4477,21 @@ connections and restarts the testpoint container so it picks up the new <code>/e
 <code>update-perfsonar-deployment.sh --apply</code> run this check automatically.</p>
 </details>
 <details class="failure">
+<summary>check-perfsonar-dns.sh reports MISMATCH: DNS record for an address this host does not have</summary>
+<p><strong>Symptoms:</strong> <code>check-perfsonar-dns.sh</code> prints <code>MISMATCH: &lt;fqdn&gt; has AAAA record &lt;address&gt;, but no interface
+on this host has that address</code> (or the same for an A record). Remote mesh tests to this host fail over that
+address family.</p>
+<p><strong>Cause:</strong> DNS publishes an address (often IPv6) that was never configured on the host. Remote perfSONAR
+hosts test to every address published for the name.</p>
+<p><strong>Fix (preferred, dual-stack):</strong> add the address, prefix and gateway for the interface to
+<code>NIC_IPV6_ADDRS</code>, <code>NIC_IPV6_PREFIXES</code> and <code>NIC_IPV6_GWS</code> (or the IPv4 arrays) in
+<code>/etc/perfSONAR-multi-nic-config.conf</code>, then apply and re-check:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--yes
+sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh
+</code></pre></div>
+<p>If the address should not be used, ask your DNS administrators to remove the record instead.</p>
+</details>
+<details class="failure">
 <summary>Container crashes after reboot with exit code 255</summary>
 <p><strong>Symptoms:</strong> Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts
 with exit code 255.</p>

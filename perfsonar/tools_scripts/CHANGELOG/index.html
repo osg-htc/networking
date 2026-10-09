@@ -2368,6 +2368,11 @@
 <li><code>update-perfsonar-deployment.sh</code> v1.7.0: checks for the stall; <code>--apply</code> fixes it and <code>--restart</code> restarts the
   testpoint container.</li>
 <li><code>perfSONAR-diagnostic-report.sh</code> v1.2.0: known-issue check for the stall.</li>
+<li><strong>Published DNS records vs. configured addresses</strong> (<code>check-perfsonar-dns.sh</code> v1.2.0): the default mode now also
+  checks every A/AAAA record published for the host's names (PTR names of configured addresses and <code>hostname -f</code>).
+  A record pointing to an address no local interface has is an error (e.g. an AAAA record while IPv6 was never
+  configured, as found on test01.swt2.uta.edu); a host with global IPv6 but no AAAA record gets a warning. The
+  diagnostic report and orchestrator step 6 pick this up automatically.</li>
 </ul>
 <h2 id="unreleased-2026-09-29">[Unreleased] - 2026-09-29<a class="headerlink" href="#unreleased-2026-09-29" title="Permanent link">&para;</a></h2>
 <h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
