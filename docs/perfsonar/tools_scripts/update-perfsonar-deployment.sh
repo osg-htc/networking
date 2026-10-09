@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.9.0 - 2026-10-09
+# Version: 1.10.0 - 2026-10-09
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,24 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.10.0 - 2026-10-09
+#   - Verify restarts: after restarting through systemd the unit must be
+#     active and the perfsonar-testpoint container must have a new start
+#     time. Previously a failed restart was reported as success because the
+#     old container was still running (seen on psum01.aglt2.org).
+#   - Compose-managed unit that is not active: run '<compose> down' before
+#     starting it, so the existing containers are replaced (systemd does not
+#     run ExecStop for a unit that never started).
+#   - Check the compose-wrapper unit's ExecStart against the installed
+#     podman-compose: options it rejects (e.g. '--shm-size=512m' with
+#     podman-compose 1.5.0, which made psum01's unit fail) are reported; with
+#     --apply, --shm-size=N is moved into docker-compose.yml as shm_size: N,
+#     and the restart is skipped if other rejected options remain.
+#   - Compose refresh keeps the current shm_size value and marks volume lines
+#     kept from the previous file with a comment. Differences in comments
+#     only no longer count as a change (no container restart).
+#   - Direct units without --shm-size are refreshed (install-systemd-units.sh
+#     >= 1.5.2).
 # Version: 1.9.0 - 2026-10-09
 #   - Recognise the older compose-wrapper unit (install-systemd-service.sh:
 #     ExecStart=podman-compose up -d). On such hosts docker-compose.yml defines
@@ -126,7 +144,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.9.0"
+VERSION="1.10.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -143,6 +161,7 @@ DRY_RUN=false
 TOOLS_SRC="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts"
 CHANGES_FOUND=0
 SYSTEMD_MANAGED=false
+SKIP_RESTART=false   # set when the unit cannot start as-is
 UNIT_KIND="none"      # direct (podman run) | compose (podman-compose) | other | none
 TESTPOINT_UNIT="/etc/systemd/system/perfsonar-testpoint.service"
 CERTBOT_UNIT="/etc/systemd/system/perfsonar-certbot.service"
@@ -573,6 +592,14 @@ phase3_container_compose() {
 
     if cmp -s "$COMPOSE_FILE" "$candidate"; then
         ok "  docker-compose.yml matches the latest template"
+    elif cmp -s <(grep -Ev '^[[:space:]]*(#|$)' "$COMPOSE_FILE") <(grep -Ev '^[[:space:]]*(#|$)' "$candidate"); then
+        # Only comments differ: refresh the text, no container restart needed.
+        ok "  docker-compose.yml matches the latest template (comments differ only)"
+        if [[ "$APPLY" == true && "$DRY_RUN" != true ]]; then
+            cp -p "$COMPOSE_FILE" "${COMPOSE_FILE}.bak.$(date -u +%Y%m%dT%H%M%SZ)"
+            cat "$candidate" > "$COMPOSE_FILE"
+            info "    → Refreshed comments in $COMPOSE_FILE (no restart needed)"
+        fi
     else
         changed "  docker-compose.yml differs from latest $template_name"
         COMPOSE_CHANGED=true
@@ -633,6 +660,7 @@ build_compose_candidate() {
             body="${BASH_REMATCH[2]}"
             active="${BASH_REMATCH[1]}${body}"
             if awk -v b="$body" '{ t = $0; sub(/^[ \t]+/, "", t); sub(/[ \t]+$/, "", t); if (t == b) f = 1 } END { exit !f }' "$current" 2>/dev/null; then
+                printf '%s# (enabled on this host; kept from the previous docker-compose.yml)\n' "${BASH_REMATCH[1]}" >> "$out"
                 printf '%s\n' "$active" >> "$out"
                 info "  Keeping local setting from current file: ${body}"
                 continue
@@ -640,6 +668,64 @@ build_compose_candidate() {
         fi
         printf '%s\n' "$line" >> "$out"
     done < "$template"
+
+    # Keep the host's shared-memory size for the testpoint (first shm_size).
+    local cur_shm
+    cur_shm=$(awk '/^[[:space:]]+shm_size:/ {print $2; exit}' "$current")
+    if [[ -n "$cur_shm" ]] && grep -qE '^[[:space:]]+shm_size:' "$out" && \
+       ! grep -qE "^[[:space:]]+shm_size:[[:space:]]*${cur_shm}[[:space:]]*$" "$out"; then
+        sed -i -E "0,/^([[:space:]]+shm_size:).*/s//\\1 ${cur_shm}/" "$out"
+        info "  Keeping local setting from current file: shm_size: ${cur_shm}"
+    fi
+}
+
+# Compose-wrapper unit: make sure the installed compose tool accepts the
+# options in ExecStart. podman-compose 1.5.0 rejects e.g. '--shm-size' on
+# 'up', so such a unit fails on every start (and after the next reboot).
+check_compose_unit_execstart() {
+    local svc="$1" exec_line opts bad=() o name help shm=""
+    exec_line=$(grep -m1 '^ExecStart=' "$svc" | sed 's/^ExecStart=//')
+    [[ "$exec_line" == *" up"* ]] || return 0
+    opts=$(printf '%s' "${exec_line#* up}" | tr ' ' '\n' | grep -E '^-' || true)
+    [[ -z "$opts" ]] && return 0
+    help=$($COMPOSE_CMD up --help 2>&1 || true)
+    while IFS= read -r o; do
+        name="${o%%=*}"
+        if ! grep -qE -- "(^|[[:space:],])${name}([[:space:],=]|$)" <<< "$help"; then
+            bad+=("$o")
+            [[ "$name" == "--shm-size" ]] && shm="${o#*=}"
+        fi
+    done <<< "$opts"
+    [[ ${#bad[@]} -eq 0 ]] && return 0
+
+    changed "  $svc passes options '$COMPOSE_CMD up' rejects: ${bad[*]}"
+    changed "  The unit fails on every start (and the testpoint would not come back after a reboot)."
+    CHANGES_FOUND=1
+    if [[ "$APPLY" != true || "$DRY_RUN" == true ]]; then
+        warn "  Run with --apply to fix (--shm-size is moved into docker-compose.yml as shm_size)."
+        return 0
+    fi
+    local remaining=()
+    for o in "${bad[@]}"; do
+        if [[ "${o%%=*}" == "--shm-size" && -n "$shm" ]]; then
+            cp -a "$svc" "${svc}.bak.$(date -u +%Y%m%dT%H%M%SZ)"
+            sed -i "s/ ${o}//" "$svc"
+            if grep -qE '^[[:space:]]+shm_size:' "$COMPOSE_FILE"; then
+                sed -i -E "0,/^([[:space:]]+shm_size:).*/s//\\1 ${shm}/" "$COMPOSE_FILE"
+            else
+                sed -i -E "0,/^([[:space:]]+)pids_limit:.*/s//&\n\\1shm_size: ${shm}/" "$COMPOSE_FILE"
+            fi
+            ok "  ✓ Moved ${o} from the unit into docker-compose.yml (shm_size: ${shm})"
+            SERVICE_FILE_CHANGED=true
+        else
+            remaining+=("$o")
+        fi
+    done
+    if [[ ${#remaining[@]} -gt 0 ]]; then
+        warn "  Remove these options from ExecStart in $svc by hand: ${remaining[*]}"
+        warn "  Not restarting the testpoint until the unit can start."
+        SKIP_RESTART=true
+    fi
 }
 
 # Print host paths bind-mounted by compose file $1 that do not exist.
@@ -839,8 +925,13 @@ fix_stale_service_file() {
     # podman-compose; its containers, mounts and health checks come from
     # docker-compose.yml (Phase 3). Never convert it to a direct unit here:
     # that would drop compose-defined services such as certbot.
-    if [[ "$UNIT_KIND" != "direct" ]]; then
-        ok "  Unit runs $COMPOSE_CMD ($UNIT_KIND); mounts and health check come from docker-compose.yml"
+    if [[ "$UNIT_KIND" == "compose" ]]; then
+        ok "  Unit runs $COMPOSE_CMD (compose); mounts and health check come from docker-compose.yml"
+        check_compose_unit_execstart "$svc"
+        echo
+        return
+    elif [[ "$UNIT_KIND" != "direct" ]]; then
+        ok "  Unit kind: $UNIT_KIND; not checked"
         echo
         return
     fi
@@ -863,6 +954,9 @@ fix_stale_service_file() {
     fi
     if ! grep -q -- '--health-cmd' "$svc"; then
         stale+=("no container health check (--health-cmd)")
+    fi
+    if ! grep -q -- '--shm-size' "$svc"; then
+        stale+=("no --shm-size=512m (PostgreSQL needs more than the 64 MB default)")
     fi
 
     if [[ ${#stale[@]} -gt 0 ]]; then
@@ -961,28 +1055,54 @@ print_container_restart_hint() {
 
 # Restart via systemd and wait for the container to come up.
 restart_via_systemd() {
+    if [[ "$SKIP_RESTART" == true ]]; then
+        warn "  Not restarting: the unit cannot start as configured (see above)."
+        return 1
+    fi
+    local before rc=0
+    before=$($RUNTIME inspect -f '{{.State.StartedAt}}' perfsonar-testpoint 2>/dev/null || true)
     info "  Reloading systemd configuration..."
     systemctl daemon-reload 2>&1 | sed 's/^/    /' || true
     # Clear a restart-loop/failed state so the restart is attempted cleanly.
     systemctl reset-failed perfsonar-testpoint.service >/dev/null 2>&1 || true
-    info "  Restarting perfsonar-testpoint.service..."
-    systemctl restart perfsonar-testpoint.service 2>&1 | sed 's/^/    /' || true
+
+    if [[ "$UNIT_KIND" == "compose" ]] && ! systemctl is-active --quiet perfsonar-testpoint.service; then
+        # systemd only runs ExecStop (compose down) for a unit that started
+        # successfully; bring existing containers down so 'up' recreates them.
+        info "  Unit is not active; running '$COMPOSE_CMD down' first so the containers are recreated..."
+        (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /') || true
+        info "  Starting perfsonar-testpoint.service..."
+        systemctl start perfsonar-testpoint.service 2>&1 | sed 's/^/    /' || rc=$?
+    else
+        info "  Restarting perfsonar-testpoint.service..."
+        systemctl restart perfsonar-testpoint.service 2>&1 | sed 's/^/    /' || rc=$?
+    fi
+    if [[ $rc -ne 0 ]] || ! systemctl is-active --quiet perfsonar-testpoint.service; then
+        warn "  perfsonar-testpoint.service failed to (re)start. Last service log lines:"
+        journalctl -u perfsonar-testpoint.service -n 20 --no-pager 2>&1 | sed 's/^/    /' || true
+        return 1
+    fi
     if [[ -f "$CERTBOT_UNIT" ]]; then
         info "  Restarting perfsonar-certbot.service..."
         systemctl restart perfsonar-certbot.service 2>&1 | sed 's/^/    /' || true
     fi
 
-    info "  Waiting up to 120s for perfsonar-testpoint to be running..."
-    local i state=""
+    info "  Waiting up to 120s for a new perfsonar-testpoint container to be running..."
+    local i state="" started=""
     for i in $(seq 1 24); do
         state=$($RUNTIME inspect -f '{{.State.Status}}' perfsonar-testpoint 2>/dev/null || true)
-        if [[ "$state" == "running" ]]; then
-            ok "  Container is running (after $((i * 5))s)"
+        started=$($RUNTIME inspect -f '{{.State.StartedAt}}' perfsonar-testpoint 2>/dev/null || true)
+        if [[ "$state" == "running" && -n "$started" && "$started" != "$before" ]]; then
+            ok "  Container restarted and running (after $((i * 5))s; started $started)"
             return 0
         fi
         sleep 5
     done
-    warn "  perfsonar-testpoint is not running (state: ${state:-absent})."
+    if [[ "$state" == "running" && "$started" == "$before" ]]; then
+        warn "  perfsonar-testpoint is still the OLD container (started $before): the restart did not take effect."
+    else
+        warn "  perfsonar-testpoint is not running (state: ${state:-absent})."
+    fi
     warn "  Last service log lines:"
     journalctl -u perfsonar-testpoint.service -n 20 --no-pager 2>&1 | sed 's/^/    /' || true
     return 1

@@ -25,6 +25,8 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:z
     tty: true
     pids_limit: 8192
+    # PostgreSQL inside the testpoint (pScheduler) needs more than the 64 MB default
+    shm_size: 512m
     cap_add:
       - CAP_NET_RAW
     healthcheck:
