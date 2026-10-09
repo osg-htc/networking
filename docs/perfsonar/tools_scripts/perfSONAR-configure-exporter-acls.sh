@@ -1,7 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="0.1.0"
+# perfSONAR-configure-exporter-acls.sh
+# ------------------------------------
+# Restrict the Prometheus exporter endpoints that Apache (httpd) exposes on a
+# perfSONAR toolkit host (/node_exporter/metrics, /perfsonar_host_exporter/)
+# to an allowlist of IPs/CIDRs.
+#
+# Version: 0.1.1 - 2026-10-09
+# Author: OSG perfSONAR deployment tools
+#
+# Version history:
+#   0.1.1 - 2026-10-09: Add header with '# Version:' line (update-perfsonar-
+#           deployment.sh reported this script as "v?").
+#   0.1.0 - 2026-03-02: Initial version.
+
+VERSION="0.1.1"
 LOG_FILE="/var/log/perfSONAR-configure-exporter-acls.log"
 ACL_FILE="/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf"
 ALLOWLIST=""

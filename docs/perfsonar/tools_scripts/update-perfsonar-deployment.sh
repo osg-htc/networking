@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.10.0 - 2026-10-09
+# Version: 1.10.1 - 2026-10-09
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,14 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.10.1 - 2026-10-09
+#   - Report-only mode no longer says "Changes were applied but container was
+#     NOT restarted" (seen on psum05.aglt2.org): in report-only and --dry-run
+#     mode Phase 4 now says nothing was applied and a restart will be needed.
+#     Same fix for toolkit hosts.
+#   - Phase 1 says that helper scripts are refreshed in every mode; --apply
+#     (and --dry-run) only govern config, compose, unit and resolver changes.
+#     --help says the same.
 # Version: 1.10.0 - 2026-10-09
 #   - Verify restarts: after restarting through systemd the unit must be
 #     active and the perfsonar-testpoint container must have a new start
@@ -123,7 +131,7 @@ set -euo pipefail
 # Options:
 #   --base DIR          Base directory (default: auto-detect)
 #   --type TYPE         Deployment type: container or toolkit (default: auto-detect)
-#   --apply             Apply compose/config/RPM changes (default: report only)
+#   --apply             Apply compose/config/unit/RPM changes (default: report only)
 #   --restart           Restart services after updates (implies --apply)
 #   --update-systemd    Re-run install-systemd-units.sh (container only)
 #   --yes               Skip interactive confirmations
@@ -144,7 +152,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.10.0"
+VERSION="1.10.1"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -221,6 +229,8 @@ Options:
   --help, -h          Show this help message
 
 Without --apply, the script runs in report-only mode showing what would change.
+Phase 1 always refreshes the helper scripts in tools_scripts/ (also in
+report-only and --dry-run mode); the other phases only report unless --apply.
 
 Deployment types:
   container   perfSONAR testpoint via podman-compose/docker-compose
@@ -415,6 +425,9 @@ preflight() {
 # --- Phase 1: Update helper scripts ---------------------------------------
 phase1_update_scripts() {
     info "Phase 1: Updating helper scripts..."
+    if [[ "$APPLY" != true || "$DRY_RUN" == true ]]; then
+        info "  (Helper scripts are refreshed in every mode; config, compose and unit changes are only reported.)"
+    fi
 
     if [[ ! -d "$TOOLS_DIR" ]]; then
         mkdir -p "$TOOLS_DIR"
@@ -1118,7 +1131,10 @@ phase4_container_restart() {
     fi
 
     if [[ "$RESTART" != true ]]; then
-        if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true || "$RESOLVER_CHANGED" == true ]]; then
+        if [[ "$APPLY" != true || "$DRY_RUN" == true ]]; then
+            info "  Nothing applied; these changes need a container restart."
+            info "  Run with --apply --restart to apply them and recreate the container."
+        else
             warn "  Changes were applied but container was NOT restarted."
             warn "  Run with --restart to recreate the container, or manually:"
             print_container_restart_hint "    " | while IFS= read -r line; do warn "$line"; done
@@ -1176,9 +1192,14 @@ phase4_toolkit_restart() {
     fi
 
     if [[ "$RESTART" != true ]]; then
-        warn "  Changes were applied but services were NOT restarted."
-        warn "  Run with --restart to restart perfSONAR services, or manually:"
-        warn "    systemctl restart ${TOOLKIT_SERVICES[*]}"
+        if [[ "$APPLY" != true || "$DRY_RUN" == true ]]; then
+            info "  Nothing applied; these changes need a restart of the perfSONAR services."
+            info "  Run with --apply --restart to apply them and restart the services."
+        else
+            warn "  Changes were applied but services were NOT restarted."
+            warn "  Run with --restart to restart perfSONAR services, or manually:"
+            warn "    systemctl restart ${TOOLKIT_SERVICES[*]}"
+        fi
         echo
         return
     fi
