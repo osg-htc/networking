@@ -1,3 +1,20 @@
+<!-- markdownlint-disable MD024 -->
+<!-- Keep-a-changelog style: each release repeats the same section headings. -->
+
+## [Unreleased] - 2026-10-09 (updater report-mode messages)
+
+### Fixed
+
+- **Misleading report-only message** (`update-perfsonar-deployment.sh` v1.10.1, seen on psum05.aglt2.org): without
+  `--apply`, Phase 4 said "Changes were applied but container was NOT restarted" although nothing was applied. It now
+  says nothing was applied and a restart will be needed (same for toolkit hosts).
+- **Phase 1 in report-only mode**: the updater, its `--help` and the install guide now say that helper scripts in
+  `tools_scripts/` are refreshed in every mode; `--apply` governs config, compose, unit and resolver changes.
+- **`perfSONAR-configure-exporter-acls.sh` v0.1.1**: added the standard header with a `# Version:` line; the updater
+  listed it as "v?".
+- **CHANGELOG.md lint**: disabled MD024 (repeated "Fixed"/"Changed" headings are the changelog's format) and fixed
+  the other markdownlint errors, so PRs that touch this file pass the Code Quality check.
+
 ## [Unreleased] - 2026-10-09 (shm_size, restart verification)
 
 ### Fixed
@@ -78,6 +95,7 @@
 - `perfSONAR-pbr-nm.sh` v1.0.1: colour codes were written literally (`\033[0;31m...`) to the terminal and log. Colours
   now use real escape characters, only when stdout is a terminal and `NO_COLOR` is unset, and the log file never
   contains escape codes. The literal `\n` in "Configuring NIC" lines is replaced by a blank log line.
+
 ## [Unreleased] - 2026-10-08
 
 ### Fixed
@@ -160,7 +178,11 @@
 
 ### Fixed
 
-- **Apache configuration initialization** (testpoint-entrypoint-wrapper.sh v1.2.0): Fixed container startup failure when using bind-mounted `/etc/apache2` with Let's Encrypt certificates. The wrapper script now initializes missing Apache configuration files on container startup, ensuring Apache can start properly. Includes automatic directory structure creation, module enablement, and configuration validation. Resolves issue where fresh deployments would fail with "Could not open configuration file /etc/apache2/apache2.conf: No such file or directory".
+- **Apache configuration initialization** (testpoint-entrypoint-wrapper.sh v1.2.0): Fixed container startup failure
+  when using bind-mounted `/etc/apache2` with Let's Encrypt certificates. The wrapper script now initializes missing
+  Apache configuration files on container startup, ensuring Apache can start properly. Includes automatic directory
+  structure creation, module enablement, and configuration validation. Resolves issue where fresh deployments would
+  fail with "Could not open configuration file /etc/apache2/apache2.conf: No such file or directory".
 
 ### Changed
 

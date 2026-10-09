@@ -1425,9 +1425,11 @@ restart it confirms the container was actually recreated.
 The testpoint runs with 512 MB of shared memory (`shm_size: 512m` in the compose files, `--shm-size=512m` in
 the systemd unit) because PostgreSQL inside the container needs more than the 64 MB default.
 
-### Report-only mode (safe, no changes)
+### Report-only mode (no configuration changes)
 
-Run without flags to see what would change:
+Run without flags to see what would change. Report-only mode (and `--dry-run`) does not change the compose file,
+config files, systemd units, resolver settings or the running container, but Phase 1 still refreshes the helper
+scripts in `tools_scripts/` to their latest versions, so the report uses the current templates and checks:
 
 ```bash
 /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh
