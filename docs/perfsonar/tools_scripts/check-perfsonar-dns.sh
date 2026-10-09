@@ -6,6 +6,10 @@ IFS=$'\n\t'
 # Quick forward/reverse DNS consistency check for addresses in
 # /etc/perfSONAR-multi-nic-config.conf
 #
+# Version: 1.2.1 - 2026-10-09
+#   - Only warn about a missing AAAA record for names with a public IPv4
+#     address (internal names such as psum01.local on 10.x are fine).
+#   - Print the list of checked names on one line.
 # Version: 1.2.0 - 2026-10-08
 #   - Default mode also checks the published DNS records of the host's names
 #     (PTR names of configured addresses + hostname -f): every A/AAAA record
@@ -30,7 +34,7 @@ IFS=$'\n\t'
 # Depends on: dig (bind-utils on EL, dnsutils on Debian/Ubuntu); python3 and
 #             nmcli for the resolver checks
 
-VERSION="1.2.0"
+VERSION="1.2.1"
 PROG_NAME="$(basename "$0")"
 
 usage() {
@@ -403,7 +407,16 @@ check_published_records() {
         fi
       done < <(lookup_records "$name" "$rtype")
     done
-    if [ -n "$local_v6" ] && [ "$found_aaaa" -eq 0 ]; then
+    # Only names that are reachable from outside (a public IPv4 A record)
+    # are expected to publish AAAA as well.
+    local has_public_v4=0
+    if lookup_records "$name" A | grep -q . && command -v python3 >/dev/null 2>&1; then
+      if lookup_records "$name" A | python3 -I -c '
+import ipaddress, sys
+sys.exit(0 if any(ipaddress.ip_address(l.strip()).is_global for l in sys.stdin if l.strip()) else 1)
+'; then has_public_v4=1; fi
+    fi
+    if [ -n "$local_v6" ] && [ "$found_aaaa" -eq 0 ] && [ "$has_public_v4" -eq 1 ]; then
       echo "WARNING: this host has global IPv6 ($(echo "$local_v6" | paste -sd' ' -)) but $name has no AAAA record;"
       echo "  remote hosts will only test to it over IPv4. Ask your DNS admins to add the AAAA record."
     fi
@@ -427,7 +440,7 @@ done
 add_host_name "$(hostname -f 2>/dev/null || true)"
 if [ "${#HOST_NAMES[@]}" -gt 0 ]; then
   echo
-  echo "Published DNS records for: ${HOST_NAMES[*]}"
+  echo "Published DNS records for: $(printf '%s ' "${HOST_NAMES[@]}")"
   rec_problems=0
   check_published_records || rec_problems=$?
   errors=$((errors + rec_problems))

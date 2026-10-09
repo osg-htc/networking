@@ -1409,10 +1409,14 @@ chmod 0755 /tmp/update-perfsonar-deployment.sh
 | ----- | ------ | ------- |
 | 1 — Scripts | Re-downloads all helper scripts from the repository | Always |
 | 2 — Config files | Installs or updates `conf/node_exporter.defaults` (and future config files) | Report only; `--apply` to write |
-| 3 — Compose file | Detects your compose variant and compares with the latest template | Report only; `--apply` to replace |
+| 3 — Compose file | Detects your compose variant and compares with the latest template. Volume lines you enabled that the template leaves commented out (e.g. the `node_exporter.defaults` workaround) are kept; the file is not replaced if a bind-mount source is missing on the host | Report only; `--apply` to replace |
 | SELinux fix | On LE deployments with SELinux Enforcing: detects stale private MCS labels on `/etc/letsencrypt` and `/var/www/html` and resets them to shared `container_file_t:s0`; immediately restarts Apache inside the container if needed | Only with `--apply` |
 | 4 — Container | Restarts the testpoint if compose, config or the service unit changed. On hosts with `perfsonar-testpoint.service` (orchestrator / `install-systemd-units.sh` installs) this is always `systemctl restart`, never `podman-compose` | Only with `--restart` |
 | 5 — Systemd | Refreshes systemd units and auto-update timer | Only with `--update-systemd` |
+
+Hosts whose `perfsonar-testpoint.service` runs `podman-compose up` (installed with the older
+`install-systemd-service.sh`) stay compose-managed: the updater keeps that unit and restarts through it,
+and `install-systemd-units.sh` refuses to replace it unless you pass `--convert-from-compose`.
 
 ### Report-only mode (safe, no changes)
 

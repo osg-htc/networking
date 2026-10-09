@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.8.0 - 2026-10-09
+# Version: 1.9.0 - 2026-10-09
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,20 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.9.0 - 2026-10-09
+#   - Recognise the older compose-wrapper unit (install-systemd-service.sh:
+#     ExecStart=podman-compose up -d). On such hosts docker-compose.yml defines
+#     the containers (incl. certbot), so the unit is NOT regenerated as a
+#     direct 'podman run' unit (that silently dropped Let's Encrypt on
+#     psum01.aglt2.org in testing); only direct units get the stale-unit
+#     checks. Restarts still go through systemd.
+#   - Phase 3 keeps local customisations when refreshing docker-compose.yml:
+#     a volume line that is active in the current file but commented out in
+#     the template (e.g. the node_exporter.defaults cpufreq workaround) is
+#     re-enabled in the new file.
+#   - Phase 3 refuses to install a compose file whose bind-mount sources are
+#     missing on the host (podman would fail to start), and explains the
+#     switch from a whole /etc/apache2 mount to the single default-ssl.conf.
 # Version: 1.8.0 - 2026-10-09
 #   - Treat a testpoint unit that bind-mounts the host's /run/dbus (breaks the
 #     container's own dbus.socket) or has no container health check as stale,
@@ -112,7 +126,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.8.0"
+VERSION="1.9.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -129,6 +143,7 @@ DRY_RUN=false
 TOOLS_SRC="https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts"
 CHANGES_FOUND=0
 SYSTEMD_MANAGED=false
+UNIT_KIND="none"      # direct (podman run) | compose (podman-compose) | other | none
 TESTPOINT_UNIT="/etc/systemd/system/perfsonar-testpoint.service"
 CERTBOT_UNIT="/etc/systemd/system/perfsonar-certbot.service"
 COMPOSE_CHANGED=false
@@ -342,7 +357,16 @@ preflight() {
         # through systemd.
         if [[ -f "$TESTPOINT_UNIT" ]]; then
             SYSTEMD_MANAGED=true
-            info "Managed by:        systemd ($(basename "$TESTPOINT_UNIT"))"
+            if grep -q 'podman run' "$TESTPOINT_UNIT"; then
+                UNIT_KIND="direct"
+                info "Managed by:        systemd ($(basename "$TESTPOINT_UNIT"), podman run)"
+            elif grep -q 'podman-compose\|docker compose\|docker-compose' "$TESTPOINT_UNIT"; then
+                UNIT_KIND="compose"
+                info "Managed by:        systemd ($(basename "$TESTPOINT_UNIT") → $COMPOSE_CMD; containers defined in docker-compose.yml)"
+            else
+                UNIT_KIND="other"
+                info "Managed by:        systemd ($(basename "$TESTPOINT_UNIT"), unrecognised unit)"
+            fi
         else
             info "Managed by:        $COMPOSE_CMD"
         fi
@@ -542,7 +566,12 @@ phase3_container_compose() {
         return
     fi
 
-    if cmp -s "$COMPOSE_FILE" "$template_file"; then
+    # Build the candidate: the template, with local customisations kept.
+    local candidate
+    candidate=$(mktemp)
+    build_compose_candidate "$COMPOSE_FILE" "$template_file" "$candidate"
+
+    if cmp -s "$COMPOSE_FILE" "$candidate"; then
         ok "  docker-compose.yml matches the latest template"
     else
         changed "  docker-compose.yml differs from latest $template_name"
@@ -551,8 +580,29 @@ phase3_container_compose() {
         if command -v diff >/dev/null 2>&1; then
             echo
             info "  Differences (current → new):"
-            diff --unified=3 "$COMPOSE_FILE" "$template_file" 2>/dev/null | head -60 | sed 's/^/    /' || true
+            diff --unified=3 "$COMPOSE_FILE" "$candidate" 2>/dev/null | head -80 | sed 's/^/    /' || true
             echo
+        fi
+
+        if grep -qE '^[[:space:]]*-[[:space:]]*/etc/apache2:/etc/apache2' "$COMPOSE_FILE" && \
+           ! grep -qE '^[[:space:]]*-[[:space:]]*/etc/apache2:/etc/apache2' "$candidate"; then
+            info "  Note: the new file mounts only /etc/apache2/sites-available/default-ssl.conf"
+            info "        from the host instead of all of /etc/apache2; the container's own Apache"
+            info "        configuration is used for everything else. Host-side Apache changes"
+            info "        outside default-ssl.conf will no longer apply."
+        fi
+
+        local missing_src
+        missing_src=$(compose_missing_sources "$candidate")
+        if [[ -n "$missing_src" ]]; then
+            warn "  The new file bind-mounts host paths that do not exist:"
+            while IFS= read -r m; do warn "    - $m"; done <<< "$missing_src"
+            warn "  Not replacing docker-compose.yml (podman would refuse to start the container)."
+            warn "  Create them first (Let's Encrypt hosts: seed_testpoint_host_dirs.sh --with-le)."
+            COMPOSE_CHANGED=false
+            rm -f "$candidate"
+            echo
+            return
         fi
 
         if [[ "$APPLY" == true && "$DRY_RUN" != true ]]; then
@@ -560,7 +610,7 @@ phase3_container_compose() {
                 local backup
                 backup="${COMPOSE_FILE}.bak.$(date -u +%Y%m%dT%H%M%SZ)"
                 cp -p "$COMPOSE_FILE" "$backup"
-                cp -p "$template_file" "$COMPOSE_FILE"
+                cat "$candidate" > "$COMPOSE_FILE"
                 info "    → Updated $COMPOSE_FILE (backup: $backup)"
             else
                 info "    → Skipped compose update"
@@ -568,7 +618,41 @@ phase3_container_compose() {
             fi
         fi
     fi
+    rm -f "$candidate"
     echo
+}
+
+# Copy template $2 to $3, re-enabling any volume line that is commented out in
+# the template but active in the current file $1 (local opt-ins such as the
+# node_exporter.defaults cpufreq workaround).
+build_compose_candidate() {
+    local current="$1" template="$2" out="$3" line active body
+    : > "$out"
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" =~ ^([[:space:]]*)#[[:space:]]*(-[[:space:]]+[^[:space:]].*)$ ]]; then
+            body="${BASH_REMATCH[2]}"
+            active="${BASH_REMATCH[1]}${body}"
+            if awk -v b="$body" '{ t = $0; sub(/^[ \t]+/, "", t); sub(/[ \t]+$/, "", t); if (t == b) f = 1 } END { exit !f }' "$current" 2>/dev/null; then
+                printf '%s\n' "$active" >> "$out"
+                info "  Keeping local setting from current file: ${body}"
+                continue
+            fi
+        fi
+        printf '%s\n' "$line" >> "$out"
+    done < "$template"
+}
+
+# Print host paths bind-mounted by compose file $1 that do not exist.
+compose_missing_sources() {
+    local f="$1" src
+    grep -E '^[[:space:]]*-[[:space:]]*(\./|/)[^:[:space:]]+:' "$f" 2>/dev/null \
+        | sed -E 's/^[[:space:]]*-[[:space:]]*//; s/:.*$//' \
+        | while IFS= read -r src; do
+            case "$src" in
+                ./*) src="$BASE_DIR/${src#./}" ;;
+            esac
+            [[ -e "$src" ]] || echo "$src"
+        done
 }
 
 phase3_toolkit_rpms() {
@@ -749,6 +833,17 @@ fix_stale_service_file() {
     fi
 
     info "Checking systemd service file for required volume mounts..."
+
+    # Only units written by install-systemd-units.sh ('podman run ...') carry
+    # their own mounts and health check. A compose-wrapper unit just runs
+    # podman-compose; its containers, mounts and health checks come from
+    # docker-compose.yml (Phase 3). Never convert it to a direct unit here:
+    # that would drop compose-defined services such as certbot.
+    if [[ "$UNIT_KIND" != "direct" ]]; then
+        ok "  Unit runs $COMPOSE_CMD ($UNIT_KIND); mounts and health check come from docker-compose.yml"
+        echo
+        return
+    fi
 
     # Stale mounts from install-systemd-units.sh < 1.4.0: sources that do not
     # exist on the host make podman refuse to start (exit 125), and a whole
