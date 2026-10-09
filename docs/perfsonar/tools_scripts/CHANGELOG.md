@@ -1,3 +1,20 @@
+## [Unreleased] - 2026-10-08 (perfSONAR-pbr-nm.sh)
+
+### Fixed
+
+- **DNS lost after static conversion** (`perfSONAR-pbr-nm.sh` v1.0.2): the script switched connections to
+  `ipv4.method manual` with address and gateway but never set `ipv4.dns`. On hosts whose DNS came from DHCP, the
+  servers disappeared the next time the connection was activated or at reboot, leaving `/etc/resolv.conf` with no
+  `nameserver` lines (seen on test01.swt2.uta.edu: DNS and chrony both failed). The DNS servers and search domains in
+  use at start-up (per device, then `/etc/resolv.conf`) are now written into every profile that has none; an optional
+  `DNS_SERVERS=(...)` in the config overrides the fallback for the default-route NIC and is written by the
+  generator. The script warns if no configured connection ends up with DNS servers.
+- `perfSONAR-pbr-nm.sh` v1.0.1: the "WARNING: This script will REMOVE ALL existing NetworkManager connections" banner
+  was printed in the default in-place mode, which keeps existing connections. It is now shown only with
+  `--rebuild-all`; in-place mode prints an accurate note instead.
+- `perfSONAR-pbr-nm.sh` v1.0.1: colour codes were written literally (`\033[0;31m...`) to the terminal and log. Colours
+  now use real escape characters, only when stdout is a terminal and `NO_COLOR` is unset, and the log file never
+  contains escape codes. The literal `\n` in "Configuring NIC" lines is replaced by a blank log line.
 ## [Unreleased] - 2026-10-08
 
 ### Fixed
