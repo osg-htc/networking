@@ -1362,10 +1362,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#report-only-mode-safe-no-changes" class="md-nav__link">
+  <a href="#report-only-mode-no-configuration-changes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Report-only mode (safe, no changes)
+        Report-only mode (no configuration changes)
       
     </span>
   </a>
@@ -4357,8 +4357,10 @@ back after a reboot); with <code>--apply</code> it moves <code>--shm-size</code>
 restart it confirms the container was actually recreated.</p>
 <p>The testpoint runs with 512 MB of shared memory (<code>shm_size: 512m</code> in the compose files, <code>--shm-size=512m</code> in
 the systemd unit) because PostgreSQL inside the container needs more than the 64 MB default.</p>
-<h3 id="report-only-mode-safe-no-changes">Report-only mode (safe, no changes)<a class="headerlink" href="#report-only-mode-safe-no-changes" title="Permanent link">&para;</a></h3>
-<p>Run without flags to see what would change:</p>
+<h3 id="report-only-mode-no-configuration-changes">Report-only mode (no configuration changes)<a class="headerlink" href="#report-only-mode-no-configuration-changes" title="Permanent link">&para;</a></h3>
+<p>Run without flags to see what would change. Report-only mode (and <code>--dry-run</code>) does not change the compose file,
+config files, systemd units, resolver settings or the running container, but Phase 1 still refreshes the helper
+scripts in <code>tools_scripts/</code> to their latest versions, so the report uses the current templates and checks:</p>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh
 </code></pre></div>
 <h3 id="full-update-with-systemd-refresh">Full update with systemd refresh<a class="headerlink" href="#full-update-with-systemd-refresh" title="Permanent link">&para;</a></h3>
