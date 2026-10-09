@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.6.0 - 2026-09-29
+# Version: 1.7.0 - 2026-10-08
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,11 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.7.0 - 2026-10-08
+#   - Check for the parallel A/AAAA DNS query stall (check-perfsonar-dns.sh
+#     --check-resolver). With --apply, fix it persistently via NetworkManager
+#     (--fix-resolver) and restart the testpoint container (with --restart)
+#     so it picks up the new /etc/resolv.conf.
 # Version: 1.6.0 - 2026-09-29
 #   - Hosts managed by systemd (perfsonar-testpoint.service present, as
 #     installed by the orchestrator / install-systemd-units.sh) are now always
@@ -102,7 +107,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.6.0"
+VERSION="1.7.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -124,6 +129,7 @@ CERTBOT_UNIT="/etc/systemd/system/perfsonar-certbot.service"
 COMPOSE_CHANGED=false
 CONFIG_CHANGED=false
 SERVICE_FILE_CHANGED=false
+RESOLVER_CHANGED=false
 RPM_UPDATES_AVAILABLE=false
 
 # --- Colours (disabled when piped) ----------------------------------------
@@ -881,14 +887,14 @@ restart_via_systemd() {
 phase4_container_restart() {
     info "Phase 4: Container management..."
 
-    if [[ "$COMPOSE_CHANGED" != true && "$CONFIG_CHANGED" != true && "$SERVICE_FILE_CHANGED" != true ]]; then
-        ok "  No compose, config, or service file changes detected — container restart not needed"
+    if [[ "$COMPOSE_CHANGED" != true && "$CONFIG_CHANGED" != true && "$SERVICE_FILE_CHANGED" != true && "$RESOLVER_CHANGED" != true ]]; then
+        ok "  No compose, config, service file or resolver changes detected — container restart not needed"
         echo
         return
     fi
 
     if [[ "$RESTART" != true ]]; then
-        if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true ]]; then
+        if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true || "$RESOLVER_CHANGED" == true ]]; then
             warn "  Changes were applied but container was NOT restarted."
             warn "  Run with --restart to recreate the container, or manually:"
             print_container_restart_hint "    " | while IFS= read -r line; do warn "$line"; done
@@ -1040,7 +1046,7 @@ print_summary() {
         info "Update complete. Changes were applied."
         local needs_restart=false
         if [[ "$DEPLOY_TYPE" == "container" ]]; then
-            if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true ]]; then
+            if [[ "$COMPOSE_CHANGED" == true || "$CONFIG_CHANGED" == true || "$SERVICE_FILE_CHANGED" == true || "$RESOLVER_CHANGED" == true ]]; then
                 needs_restart=true
             fi
         else
@@ -1094,6 +1100,49 @@ maybe_relaunch_if_self_updated() {
     exec "$new_script" "${ORIGINAL_ARGS[@]}"
 }
 
+# --- DNS resolver: parallel A/AAAA query stall -----------------------------
+#
+# glibc sends A and AAAA queries in parallel from one socket. If one reply is
+# dropped (e.g. conntrack race with a stateful firewall) every dual-stack
+# lookup waits for the 5 s resolver timeout and pScheduler (2-3 s timeouts)
+# reports the host as unresolvable. check-perfsonar-dns.sh detects this and,
+# with --fix-resolver, sets single-request-reopen through NetworkManager.
+
+fix_dns_resolver() {
+    local checker="$TOOLS_DIR/check-perfsonar-dns.sh"
+    if [[ ! -f "$checker" ]]; then
+        return
+    fi
+    if ! grep -q -- '--fix-resolver' "$checker" 2>/dev/null; then
+        return
+    fi
+    command -v python3 >/dev/null 2>&1 || return 0
+
+    info "Checking DNS resolver for the parallel A/AAAA query stall..."
+    local rc=0
+    if [[ "$APPLY" == true && "$DRY_RUN" != true ]]; then
+        bash "$checker" --fix-resolver --no-restart 2>&1 | sed 's/^/    /' || rc=$?
+    else
+        bash "$checker" --check-resolver 2>&1 | sed 's/^/    /' || rc=$?
+    fi
+    case "$rc" in
+        0)  ok "  Resolver OK" ;;
+        10) changed "  Resolver fixed (single-request-reopen set via NetworkManager)"
+            CHANGES_FOUND=1
+            if [[ "$DEPLOY_TYPE" == "container" ]]; then
+                RESOLVER_CHANGED=true
+            fi ;;
+        1)  changed "  Parallel-query DNS stall detected"
+            CHANGES_FOUND=1
+            if [[ "$APPLY" != true ]]; then
+                warn "  Run with --apply to fix it."
+            fi ;;
+        5)  warn "  DNS lookups are slow for another reason — check the nameservers" ;;
+        *)  warn "  Resolver check could not run (exit $rc)" ;;
+    esac
+    echo
+}
+
 # --- Main ------------------------------------------------------------------
 
 main() {
@@ -1106,6 +1155,7 @@ main() {
     fix_stale_service_file
     phase3_update
     fix_container_selinux_labels
+    fix_dns_resolver
     phase4_restart
     phase5_systemd
     print_summary

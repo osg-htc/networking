@@ -4459,6 +4459,24 @@ Do <strong>not</strong> just create empty <code>/etc/apache2</code> — mounting
 container's own Apache configuration.</p>
 </details>
 <details class="failure">
+<summary>pscheduler troubleshoot: 'Not resolvable or timed out' although the host's DNS is correct</summary>
+<p><strong>Symptoms:</strong> <code>pscheduler troubleshoot --quick</code> reports <code>Checking that host "&lt;fqdn&gt;" resolves... Failed</code>
+or <code>Looking for pScheduler... Failed. Resolving timed out after 3000 milliseconds</code>, while <code>dig</code> and
+<code>getent ahosts &lt;fqdn&gt;</code> answer instantly. A dual-stack lookup takes about 5 seconds:</p>
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import socket,time; t=time.time(); socket.getaddrinfo('</span><span class="k">$(</span>hostname<span class="w"> </span>-f<span class="k">)</span><span class="s2">', 0); print(round(time.time()-t, 3), 'seconds')"</span>
+</code></pre></div>
+<p><strong>Cause:</strong> glibc sends the A and AAAA queries in parallel from one socket and one reply is dropped
+(typically a connection-tracking race in a stateful firewall), so every lookup waits for the 5 s
+resolver timeout. pScheduler gives up after 2–3 s. <code>getent ahosts</code> is not affected on IPv4-only hosts
+because it skips the AAAA query.</p>
+<p><strong>Fix:</strong> detect and fix it persistently (sets <code>single-request-reopen</code> on the active NetworkManager
+connections and restarts the testpoint container so it picks up the new <code>/etc/resolv.conf</code>):</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/check-perfsonar-dns.sh<span class="w"> </span>--fix-resolver
+</code></pre></div>
+<p>Use <code>--check-resolver</code> to only report. The orchestrator (step 7.5) and
+<code>update-perfsonar-deployment.sh --apply</code> run this check automatically.</p>
+</details>
+<details class="failure">
 <summary>Container crashes after reboot with exit code 255</summary>
 <p><strong>Symptoms:</strong> Containers run fine when started manually but crash-loop after host reboot. Logs show repeated restarts
 with exit code 255.</p>
