@@ -1,6 +1,36 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-09 (Let's Encrypt renewal fixes)
+
+### Fixed
+
+Found while updating psmsu01.aglt2.org (certificate expired since 28 July) and psum05.aglt2.org:
+
+- **Let's Encrypt mode not detected** (`install-systemd-units.sh` v1.6.0): only an existing `perfsonar-certbot.service`
+  counted, so the updater regenerated psmsu01's unit as testpoint-only and Apache fell back to a self-signed
+  certificate. LE mode is now also detected from the existing unit's `/etc/letsencrypt` mount, or from a certbot
+  service in `docker-compose.yml` plus a certificate in `/etc/letsencrypt/live`.
+- **Renewed certificates never loaded** (`install-systemd-units.sh` v1.6.0): the certbot unit lacked
+  `--security-opt label=disable` (the compose files have `security_opt: label=disable`), so SELinux denied executing
+  the deploy hook (exit 126) and connecting to the Podman socket. The unit also dropped `--systemd=always` (certbot
+  does not run systemd) and uses `Wants=` instead of `Requires=` on the testpoint, so a testpoint restart no longer
+  stops certbot.
+- **podman.socket never enabled**: the deploy hook needs `/run/podman/podman.sock`. `install-systemd-units.sh` enables
+  it in LE mode, and the updater enables it with `--apply`.
+- **Deploy hook restarted the container** (`certbot-deploy-hook.sh` v2.1.0): it now reloads Apache inside the testpoint
+  (`systemctl reload apache2`, then `apachectl graceful`) through the Podman API and restarts the container only if
+  that fails. A restart through the API made the systemd unit's `podman run` exit, so systemd removed the container
+  and started a new one after 10 s.
+- **Unmanaged certbot container from the orchestrator** (`perfSONAR-orchestrator.sh` v1.1.8): Option B started certbot
+  with a separate `podman run -d`, outside systemd; it now restarts `perfsonar-certbot.service`.
+- **Updater Let's Encrypt checks** (`update-perfsonar-deployment.sh` v1.11.0): repairs a missing or outdated certbot
+  unit and enables `podman.socket` with `--apply`; warns when certbot is not running and when a certificate is expired
+  or expires within 14 days. In report-only mode Phase 4 no longer says "restart not needed" when changes were
+  reported.
+- Install guide: deploy-hook requirements, a troubleshooting entry for an expired certificate with certbot not
+  running, and updated steps for "Certificate not loaded after renewal".
+
 ## [Unreleased] - 2026-10-09 (updater report-mode messages)
 
 ### Fixed

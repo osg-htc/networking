@@ -900,13 +900,19 @@ podman start certbot
 
 The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.
 
-**Automatic Container Restart:** After each successful certificate renewal, certbot automatically runs
-a deploy hook script (`certbot-deploy-hook.sh`) that gracefully restarts the `perfsonar-testpoint`
-container. This ensures the new certificates are loaded without manual intervention. The deploy hook
-uses the mounted Podman socket (`/run/podman/podman.sock`) to communicate with the host's container
-runtime via the Podman REST API (using Python, since the `podman` CLI is not present in the certbot
-image). On EL9 hosts with SELinux enforcing, the certbot service requires `security_opt: label=disable`
-to access the socket.
+**Automatic certificate reload:** After each successful certificate renewal, certbot runs a deploy hook script
+(`certbot-deploy-hook.sh`) that reloads Apache inside the `perfsonar-testpoint` container (`systemctl reload apache2`),
+so the new certificate is used without restarting the container. Only if the reload fails does the hook restart the
+container. The deploy hook uses the mounted Podman socket (`/run/podman/podman.sock`) to reach the host's container
+runtime through the Podman REST API (using Python, since the `podman` CLI is not present in the certbot image).
+This needs:
+
+- `podman.socket` enabled on the host (`systemctl enable --now podman.socket`; `install-systemd-units.sh --with-certbot`
+  and `update-perfsonar-deployment.sh --apply` do this);
+- SELinux label confinement disabled for the certbot container: `security_opt: label=disable` in the compose file,
+  `--security-opt label=disable` in `perfsonar-certbot.service` (written by `install-systemd-units.sh` v1.6.0 and
+  later). Without it, SELinux denies executing the hook and connecting to the socket, so renewed certificates are
+  never loaded.
 
 **Note:** The certbot container in this setup uses **host networking mode** (via `network_mode: host` in the compose
 file) so it can bind directly to port 80 for HTTP-01 challenges during renewals. This works because the perfsonar-
@@ -918,8 +924,8 @@ Test renewal with a dry-run:
 podman exec certbot certbot renew --dry-run
 ```
 
-If successful, certificates will auto-renew before expiry, and the testpoint will be automatically restarted to load the
-new certificates. You can verify this behavior by checking the certbot logs after a renewal:
+If successful, certificates will auto-renew before expiry, and Apache in the testpoint will load the new certificates
+automatically. You can verify this behavior by checking the certbot logs after a renewal:
 
 ```bash
 podman logs certbot 2>&1 | grep -A5 "deploy hook"
@@ -1413,6 +1419,7 @@ chmod 0755 /tmp/update-perfsonar-deployment.sh
 | SELinux fix | On LE deployments with SELinux Enforcing: detects stale private MCS labels on `/etc/letsencrypt` and `/var/www/html` and resets them to shared `container_file_t:s0`; immediately restarts Apache inside the container if needed | Only with `--apply` |
 | 4 — Container | Restarts the testpoint if compose, config or the service unit changed. On hosts with `perfsonar-testpoint.service` (orchestrator / `install-systemd-units.sh` installs) this is always `systemctl restart`, never `podman-compose` | Only with `--restart` |
 | 5 — Systemd | Refreshes systemd units and auto-update timer | Only with `--update-systemd` |
+| Let's Encrypt | On LE hosts: repairs a missing or outdated certbot unit (SELinux `label=disable`), enables `podman.socket`, warns when certbot is not running or a certificate is expired or expires within 14 days | Repairs only with `--apply` |
 
 Hosts whose `perfsonar-testpoint.service` runs `podman-compose up` (installed with the older
 `install-systemd-service.sh`) stay compose-managed: the updater keeps that unit and restarts through it,
@@ -1841,6 +1848,26 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
     - DNS not propagated: Wait for DNS changes to propagate globally
     - Rate limiting: Let's Encrypt has rate limits; wait if you've hit them
 
+??? failure "Let's Encrypt certificate expired: certbot is not running"
+
+    **Symptoms:** `openssl s_client -connect <fqdn>:443` shows an expired Let's Encrypt certificate;
+    `podman ps -a` shows the `certbot` container exited long ago, or there is no `perfsonar-certbot.service`.
+    `update-perfsonar-deployment.sh` (v1.11.0 and later) reports this under "Let's Encrypt checks".
+
+    **Cause:** On hosts whose systemd unit runs the testpoint with `podman run`, certbot needs its own unit. Hosts
+    that never had `perfsonar-certbot.service` (or where the old certbot container stopped) never renew the
+    certificate.
+
+    **Fix:**
+
+    ```bash
+    /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply --restart --yes
+    ```
+
+    This regenerates the units with `install-systemd-units.sh --force --with-certbot`, enables `podman.socket` and
+    restarts certbot. certbot renews an expired certificate right away (standalone HTTP-01 on port 80, which the
+    testpoint's Apache leaves free); the deploy hook then reloads Apache. Check with `podman logs --tail 30 certbot`.
+
 ??? failure "Certificate not loaded after renewal"
 
     **Symptoms:** Old certificate still in use after automatic renewal.
@@ -1854,11 +1881,14 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
     # Verify deploy hook is configured
     podman logs certbot 2>&1 | grep "deploy hook"
 
-    # Check if container restarted
-    podman ps --format 'table {{.Names}}\t{{.Status}}'
+    # Run the deploy hook by hand (reloads Apache in the testpoint)
+    podman exec certbot /etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh
 
-    # Manually restart testpoint
-    podman restart perfsonar-testpoint
+    # Look for SELinux denials of the hook or the Podman socket
+    ausearch -m avc -ts recent | grep -i certbot
+
+    # Load the new certificate by hand
+    podman exec perfsonar-testpoint systemctl reload apache2
 
     ```
 
@@ -1866,10 +1896,14 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
 
     - Verify deploy hook script exists and is executable: `/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh`
     - Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
-    - Verify Podman socket is mounted in certbot container: `podman exec certbot ls /run/podman/podman.sock`
-    - Verify `security_opt: label=disable` is set on the certbot service in `docker-compose.yml` (required on EL9/SELinux hosts)
+    - Verify Podman socket is mounted in certbot container: `podman exec certbot ls /run/podman/podman.sock`, and that
+      `podman.socket` is active on the host: `systemctl is-active podman.socket` (enable it with
+      `systemctl enable --now podman.socket`)
+    - `Permission denied` for the hook or the socket (exit code 126, or `[Errno 13]`): the certbot container needs
+      `security_opt: label=disable` (compose) or `--security-opt label=disable` (`perfsonar-certbot.service`). Run
+      `update-perfsonar-deployment.sh --apply --restart` to regenerate an old certbot unit.
     - Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
-    - Manually restart testpoint after renewals if deploy hook fails: `podman restart perfsonar-testpoint`
+    - Load the certificate by hand if the deploy hook fails: `podman exec perfsonar-testpoint systemctl reload apache2`
 
     **Note:** Certbot automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are
     renewed. The deploy hook uses the Podman REST API via Python (not the `podman` CLI, which is absent from the Alpine-based certbot image).

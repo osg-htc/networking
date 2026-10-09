@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.1.8 - 2026-10-09
+#   - Option B: after issuing the certificate, (re)start the systemd-managed
+#     perfsonar-certbot.service instead of a separate 'podman run -d certbot'
+#     container that systemd did not manage (it was not restarted after a
+#     reboot, and the unit's container replaced it). Requires
+#     install-systemd-units.sh >= 1.6.0 (certbot unit with label=disable,
+#     podman.socket enabled).
 # Version: 1.1.7 - 2026-10-08
 #   - New step 7.5 (after nftables/SELinux): check-perfsonar-dns.sh
 #     --fix-resolver detects the parallel A/AAAA DNS query stall (one reply
@@ -396,6 +403,8 @@ step_deploy_option_b() {
       ss -tnlp | grep ':80 ' | tee -a "$LOG_FILE" || true
     fi
     
+    # Free port 80 for the one-time standalone issuance.
+    run systemctl stop perfsonar-certbot.service || true
     run podman stop certbot || true
     run mkdir -p /etc/letsencrypt /var/www/html
     
@@ -428,18 +437,15 @@ step_deploy_option_b() {
     fi
     
     run systemctl restart perfsonar-testpoint || true
-    # Start the certbot renewal container with Podman socket for the deploy hook
-    run podman rm -f certbot || true
-    run podman run -d --name certbot --net=host \
-      --security-opt label=disable \
-      -v /etc/letsencrypt:/etc/letsencrypt:z \
-      -v /var/www/html:/var/www/html:z \
-      -v /run/podman/podman.sock:/run/podman/podman.sock:ro \
-      -v "/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro" \
-      --entrypoint /bin/sh \
-      docker.io/certbot/certbot:latest \
-      '-c' 'trap exit TERM; while :; do certbot renew --deploy-hook /etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh; sleep 12h & wait ${!}; done' \
-      || log "WARNING: certbot renewal container failed to start; set it up manually."
+    # Renewals run in the systemd-managed certbot container (unit written by
+    # install-systemd-units.sh --with-certbot); its deploy hook reloads Apache
+    # in the testpoint through the Podman socket.
+    run systemctl enable --now podman.socket || true
+    run systemctl reset-failed perfsonar-certbot.service || true
+    if ! run systemctl restart perfsonar-certbot.service; then
+      log "WARNING: perfsonar-certbot.service failed to start; check: systemctl status perfsonar-certbot.service"
+    fi
+    sleep 5
     run podman exec certbot certbot renew --dry-run || true
   else
     log "Skipping certificate issuance (missing --fqdn/--email or no FQDNs detected). You can do this later."
