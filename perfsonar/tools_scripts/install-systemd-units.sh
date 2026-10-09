@@ -17,8 +17,12 @@
 #                         /etc/letsencrypt and the single Apache default-ssl.conf
 #                         file) to the testpoint unit. Without this flag the
 #                         testpoint unit mounts only what Option A needs.
-#                         If perfsonar-certbot.service already exists, LE mode
-#                         is kept automatically unless --no-certbot is given.
+#                         LE mode is also chosen automatically (unless
+#                         --no-certbot is given) when perfsonar-certbot.service
+#                         exists, when the existing testpoint unit mounts
+#                         /etc/letsencrypt, or when docker-compose.yml has a
+#                         certbot service and /etc/letsencrypt/live has a
+#                         certificate. LE mode also enables podman.socket.
 #   --no-certbot          Force Option A (testpoint-only) mounts even if a
 #                         certbot unit from a previous install is present.
 #   --convert-from-compose
@@ -43,10 +47,25 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.5.2
+# Version: 1.6.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.6.0 - Let's Encrypt fixes (found on psmsu01/psum05.aglt2.org):
+#         - Detect LE mode from the existing testpoint unit's /etc/letsencrypt
+#           mount, or from a certbot service in docker-compose.yml plus a
+#           certificate in /etc/letsencrypt/live. Before, only an existing
+#           perfsonar-certbot.service counted, so a host whose certbot unit
+#           was missing was switched to testpoint-only mounts.
+#         - Certbot unit: --security-opt label=disable (as in the compose
+#           files). Without it SELinux denied executing the bind-mounted
+#           deploy hook and connecting to the Podman socket, so renewed
+#           certificates were never loaded by Apache. Dropped --systemd=always
+#           (the certbot image does not run systemd). Wants= instead of
+#           Requires= perfsonar-testpoint.service, so a testpoint restart no
+#           longer stops certbot (and its running deploy hook).
+#         - Enable podman.socket in LE mode; the deploy hook needs
+#           /run/podman/podman.sock. Nothing enabled it before.
 #   1.5.2 - Run the testpoint with --shm-size=512m: PostgreSQL inside the
 #           container (pScheduler) runs out of shared memory with the 64 MB
 #           default. Matches shm_size: 512m in the compose files.
@@ -203,6 +222,23 @@ if [[ -f "$TESTPOINT_SERVICE" ]] && grep -q 'podman-compose\|docker compose\|doc
     fi
 fi
 
+# Keep Let's Encrypt mode when the existing direct unit already mounts the
+# certificates (e.g. a host whose certbot unit is missing or was never made).
+if [[ "$WITH_CERTBOT" != "true" && "$NO_CERTBOT" != "true" && -f "$TESTPOINT_SERVICE" ]] && \
+   grep -qE -- '-v /etc/letsencrypt:' "$TESTPOINT_SERVICE"; then
+    echo "==> Existing $TESTPOINT_SERVICE mounts /etc/letsencrypt — keeping Let's Encrypt (Option B) mounts"
+    echo "    (pass --no-certbot to switch this host to testpoint-only mounts)"
+    WITH_CERTBOT=true
+fi
+# A Let's Encrypt compose file plus an issued certificate also means LE mode.
+if [[ "$WITH_CERTBOT" != "true" && "$NO_CERTBOT" != "true" ]] && \
+   grep -qE '^[[:space:]]*certbot:' "$INSTALL_DIR/docker-compose.yml" 2>/dev/null && \
+   compgen -G '/etc/letsencrypt/live/*/cert.pem' >/dev/null; then
+    echo "==> docker-compose.yml has a certbot service and /etc/letsencrypt/live has a certificate"
+    echo "    — enabling Let's Encrypt (Option B) mounts (pass --no-certbot to override)"
+    WITH_CERTBOT=true
+fi
+
 # Keep Let's Encrypt mode on re-runs: if a certbot unit from a previous LE
 # install exists and the caller did not say otherwise, keep the LE mounts so a
 # plain re-run (e.g. from update-perfsonar-deployment.sh) does not silently
@@ -296,6 +332,12 @@ prepare_host_mounts() {
         fi
         fix_shared_selinux_label /var/www/html
         fix_shared_selinux_label /etc/letsencrypt
+        local hook="$INSTALL_DIR/tools_scripts/certbot-deploy-hook.sh"
+        if [[ ! -f "$hook" ]]; then
+            echo "ERROR: $hook not found (the certbot unit mounts it). Run install_tools_scripts.sh first." >&2
+            exit 1
+        fi
+        chmod 0755 "$hook"
     fi
 
     if [[ ! -x "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh" ]]; then
@@ -405,11 +447,24 @@ echo "==> ✓ Created $TESTPOINT_SERVICE"
 
 # Create certbot service if requested
 if [[ "$WITH_CERTBOT" == "true" ]]; then
+    # The deploy hook reaches the testpoint through the host's Podman socket.
+    echo "==> Enabling podman.socket (the certbot deploy hook uses /run/podman/podman.sock)"
+    systemctl enable --now podman.socket >/dev/null 2>&1 || \
+        echo "    WARNING: could not enable podman.socket; renewed certificates will not be loaded automatically"
+    if [[ ! -S /run/podman/podman.sock ]]; then
+        echo "    WARNING: /run/podman/podman.sock does not exist; check: systemctl status podman.socket"
+    fi
+
+    # label=disable: like the compose files' security_opt. With SELinux label
+    # confinement the container may neither execute the bind-mounted deploy
+    # hook (usr_t) nor connect to the Podman socket.
+    # Wants=, not Requires=: certbot renews on its own (standalone, port 80),
+    # and a testpoint restart must not stop certbot while its hook runs.
     cat > "$CERTBOT_SERVICE" << EOF
 [Unit]
 Description=perfSONAR Certbot Renewal Container
-After=perfsonar-testpoint.service
-Requires=perfsonar-testpoint.service
+After=perfsonar-testpoint.service podman.socket
+Wants=perfsonar-testpoint.service podman.socket
 
 [Service]
 Type=simple
@@ -418,8 +473,8 @@ RestartSec=10
 ExecStartPre=-/usr/bin/podman rm -f certbot
 ExecStart=/usr/bin/podman run --name certbot \\
   --replace \\
-  --systemd=always \\
   --network host \\
+  --security-opt label=disable \\
   --entrypoint=/bin/sh \\
   -v /run/podman/podman.sock:/run/podman/podman.sock:ro \\
   -v /var/www/html:/var/www/html:z \\
