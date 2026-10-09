@@ -575,20 +575,14 @@ ls -la /opt/perfsonar-tp/psconfig
     If SELinux is enforcing, the `:Z` and `:z` options in the compose files will cause Podman to relabel the host paths when
     containers start. No manual `chcon` commands are required.
 
-??? tip "node_exporter D-Bus access on EL9/SELinux"
+??? tip "node_exporter and D-Bus"
 
-    The compose file bind-mounts `/run/dbus:/run/dbus:ro` so that node_exporter can use
-    `--collector.systemd` to expose perfSONAR service states as Prometheus metrics.
-    On EL9 hosts with SELinux in **Enforcing** mode the `system_dbusd_var_run_t` label may
-    block access. Enable with:
-
-    ```bash
-    setsebool -P container_use_dbusd 1
-    ```
-
-    If the boolean is not available on your policy version, add `security_opt: label=disable`
-    to the testpoint service in `docker-compose.yml` (less preferred — disables all SELinux
-    confinement for the container).
+    node_exporter's `--collector.systemd` exposes perfSONAR service states as Prometheus metrics.
+    The perfSONAR services run **inside** the container, so the collector uses the container's own
+    D-Bus. Current compose files and systemd units therefore do **not** bind-mount the host's
+    `/run/dbus` (older versions did; that read-only mount made the container's `dbus.socket` fail),
+    and the `container_use_dbusd` SELinux boolean is no longer needed. To remove the old mount from an
+    existing deployment, run `update-perfsonar-deployment.sh --apply --restart --yes`.
 
 #### 2) Deploy the container
 
@@ -649,7 +643,7 @@ podman ps
 !!! warning "Install the health-monitor watchdog (included above)"
     The compose healthcheck marks the container `unhealthy` after three consecutive failures, but `restart: unless-stopped` does **not** auto-restart on health failures — a separate watchdog is needed.
 
-    `--health-monitor` installs a systemd timer that checks container health every 5 minutes and restarts `perfsonar-testpoint.service` if the container is `unhealthy`. Without it, a pScheduler failure will leave the container stuck in `unhealthy` state indefinitely.
+    `--health-monitor` installs a systemd timer that checks container health every 5 minutes and restarts `perfsonar-testpoint.service` if the container is `unhealthy`. Without it, a pScheduler failure will leave the container stuck in `unhealthy` state indefinitely. The systemd unit written by `install-systemd-units.sh` (1.5.0 and later) carries the same health check as the compose files. The monitor restarts at most 3 times per hour; if that does not help it logs an ALERT (with what to check, e.g. DNS or time sync) instead of restarting again.
 
     This creates `perfsonar-health-monitor.service` + `perfsonar-health-monitor.timer` and logs to `/var/log/perfsonar-health-monitor.log`. Expected recovery time from pScheduler failure: ≤8 minutes.
 
@@ -698,8 +692,6 @@ to fail.
 **What's NOT seeded:**
 
 - `/etc/letsencrypt` — Certbot creates this automatically; no pre-seeding needed
-
-- `/run/dbus` — Host D-Bus socket mount; exists at runtime, no seeding needed
 
 - `node_exporter.defaults` — the container ships its own complete copy with all needed collectors;
   see the Option A cpufreq workaround tip if you need to override it
@@ -1955,17 +1947,14 @@ Run without flags to see what would change:
     The compose files in this repo have the volume line commented out by default;
     uncomment it after creating `/opt/perfsonar-tp/conf/node_exporter.defaults`.
 
-    **Root cause — D-Bus / SELinux (--collector.systemd):**
-    node_exporter uses `--collector.systemd` which connects to D-Bus. The compose file
-    mounts `/run/dbus:/run/dbus:ro`, but on EL9 with SELinux **Enforcing** the socket
-    label `system_dbusd_var_run_t` blocks the container process.
+    **Root cause — D-Bus (--collector.systemd):**
+    node_exporter's `--collector.systemd` connects to the container's own D-Bus. Older deployments
+    bind-mounted the host's `/run/dbus` read-only, which makes the container's `dbus.socket` fail
+    (`systemctl --failed` inside the container shows it). Remove that mount:
 
     ```bash
-    # Check for permission denied on the D-Bus socket
-    podman exec perfsonar-testpoint ls /run/dbus/system_bus_socket
-
-    # Fix: enable the SELinux boolean
-    setsebool -P container_use_dbusd 1
+    podman exec perfsonar-testpoint systemctl --failed --no-pager
+    sudo /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply --restart --yes
     ```
 
 ### Auto-Update Issues

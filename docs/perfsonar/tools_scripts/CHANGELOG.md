@@ -1,3 +1,27 @@
+## [Unreleased] - 2026-10-09 (health check and D-Bus)
+
+### Fixed
+
+- **No container health check on systemd-managed testpoints** (`install-systemd-units.sh` v1.5.0): the unit now runs
+  podman with `--health-cmd "pscheduler troubleshoot --quick"` (60s interval, 30s timeout, 3 retries, 120s start
+  period, the same as the compose files). Previously `perfSONAR-health-monitor.sh` only ever logged "no healthcheck
+  defined" on these hosts and never restarted a broken container.
+- **Container `dbus.socket` failed** (`install-systemd-units.sh` v1.5.0, compose files): the host's `/run/dbus` is no
+  longer bind-mounted read-only over the container's. The perfSONAR services that node_exporter's systemd collector
+  watches run inside the container, so the collector needs the container's own D-Bus; the `container_use_dbusd`
+  SELinux boolean is no longer needed.
+- **Restart loops** (`perfSONAR-health-monitor.sh` v1.1.0): at most 3 restarts per hour (`MAX_RESTARTS`,
+  `RESTART_WINDOW`), then an ALERT with what to check (DNS, time sync) instead of restarting again; the output of the
+  failed health check is logged. `install-systemd-units.sh` refreshes an installed monitor on every run.
+
+### Changed
+
+- `update-perfsonar-deployment.sh` v1.8.0: a unit with the host `/run/dbus` mount or without `--health-cmd` is treated
+  as stale and regenerated with `--apply`; the `/run/dbus` mount is no longer required or patched in.
+- `perfSONAR-diagnostic-report.sh` v1.3.0: service-unit check updated accordingly; the SELinux D-Bus boolean is only
+  reported where the old mount is still present.
+- `seed_testpoint_host_dirs.sh` v2.0.1, `node_exporter.defaults`, testpoint guide: notes updated.
+
 ## [Unreleased] - 2026-10-08 (perfSONAR-pbr-nm.sh)
 
 ### Fixed

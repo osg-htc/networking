@@ -16,8 +16,9 @@ services:
       - /run/lock
       - /tmp
     volumes:
-      # D-Bus socket: needed by node_exporter --collector.systemd on systemd hosts
-      - /run/dbus:/run/dbus:ro
+      # No host /run/dbus mount: the container's own D-Bus serves node_exporter's
+      # systemd collector (the perfSONAR services run inside the container), and
+      # a read-only host mount there makes the container's dbus.socket fail.
       - /opt/perfsonar-tp/psconfig:/etc/perfsonar/psconfig:Z
       # Optional: uncomment and create this file if node_exporter crashes with
       # 'slice bounds out of range' (procfs v0.10.0 cpufreq bug on hosts with
