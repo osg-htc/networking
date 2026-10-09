@@ -40,16 +40,29 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.4.0
+# Version: 1.5.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.5.0 - Add a container health check to the testpoint unit (podman
+#           --health-cmd "pscheduler troubleshoot --quick", 60s interval, 30s
+#           timeout, 3 retries, 120s start period — same as the compose files).
+#           Without it the health-monitor timer saw "no healthcheck defined"
+#           and never restarted a broken container.
+#         - Refresh an installed /usr/local/bin/perfsonar-health-monitor.sh
+#           from tools_scripts on every run.
+#         - Stop bind-mounting the host's /run/dbus into the container. The
+#           read-only mount occupied /run/dbus inside the container, so the
+#           container's own dbus.socket failed. The units node_exporter's
+#           systemd collector watches (pscheduler-*, psconfig-*, owamp,
+#           httpd, ...) run inside the container, so it needs the container's
+#           own D-Bus, not the host's.
 #   1.4.0 - Fix fresh-host start failure ("statfs /var/www/html: no such file
 #           or directory", podman exit 125). The unit previously bind-mounted
 #           /var/www/html, the whole /etc/apache2 and /etc/letsencrypt for
 #           every deployment, but seed_testpoint_host_dirs.sh v2 (Option A)
 #           no longer creates them. Mounts now match the compose files:
-#             Option A: psconfig, tools_scripts, cgroup, dbus, node_exporter
+#             Option A: psconfig, tools_scripts, cgroup, node_exporter
 #             Option B: + /var/www/html, /etc/letsencrypt and only
 #                       /etc/apache2/sites-available/default-ssl.conf
 #           Mounting the whole host /etc/apache2 hid the container's Apache
@@ -268,13 +281,10 @@ build_testpoint_mounts() {
     TP_MOUNTS+=("-v /sys/fs/cgroup:/sys/fs/cgroup:ro")
     TP_MOUNTS+=("-v $INSTALL_DIR/tools_scripts:$INSTALL_DIR/tools_scripts:ro")
 
-    # D-Bus socket for node_exporter --collector.systemd (present on EL9/EL10
-    # with dbus-broker; skip rather than fail if the host has no system bus).
-    if [[ -d /run/dbus ]]; then
-        TP_MOUNTS+=("-v /run/dbus:/run/dbus:ro")
-    else
-        echo "    NOTE: /run/dbus not present on host; skipping D-Bus mount"
-    fi
+    # No host /run/dbus mount: the container runs its own systemd + D-Bus,
+    # and node_exporter's systemd collector must talk to that bus to see the
+    # perfSONAR services (they run inside the container). Mounting the host's
+    # /run/dbus read-only made the container's dbus.socket fail.
 
     if [[ -f "$INSTALL_DIR/conf/node_exporter.defaults" ]]; then
         TP_MOUNTS+=("-v $INSTALL_DIR/conf/node_exporter.defaults:/etc/default/node_exporter:z")
@@ -342,6 +352,9 @@ ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \\
 ${MOUNT_LINES}  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
   --label=io.containers.autoupdate=registry \\
+  --health-cmd "pscheduler troubleshoot --quick" \\
+  --health-interval 60s --health-timeout 30s \\
+  --health-retries 3 --health-start-period 120s \\
   $TP_IMAGE \\
   $INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh
 ExecStop=/usr/bin/podman stop -t 10 perfsonar-testpoint
@@ -517,6 +530,17 @@ EOF
     echo "  Run now (test):   systemctl start perfsonar-auto-update.service"
     echo "  View log:         journalctl -u perfsonar-auto-update.service -f"
     echo "  Update log file:  tail -f /var/log/perfsonar-auto-update.log"
+fi
+
+# Keep an already-installed health monitor current even when --health-monitor
+# is not given (e.g. update-perfsonar-deployment.sh re-running this script).
+if [[ "$HEALTH_MONITOR" != "true" && -f /usr/local/bin/perfsonar-health-monitor.sh && \
+      -f "$INSTALL_DIR/tools_scripts/perfSONAR-health-monitor.sh" ]]; then
+    if ! cmp -s "$INSTALL_DIR/tools_scripts/perfSONAR-health-monitor.sh" /usr/local/bin/perfsonar-health-monitor.sh; then
+        cp "$INSTALL_DIR/tools_scripts/perfSONAR-health-monitor.sh" /usr/local/bin/perfsonar-health-monitor.sh
+        chmod 0755 /usr/local/bin/perfsonar-health-monitor.sh
+        echo "==> ✓ Updated /usr/local/bin/perfsonar-health-monitor.sh"
+    fi
 fi
 
 # ── Optional: health-monitor timer ────────────────────────────────────────────

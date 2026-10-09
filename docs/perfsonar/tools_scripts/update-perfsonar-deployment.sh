@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.7.0 - 2026-10-08
+# Version: 1.8.0 - 2026-10-09
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,11 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.8.0 - 2026-10-09
+#   - Treat a testpoint unit that bind-mounts the host's /run/dbus (breaks the
+#     container's own dbus.socket) or has no container health check as stale,
+#     and regenerate it with install-systemd-units.sh --force (>= 1.5.0) under
+#     --apply. The /run/dbus mount is no longer required or patched in.
 # Version: 1.7.0 - 2026-10-08
 #   - Check for the parallel A/AAAA DNS query stall (check-perfsonar-dns.sh
 #     --check-resolver). With --apply, fix it persistently via NetworkManager
@@ -107,7 +112,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.7.0"
+VERSION="1.8.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -724,7 +729,7 @@ fix_container_selinux_labels() {
 #
 # Older versions of install-systemd-units.sh omitted two volume mounts from
 # the perfsonar-testpoint.service unit:
-#   1. /run/dbus:/run/dbus:ro  — required for --collector.systemd in node_exporter
+#   1. /run/dbus:/run/dbus:ro  — (historical; no longer used since 1.8.0, see above)
 #   2. <base>/conf/node_exporter.defaults:/etc/default/node_exporter:z
 #        — required for the --no-collector.cpufreq workaround; without it,
 #          node_exporter panics on its first scrape (procfs v0.10.0 bug:
@@ -755,9 +760,18 @@ fix_stale_service_file() {
     while IFS= read -r src; do
         [[ -n "$src" && ! -e "$src" ]] && stale+=("missing host path $src")
     done < <(grep -oE -- '-v [^ :]+:' "$svc" | sed -e 's/^-v //' -e 's/:$//')
+    # install-systemd-units.sh < 1.5.0: host /run/dbus mounted over the
+    # container's (its dbus.socket fails), and no container health check (the
+    # health-monitor timer then never acts).
+    if grep -q -- '-v /run/dbus:/run/dbus' "$svc"; then
+        stale+=("host /run/dbus bind mount (breaks the container's dbus.socket)")
+    fi
+    if ! grep -q -- '--health-cmd' "$svc"; then
+        stale+=("no container health check (--health-cmd)")
+    fi
 
     if [[ ${#stale[@]} -gt 0 ]]; then
-        changed "  Service file has stale volume mounts:"
+        changed "  Service file is out of date:"
         for src in "${stale[@]}"; do
             changed "    - $src"
         done
@@ -769,7 +783,7 @@ fix_stale_service_file() {
             return
         fi
         if [[ "$APPLY" != true ]]; then
-            warn "  Run with --apply to regenerate the unit with correct mounts."
+            warn "  Run with --apply to regenerate the unit."
             echo
             return
         fi
@@ -779,7 +793,7 @@ fix_stale_service_file() {
             return
         fi
         if bash "$installer" --install-dir "$BASE_DIR" --force 2>&1 | sed 's/^/    /'; then
-            ok "  ✓ Regenerated $svc with correct volume mounts"
+            ok "  ✓ Regenerated $svc"
             SERVICE_FILE_CHANGED=true
         else
             warn "  install-systemd-units.sh failed; see output above"
@@ -789,7 +803,6 @@ fix_stale_service_file() {
     fi
 
     local missing=()
-    grep -q '/run/dbus:/run/dbus' "$svc" || missing+=("/run/dbus")
     grep -q 'node_exporter.defaults' "$svc" || missing+=("node_exporter.defaults")
 
     if [[ ${#missing[@]} -eq 0 ]]; then
@@ -813,10 +826,6 @@ fix_stale_service_file() {
     fi
 
     # Patch in-place with awk: insert missing mounts after the tools_scripts volume line
-    if ! grep -q '/run/dbus:/run/dbus' "$svc"; then
-        awk '/tools_scripts.*:ro/{print; print "  -v /run/dbus:/run/dbus:ro \\"; next}1' \
-            "$svc" > "${svc}.tmp" && mv "${svc}.tmp" "$svc"
-    fi
     if ! grep -q 'node_exporter.defaults' "$svc"; then
         awk -v base="$BASE_DIR" \
             '/tools_scripts.*:ro/{print; print "  -v " base "/conf/node_exporter.defaults:/etc/default/node_exporter:z \\"; next}1' \

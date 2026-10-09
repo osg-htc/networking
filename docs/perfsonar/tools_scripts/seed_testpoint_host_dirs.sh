@@ -5,6 +5,8 @@ set -euo pipefail
 # Seed host directories from perfSONAR testpoint image.
 # Intended to be run on the host as root (or with sudo) BEFORE first compose up.
 #
+# Version: 2.0.1 - 2026-10-09
+#   - Update notes: the host /run/dbus is no longer mounted into the container.
 # Version: 2.0.0 - 2026-03-04
 #   - Option A (default): seed only psconfig — /var/www/html and /etc/apache2 are not
 #     mounted for plain testpoint, so seeding them is unnecessary. The container's
@@ -21,7 +23,7 @@ set -euo pipefail
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp] [--with-le] [--version|--help]
 
-VERSION="2.0.0"
+VERSION="2.0.1"
 PROG_NAME="$(basename "$0")"
 RUNTIME=""
 BASE_DIR="/opt/perfsonar-tp"
@@ -61,9 +63,8 @@ unpopulated CPU sockets and node_exporter panics (procfs v0.10.0 cpufreq bug),
 see the documentation for how to create an override file manually.
 
 Note: /etc/letsencrypt does NOT need seeding - certbot creates it automatically.
-Note: /run/dbus is mounted read-only for node_exporter --collector.systemd;
-      on EL9 with SELinux enforcing you may need to enable the
-      container_use_dbusd boolean: setsebool -P container_use_dbusd 1
+Note: the host's /run/dbus is no longer mounted into the container; the
+      container's own D-Bus serves node_exporter --collector.systemd.
 
 Options:
   --runtime RUNTIME   Specify container runtime (docker or podman)
@@ -266,9 +267,8 @@ echo
 echo "==> SELinux labels will be applied automatically by Podman when containers start"
 echo "    (compose file uses :z and :Z flags on bind mounts)"
 echo
-echo "==> Note: /run/dbus is bind-mounted read-only for node_exporter --collector.systemd."
-echo "    On EL9 hosts with SELinux enforcing, enable access with:"
-echo "      setsebool -P container_use_dbusd 1"
+echo "==> Note: the host's /run/dbus is not mounted; node_exporter's systemd collector"
+echo "    uses the container's own D-Bus (the perfSONAR services run inside it)."
 echo
 echo "==> Note: node_exporter options use the container's own defaults."
 echo "    If your host has offline/unpopulated CPU sockets and node_exporter panics"

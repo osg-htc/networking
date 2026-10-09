@@ -14,6 +14,11 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.3.0 - 2026-10-09
+#   - Service-unit check: flag a host /run/dbus bind mount (breaks the
+#     container's dbus.socket) and a missing container health check instead
+#     of requiring the /run/dbus mount; the container_use_dbusd SELinux
+#     boolean is only reported where the old mount is still in use.
 # Version: 1.2.0 - 2026-10-08
 #   - Known-issue check: parallel A/AAAA DNS query stall (lookups wait for
 #     the 5 s resolver timeout; pScheduler reports the host unresolvable).
@@ -41,7 +46,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.2.0"
+VERSION="1.3.0"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------
@@ -466,15 +471,18 @@ collect_config_files() {
         emit ""
         emit "--- Service file volume mount check ---"
         local missing=()
-        grep -q '/run/dbus:/run/dbus' "$svc" || missing+=("/run/dbus:/run/dbus:ro")
         grep -q 'node_exporter.defaults' "$svc" || missing+=("node_exporter.defaults mount")
+        grep -q -- '--health-cmd' "$svc" || missing+=("container health check (--health-cmd)")
+        if grep -q -- '-v /run/dbus:/run/dbus' "$svc"; then
+            missing+=("remove host /run/dbus mount (breaks container dbus.socket)")
+        fi
         if [[ ${#missing[@]} -eq 0 ]]; then
-            emit "  OK: All required volume mounts present"
-            printf "  ${C_GREEN}✓${C_RESET} Service file volume mounts OK\n"
+            emit "  OK: service unit is current (mounts and health check)"
+            printf "  ${C_GREEN}✓${C_RESET} Service file OK\n"
         else
-            emit "  MISSING volume mounts: ${missing[*]}"
+            emit "  OUT OF DATE: ${missing[*]}"
             emit "  Fix: run update-perfsonar-deployment.sh --apply --restart --yes"
-            printf "  ${C_RED}✗${C_RESET} Service file missing mounts: ${missing[*]}\n"
+            printf "  ${C_RED}✗${C_RESET} Service file out of date: ${missing[*]}\n"
         fi
     fi
 
@@ -797,8 +805,10 @@ collect_known_issues() {
         emit ""
     fi
 
-    # Check 3: D-Bus SELinux boolean
-    if command -v getsebool &>/dev/null; then
+    # Check 3: D-Bus SELinux boolean (only relevant to deployments that still
+    # bind-mount the host's /run/dbus; current units and compose files do not)
+    if command -v getsebool &>/dev/null && \
+       grep -qs -- '/run/dbus:/run/dbus' /etc/systemd/system/perfsonar-testpoint.service "$BASE_DIR/docker-compose.yml"; then
         emit "--- Check: container_use_dbusd SELinux boolean ---"
         local dbus_bool
         dbus_bool=$(getsebool container_use_dbusd 2>/dev/null | awk '{print $NF}' || echo "unknown")
