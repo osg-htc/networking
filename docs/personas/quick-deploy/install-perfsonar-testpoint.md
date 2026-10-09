@@ -1417,6 +1417,13 @@ chmod 0755 /tmp/update-perfsonar-deployment.sh
 Hosts whose `perfsonar-testpoint.service` runs `podman-compose up` (installed with the older
 `install-systemd-service.sh`) stay compose-managed: the updater keeps that unit and restarts through it,
 and `install-systemd-units.sh` refuses to replace it unless you pass `--convert-from-compose`.
+The updater also checks that unit's `ExecStart` against the installed podman-compose (podman-compose 1.5.0
+rejects options such as `--shm-size` on `up`, so the unit fails on every start and the testpoint does not come
+back after a reboot); with `--apply` it moves `--shm-size` into `docker-compose.yml` as `shm_size`. After a
+restart it confirms the container was actually recreated.
+
+The testpoint runs with 512 MB of shared memory (`shm_size: 512m` in the compose files, `--shm-size=512m` in
+the systemd unit) because PostgreSQL inside the container needs more than the 64 MB default.
 
 ### Report-only mode (safe, no changes)
 

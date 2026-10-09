@@ -1,3 +1,21 @@
+## [Unreleased] - 2026-10-09 (shm_size, restart verification)
+
+### Fixed
+
+- **PostgreSQL shared memory**: the testpoint now runs with 512 MB of shared memory (`shm_size: 512m` in the four
+  compose files, `--shm-size=512m` in the unit from `install-systemd-units.sh` v1.5.2); PostgreSQL inside the
+  container (pScheduler) runs out with the 64 MB default.
+- **Restart reported as success when it failed** (`update-perfsonar-deployment.sh` v1.10.0): after restarting through
+  systemd the unit must be active and the container must have a new start time. On psum01.aglt2.org the unit failed
+  but the old container was still running, and the updater said "Container is running".
+- **Compose-wrapper unit that cannot start**: its `ExecStart` is checked against `podman-compose up --help`; options
+  podman-compose 1.5.0 rejects (here `--shm-size=512m`, which would have kept psum01's testpoint down after a reboot)
+  are reported, `--shm-size` is moved into `docker-compose.yml` with `--apply`, and the restart is skipped if other
+  rejected options remain. A compose-wrapper unit that is not active is brought `down` before it is started, so the
+  containers are actually recreated.
+- **Compose refresh**: keeps the host's `shm_size`, marks volume lines kept from the previous file, and treats
+  comment-only differences as no change (no restart). Direct units without `--shm-size` are refreshed.
+
 ## [Unreleased] - 2026-10-09 (compose-managed hosts)
 
 ### Fixed

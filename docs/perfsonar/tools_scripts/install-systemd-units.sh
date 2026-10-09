@@ -43,10 +43,13 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.5.1
+# Version: 1.5.2
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.5.2 - Run the testpoint with --shm-size=512m: PostgreSQL inside the
+#           container (pScheduler) runs out of shared memory with the 64 MB
+#           default. Matches shm_size: 512m in the compose files.
 #   1.5.1 - Refuse to overwrite an existing compose-wrapper unit
 #           (ExecStart=podman-compose ..., from install-systemd-service.sh)
 #           unless --convert-from-compose is given: on such hosts
@@ -383,6 +386,7 @@ ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   --privileged \\
   --cgroupns host \\
   --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \\
+  --shm-size=512m \\
 ${MOUNT_LINES}  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
   --label=io.containers.autoupdate=registry \\
   --health-cmd "pscheduler troubleshoot --quick" \\
