@@ -1,3 +1,20 @@
+## [Unreleased] - 2026-10-08
+
+### Fixed
+
+- **Parallel A/AAAA DNS query stall** (`check-perfsonar-dns.sh` v1.1.0): new `--check-resolver` and `--fix-resolver`
+  modes. On some hosts (seen on AlmaLinux 10 behind our nftables ruleset) one of the two parallel DNS replies is
+  dropped, so every dual-stack lookup waits for the 5 s resolver timeout and `pscheduler troubleshoot` reports the
+  host as "Not resolvable or timed out". The check times a dual-stack `getaddrinfo()` with and without
+  `single-request-reopen`; the fix sets that option persistently on the active NetworkManager connections
+  (`nmcli device reapply`, falling back to `connection up`), verifies it, and restarts a running testpoint.
+  Before re-applying, it saves the DNS servers in use into any profile that has none (re-applying a static profile
+  without DNS would remove DHCP-learned servers), and skips a connection when neither has DNS.
+- `perfSONAR-orchestrator.sh` v1.1.7: new step 7.5 runs `--fix-resolver` after the nftables/SELinux step.
+- `update-perfsonar-deployment.sh` v1.7.0: checks for the stall; `--apply` fixes it and `--restart` restarts the
+  testpoint container.
+- `perfSONAR-diagnostic-report.sh` v1.2.0: known-issue check for the stall.
+
 ## [Unreleased] - 2026-09-29
 
 ### Fixed
