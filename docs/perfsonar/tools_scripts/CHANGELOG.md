@@ -2,6 +2,13 @@
 
 ### Fixed
 
+- **DNS lost after static conversion** (`perfSONAR-pbr-nm.sh` v1.0.2): the script switched connections to
+  `ipv4.method manual` with address and gateway but never set `ipv4.dns`. On hosts whose DNS came from DHCP, the
+  servers disappeared the next time the connection was activated or at reboot, leaving `/etc/resolv.conf` with no
+  `nameserver` lines (seen on test01.swt2.uta.edu: DNS and chrony both failed). The DNS servers and search domains in
+  use at start-up (per device, then `/etc/resolv.conf`) are now written into every profile that has none; an optional
+  `DNS_SERVERS=(...)` in the config overrides the fallback for the default-route NIC and is written by the
+  generator. The script warns if no configured connection ends up with DNS servers.
 - `perfSONAR-pbr-nm.sh` v1.0.1: the "WARNING: This script will REMOVE ALL existing NetworkManager connections" banner
   was printed in the default in-place mode, which keeps existing connections. It is now shown only with
   `--rebuild-all`; in-place mode prints an accurate note instead.

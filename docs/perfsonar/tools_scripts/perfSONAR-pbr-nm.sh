@@ -26,6 +26,16 @@
 #     configured with their own routing tables and source-based rules.
 #
 # Author: Shawn McKee - University of Michigan <smckee@umich.edu>
+# Version: 1.0.2 - Oct 9 2026
+#   - Preserve DNS when switching connections to static addressing. The
+#     script set ipv4.method manual with address + gateway but never set
+#     ipv4.dns, so on hosts that got DNS from DHCP the servers vanished the
+#     next time the connection was activated (or at reboot), leaving
+#     /etc/resolv.conf with no nameserver lines. DNS servers and search
+#     domains in use at start-up (per device, then /etc/resolv.conf) are now
+#     written into each profile that has none. Optional DNS_SERVERS=(...)
+#     in the config overrides the fallback; the generator writes it. Warns
+#     if no configured connection ends up with DNS servers.
 # Version: 1.0.1 - Oct 8 2026
 #   - Show the "REMOVE ALL existing NetworkManager connections" warning only
 #     for --rebuild-all; in-place mode (the default) gets an accurate note.
@@ -253,6 +263,10 @@ save_config_to_file() {
         _print_arr NIC_IPV6_GWS "${NIC_IPV6_GWS[@]}"
 
         printf 'DEFAULT_ROUTE_NIC="%s"\n' "${DEFAULT_ROUTE_NIC:-}" >> "$TMPFILE"
+        if [ -n "${DNS_SERVERS[*]:-}" ]; then
+            printf '\n' >> "$TMPFILE"
+            _print_arr DNS_SERVERS "${DNS_SERVERS[@]}"
+        fi
     }
 
     if [ "$DRY_RUN" = true ]; then
@@ -633,6 +647,8 @@ NIC_IPV6_PREFIXES=("-" "-")
 NIC_IPV6_GWS=("-" "-")
 # Specify the NIC that will hold the default route for this host
 DEFAULT_ROUTE_NIC="eth1"
+# DNS servers written to the default-route NIC profile when it has none
+DNS_SERVERS=("192.0.2.53")
 EXAMPLE
     chmod 0644 "$CONFIG_FILE" || true
     chown root:root "$CONFIG_FILE" || true
@@ -748,6 +764,17 @@ EXAMPLE
 
         echo "# Specify the NIC that will hold the default route for this host"
         printf 'DEFAULT_ROUTE_NIC="%s"\n' "$DEFAULT_ROUTE_NIC_DETECTED" >> "$TMPFILE"
+
+        # DNS servers for the default-route NIC, used only when its profile has
+        # no DNS of its own (e.g. it got DNS from DHCP before being made static)
+        {
+            printf '\n# DNS servers written to the default-route NIC profile when it has none\n'
+            printf '# (static addressing drops DNS learned from DHCP). Edit if needed.\n'
+            printf 'DNS_SERVERS=('
+            awk '/^[[:space:]]*nameserver[[:space:]]/ {print $2}' /etc/resolv.conf 2>/dev/null \
+                | grep -Ev '^(127\.|::1$)' | while read -r ns; do printf ' "%s"' "$ns"; done || true
+            printf ' )\n'
+        } >> "$TMPFILE"
     }
 
     # Move into place (or print preview when in dry-run/debug).
@@ -1201,6 +1228,112 @@ add_routing_table() {
 # (for example "Wired connection 1"). This helper finds the connection
 # associated with a device or creates a new dedicated connection named
 # "perfsonar-<dev>" if none exists. It prints the connection name to stdout.
+# -------- DNS preservation --------
+# Switching a profile to ipv4.method manual drops DNS servers it obtained via
+# DHCP. Capture what each device (and /etc/resolv.conf) uses before changing
+# anything, and write it into profiles that have no DNS of their own.
+declare -A LIVE_DNS=()
+declare -A LIVE_DOMAINS=()
+RESOLV_DNS=""
+RESOLV_SEARCH=""
+
+# Print the values of a multi-valued nmcli field ("a | b", "a,b" or one per line)
+# as a space-separated list.
+_nm_values() {
+    tr '|,' '\n\n' | sed -e 's/\\:/:/g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | grep -v '^--$' | grep -v '^$' | paste -sd' ' - || true
+}
+
+capture_live_dns() {
+    local dev
+    for dev in "${NIC_NAMES[@]}"; do
+        [ -z "$dev" ] && continue
+        LIVE_DNS[$dev]="$( { nmcli -g IP4.DNS device show "$dev" 2>/dev/null; nmcli -g IP6.DNS device show "$dev" 2>/dev/null; } | _nm_values || true)"
+        LIVE_DOMAINS[$dev]="$(nmcli -g IP4.DOMAIN device show "$dev" 2>/dev/null | _nm_values || true)"
+    done
+    # Fallback: nameservers currently in /etc/resolv.conf (skip loopback stubs)
+    RESOLV_DNS="$(awk '/^[[:space:]]*nameserver[[:space:]]/ {print $2}' /etc/resolv.conf 2>/dev/null \
+        | grep -Ev '^(127\.|::1$)' | paste -sd' ' - || true)"
+    RESOLV_SEARCH="$(awk '/^[[:space:]]*search[[:space:]]/ {$1=""; print}' /etc/resolv.conf 2>/dev/null | xargs || true)"
+    for dev in "${NIC_NAMES[@]}"; do
+        [ -z "$dev" ] && continue
+        log "DNS in use on $dev: ${LIVE_DNS[$dev]:-none}${LIVE_DOMAINS[$dev]:+ (search: ${LIVE_DOMAINS[$dev]})}"
+    done
+    log "DNS in /etc/resolv.conf: ${RESOLV_DNS:-none}${RESOLV_SEARCH:+ (search: $RESOLV_SEARCH)}"
+}
+
+# Ensure profile $1 (device $2) keeps DNS servers after becoming static.
+# Order of preference: the profile's own setting > DNS_SERVERS from the
+# config (default-route NIC) > what the device used at start-up >
+# /etc/resolv.conf (default-route NIC).
+ensure_conn_dns() {
+    local conn=$1 nic=$2 ipv6_addr=$3
+    # Space-separated lists below (the script's global IFS is newline/tab)
+    local IFS=' '
+    local prof4 prof6 candidates="" v4="" v6="" s source=""
+
+    prof4="$(nmcli -g ipv4.dns connection show "$conn" 2>/dev/null | _nm_values || true)"
+    prof6="$(nmcli -g ipv6.dns connection show "$conn" 2>/dev/null | _nm_values || true)"
+    if [ -n "$prof4" ] || [ -n "$prof6" ]; then
+        log "  - DNS already set on $conn: ${prof4} ${prof6}"
+        return 0
+    fi
+
+    if [ "$nic" = "$DEFAULT_ROUTE_NIC" ] && [ -n "${DNS_SERVERS[*]:-}" ]; then
+        candidates="${DNS_SERVERS[*]}"; source="DNS_SERVERS in $CONFIG_FILE"
+    elif [ -n "${LIVE_DNS[$nic]:-}" ]; then
+        candidates="${LIVE_DNS[$nic]}"; source="DNS in use on $nic"
+    elif [ "$nic" = "$DEFAULT_ROUTE_NIC" ] && [ -n "$RESOLV_DNS" ]; then
+        candidates="$RESOLV_DNS"; source="/etc/resolv.conf"
+    fi
+    if [ -z "$candidates" ]; then
+        log "  - No DNS servers known for $conn ($nic); leaving DNS unset"
+        return 0
+    fi
+
+    for s in $candidates; do
+        case "$s" in
+            *:*) v6="${v6:+$v6 }$s" ;;
+            *.*) v4="${v4:+$v4 }$s" ;;
+        esac
+    done
+    log "  - Preserving DNS on $conn from $source: ${v4} ${v6}"
+    if [ -n "$v4" ]; then
+        run_cmd nmcli con mod "$conn" ipv4.dns "$v4" || log "WARNING: failed to set ipv4.dns on $conn"
+    fi
+    if [ -n "$v6" ] && [ "$ipv6_addr" != "-" ]; then
+        run_cmd nmcli con mod "$conn" ipv6.dns "$v6" || log "WARNING: failed to set ipv6.dns on $conn"
+    fi
+
+    local search
+    search="$(nmcli -g ipv4.dns-search connection show "$conn" 2>/dev/null | _nm_values || true)"
+    if [ -z "$search" ]; then
+        local domains="${LIVE_DOMAINS[$nic]:-}"
+        if [ -z "$domains" ] && [ "$nic" = "$DEFAULT_ROUTE_NIC" ]; then
+            domains="$RESOLV_SEARCH"
+        fi
+        if [ -n "$domains" ]; then
+            run_cmd nmcli con mod "$conn" ipv4.dns-search "$domains" || log "WARNING: failed to set ipv4.dns-search on $conn"
+        fi
+    fi
+}
+
+# After configuration: warn loudly if no configured profile has DNS.
+check_any_dns_configured() {
+    local dev conn d found=0
+    for dev in "${NIC_NAMES[@]}"; do
+        [ -z "$dev" ] && continue
+        conn=$(nmcli -t -f NAME,DEVICE connection show 2>/dev/null | awk -F: -v d="$dev" '$2==d{print $1; exit}' || true)
+        [ -z "$conn" ] && continue
+        d="$(nmcli -g ipv4.dns,ipv6.dns connection show "$conn" 2>/dev/null | _nm_values || true)"
+        [ -n "$d" ] && found=1
+    done
+    if [ "$found" -eq 0 ] && [ "$DRY_RUN" != true ]; then
+        log "${RED}WARNING: none of the configured connections has DNS servers. After the next${NC}"
+        log "${RED}  reactivation or reboot this host will have no name resolution. Set${NC}"
+        log "${RED}  DNS_SERVERS=(\"<server1>\" \"<server2>\") in $CONFIG_FILE and re-run this script.${NC}"
+    fi
+}
+
 get_conn_for_device() {
     local dev=$1
     local conn=""
@@ -1283,6 +1416,9 @@ configure_nic() {
     # Configure static IPv4 address + gateway (set method and address together to avoid NM errors)
     log "  - Setting IPv4 method manual with address and gateway"
     run_cmd nmcli con mod "$conn" ipv4.method manual ipv4.addresses "$ipv4_addr$ipv4_prefix" ipv4.gateway "$ipv4_gw" || handle_error "Failed to set IPv4 configuration for $nic (conn: $conn)"
+
+    # Static addressing drops DHCP-provided DNS: keep the servers in use
+    ensure_conn_dns "$conn" "$nic" "$ipv6_addr"
 
     # Configure static IPv6 if present
     if [[ "$ipv6_addr" != "-" ]]; then
@@ -1536,6 +1672,9 @@ else
     log "No active SSH interface detected or detection failed."
 fi
 
+# Record DNS in use before any connection is modified or removed
+capture_live_dns
+
 if [ "$REBUILD_ALL" = true ]; then
     backup_existing_configs
     # Flush existing routes (use sudo with tee via bash -c to avoid redirection issues)
@@ -1567,6 +1706,8 @@ for ((i = 0; i < count; i++)); do
         configure_nic "$i"
     fi
 done
+
+check_any_dns_configured
 
 log ""
 log "${GREEN}All NICs configured. Done at $(date).${NC}"
