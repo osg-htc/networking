@@ -26,6 +26,8 @@
 #     configured with their own routing tables and source-based rules.
 #
 # Author: Shawn McKee - University of Michigan <smckee@umich.edu>
+# Version: 1.0.3 - Oct 9 2026
+#   - --dry-run no longer asks for confirmation (nothing is changed).
 # Version: 1.0.2 - Oct 9 2026
 #   - Preserve DNS when switching connections to static addressing. The
 #     script set ipv4.method manual with address + gateway but never set
@@ -1627,7 +1629,9 @@ if [ "$REBUILD_ALL" = true ]; then
     log "${RED}WARNING: --rebuild-all will REMOVE ALL existing NetworkManager connections and apply new configurations.${NC}"
     log "${RED}  - Run this from a directly connected console: the network will drop.${NC}"
     log "Full rebuild requested (--rebuild-all). Existing NM connections will be removed."
-    if [ "$AUTO_YES" != true ]; then
+    if [ "$DRY_RUN" = true ]; then
+        log "Dry-run: no changes will be made; continuing without prompt."
+    elif [ "$AUTO_YES" != true ]; then
         echo "Proceed with DESTRUCTIVE full rebuild? (type: yes)"
         read -r response
         if [[ "$response" != "yes" ]]; then
@@ -1640,7 +1644,9 @@ if [ "$REBUILD_ALL" = true ]; then
 else
     log "In-place mode selected (default). Existing NM connections retained; routes/rules adjusted non-destructively."
     log "  Note: addresses, routes and rules on the configured NICs are re-applied; connectivity may blip briefly."
-    if [ "$AUTO_YES" != true ]; then
+    if [ "$DRY_RUN" = true ]; then
+        log "Dry-run: no changes will be made; continuing without prompt."
+    elif [ "$AUTO_YES" != true ]; then
         echo "Proceed with in-place apply? (yes/no)"
         read -r response
         if [[ "$response" != "yes" ]]; then

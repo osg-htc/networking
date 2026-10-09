@@ -1,3 +1,24 @@
+## [Unreleased] - 2026-10-09 (compose-managed hosts)
+
+### Fixed
+
+- **Compose-managed hosts** (found testing on psum01.aglt2.org): hosts whose `perfsonar-testpoint.service` runs
+  `podman-compose up` (older `install-systemd-service.sh`) were treated like direct `podman run` units.
+  `update-perfsonar-deployment.sh --apply` would have regenerated the unit with `install-systemd-units.sh --force`,
+  switching the host to a direct unit without its compose-defined certbot service.
+  - `update-perfsonar-deployment.sh` v1.9.0 detects the unit kind; compose-wrapper units are left alone (their mounts
+    and health check come from `docker-compose.yml`) and restarted through systemd.
+  - `install-systemd-units.sh` v1.5.1 refuses to replace a compose-wrapper unit unless `--convert-from-compose` is
+    given, and then enables Let's Encrypt mode if the compose file has a certbot service.
+  - `perfSONAR-diagnostic-report.sh` v1.4.0 checks compose-managed hosts in `docker-compose.yml`.
+- **Compose refresh dropped local settings** (`update-perfsonar-deployment.sh` v1.9.0): volume lines active in the
+  current `docker-compose.yml` but commented out in the template (e.g. the `node_exporter.defaults` cpufreq
+  workaround) are kept. The file is not replaced if the new version would bind-mount a host path that does not exist,
+  and the switch from a whole `/etc/apache2` mount to the single `default-ssl.conf` is explained.
+- `check-perfsonar-dns.sh` v1.2.1: no missing-AAAA warning for internal names (e.g. `psum01.local` on 10.x); the list
+  of checked names is printed on one line.
+- `perfSONAR-pbr-nm.sh` v1.0.3: `--dry-run` no longer asks for confirmation.
+
 ## [Unreleased] - 2026-10-09 (health check and D-Bus)
 
 ### Fixed

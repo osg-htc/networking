@@ -21,6 +21,9 @@
 #                         is kept automatically unless --no-certbot is given.
 #   --no-certbot          Force Option A (testpoint-only) mounts even if a
 #                         certbot unit from a previous install is present.
+#   --convert-from-compose
+#                         Allow replacing an existing compose-wrapper unit
+#                         (podman-compose up) with a direct 'podman run' unit.
 #   --force               Rewrite the service units even when only
 #                         --auto-update was requested and a unit already exists
 #                         (used by update-perfsonar-deployment.sh to repair
@@ -40,10 +43,17 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.5.0
+# Version: 1.5.1
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.5.1 - Refuse to overwrite an existing compose-wrapper unit
+#           (ExecStart=podman-compose ..., from install-systemd-service.sh)
+#           unless --convert-from-compose is given: on such hosts
+#           docker-compose.yml defines the containers (often including
+#           certbot) and silently replacing the unit drops them. When
+#           converting, Let's Encrypt mode is enabled if the compose file has
+#           a certbot service.
 #   1.5.0 - Add a container health check to the testpoint unit (podman
 #           --health-cmd "pscheduler troubleshoot --quick", 60s interval, 30s
 #           timeout, 3 retries, 120s start period — same as the compose files).
@@ -84,6 +94,7 @@ INSTALL_DIR="/opt/perfsonar-tp"
 WITH_CERTBOT=false
 NO_CERTBOT=false
 FORCE=false
+CONVERT_FROM_COMPOSE=false
 AUTO_UPDATE=false
 HEALTH_MONITOR=false
 TP_IMAGE="hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production"
@@ -106,6 +117,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --force)
             FORCE=true
+            shift
+            ;;
+        --convert-from-compose)
+            CONVERT_FROM_COMPOSE=true
             shift
             ;;
         --auto-update)
@@ -165,6 +180,24 @@ mkdir -p "$INSTALL_DIR/conf"
 if [[ ! -f "$INSTALL_DIR/conf/node_exporter.defaults" && -f "$INSTALL_DIR/tools_scripts/node_exporter.defaults" ]]; then
     cp "$INSTALL_DIR/tools_scripts/node_exporter.defaults" "$INSTALL_DIR/conf/node_exporter.defaults"
     echo "==> ✓ Seeded $INSTALL_DIR/conf/node_exporter.defaults"
+fi
+
+# Never silently replace a compose-wrapper unit: there docker-compose.yml
+# defines the containers (often including certbot).
+if [[ -f "$TESTPOINT_SERVICE" ]] && grep -q 'podman-compose\|docker compose\|docker-compose' "$TESTPOINT_SERVICE" \
+   && ! grep -q 'podman run' "$TESTPOINT_SERVICE"; then
+    if [[ "$CONVERT_FROM_COMPOSE" != "true" ]]; then
+        echo "ERROR: $TESTPOINT_SERVICE runs podman-compose; docker-compose.yml defines this host's containers." >&2
+        echo "       Not replacing it. Keep using update-perfsonar-deployment.sh for this host, or re-run with" >&2
+        echo "       --convert-from-compose to switch to a direct 'podman run' unit deliberately." >&2
+        exit 1
+    fi
+    echo "==> Converting compose-wrapper unit to a direct podman run unit (--convert-from-compose)"
+    if [[ "$WITH_CERTBOT" != "true" && "$NO_CERTBOT" != "true" ]] && \
+       grep -qE '^[[:space:]]*certbot:' "$INSTALL_DIR/docker-compose.yml" 2>/dev/null; then
+        echo "==> docker-compose.yml has a certbot service — enabling Let's Encrypt (Option B) mounts"
+        WITH_CERTBOT=true
+    fi
 fi
 
 # Keep Let's Encrypt mode on re-runs: if a certbot unit from a previous LE
