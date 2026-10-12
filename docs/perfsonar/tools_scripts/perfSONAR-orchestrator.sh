@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.1.9 - 2026-10-12
+#   - Step 9 (pSConfig): after enrolling, check that the agent has at least
+#     one remote and say so loudly if not (enrollment failures were ignored,
+#     leaving hosts that create no mesh tests of their own, as found on
+#     psmsu01/psmsu02.aglt2.org). The enroll script now restarts the agent.
 # Version: 1.1.8 - 2026-10-09
 #   - Option B: after issuing the certificate, (re)start the systemd-managed
 #     perfsonar-certbot.service instead of a separate 'podman run -d certbot'
@@ -497,6 +502,20 @@ step_psconfig() {
   if [ -x /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh ]; then
     run /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y -v || true
     run podman exec perfsonar-testpoint psconfig remote list || true
+    if [ "$DRY_RUN" != true ]; then
+      local nremotes
+      nremotes=$(podman exec perfsonar-testpoint psconfig remote list 2>/dev/null | grep -c '"url"' || true)
+      if [ "${nremotes:-0}" -eq 0 ]; then
+        log "ERROR: the pSConfig agent has NO remote configured. This host will take part in tests"
+        log "  that other hosts schedule, but will create none of its own."
+        log "  Check reverse DNS for this host's addresses, then run:"
+        log "    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -n -v   (preview)"
+        log "    /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y"
+        log "  or: podman exec perfsonar-testpoint psconfig remote add --configure-archives https://psconfig.opensciencegrid.org/pub/auto/<fqdn>"
+      else
+        log "pSConfig agent enrolled ($nremotes remote(s))."
+      fi
+    fi
   else
     log "Auto-enroll script not present; skipping."
   fi
