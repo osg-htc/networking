@@ -14,6 +14,10 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.5.0 - 2026-10-12
+#   - Known-issue check for hosts with several IPv4 NICs: arp_ignore < 1,
+#     arp_announce < 2 or strict rp_filter lets NICs answer ARP for each
+#     other's addresses ("ARP flux"); collect rp_filter with the sysctls.
 # Version: 1.4.0 - 2026-10-09
 #   - Service-unit check distinguishes a direct 'podman run' unit from the
 #     older compose-wrapper unit (podman-compose up); for the latter, mounts
@@ -50,7 +54,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.4.0"
+VERSION="1.5.0"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------
@@ -706,6 +710,7 @@ collect_tuning() {
         net.core.netdev_max_backlog
         net.ipv4.conf.all.arp_ignore
         net.ipv4.conf.all.arp_announce
+        net.ipv4.conf.all.rp_filter
     )
     {
         echo "--- Key sysctl parameters ---"
@@ -762,6 +767,42 @@ collect_known_issues() {
         fi
     fi
     emit ""
+
+    # Check 1b: several IPv4 NICs need arp_ignore/arp_announce/loose rp_filter
+    local mn_devs=() mn_dev mn_bad=() ig an rp
+    while IFS= read -r mn_dev; do
+        case "$mn_dev" in lo|podman*|cni*|docker*|veth*|virbr*|br-*) continue ;; esac
+        [[ " ${mn_devs[*]} " == *" $mn_dev "* ]] || mn_devs+=("$mn_dev")
+    done < <(ip -4 -o addr show scope global 2>/dev/null | awk '{print $2}' | sed 's/@.*//')
+    if [[ ${#mn_devs[@]} -ge 2 ]]; then
+        emit "--- Check: ARP settings for multiple NICs (${mn_devs[*]}) ---"
+        for mn_dev in "${mn_devs[@]}"; do
+            ig=$(cat /proc/sys/net/ipv4/conf/all/arp_ignore 2>/dev/null || echo 0)
+            an=$(cat /proc/sys/net/ipv4/conf/all/arp_announce 2>/dev/null || echo 0)
+            rp=$(cat /proc/sys/net/ipv4/conf/all/rp_filter 2>/dev/null || echo 0)
+            local d_ig d_an d_rp
+            d_ig=$(cat "/proc/sys/net/ipv4/conf/$mn_dev/arp_ignore" 2>/dev/null || echo 0)
+            d_an=$(cat "/proc/sys/net/ipv4/conf/$mn_dev/arp_announce" 2>/dev/null || echo 0)
+            d_rp=$(cat "/proc/sys/net/ipv4/conf/$mn_dev/rp_filter" 2>/dev/null || echo 0)
+            (( d_ig > ig )) && ig=$d_ig
+            (( d_an > an )) && an=$d_an
+            (( d_rp > rp )) && rp=$d_rp
+            if (( ig < 1 || an < 2 || rp == 1 )); then
+                mn_bad+=("$mn_dev(arp_ignore=$ig,arp_announce=$an,rp_filter=$rp)")
+            fi
+        done
+        if [[ ${#mn_bad[@]} -gt 0 ]]; then
+            emit "  WARNING: ${mn_bad[*]}"
+            emit "  Every NIC may answer ARP for every local address, so traffic for one test"
+            emit "  address can arrive on another card (and strict rp_filter can drop it)."
+            emit "  Fix: update-perfsonar-deployment.sh --apply  (or perfSONAR-pbr-nm.sh --multinic-sysctl-only)"
+            printf "  ${C_RED}✗${C_RESET} multi-NIC ARP settings not set\n"
+        else
+            emit "  OK: arp_ignore>=1, arp_announce=2, rp_filter not strict"
+            printf "  ${C_GREEN}✓${C_RESET} multi-NIC ARP settings OK\n"
+        fi
+        emit ""
+    fi
 
     # Check 2: certbot :Z volume mount issue
     if [[ "$DEPLOY_TYPE" == "container" && -f "$BASE_DIR/docker-compose.yml" ]]; then

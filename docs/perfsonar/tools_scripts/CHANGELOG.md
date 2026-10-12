@@ -1,6 +1,22 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-12 (multi-NIC ARP settings)
+
+### Fixed
+
+- **ARP flux on hosts with several NICs** (found on psum01.aglt2.org: three NICs in one /23). With the kernel defaults
+  (`arp_ignore=0`, `arp_announce=0`) every NIC answered ARP for every local address; a 25G NIC also answered for the
+  100G test address, so its traffic could arrive on the wrong card, and strict `rp_filter=1` could drop packets that
+  source-based routing expects.
+  - `perfSONAR-pbr-nm.sh` v1.1.0 writes `/etc/sysctl.d/90-perfsonar-multinic.conf` (`arp_ignore=1`,
+    `arp_announce=2`, `rp_filter=2`) when it configures two or more IPv4 NICs, applies it and sends gratuitous ARPs.
+    New options `--no-multinic-sysctl` and `--multinic-sysctl-only`.
+  - `update-perfsonar-deployment.sh` v1.12.0 checks multi-NIC hosts (container and toolkit) and applies the same
+    settings with `--apply`; no restart needed.
+  - `perfSONAR-diagnostic-report.sh` v1.5.0 reports the issue and collects `rp_filter`.
+  - Install guide: "Several NICs on one host" section with a check.
+
 ## [Unreleased] - 2026-10-09 (Let's Encrypt renewal fixes)
 
 ### Fixed
