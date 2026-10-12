@@ -1,6 +1,21 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-12 (pSConfig enrollment check)
+
+### Fixed
+
+- **Hosts with no pSConfig remote went unnoticed** (found on psmsu01/psmsu02.aglt2.org, which had `"remotes": []`
+  since their install in February: they took part in tests other hosts scheduled but created none of their own,
+  while pScheduler and the health check looked fine).
+  - `update-perfsonar-deployment.sh` v1.13.0 checks `psconfig remote list` (container and toolkit) and, with
+    `--apply`, enrolls the host with `perfSONAR-auto-enroll-psconfig.sh`.
+  - `perfSONAR-diagnostic-report.sh` v1.6.0 reports it as a known issue and lists the remotes.
+  - `perfSONAR-orchestrator.sh` v1.1.9 checks the result of Step 9 and says so loudly if no remote was added
+    (failures were ignored before).
+  - `perfSONAR-auto-enroll-psconfig.sh` v1.1.0 restarts `psconfig-pscheduler-agent` after enrolling.
+  - Install guide: warning on checking enrollment.
+
 ## [Unreleased] - 2026-10-12 (multi-NIC ARP settings)
 
 ### Fixed

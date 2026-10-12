@@ -1063,6 +1063,15 @@ podman exec -it perfsonar-testpoint psconfig remote list
     - Deduplicates while preserving discovery order.
     - Adds each `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` with `--configure-archives`.
     - Lists configured remotes and returns non-zero if any enrollment fails.
+    - Restarts `psconfig-pscheduler-agent` (v1.1.0 and later) so the agent creates its tasks right away.
+
+!!! warning "Check that enrollment worked"
+
+    A testpoint with **no** pSConfig remote looks healthy (pScheduler runs, `pscheduler troubleshoot` passes) but
+    creates no mesh tests of its own; it only takes part in tests other hosts schedule. `psconfig remote list` must
+    show at least one `https://psconfig.opensciencegrid.org/pub/auto/<FQDN>` entry; `[]` means the host is not
+    enrolled. `update-perfsonar-deployment.sh` (v1.13.0 and later) and `perfSONAR-diagnostic-report.sh` warn about
+    this, and `update-perfsonar-deployment.sh --apply` enrolls the host.
 
     Integrate into provisioning CI by running with `-n` (dry-run) for approval and then `-y` once approved.
 
