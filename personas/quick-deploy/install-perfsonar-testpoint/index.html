@@ -1040,6 +1040,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#several-nics-on-one-host-arp-and-reverse-path-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Several NICs on one host: ARP and reverse-path settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dns-forward-and-reverse-entries-required" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3378,6 +3389,26 @@ unnecessary. If connectivity or rules appear inconsistent (<code>ip rule show</c
 NetworkManager restart:</p>
 <div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>restart<span class="w"> </span>NetworkManager
 </code></pre></div>
+<h3 id="several-nics-on-one-host-arp-and-reverse-path-settings">Several NICs on one host: ARP and reverse-path settings<a class="headerlink" href="#several-nics-on-one-host-arp-and-reverse-path-settings" title="Permanent link">&para;</a></h3>
+<p>With two or more NICs that carry IPv4 addresses (for example a latency NIC, a 25G and a 100G throughput NIC, often in
+the same subnet), the kernel defaults let <strong>every NIC answer ARP for every address on the host</strong> ("ARP flux"). The
+gateway can then learn one test address at another NIC's MAC, so traffic for the 100G address arrives on a 25G card,
+and strict reverse-path filtering can drop packets that source-based routing expects.</p>
+<p><code>perfSONAR-pbr-nm.sh</code> (v1.1.0 and later) therefore writes <code>/etc/sysctl.d/90-perfsonar-multinic.conf</code> whenever it
+configures two or more IPv4 NICs, applies it and sends gratuitous ARPs:</p>
+<div class="highlight"><pre><span></span><code>net.ipv4.conf.all.arp_ignore = 1
+net.ipv4.conf.all.arp_announce = 2
+net.ipv4.conf.all.rp_filter = 2
+</code></pre></div>
+<p><code>update-perfsonar-deployment.sh --apply</code> (v1.12.0 and later) makes the same change on existing hosts, and
+<code>perfSONAR-diagnostic-report.sh</code> reports hosts that still need it. To apply only this step:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh<span class="w"> </span>--multinic-sysctl-only
+</code></pre></div>
+<p>To check a host, send a duplicate-address probe for one NIC's address out of another NIC and count the replies. Each
+address should be answered by exactly one MAC, the owning NIC's (replace the interface and address):</p>
+<div class="highlight"><pre><span></span><code>timeout<span class="w"> </span><span class="m">6</span><span class="w"> </span>tcpdump<span class="w"> </span>-eni<span class="w"> </span>ens1f1np1<span class="w"> </span>-l<span class="w"> </span><span class="s1">'arp[6:2] = 2'</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">'{print "reply from", $2}'</span><span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>sleep<span class="w"> </span><span class="m">1</span><span class="p">;</span><span class="w"> </span>arping<span class="w"> </span>-D<span class="w"> </span>-c<span class="w"> </span><span class="m">3</span><span class="w"> </span>-w<span class="w"> </span><span class="m">3</span><span class="w"> </span>-I<span class="w"> </span>ens1f1np1<span class="w"> </span><span class="m">192</span>.0.2.55<span class="w"> </span>&gt;/dev/null<span class="p">;</span><span class="w"> </span><span class="nb">wait</span>
+</code></pre></div>
+<p>IPv6 is not affected: Linux answers neighbour solicitations only for addresses on the receiving interface.</p>
 <h3 id="dns-forward-and-reverse-entries-required">DNS: forward and reverse entries (required)<a class="headerlink" href="#dns-forward-and-reverse-entries-required" title="Permanent link">&para;</a></h3>
 <p>All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching
 reverse (PTR) record. This is required so remote test tools and site operators can reliably reach and identify your
@@ -4680,6 +4711,8 @@ tail<span class="w"> </span>-100<span class="w"> </span>/var/log/perfSONAR-multi
 <ul>
 <li>Verify <code>/etc/perfSONAR-multi-nic-config.conf</code> has correct IPs and gateways</li>
 <li>Reapply configuration: <code>/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes</code></li>
+<li>On hosts with several NICs, check the ARP settings (see "Several NICs on one host" in Step 3): with
+  <code>arp_ignore=0</code> another NIC can answer ARP for a test address and receive its traffic</li>
 <li>Reboot if rules are not being applied correctly</li>
 <li>Check for conflicting NetworkManager or systemd-networkd rules</li>
 </ul>

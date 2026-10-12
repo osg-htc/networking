@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.11.0 - 2026-10-09
+# Version: 1.12.0 - 2026-10-12
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,14 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.12.0 - 2026-10-12
+#   - Multi-NIC ARP check (container and toolkit hosts): with two or more
+#     interfaces carrying global IPv4 addresses, require arp_ignore >= 1,
+#     arp_announce = 2 and loose rp_filter (2). The kernel defaults let every
+#     NIC answer ARP for every local address (on psum01.aglt2.org a 25G NIC
+#     answered for the 100G test address). With --apply, writes
+#     /etc/sysctl.d/90-perfsonar-multinic.conf (same as perfSONAR-pbr-nm.sh
+#     >= 1.1.0), applies it and sends gratuitous ARPs. No restart needed.
 # Version: 1.11.0 - 2026-10-09
 #   - Let's Encrypt checks (found on psmsu01/psum05.aglt2.org), for hosts
 #     whose testpoint mounts /etc/letsencrypt, have a certbot unit, or (compose)
@@ -168,7 +176,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.11.0"
+VERSION="1.12.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -1536,6 +1544,80 @@ check_letsencrypt() {
     echo
 }
 
+# --- Multi-NIC ARP / rp_filter ----------------------------------------------
+#
+# Several NICs with global IPv4 addresses on one host need arp_ignore=1 and
+# arp_announce=2, or every NIC answers ARP for every local address ("ARP flux")
+# and traffic for one test address can arrive on another card; strict
+# rp_filter (1) can then drop it. Linux applies max(all, <dev>) for these.
+
+MULTINIC_SYSCTL_FILE="/etc/sysctl.d/90-perfsonar-multinic.conf"
+
+sysctl_val() { cat "/proc/sys/net/ipv4/conf/$1/$2" 2>/dev/null || echo 0; }
+
+check_multinic_arp() {
+    local devs=() dev
+    while IFS= read -r dev; do
+        case "$dev" in
+            lo|podman*|cni*|docker*|veth*|virbr*|br-*) continue ;;
+        esac
+        [[ " ${devs[*]} " == *" $dev "* ]] || devs+=("$dev")
+    done < <(ip -4 -o addr show scope global 2>/dev/null | awk '{print $2}' | sed 's/@.*//')
+    if [[ ${#devs[@]} -lt 2 ]]; then
+        return
+    fi
+
+    info "Multi-NIC ARP check (${#devs[@]} IPv4 interfaces: ${devs[*]})..."
+    local bad=() all_ig all_an all_rp ig an rp
+    all_ig=$(sysctl_val all arp_ignore); all_an=$(sysctl_val all arp_announce); all_rp=$(sysctl_val all rp_filter)
+    for dev in "${devs[@]}"; do
+        ig=$(sysctl_val "$dev" arp_ignore);   (( all_ig > ig )) && ig=$all_ig
+        an=$(sysctl_val "$dev" arp_announce); (( all_an > an )) && an=$all_an
+        rp=$(sysctl_val "$dev" rp_filter);    (( all_rp > rp )) && rp=$all_rp
+        if (( ig < 1 || an < 2 || rp == 1 )); then
+            bad+=("$dev (arp_ignore=$ig arp_announce=$an rp_filter=$rp)")
+        fi
+    done
+    if [[ ${#bad[@]} -eq 0 ]]; then
+        ok "  ARP/rp_filter settings OK for multiple NICs"
+        echo
+        return
+    fi
+    changed "  NICs answer ARP for each other's addresses / strict reverse-path filter:"
+    for dev in "${bad[@]}"; do changed "    - $dev"; done
+    CHANGES_FOUND=1
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would write $MULTINIC_SYSCTL_FILE (arp_ignore=1, arp_announce=2, rp_filter=2) and apply it"
+    elif [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to set arp_ignore=1, arp_announce=2, rp_filter=2 ($MULTINIC_SYSCTL_FILE)."
+    else
+        cat > "$MULTINIC_SYSCTL_FILE" <<'SYSCTL'
+# Written by update-perfsonar-deployment.sh: several NICs on one host.
+# arp_ignore=1: answer ARP only for addresses on the receiving interface.
+# arp_announce=2: use the outgoing interface's own address in ARP requests.
+# rp_filter=2: loose reverse-path filtering (strict mode breaks source routing).
+net.ipv4.conf.all.arp_ignore = 1
+net.ipv4.conf.all.arp_announce = 2
+net.ipv4.conf.all.rp_filter = 2
+SYSCTL
+        if sysctl -q -p "$MULTINIC_SYSCTL_FILE"; then
+            ok "  ✓ Wrote and applied $MULTINIC_SYSCTL_FILE"
+        else
+            warn "  sysctl -p $MULTINIC_SYSCTL_FILE failed"
+        fi
+        if command -v arping >/dev/null 2>&1; then
+            local addr
+            for dev in "${devs[@]}"; do
+                while IFS= read -r addr; do
+                    arping -q -U -c 2 -I "$dev" "$addr" >/dev/null 2>&1 || true
+                done < <(ip -4 -o addr show dev "$dev" scope global | awk '{print $4}' | cut -d/ -f1)
+            done
+            ok "  ✓ Sent gratuitous ARPs so neighbours relearn each address's MAC"
+        fi
+    fi
+    echo
+}
+
 # --- Main ------------------------------------------------------------------
 
 main() {
@@ -1549,6 +1631,7 @@ main() {
     phase3_update
     fix_container_selinux_labels
     check_letsencrypt
+    check_multinic_arp
     fix_dns_resolver
     phase4_restart
     phase5_systemd

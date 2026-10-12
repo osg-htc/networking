@@ -26,6 +26,16 @@
 #     configured with their own routing tables and source-based rules.
 #
 # Author: Shawn McKee - University of Michigan <smckee@umich.edu>
+# Version: 1.1.0 - Oct 12 2026
+#   - Multi-NIC hosts: write /etc/sysctl.d/90-perfsonar-multinic.conf
+#     (arp_ignore=1, arp_announce=2, rp_filter=2), apply it and send
+#     gratuitous ARPs. With the kernel defaults every NIC answers ARP for
+#     every local address ("ARP flux"); on psum01.aglt2.org (three NICs in
+#     one /23) the 100G address was also answered by a 25G NIC, so traffic
+#     for the 100G test address could arrive on the wrong card. Strict
+#     rp_filter can drop packets that source-based routing expects.
+#     Skipped with --no-multinic-sysctl; --multinic-sysctl-only applies just
+#     this step.
 # Version: 1.0.3 - Oct 9 2026
 #   - --dry-run no longer asks for confirmation (nothing is changed).
 # Version: 1.0.2 - Oct 9 2026
@@ -79,6 +89,9 @@ fi
 LOG_FILE="/var/log/perfSONAR-multi-nic-config.log"
 # Runtime flags: set by CLI parsing later in the main section.
 DRY_RUN=false        # when true: print actions and do not make changes
+MULTINIC_SYSCTL=true # write/apply the multi-NIC ARP/rp_filter sysctls (see below)
+MULTINIC_SYSCTL_ONLY=false
+MULTINIC_SYSCTL_FILE="/etc/sysctl.d/90-perfsonar-multinic.conf"
 AUTO_YES=false       # when true: skip interactive confirmation
 DEBUG=false          # when true: run commands under bash -x for verbose output
 
@@ -113,6 +126,15 @@ Options:
   --debug                     Run commands in debug mode (bash -x)
     --rebuild-all               Destructive full rebuild (remove all NM connections and rules first)
     --apply-inplace             Explicitly select in-place apply (non-destructive, default)
+  --no-multinic-sysctl        Do not write/apply the multi-NIC ARP and rp_filter sysctls
+  --multinic-sysctl-only      Only write/apply the multi-NIC sysctls (no NetworkManager changes)
+
+Multi-NIC sysctls: with two or more IPv4 NICs the script writes
+/etc/sysctl.d/90-perfsonar-multinic.conf with
+    net.ipv4.conf.all.arp_ignore = 1     (answer ARP only for the receiving NIC's own address)
+    net.ipv4.conf.all.arp_announce = 2   (use the outgoing NIC's address in ARP requests)
+    net.ipv4.conf.all.rp_filter = 2      (loose reverse-path check, needed with source routing)
+applies it and sends gratuitous ARPs so neighbours relearn the right MAC per address.
   
 Note:
     --generate-config-auto will skip NICs that do not have either an IPv4 or
@@ -120,6 +142,53 @@ Note:
     NM connection files unless they are explicitly set as DEFAULT_ROUTE_NIC
     or provided with a gateway.
 EOF
+}
+
+# Multi-NIC ARP / reverse-path settings.
+# With the kernel defaults (arp_ignore=0, arp_announce=0) every NIC answers ARP
+# requests for every address on the host, so the gateway can learn an address
+# at another NIC's MAC ("ARP flux") and traffic for one test address arrives on
+# a different card. Strict rp_filter (1) can then drop it. These settings are
+# the standard ones for several NICs on the same host, in one subnet or not.
+configure_multinic_sysctls() {
+    local i n4=0
+    for i in "${!NIC_NAMES[@]}"; do
+        [ "${NIC_IPV4_ADDRS[$i]:--}" != "-" ] && n4=$((n4 + 1))
+    done
+    if [ "$MULTINIC_SYSCTL" != true ]; then
+        log "Multi-NIC sysctls skipped (--no-multinic-sysctl)."
+        return 0
+    fi
+    if (( n4 < 2 )); then
+        log "Single IPv4 NIC: multi-NIC ARP/rp_filter sysctls not needed."
+        return 0
+    fi
+    log "Configuring multi-NIC ARP/rp_filter sysctls ($n4 IPv4 NICs) in $MULTINIC_SYSCTL_FILE"
+    local content
+    content="# Written by perfSONAR-pbr-nm.sh: several NICs on one host.
+# arp_ignore=1: answer ARP only for addresses on the receiving interface.
+# arp_announce=2: use the outgoing interface's own address in ARP requests.
+# rp_filter=2: loose reverse-path filtering (strict mode breaks source routing).
+net.ipv4.conf.all.arp_ignore = 1
+net.ipv4.conf.all.arp_announce = 2
+net.ipv4.conf.all.rp_filter = 2
+"
+    if [ "$DRY_RUN" = true ]; then
+        echo "[DRY-RUN] write $MULTINIC_SYSCTL_FILE:"
+        printf '%s' "$content" | sed 's/^/[DRY-RUN]   /'
+    else
+        printf '%s' "$content" > "$MULTINIC_SYSCTL_FILE" || { log "WARNING: could not write $MULTINIC_SYSCTL_FILE"; return 0; }
+    fi
+    run_cmd sysctl -q -p "$MULTINIC_SYSCTL_FILE" || log "WARNING: sysctl -p $MULTINIC_SYSCTL_FILE failed"
+    if command -v arping >/dev/null 2>&1; then
+        for i in "${!NIC_NAMES[@]}"; do
+            [ "${NIC_IPV4_ADDRS[$i]:--}" = "-" ] && continue
+            run_cmd arping -q -U -c 2 -I "${NIC_NAMES[$i]}" "${NIC_IPV4_ADDRS[$i]}" || \
+                log "WARNING: gratuitous ARP for ${NIC_IPV4_ADDRS[$i]} on ${NIC_NAMES[$i]} failed"
+        done
+    else
+        log "arping not installed: neighbours relearn MACs when their ARP entries expire (dnf install iputils)."
+    fi
 }
 
 # CLI parsing is deferred to the MAIN section (end of file) so that all helper
@@ -1556,6 +1625,14 @@ while [[ ${#} -gt 0 ]]; do
             REBUILD_ALL=false
             shift
             ;;
+        --no-multinic-sysctl)
+            MULTINIC_SYSCTL=false
+            shift
+            ;;
+        --multinic-sysctl-only)
+            MULTINIC_SYSCTL_ONLY=true
+            shift
+            ;;
         --generate-config-auto)
             GENERATE_CONFIG_AUTO=true
             shift
@@ -1623,6 +1700,13 @@ source "$CONFIG_FILE"
 sanitize_config
 prompt_missing_gateways_from_config
 validate_config
+
+if [ "$MULTINIC_SYSCTL_ONLY" = true ]; then
+    MULTINIC_SYSCTL=true
+    configure_multinic_sysctls
+    log "Multi-NIC sysctl step done (--multinic-sysctl-only); NetworkManager not changed."
+    exit 0
+fi
 
 # -------- Warning Prompt --------
 if [ "$REBUILD_ALL" = true ]; then
@@ -1714,6 +1798,8 @@ for ((i = 0; i < count; i++)); do
 done
 
 check_any_dns_configured
+
+configure_multinic_sysctls
 
 log ""
 log "${GREEN}All NICs configured. Done at $(date).${NC}"
