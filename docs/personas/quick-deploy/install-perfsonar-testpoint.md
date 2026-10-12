@@ -352,6 +352,38 @@ systemctl restart NetworkManager
 
 ```
 
+### Several NICs on one host: ARP and reverse-path settings
+
+With two or more NICs that carry IPv4 addresses (for example a latency NIC, a 25G and a 100G throughput NIC, often in
+the same subnet), the kernel defaults let **every NIC answer ARP for every address on the host** ("ARP flux"). The
+gateway can then learn one test address at another NIC's MAC, so traffic for the 100G address arrives on a 25G card,
+and strict reverse-path filtering can drop packets that source-based routing expects.
+
+`perfSONAR-pbr-nm.sh` (v1.1.0 and later) therefore writes `/etc/sysctl.d/90-perfsonar-multinic.conf` whenever it
+configures two or more IPv4 NICs, applies it and sends gratuitous ARPs:
+
+```text
+net.ipv4.conf.all.arp_ignore = 1
+net.ipv4.conf.all.arp_announce = 2
+net.ipv4.conf.all.rp_filter = 2
+```
+
+`update-perfsonar-deployment.sh --apply` (v1.12.0 and later) makes the same change on existing hosts, and
+`perfSONAR-diagnostic-report.sh` reports hosts that still need it. To apply only this step:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --multinic-sysctl-only
+```
+
+To check a host, send a duplicate-address probe for one NIC's address out of another NIC and count the replies. Each
+address should be answered by exactly one MAC, the owning NIC's (replace the interface and address):
+
+```bash
+timeout 6 tcpdump -eni ens1f1np1 -l 'arp[6:2] = 2' 2>/dev/null | awk '{print "reply from", $2}' & sleep 1; arping -D -c 3 -w 3 -I ens1f1np1 192.0.2.55 >/dev/null; wait
+```
+
+IPv6 is not affected: Linux answers neighbour solicitations only for addresses on the receiving interface.
+
 ### DNS: forward and reverse entries (required)
 
 All IP addresses that will be used for perfSONAR testing MUST have DNS entries: a forward (A/AAAA) record and a matching
@@ -1785,6 +1817,8 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
 
     - Verify `/etc/perfSONAR-multi-nic-config.conf` has correct IPs and gateways
     - Reapply configuration: `/opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --yes`
+    - On hosts with several NICs, check the ARP settings (see "Several NICs on one host" in Step 3): with
+      `arp_ignore=0` another NIC can answer ARP for a test address and receive its traffic
     - Reboot if rules are not being applied correctly
     - Check for conflicting NetworkManager or systemd-networkd rules
 
