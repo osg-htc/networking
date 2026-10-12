@@ -3988,9 +3988,18 @@ podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </spa
 <li>Deduplicates while preserving discovery order.</li>
 <li>Adds each <code>https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> with <code>--configure-archives</code>.</li>
 <li>Lists configured remotes and returns non-zero if any enrollment fails.</li>
+<li>Restarts <code>psconfig-pscheduler-agent</code> (v1.1.0 and later) so the agent creates its tasks right away.</li>
 </ul>
-<p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
 </details>
+<div class="admonition warning">
+<p class="admonition-title">Check that enrollment worked</p>
+<p>A testpoint with <strong>no</strong> pSConfig remote looks healthy (pScheduler runs, <code>pscheduler troubleshoot</code> passes) but
+creates no mesh tests of its own; it only takes part in tests other hosts schedule. <code>psconfig remote list</code> must
+show at least one <code>https://psconfig.opensciencegrid.org/pub/auto/&lt;FQDN&gt;</code> entry; <code>[]</code> means the host is not
+enrolled. <code>update-perfsonar-deployment.sh</code> (v1.13.0 and later) and <code>perfSONAR-diagnostic-report.sh</code> warn about
+this, and <code>update-perfsonar-deployment.sh --apply</code> enrolls the host.</p>
+<p>Integrate into provisioning CI by running with <code>-n</code> (dry-run) for approval and then <code>-y</code> once approved.</p>
+</div>
 <hr />
 <h2 id="step-7-register-and-configure-with-wlcgosg">Step 7 – Register and Configure with WLCG/OSG<a class="headerlink" href="#step-7-register-and-configure-with-wlcgosg" title="Permanent link">&para;</a></h2>
 <ol>

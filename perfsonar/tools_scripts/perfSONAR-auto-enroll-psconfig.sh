@@ -8,6 +8,9 @@
 #   - Container mode (default): uses podman/docker to run psconfig inside the container
 #   - Local mode (--local): runs psconfig commands directly on the host (RPM Toolkit install)
 #
+# Version: 1.1.0 - 2026-10-12
+#   - Restart psconfig-pscheduler-agent after enrolling so the agent creates
+#     its tasks now instead of at its next cycle.
 # Version: 1.0.0 - 2025-11-09
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
@@ -35,7 +38,7 @@
 
 set -euo pipefail
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 PROG_NAME="$(basename "$0")"
 CONTAINER="perfsonar-testpoint"
 CONFIG="/etc/perfSONAR-multi-nic-config.conf"
@@ -248,6 +251,10 @@ if [[ $LOCAL_MODE -eq 0 ]]; then
     fi
   done
   log "Configured remotes:"; $RUNTIME exec "$CONTAINER" psconfig remote list || true
+  if [ $FAILURES -lt ${#UNIQ[@]} ]; then
+    log "Restarting psconfig-pscheduler-agent so it creates its tasks now"
+    $RUNTIME exec "$CONTAINER" systemctl restart psconfig-pscheduler-agent || err "Agent restart failed; it will pick up the remotes at its next cycle"
+  fi
 else
   for fq in "${UNIQ[@]}"; do
     url="https://psconfig.opensciencegrid.org/pub/auto/$fq"
@@ -257,6 +264,10 @@ else
     fi
   done
   log "Configured remotes (local):"; psconfig remote list || true
+  if [ $FAILURES -lt ${#UNIQ[@]} ]; then
+    log "Restarting psconfig-pscheduler-agent so it creates its tasks now"
+    systemctl restart psconfig-pscheduler-agent || err "Agent restart failed; it will pick up the remotes at its next cycle"
+  fi
 fi
 
 if [ $FAILURES -gt 0 ]; then

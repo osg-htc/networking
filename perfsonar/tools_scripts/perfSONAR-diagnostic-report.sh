@@ -14,6 +14,9 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.6.0 - 2026-10-12
+#   - Known-issue check: pSConfig agent with no remote configured (the host
+#     creates no mesh tests of its own); collect 'psconfig remote list'.
 # Version: 1.5.0 - 2026-10-12
 #   - Known-issue check for hosts with several IPv4 NICs: arp_ignore < 1,
 #     arp_announce < 2 or strict rp_filter lets NICs answer ARP for each
@@ -54,7 +57,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.5.0"
+VERSION="1.6.0"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------
@@ -800,6 +803,30 @@ collect_known_issues() {
         else
             emit "  OK: arp_ignore>=1, arp_announce=2, rp_filter not strict"
             printf "  ${C_GREEN}✓${C_RESET} multi-NIC ARP settings OK\n"
+        fi
+        emit ""
+    fi
+
+    # Check 1c: pSConfig agent enrolled in at least one mesh
+    local remotes_out="" remotes_n=""
+    if [[ "$DEPLOY_TYPE" == "container" && -n "${RUNTIME:-}" ]]; then
+        remotes_out=$($RUNTIME exec perfsonar-testpoint psconfig remote list 2>/dev/null || true)
+    elif [[ "$DEPLOY_TYPE" == "toolkit" ]] && command -v psconfig >/dev/null 2>&1; then
+        remotes_out=$(psconfig remote list 2>/dev/null || true)
+    fi
+    if [[ -n "$remotes_out" ]]; then
+        emit "--- Check: pSConfig enrollment ---"
+        remotes_n=$(grep -c '"url"' <<< "$remotes_out" || true)
+        if [[ "$remotes_n" -gt 0 ]]; then
+            emit "  OK: $remotes_n remote(s):"
+            grep '"url"' <<< "$remotes_out" | sed -e 's/.*"url" *: *"//' -e 's/".*//' -e 's/^/      /' >> "$OUTPUT_FILE"
+            printf "  ${C_GREEN}✓${C_RESET} pSConfig agent enrolled\n"
+        else
+            emit "  WARNING: the pSConfig agent has NO remote configured."
+            emit "  This host takes part in tests other hosts schedule, but creates none of its own."
+            emit "  Fix: perfSONAR-auto-enroll-psconfig.sh -n -v (preview), then -y"
+            emit "       (or update-perfsonar-deployment.sh --apply)"
+            printf "  ${C_RED}✗${C_RESET} pSConfig agent NOT enrolled\n"
         fi
         emit ""
     fi

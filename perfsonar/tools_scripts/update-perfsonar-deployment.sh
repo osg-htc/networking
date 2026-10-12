@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.12.0 - 2026-10-12
+# Version: 1.13.0 - 2026-10-12
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,11 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.13.0 - 2026-10-12
+#   - pSConfig enrollment check: warn when the pSConfig agent has no remote
+#     (the host then creates no mesh tests of its own; found on
+#     psmsu01/psmsu02.aglt2.org). With --apply, enroll with
+#     perfSONAR-auto-enroll-psconfig.sh (--local on toolkit hosts).
 # Version: 1.12.0 - 2026-10-12
 #   - Multi-NIC ARP check (container and toolkit hosts): with two or more
 #     interfaces carrying global IPv4 addresses, require arp_ignore >= 1,
@@ -176,7 +181,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.12.0"
+VERSION="1.13.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -1618,6 +1623,70 @@ SYSCTL
     echo
 }
 
+# --- pSConfig enrollment ----------------------------------------------------
+#
+# A host whose pSConfig agent has no remote configured looks healthy (pScheduler
+# runs, troubleshoot passes) but creates no mesh tasks of its own: it only takes
+# part in tests other hosts schedule. psmsu01/psmsu02.aglt2.org ran like this
+# for eight months after their install. With --apply, enroll with
+# perfSONAR-auto-enroll-psconfig.sh (reverse DNS of the configured addresses).
+
+psconfig_remote_list() {
+    if [[ "$DEPLOY_TYPE" == "container" ]]; then
+        $RUNTIME exec perfsonar-testpoint psconfig remote list 2>/dev/null
+    else
+        psconfig remote list 2>/dev/null
+    fi
+}
+
+check_psconfig_remotes() {
+    if [[ "$DEPLOY_TYPE" == "container" ]]; then
+        local state
+        state=$($RUNTIME inspect -f '{{.State.Status}}' perfsonar-testpoint 2>/dev/null || true)
+        [[ "$state" == "running" ]] || return 0
+    else
+        command -v psconfig >/dev/null 2>&1 || return 0
+    fi
+
+    info "Checking pSConfig enrollment..."
+    local out n
+    if ! out=$(psconfig_remote_list); then
+        warn "  Could not run 'psconfig remote list'"
+        echo
+        return
+    fi
+    n=$(grep -c '"url"' <<< "$out" || true)
+    if [[ "$n" -gt 0 ]]; then
+        ok "  pSConfig agent has $n remote(s):"
+        grep '"url"' <<< "$out" | sed -e 's/.*"url" *: *"//' -e 's/".*//' -e 's/^/      /'
+        echo
+        return
+    fi
+
+    changed "  pSConfig agent has NO remote configured: this host creates no mesh tests of its own"
+    CHANGES_FOUND=1
+    local enroll="$TOOLS_DIR/perfSONAR-auto-enroll-psconfig.sh"
+    local args=(-y)
+    [[ "$DEPLOY_TYPE" == "toolkit" ]] && args+=(--local)
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would run: $enroll ${args[*]}"
+    elif [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to enroll (or: $enroll -n -v to preview, then $enroll ${args[*]})."
+    elif [[ ! -f "$enroll" ]]; then
+        warn "  $enroll not found; enroll manually: psconfig remote add --configure-archives https://psconfig.opensciencegrid.org/pub/auto/<fqdn>"
+    elif bash "$enroll" "${args[@]}" 2>&1 | sed 's/^/    /'; then
+        n=$(psconfig_remote_list | grep -c '"url"' || true)
+        if [[ "$n" -gt 0 ]]; then
+            ok "  ✓ Enrolled ($n remote(s))"
+        else
+            warn "  Enrollment ran but no remote is configured; check reverse DNS of this host's addresses"
+        fi
+    else
+        warn "  Enrollment failed (see above). Manual: psconfig remote add --configure-archives https://psconfig.opensciencegrid.org/pub/auto/<fqdn>"
+    fi
+    echo
+}
+
 # --- Main ------------------------------------------------------------------
 
 main() {
@@ -1632,6 +1701,7 @@ main() {
     fix_container_selinux_labels
     check_letsencrypt
     check_multinic_arp
+    check_psconfig_remotes
     fix_dns_resolver
     phase4_restart
     phase5_systemd
