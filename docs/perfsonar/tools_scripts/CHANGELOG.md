@@ -1,6 +1,19 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-13 (orchestrator enables EPEL)
+
+### Fixed
+
+- **Orchestrator package step on fresh hosts**: `podman-compose` and `fail2ban` come only from EPEL, which the
+  orchestrator never enabled, so on a fresh EL9/EL10 host `dnf install` failed with "No match for argument" and the
+  orchestrator stopped (reported by UTA on a rebuilt test01.swt2.uta.edu).
+  - `perfSONAR-orchestrator.sh` v1.2.0 enables EPEL after CRB (`epel-release` on AlmaLinux/Rocky, the Fedora
+    `epel-release-latest-<major>` RPM on RHEL). `--no-epel` skips it.
+  - If the install still fails, it retries without the EPEL-only packages and lists what is missing instead of
+    aborting. `--help` prints the whole usage block.
+  - The install guide's manual package step shows how to enable CRB and EPEL first.
+
 ## [Unreleased] - 2026-10-13 (process limit for systemd units)
 
 ### Fixed
