@@ -14,6 +14,9 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.6.1 - 2026-10-13
+#   - Service-unit check: flag a direct unit without --shm-size or
+#     --pids-limit (podman's default of 2048 processes is too low).
 # Version: 1.6.0 - 2026-10-12
 #   - Known-issue check: pSConfig agent with no remote configured (the host
 #     creates no mesh tests of its own); collect 'psconfig remote list'.
@@ -57,7 +60,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.6.0"
+VERSION="1.6.1"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------
@@ -496,11 +499,13 @@ collect_config_files() {
         local missing=()
         grep -q 'node_exporter.defaults' "$svc" || missing+=("node_exporter.defaults mount")
         grep -q -- '--health-cmd' "$svc" || missing+=("container health check (--health-cmd)")
+        grep -q -- '--shm-size' "$svc" || missing+=("--shm-size=512m")
+        grep -q -- '--pids-limit' "$svc" || missing+=("--pids-limit=8192 (podman default 2048 is too low)")
         if grep -q -- '-v /run/dbus:/run/dbus' "$svc"; then
             missing+=("remove host /run/dbus mount (breaks container dbus.socket)")
         fi
         if [[ ${#missing[@]} -eq 0 ]]; then
-            emit "  OK: service unit is current (mounts and health check)"
+            emit "  OK: service unit is current (mounts, health check, shm and pids limits)"
             printf "  ${C_GREEN}✓${C_RESET} Service file OK\n"
         else
             emit "  OUT OF DATE: ${missing[*]}"
