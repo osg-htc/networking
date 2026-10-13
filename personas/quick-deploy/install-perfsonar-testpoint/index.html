@@ -3177,6 +3177,9 @@ ip<span class="w"> </span>-br<span class="w"> </span>addr
 <h3 id="path-a-orchestrated-guided-install-recommended-for-new-deployments">Path A: Orchestrated Guided Install (Recommended for New Deployments)<a class="headerlink" href="#path-a-orchestrated-guided-install-recommended-for-new-deployments" title="Permanent link">&para;</a></h3>
 <p>The orchestrator automates package installation, bootstrap, PBR configuration, security hardening, container deployment,
 certificate issuance, and pSConfig enrollment with interactive pauses (or non-interactive batch mode).</p>
+<p>Step 1 of the orchestrator enables CodeReady Builder (CRB) and EPEL, which provide <code>podman-compose</code> and <code>fail2ban</code>.
+On RHEL it uses <code>subscription-manager</code> for CRB and the Fedora <code>epel-release-latest-&lt;major&gt;</code> RPM for EPEL. If your site
+provides EPEL through a local mirror or Satellite, or does not allow it, configure that first and pass <code>--no-epel</code>.</p>
 <p><strong>Download and run the orchestrator:</strong></p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-fsSL<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/perfSONAR-orchestrator.sh<span class="w"> </span><span class="se">\</span>
@@ -3224,8 +3227,17 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 <p>For users who prefer granular control or need to customize each stage, continue with manual package installation,
 bootstrap, and configuration.</p>
 <h4 id="step-21-install-base-packages">Step 2.1 – Install Base Packages<a class="headerlink" href="#step-21-install-base-packages" title="Permanent link">&para;</a></h4>
-<p>On minimal hosts several required tools (e.g. <code>dig</code>, <code>nft</code>, <code>podman-compose</code>) are missing. Install all recommended
-prerequisites in one command:</p>
+<p>On minimal hosts several required tools (e.g. <code>dig</code>, <code>nft</code>, <code>podman-compose</code>) are missing. <code>podman-compose</code> and
+<code>fail2ban</code> come from EPEL, which needs CodeReady Builder (CRB). Enable both first:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># AlmaLinux / Rocky</span>
+dnf<span class="w"> </span>config-manager<span class="w"> </span>--set-enabled<span class="w"> </span>crb
+dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>epel-release
+
+<span class="c1"># RHEL (EL9 or EL10)</span>
+subscription-manager<span class="w"> </span>repos<span class="w"> </span>--enable<span class="w"> </span><span class="s2">"codeready-builder-for-rhel-</span><span class="k">$(</span>rpm<span class="w"> </span>-E<span class="w"> </span>%rhel<span class="k">)</span><span class="s2">-</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">-rpms"</span>
+dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span><span class="s2">"https://dl.fedoraproject.org/pub/epel/epel-release-latest-</span><span class="k">$(</span>rpm<span class="w"> </span>-E<span class="w"> </span>%rhel<span class="k">)</span><span class="s2">.noarch.rpm"</span>
+</code></pre></div>
+<p>Then install all recommended prerequisites in one command:</p>
 <div class="highlight"><pre><span></span><code>dnf<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>podman<span class="w"> </span>podman-docker<span class="w"> </span>podman-compose<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>jq<span class="w"> </span>curl<span class="w"> </span>tar<span class="w"> </span>gzip<span class="w"> </span>rsync<span class="w"> </span>bind-utils<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>nftables<span class="w"> </span>fail2ban<span class="w"> </span>policycoreutils-python-utils<span class="w"> </span><span class="se">\</span>
