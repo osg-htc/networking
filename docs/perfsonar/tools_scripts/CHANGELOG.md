@@ -1,6 +1,17 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-13 (process limit for systemd units)
+
+### Fixed
+
+- **Testpoint process limit**: the systemd unit written by `install-systemd-units.sh` had no `--pids-limit`, so
+  podman's default of 2048 processes applied, while the compose files set `pids_limit: 8192`. psmsu01.aglt2.org
+  reached the limit after it was enrolled (pScheduler: "can't start new thread").
+  - `install-systemd-units.sh` v1.6.1 adds `--pids-limit=8192`.
+  - `update-perfsonar-deployment.sh` v1.13.1 refreshes direct units without it (`--apply --restart`).
+  - `perfSONAR-diagnostic-report.sh` v1.6.1 flags units without `--shm-size` or `--pids-limit`.
+
 ## [Unreleased] - 2026-10-12 (pSConfig enrollment check)
 
 ### Fixed
