@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.2.0 - 2026-10-13
+#   - Step 1 enables EPEL (after CodeReady Builder): podman-compose and
+#     fail2ban come only from EPEL, so on a fresh EL9/EL10 host 'dnf install'
+#     failed with "No match for argument" and stopped the orchestrator (found
+#     by UTA on a rebuilt test01.swt2.uta.edu). AlmaLinux/Rocky install
+#     epel-release from their own repos; RHEL installs the Fedora
+#     epel-release-latest-<major> RPM. New --no-epel skips this for sites
+#     that provide EPEL some other way or do not allow it.
+#   - If the package install still fails, retry without the EPEL-only
+#     packages and say which are missing, instead of aborting: Option A/B
+#     run podman directly from systemd units, and Step 7 skips fail2ban when
+#     it is not installed.
+#   - --help prints the usage block (it was cut at a fixed line count).
 # Version: 1.1.9 - 2026-10-12
 #   - Step 9 (pSConfig): after enrolling, check that the agent has at least
 #     one remote and say so loudly if not (enrollment failures were ignored,
@@ -61,6 +74,8 @@ set -euo pipefail
 #  --auto-update           Install and enable auto-update timer for compose-managed containers
 #   --dry-run              Print steps but do not execute destructive operations
 #   --no-flowd-go          Skip flowd-go (SciTags) installation (installed by default)
+#   --no-epel              Do not enable EPEL in Step 1 (podman-compose and fail2ban
+#                          then need EPEL or a local mirror configured beforehand)
 #   --experiment-id N       SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
 #
 # Log:
@@ -73,12 +88,15 @@ NON_INTERACTIVE=false
 # shellcheck disable=SC2034
 AUTO_UPDATE=false
 INSTALL_FLOWD_GO=true
+ENABLE_EPEL=true
 FLOWD_GO_EXPERIMENT_ID=""
 DEPLOY_OPTION="A"         # A or B
 LE_FQDN=""
 LE_EMAIL=""
 
-# Recommended package set for minimal RHEL 9
+# Recommended package set for minimal EL9/EL10. Packages in EPEL_PACKAGES come
+# only from EPEL; the rest are in BaseOS/AppStream.
+EPEL_PACKAGES=(podman-compose fail2ban)
 RECOMMENDED_PACKAGES=(
   podman podman-docker podman-compose
   jq curl tar gzip rsync bind-utils
@@ -131,10 +149,11 @@ parse_cli() {
       --fqdn) LE_FQDN="${2:-}"; shift 2;;
       --email) LE_EMAIL="${2:-}"; shift 2;;
       --help|-h)
-        sed -n '1,80p' "$0" | sed -n '1,80p'
+        sed -n '/^# perfSONAR-orchestrator.sh$/,/^#   \/var\/log/p' "$0"
         exit 0;;
       --auto-update) AUTO_UPDATE=true; shift;;
       --no-flowd-go) INSTALL_FLOWD_GO=false; shift;;
+      --no-epel) ENABLE_EPEL=false; shift;;
       --experiment-id) FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
@@ -171,9 +190,57 @@ step_packages() {
       run dnf config-manager --set-enabled crb || \
         log "WARNING: 'crb' repo not found; continuing anyway"
     fi
-    run dnf -y install "${RECOMMENDED_PACKAGES[@]}"
+    if [ "$ENABLE_EPEL" = true ]; then
+      enable_epel "$el_major"
+    else
+      log "Not enabling EPEL (--no-epel); ${EPEL_PACKAGES[*]} must come from a repo you have configured"
+    fi
+    if ! run dnf -y install "${RECOMMENDED_PACKAGES[@]}"; then
+      local core=() p e skip
+      for p in "${RECOMMENDED_PACKAGES[@]}"; do
+        skip=false
+        for e in "${EPEL_PACKAGES[@]}"; do [ "$p" = "$e" ] && skip=true; done
+        [ "$skip" = true ] || core+=("$p")
+      done
+      log "WARNING: package install failed; retrying without the EPEL-only packages (${EPEL_PACKAGES[*]})"
+      if ! run dnf -y install "${core[@]}"; then
+        log "ERROR: base package install failed; see the dnf output above."
+        exit 1
+      fi
+    fi
+    local missing=() e
+    for e in "${EPEL_PACKAGES[@]}"; do
+      rpm -q "$e" >/dev/null 2>&1 || missing+=("$e")
+    done
+    if [ "$DRY_RUN" != true ] && [ ${#missing[@]} -gt 0 ]; then
+      log "WARNING: not installed: ${missing[*]} (from EPEL). The testpoint still deploys"
+      log "         (systemd runs podman directly; Step 7 skips fail2ban). To add them later:"
+      log "         enable EPEL, then: dnf -y install ${missing[*]}"
+    fi
   else
     log "dnf not found; please install packages manually."
+  fi
+}
+
+# Enable EPEL. AlmaLinux/Rocky/CentOS Stream ship epel-release in their own
+# repos (extras/AppStream); RHEL needs the Fedora release RPM. CRB must be
+# enabled first (done by the caller).
+enable_epel() {
+  local el_major="$1"
+  if rpm -q epel-release >/dev/null 2>&1; then
+    log "EPEL already enabled ($(rpm -q epel-release))"
+    return 0
+  fi
+  local url="https://dl.fedoraproject.org/pub/epel/epel-release-latest-${el_major}.noarch.rpm"
+  if grep -qsi 'Red Hat Enterprise Linux' /etc/os-release; then
+    log "RHEL ${el_major} — installing EPEL from ${url}"
+    run dnf -y install "$url" || log "WARNING: could not install EPEL from ${url}"
+  else
+    log "EL${el_major} — installing epel-release"
+    run dnf -y install epel-release || {
+      log "epel-release not in the configured repos; trying ${url}"
+      run dnf -y install "$url" || log "WARNING: could not enable EPEL"
+    }
   fi
 }
 

@@ -106,6 +106,10 @@ After completing Step 1 (minimal OS hardening), you can proceed in one of two wa
 The orchestrator automates package installation, bootstrap, PBR configuration, security hardening, container deployment,
 certificate issuance, and pSConfig enrollment with interactive pauses (or non-interactive batch mode).
 
+Step 1 of the orchestrator enables CodeReady Builder (CRB) and EPEL, which provide `podman-compose` and `fail2ban`.
+On RHEL it uses `subscription-manager` for CRB and the Fedora `epel-release-latest-<major>` RPM for EPEL. If your site
+provides EPEL through a local mirror or Satellite, or does not allow it, configure that first and pass `--no-epel`.
+
 **Download and run the orchestrator:**
 
 ```bash
@@ -169,8 +173,20 @@ bootstrap, and configuration.
 
 #### Step 2.1 – Install Base Packages
 
-On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) are missing. Install all recommended
-prerequisites in one command:
+On minimal hosts several required tools (e.g. `dig`, `nft`, `podman-compose`) are missing. `podman-compose` and
+`fail2ban` come from EPEL, which needs CodeReady Builder (CRB). Enable both first:
+
+```bash
+# AlmaLinux / Rocky
+dnf config-manager --set-enabled crb
+dnf -y install epel-release
+
+# RHEL (EL9 or EL10)
+subscription-manager repos --enable "codeready-builder-for-rhel-$(rpm -E %rhel)-$(uname -m)-rpms"
+dnf -y install "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm"
+```
+
+Then install all recommended prerequisites in one command:
 
 ```bash
 dnf -y install podman podman-docker podman-compose \
