@@ -6,7 +6,7 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.13.0 - 2026-10-12
+# Version: 1.13.1 - 2026-10-13
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
@@ -46,6 +46,10 @@ set -euo pipefail
 #     over the container's Apache config. With --apply the unit is regenerated
 #     by install-systemd-units.sh --force (>= 1.4.0), which derives the correct
 #     Option A / Option B mounts, and the container is restarted.
+# Version: 1.13.1 - 2026-10-13
+#   - Direct units without --pids-limit are refreshed: podman's default of
+#     2048 processes is too low for a busy testpoint (install-systemd-units.sh
+#     >= 1.6.1 sets 8192, as the compose files do).
 # Version: 1.13.0 - 2026-10-12
 #   - pSConfig enrollment check: warn when the pSConfig agent has no remote
 #     (the host then creates no mesh tests of its own; found on
@@ -181,7 +185,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.13.0"
+VERSION="1.13.1"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -999,6 +1003,9 @@ fix_stale_service_file() {
     fi
     if ! grep -q -- '--shm-size' "$svc"; then
         stale+=("no --shm-size=512m (PostgreSQL needs more than the 64 MB default)")
+    fi
+    if ! grep -q -- '--pids-limit' "$svc"; then
+        stale+=("no --pids-limit=8192 (podman's default of 2048 processes is too low for a busy testpoint)")
     fi
 
     if [[ ${#stale[@]} -gt 0 ]]; then

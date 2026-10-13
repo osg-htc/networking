@@ -47,10 +47,14 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.6.0
+# Version: 1.6.1
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.6.1 - Run the testpoint with --pids-limit=8192, like pids_limit: 8192
+#           in the compose files. Without it podman's default of 2048 applies;
+#           psmsu01.aglt2.org reached it after enrollment (pScheduler
+#           "can't start new thread").
 #   1.6.0 - Let's Encrypt fixes (found on psmsu01/psum05.aglt2.org):
 #         - Detect LE mode from the existing testpoint unit's /etc/letsencrypt
 #           mount, or from a certbot service in docker-compose.yml plus a
@@ -429,6 +433,7 @@ ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   --cgroupns host \\
   --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \\
   --shm-size=512m \\
+  --pids-limit=8192 \\
 ${MOUNT_LINES}  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
   --label=io.containers.autoupdate=registry \\
   --health-cmd "pscheduler troubleshoot --quick" \\
