@@ -4,6 +4,17 @@ set -euo pipefail
 # perfSONAR-install-flowd-go.sh
 # Install and configure flowd-go (SciTags flow-marking daemon) for perfSONAR hosts.
 #
+# Version: 1.5.0 - 2026-10-19
+#   - Install flowd-go from the CERN SciTags repository (written to
+#     /etc/yum.repos.d/scitags.repo) instead of a fixed RPM URL. The pinned
+#     flowd-go-2.5.0-1 file was removed from the repository, so new installs
+#     failed with HTTP 404 (reported by UTA on test01.swt2.uta.edu). The
+#     repository for the running EL major version is used, falling back to
+#     the EL9 one if it does not exist. dnf now picks the newest flowd-go,
+#     and 'dnf update' keeps it current.
+#   - New --repo-url URL (repository base URL) and --rpm-url URL (install one
+#     RPM, the old behaviour) override the default.
+#   - VERSION now matches the header (it still said 1.2.0).
 # Version: 1.4.0 - 2026-03-04
 #   - Reduce TCP enrichment sampling interval from 15 to 60 seconds for lower overhead
 #   - Firefly backend now sends START, periodic (every 60s) + END fireflies
@@ -27,6 +38,9 @@ set -euo pipefail
 #   --firefly-receiver HOST    Collector address for the fireflyb backend
 #                              (default: global.scitags.org; set to empty to disable)
 #   --firefly-receiver-port N  UDP port on the firefly collector (default: 10514)
+#   --repo-url URL             Base URL of the SciTags RPM repository
+#                              (default: CERN scitags<EL>al-testing for this EL version)
+#   --rpm-url URL              Install this flowd-go RPM instead of using a repository
 #   --list-experiments         Show available experiment IDs and exit
 #   --yes                      Skip interactive prompts
 #   --dry-run                  Preview actions without making changes
@@ -40,7 +54,7 @@ set -euo pipefail
 #   to the configured collector. This allows perfSONAR measurement flows to be tracked
 #   by ESnet Stardust and other SciTags-aware systems. Requires flowd-go >= 2.5.0.
 
-VERSION="1.2.0"
+VERSION="1.5.0"
 PROG_NAME="$(basename "$0")"
 LOG_FILE="/var/log/perfSONAR-install-flowd-go.log"
 
@@ -53,7 +67,12 @@ DRY_RUN=false
 UNINSTALL=false
 MULTI_NIC_CONF="/etc/perfSONAR-multi-nic-config.conf"
 FLOWD_GO_CONF="/etc/flowd-go/conf.yaml"
-FLOWD_GO_RPM_URL="https://linuxsoft.cern.ch/repos/scitags9al-testing/x86_64/os/Packages/f/flowd-go-2.5.0-1.x86_64.rpm"
+# flowd-go comes from the CERN SciTags repository. %s is the EL major version.
+FLOWD_GO_REPO_URL_FMT="https://linuxsoft.cern.ch/repos/scitags%sal-testing/\$basearch/os/"
+FLOWD_GO_REPO_URL=""     # --repo-url; default built from FLOWD_GO_REPO_URL_FMT
+FLOWD_GO_RPM_URL=""      # --rpm-url; install one RPM instead of using the repo
+FLOWD_GO_REPO_FILE="/etc/yum.repos.d/scitags.repo"
+FLOWD_GO_MIN_VERSION="2.5.0"
 
 # Firefly backend defaults
 # global.scitags.org is the authoritative global SciTags firefly collector.
@@ -233,6 +252,80 @@ build_config() {
     fi
 }
 
+# Write the SciTags repo file for base URL $1.
+write_scitags_repo() {
+    local url="$1"
+    log "Writing $FLOWD_GO_REPO_FILE (baseurl $url)"
+    [ "$DRY_RUN" = true ] && return 0
+    cat > "$FLOWD_GO_REPO_FILE" <<REPO
+# Written by perfSONAR-install-flowd-go.sh: CERN SciTags packages (flowd-go).
+[scitags]
+name=SciTags (flowd-go)
+baseurl=$url
+enabled=1
+gpgcheck=0
+REPO
+}
+
+# Check that the scitags repo answers (its metadata downloads).
+scitags_repo_ok() {
+    [ "$DRY_RUN" = true ] && return 0
+    "$PKG" -q -y --disablerepo='*' --enablerepo=scitags makecache >/dev/null 2>&1
+}
+
+install_flowd_go_rpm() {
+    PKG=""
+    command -v dnf &>/dev/null && PKG=dnf
+    [ -z "$PKG" ] && command -v yum &>/dev/null && PKG=yum
+    if [ -z "$PKG" ]; then
+        log "ERROR: Neither dnf nor yum found. Cannot install flowd-go."
+        return 1
+    fi
+
+    if [ -n "$FLOWD_GO_RPM_URL" ]; then
+        log "Installing flowd-go from $FLOWD_GO_RPM_URL (--rpm-url)"
+        run "$PKG" install -y "$FLOWD_GO_RPM_URL" || {
+            log "ERROR: could not install $FLOWD_GO_RPM_URL"; return 1; }
+        return 0
+    fi
+
+    local el_major url
+    el_major=$(. /etc/os-release 2>/dev/null && echo "${VERSION_ID%%.*}")
+    el_major=${el_major:-9}
+    if [ -n "$FLOWD_GO_REPO_URL" ]; then
+        url="$FLOWD_GO_REPO_URL"
+        write_scitags_repo "$url"
+    else
+        # shellcheck disable=SC2059
+        url=$(printf "$FLOWD_GO_REPO_URL_FMT" "$el_major")
+        write_scitags_repo "$url"
+        if ! scitags_repo_ok && [ "$el_major" != 9 ]; then
+            # shellcheck disable=SC2059
+            url=$(printf "$FLOWD_GO_REPO_URL_FMT" 9)
+            log "WARNING: no SciTags repository for EL${el_major}; using the EL9 one"
+            write_scitags_repo "$url"
+        fi
+    fi
+    if ! scitags_repo_ok; then
+        log "ERROR: the SciTags repository at $url is not reachable."
+        log "       Check network access to linuxsoft.cern.ch, or pass --repo-url / --rpm-url."
+        return 1
+    fi
+
+    log "Installing flowd-go from the SciTags repository..."
+    run "$PKG" install -y --refresh flowd-go || {
+        log "ERROR: '$PKG install flowd-go' failed (see above)."; return 1; }
+
+    if [ "$DRY_RUN" != true ]; then
+        local ver
+        ver=$(rpm -q --queryformat '%{VERSION}' flowd-go 2>/dev/null || true)
+        log "Installed flowd-go $ver"
+        if [ -n "$ver" ] && [ "$(printf '%s\n%s\n' "$FLOWD_GO_MIN_VERSION" "$ver" | sort -V | head -1)" != "$FLOWD_GO_MIN_VERSION" ]; then
+            log "WARNING: flowd-go $ver is older than $FLOWD_GO_MIN_VERSION, which the firefly backend needs."
+        fi
+    fi
+}
+
 install_flowd_go() {
     log "=== flowd-go installation started ==="
 
@@ -246,15 +339,7 @@ install_flowd_go() {
             return
         fi
     else
-        log "Installing flowd-go RPM..."
-        if command -v dnf &>/dev/null; then
-            run dnf install -y "$FLOWD_GO_RPM_URL"
-        elif command -v yum &>/dev/null; then
-            run yum install -y "$FLOWD_GO_RPM_URL"
-        else
-            log "ERROR: Neither dnf nor yum found. Cannot install flowd-go."
-            return 1
-        fi
+        install_flowd_go_rpm || return 1
     fi
 
     # Prompt for experiment
@@ -343,6 +428,10 @@ uninstall_flowd_go() {
         log "Removing configuration file $FLOWD_GO_CONF"
         run rm -f "$FLOWD_GO_CONF"
     fi
+    if [ -f "$FLOWD_GO_REPO_FILE" ] && grep -q 'perfSONAR-install-flowd-go.sh' "$FLOWD_GO_REPO_FILE"; then
+        log "Removing $FLOWD_GO_REPO_FILE"
+        run rm -f "$FLOWD_GO_REPO_FILE"
+    fi
 
     log "=== flowd-go removal complete ==="
 }
@@ -370,6 +459,12 @@ parse_cli() {
                 FIREFLY_RECEIVER_PORT="${2:-10514}"
                 shift 2 ;;
 
+            --repo-url)
+                FLOWD_GO_REPO_URL="${2:-}"
+                shift 2 ;;
+            --rpm-url)
+                FLOWD_GO_RPM_URL="${2:-}"
+                shift 2 ;;
             --list-experiments)
                 list_experiments
                 exit 0 ;;

@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-19 (flowd-go from the SciTags repository)
+
+### Fixed
+
+- **flowd-go install failed with HTTP 404**: `perfSONAR-install-flowd-go.sh` installed a fixed RPM URL
+  (`flowd-go-2.5.0-1`) that has been removed from CERN's SciTags repository (reported by UTA on test01.swt2.uta.edu).
+  - `perfSONAR-install-flowd-go.sh` v1.5.0 writes `/etc/yum.repos.d/scitags.repo` and installs the newest flowd-go
+    from it, so `dnf update` keeps it current. It uses the repository for the running EL version, falling back to the
+    EL9 one. `--repo-url` and `--rpm-url` override the default; `--uninstall` removes the repo file.
+  - `perfSONAR-update-lsregistration.sh` v1.0.3: when the testpoint container does not exist, it says how to check
+    `perfsonar-testpoint.service` instead of only "Container ... not found".
+
 ## [Unreleased] - 2026-10-13 (orchestrator enables EPEL)
 
 ### Fixed
