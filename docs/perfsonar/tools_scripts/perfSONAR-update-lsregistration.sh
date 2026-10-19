@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # Combined lsregistration helper
+# Version: 1.0.3 - 2026-10-19
+#   - When the container does not exist, say how to check the testpoint service
+#     instead of only "Container ... not found".
 # Version: 1.0.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
@@ -133,6 +136,21 @@ pick_engine() {
 	exit 2
 }
 
+# The container does not exist (not even stopped): explain where to look.
+container_missing() {
+	local name=$1
+	echo "Container '$name' not found." >&2
+	echo "This script edits the configuration inside the running testpoint container, so deploy it first." >&2
+	if systemctl cat perfsonar-testpoint.service >/dev/null 2>&1; then
+		echo "perfsonar-testpoint.service is $(systemctl is-active perfsonar-testpoint.service 2>/dev/null || true); check:" >&2
+		echo "  systemctl status perfsonar-testpoint.service --no-pager" >&2
+		echo "  journalctl -u perfsonar-testpoint.service -n 50 --no-pager" >&2
+	else
+		echo "No perfsonar-testpoint.service unit exists: the deployment step (orchestrator Step 8 or install guide Step 5) has not run." >&2
+	fi
+	exit 1
+}
+
 container_exists() {
 	local eng=$1 name=$2
 	if [[ $eng == docker ]]; then
@@ -230,7 +248,7 @@ do_save() {
 	else
 		ENG=$(pick_engine)
 		need_cmd "$ENG"
-		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		container_exists "$ENG" "$CONTAINER" || container_missing "$CONTAINER"
 		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$tmp"
 	fi
 	cp -a "$tmp" "$outpath"
@@ -258,7 +276,7 @@ do_restore() {
 	else
 		ENG=$(pick_engine)
 		need_cmd "$ENG"
-		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		container_exists "$ENG" "$CONTAINER" || container_missing "$CONTAINER"
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
 		# Attempt to relabel in-container if necessary
 		try_restorecon_container "$ENG" "$CONTAINER" "$CONF_PATH" || true
@@ -282,7 +300,7 @@ do_update() {
 	else
 		ENG=$(pick_engine)
 		need_cmd "$ENG"
-		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		container_exists "$ENG" "$CONTAINER" || container_missing "$CONTAINER"
 		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$tmp"
 	fi
 	cp -a "$tmp" "$orig"
@@ -380,7 +398,7 @@ EOF
 	else
 		ENG=$(pick_engine)
 		need_cmd "$ENG"
-		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		container_exists "$ENG" "$CONTAINER" || container_missing "$CONTAINER"
 		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
 		# Attempt to relabel in-container if necessary
 		try_restorecon_container "$ENG" "$CONTAINER" "$CONF_PATH" || true
@@ -402,7 +420,7 @@ do_extract() {
 	else
 		ENG=$(pick_engine)
 		need_cmd "$ENG"
-		if ! container_exists "$ENG" "$CONTAINER"; then echo "Container '$CONTAINER' not found" >&2; exit 1; fi
+		container_exists "$ENG" "$CONTAINER" || container_missing "$CONTAINER"
 		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$tmp"
 	fi
 	# Emit a self-contained restore script that writes the conf to /etc/perfsonar/lsregistrationdaemon.conf
