@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 # Combined lsregistration helper
+# Version: 1.0.4 - 2026-10-20
+#   - Container modes must run as root: the testpoint runs under root's
+#     podman, and a normal user's 'podman ps' never lists it (UTA saw
+#     "Container 'perfsonar-testpoint' not found" while the service was
+#     running). Stop early with a clear message instead.
+#   - Prefer podman over docker when both exist (podman-docker's 'docker'
+#     wrapper only adds the "Emulate Docker CLI" notice).
 # Version: 1.0.3 - 2026-10-19
 #   - When the container does not exist, say how to check the testpoint service
 #     instead of only "Container ... not found".
@@ -126,11 +133,16 @@ pick_engine() {
 	if [[ "$ENGINE" == "docker" || "$ENGINE" == "podman" ]]; then
 		echo "$ENGINE"; return 0
 	fi
-	if command -v docker >/dev/null 2>&1 && docker ps >/dev/null 2>&1; then
-		echo docker; return 0
+	if [[ $(id -u) -ne 0 ]]; then
+		echo "Run this as root (sudo -i, or prefix with sudo)." >&2
+		echo "The perfsonar-testpoint container runs under root's podman; as $(id -un), podman only sees your own containers." >&2
+		exit 1
 	fi
 	if command -v podman >/dev/null 2>&1 && podman ps >/dev/null 2>&1; then
 		echo podman; return 0
+	fi
+	if command -v docker >/dev/null 2>&1 && docker ps >/dev/null 2>&1; then
+		echo docker; return 0
 	fi
 	echo "No container engine found (docker/podman)" >&2
 	exit 2

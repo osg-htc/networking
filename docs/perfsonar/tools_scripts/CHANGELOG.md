@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-10-20 (lsregistration helper must run as root)
+
+### Fixed
+
+- **"Container 'perfsonar-testpoint' not found" while the testpoint was running**: run as a normal user,
+  `perfSONAR-update-lsregistration.sh` looked at that user's podman containers, never root's (reported by UTA).
+  v1.0.4 stops with "Run this as root" in container modes, and prefers `podman` over the `podman-docker` wrapper.
+
 ## [Unreleased] - 2026-10-19 (flowd-go from the SciTags repository)
 
 ### Fixed
