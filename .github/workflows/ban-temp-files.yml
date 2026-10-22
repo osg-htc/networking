@@ -18,7 +18,7 @@ jobs:
         run: |
           set -e
           # Look for any files matching tmp/ or *.bak tracked in commit
-          list=$(git ls-files | grep -E "(^tmp/|\.bak$)" || true)
+          list=$(git ls-files | grep -E "(^tmp/|\.bak$|\.bak\.|/\.indent_fix_backups/|/\.link_check_backups/)" || true)
           if [ -n "$list" ]; then
             echo "Found forbidden tracked files:\n$list"
             exit 1
