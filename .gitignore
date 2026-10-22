@@ -10,8 +10,12 @@ site/
 # Temporary artifact folder for linter / debug outputs
 tmp/
 
-# Backup files
+# Backup files (the docs fix-up scripts write *.bak.<timestamp> and *.bak.auto
+# into .indent_fix_backups/ and .link_check_backups/ directories)
 *.bak
+*.bak.*
+.indent_fix_backups/
+.link_check_backups/
 
 # Python compiled files
 __pycache__/
