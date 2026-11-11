@@ -67,7 +67,7 @@ set -euo pipefail
 #   1  Fatal error (missing dependencies, not root, etc.)
 #   2  Invalid arguments
 
-VERSION="1.6.1"
+VERSION="1.7.0"
 PROG_NAME="$(basename "$0")"
 
 # --- Defaults --------------------------------------------------------------

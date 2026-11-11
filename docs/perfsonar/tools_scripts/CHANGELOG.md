@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-11 (updater relaunch loop)
+
+### Fixed
+
+- **`update-perfsonar-deployment.sh` relaunched itself forever** (v1.14.0 and v1.15.0, on master for a few hours on
+  2026-11-11): the header version was changed but `VERSION` stayed `1.13.1`, so the self-update check after Phase 1
+  saw a "new" version on every pass. The script never got past downloading helper scripts and changed nothing on the
+  host. Stop a looping run with Ctrl-C and run it again; it fetches v1.15.1 and continues normally.
+  - v1.15.1 sets `VERSION` to match and relaunches at most once per run.
+  - `perfSONAR-diagnostic-report.sh` reported itself as 1.6.1; `VERSION` is now 1.7.0.
+  - CI (`verify-site-scripts.sh`) now fails when a script's header version and `VERSION` variable differ.
+
 ## [Unreleased] - 2026-11-11 (compose hosts orphan volumes too; storage check)
 
 ### Fixed

@@ -70,6 +70,15 @@ for f in "${files_to_check[@]}"; do
       EXIT_CODE=1
     fi
   fi
+  # The first '# Version: X.Y.Z' header line must match the VERSION variable
+  # when a script has both. update-perfsonar-deployment.sh relaunches itself
+  # when they differ, so a mismatch there loops forever on every host.
+  hdr_ver=$(grep -m1 -E '^# Version: [0-9]' "$docf" | awk '{print $3}' || true)
+  var_ver=$(grep -m1 -E '^(VERSION|SCRIPT_VERSION)=' "$docf" | sed -E 's/^[A-Z_]+="?([^" ]*)"?.*/\1/' || true)
+  if [[ -n "$hdr_ver" && -n "$var_ver" && "$hdr_ver" != "$var_ver" ]]; then
+    echo "VERSION MISMATCH for $base: header says $hdr_ver, VERSION variable says $var_ver"
+    EXIT_CODE=1
+  fi
   # Verify sha file entry
   sha_expected=$(sha256sum "$docf" | awk '{print $1}')
   shafile="$DOCS_DIR/${base}.sha256"
