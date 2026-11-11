@@ -1,6 +1,25 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-11 (orphaned podman volumes and unrotated Apache logs fill /var)
+
+### Fixed
+
+- **`/var` filled up, stopping PostgreSQL and pScheduler** (psum05.aglt2.org: 310 orphaned podman volumes, 44.5 GB;
+  pScheduler returned HTTP 500 for `/tests` and `/archivers`). There were two causes:
+  - `install-systemd-units.sh` v1.6.2: the units ran `podman rm -f` without `-v`, so every restart or auto-update left
+    the container's anonymous volumes (`/var/log`, `/var/lib/postgresql`, certbot's `/var/lib/letsencrypt`) behind.
+    All `podman rm` calls now use `-v`, including the temporary seed container.
+  - `testpoint-entrypoint-wrapper.sh` v1.4.0: the image's `/usr/sbin/policy-rc.d` (exit 101) silently refuses the
+    `invoke-rc.d apache2 reload` in logrotate's postrotate, so Apache wrote to `access.log.1` indefinitely
+    (~100 MB/day; one 15 GB file seen). On every start the wrapper now switches `/etc/logrotate.d/apache2` to
+    `copytruncate`. It does nothing if that is already done and never stops the container from starting.
+  - Existing hosts need a one-time cleanup and to reinstall the units: see "/var filling up" in the quick-deploy
+    troubleshooting guide.
+- Corrected author name typo ("Shank" → "Shawn") and removed duplicated header lines in
+  `testpoint-entrypoint-wrapper.sh` and `perfSONAR-install-nftables.sh`; `perfSONAR-install-nftables.sh.sha256` no
+  longer contains an absolute local path.
+
 ## [Unreleased] - 2026-10-22 (flowd-go firefly forwarding, no TCP enrichment)
 
 ### Fixed

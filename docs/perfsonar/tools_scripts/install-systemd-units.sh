@@ -47,10 +47,15 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.6.1
+# Version: 1.6.2
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.6.2 - Remove containers with 'podman rm -f -v' so their anonymous
+#           volumes (/var/log, /var/lib/postgresql, certbot's
+#           /var/lib/letsencrypt) go with them. Before this, every restart or
+#           auto-update orphaned them; psum05.aglt2.org built up 310 volumes
+#           (44.5 GB), filled /var and stopped PostgreSQL/pScheduler.
 #   1.6.1 - Run the testpoint with --pids-limit=8192, like pids_limit: 8192
 #           in the compose files. Without it podman's default of 2048 applies;
 #           psmsu01.aglt2.org reached it after enrollment (pScheduler
@@ -276,10 +281,10 @@ copy_file_from_image() {
     podman image exists "$TP_IMAGE" 2>/dev/null || podman pull -q "$TP_IMAGE" >/dev/null || return 1
     podman create --name "$cname" "$TP_IMAGE" >/dev/null 2>&1 || return 1
     if podman cp "$cname:$src" "$dst" >/dev/null 2>&1; then
-        podman rm -f "$cname" >/dev/null 2>&1 || true
+        podman rm -f -v "$cname" >/dev/null 2>&1 || true
         return 0
     fi
-    podman rm -f "$cname" >/dev/null 2>&1 || true
+    podman rm -f -v "$cname" >/dev/null 2>&1 || true
     return 1
 }
 
@@ -424,7 +429,7 @@ Wants=network-online.target
 Type=simple
 Restart=always
 RestartSec=10
-ExecStartPre=-/usr/bin/podman rm -f perfsonar-testpoint
+ExecStartPre=-/usr/bin/podman rm -f -v perfsonar-testpoint
 ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   --replace \\
   --systemd=always \\
@@ -442,7 +447,7 @@ ${MOUNT_LINES}  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
   $TP_IMAGE \\
   $INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh
 ExecStop=/usr/bin/podman stop -t 10 perfsonar-testpoint
-ExecStopPost=/usr/bin/podman rm -f perfsonar-testpoint
+ExecStopPost=/usr/bin/podman rm -f -v perfsonar-testpoint
 
 [Install]
 WantedBy=multi-user.target
@@ -475,7 +480,7 @@ Wants=perfsonar-testpoint.service podman.socket
 Type=simple
 Restart=always
 RestartSec=10
-ExecStartPre=-/usr/bin/podman rm -f certbot
+ExecStartPre=-/usr/bin/podman rm -f -v certbot
 ExecStart=/usr/bin/podman run --name certbot \\
   --replace \\
   --network host \\
@@ -489,7 +494,7 @@ ExecStart=/usr/bin/podman run --name certbot \\
   docker.io/certbot/certbot:latest \\
   -c "trap 'exit 0' TERM; while :; do certbot renew; sleep 12h & wait \$\$!; done"
 ExecStop=/usr/bin/podman stop -t 10 certbot
-ExecStopPost=/usr/bin/podman rm -f certbot
+ExecStopPost=/usr/bin/podman rm -f -v certbot
 
 [Install]
 WantedBy=multi-user.target
