@@ -6,11 +6,21 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.14.0 - 2026-11-12
+# Version: 1.15.0 - 2026-11-11
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
-# Version: 1.14.0 - 2026-11-12
+# Version: 1.15.0 - 2026-11-11
+#   - Compose hosts no longer orphan volumes: 'compose down' leaves the
+#     anonymous volumes the testpoint image declares (and 'down -v' removes
+#     only named ones), so every restart left a /var/log and a PostgreSQL
+#     volume behind. The updater's own restarts now remove the project's
+#     containers with 'rm -f -v' first, and a compose-wrapper unit whose
+#     ExecStop is a bare 'compose down' is patched with --apply
+#     (install-systemd-service.sh >= 1.1.0 writes the same ExecStop).
+#   - Orphaned-volume check: report container volumes attached to no
+#     container and /var usage, with the command to remove them.
+# Version: 1.14.0 - 2026-11-11
 #   - Direct units that remove containers without 'podman rm -f -v' are
 #     refreshed: every restart or update orphaned the container's /var/log and
 #     PostgreSQL volumes until /var filled (psum05.aglt2.org, 44.5 GB).
@@ -739,6 +749,57 @@ build_compose_candidate() {
 # Compose-wrapper unit: make sure the installed compose tool accepts the
 # options in ExecStart. podman-compose 1.5.0 rejects e.g. '--shm-size' on
 # 'up', so such a unit fails on every start (and after the next reboot).
+# Bring a compose project down without orphaning volumes. 'compose down'
+# removes the containers but not the anonymous volumes the image declares, and
+# podman-compose's 'down -v' removes only named volumes. So: stop gracefully,
+# remove this project's containers together with their anonymous volumes, then
+# let 'down' clean up the network.
+compose_down() {
+    (cd "$BASE_DIR" && $COMPOSE_CMD stop 2>&1 | sed 's/^/    /') || true
+    $RUNTIME ps -aq --filter "label=com.docker.compose.project.working_dir=$BASE_DIR" 2>/dev/null \
+        | xargs -r $RUNTIME rm -f -v >/dev/null 2>&1 || true
+    (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | grep -v 'no such container' | sed 's/^/    /') || true
+}
+
+# A compose-wrapper unit written by install-systemd-service.sh < 1.1.0 stops
+# with a bare 'compose down', which orphans the containers' anonymous volumes
+# on every restart. Replace it with the stop / rm -f -v / down sequence.
+check_compose_unit_execstop() {
+    local svc="$1" stop_line cmd
+    grep -q 'rm -f -v' "$svc" && return 0
+    stop_line=$(grep -m1 -E '^ExecStop=-?[^ ]+([ ]compose)? down[[:space:]]*$' "$svc" || true)
+    [[ -n "$stop_line" ]] || return 0
+    cmd=$(sed -E 's/^ExecStop=-?//; s/ down[[:space:]]*$//' <<< "$stop_line")
+
+    changed "  $svc stops with '$cmd down', which orphans the containers' /var/log and PostgreSQL volumes on every restart"
+    CHANGES_FOUND=1
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would patch ExecStop in $svc (stop, rm -f -v, down)"
+        return 0
+    fi
+    if [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to patch ExecStop."
+        return 0
+    fi
+    local runtime_bin tmp
+    runtime_bin=$(command -v "$RUNTIME" 2>/dev/null || echo "/usr/bin/$RUNTIME")
+    cp -a "$svc" "${svc}.bak.$(date -u +%Y%m%dT%H%M%SZ)"
+    tmp=$(mktemp)
+    while IFS= read -r line; do
+        if [[ "$line" == "$stop_line" ]]; then
+            printf 'ExecStop=-%s stop\n' "$cmd"
+            printf "ExecStop=-/bin/sh -c '%s ps -aq --filter label=com.docker.compose.project.working_dir=%s | xargs -r %s rm -f -v'\n" \
+                "$runtime_bin" "$BASE_DIR" "$runtime_bin"
+            printf 'ExecStop=%s down\n' "$cmd"
+        else
+            printf '%s\n' "$line"
+        fi
+    done < "$svc" > "$tmp"
+    cat "$tmp" > "$svc" && rm -f "$tmp"
+    systemctl daemon-reload
+    ok "  ✓ Patched ExecStop in $svc (takes effect at the next stop; no restart needed)"
+}
+
 check_compose_unit_execstart() {
     local svc="$1" exec_line opts bad=() o name help shm=""
     exec_line=$(grep -m1 '^ExecStart=' "$svc" | sed 's/^ExecStart=//')
@@ -985,6 +1046,7 @@ fix_stale_service_file() {
     if [[ "$UNIT_KIND" == "compose" ]]; then
         ok "  Unit runs $COMPOSE_CMD (compose); mounts and health check come from docker-compose.yml"
         check_compose_unit_execstart "$svc"
+        check_compose_unit_execstop "$svc"
         echo
         return
     elif [[ "$UNIT_KIND" != "direct" ]]; then
@@ -1115,7 +1177,8 @@ print_container_restart_hint() {
             echo "${prefix}systemctl restart perfsonar-certbot.service"
         fi
     else
-        echo "${prefix}cd $BASE_DIR && $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+        # 'rm -f -v' before 'down': compose down alone orphans the containers' anonymous volumes
+        echo "${prefix}cd $BASE_DIR && $COMPOSE_CMD stop && $RUNTIME ps -aq --filter label=com.docker.compose.project.working_dir=$BASE_DIR | xargs -r $RUNTIME rm -f -v; $COMPOSE_CMD down && $COMPOSE_CMD up -d"
     fi
 }
 
@@ -1136,7 +1199,7 @@ restart_via_systemd() {
         # systemd only runs ExecStop (compose down) for a unit that started
         # successfully; bring existing containers down so 'up' recreates them.
         info "  Unit is not active; running '$COMPOSE_CMD down' first so the containers are recreated..."
-        (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /') || true
+        compose_down
         info "  Starting perfsonar-testpoint.service..."
         systemctl start perfsonar-testpoint.service 2>&1 | sed 's/^/    /' || rc=$?
     else
@@ -1224,7 +1287,7 @@ phase4_container_restart() {
             restart_via_systemd || warn "  Check: systemctl status perfsonar-testpoint --no-pager"
         else
             info "  Stopping containers..."
-            (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /')
+            compose_down
             info "  Starting containers with updated compose..."
             (cd "$BASE_DIR" && $COMPOSE_CMD up -d 2>&1 | sed 's/^/    /')
 
@@ -1782,6 +1845,38 @@ check_auto_update() {
     echo
 }
 
+# --- Orphaned container volumes (container only) ----------------------------
+#
+# Volumes attached to no container are left behind by units and compose stops
+# that removed containers without their anonymous volumes (fixed in
+# install-systemd-units.sh 1.6.2 and install-systemd-service.sh 1.1.0). They
+# hold old container logs and old pScheduler databases and grow until /var is
+# full, which stops PostgreSQL and pScheduler. Report only: removing them
+# cannot be undone, so that is left to the administrator.
+
+check_orphaned_volumes() {
+    [[ "$DEPLOY_TYPE" == "container" && "$RUNTIME" == "podman" ]] || return 0
+
+    info "Checking for orphaned container volumes..."
+    local n root pct
+    n=$(podman volume ls -q --filter dangling=true 2>/dev/null | wc -l)
+    root=$(podman info --format '{{.Store.GraphRoot}}' 2>/dev/null || echo /var/lib/containers/storage)
+    pct=$(df --output=pcent "$root" 2>/dev/null | tail -1 | tr -dc '0-9')
+    if [[ "$n" -eq 0 ]]; then
+        ok "  No orphaned volumes (container storage filesystem ${pct:-?}% used)"
+    else
+        local reclaim
+        reclaim=$(podman system df --format '{{.Type}}|{{.Reclaimable}}' 2>/dev/null | awk -F'|' '$1 ~ /Volumes/ {print $2}')
+        warn "  $n volume(s) are attached to no container${reclaim:+ ($reclaim reclaimable)}; container storage filesystem ${pct:-?}% used"
+        warn "  They are old container logs and pScheduler databases left by earlier restarts."
+        warn "  Remove them with: podman volume prune   (in-use volumes are kept; cannot be undone)"
+    fi
+    if [[ -n "$pct" && "$pct" -ge 85 ]]; then
+        warn "  Container storage filesystem ($root) is ${pct}% full: PostgreSQL and pScheduler stop when it fills."
+    fi
+    echo
+}
+
 # --- Main ------------------------------------------------------------------
 
 main() {
@@ -1798,6 +1893,7 @@ main() {
     check_multinic_arp
     check_psconfig_remotes
     check_auto_update
+    check_orphaned_volumes
     fix_dns_resolver
     phase4_restart
     phase5_systemd

@@ -18,8 +18,17 @@
 #   - perfSONAR testpoint docker-compose.yml in the installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.0.0
+# Version: 1.1.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
+#
+# Version history:
+#   1.1.0 - Stop without orphaning volumes. 'podman-compose down' removes the
+#           containers but leaves the anonymous volumes the testpoint image
+#           declares (/var/log, /var/lib/postgresql), and 'down -v' only
+#           removes named volumes (podman-compose 1.5.0). Every restart or
+#           image update therefore left volumes behind until /var filled.
+#           ExecStop now stops the containers, removes this project's
+#           containers with 'podman rm -f -v', then runs 'down'.
 
 set -e
 
@@ -70,6 +79,8 @@ Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/perfsonar-tp
 ExecStart=/usr/bin/podman-compose up -d
+ExecStop=-/usr/bin/podman-compose stop
+ExecStop=-/bin/sh -c '/usr/bin/podman ps -aq --filter label=com.docker.compose.project.working_dir=/opt/perfsonar-tp | xargs -r /usr/bin/podman rm -f -v'
 ExecStop=/usr/bin/podman-compose down
 TimeoutStartSec=300
 Restart=on-failure
@@ -83,6 +94,7 @@ EOF
 if [[ "$INSTALL_DIR" != "/opt/perfsonar-tp" ]]; then
     sed -i "s|WorkingDirectory=/opt/perfsonar-tp|WorkingDirectory=$INSTALL_DIR|g" "$SERVICE_FILE"
     sed -i "s|RequiresMountsFor=/opt/perfsonar-tp|RequiresMountsFor=$INSTALL_DIR|g" "$SERVICE_FILE"
+    sed -i "s|project.working_dir=/opt/perfsonar-tp |project.working_dir=$INSTALL_DIR |g" "$SERVICE_FILE"
 fi
 
 echo "==> Reloading systemd daemon"

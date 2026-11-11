@@ -1,7 +1,32 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
-## [Unreleased] - 2026-11-12 (one container update mechanism)
+## [Unreleased] - 2026-11-11 (compose hosts orphan volumes too; storage check)
+
+### Fixed
+
+- **Compose-managed testpoints orphaned volumes on every restart**: `podman-compose down` removes the containers but
+  not the anonymous volumes the testpoint image declares (`/var/log`, `/var/lib/postgresql`), and `down -v` removes
+  only named volumes (verified with podman-compose 1.5.0). This is the compose form of the `/var` fill-up fixed for
+  direct units in `install-systemd-units.sh` v1.6.2.
+  - `install-systemd-service.sh` v1.1.0: `ExecStop` now stops the containers, removes the project's containers with
+    `podman rm -f -v`, then runs `down`.
+  - `update-perfsonar-deployment.sh` v1.15.0: patches an existing compose-wrapper unit's `ExecStop` the same way with
+    `--apply` (no restart needed), and its own compose restarts use the same sequence.
+- Quick-deploy "/var filling up" steps: the in-place logrotate fix also needs `systemctl reload apache2` in the
+  container. Without it Apache keeps writing to the renamed `access.log.1` and `copytruncate` never takes effect until
+  the next container start.
+- Corrected the date of the previous entry and of `update-perfsonar-deployment.sh` v1.14.0 (2026-11-11, not 11-12).
+
+### Added
+
+- `perfSONAR-diagnostic-report.sh` v1.7.0: "container storage" known-issue check. Reports volumes attached to no
+  container and how much they hold, how full the container storage filesystem is, a unit that still orphans volumes,
+  and Apache logs that are not rotating in the container.
+- `update-perfsonar-deployment.sh` v1.15.0: reports orphaned volumes and storage usage on every run, with the command
+  to remove them (never removes them itself).
+
+## [Unreleased] - 2026-11-11 (one container update mechanism)
 
 ### Fixed
 

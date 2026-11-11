@@ -14,6 +14,13 @@ set -euo pipefail
 #   container  — perfSONAR testpoint running via podman-compose / docker-compose
 #   toolkit    — perfSONAR toolkit installed from RPM packages (dnf)
 #
+# Version: 1.7.0 - 2026-11-11
+#   - Known-issue check: container storage filling up. Reports volumes
+#     attached to no container (left behind by restarts that removed the
+#     container without its anonymous volumes), how full the container
+#     storage filesystem is, a unit that still orphans volumes, and Apache
+#     logs that are not rotating inside the container (found on
+#     psum05.aglt2.org: 310 volumes, 44.5 GB, /var full, pScheduler down).
 # Version: 1.6.1 - 2026-10-13
 #   - Service-unit check: flag a direct unit without --shm-size or
 #     --pids-limit (podman's default of 2048 processes is too low).
@@ -957,6 +964,71 @@ collect_known_issues() {
             fi
         fi
         printf "  ${C_GREEN}✓${C_RESET} cgroup: $cgroup_ver\n"
+        emit ""
+    fi
+
+    # Check: container storage filling up (orphaned volumes, unrotated Apache logs)
+    if [[ "$DEPLOY_TYPE" == "container" ]]; then
+        emit "--- Check: container storage (orphaned volumes, Apache log rotation) ---"
+        local vol_n=0 store_root store_pct vol_reclaim="" svc_unit="/etc/systemd/system/perfsonar-testpoint.service"
+        vol_n=$($RUNTIME volume ls -q --filter dangling=true 2>/dev/null | wc -l)
+        store_root=$($RUNTIME info --format '{{.Store.GraphRoot}}' 2>/dev/null || true)
+        [[ -n "$store_root" ]] || store_root=$($RUNTIME info --format '{{.DockerRootDir}}' 2>/dev/null || echo /var/lib/containers/storage)
+        store_pct=$(df --output=pcent "$store_root" 2>/dev/null | tail -1 | tr -dc '0-9')
+        emit "  Container storage: $store_root (filesystem ${store_pct:-?}% used)"
+        $RUNTIME system df >> "$OUTPUT_FILE" 2>&1 || true
+
+        if [[ "$vol_n" -eq 0 ]]; then
+            emit "  OK: no volumes attached to no container"
+            printf "  ${C_GREEN}✓${C_RESET} No orphaned container volumes\n"
+        else
+            vol_reclaim=$($RUNTIME system df --format '{{.Type}}|{{.Reclaimable}}' 2>/dev/null | awk -F'|' '$1 ~ /Volumes/ {print $2}')
+            emit "  WARNING: $vol_n volume(s) are attached to no container${vol_reclaim:+ ($vol_reclaim reclaimable)}"
+            emit "  They hold old container logs and pScheduler databases left by earlier restarts."
+            emit "  Fix: $RUNTIME volume prune   (in-use volumes are kept; cannot be undone)"
+            printf "  ${C_RED}✗${C_RESET} %s orphaned container volume(s)%s\n" "$vol_n" "${vol_reclaim:+ ($vol_reclaim reclaimable)}"
+        fi
+        if [[ -n "$store_pct" && "$store_pct" -ge 85 ]]; then
+            emit "  WARNING: container storage filesystem is ${store_pct}% full; PostgreSQL and pScheduler stop when it fills"
+            printf "  ${C_RED}✗${C_RESET} Container storage filesystem %s%% full\n" "$store_pct"
+        fi
+
+        # Does the unit still leave volumes behind on every restart?
+        if [[ -f "$svc_unit" ]]; then
+            if grep -q 'rm -f -v' "$svc_unit"; then
+                emit "  OK: unit removes containers together with their anonymous volumes"
+                printf "  ${C_GREEN}✓${C_RESET} Unit removes volumes with the container\n"
+            elif grep -qE 'podman rm -f perfsonar-testpoint|^ExecStop=.* down[[:space:]]*$' "$svc_unit"; then
+                emit "  OUT OF DATE: $svc_unit removes containers without their anonymous volumes;"
+                emit "  every restart or image update orphans a /var/log and a PostgreSQL volume."
+                emit "  Fix: run update-perfsonar-deployment.sh --apply"
+                printf "  ${C_RED}✗${C_RESET} Unit orphans volumes on every restart\n"
+            fi
+        fi
+
+        # Apache log rotation inside the container: the image's policy-rc.d
+        # blocks the postrotate reload, so without copytruncate Apache writes
+        # to access.log.1 forever (testpoint-entrypoint-wrapper.sh >= 1.4.0).
+        if $RUNTIME exec perfsonar-testpoint true >/dev/null 2>&1; then
+            local biggest=""
+            biggest=$($RUNTIME exec perfsonar-testpoint sh -c 'ls -S /var/log/apache2/ 2>/dev/null | head -1; du -sm /var/log/apache2 2>/dev/null | cut -f1' 2>/dev/null | tr '\n' ' ' || true)
+            emit "  Apache logs in container: largest file and total MB: ${biggest:-unknown}"
+            if $RUNTIME exec perfsonar-testpoint sh -c '[ ! -s /var/log/apache2/access.log ] && [ /var/log/apache2/access.log.1 -nt /var/log/apache2/access.log ]' 2>/dev/null; then
+                emit "  WARNING: Apache is still writing to access.log.1 (access.log is empty), so the log never rotates."
+                emit "  Fix: $RUNTIME exec perfsonar-testpoint systemctl reload apache2"
+                emit "       (and make sure logrotate uses copytruncate: update-perfsonar-deployment.sh --apply)"
+                printf "  ${C_RED}✗${C_RESET} Apache is writing to access.log.1; logs are not rotating\n"
+            elif $RUNTIME exec perfsonar-testpoint grep -q '^[[:space:]]*copytruncate' /etc/logrotate.d/apache2 2>/dev/null; then
+                emit "  OK: Apache logrotate uses copytruncate"
+                printf "  ${C_GREEN}✓${C_RESET} Apache log rotation (copytruncate)\n"
+            else
+                emit "  WARNING: Apache logrotate in the container does not use copytruncate;"
+                emit "  Apache keeps writing to access.log.1 (about 100 MB/day) and the log never shrinks."
+                emit "  Fix: run update-perfsonar-deployment.sh --apply --restart (installs the current"
+                emit "       testpoint-entrypoint-wrapper.sh, which patches logrotate at container start)"
+                printf "  ${C_RED}✗${C_RESET} Apache logs are not rotating in the container\n"
+            fi
+        fi
         emit ""
     fi
 }
