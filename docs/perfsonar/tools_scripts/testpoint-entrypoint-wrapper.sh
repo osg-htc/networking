@@ -1,10 +1,6 @@
 #!/bin/bash
-# Version: 1.0.0
-# Author: Shank McKee, University of Michigan
-# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # testpoint-entrypoint-wrapper.sh
-# Version: 1.3.0  # UPDATED: SSL patch works when default-ssl.conf is a
-#                  single-file bind mount (Option B / LE deployments)
+# Version: 1.4.0  # UPDATED: Apache logrotate switched to copytruncate
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # --------------------------------
@@ -37,9 +33,9 @@
 #     file cannot be replaced by rename (sed -i / mv fail with "Device or
 #     resource busy", which under set -e killed the container), so it is edited
 #     by rewriting its contents in place (v1.3.0).
-#
-# Author: OSG perfSONAR deployment tools
-# Version: 1.2.0
+#   - Switches the container's Apache logrotate to copytruncate (v1.4.0). The
+#     image's /usr/sbin/policy-rc.d (exit 101) silently refuses the stock
+#     postrotate reload, so Apache wrote to access.log.1 forever and filled /var.
 
 set -e
 
@@ -233,6 +229,24 @@ if [[ -n "$CERT_DIR" ]]; then
         echo "    Expected: ${FULLCHAIN}"
         echo "    Skipping SSL certificate patch (will use default certificates)"
         echo "    Obtain certificates and restart the container to enable Let's Encrypt."
+    fi
+fi
+
+# Fix Apache log rotation.
+# The image ships /usr/sbin/policy-rc.d (exit 101), so the stock postrotate
+# 'invoke-rc.d apache2 reload' is silently refused. Apache then keeps writing
+# to the renamed access.log.1 forever (~100 MB/day from pscheduler traffic),
+# which is never compressed or expired and eventually fills the host's /var.
+# copytruncate needs no reload, so it works regardless of policy-rc.d.
+# The container filesystem is recreated on every start, so re-apply each time.
+# Never let this abort startup (set -e).
+APACHE_LOGROTATE="/etc/logrotate.d/apache2"
+if [[ -f "$APACHE_LOGROTATE" ]] && ! grep -q '^\s*copytruncate' "$APACHE_LOGROTATE"; then
+    if sed -i -e '/^\s*create\b/d' -e 's/^\(\s*\)delaycompress\b/&\n\1copytruncate/' "$APACHE_LOGROTATE" \
+        && grep -q '^\s*copytruncate' "$APACHE_LOGROTATE"; then
+        echo "==> ✓ Apache logrotate switched to copytruncate"
+    else
+        echo "WARNING: could not patch ${APACHE_LOGROTATE}; Apache logs may not rotate"
     fi
 fi
 

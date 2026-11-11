@@ -1439,6 +1439,8 @@ Perform these checks before handing the host over to operations:
 
 - Verify health-monitor timer is active: `systemctl list-timers perfsonar-health-monitor.timer`.
 
+- Watch `/var` usage (`df -h /var`, `podman system df`). Hosts installed with helper scripts older than November 2026 leak podman volumes on every container restart or update. See "/var filling up" under Troubleshooting.
+
 ---
 
 ## Updating an Existing Deployment
@@ -1810,6 +1812,53 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
     - Verify volume labels are correct (`:z` for shared paths, `:Z` only for paths exclusive to one container)
     - Recreate containers to reapply SELinux labels: `podman-compose down && podman-compose up -d`
     - If persistent issues, consider creating custom SELinux policy or running in permissive mode
+
+??? failure "/var filling up (orphaned podman volumes, Apache logs not rotating)"
+
+    **Symptoms:** `/var` near 100%; container `unhealthy`; PostgreSQL inside the container
+    stopped (`postgresql@14-main` failed), so pscheduler returns HTTP 500 for `/tests` and `/archivers`.
+
+    **Cause:** two problems in helper scripts released before November 2026:
+
+    1. The systemd units ran `podman rm -f` without `-v`, so every container restart or
+       auto-update left the old anonymous `/var/log` and `/var/lib/postgresql` volumes behind.
+    2. The image's `/usr/sbin/policy-rc.d` blocks the Apache reload in logrotate's `postrotate`,
+       so Apache keeps writing to `access.log.1` forever (~100 MB/day).
+
+    **Diagnose:**
+
+    ```bash
+    df -h /var
+    podman system df                                   # look at "Local Volumes" RECLAIMABLE
+    podman volume ls -q --filter dangling=true | wc -l
+    podman exec perfsonar-testpoint ls -la /var/log/apache2/
+    ```
+
+    **Fix (does not recreate the container):**
+
+    ```bash
+    # 1. Free space. Removes only volumes attached to no container (old logs and old
+    #    pscheduler databases). In-use volumes are protected. This cannot be undone.
+    podman volume prune -f
+
+    # 2. Restart PostgreSQL and the pScheduler daemons, then check
+    podman exec perfsonar-testpoint systemctl start postgresql@14-main
+    podman exec perfsonar-testpoint systemctl restart pscheduler-ticker pscheduler-scheduler \
+        pscheduler-runner pscheduler-archiver
+    podman exec perfsonar-testpoint pscheduler troubleshoot --quick
+
+    # 3. Install the current wrapper and units so the problem does not return
+    #    (install-systemd-units.sh detects Option A/B from the existing unit)
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/testpoint-entrypoint-wrapper.sh \
+        -o /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+    curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
+        -o /tmp/install-systemd-units.sh
+    bash /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp
+
+    # 4. Apply the logrotate fix to the running container (the wrapper does this on future starts)
+    podman exec perfsonar-testpoint sed -i -e '/^\s*create\b/d' \
+        -e 's/^\(\s*\)delaycompress\b/&\n\1copytruncate/' /etc/logrotate.d/apache2
+    ```
 
 ### Networking Issues
 
