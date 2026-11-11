@@ -1825,6 +1825,8 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
 
     1. The systemd units ran `podman rm -f` without `-v`, so every container restart or
        auto-update left the old anonymous `/var/log` and `/var/lib/postgresql` volumes behind.
+       Compose-managed hosts had the same leak: `podman-compose down` removes the containers but
+       not their anonymous volumes, and `down -v` removes only named volumes.
     2. The image's `/usr/sbin/policy-rc.d` blocks the Apache reload in logrotate's `postrotate`,
        so Apache keeps writing to `access.log.1` forever (~100 MB/day).
 
@@ -1835,6 +1837,8 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
     podman system df                                   # look at "Local Volumes" RECLAIMABLE
     podman volume ls -q --filter dangling=true | wc -l
     podman exec perfsonar-testpoint ls -la /var/log/apache2/
+    # or run the diagnostic report, which checks all of this ("container storage" check)
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh --brief
     ```
 
     **Fix (does not recreate the container):**
@@ -1857,10 +1861,14 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
     curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh \
         -o /tmp/install-systemd-units.sh
     bash /tmp/install-systemd-units.sh --install-dir /opt/perfsonar-tp
+    #    Compose-managed hosts (unit runs podman-compose) instead run:
+    #    /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply
 
-    # 4. Apply the logrotate fix to the running container (the wrapper does this on future starts)
+    # 4. Apply the logrotate fix to the running container (the wrapper does this on future starts),
+    #    then reload Apache so it stops writing to the renamed access.log.1
     podman exec perfsonar-testpoint sed -i -e '/^\s*create\b/d' \
         -e 's/^\(\s*\)delaycompress\b/&\n\1copytruncate/' /etc/logrotate.d/apache2
+    podman exec perfsonar-testpoint systemctl reload apache2
     ```
 
 ### Networking Issues
