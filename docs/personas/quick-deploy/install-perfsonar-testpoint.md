@@ -1162,6 +1162,9 @@ podman exec -it perfsonar-testpoint psconfig remote list
         - **`/etc/systemd/system/perfsonar-auto-update.timer`** — daily trigger with a 1-hour
           randomised delay and `Persistent=true` (catches up if the host was off).
         - Enables and starts the timer immediately.
+        - Disables podman's own `podman-auto-update.timer` if no other container on the host
+          uses it. This timer is the only update mechanism; the perfSONAR containers do not
+          carry the labels `podman auto-update` needs.
 
     Verify the timer is active:
 
@@ -2116,7 +2119,8 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
 
 ??? failure "Auto-update not working"
 
-    **Symptoms:** Containers not updating despite new images available.
+    **Symptoms:** Containers not updating despite new images available, or
+    `podman-auto-update.service` shown as failed every night.
     
     **Diagnostic steps:**
     
@@ -2140,6 +2144,15 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
 
     - Enable timer if not active: `systemctl enable --now perfsonar-auto-update.timer`
     - Verify script exists and is executable: `ls -la /usr/local/bin/perfsonar-auto-update.sh`
+    - **Old installs pull images but never restart the containers.** A
+      `/usr/local/bin/perfsonar-auto-update.sh` that runs `podman-compose pull` and looks for
+      "Downloaded newer image" (which podman never prints) is the compose-era version. Replace
+      it by running `update-perfsonar-deployment.sh --apply`, which also refreshes outdated units.
+    - **`podman-auto-update.service` fails nightly (exit 125, "no PODMAN_SYSTEMD_UNIT label found").**
+      Older versions of this guide had sites enable `podman-auto-update.timer`. It cannot update the
+      perfSONAR containers; `perfsonar-auto-update.timer` does. `update-perfsonar-deployment.sh --apply`
+      disables it unless another container on the host uses it, or run
+      `systemctl disable --now podman-auto-update.timer`.
     - If script is missing, reinstall from `tools_scripts/`:
 
       ```bash

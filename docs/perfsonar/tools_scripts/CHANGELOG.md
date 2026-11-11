@@ -1,6 +1,28 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-12 (one container update mechanism)
+
+### Fixed
+
+- **Containers were never updated on older installs, and `podman-auto-update.service` failed every night** (found on
+  psum05.aglt2.org). Two update mechanisms were installed side by side and neither worked:
+  - `podman-auto-update.timer`, enabled by older versions of the quick-deploy guide, acts on containers labelled
+    `io.containers.autoupdate`, but also needs a `PODMAN_SYSTEMD_UNIT` label that our containers never had, so it
+    failed with exit 125.
+  - The compose-era `/usr/local/bin/perfsonar-auto-update.sh` waited for "Downloaded newer image", which podman never
+    prints, so it pulled images but never restarted anything. The current `perfSONAR-auto-update.sh` was never copied
+    over it.
+- `install-systemd-units.sh` v1.7.0: drops the `io.containers.autoupdate` label from the units; with `--auto-update`
+  disables `podman-auto-update.timer` unless another container uses it; keeps an installed
+  `/usr/local/bin/perfsonar-auto-update.sh` current on every run.
+- `update-perfsonar-deployment.sh` v1.14.0: new auto-update check reports (and with `--apply` fixes) a stale
+  `/usr/local/bin/perfsonar-auto-update.sh` and an enabled `podman-auto-update.timer`. Direct units still using
+  `podman rm -f` without `-v` (the `/var` fill-up fixed in v1.6.2) or carrying the `io.containers.autoupdate` label
+  are regenerated, so existing hosts pick up both fixes with `--apply`.
+- The compose files keep their `io.containers.autoupdate` labels: changing them would recreate every compose site's
+  containers for no functional gain.
+
 ## [Unreleased] - 2026-11-11 (orphaned podman volumes and unrotated Apache logs fill /var)
 
 ### Fixed
