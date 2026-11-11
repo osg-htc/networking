@@ -6,10 +6,31 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.13.1 - 2026-10-13
+# Version: 1.15.0 - 2026-11-11
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
+# Version: 1.15.0 - 2026-11-11
+#   - Compose hosts no longer orphan volumes: 'compose down' leaves the
+#     anonymous volumes the testpoint image declares (and 'down -v' removes
+#     only named ones), so every restart left a /var/log and a PostgreSQL
+#     volume behind. The updater's own restarts now remove the project's
+#     containers with 'rm -f -v' first, and a compose-wrapper unit whose
+#     ExecStop is a bare 'compose down' is patched with --apply
+#     (install-systemd-service.sh >= 1.1.0 writes the same ExecStop).
+#   - Orphaned-volume check: report container volumes attached to no
+#     container and /var usage, with the command to remove them.
+# Version: 1.14.0 - 2026-11-11
+#   - Direct units that remove containers without 'podman rm -f -v' are
+#     refreshed: every restart or update orphaned the container's /var/log and
+#     PostgreSQL volumes until /var filled (psum05.aglt2.org, 44.5 GB).
+#     Units still carrying io.containers.autoupdate are refreshed too
+#     (install-systemd-units.sh >= 1.7.0 drops that label).
+#   - Container auto-update check: refresh a stale
+#     /usr/local/bin/perfsonar-auto-update.sh (the compose-era copy pulls
+#     images but never restarts anything), and with --apply disable
+#     podman-auto-update.timer when no other container uses it (it fails
+#     nightly on our containers and duplicates perfsonar-auto-update.timer).
 # Version: 1.0.0 - 2026-02-26
 #   - Initial release: container-only update support.
 # Version: 1.1.0 - 2026-02-26
@@ -728,6 +749,57 @@ build_compose_candidate() {
 # Compose-wrapper unit: make sure the installed compose tool accepts the
 # options in ExecStart. podman-compose 1.5.0 rejects e.g. '--shm-size' on
 # 'up', so such a unit fails on every start (and after the next reboot).
+# Bring a compose project down without orphaning volumes. 'compose down'
+# removes the containers but not the anonymous volumes the image declares, and
+# podman-compose's 'down -v' removes only named volumes. So: stop gracefully,
+# remove this project's containers together with their anonymous volumes, then
+# let 'down' clean up the network.
+compose_down() {
+    (cd "$BASE_DIR" && $COMPOSE_CMD stop 2>&1 | sed 's/^/    /') || true
+    $RUNTIME ps -aq --filter "label=com.docker.compose.project.working_dir=$BASE_DIR" 2>/dev/null \
+        | xargs -r $RUNTIME rm -f -v >/dev/null 2>&1 || true
+    (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | grep -v 'no such container' | sed 's/^/    /') || true
+}
+
+# A compose-wrapper unit written by install-systemd-service.sh < 1.1.0 stops
+# with a bare 'compose down', which orphans the containers' anonymous volumes
+# on every restart. Replace it with the stop / rm -f -v / down sequence.
+check_compose_unit_execstop() {
+    local svc="$1" stop_line cmd
+    grep -q 'rm -f -v' "$svc" && return 0
+    stop_line=$(grep -m1 -E '^ExecStop=-?[^ ]+([ ]compose)? down[[:space:]]*$' "$svc" || true)
+    [[ -n "$stop_line" ]] || return 0
+    cmd=$(sed -E 's/^ExecStop=-?//; s/ down[[:space:]]*$//' <<< "$stop_line")
+
+    changed "  $svc stops with '$cmd down', which orphans the containers' /var/log and PostgreSQL volumes on every restart"
+    CHANGES_FOUND=1
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would patch ExecStop in $svc (stop, rm -f -v, down)"
+        return 0
+    fi
+    if [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to patch ExecStop."
+        return 0
+    fi
+    local runtime_bin tmp
+    runtime_bin=$(command -v "$RUNTIME" 2>/dev/null || echo "/usr/bin/$RUNTIME")
+    cp -a "$svc" "${svc}.bak.$(date -u +%Y%m%dT%H%M%SZ)"
+    tmp=$(mktemp)
+    while IFS= read -r line; do
+        if [[ "$line" == "$stop_line" ]]; then
+            printf 'ExecStop=-%s stop\n' "$cmd"
+            printf "ExecStop=-/bin/sh -c '%s ps -aq --filter label=com.docker.compose.project.working_dir=%s | xargs -r %s rm -f -v'\n" \
+                "$runtime_bin" "$BASE_DIR" "$runtime_bin"
+            printf 'ExecStop=%s down\n' "$cmd"
+        else
+            printf '%s\n' "$line"
+        fi
+    done < "$svc" > "$tmp"
+    cat "$tmp" > "$svc" && rm -f "$tmp"
+    systemctl daemon-reload
+    ok "  ✓ Patched ExecStop in $svc (takes effect at the next stop; no restart needed)"
+}
+
 check_compose_unit_execstart() {
     local svc="$1" exec_line opts bad=() o name help shm=""
     exec_line=$(grep -m1 '^ExecStart=' "$svc" | sed 's/^ExecStart=//')
@@ -974,6 +1046,7 @@ fix_stale_service_file() {
     if [[ "$UNIT_KIND" == "compose" ]]; then
         ok "  Unit runs $COMPOSE_CMD (compose); mounts and health check come from docker-compose.yml"
         check_compose_unit_execstart "$svc"
+        check_compose_unit_execstop "$svc"
         echo
         return
     elif [[ "$UNIT_KIND" != "direct" ]]; then
@@ -1006,6 +1079,12 @@ fix_stale_service_file() {
     fi
     if ! grep -q -- '--pids-limit' "$svc"; then
         stale+=("no --pids-limit=8192 (podman's default of 2048 processes is too low for a busy testpoint)")
+    fi
+    if grep -q 'podman rm -f perfsonar-testpoint' "$svc"; then
+        stale+=("'podman rm -f' without -v (orphans the container's /var/log and PostgreSQL volumes on every restart)")
+    fi
+    if grep -q 'io.containers.autoupdate' "$svc"; then
+        stale+=("io.containers.autoupdate label (podman-auto-update fails on it; perfsonar-auto-update.timer handles updates)")
     fi
 
     if [[ ${#stale[@]} -gt 0 ]]; then
@@ -1098,7 +1177,8 @@ print_container_restart_hint() {
             echo "${prefix}systemctl restart perfsonar-certbot.service"
         fi
     else
-        echo "${prefix}cd $BASE_DIR && $COMPOSE_CMD down && $COMPOSE_CMD up -d"
+        # 'rm -f -v' before 'down': compose down alone orphans the containers' anonymous volumes
+        echo "${prefix}cd $BASE_DIR && $COMPOSE_CMD stop && $RUNTIME ps -aq --filter label=com.docker.compose.project.working_dir=$BASE_DIR | xargs -r $RUNTIME rm -f -v; $COMPOSE_CMD down && $COMPOSE_CMD up -d"
     fi
 }
 
@@ -1119,7 +1199,7 @@ restart_via_systemd() {
         # systemd only runs ExecStop (compose down) for a unit that started
         # successfully; bring existing containers down so 'up' recreates them.
         info "  Unit is not active; running '$COMPOSE_CMD down' first so the containers are recreated..."
-        (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /') || true
+        compose_down
         info "  Starting perfsonar-testpoint.service..."
         systemctl start perfsonar-testpoint.service 2>&1 | sed 's/^/    /' || rc=$?
     else
@@ -1207,7 +1287,7 @@ phase4_container_restart() {
             restart_via_systemd || warn "  Check: systemctl status perfsonar-testpoint --no-pager"
         else
             info "  Stopping containers..."
-            (cd "$BASE_DIR" && $COMPOSE_CMD down 2>&1 | sed 's/^/    /')
+            compose_down
             info "  Starting containers with updated compose..."
             (cd "$BASE_DIR" && $COMPOSE_CMD up -d 2>&1 | sed 's/^/    /')
 
@@ -1694,6 +1774,109 @@ check_psconfig_remotes() {
     echo
 }
 
+# --- Container auto-update (container only) ---------------------------------
+#
+# perfsonar-auto-update.timer is the one supported update mechanism. Two
+# leftovers from older installs are checked:
+#   - /usr/local/bin/perfsonar-auto-update.sh differing from tools_scripts.
+#     The compose-era copy waits for "Downloaded newer image", which podman
+#     never prints, so it pulls images but never restarts the containers.
+#   - podman-auto-update.timer enabled (older docs told sites to enable it).
+#     Our containers lack the PODMAN_SYSTEMD_UNIT label it needs, so it fails
+#     nightly; disabled with --apply unless another container uses it.
+
+check_auto_update() {
+    [[ "$DEPLOY_TYPE" == "container" ]] || return 0
+
+    local bin="/usr/local/bin/perfsonar-auto-update.sh"
+    local src="$TOOLS_DIR/perfSONAR-auto-update.sh"
+    local podman_timer=false
+    systemctl is-enabled --quiet podman-auto-update.timer 2>/dev/null && podman_timer=true
+    [[ -f "$bin" || "$podman_timer" == true ]] || return 0
+
+    info "Checking container auto-update..."
+
+    if [[ -f "$bin" && -f "$src" ]]; then
+        if cmp -s "$src" "$bin"; then
+            ok "  $bin is current"
+        else
+            if grep -qE 'podman-compose pull|Downloaded newer image' "$bin"; then
+                changed "  $bin is the compose-era version: it pulls images but never restarts the containers"
+            else
+                changed "  $bin differs from $src"
+            fi
+            CHANGES_FOUND=1
+            if [[ "$DRY_RUN" == true ]]; then
+                info "  [DRY-RUN] Would install $src as $bin"
+            elif [[ "$APPLY" != true ]]; then
+                warn "  Run with --apply to update it."
+            else
+                install -m 0755 "$src" "$bin"
+                ok "  ✓ Updated $bin"
+            fi
+        fi
+    fi
+
+    if [[ "$podman_timer" == true ]]; then
+        local others
+        others=$($RUNTIME ps -a --filter label=io.containers.autoupdate --format '{{.Names}}' 2>/dev/null \
+            | grep -vxE 'perfsonar-testpoint|certbot' || true)
+        if [[ -n "$others" ]]; then
+            ok "  podman-auto-update.timer is enabled and used by other containers: $(echo $others)"
+        else
+            changed "  podman-auto-update.timer is enabled: it fails nightly on the perfSONAR containers (no PODMAN_SYSTEMD_UNIT label) and duplicates perfsonar-auto-update.timer"
+            CHANGES_FOUND=1
+            if [[ "$DRY_RUN" == true ]]; then
+                info "  [DRY-RUN] Would run: systemctl disable --now podman-auto-update.timer"
+            elif [[ "$APPLY" != true ]]; then
+                warn "  Run with --apply to disable it."
+            else
+                systemctl disable --now podman-auto-update.timer 2>&1 | sed 's/^/    /'
+                systemctl reset-failed podman-auto-update.service 2>/dev/null || true
+                ok "  ✓ Disabled podman-auto-update.timer"
+            fi
+        fi
+    fi
+
+    if ! systemctl is-enabled --quiet perfsonar-auto-update.timer 2>/dev/null; then
+        warn "  perfsonar-auto-update.timer is not enabled: container images are not updated automatically."
+        warn "  Enable it with: $TOOLS_DIR/install-systemd-units.sh --install-dir $BASE_DIR --auto-update"
+    fi
+    echo
+}
+
+# --- Orphaned container volumes (container only) ----------------------------
+#
+# Volumes attached to no container are left behind by units and compose stops
+# that removed containers without their anonymous volumes (fixed in
+# install-systemd-units.sh 1.6.2 and install-systemd-service.sh 1.1.0). They
+# hold old container logs and old pScheduler databases and grow until /var is
+# full, which stops PostgreSQL and pScheduler. Report only: removing them
+# cannot be undone, so that is left to the administrator.
+
+check_orphaned_volumes() {
+    [[ "$DEPLOY_TYPE" == "container" && "$RUNTIME" == "podman" ]] || return 0
+
+    info "Checking for orphaned container volumes..."
+    local n root pct
+    n=$(podman volume ls -q --filter dangling=true 2>/dev/null | wc -l)
+    root=$(podman info --format '{{.Store.GraphRoot}}' 2>/dev/null || echo /var/lib/containers/storage)
+    pct=$(df --output=pcent "$root" 2>/dev/null | tail -1 | tr -dc '0-9')
+    if [[ "$n" -eq 0 ]]; then
+        ok "  No orphaned volumes (container storage filesystem ${pct:-?}% used)"
+    else
+        local reclaim
+        reclaim=$(podman system df --format '{{.Type}}|{{.Reclaimable}}' 2>/dev/null | awk -F'|' '$1 ~ /Volumes/ {print $2}')
+        warn "  $n volume(s) are attached to no container${reclaim:+ ($reclaim reclaimable)}; container storage filesystem ${pct:-?}% used"
+        warn "  They are old container logs and pScheduler databases left by earlier restarts."
+        warn "  Remove them with: podman volume prune   (in-use volumes are kept; cannot be undone)"
+    fi
+    if [[ -n "$pct" && "$pct" -ge 85 ]]; then
+        warn "  Container storage filesystem ($root) is ${pct}% full: PostgreSQL and pScheduler stop when it fills."
+    fi
+    echo
+}
+
 # --- Main ------------------------------------------------------------------
 
 main() {
@@ -1709,6 +1892,8 @@ main() {
     check_letsencrypt
     check_multinic_arp
     check_psconfig_remotes
+    check_auto_update
+    check_orphaned_volumes
     fix_dns_resolver
     phase4_restart
     phase5_systemd

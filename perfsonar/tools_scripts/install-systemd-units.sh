@@ -47,10 +47,26 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.6.1
+# Version: 1.7.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.7.0 - One container update mechanism: perfsonar-auto-update.timer.
+#         - Drop the io.containers.autoupdate=registry label. podman
+#           auto-update also needs a PODMAN_SYSTEMD_UNIT label, which these
+#           containers never had, so podman-auto-update.service failed every
+#           night (exit 125) and updated nothing.
+#         - With --auto-update, disable podman-auto-update.timer when no other
+#           container on the host uses it (older docs had sites enable it).
+#         - Keep an installed /usr/local/bin/perfsonar-auto-update.sh current
+#           on every run. Hosts still had the compose-era copy, which waited
+#           for "Downloaded newer image" (podman never prints it) and so
+#           pulled images but never restarted anything (found on psum05).
+#   1.6.2 - Remove containers with 'podman rm -f -v' so their anonymous
+#           volumes (/var/log, /var/lib/postgresql, certbot's
+#           /var/lib/letsencrypt) go with them. Before this, every restart or
+#           auto-update orphaned them; psum05.aglt2.org built up 310 volumes
+#           (44.5 GB), filled /var and stopped PostgreSQL/pScheduler.
 #   1.6.1 - Run the testpoint with --pids-limit=8192, like pids_limit: 8192
 #           in the compose files. Without it podman's default of 2048 applies;
 #           psmsu01.aglt2.org reached it after enrollment (pScheduler
@@ -276,10 +292,10 @@ copy_file_from_image() {
     podman image exists "$TP_IMAGE" 2>/dev/null || podman pull -q "$TP_IMAGE" >/dev/null || return 1
     podman create --name "$cname" "$TP_IMAGE" >/dev/null 2>&1 || return 1
     if podman cp "$cname:$src" "$dst" >/dev/null 2>&1; then
-        podman rm -f "$cname" >/dev/null 2>&1 || true
+        podman rm -f -v "$cname" >/dev/null 2>&1 || true
         return 0
     fi
-    podman rm -f "$cname" >/dev/null 2>&1 || true
+    podman rm -f -v "$cname" >/dev/null 2>&1 || true
     return 1
 }
 
@@ -424,7 +440,7 @@ Wants=network-online.target
 Type=simple
 Restart=always
 RestartSec=10
-ExecStartPre=-/usr/bin/podman rm -f perfsonar-testpoint
+ExecStartPre=-/usr/bin/podman rm -f -v perfsonar-testpoint
 ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   --replace \\
   --systemd=always \\
@@ -435,14 +451,13 @@ ExecStart=/usr/bin/podman run --name perfsonar-testpoint \\
   --shm-size=512m \\
   --pids-limit=8192 \\
 ${MOUNT_LINES}  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
-  --label=io.containers.autoupdate=registry \\
   --health-cmd "pscheduler troubleshoot --quick" \\
   --health-interval 60s --health-timeout 30s \\
   --health-retries 3 --health-start-period 120s \\
   $TP_IMAGE \\
   $INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh
 ExecStop=/usr/bin/podman stop -t 10 perfsonar-testpoint
-ExecStopPost=/usr/bin/podman rm -f perfsonar-testpoint
+ExecStopPost=/usr/bin/podman rm -f -v perfsonar-testpoint
 
 [Install]
 WantedBy=multi-user.target
@@ -475,7 +490,7 @@ Wants=perfsonar-testpoint.service podman.socket
 Type=simple
 Restart=always
 RestartSec=10
-ExecStartPre=-/usr/bin/podman rm -f certbot
+ExecStartPre=-/usr/bin/podman rm -f -v certbot
 ExecStart=/usr/bin/podman run --name certbot \\
   --replace \\
   --network host \\
@@ -485,11 +500,10 @@ ExecStart=/usr/bin/podman run --name certbot \\
   -v /var/www/html:/var/www/html:z \\
   -v /etc/letsencrypt:/etc/letsencrypt:z \\
   -v $INSTALL_DIR/tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro \\
-  --label=io.containers.autoupdate=registry \\
   docker.io/certbot/certbot:latest \\
   -c "trap 'exit 0' TERM; while :; do certbot renew; sleep 12h & wait \$\$!; done"
 ExecStop=/usr/bin/podman stop -t 10 certbot
-ExecStopPost=/usr/bin/podman rm -f certbot
+ExecStopPost=/usr/bin/podman rm -f -v certbot
 
 [Install]
 WantedBy=multi-user.target
@@ -620,6 +634,23 @@ EOF
 
     systemctl daemon-reload
     systemctl enable --now perfsonar-auto-update.timer
+
+    # podman's own auto-update timer only acts on containers labelled
+    # io.containers.autoupdate. Ours no longer are (and never had the
+    # PODMAN_SYSTEMD_UNIT label it also needs), so it duplicates this timer at
+    # best and fails nightly at worst. Leave it alone if anything else uses it.
+    if systemctl is-enabled --quiet podman-auto-update.timer 2>/dev/null; then
+        OTHER_LABELLED=$(podman ps -a --filter label=io.containers.autoupdate \
+            --format '{{.Names}}' 2>/dev/null | grep -vxE 'perfsonar-testpoint|certbot' || true)
+        if [[ -z "$OTHER_LABELLED" ]]; then
+            systemctl disable --now podman-auto-update.timer
+            systemctl reset-failed podman-auto-update.service 2>/dev/null || true
+            echo "==> ✓ Disabled podman-auto-update.timer (perfsonar-auto-update.timer handles updates)"
+        else
+            echo "==> Leaving podman-auto-update.timer enabled; other containers use it:"
+            echo "$OTHER_LABELLED" | sed 's/^/      /'
+        fi
+    fi
     echo "==> ✓ Enabled perfsonar-auto-update.timer (runs daily at 03:00 + up to 1h random delay)"
     echo ""
     echo "Useful auto-update commands:"
@@ -627,6 +658,17 @@ EOF
     echo "  Run now (test):   systemctl start perfsonar-auto-update.service"
     echo "  View log:         journalctl -u perfsonar-auto-update.service -f"
     echo "  Update log file:  tail -f /var/log/perfsonar-auto-update.log"
+fi
+
+# Keep an already-installed auto-update script current even when --auto-update
+# is not given (e.g. update-perfsonar-deployment.sh re-running this script).
+if [[ "$AUTO_UPDATE" != "true" && -f /usr/local/bin/perfsonar-auto-update.sh && \
+      -f "$INSTALL_DIR/tools_scripts/perfSONAR-auto-update.sh" ]]; then
+    if ! cmp -s "$INSTALL_DIR/tools_scripts/perfSONAR-auto-update.sh" /usr/local/bin/perfsonar-auto-update.sh; then
+        cp "$INSTALL_DIR/tools_scripts/perfSONAR-auto-update.sh" /usr/local/bin/perfsonar-auto-update.sh
+        chmod 0755 /usr/local/bin/perfsonar-auto-update.sh
+        echo "==> ✓ Updated /usr/local/bin/perfsonar-auto-update.sh"
+    fi
 fi
 
 # Keep an already-installed health monitor current even when --health-monitor

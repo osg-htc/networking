@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -4079,6 +4079,9 @@ systemd service + timer that runs daily at 03:00 (plus a random delay up to 1 ho
 <li><strong><code>/etc/systemd/system/perfsonar-auto-update.timer</code></strong> — daily trigger with a 1-hour
   randomised delay and <code>Persistent=true</code> (catches up if the host was off).</li>
 <li>Enables and starts the timer immediately.</li>
+<li>Disables podman's own <code>podman-auto-update.timer</code> if no other container on the host
+  uses it. This timer is the only update mechanism; the perfSONAR containers do not
+  carry the labels <code>podman auto-update</code> needs.</li>
 </ul>
 </details>
 <p>Verify the timer is active:</p>
@@ -4346,6 +4349,9 @@ sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> 
 </li>
 <li>
 <p>Verify health-monitor timer is active: <code>systemctl list-timers perfsonar-health-monitor.timer</code>.</p>
+</li>
+<li>
+<p>Watch <code>/var</code> usage (<code>df -h /var</code>, <code>podman system df</code>). Hosts installed with helper scripts older than November 2026 leak podman volumes on every container restart or update. See "/var filling up" under Troubleshooting.</p>
 </li>
 </ul>
 <hr />
@@ -4707,6 +4713,55 @@ ausearch<span class="w"> </span>-m<span class="w"> </span>avc<span class="w"> </
 <li>If persistent issues, consider creating custom SELinux policy or running in permissive mode</li>
 </ul>
 </details>
+<details class="failure">
+<summary>/var filling up (orphaned podman volumes, Apache logs not rotating)</summary>
+<p><strong>Symptoms:</strong> <code>/var</code> near 100%; container <code>unhealthy</code>; PostgreSQL inside the container
+stopped (<code>postgresql@14-main</code> failed), so pscheduler returns HTTP 500 for <code>/tests</code> and <code>/archivers</code>.</p>
+<p><strong>Cause:</strong> two problems in helper scripts released before November 2026:</p>
+<ol>
+<li>The systemd units ran <code>podman rm -f</code> without <code>-v</code>, so every container restart or
+   auto-update left the old anonymous <code>/var/log</code> and <code>/var/lib/postgresql</code> volumes behind.
+   Compose-managed hosts had the same leak: <code>podman-compose down</code> removes the containers but
+   not their anonymous volumes, and <code>down -v</code> removes only named volumes.</li>
+<li>The image's <code>/usr/sbin/policy-rc.d</code> blocks the Apache reload in logrotate's <code>postrotate</code>,
+   so Apache keeps writing to <code>access.log.1</code> forever (~100 MB/day).</li>
+</ol>
+<p><strong>Diagnose:</strong></p>
+<div class="highlight"><pre><span></span><code>df<span class="w"> </span>-h<span class="w"> </span>/var
+podman<span class="w"> </span>system<span class="w"> </span>df<span class="w">                                   </span><span class="c1"># look at "Local Volumes" RECLAIMABLE</span>
+podman<span class="w"> </span>volume<span class="w"> </span>ls<span class="w"> </span>-q<span class="w"> </span>--filter<span class="w"> </span><span class="nv">dangling</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>ls<span class="w"> </span>-la<span class="w"> </span>/var/log/apache2/
+<span class="c1"># or run the diagnostic report, which checks all of this ("container storage" check)</span>
+/opt/perfsonar-tp/tools_scripts/perfSONAR-diagnostic-report.sh<span class="w"> </span>--brief
+</code></pre></div>
+<p><strong>Fix (does not recreate the container):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Free space. Removes only volumes attached to no container (old logs and old</span>
+<span class="c1">#    pscheduler databases). In-use volumes are protected. This cannot be undone.</span>
+podman<span class="w"> </span>volume<span class="w"> </span>prune<span class="w"> </span>-f
+
+<span class="c1"># 2. Restart PostgreSQL and the pScheduler daemons, then check</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>postgresql@14-main
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>pscheduler-ticker<span class="w"> </span>pscheduler-scheduler<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>pscheduler-runner<span class="w"> </span>pscheduler-archiver
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>pscheduler<span class="w"> </span>troubleshoot<span class="w"> </span>--quick
+
+<span class="c1"># 3. Install the current wrapper and units so the problem does not return</span>
+<span class="c1">#    (install-systemd-units.sh detects Option A/B from the existing unit)</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/testpoint-entrypoint-wrapper.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>/tmp/install-systemd-units.sh
+bash<span class="w"> </span>/tmp/install-systemd-units.sh<span class="w"> </span>--install-dir<span class="w"> </span>/opt/perfsonar-tp
+<span class="c1">#    Compose-managed hosts (unit runs podman-compose) instead run:</span>
+<span class="c1">#    /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply</span>
+
+<span class="c1"># 4. Apply the logrotate fix to the running container (the wrapper does this on future starts),</span>
+<span class="c1">#    then reload Apache so it stops writing to the renamed access.log.1</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span>-e<span class="w"> </span><span class="s1">'/^\s*create\b/d'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s1">'s/^\(\s*\)delaycompress\b/&amp;\n\1copytruncate/'</span><span class="w"> </span>/etc/logrotate.d/apache2
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>perfsonar-testpoint<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>apache2
+</code></pre></div>
+</details>
 <h3 id="networking-issues">Networking Issues<a class="headerlink" href="#networking-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>Policy-based routing not working correctly</summary>
@@ -4918,7 +4973,8 @@ sudo<span class="w"> </span>/opt/perfsonar-tp/tools_scripts/update-perfsonar-dep
 <h3 id="auto-update-issues">Auto-Update Issues<a class="headerlink" href="#auto-update-issues" title="Permanent link">&para;</a></h3>
 <details class="failure">
 <summary>Auto-update not working</summary>
-<p><strong>Symptoms:</strong> Containers not updating despite new images available.</p>
+<p><strong>Symptoms:</strong> Containers not updating despite new images available, or
+<code>podman-auto-update.service</code> shown as failed every night.</p>
 <p><strong>Diagnostic steps:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Check timer status</span>
 systemctl<span class="w"> </span>status<span class="w"> </span>perfsonar-auto-update.timer
@@ -4937,6 +4993,15 @@ systemctl<span class="w"> </span>start<span class="w"> </span>perfsonar-auto-upd
 <ul>
 <li>Enable timer if not active: <code>systemctl enable --now perfsonar-auto-update.timer</code></li>
 <li>Verify script exists and is executable: <code>ls -la /usr/local/bin/perfsonar-auto-update.sh</code></li>
+<li><strong>Old installs pull images but never restart the containers.</strong> A
+  <code>/usr/local/bin/perfsonar-auto-update.sh</code> that runs <code>podman-compose pull</code> and looks for
+  "Downloaded newer image" (which podman never prints) is the compose-era version. Replace
+  it by running <code>update-perfsonar-deployment.sh --apply</code>, which also refreshes outdated units.</li>
+<li><strong><code>podman-auto-update.service</code> fails nightly (exit 125, "no PODMAN_SYSTEMD_UNIT label found").</strong>
+  Older versions of this guide had sites enable <code>podman-auto-update.timer</code>. It cannot update the
+  perfSONAR containers; <code>perfsonar-auto-update.timer</code> does. <code>update-perfsonar-deployment.sh --apply</code>
+  disables it unless another container on the host uses it, or run
+  <code>systemctl disable --now podman-auto-update.timer</code>.</li>
 <li>If script is missing, reinstall from <code>tools_scripts/</code>:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/install-systemd-units.sh<span class="w"> </span><span class="se">\</span>
@@ -5068,10 +5133,10 @@ with the subject prefix <code>[perfSONAR diagnostic]</code>.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "toc.follow", "toc.integrate", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
     
   </body>

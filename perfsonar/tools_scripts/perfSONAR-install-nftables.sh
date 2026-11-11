@@ -1,7 +1,4 @@
 #!/bin/bash
-# Version: 0.1.2
-# Author: Shank McKee, University of Michigan
-# Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # perfSONAR nftables installer and helper
 # Version: 0.1.2
 # Author: Shawn McKee, University of Michigan
