@@ -6,10 +6,17 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.15.0 - 2026-11-11
+# Version: 1.15.1 - 2026-11-11
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
+# Version: 1.15.1 - 2026-11-11
+#   - Fix endless relaunch loop: 1.14.0 and 1.15.0 changed the header version
+#     but left VERSION="1.13.1", so the self-update check after Phase 1 saw a
+#     "new" version on every pass and relaunched forever (the script never got
+#     past downloading helper scripts; nothing on the host was changed).
+#     VERSION now matches the header, and the script relaunches at most once
+#     per run whatever the versions say.
 # Version: 1.15.0 - 2026-11-11
 #   - Compose hosts no longer orphan volumes: 'compose down' leaves the
 #     anonymous volumes the testpoint image declares (and 'down -v' removes
@@ -206,7 +213,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.13.1"
+VERSION="1.15.1"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -1460,6 +1467,14 @@ maybe_relaunch_if_self_updated() {
         | awk '{print $3}' || true)
     [[ -n "$new_version" ]] || return 0
     [[ "$new_version" != "$VERSION" ]] || return 0
+
+    # Relaunch at most once per run. If the header version and VERSION ever
+    # disagree again, an unguarded relaunch loops forever through Phase 1.
+    if [[ -n "${PS_UPDATER_RELAUNCHED:-}" ]]; then
+        warn "Already relaunched once (running $VERSION, file says $new_version); continuing without relaunching again."
+        return 0
+    fi
+    export PS_UPDATER_RELAUNCHED=1
 
     echo
     info "This script was updated ($VERSION → $new_version) during Phase 1."
