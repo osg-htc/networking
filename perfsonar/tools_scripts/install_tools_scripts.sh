@@ -5,6 +5,9 @@ set -euo pipefail
 # Purpose: Ensure the perfSONAR testpoint repository is cloned and the tools_scripts
 #          directory is present under /opt/perfsonar-tp/tools_scripts.
 #
+# Version: 1.0.8 - 2026-11-11
+#   - Fetch perfSONAR-fix-apache-logrotate.sh (Apache log rotation fix for the
+#     testpoint container, used by the compose unit and the updater).
 # Version: 1.0.7 - 2026-03-02
 #   - Add perfSONAR-configure-exporter-acls.sh to download list for toolkit/container exporter ACL hardening.
 # Version: 1.0.6 - 2026-02-27
@@ -20,7 +23,7 @@ set -euo pipefail
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 
-VERSION="1.0.7"
+VERSION="1.0.8"
 PROG_NAME="$(basename "$0")"
 
 # Check for --version or --help flags
@@ -97,6 +100,7 @@ files=(
     perfSONAR-auto-enroll-psconfig.sh
     perfSONAR-auto-update.sh
     perfSONAR-health-monitor.sh
+    perfSONAR-fix-apache-logrotate.sh
     perfSONAR-diagnostic-report.sh
     perfSONAR-install-flowd-go.sh
     perfSONAR-configure-exporter-acls.sh
