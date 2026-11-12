@@ -1,6 +1,25 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-11 (Apache log rotation on compose hosts)
+
+### Fixed
+
+- **Apache logs did not rotate on most compose-managed testpoints** (found on psum01.aglt2.org): the `copytruncate`
+  fix from `testpoint-entrypoint-wrapper.sh` v1.4.0 only runs when the container starts through the wrapper, and of
+  the compose files only `docker-compose.testpoint-le-auto.yml` does that. With the others, a new container's Apache
+  wrote to `access.log.1` indefinitely (~100 MB/day).
+  - New `perfSONAR-fix-apache-logrotate.sh` v1.0.0 (runs on the host): switches the container's Apache logrotate to
+    `copytruncate` and reloads Apache if it is still writing to `access.log.1`. Changes nothing when both are right;
+    `--check` only reports.
+  - `install-systemd-service.sh` v1.2.0: the compose unit runs it as `ExecStartPost` after every start.
+  - `update-perfsonar-deployment.sh` v1.16.0: adds that `ExecStartPost` to an existing compose unit with `--apply`
+    (no restart), and a new check fixes a container that is already running, in place.
+  - `install_tools_scripts.sh` v1.0.8 fetches the new script.
+- The compose files are unchanged. Starting every variant through the wrapper was rejected: with the wrapper as
+  entrypoint podman no longer turns on its systemd mode (podman-compose has no setting for it), and
+  `testpoint-le` would have become the same as `testpoint-le-auto`.
+
 ## [Unreleased] - 2026-11-11 (updater relaunch loop)
 
 ### Fixed

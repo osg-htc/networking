@@ -18,10 +18,16 @@
 #   - perfSONAR testpoint docker-compose.yml in the installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.1.0
+# Version: 1.2.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.2.0 - Make Apache's logs rotate in the container: ExecStartPost runs
+#           perfSONAR-fix-apache-logrotate.sh after every start. Only the
+#           testpoint-le-auto compose file starts the container through
+#           testpoint-entrypoint-wrapper.sh (which applies the same change);
+#           with the other compose files Apache wrote to access.log.1
+#           forever (found on psum01.aglt2.org).
 #   1.1.0 - Stop without orphaning volumes. 'podman-compose down' removes the
 #           containers but leaves the anonymous volumes the testpoint image
 #           declares (/var/log, /var/lib/postgresql), and 'down -v' only
@@ -79,6 +85,7 @@ Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/opt/perfsonar-tp
 ExecStart=/usr/bin/podman-compose up -d
+ExecStartPost=-/bin/bash /opt/perfsonar-tp/tools_scripts/perfSONAR-fix-apache-logrotate.sh
 ExecStop=-/usr/bin/podman-compose stop
 ExecStop=-/bin/sh -c '/usr/bin/podman ps -aq --filter label=com.docker.compose.project.working_dir=/opt/perfsonar-tp | xargs -r /usr/bin/podman rm -f -v'
 ExecStop=/usr/bin/podman-compose down
@@ -95,6 +102,7 @@ if [[ "$INSTALL_DIR" != "/opt/perfsonar-tp" ]]; then
     sed -i "s|WorkingDirectory=/opt/perfsonar-tp|WorkingDirectory=$INSTALL_DIR|g" "$SERVICE_FILE"
     sed -i "s|RequiresMountsFor=/opt/perfsonar-tp|RequiresMountsFor=$INSTALL_DIR|g" "$SERVICE_FILE"
     sed -i "s|project.working_dir=/opt/perfsonar-tp |project.working_dir=$INSTALL_DIR |g" "$SERVICE_FILE"
+    sed -i "s|ExecStartPost=-/bin/bash /opt/perfsonar-tp/|ExecStartPost=-/bin/bash $INSTALL_DIR/|g" "$SERVICE_FILE"
 fi
 
 echo "==> Reloading systemd daemon"
