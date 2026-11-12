@@ -1864,11 +1864,11 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
     #    Compose-managed hosts (unit runs podman-compose) instead run:
     #    /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply
 
-    # 4. Apply the logrotate fix to the running container (the wrapper does this on future starts),
-    #    then reload Apache so it stops writing to the renamed access.log.1
-    podman exec perfsonar-testpoint sed -i -e '/^\s*create\b/d' \
-        -e 's/^\(\s*\)delaycompress\b/&\n\1copytruncate/' /etc/logrotate.d/apache2
-    podman exec perfsonar-testpoint systemctl reload apache2
+    # 4. Fix Apache log rotation in the running container (no restart): switches logrotate to
+    #    copytruncate and, if Apache is still writing to the renamed access.log.1, reloads it.
+    #    New containers get this at start: from the entrypoint wrapper (direct units and the
+    #    testpoint-le-auto compose file) or from the compose unit's ExecStartPost.
+    /opt/perfsonar-tp/tools_scripts/perfSONAR-fix-apache-logrotate.sh
     ```
 
 ### Networking Issues

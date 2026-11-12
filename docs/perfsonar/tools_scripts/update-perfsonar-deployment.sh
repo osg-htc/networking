@@ -6,10 +6,19 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.15.1 - 2026-11-11
+# Version: 1.16.0 - 2026-11-11
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
+# Version: 1.16.0 - 2026-11-11
+#   - Apache log rotation check for the running testpoint container: reports,
+#     and with --apply fixes in place (no restart), a container whose Apache
+#     logrotate lacks copytruncate or whose Apache still writes to
+#     access.log.1 (perfSONAR-fix-apache-logrotate.sh).
+#   - A compose-wrapper unit without that script as ExecStartPost is patched
+#     with --apply, so the fix is re-applied after every start. Only the
+#     testpoint-le-auto compose file gets it from the entrypoint wrapper
+#     (found on psum01.aglt2.org).
 # Version: 1.15.1 - 2026-11-11
 #   - Fix endless relaunch loop: 1.14.0 and 1.15.0 changed the header version
 #     but left VERSION="1.13.1", so the self-update check after Phase 1 saw a
@@ -213,7 +222,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.15.1"
+VERSION="1.16.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -807,6 +816,43 @@ check_compose_unit_execstop() {
     ok "  ✓ Patched ExecStop in $svc (takes effect at the next stop; no restart needed)"
 }
 
+# A compose-wrapper unit must run perfSONAR-fix-apache-logrotate.sh after every
+# start: only the testpoint-le-auto compose file starts the container through
+# testpoint-entrypoint-wrapper.sh, so with the other compose files nothing else
+# makes Apache's logs rotate in a newly created container.
+check_compose_unit_execstartpost() {
+    local svc="$1" helper="$TOOLS_DIR/perfSONAR-fix-apache-logrotate.sh" start_line tmp line
+    grep -q 'perfSONAR-fix-apache-logrotate.sh' "$svc" && return 0
+    start_line=$(grep -m1 '^ExecStart=' "$svc" || true)
+    [[ -n "$start_line" ]] || return 0
+
+    changed "  $svc does not fix Apache log rotation after a start (the container's Apache log then grows until the next restart)"
+    CHANGES_FOUND=1
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would add ExecStartPost=-/bin/bash $helper to $svc"
+        return 0
+    fi
+    if [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to add ExecStartPost."
+        return 0
+    fi
+    if [[ ! -f "$helper" ]]; then
+        warn "  $helper not found; cannot patch the unit"
+        return 0
+    fi
+    cp -a "$svc" "${svc}.bak.$(date -u +%Y%m%dT%H%M%SZ)"
+    tmp=$(mktemp)
+    while IFS= read -r line; do
+        printf '%s\n' "$line"
+        if [[ "$line" == "$start_line" ]]; then
+            printf 'ExecStartPost=-/bin/bash %s\n' "$helper"
+        fi
+    done < "$svc" > "$tmp"
+    cat "$tmp" > "$svc" && rm -f "$tmp"
+    systemctl daemon-reload
+    ok "  ✓ Added ExecStartPost to $svc (runs after the next start; no restart needed)"
+}
+
 check_compose_unit_execstart() {
     local svc="$1" exec_line opts bad=() o name help shm=""
     exec_line=$(grep -m1 '^ExecStart=' "$svc" | sed 's/^ExecStart=//')
@@ -1054,6 +1100,7 @@ fix_stale_service_file() {
         ok "  Unit runs $COMPOSE_CMD (compose); mounts and health check come from docker-compose.yml"
         check_compose_unit_execstart "$svc"
         check_compose_unit_execstop "$svc"
+        check_compose_unit_execstartpost "$svc"
         echo
         return
     elif [[ "$UNIT_KIND" != "direct" ]]; then
@@ -1860,6 +1907,43 @@ check_auto_update() {
     echo
 }
 
+# --- Apache log rotation in the running container (container only) ----------
+#
+# The image's policy-rc.d blocks the Apache reload in logrotate's postrotate,
+# so without copytruncate Apache writes to access.log.1 forever. New containers
+# get the fix at start (entrypoint wrapper, or the compose unit's
+# ExecStartPost); this fixes a container that is already running, in place.
+
+check_apache_logrotate() {
+    [[ "$DEPLOY_TYPE" == "container" ]] || return 0
+    local helper="$TOOLS_DIR/perfSONAR-fix-apache-logrotate.sh" state out
+    state=$($RUNTIME inspect -f '{{.State.Status}}' perfsonar-testpoint 2>/dev/null || true)
+    [[ "$state" == "running" && -f "$helper" ]] || return 0
+
+    info "Checking Apache log rotation in the testpoint container..."
+    if out=$(bash "$helper" --check --wait 0 2>&1); then
+        ok "  Apache logs rotate (copytruncate; Apache writes to access.log)"
+        echo
+        return
+    fi
+    sed -e 's/^[^:]*: //' -e 's/^/    /' <<< "$out"
+    changed "  Apache logs in the container are not rotating"
+    CHANGES_FOUND=1
+    if [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would run: $helper"
+    elif [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to fix it in place (no restart)."
+    else
+        bash "$helper" --wait 0 2>&1 | sed -e 's/^[^:]*: //' -e 's/^/    /'
+        if bash "$helper" --check --wait 0 >/dev/null 2>&1; then
+            ok "  ✓ Apache log rotation fixed in the running container"
+        else
+            warn "  Apache log rotation is still not right; see the messages above"
+        fi
+    fi
+    echo
+}
+
 # --- Orphaned container volumes (container only) ----------------------------
 #
 # Volumes attached to no container are left behind by units and compose stops
@@ -1908,6 +1992,7 @@ main() {
     check_multinic_arp
     check_psconfig_remotes
     check_auto_update
+    check_apache_logrotate
     check_orphaned_volumes
     fix_dns_resolver
     phase4_restart
