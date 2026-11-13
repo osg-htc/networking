@@ -1,6 +1,16 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-13 (served certificate check)
+
+### Added
+
+- `update-perfsonar-deployment.sh` v1.17.0: on Let's Encrypt hosts, compares the certificate Apache serves on port
+  443 with the one in `/etc/letsencrypt/live`. Until now only the file was checked, so when certbot renewed the
+  certificate but the deploy hook could not reload Apache (podman.socket off, SELinux, an older hook), the updater
+  reported the certificate as valid while browsers and monitoring saw the old one expire. The mismatch is reported;
+  with `--apply` Apache in the testpoint is reloaded (no restart) and the served certificate is checked again.
+
 ## [Unreleased] - 2026-11-11 (Apache log rotation on compose hosts)
 
 ### Fixed

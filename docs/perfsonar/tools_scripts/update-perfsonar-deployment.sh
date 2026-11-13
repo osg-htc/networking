@@ -6,10 +6,17 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.16.0 - 2026-11-11
+# Version: 1.17.0 - 2026-11-13
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
+# Version: 1.17.0 - 2026-11-13
+#   - Let's Encrypt: compares the certificate Apache actually serves on port
+#     443 with the one in /etc/letsencrypt/live. If certbot renewed it but
+#     Apache was never reloaded (deploy hook could not run), Apache keeps
+#     serving the old certificate until it expires while the file looks
+#     valid. Reported; with --apply Apache in the testpoint is reloaded (no
+#     restart) and the served certificate is checked again.
 # Version: 1.16.0 - 2026-11-11
 #   - Apache log rotation check for the running testpoint container: reports,
 #     and with --apply fixes in place (no restart), a container whose Apache
@@ -222,7 +229,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.16.0"
+VERSION="1.17.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -1694,8 +1701,82 @@ check_letsencrypt() {
         else
             ok "  Certificate $name valid until $end"
         fi
+        check_served_cert "$name" "$cert" "$applying"
     done
     echo
+}
+
+# 5. Is Apache serving the certificate that is on disk?
+#
+# Apache in the testpoint reads its certificate only when it starts or
+# reloads. If the deploy hook never ran (podman.socket off, SELinux, an older
+# hook), certbot renews the file in /etc/letsencrypt/live but Apache keeps
+# serving the old certificate until it expires, while the expiry check above
+# still reports the file as valid.
+
+served_cert() {   # $1 = server name; prints the PEM certificate Apache serves
+    local addr pem
+    for addr in 127.0.0.1 "$1"; do
+        pem=$(echo | timeout 10 openssl s_client -connect "$addr:443" -servername "$1" 2>/dev/null \
+              | openssl x509 2>/dev/null) || true
+        if [[ -n "$pem" ]]; then
+            printf '%s\n' "$pem"
+            return 0
+        fi
+    done
+    return 1
+}
+
+cert_fp()  { openssl x509 -noout -fingerprint -sha256 2>/dev/null | cut -d= -f2; }
+cert_end() { openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2; }
+
+check_served_cert() {
+    local name="$1" cert="$2" applying="$3"
+    local state served file_fp served_fp file_end served_end file_ts served_ts
+
+    state=$($RUNTIME inspect -f '{{.State.Status}}' perfsonar-testpoint 2>/dev/null || true)
+    [[ "$state" == "running" ]] || return 0
+
+    if ! served=$(served_cert "$name"); then
+        warn "  Could not fetch the certificate Apache serves for $name on port 443; not compared"
+        return 0
+    fi
+    file_fp=$(cert_fp < "$cert")
+    served_fp=$(cert_fp <<< "$served")
+    if [[ -n "$file_fp" && "$file_fp" == "$served_fp" ]]; then
+        ok "  Apache serves the current certificate for $name"
+        return 0
+    fi
+
+    file_end=$(cert_end < "$cert")
+    served_end=$(cert_end <<< "$served")
+    file_ts=$(date -d "$file_end" +%s 2>/dev/null || echo 0)
+    served_ts=$(date -d "$served_end" +%s 2>/dev/null || echo 0)
+    if [[ "$served_ts" -ge "$file_ts" ]]; then
+        warn "  Apache serves a different certificate for $name (valid until $served_end) than"
+        warn "  $cert (valid until $file_end); check the SSLCertificateFile paths in the testpoint"
+        return 0
+    fi
+
+    changed "  Apache still serves an OLDER certificate for $name (valid until $served_end);"
+    changed "  certbot renewed it (valid until $file_end) but Apache was never reloaded"
+    CHANGES_FOUND=1
+    if [[ "$applying" == true ]]; then
+        if $RUNTIME exec perfsonar-testpoint systemctl reload apache2 >/dev/null 2>&1; then
+            sleep 2
+            if [[ "$(served_cert "$name" | cert_fp)" == "$file_fp" ]]; then
+                ok "  ✓ Reloaded Apache; it now serves the renewed certificate"
+            else
+                warn "  Reloaded Apache but it still does not serve $cert; check the SSLCertificateFile paths"
+            fi
+        else
+            warn "  Could not reload Apache (try: $RUNTIME exec perfsonar-testpoint systemctl reload apache2)"
+        fi
+    elif [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would run: $RUNTIME exec perfsonar-testpoint systemctl reload apache2"
+    else
+        warn "  Run with --apply to reload Apache (no restart), or: $RUNTIME exec perfsonar-testpoint systemctl reload apache2"
+    fi
 }
 
 # --- Multi-NIC ARP / rp_filter ----------------------------------------------
