@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#unreleased-2026-11-11-apache-log-rotation-on-compose-hosts" class="md-skip">
+        <a href="#unreleased-2026-11-13-served-certificate-check" class="md-skip">
           Skip to content
         </a>
       
@@ -2356,6 +2356,15 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+<h2 id="unreleased-2026-11-13-served-certificate-check">[Unreleased] - 2026-11-13 (served certificate check)<a class="headerlink" href="#unreleased-2026-11-13-served-certificate-check" title="Permanent link">&para;</a></h2>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>update-perfsonar-deployment.sh</code> v1.17.0: on Let's Encrypt hosts, compares the certificate Apache serves on port
+  443 with the one in <code>/etc/letsencrypt/live</code>. Until now only the file was checked, so when certbot renewed the
+  certificate but the deploy hook could not reload Apache (podman.socket off, SELinux, an older hook), the updater
+  reported the certificate as valid while browsers and monitoring saw the old one expire. The mismatch is reported;
+  with <code>--apply</code> Apache in the testpoint is reloaded (no restart) and the served certificate is checked again.</li>
+</ul>
 <h2 id="unreleased-2026-11-11-apache-log-rotation-on-compose-hosts">[Unreleased] - 2026-11-11 (Apache log rotation on compose hosts)<a class="headerlink" href="#unreleased-2026-11-11-apache-log-rotation-on-compose-hosts" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2401,7 +2410,7 @@
   the next container start.</li>
 <li>Corrected the date of the previous entry and of <code>update-perfsonar-deployment.sh</code> v1.14.0 (2026-11-11, not 11-12).</li>
 </ul>
-<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>perfSONAR-diagnostic-report.sh</code> v1.7.0: "container storage" known-issue check. Reports volumes attached to no
   container and how much they hold, how full the container storage filesystem is, a unit that still orphans volumes,
