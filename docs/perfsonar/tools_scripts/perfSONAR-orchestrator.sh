@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.3.0 - 2026-11-14
+#   - New --no-firewall: skip Step 7 (perfSONAR-install-nftables.sh) without a
+#     prompt, for sites whose configuration management owns the host firewall.
+#     That script's ruleset starts with "flush ruleset", so on such a host it
+#     removed the site's rules (found preparing psmsu05.aglt2.org).
+#   - The auto-update timer is its own step (8.2), after the containers are
+#     deployed. It was offered only inside Step 7, so skipping the firewall
+#     step also skipped it; and --auto-update tried to install it before the
+#     helper scripts were bootstrapped ("install-systemd-units.sh not found").
+#   - Skipping Step 4 no longer leaves the host without
+#     /etc/perfSONAR-multi-nic-config.conf: flowd-go (Step 8.5) and pSConfig
+#     enrollment (Step 9) read it, and enrollment failed without it. The file
+#     is generated before those steps when missing; this changes no routing.
+#   - Step 4 opens the editor only on a terminal and without --yes, so a
+#     scripted run can no longer hang in vi.
 # Version: 1.2.0 - 2026-10-13
 #   - Step 1 enables EPEL (after CodeReady Builder): podman-compose and
 #     fail2ban come only from EPEL, so on a fresh EL9/EL10 host 'dnf install'
@@ -74,6 +89,8 @@ set -euo pipefail
 #  --auto-update           Install and enable auto-update timer for compose-managed containers
 #   --dry-run              Print steps but do not execute destructive operations
 #   --no-flowd-go          Skip flowd-go (SciTags) installation (installed by default)
+#   --no-firewall          Skip Step 7 (nftables/SELinux/Fail2Ban) without prompting; use when
+#                          the site's configuration management owns the host firewall
 #   --no-epel              Do not enable EPEL in Step 1 (podman-compose and fail2ban
 #                          then need EPEL or a local mirror configured beforehand)
 #   --experiment-id N       SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
@@ -88,6 +105,7 @@ NON_INTERACTIVE=false
 # shellcheck disable=SC2034
 AUTO_UPDATE=false
 INSTALL_FLOWD_GO=true
+NO_FIREWALL=false
 ENABLE_EPEL=true
 FLOWD_GO_EXPERIMENT_ID=""
 DEPLOY_OPTION="A"         # A or B
@@ -153,6 +171,7 @@ parse_cli() {
         exit 0;;
       --auto-update) AUTO_UPDATE=true; shift;;
       --no-flowd-go) INSTALL_FLOWD_GO=false; shift;;
+      --no-firewall) NO_FIREWALL=true; shift;;
       --no-epel) ENABLE_EPEL=false; shift;;
       --experiment-id) FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
       *) echo "Unknown arg: $1" >&2; exit 2;;
@@ -272,8 +291,26 @@ step_generate_config() {
   run "${gen_cmd[@]}"
   echo "Edit /etc/perfSONAR-multi-nic-config.conf if needed (gateways, DEFAULT_ROUTE_NIC)."
   echo "Note: The auto-generator will skip NICs that have neither an IPv4 nor an IPv6 gateway (management-only NICs) unless they are set as DEFAULT_ROUTE_NIC."
-  if [ "$NON_INTERACTIVE" != true ]; then
+  # Open the editor only for a person at a terminal: with --yes or without a
+  # tty (scripted runs) vi would wait forever.
+  if [ "$NON_INTERACTIVE" != true ] && [ "$AUTO_YES" != true ] && [ -t 0 ] && [ -t 1 ]; then
     ${EDITOR:-vi} /etc/perfSONAR-multi-nic-config.conf || true
+  fi
+}
+
+# flowd-go (Step 8.5) and pSConfig enrollment (Step 9) read
+# /etc/perfSONAR-multi-nic-config.conf. When Step 4 was skipped (single-NIC
+# hosts, or routing managed by the site) generate it now. Generating the file
+# changes no routing; only Step 5 applies it.
+ensure_nic_config() {
+  local conf=/etc/perfSONAR-multi-nic-config.conf
+  [ -f "$conf" ] && return 0
+  [ "$DRY_RUN" = true ] && { echo "[DRY-RUN] would generate $conf (no routing change)"; return 0; }
+  if [ -x /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh ]; then
+    log "$conf is missing (Step 4 skipped); generating it for flowd-go and pSConfig. No routing is changed."
+    run /opt/perfsonar-tp/tools_scripts/perfSONAR-pbr-nm.sh --generate-config-auto --yes || true
+  else
+    log "WARNING: $conf is missing and perfSONAR-pbr-nm.sh is not installed; flowd-go and pSConfig enrollment may fail."
   fi
 }
 
@@ -330,6 +367,12 @@ step_resolver_check() {
 }
 
 step_security() {
+  if [ "$NO_FIREWALL" = true ]; then
+    log "Skipping Step 7 (--no-firewall): the host firewall is managed by the site."
+    log "  perfSONAR needs these open: tcp 443 861 862 5000 5001 5101 5201 5890-5900 (and 80 for Let's Encrypt);"
+    log "  udp 123 5000 5001 5101 5201 8760-9960 18760-19960 33434-33634."
+    return
+  fi
   if ! confirm "Step 7: Apply nftables/SELinux/Fail2Ban (if installed)?"; then
     log "Skipping security step."
     return
@@ -341,8 +384,15 @@ step_security() {
     sec_cmd+=(--perf-ports 80)
   fi
   run "${sec_cmd[@]}" || true
-  # Optional: setup auto-update timer (Step 7.4)
-  if confirm "Step 7.4: Install auto-update timer (daily image pull + restart if new image found)?"; then
+}
+
+# Step 8.2: auto-update timer. Runs after Step 8 so install-systemd-units.sh is
+# bootstrapped and the units exist. --auto-update installs it without asking.
+step_auto_update() {
+  if [ "$AUTO_UPDATE" = true ]; then
+    log "Step 8.2: installing the auto-update timer (--auto-update)."
+    step_auto_update_compose
+  elif confirm "Step 8.2: Install auto-update timer (daily image pull + restart if new image found)?"; then
     step_auto_update_compose
   else
     log "Skipping auto-update setup."
@@ -545,6 +595,7 @@ step_flowd_go() {
     log "Skipping flowd-go."
     return
   fi
+  ensure_nic_config
   local flowd_cmd=(/opt/perfsonar-tp/tools_scripts/perfSONAR-install-flowd-go.sh)
   [ "$AUTO_YES" = true ] && flowd_cmd+=(--yes)
   [ -n "$FLOWD_GO_EXPERIMENT_ID" ] && flowd_cmd+=(--experiment-id "$FLOWD_GO_EXPERIMENT_ID")
@@ -566,6 +617,7 @@ step_psconfig() {
     log "  Once it is running: /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y -v"
     return
   fi
+  ensure_nic_config
   if [ -x /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh ]; then
     run /opt/perfsonar-tp/tools_scripts/perfSONAR-auto-enroll-psconfig.sh -y -v || true
     run podman exec perfsonar-testpoint psconfig remote list || true
@@ -610,9 +662,8 @@ main() {
   parse_cli "$@"
   preflight
   if [ "$AUTO_UPDATE" = true ]; then
-    log "AUTO_UPDATE flag detected: enabling auto-update setup."
+    log "AUTO_UPDATE flag detected: the auto-update timer is installed after the containers (Step 8.2)."
     AUTO_YES=true
-    step_auto_update_compose
   fi
   step_packages
   step_disable_conflicts
@@ -623,6 +674,7 @@ main() {
   step_security
   step_resolver_check
   step_deploy
+  step_auto_update
   step_flowd_go
   step_psconfig
   step_validate
