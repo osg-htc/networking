@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.2.0 - 2026-11-14
+#   - New --no-firewall: Step 6 does not run perfSONAR-install-nftables.sh, for
+#     sites whose configuration management owns the host firewall (its ruleset
+#     starts with "flush ruleset"). Exporter ACLs are still applied. Warns when
+#     firewalld is active, because the perfsonar-toolkit RPMs enable it.
+#   - Skipping Step 4 no longer leaves the host without
+#     /etc/perfSONAR-multi-nic-config.conf, which flowd-go (Step 8) and pSConfig
+#     enrollment (Step 9) read; it is generated when missing (no routing change).
+#   - Step 4 opens the editor only on a terminal and without --yes.
 # Version: 1.1.0
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
@@ -31,6 +40,8 @@ set -euo pipefail
 #   --yes                  Auto-confirm internal script prompts
 #   --dry-run              Print steps but do not execute destructive operations
 #   --no-flowd-go          Skip flowd-go (SciTags) installation (installed by default)
+#   --no-firewall          Do not apply the nftables/SELinux/Fail2Ban rules in Step 6; use when
+#                          the site's configuration management owns the host firewall
 #   --experiment-id N      SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
 
 #   --exporter-allowlist   Override default exporter endpoint allow-list (comma-separated CIDRs/IPs)
@@ -46,6 +57,7 @@ DRY_RUN=false
 AUTO_YES=false
 NON_INTERACTIVE=false
 INSTALL_FLOWD_GO=true
+NO_FIREWALL=false
 FLOWD_GO_EXPERIMENT_ID=""
 NO_EXPORTER_ACLS=false
 BUNDLE="toolkit"
@@ -105,6 +117,7 @@ parse_cli() {
       --fqdn)           LE_FQDN="${2:-}"; shift 2;;
       --email)          LE_EMAIL="${2:-}"; shift 2;;
       --no-flowd-go)         INSTALL_FLOWD_GO=false; shift;;
+      --no-firewall)         NO_FIREWALL=true; shift;;
       --experiment-id)       FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
 
       --exporter-allowlist)  EXPORTER_ALLOWLIST="${2:-}"; shift 2;;
@@ -204,7 +217,8 @@ step_multnic_pbr() {
   run "${gen_cmd[@]}"
 
   echo "Edit /etc/perfSONAR-multi-nic-config.conf if needed, then press Enter."
-  if [ "$NON_INTERACTIVE" != true ]; then
+  # Only for a person at a terminal: with --yes or without a tty vi would wait forever.
+  if [ "$NON_INTERACTIVE" != true ] && [ "$AUTO_YES" != true ] && [ -t 0 ] && [ -t 1 ]; then
     ${EDITOR:-vi} /etc/perfSONAR-multi-nic-config.conf || true
   fi
 
@@ -231,8 +245,23 @@ step_dns_check() {
 # ---------------------------------------------------------------------------
 # Step 6 — nftables / SELinux / Fail2Ban
 # ---------------------------------------------------------------------------
+# flowd-go (Step 8) and pSConfig enrollment (Step 9) read
+# /etc/perfSONAR-multi-nic-config.conf. When Step 4 was skipped, generate it.
+# Generating the file changes no routing.
+ensure_nic_config() {
+  local conf=/etc/perfSONAR-multi-nic-config.conf
+  [ -f "$conf" ] && return 0
+  [ "$DRY_RUN" = true ] && { echo "[DRY-RUN] would generate $conf (no routing change)"; return 0; }
+  if [ -x "$HELPER_DIR/tools_scripts/perfSONAR-pbr-nm.sh" ]; then
+    log "$conf is missing (Step 4 skipped); generating it for flowd-go and pSConfig. No routing is changed."
+    run "$HELPER_DIR/tools_scripts/perfSONAR-pbr-nm.sh" --generate-config-auto --yes || true
+  else
+    log "WARNING: $conf is missing and perfSONAR-pbr-nm.sh is not installed; flowd-go and pSConfig enrollment may fail."
+  fi
+}
+
 step_security() {
-  if ! confirm "Step 6: Apply nftables / SELinux / Fail2Ban rules?"; then
+  if [ "$NO_FIREWALL" != true ] && ! confirm "Step 6: Apply nftables / SELinux / Fail2Ban rules?"; then
     log "Skipping security step."
     return
   fi
@@ -246,7 +275,17 @@ step_security() {
     log "FQDN provided — adding port 80 to nftables for Let's Encrypt HTTP-01 challenge"
     sec_cmd+=(--perf-ports 80)
   fi
-  run "${sec_cmd[@]}" || true
+  if [ "$NO_FIREWALL" = true ]; then
+    log "Not applying nftables/SELinux/Fail2Ban rules (--no-firewall): the host firewall is managed by the site."
+    log "  perfSONAR needs these open: tcp 443 861 862 5000 5001 5101 5201 5890-5900 (and 80 for Let's Encrypt);"
+    log "  udp 123 5000 5001 5101 5201 8760-9960 18760-19960 33434-33634."
+    if systemctl is-active --quiet firewalld 2>/dev/null; then
+      log "WARNING: firewalld is active (the perfsonar-toolkit RPMs enable it). If the site firewall is nftables,"
+      log "  both are now filtering: systemctl disable --now firewalld"
+    fi
+  else
+    run "${sec_cmd[@]}" || true
+  fi
 
   if [ "$NO_EXPORTER_ACLS" = true ]; then
     log "WARNING: Exporter endpoint ACL protection is DISABLED (--no-exporter-acls). Both /node_exporter/metrics and /perfsonar_host_exporter/ will be accessible from any HTTPS client. This is not recommended."
@@ -330,6 +369,7 @@ step_flowd_go() {
     return
   fi
 
+  ensure_nic_config
   local flowd_cmd=("$HELPER_DIR/tools_scripts/perfSONAR-install-flowd-go.sh")
   [ "$AUTO_YES" = true ]             && flowd_cmd+=(--yes)
   [ -n "$FLOWD_GO_EXPERIMENT_ID" ]   && flowd_cmd+=(--experiment-id "$FLOWD_GO_EXPERIMENT_ID")
@@ -351,6 +391,7 @@ step_psconfig() {
     return
   fi
 
+  ensure_nic_config
   if [ -x "$HELPER_DIR/tools_scripts/perfSONAR-auto-enroll-psconfig.sh" ]; then
     # --local mode: runs psconfig commands directly on the host (RPM toolkit)
     # instead of via podman exec (container mode)

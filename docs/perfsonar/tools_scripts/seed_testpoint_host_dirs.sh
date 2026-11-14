@@ -5,6 +5,11 @@ set -euo pipefail
 # Seed host directories from perfSONAR testpoint image.
 # Intended to be run on the host as root (or with sudo) BEFORE first compose up.
 #
+# Version: 2.0.2 - 2026-11-14
+#   - Remove the temporary containers with their anonymous volumes
+#     ("rm -f -v"). Each "create" from the testpoint image makes three
+#     volumes, so every seeding run left nine empty dangling volumes
+#     (found on a fresh install of psmsu05.aglt2.org).
 # Version: 2.0.1 - 2026-10-09
 #   - Update notes: the host /run/dbus is no longer mounted into the container.
 # Version: 2.0.0 - 2026-03-04
@@ -23,7 +28,7 @@ set -euo pipefail
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp] [--with-le] [--version|--help]
 
-VERSION="2.0.1"
+VERSION="2.0.2"
 PROG_NAME="$(basename "$0")"
 RUNTIME=""
 BASE_DIR="/opt/perfsonar-tp"
@@ -164,7 +169,7 @@ cleanup_container() {
     local name="$1"
     if $RUNTIME ps -a --format '{{.Names}}' 2>/dev/null | grep -qw "${name}"; then
         echo "    Removing temporary container: $name"
-        $RUNTIME rm -f "$name" >/dev/null 2>&1 || true
+        $RUNTIME rm -f -v "$name" >/dev/null 2>&1 || true
     fi
 }
 

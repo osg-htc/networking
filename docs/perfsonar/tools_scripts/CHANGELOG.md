@@ -1,6 +1,32 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-14 (installers on hosts with a site-managed firewall)
+
+### Added
+
+- `perfSONAR-orchestrator.sh` v1.3.0 and `perfSONAR-toolkit-install.sh` v1.2.0: new `--no-firewall`. The firewall
+  step runs `perfSONAR-install-nftables.sh`, whose ruleset starts with `flush ruleset`; on a host whose firewall is
+  managed by the site (Ansible, Puppet) that removes the site's rules. With `--no-firewall` the step is skipped
+  without a prompt and the ports perfSONAR needs are logged. The toolkit installer still applies the exporter ACLs
+  and warns when firewalld is active, because the perfsonar-toolkit RPMs enable it.
+
+### Fixed
+
+Found installing psmsu05.aglt2.org (container) and psumvm03.aglt2.org (toolkit) with the routing and firewall steps
+skipped:
+
+- **Auto-update timer was tied to the firewall step** (orchestrator): it was offered as "Step 7.4" inside Step 7, so
+  skipping the firewall also skipped it, and `--auto-update` tried to install it before the helper scripts were
+  bootstrapped (`install-systemd-units.sh not found`). It is now Step 8.2, after the containers are deployed.
+- **Skipping Step 4 broke pSConfig enrollment and flowd-go** (both installers): they read
+  `/etc/perfSONAR-multi-nic-config.conf`, which only Step 4 wrote. The file is now generated before those steps when
+  it is missing. Generating it changes no routing.
+- **Step 4 could hang a scripted run in `vi`** (both installers): the editor now opens only on a terminal and
+  without `--yes`.
+- **Nine empty dangling volumes after every install** (`seed_testpoint_host_dirs.sh` v2.0.2): the temporary
+  containers used to copy files out of the image were removed without `-v`.
+
 ## [Unreleased] - 2026-11-13 (served certificate check)
 
 ### Added
