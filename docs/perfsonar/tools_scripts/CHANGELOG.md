@@ -1,6 +1,38 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-20 (Lookup Service registration on multi-NIC hosts)
+
+### Added
+
+- `perfSONAR-update-lsregistration.sh` v1.1.0: new `multi-nic` command (with `--nic-conf FILE`). It reads
+  `/etc/perfSONAR-multi-nic-config.conf` and writes one Lookup Service `<host>` per public NIC (host name, its own
+  interface, services with explicit addresses), keeping all other settings. Supports `--dry-run`, `--local` and the
+  container options like the other commands.
+
+### Fixed
+
+- **Multi-NIC hosts were registered under only one name.** The default `lsregistrationdaemon.conf` autodiscovers one
+  primary address, so on psum01.aglt2.org (NICs psum01, psum02, psum02-100g) only one name was in the Lookup
+  Service, and which one changed over time. The other names went stale in the OSG/WLCG pSConfig Web Admin. Checked
+  by running the daemon with the generated configuration against a capture endpoint: three host records, each with
+  its own interface and services, one shared `client-uuid`.
+
+- **`update`, `create` and `restore` aborted after writing the file** (since v1.0.1): they call
+  `restart_lsregistration_local`/`restart_lsregistration_container`, which were never defined, so the run ended with
+  "command not found" and the daemon was not restarted. Both helpers are now defined (unit
+  `perfsonar-lsregistrationdaemon`, then `lsregistrationdaemon`, then SIGHUP), host and container.
+- Deployed on psum01.aglt2.org: the production Lookup Service shows three host records (psum01, psum02,
+  psum02-100g), each with its own interface and services.
+
+### Known issue
+
+- `lsregistrationdaemon.conf` is not bind-mounted by the testpoint compose files, so changes made with this script
+  are lost when the container is re-created. Documented in `multiple-nic-guidance.md`; the bind mount (seeded from
+  the running container) is planned.
+- `ls_lease_duration` has no effect on new registrations with perfSONAR 5.2.x (it is only sent with bulk renews,
+  which the 2026 Lookup Service rejects); see `README-lsregistration.md`.
+
 ## [Unreleased] - 2026-11-14 (installers on hosts with a site-managed firewall)
 
 ### Added

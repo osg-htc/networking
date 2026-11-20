@@ -5,7 +5,7 @@ This directory includes a helper for managing the perfSONAR Lookup Service (LS) 
 
 - `perfSONAR-update-lsregistration.sh` — a combined helper that can update,
 save, restore, create, and extract a `lsregistrationdaemon.conf`. Use the commands `update`, `save`, `restore`,
-`create`, and `extract` (see examples below).
+`create`, `extract` and `multi-nic` (see examples below).
 
 ## Update existing configuration (container or local)
 
@@ -28,7 +28,11 @@ inside the container.
 
 - SELinux: when writing configuration to a host or into a container the updater will attempt to apply `restorecon` (if available) to the target path to ensure SELinux labels are usable after an automated restore. For manual restores that fail due to SELinux, run: `sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf`.
 
-- **Save vs Extract:** `save --output FILE` writes the raw `lsregistrationdaemon.conf` to `FILE` (recommended suffix `.conf`). `extract --output SCRIPT` produces an **executable restore script that embeds the full configuration**—when run, the script writes the conf into `/etc/perfsonar/lsregistrationdaemon.conf` and applies `restorecon` if available. The extracted script is portable and can be used to restore the configuration on any system (recommended suffix `.sh`).
+- **Save vs Extract:** `save --output FILE` writes the raw `lsregistrationdaemon.conf` to `FILE` (recommended suffix
+  `.conf`). `extract --output SCRIPT` produces an **executable restore script that embeds the full
+  configuration**—when run, the script writes the conf into `/etc/perfsonar/lsregistrationdaemon.conf` and applies
+  `restorecon` if available. The extracted script is portable and can be used to restore the configuration on any
+  system (recommended suffix `.sh`).
 
 Examples:
 
@@ -73,3 +77,35 @@ Examples:
 
 - In container mode, the updater restarts services inside the container; in
   local mode, it attempts to restart the host service.
+
+## Hosts with several perfSONAR NICs (`multi-nic`, v1.1.0+)
+
+By default the daemon registers one host record for one autodiscovered primary address, so a host with several
+perfSONAR NICs and DNS names is only visible in the Lookup Service under one of them. `multi-nic` registers one host
+record per public NIC instead, based on `/etc/perfSONAR-multi-nic-config.conf`:
+
+```bash
+# Container testpoint (default): preview, then apply and restart the daemon
+perfSONAR-update-lsregistration.sh multi-nic --dry-run
+perfSONAR-update-lsregistration.sh multi-nic
+
+# RPM toolkit, or a different NIC file
+perfSONAR-update-lsregistration.sh multi-nic --local
+perfSONAR-update-lsregistration.sh multi-nic --nic-conf /path/to/perfSONAR-multi-nic-config.conf
+```
+
+- One `<host>` per public NIC, default-route NIC first: `host_name` = IPv4 address and DNS name, its own
+  `<interface>`, and the existing `<service>` blocks with explicit addresses (name, IPv4, IPv6).
+- Private addresses are skipped unless `--allow-internal 1`. Each public NIC needs a reverse-DNS name that resolves
+  back to its IPv4 address.
+- Everything outside the `<host>` blocks (site, location, administrator, `ls_instance`) is kept. Running it again
+  regenerates the hosts from the current NIC file.
+- In container testpoints the file is not bind-mounted, so a container re-create brings back the default; re-run the
+  command after updates. See [multiple-nic-guidance.md](../multiple-nic-guidance.md).
+
+## Note on `ls_lease_duration` with the 2026 Lookup Service
+
+Since June 2026 the global Lookup Service no longer accepts the v1 bulk renew (keepalive) requests that
+`lsregistrationdaemon` sends, so records expire after the server's default lifetime and are registered again.
+Raising `ls_lease_duration` (`--ls-lease-duration`) does not help with perfSONAR 5.2.x: the daemon sends that value
+only in bulk renew requests, not with new registrations. Longer record lifetimes have to come from the server side.
