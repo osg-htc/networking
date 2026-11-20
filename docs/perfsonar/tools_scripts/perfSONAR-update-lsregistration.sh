@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 # Combined lsregistration helper
+# Version: 1.1.0 - 2026-11-20
+#   - New 'multi-nic' command: register one Lookup Service host per public NIC,
+#     from /etc/perfSONAR-multi-nic-config.conf (written by perfSONAR-pbr-nm.sh).
+#     By default the daemon autodiscovers ONE primary address, so a host with
+#     several perfSONAR NICs/FQDNs registers under only one of them (which one
+#     can change), and the other FQDNs never appear in the Lookup Service or PWA.
+#   - Define restart_lsregistration_local/_container. They were called since 1.0.1
+#     but never defined, so update/create/restore aborted after writing the file.
 # Version: 1.0.4 - 2026-10-20
 #   - Container modes must run as root: the testpoint runs under root's
 #     podman, and a normal user's 'podman ps' never lists it (UTA saw
@@ -13,7 +21,7 @@
 # Version: 1.0.2
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
-# Supports: save, restore, create, update, extract
+# Supports: save, restore, create, update, extract, multi-nic
 # Works against a container (docker|podman) or local filesystem.
 
 set -euo pipefail
@@ -48,6 +56,7 @@ CHECK_INTERVAL=""
 ALLOW_INTERNAL=""
 ADMIN_NAME=""
 ADMIN_EMAIL=""
+NIC_CONF="/etc/perfSONAR-multi-nic-config.conf"
 
 usage() {
 	cat <<EOF
@@ -59,6 +68,10 @@ Commands:
 	create  --input FILE|--build Build a fresh conf from options and install
 	update  [options]           Update existing conf in-place (fields below)
 	extract --output FILE       Produce a self-contained, executable restore script (recommended suffix: .sh)
+	multi-nic [--nic-conf FILE] Register one Lookup Service host per public NIC (multi-NIC hosts).
+	                            Reads NIC_NAMES/NIC_IPV4_ADDRS/NIC_IPV6_ADDRS/DEFAULT_ROUTE_NIC from FILE
+	                            (default: /etc/perfSONAR-multi-nic-config.conf). Each NIC needs a
+	                            reverse-DNS name that resolves back to its IPv4 address.
 
 Global options:
 	--container NAME            Container name (default: $DEFAULT_CONTAINER)
@@ -94,6 +107,10 @@ Examples:
 
 	# Create a fresh conf from fields and install into container
 	$PROG_NAME create --site-name "Acme" --domain example.org --project OSG
+
+	# Multi-NIC host: preview, then apply, one LS host record per public NIC
+	$PROG_NAME multi-nic --dry-run
+	$PROG_NAME multi-nic
 
 	# Produce a self-contained restore script for host use
 	$PROG_NAME extract --output restore-lsreg.sh  # produces an executable script that writes to /etc/perfsonar/lsregistrationdaemon.conf and tries to fix SELinux labels
@@ -197,6 +214,29 @@ exec_in_container() {
 		docker exec "$name" "$@"
 	else
 		podman exec "$name" "$@"
+	fi
+}
+
+# Restart helpers (called by restore/update/create/multi-nic since v1.0.1, but never
+# defined until v1.1.0: those commands wrote the file and then aborted with
+# "command not found"). Unit name differs: perfsonar-lsregistrationdaemon (5.x RPM and
+# testpoint image) vs lsregistrationdaemon (older); fall back to SIGHUP.
+LSREG_RESTART_CMD='systemctl restart perfsonar-lsregistrationdaemon 2>/dev/null || systemctl restart lsregistrationdaemon 2>/dev/null || pkill -HUP -f lsregistrationdaemon'
+
+restart_lsregistration_local() {
+	log "Restarting lsregistrationdaemon on host"
+	if ! bash -c "$LSREG_RESTART_CMD"; then
+		log "WARNING: could not restart lsregistrationdaemon; restart it by hand"
+		return 0
+	fi
+}
+
+restart_lsregistration_container() {
+	local eng=$1 name=$2
+	log "Restarting lsregistrationdaemon inside container $name"
+	if ! exec_in_container "$eng" "$name" bash -c "$LSREG_RESTART_CMD"; then
+		log "WARNING: could not restart lsregistrationdaemon in $name; run: $eng exec $name systemctl restart perfsonar-lsregistrationdaemon"
+		return 0
 	fi
 }
 
@@ -421,6 +461,128 @@ EOF
 	log "Create/install complete"
 }
 
+is_private_ipv4() {
+	case "$1" in
+		10.*|192.168.*|127.*|169.254.*) return 0;;
+		172.1[6-9].*|172.2[0-9].*|172.3[0-1].*) return 0;;
+	esac
+	return 1
+}
+
+# Reverse-resolve IP to a name and require the name to resolve back to the IP.
+verified_fqdn_for() {
+	local ip=$1 name
+	name=$(getent hosts "$ip" | awk 'NR==1{print $2}')
+	[[ -n "$name" ]] || return 1
+	getent ahostsv4 "$name" | awk '{print $1}' | grep -qx "$ip" || return 1
+	printf '%s\n' "${name%.}"
+}
+
+# generate_multinic_conf IN OUT NICCONF
+# Keeps everything outside <site>...</site> and the site-level keys, and replaces
+# the <host> blocks with one host per public NIC. The <service> blocks of the
+# first existing <host> are copied into every new host, with explicit addresses.
+generate_multinic_conf() {
+	local in=$1 out=$2 nicconf=$3
+	[[ -r "$nicconf" ]] || { echo "Cannot read $nicconf (run perfSONAR-pbr-nm.sh --generate-config-auto first)" >&2; return 2; }
+	local NIC_NAMES=() NIC_IPV4_ADDRS=() NIC_IPV6_ADDRS=() DEFAULT_ROUTE_NIC=""
+	# shellcheck disable=SC1090
+	source "$nicconf"
+	grep -q '^[[:space:]]*<site>' "$in" || { echo "No <site> block in $in" >&2; return 2; }
+
+	local workdir
+	workdir=$(dirname "$out")
+	# 1. service blocks of the first <host> (without address lines we may have added before)
+	awk '
+		/^[[:space:]]*<site>/ {insite=1}
+		insite && /^[[:space:]]*<host>/ {hostn++; inhost=1; next}
+		inhost && /^[[:space:]]*<\/host>/ {inhost=0; next}
+		inhost && hostn==1 && /^[[:space:]]*<service>/ {insvc=1}
+		insvc && !/^[[:space:]]*(address|autodiscover_addresses)[[:space:]]/ {print}
+		insvc && /^[[:space:]]*<\/service>/ {insvc=0}
+	' "$in" > "$workdir/services.txt"
+	[[ -s "$workdir/services.txt" ]] || { echo "No <service> blocks found in the first <host> of $in" >&2; return 2; }
+
+	# 2. NIC order: default-route NIC first, then the file order
+	local -a order=()
+	local i
+	for i in "${!NIC_NAMES[@]}"; do [[ "${NIC_NAMES[$i]}" == "$DEFAULT_ROUTE_NIC" ]] && order+=("$i"); done
+	for i in "${!NIC_NAMES[@]}"; do [[ "${NIC_NAMES[$i]}" != "$DEFAULT_ROUTE_NIC" ]] && order+=("$i"); done
+
+	# 3. one <host> per public NIC
+	local hosts="$workdir/hosts.txt" n=0 nic v4 v6 fqdn
+	: > "$hosts"
+	for i in "${order[@]}"; do
+		nic=${NIC_NAMES[$i]}; v4=${NIC_IPV4_ADDRS[$i]:--}; v6=${NIC_IPV6_ADDRS[$i]:--}
+		[[ "$v4" == "-" || -z "$v4" ]] && { log "multi-nic: skip $nic (no IPv4 address)"; continue; }
+		if is_private_ipv4 "$v4" && [[ "$ALLOW_INTERNAL" != 1 ]]; then log "multi-nic: skip $nic ($v4 is private)"; continue; fi
+		if ! fqdn=$(verified_fqdn_for "$v4"); then
+			echo "multi-nic: $nic $v4 has no reverse-DNS name that resolves back to it; fix DNS first" >&2; return 3
+		fi
+		log "multi-nic: $nic -> $fqdn ($v4${v6:+ $v6})"
+		{
+			printf '    # %s %s (generated by %s multi-nic from %s)\n' "$nic" "$fqdn" "$PROG_NAME" "$nicconf"
+			printf '    <host>\n        is_local                   1\n        autodiscover               1\n        autodiscover_interfaces    0\n'
+			printf '        host_name                  %s\n        host_name                  %s\n' "$v4" "$fqdn"
+			printf '        <interface>\n            is_local     1\n            autodiscover 1\n            if_name      %s\n        </interface>\n' "$nic"
+			awk -v fq="$fqdn" -v a4="$v4" -v a6="$v6" '
+				{print}
+				/^[[:space:]]*<service>/ {
+					print "            autodiscover_addresses 0"
+					print "            address " fq
+					print "            address " a4
+					if (a6 != "-" && a6 != "") print "            address " a6
+				}' "$workdir/services.txt"
+			printf '    </host>\n'
+		} >> "$hosts"
+		n=$((n+1))
+	done
+	(( n > 0 )) || { echo "multi-nic: no public NIC found in $nicconf" >&2; return 3; }
+
+	# 4. rebuild: keep text outside <site> and site-level lines; replace all <host> blocks
+	awk -v hostsfile="$hosts" '
+		/^[[:space:]]*<site>/ {insite=1; print; next}
+		insite && /^[[:space:]]*<host>/ {inhost=1; next}
+		inhost && /^[[:space:]]*<\/host>/ {inhost=0; next}
+		inhost {next}
+		insite && /^[[:space:]]*# .*generated by .* multi-nic from/ {next}
+		insite && /^[[:space:]]*<\/site>/ {while ((getline l < hostsfile) > 0) print l; insite=0; print; next}
+		{print}
+	' "$in" > "$out"
+	log "multi-nic: $n host(s) written"
+}
+
+do_multinic() {
+	local workdir
+	workdir=$(make_workdir)
+	trap 'rm -rf "$workdir"' RETURN
+	local tmp="$workdir/lsregistrationdaemon.conf" orig="$workdir/lsregistrationdaemon.conf.orig"
+	if [[ "$LOCAL_MODE" == true ]]; then
+		cp -a "$CONF_PATH" "$orig"
+	else
+		ENG=$(pick_engine)
+		need_cmd "$ENG"
+		container_exists "$ENG" "$CONTAINER" || container_missing "$CONTAINER"
+		copy_from_container "$ENG" "$CONTAINER" "$CONF_PATH" "$orig"
+	fi
+	generate_multinic_conf "$orig" "$tmp" "$NIC_CONF" || return $?
+	if diff -u "$orig" "$tmp" >/dev/null 2>&1; then log "No changes detected."; return 0; fi
+	log "Changes to be applied:"; diff -u "$orig" "$tmp" || true
+	if [[ "$DRY_RUN" == true ]]; then log "Dry-run: not writing."; return 0; fi
+	if [[ "$LOCAL_MODE" == true ]]; then
+		cp -a "$tmp" "$CONF_PATH"; try_restorecon_local "$CONF_PATH" || true
+		[[ "$NO_RESTART" == true ]] || restart_lsregistration_local
+	else
+		copy_to_container "$ENG" "$CONTAINER" "$tmp" "$CONF_PATH"
+		try_restorecon_container "$ENG" "$CONTAINER" "$CONF_PATH" || true
+		[[ "$NO_RESTART" == true ]] || restart_lsregistration_container "$ENG" "$CONTAINER"
+		log "NOTE: $CONF_PATH is not bind-mounted in the standard testpoint compose files;"
+		log "      a container re-create (auto-update) restores the image default. Re-run after updates,"
+		log "      or bind-mount it (see multiple-nic-guidance.md)."
+	fi
+	log "multi-nic complete"
+}
+
 do_extract() {
 	local out="${OUT_PATH:-}" workdir
 	if [[ -z "$out" ]]; then echo "--output is required for extract" >&2; exit 1; fi
@@ -497,6 +659,7 @@ while [[ $# -gt 0 ]]; do
 		--allow-internal) ALLOW_INTERNAL="$2"; shift 2;;
 		--admin-name) ADMIN_NAME="$2"; shift 2;;
 		--admin-email) ADMIN_EMAIL="$2"; shift 2;;
+		--nic-conf) NIC_CONF="$2"; shift 2;;
 		*) echo "Unknown option: $1" >&2; usage; exit 1;;
 	esac
 done
@@ -522,6 +685,9 @@ case "$CMD" in
 		;;
 	extract)
 		do_extract
+		;;
+	multi-nic)
+		do_multinic
 		;;
 	*) echo "Unknown command: $CMD" >&2; usage; exit 1;;
 esac
