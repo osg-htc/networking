@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
     
     
       
@@ -1812,6 +1812,28 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#hosts-with-several-perfsonar-nics-multi-nic-v110" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hosts with several perfSONAR NICs (multi-nic, v1.1.0+)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-on-ls_lease_duration-with-the-2026-lookup-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note on ls_lease_duration with the 2026 Lookup Service
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2486,7 +2508,7 @@
 <ul>
 <li><code>perfSONAR-update-lsregistration.sh</code> — a combined helper that can update,
 save, restore, create, and extract a <code>lsregistrationdaemon.conf</code>. Use the commands <code>update</code>, <code>save</code>, <code>restore</code>,
-<code>create</code>, and <code>extract</code> (see examples below).</li>
+<code>create</code>, <code>extract</code> and <code>multi-nic</code> (see examples below).</li>
 </ul>
 <h2 id="update-existing-configuration-container-or-local">Update existing configuration (container or local)<a class="headerlink" href="#update-existing-configuration-container-or-local" title="Permanent link">&para;</a></h2>
 <p>Script: <code>perfSONAR-update-lsregistration.sh</code></p>
@@ -2516,7 +2538,11 @@ inside the container.</p>
 <p>SELinux: when writing configuration to a host or into a container the updater will attempt to apply <code>restorecon</code> (if available) to the target path to ensure SELinux labels are usable after an automated restore. For manual restores that fail due to SELinux, run: <code>sudo /sbin/restorecon -v /etc/perfsonar/lsregistrationdaemon.conf</code>.</p>
 </li>
 <li>
-<p><strong>Save vs Extract:</strong> <code>save --output FILE</code> writes the raw <code>lsregistrationdaemon.conf</code> to <code>FILE</code> (recommended suffix <code>.conf</code>). <code>extract --output SCRIPT</code> produces an <strong>executable restore script that embeds the full configuration</strong>—when run, the script writes the conf into <code>/etc/perfsonar/lsregistrationdaemon.conf</code> and applies <code>restorecon</code> if available. The extracted script is portable and can be used to restore the configuration on any system (recommended suffix <code>.sh</code>).</p>
+<p><strong>Save vs Extract:</strong> <code>save --output FILE</code> writes the raw <code>lsregistrationdaemon.conf</code> to <code>FILE</code> (recommended suffix
+  <code>.conf</code>). <code>extract --output SCRIPT</code> produces an <strong>executable restore script that embeds the full
+  configuration</strong>—when run, the script writes the conf into <code>/etc/perfsonar/lsregistrationdaemon.conf</code> and applies
+  <code>restorecon</code> if available. The extracted script is portable and can be used to restore the configuration on any
+  system (recommended suffix <code>.sh</code>).</p>
 </li>
 </ul>
 <p>Examples:</p>
@@ -2558,6 +2584,33 @@ inside the container.</p>
   local mode, it attempts to restart the host service.</p>
 </li>
 </ul>
+<h2 id="hosts-with-several-perfsonar-nics-multi-nic-v110">Hosts with several perfSONAR NICs (<code>multi-nic</code>, v1.1.0+)<a class="headerlink" href="#hosts-with-several-perfsonar-nics-multi-nic-v110" title="Permanent link">&para;</a></h2>
+<p>By default the daemon registers one host record for one autodiscovered primary address, so a host with several
+perfSONAR NICs and DNS names is only visible in the Lookup Service under one of them. <code>multi-nic</code> registers one host
+record per public NIC instead, based on <code>/etc/perfSONAR-multi-nic-config.conf</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Container testpoint (default): preview, then apply and restart the daemon</span>
+perfSONAR-update-lsregistration.sh<span class="w"> </span>multi-nic<span class="w"> </span>--dry-run
+perfSONAR-update-lsregistration.sh<span class="w"> </span>multi-nic
+
+<span class="c1"># RPM toolkit, or a different NIC file</span>
+perfSONAR-update-lsregistration.sh<span class="w"> </span>multi-nic<span class="w"> </span>--local
+perfSONAR-update-lsregistration.sh<span class="w"> </span>multi-nic<span class="w"> </span>--nic-conf<span class="w"> </span>/path/to/perfSONAR-multi-nic-config.conf
+</code></pre></div>
+<ul>
+<li>One <code>&lt;host&gt;</code> per public NIC, default-route NIC first: <code>host_name</code> = IPv4 address and DNS name, its own
+  <code>&lt;interface&gt;</code>, and the existing <code>&lt;service&gt;</code> blocks with explicit addresses (name, IPv4, IPv6).</li>
+<li>Private addresses are skipped unless <code>--allow-internal 1</code>. Each public NIC needs a reverse-DNS name that resolves
+  back to its IPv4 address.</li>
+<li>Everything outside the <code>&lt;host&gt;</code> blocks (site, location, administrator, <code>ls_instance</code>) is kept. Running it again
+  regenerates the hosts from the current NIC file.</li>
+<li>In container testpoints the file is not bind-mounted, so a container re-create brings back the default; re-run the
+  command after updates. See <a href="../../multiple-nic-guidance/">multiple-nic-guidance.md</a>.</li>
+</ul>
+<h2 id="note-on-ls_lease_duration-with-the-2026-lookup-service">Note on <code>ls_lease_duration</code> with the 2026 Lookup Service<a class="headerlink" href="#note-on-ls_lease_duration-with-the-2026-lookup-service" title="Permanent link">&para;</a></h2>
+<p>Since June 2026 the global Lookup Service no longer accepts the v1 bulk renew (keepalive) requests that
+<code>lsregistrationdaemon</code> sends, so records expire after the server's default lifetime and are registered again.
+Raising <code>ls_lease_duration</code> (<code>--ls-lease-duration</code>) does not help with perfSONAR 5.2.x: the daemon sends that value
+only in bulk renew requests, not with new registrations. Longer record lifetimes have to come from the server side.</p>
 
 
 
