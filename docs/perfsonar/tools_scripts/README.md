@@ -27,7 +27,7 @@ for your site — they are not interchangeable:
 | **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
 | **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
 | **perfSONAR-install-flowd-go.sh** | v1.6.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
-| **perfSONAR-configure-exporter-acls.sh** | v0.1.0 | Restrict exporter endpoints to monitoring CIDRs | [RPM toolkit deployment](#rpm-toolkit-installer) |
+| **perfSONAR-configure-exporter-acls.sh** | v0.2.0 | Restrict exporter endpoints to monitoring CIDRs (toolkit and container) | [Exporter access](../../personas/quick-deploy/install-perfsonar-testpoint.md#exporter-access) |
 
 **Latest Updates**: v1.0.0 (Feb 2026) adds `perfSONAR-toolkit-install.sh` for RPM-based toolkit deployments.
 

@@ -1426,6 +1426,36 @@ Perform these checks before handing the host over to operations:
 
 ---
 
+## Exporter access
+
+The testpoint serves two Prometheus exporters over HTTPS, used by the OSG/WLCG central monitoring (psetf) and by site monitoring:
+
+- `/node_exporter/metrics`: host metrics from Node Exporter
+- `/perfsonar_host_exporter/`: perfSONAR metrics (bundle version, pScheduler runs, pSConfig and LS status)
+
+The OSG image restricts both to loopback plus a default allow-list: the AGLT2 networks (`2001:48a8:68f7::/48`, `192.41.230.0/23`, `192.41.236.0/23`), where the central monitoring runs, and CERN. pScheduler and the other perfSONAR services are not affected.
+
+**Use your own list.** Run the helper script; it detects the container, writes `/opt/perfsonar-tp/conf/exporter-allow.conf` and reloads Apache in the container:
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh \
+    --allowlist "YOUR_SUBNET_1,YOUR_SUBNET_2" --yes
+```
+
+Include the central monitoring networks above in your list if you want the testpoint to stay visible in OSG/WLCG monitoring. The systemd unit from `install-systemd-units.sh` 1.8.0 or later mounts that file into the container, so the list survives container updates. With an older unit the script applies the list to the running container and tells you to rerun `install-systemd-units.sh`.
+
+**Check it.** From an allowed host both URLs return 200; from any other address they return 403:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' https://<your-host>/perfsonar_host_exporter/
+curl -s -o /dev/null -w '%{http_code}\n' https://<your-host>/node_exporter/metrics
+```
+
+!!! note "Let's Encrypt (Option B) hosts with an older image"
+    Images before the exporter ACL change kept the restrictions inside `default-ssl.conf`, and Option B hosts use their own copy of that file. Those restrictions covered the wrong URLs, so both exporters were open. Update to the current image; the new rules live outside `default-ssl.conf` and apply on Option B hosts too.
+
+---
+
 ## Ongoing Maintenance
 
 - **Quarterly or as-needed:** Re-validate routing policy and nftables rules after network changes or security audits.

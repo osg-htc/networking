@@ -503,11 +503,11 @@ The toolkit exposes two exporter endpoints via HTTPS:
 - `/node_exporter/metrics` (system metrics from Node Exporter, proxied via `localhost:9100`)
 - `/perfsonar_host_exporter/` (host-specific metrics from perfSONAR)
 
-**These endpoints are protected by default** with Apache `Require ip` ACLs that restrict access to AGLT2 and CERN monitoring subnets, matching the container deployment protection model. This happens automatically during installation without any additional flags required.
+**These endpoints are protected by default** with Apache `Require ip` ACLs that restrict access to loopback plus the AGLT2 networks (where the OSG/WLCG central perfSONAR monitoring, psetf, runs) and CERN. The OSG testpoint container uses the same default list. This happens automatically during installation without any additional flags required.
 
 **Default protected subnets** (same as container image):
 - AGLT2 IPv4: `192.41.230.0/23`, `192.41.236.0/23`
-- AGLT2 IPv6: `2001:48a8:68f7::/50`
+- AGLT2 IPv6: `2001:48a8:68f7::/48`
 - CERN IPv4: `188.184.0.0/17`, `188.185.0.0/17`, `188.185.128.0/18`, `128.142.0.0/16`
 - CERN IPv6: `2001:1458:d00::/48`, `2001:1458:d03::/48`, `2001:1458:301::/48`, `2001:1458:302::/48`, `2001:1458:303::/48`
 
@@ -535,7 +535,7 @@ curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perf
     | sudo bash -s -- --experiment-id 1 --non-interactive --no-exporter-acls
 ```
 
-The ACL configuration writes to `/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf` with Apache `<Location>` blocks using `Require ip` directives, and reloads the web server.
+The ACL configuration writes to `/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf` with Apache `<Location>` blocks for `/node_exporter` and `/perfsonar_host_exporter` (loopback is always allowed, so local checks keep working), and reloads the web server.
 
 ??? info "SSH allow-lists and validation"
         
