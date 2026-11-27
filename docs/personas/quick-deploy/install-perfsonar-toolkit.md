@@ -537,6 +537,13 @@ curl -fsSL https://raw.githubusercontent.com/osg-htc/networking/master/docs/perf
 
 The ACL configuration writes to `/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf` with Apache `<Location>` blocks for `/node_exporter` and `/perfsonar_host_exporter` (loopback is always allowed, so local checks keep working), and reloads the web server.
 
+**Existing installations.** ACL files written before helper version 0.2.0 (November 2026) protect only `/node_exporter/metrics`, and their default list has AGLT2 IPv6 as `2001:48a8:68f7::/50`, which blocks the central monitor (psetf) over IPv6. `update-perfsonar-deployment.sh` (1.18.0+) reports such a file, and with `--apply` rewrites it with the same list and the corrected range. To do it by hand, update the helper scripts and re-run the helper with your list (omit `--allowlist` for the default):
+
+```bash
+/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh --mode toolkit \
+    --allowlist "YOUR_SUBNET_1,YOUR_SUBNET_2" --yes
+```
+
 ??? info "SSH allow-lists and validation"
         
     - **Auto-detects current SSH clients:** The script captures the IP address of your current SSH connection (via `$SSH_CONNECTION`) and active SSH connections (via `ss`) to ensure your SSH access is not interrupted when the firewall is applied.

@@ -6,10 +6,19 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.17.0 - 2026-11-13
+# Version: 1.18.0 - 2026-11-27
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
+# Version: 1.18.0 - 2026-11-27
+#   - Exporter ACL check. Toolkit: an ACL file written by
+#     perfSONAR-configure-exporter-acls.sh older than 0.2.0 covers only
+#     /node_exporter/metrics and may carry the AGLT2 IPv6 /50, which blocks
+#     the central monitor psetf over IPv6. Reported; with --apply the helper
+#     is re-run with the host's own list (the /50 corrected to /48). No ACL
+#     file is reported only (the site may have chosen --no-exporter-acls).
+#     Container: reports a running image without the OSG exporter ACL
+#     (/etc/apache2/conf-enabled/osg-exporter-acl.conf); update the image.
 # Version: 1.17.0 - 2026-11-13
 #   - Let's Encrypt: compares the certificate Apache actually serves on port
 #     443 with the one in /etc/letsencrypt/live. If certbot renewed it but
@@ -229,7 +238,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.17.0"
+VERSION="1.18.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -2025,6 +2034,77 @@ check_apache_logrotate() {
     echo
 }
 
+# --- Exporter ACLs (toolkit and container) -----------------------------------
+#
+# /node_exporter and /perfsonar_host_exporter should be limited to loopback
+# plus the monitoring networks. Toolkit hosts get an httpd snippet from
+# perfSONAR-configure-exporter-acls.sh; versions before 0.2.0 covered only
+# /node_exporter/metrics, and their default list had AGLT2 IPv6 as /50, which
+# leaves out the subnet of the central monitor (psetf). Container hosts get the
+# rules from the OSG image (conf-enabled/osg-exporter-acl.conf).
+
+EXPORTER_ACL_MIN="0.2.0"
+EXPORTER_ACL_FILE="/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf"
+
+check_exporter_acls() {
+    local helper="$TOOLS_DIR/perfSONAR-configure-exporter-acls.sh"
+    if [[ "$DEPLOY_TYPE" == "container" ]]; then
+        local state
+        state=$($RUNTIME inspect -f '{{.State.Status}}' perfsonar-testpoint 2>/dev/null || true)
+        [[ "$state" == "running" ]] || return 0
+        info "Checking exporter ACLs in the testpoint container..."
+        if $RUNTIME exec perfsonar-testpoint test -f /etc/apache2/conf-enabled/osg-exporter-acl.conf; then
+            ok "  Exporter ACLs present in the image (site list: $BASE_DIR/conf/exporter-allow.conf if present)"
+        else
+            changed "  The running image has no OSG exporter ACL; /node_exporter and /perfsonar_host_exporter may be open"
+            CHANGES_FOUND=1
+            warn "  Update the testpoint image (perfSONAR-auto-update.sh or --apply), then check again."
+        fi
+        echo
+        return
+    fi
+
+    [[ "$DEPLOY_TYPE" == "toolkit" ]] || return 0
+    info "Checking exporter ACLs (httpd)..."
+    if [[ ! -f "$EXPORTER_ACL_FILE" ]]; then
+        warn "  No $EXPORTER_ACL_FILE: the exporters are open to any HTTPS client."
+        warn "  If that is not intended, run: $helper --mode toolkit --yes"
+        echo
+        return
+    fi
+
+    local have list
+    have=$(sed -n 's/^# Managed by perfSONAR-configure-exporter-acls.sh v\([0-9.]*\).*/\1/p' "$EXPORTER_ACL_FILE" | head -1)
+    have=${have:-0}
+    if [[ "$(printf '%s\n%s\n' "$EXPORTER_ACL_MIN" "$have" | sort -V | head -1)" == "$EXPORTER_ACL_MIN" ]] \
+        && ! grep -q '2001:48a8:68f7::/50' "$EXPORTER_ACL_FILE"; then
+        ok "  Exporter ACLs current (written by v$have)"
+        echo
+        return
+    fi
+
+    # The host's own allow-list, without loopback, with the /50 corrected.
+    list=$(awk '$1 == "Require" && $2 == "ip" { print $3 }' "$EXPORTER_ACL_FILE" \
+        | grep -v -x -E '127\.0\.0\.1|::1' | sed 's|^2001:48a8:68f7::/50$|2001:48a8:68f7::/48|' \
+        | awk '!seen[$0]++' | paste -sd, -)
+    changed "  Exporter ACLs were written by v$have (need $EXPORTER_ACL_MIN+): they cover only part of /node_exporter or block psetf over IPv6"
+    CHANGES_FOUND=1
+    if [[ -z "$list" ]]; then
+        warn "  Could not read the allow-list from $EXPORTER_ACL_FILE; run $helper --mode toolkit --allowlist \"...\" --yes"
+    elif [[ "$DRY_RUN" == true ]]; then
+        info "  [DRY-RUN] Would run: $helper --mode toolkit --allowlist \"$list\" --yes"
+    elif [[ "$APPLY" != true ]]; then
+        warn "  Run with --apply to rewrite them with the same list (no restart; httpd is reloaded)."
+    elif [[ ! -x "$helper" ]]; then
+        warn "  $helper not found; cannot rewrite the ACLs"
+    elif bash "$helper" --mode toolkit --allowlist "$list" --yes 2>&1 | sed -e 's/^[0-9-]* [0-9:]* //' -e '/^CMD/d' -e 's/^/    /'; then
+        ok "  ✓ Exporter ACLs rewritten (backup next to $EXPORTER_ACL_FILE)"
+    else
+        warn "  Rewriting the exporter ACLs failed; see the messages above"
+    fi
+    echo
+}
+
 # --- Orphaned container volumes (container only) ----------------------------
 #
 # Volumes attached to no container are left behind by units and compose stops
@@ -2074,6 +2154,7 @@ main() {
     check_psconfig_remotes
     check_auto_update
     check_apache_logrotate
+    check_exporter_acls
     check_orphaned_volumes
     fix_dns_resolver
     phase4_restart
