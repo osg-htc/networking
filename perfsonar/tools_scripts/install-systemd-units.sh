@@ -47,10 +47,13 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.7.0
+# Version: 1.8.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.8.0 - Mount $INSTALL_DIR/conf/exporter-allow.conf over the image's
+#           /etc/apache2/osg/exporter-allow.conf when it exists (site list for
+#           the exporter ACLs; written by perfSONAR-configure-exporter-acls.sh).
 #   1.7.0 - One container update mechanism: perfsonar-auto-update.timer.
 #         - Drop the io.containers.autoupdate=registry label. podman
 #           auto-update also needs a PODMAN_SYSTEMD_UNIT label, which these
@@ -388,6 +391,12 @@ build_testpoint_mounts() {
         TP_MOUNTS+=("-v $INSTALL_DIR/conf/node_exporter.defaults:/etc/default/node_exporter:z")
     else
         echo "    NOTE: $INSTALL_DIR/conf/node_exporter.defaults not present; using container defaults"
+    fi
+
+    # Site allow-list for the exporter ACLs (OSG image osg-exporter-acl.conf).
+    # Without it the image's default list applies.
+    if [[ -f "$INSTALL_DIR/conf/exporter-allow.conf" ]]; then
+        TP_MOUNTS+=("-v $INSTALL_DIR/conf/exporter-allow.conf:/etc/apache2/osg/exporter-allow.conf:ro,z")
     fi
 
     if [[ "$WITH_CERTBOT" == "true" ]]; then

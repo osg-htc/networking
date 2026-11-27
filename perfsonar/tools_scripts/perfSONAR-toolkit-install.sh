@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.2.1 - 2026-11-27
+#   - Default exporter allow-list: AGLT2 IPv6 is 2001:48a8:68f7::/48 (was /50,
+#     which left out the MSU subnet where the central monitor psetf runs).
 # Version: 1.2.0 - 2026-11-14
 #   - New --no-firewall: Step 6 does not run perfSONAR-install-nftables.sh, for
 #     sites whose configuration management owns the host firewall (its ruleset
@@ -65,7 +68,7 @@ LE_FQDN=""
 LE_EMAIL=""
 
 # Default exporter endpoint ACL allow-list (AGLT2 + CERN, matching container)
-DEFAULT_EXPORTER_ALLOWLIST="192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/50,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48"
+DEFAULT_EXPORTER_ALLOWLIST="192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/48,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48"
 EXPORTER_ALLOWLIST="$DEFAULT_EXPORTER_ALLOWLIST"
 
 # Repo + package constants

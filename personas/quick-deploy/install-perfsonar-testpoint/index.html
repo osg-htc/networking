@@ -1328,6 +1328,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#exporter-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exporter access
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ongoing-maintenance" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4326,6 +4337,27 @@ sudo<span class="w"> </span>openssl<span class="w"> </span>x509<span class="w"> 
 </details>
 </li>
 </ol>
+<hr />
+<h2 id="exporter-access">Exporter access<a class="headerlink" href="#exporter-access" title="Permanent link">&para;</a></h2>
+<p>The testpoint serves two Prometheus exporters over HTTPS, used by the OSG/WLCG central monitoring (psetf) and by site monitoring:</p>
+<ul>
+<li><code>/node_exporter/metrics</code>: host metrics from Node Exporter</li>
+<li><code>/perfsonar_host_exporter/</code>: perfSONAR metrics (bundle version, pScheduler runs, pSConfig and LS status)</li>
+</ul>
+<p>The OSG image restricts both to loopback plus a default allow-list: the AGLT2 networks (<code>2001:48a8:68f7::/48</code>, <code>192.41.230.0/23</code>, <code>192.41.236.0/23</code>), where the central monitoring runs, and CERN. pScheduler and the other perfSONAR services are not affected.</p>
+<p><strong>Use your own list.</strong> Run the helper script; it detects the container, writes <code>/opt/perfsonar-tp/conf/exporter-allow.conf</code> and reloads Apache in the container:</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--allowlist<span class="w"> </span><span class="s2">"YOUR_SUBNET_1,YOUR_SUBNET_2"</span><span class="w"> </span>--yes
+</code></pre></div>
+<p>Include the central monitoring networks above in your list if you want the testpoint to stay visible in OSG/WLCG monitoring. The systemd unit from <code>install-systemd-units.sh</code> 1.8.0 or later mounts that file into the container, so the list survives container updates. With an older unit the script applies the list to the running container and tells you to rerun <code>install-systemd-units.sh</code>.</p>
+<p><strong>Check it.</strong> From an allowed host both URLs return 200; from any other address they return 403:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s1">'%{http_code}\n'</span><span class="w"> </span>https://&lt;your-host&gt;/perfsonar_host_exporter/
+curl<span class="w"> </span>-s<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s1">'%{http_code}\n'</span><span class="w"> </span>https://&lt;your-host&gt;/node_exporter/metrics
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Let's Encrypt (Option B) hosts with an older image</p>
+<p>Images before the exporter ACL change kept the restrictions inside <code>default-ssl.conf</code>, and Option B hosts use their own copy of that file. Those restrictions covered the wrong URLs, so both exporters were open. Update to the current image; the new rules live outside <code>default-ssl.conf</code> and apply on Option B hosts too.</p>
+</div>
 <hr />
 <h2 id="ongoing-maintenance">Ongoing Maintenance<a class="headerlink" href="#ongoing-maintenance" title="Permanent link">&para;</a></h2>
 <ul>
