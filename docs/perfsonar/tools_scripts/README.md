@@ -19,7 +19,7 @@ for your site — they are not interchangeable:
 | Tool | Version | Purpose | Documentation |
 |------|---------|---------|---------------|
 | **perfSONAR-orchestrator.sh** | v1.1.4 | Container testpoint orchestrator | [Container deployment](#container-based-deployment-orchestrator) |
-| **perfSONAR-toolkit-install.sh** | v1.0.0 | RPM toolkit guided installer | [RPM toolkit deployment](#rpm-toolkit-installer) |
+| **perfSONAR-toolkit-install.sh** | v1.2.2 | RPM toolkit guided installer | [RPM toolkit deployment](#rpm-toolkit-installer) |
 | **fasterdata-tuning.sh** | v1.3.1 | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
 | **perfSONAR-pbr-nm.sh** | — | Multi-NIC policy-based routing | [Multiple NIC Guidance](../multiple-nic-guidance.md) |
 | **perfSONAR-update-lsregistration.sh** | — | LS registration management | [LS Registration Tools](README-lsregistration.md) |
