@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.2.2 - 2026-11-27
+#   - Exporter ACL step: runs perfSONAR-configure-exporter-acls.sh in toolkit
+#     mode explicitly; a failure is no longer swallowed (|| true) but reported
+#     as an ERROR and repeated at the end of the install with the command to
+#     re-run. Log messages name the protected paths correctly (/node_exporter,
+#     /perfsonar_host_exporter).
 # Version: 1.2.1 - 2026-11-27
 #   - Default exporter allow-list: AGLT2 IPv6 is 2001:48a8:68f7::/48 (was /50,
 #     which left out the MSU subnet where the central monitor psetf runs).
@@ -70,6 +76,7 @@ LE_EMAIL=""
 # Default exporter endpoint ACL allow-list (AGLT2 + CERN, matching container)
 DEFAULT_EXPORTER_ALLOWLIST="192.41.230.0/23,192.41.236.0/23,2001:48a8:68f7::/48,188.184.0.0/17,188.185.0.0/17,188.185.128.0/18,128.142.0.0/16,2001:1458:d00::/48,2001:1458:d03::/48,2001:1458:301::/48,2001:1458:302::/48,2001:1458:303::/48"
 EXPORTER_ALLOWLIST="$DEFAULT_EXPORTER_ALLOWLIST"
+EXPORTER_ACL_FAILED=false
 
 # Repo + package constants
 PERFSONA_REPO_URL="http://software.internet2.edu/rpms/el9/x86_64/latest/packages/perfsonar-repo-0.11-1.noarch.rpm"
@@ -291,15 +298,19 @@ step_security() {
   fi
 
   if [ "$NO_EXPORTER_ACLS" = true ]; then
-    log "WARNING: Exporter endpoint ACL protection is DISABLED (--no-exporter-acls). Both /node_exporter/metrics and /perfsonar_host_exporter/ will be accessible from any HTTPS client. This is not recommended."
+    log "WARNING: Exporter endpoint ACL protection is DISABLED (--no-exporter-acls). Both /node_exporter and /perfsonar_host_exporter will be accessible from any HTTPS client. This is not recommended."
   else
-    log "Protecting exporter endpoints (/node_exporter/metrics, /perfsonar_host_exporter/) with ACLs for: $EXPORTER_ALLOWLIST"
+    log "Protecting exporter endpoints (/node_exporter, /perfsonar_host_exporter) with ACLs for loopback and: $EXPORTER_ALLOWLIST"
     if [ -x "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" ]; then
-      run "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" \
-        --allowlist "$EXPORTER_ALLOWLIST" --yes || true
-      run systemctl reload httpd || run systemctl reload apache2 || true
+      # The helper writes the httpd snippet, tests the configuration and reloads httpd.
+      if ! run "$HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh" \
+          --mode toolkit --allowlist "$EXPORTER_ALLOWLIST" --yes; then
+        EXPORTER_ACL_FAILED=true
+        log "ERROR: exporter ACL configuration failed; the exporters may be open to any HTTPS client."
+      fi
     else
-      log "WARNING: perfSONAR-configure-exporter-acls.sh not found; skipping exporter ACL configuration."
+      EXPORTER_ACL_FAILED=true
+      log "ERROR: perfSONAR-configure-exporter-acls.sh not found; exporter ACLs were not configured."
     fi
   fi
 }
@@ -472,6 +483,10 @@ main() {
   step_flowd_go
   step_psconfig
   step_validate
+  if [ "$EXPORTER_ACL_FAILED" = true ]; then
+    log "WARNING: exporter endpoint ACLs are NOT in place (see the ERROR above). Fix the cause, then run:"
+    log "  $HELPER_DIR/tools_scripts/perfSONAR-configure-exporter-acls.sh --mode toolkit --allowlist \"$EXPORTER_ALLOWLIST\" --yes"
+  fi
   log "=== perfSONAR Toolkit installation complete ==="
 }
 

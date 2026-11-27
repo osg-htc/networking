@@ -3718,6 +3718,10 @@ config.conf</code>, optionally adjusts SELinux, and enables Fail2ban jails—onl
 <span class="w">    </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>bash<span class="w"> </span>-s<span class="w"> </span>--<span class="w"> </span>--experiment-id<span class="w"> </span><span class="m">1</span><span class="w"> </span>--non-interactive<span class="w"> </span>--no-exporter-acls
 </code></pre></div>
 <p>The ACL configuration writes to <code>/etc/httpd/conf.d/apache-osg-exporter-restrictions.conf</code> with Apache <code>&lt;Location&gt;</code> blocks for <code>/node_exporter</code> and <code>/perfsonar_host_exporter</code> (loopback is always allowed, so local checks keep working), and reloads the web server.</p>
+<p><strong>Existing installations.</strong> ACL files written before helper version 0.2.0 (November 2026) protect only <code>/node_exporter/metrics</code>, and their default list has AGLT2 IPv6 as <code>2001:48a8:68f7::/50</code>, which blocks the central monitor (psetf) over IPv6. <code>update-perfsonar-deployment.sh</code> (1.18.0+) reports such a file, and with <code>--apply</code> rewrites it with the same list and the corrected range. To do it by hand, update the helper scripts and re-run the helper with your list (omit <code>--allowlist</code> for the default):</p>
+<div class="highlight"><pre><span></span><code>/opt/perfsonar-tp/tools_scripts/perfSONAR-configure-exporter-acls.sh<span class="w"> </span>--mode<span class="w"> </span>toolkit<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--allowlist<span class="w"> </span><span class="s2">"YOUR_SUBNET_1,YOUR_SUBNET_2"</span><span class="w"> </span>--yes
+</code></pre></div>
 <details class="info">
 <summary>SSH allow-lists and validation</summary>
 <ul>
