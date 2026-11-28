@@ -1,100 +1,91 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# verify-site-scripts.sh: check the helper scripts in docs/perfsonar/tools_scripts.
+#
+# Always checks every script (file arguments are accepted for compatibility
+# and ignored). It only reads; to fix checksum problems run
+#   bash .github/scripts/update-script-checksums.sh
+# and commit the result.
+#
+# Checks:
+#   - every *.sh has <script>.sha256 holding "<sha256>  <script>", and every
+#     per-file .sha256 passes 'sha256sum -c' (right hash, right file name);
+#   - scripts.sha256 lists every *.sh, lists no missing file, and passes
+#     'sha256sum -c';
+#   - the first '# Version: X.Y.Z' header line matches a VERSION= or
+#     SCRIPT_VERSION= variable when a script has both
+#     (update-perfsonar-deployment.sh relaunches itself when they differ, so a
+#     mismatch there loops forever on every host).
 
-# Usage: verify-site-scripts.sh [file1 file2 ...]
-# If no args are provided, it checks all scripts under docs/perfsonar/tools_scripts
+set -uo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)
-DOCS_DIR="$ROOT/docs/perfsonar/tools_scripts"
-SITE_DIR="$ROOT/site/perfsonar/tools_scripts"
+DIR="$ROOT/docs/perfsonar/tools_scripts"
+LIST="scripts.sha256"
+FIX="bash .github/scripts/update-script-checksums.sh"
 
-echo "Verifying docs -> site script sync and SHA256 checks"
-EXIT_CODE=0
+cd "$DIR" || { echo "ERROR: $DIR not found"; exit 1; }
 
-files_to_check=()
-if [[ $# -gt 0 ]]; then
-  # Use given list of files; they can be absolute or relative paths
-  for arg in "$@"; do
-    # normalize to docs dir if necessary
-    if [[ "$arg" =~ ^docs/perfsonar/tools_scripts/ || "$arg" =~ ^site/perfsonar/tools_scripts/ ]]; then
-      files_to_check+=("$arg")
-    elif [[ "$arg" =~ \.sh$ ]]; then
-      files_to_check+=("$DOCS_DIR/$arg")
-    else
-      files_to_check+=("$DOCS_DIR/$arg")
-    fi
-  done
-else
-  # Default: all script files in docs dir
-  while IFS= read -r -d '' f; do files_to_check+=("$f"); done < <(find "$DOCS_DIR" -maxdepth 1 -type f -name "*.sh" -print0)
-fi
+errors=0
+sha_errors=0
+fail() { echo "FAIL: $*"; errors=$((errors + 1)); }
+sha_fail() { fail "$@"; sha_errors=$((sha_errors + 1)); }
 
-for f in "${files_to_check[@]}"; do
-  # Normalize base and filename
-  if [[ "$f" == "$DOCS_DIR"/* ]]; then
-    base=$(basename "$f")
-    docf="$f"
-  elif [[ "$f" == "$SITE_DIR"/* ]]; then
-    base=$(basename "$f")
-    docf="$DOCS_DIR/$base"
-  else
-    # some other path: resolve basis as a filename
-    base=$(basename "$f")
-    docf="$DOCS_DIR/$base"
-  fi
+mapfile -t scripts < <(find . -maxdepth 1 -type f -name '*.sh' -printf '%f\n' | LC_ALL=C sort)
+echo "Checking ${#scripts[@]} scripts in docs/perfsonar/tools_scripts"
 
-  sitef="$SITE_DIR/$base"
-  if [[ ! -d "$SITE_DIR" ]]; then
-    echo "NOTE: site directory not found; skipping docs->site diff checks for $base"
-  else
-    if [[ ! -f "$sitef" ]]; then
-      echo "MISSING site copy for $base"
-      EXIT_CODE=1
-      continue
+# Per-file checksums
+for f in "${scripts[@]}"; do
+    if [[ ! -f "$f.sha256" ]]; then
+        sha_fail "$f has no $f.sha256"
+    elif ! grep -qE "^[0-9a-f]{64}  ${f//./\\.}\$" "$f.sha256"; then
+        sha_fail "$f.sha256 is not in the form '<sha256>  $f' (got: $(head -c 120 "$f.sha256"))"
+    elif ! sha256sum -c --status "$f.sha256" 2>/dev/null; then
+        sha_fail "$f.sha256 does not match $f"
     fi
-    # Compare content with site copy
-    if ! cmp -s "$docf" "$sitef"; then
-      echo "DIFF: $base differs between docs and site"
-      EXIT_CODE=1
+done
+for c in *.sha256; do
+    [[ "$c" == "$LIST" ]] && continue
+    target=${c%.sha256}
+    if [[ ! -f "$target" ]]; then
+        sha_fail "$c has no $target"
+    elif [[ "$target" != *.sh ]] && ! sha256sum -c --status "$c" 2>/dev/null; then
+        sha_fail "$c does not match $target"
     fi
-  fi
-  if [[ ! -f "$docf" ]]; then
-    echo "MISSING docs copy for $base"
-    EXIT_CODE=1
-    continue
-  fi
-  # Compare content (only if site copied files exist)
-  if [[ -d "$SITE_DIR" ]]; then
-    if ! cmp -s "$docf" "$sitef"; then
-      echo "DIFF: $base differs between docs and site"
-      EXIT_CODE=1
-    fi
-  fi
-  # The first '# Version: X.Y.Z' header line must match the VERSION variable
-  # when a script has both. update-perfsonar-deployment.sh relaunches itself
-  # when they differ, so a mismatch there loops forever on every host.
-  hdr_ver=$(grep -m1 -E '^# Version: [0-9]' "$docf" | awk '{print $3}' || true)
-  var_ver=$(grep -m1 -E '^(VERSION|SCRIPT_VERSION)=' "$docf" | sed -E 's/^[A-Z_]+="?([^" ]*)"?.*/\1/' || true)
-  if [[ -n "$hdr_ver" && -n "$var_ver" && "$hdr_ver" != "$var_ver" ]]; then
-    echo "VERSION MISMATCH for $base: header says $hdr_ver, VERSION variable says $var_ver"
-    EXIT_CODE=1
-  fi
-  # Verify sha file entry
-  sha_expected=$(sha256sum "$docf" | awk '{print $1}')
-  shafile="$DOCS_DIR/${base}.sha256"
-  if [[ -f "$shafile" ]]; then
-    sha_in_file=$(awk '{print $1}' "$shafile")
-    if [[ "$sha_expected" != "$sha_in_file" ]]; then
-      echo "SHA MISMATCH for $base: $sha_expected != $sha_in_file in $shafile"
-      EXIT_CODE=1
-    fi
-  else
-    echo "Missing sha file: $shafile"
-    EXIT_CODE=1
-  fi
 done
 
-if [[ $EXIT_CODE -ne 0 ]]; then
-  echo "One or more verification checks failed. See above."
+# scripts.sha256
+if [[ ! -f "$LIST" ]]; then
+    sha_fail "$LIST is missing"
+else
+    while read -r _ name; do
+        [[ -n "${name:-}" && ! -f "$name" ]] && sha_fail "$LIST lists $name, which does not exist"
+    done < "$LIST"
+    for f in "${scripts[@]}"; do
+        grep -qE "^[0-9a-f]{64}  ${f//./\\.}\$" "$LIST" || sha_fail "$LIST has no entry for $f"
+    done
+    while IFS= read -r line; do
+        sha_fail "$LIST: $line"
+    done < <(sha256sum -c "$LIST" 2>/dev/null | grep -v ': OK$')
 fi
-exit $EXIT_CODE
+
+# Version header vs VERSION variable
+for f in "${scripts[@]}"; do
+    hdr=$(grep -m1 -E '^# Version: [0-9]' "$f" | awk '{print $3}' || true)
+    var=$(grep -m1 -E '^(VERSION|SCRIPT_VERSION)=' "$f" | sed -E 's/^[A-Z_]+="?([^" ]*)"?.*/\1/' || true)
+    if [[ -n "$hdr" && -n "$var" && "$hdr" != "$var" ]]; then
+        fail "$f: header says version $hdr, VERSION variable says $var"
+    fi
+done
+
+if [[ $errors -eq 0 ]]; then
+    echo "OK: checksums and version headers are consistent"
+    exit 0
+fi
+echo
+echo "$errors problem(s) found."
+if [[ $sha_errors -gt 0 ]]; then
+    echo "Fix the checksum files with:"
+    echo "  $FIX"
+    echo "and commit the changes."
+fi
+exit 1
