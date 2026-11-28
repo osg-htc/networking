@@ -46,9 +46,9 @@ mkdocs build --clean -d site
 
 - `mkdocs build --clean` (fail on build errors)
 
-- Run link checks and the `verify-site-scripts.sh` script to assert docs/site parity for changed files (optional if not keeping `site/` in repo)
+- Run link checks and `verify-site-scripts.sh` (script checksums and version headers)
 
-- Run `autoupdate-scripts-sha.sh` to update `*.sha256` files when scripts change in docs.
+- Run `bash .github/scripts/update-script-checksums.sh` to update the `*.sha256` files and `scripts.sha256` when scripts change in docs, and commit them with the script.
 
 1. CI publish step (if you want to auto-deploy): use `peaceiris/actions-gh-pages` or `JamesIves/github-pages-deploy-action` to publish the `site/` directory to the `gh-pages` branch or a host.
 
@@ -66,9 +66,9 @@ mkdocs build --clean -d site
 
 ## Actions we automated
 
-- CI verification: `.github/scripts/verify-site-scripts.sh` — verifies `docs/` script copies and `site/` parity for changed scripts.
+- CI verification: `.github/scripts/verify-site-scripts.sh` (workflow `verify-site-scripts.yml`, on every PR and push to master) — checks every script in `docs/perfsonar/tools_scripts`: its `<script>.sha256` (`<sha256>  <script>`), the entries in `scripts.sha256`, and that the `# Version:` header matches a `VERSION=` variable. It only reads; it never commits.
 
-- Autoupdate: `.github/scripts/autoupdate-scripts-sha.sh` — updates per script `*.sha256` and `scripts.sha256` when a script in `docs/` changes in a PR.
+- Checksum update (run locally): after changing a script, run `bash .github/scripts/update-script-checksums.sh` and commit the updated `*.sha256` files and `scripts.sha256` with the script. CI fails, and prints this command, when they are out of date.
 
 ## Migration / Next steps
 

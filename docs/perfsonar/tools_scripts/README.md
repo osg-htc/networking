@@ -318,6 +318,19 @@ apt-get install -y bash coreutils iproute2 network-manager rsync curl openssl \
 
 ---
 
+## Changing a script
+
+Each script has a `<script>.sha256` file and a line in `scripts.sha256`. After changing a script (and, when it has
+one, bumping both its `# Version:` header and its `VERSION=` variable), regenerate the checksums from the repository
+root and commit them with the script:
+
+```bash
+bash .github/scripts/update-script-checksums.sh
+bash .github/scripts/verify-site-scripts.sh   # the same check CI runs
+```
+
+CI only verifies; it does not commit checksum updates.
+
 ## Support & Additional Resources
 
 - **Installation Guides:** [Quick Deploy Landing](../../personas/quick-deploy/landing.md)
