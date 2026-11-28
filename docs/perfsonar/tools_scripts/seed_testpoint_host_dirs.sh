@@ -5,6 +5,12 @@ set -euo pipefail
 # Seed host directories from perfSONAR testpoint image.
 # Intended to be run on the host as root (or with sudo) BEFORE first compose up.
 #
+# Version: 2.1.0 - 2026-11-28
+#   - --with-le seeds nothing extra when the image chooses its TLS certificate
+#     itself (label feature "tls-auto", OSG images from 5.2.6-osg2): only
+#     /etc/letsencrypt is needed, and install-systemd-units.sh >= 1.9.0 no
+#     longer mounts /var/www/html or default-ssl.conf for such images.
+#   - Image from PERFSONAR_TP_IMAGE if set.
 # Version: 2.0.2 - 2026-11-14
 #   - Remove the temporary containers with their anonymous volumes
 #     ("rm -f -v"). Each "create" from the testpoint image makes three
@@ -117,7 +123,24 @@ if [ -z "$RUNTIME" ]; then
 fi
 
 echo "==> Using container runtime: $RUNTIME"
-[ "$WITH_LE" = true ] && echo "==> Mode: Option B (Let's Encrypt) — seeding webroot and Apache SSL config"
+
+TP_IMAGE="${PERFSONAR_TP_IMAGE:-hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production}"
+
+# Images that choose their certificate themselves need no webroot or Apache
+# file on the host.
+if [ "$WITH_LE" = true ]; then
+    $RUNTIME image exists "$TP_IMAGE" 2>/dev/null || $RUNTIME pull -q "$TP_IMAGE" >/dev/null 2>&1 || true
+    features=$($RUNTIME image inspect "$TP_IMAGE" \
+               --format '{{ index .Labels "org.osg-htc.testpoint.features" }}' 2>/dev/null || true)
+    if [[ " $features " == *" tls-auto "* ]]; then
+        echo "==> Mode: Option B (Let's Encrypt); $TP_IMAGE chooses its certificate itself,"
+        echo "    so only /etc/letsencrypt is needed (no webroot or Apache SSL config to seed)"
+        mkdir -p /etc/letsencrypt
+        WITH_LE=false
+    else
+        echo "==> Mode: Option B (Let's Encrypt) — seeding webroot and Apache SSL config"
+    fi
+fi
 echo
 
 PSCONFIG_DIR="$BASE_DIR/psconfig"
@@ -230,9 +253,6 @@ copy_file_from_image() {
     cleanup_container "$cname"
     echo
 }
-
-# Use the production perfsonar testpoint image
-TP_IMAGE="hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production"
 
 echo "==> Pulling latest perfSONAR testpoint image: $TP_IMAGE"
 $RUNTIME pull "$TP_IMAGE" || echo "WARNING: Failed to pull latest image, using cached version"

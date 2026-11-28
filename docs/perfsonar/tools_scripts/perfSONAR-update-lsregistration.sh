@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 # Combined lsregistration helper
+# Version: 1.2.0 - 2026-11-28
+#   - When the container bind-mounts lsregistrationdaemon.conf from the host
+#     (install-systemd-units.sh >= 1.9.0 does, so LS settings survive container
+#     restarts), write the host file in place instead of 'podman cp'. A
+#     single-file bind mount cannot be replaced, and a copy into the container
+#     alone would be lost at the next restart.
 # Version: 1.1.0 - 2026-11-20
 #   - New 'multi-nic' command: register one Lookup Service host per public NIC,
 #     from /etc/perfSONAR-multi-nic-config.conf (written by perfSONAR-pbr-nm.sh).
@@ -198,8 +204,23 @@ copy_from_container() {
 	fi
 }
 
+# Host path bind-mounted at $dst in the container, or nothing.
+container_mount_source() {
+	local eng=$1 name=$2 dst=$3
+	"$eng" inspect "$name" --format '{{range .Mounts}}{{.Destination}}|{{.Source}}{{"\n"}}{{end}}' 2>/dev/null \
+		| awk -F'|' -v d="$dst" '$1 == d && !found { print $2; found = 1 }' || true
+}
+
 copy_to_container() {
-	local eng=$1 name=$2 src=$3 dst=$4
+	local eng=$1 name=$2 src=$3 dst=$4 host
+	host=$(container_mount_source "$eng" "$name" "$dst")
+	if [[ -n "$host" && -f "$host" ]]; then
+		# Rewrite in place: keeps the inode the container sees, and the change
+		# persists on the host.
+		cat "$src" > "$host"
+		log "Wrote $host (mounted at $dst in $name)"
+		return 0
+	fi
 	if [[ $eng == docker ]]; then
 		docker cp "$src" "$name:$dst"
 	else

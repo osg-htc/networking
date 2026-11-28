@@ -554,7 +554,7 @@ Run the official testpoint image using Podman (or Docker). Choose one of the two
 
 - **Option A:** Testpoint only (simplest) — bind-mounts `/opt/perfsonar-tp/psconfig` only. The container uses its own internal Apache webroot and config; no `/var/www/html` or `/etc/apache2` mount is needed.
 
-- **Option B:** Testpoint + Let’s Encrypt — two containers that share a webroot and certificate state via host bind mounts. Only the single file `/etc/apache2/sites-available/default-ssl.conf` is mounted from the host (the entrypoint wrapper patches only that file with LE cert paths).
+- **Option B:** Testpoint + Let’s Encrypt — the testpoint reads its certificate from the host's `/etc/letsencrypt` (mounted read-only) and picks it up at start; a systemd timer renews it with certbot twice a day and reloads Apache afterwards. No Apache files or webroot are mounted from the host.
 
 Use `podman-compose` (or `docker-compose`) in the examples below.
 
@@ -707,330 +707,116 @@ Jump to [Step 6](#step-6-configure-and-enroll-in-psconfig) below.
 
 ---
 
-### Option B — Testpoint + Let's Encrypt (shared Apache and certs)
+### Option B — Testpoint + Let's Encrypt
 
-This mode runs two containers (`perfsonar-testpoint` and `certbot`) and bind-mounts the following host paths so pSConfig, webroot content, the Apache SSL config, and certificates persist on the host and are shared between containers:
+The testpoint image chooses its certificate itself: at every start it uses the Let's Encrypt certificate in the
+host's `/etc/letsencrypt/live` (the one named after the host, or `SERVER_FQDN` if set, or the only one present), and
+the image's own certificate when there is none. The host mounts:
 
 - `/opt/perfsonar-tp/psconfig` → `/etc/perfsonar/psconfig` — perfSONAR configuration
+- `/etc/letsencrypt` → `/etc/letsencrypt` (read-only) — certificates
+- Lookup Service and pSConfig state (see [Persistent registration state](#persistent-registration-state))
 
-- `/var/www/html` → `/var/www/html` — Apache webroot (shared for HTTP-01 ACME challenges)
-
-- `/etc/apache2/sites-available/default-ssl.conf` → same path inside container — the single Apache
-  SSL virtual-host file patched by the entrypoint wrapper with LE cert paths; the rest of the Apache
-  config stays inside the container
-
-- `/etc/letsencrypt` → `/etc/letsencrypt` — Let's Encrypt certificates and state
+Certificates are obtained and renewed by certbot in standalone mode on port 80 (the testpoint does not listen on
+port 80), in a throw-away container started by `perfsonar-certbot.timer`.
 
 <!-- markdownlint-disable-next-line MD024 -->
-#### 1) Seed required host directories (REQUIRED before first compose up)
-
-**Why seed?** The perfsonar-testpoint container requires baseline configuration files from the image to be present on
-the host filesystem. Without seeding, the bind-mounted directories would be empty, causing Apache and perfSONAR services
-to fail.
-
-**What's seeded:**
-
-- `/opt/perfsonar-tp/psconfig` — perfSONAR pSConfig files (baseline remotes and archives)
-
-- `/var/www/html` — Apache webroot (needed for certbot HTTP-01 ACME challenges)
-
-- `/etc/apache2/sites-available/default-ssl.conf` — the one Apache file the entrypoint wrapper
-  patches to point at LE certs; the rest of Apache config stays inside the container
-
-**What's NOT seeded:**
-
-- `/etc/letsencrypt` — Certbot creates this automatically; no pre-seeding needed
-
-- `node_exporter.defaults` — the container ships its own complete copy with all needed collectors;
-  see the Option A cpufreq workaround tip if you need to override it
-
-Run the bundled seeding helper script with the `--with-le` flag (automatically installed in Step 2):
+#### 1) Seed the host directories
 
 ```bash
 /opt/perfsonar-tp/tools_scripts/seed_testpoint_host_dirs.sh --with-le
 ```
 
-??? info "Seed script details"
+This copies the image's `/etc/perfsonar/psconfig` to `/opt/perfsonar-tp/psconfig` and creates `/etc/letsencrypt`.
+(With images older than `5.2.6-osg2` it also seeds `/var/www/html` and `default-ssl.conf`, which those images need.)
 
-    - Pulls the latest perfSONAR testpoint image
-    - Creates temporary containers to extract baseline files
-    - Copies `/etc/perfsonar/psconfig` content to `/opt/perfsonar-tp/psconfig`
-    - Copies `/var/www/html` content to host `/var/www/html`
-    - Extracts the single file `/etc/apache2/sites-available/default-ssl.conf` to the host
-    - Verifies seeding was successful
-    - Skips seeding if all paths already have content (idempotent)
+#### 2) Install the systemd units and start the testpoint
 
-Verify seeding succeeded:
+!!! warning "Use the systemd units, not podman-compose"
+
+    The testpoint image runs systemd inside the container and needs `podman run --systemd=always`, which
+    podman-compose does not support (containers crash-loop after a reboot with exit code 255).
 
 ```bash
-# Should show psconfig files
-ls -la /opt/perfsonar-tp/psconfig
-
-# Should show index.html and perfsonar/ directory
-ls -la /var/www/html
-
-# Should show the single patched SSL config file
-ls -la /etc/apache2/sites-available/default-ssl.conf
-```
-
-??? tip "SELinux volume labels: `:z` vs `:Z`"
-
-    Podman uses two SELinux relabeling suffixes on bind-mounts:
-
-    - `:z` (lowercase) — **Shared.** Applies `container_file_t:s0` (no MCS restriction); any container can access the path.
-    - `:Z` (uppercase) — **Private.** Stamps the current container's unique random MCS categories onto the host path. Only that exact container instance can access the files — **and those labels change on every container recreation.**
-
-    !!! warning "Never use `:Z` on a directory shared between two containers"
-        If two containers mount the same host path and one uses `:Z`, whichever
-        container was most recently recreated will lock the other out. In LE
-        deployments, `certbot` and `perfsonar-testpoint` both mount `/etc/letsencrypt`
-        and `/var/www/html`, so both services use `:z` (shared). A prior bug
-        used `:Z` for certbot — corrected in v1.5.1. The `update-perfsonar-deployment.sh`
-        script (v1.2.0+) automatically detects and corrects stale MCS labels on
-        these paths when run with `--apply`.
-
-    Paths in the LE compose files:
-
-    | Path | Label | Reason |
-    | ---- | ----- | ------ |
-    | `/etc/letsencrypt` | `:z` | Shared — both testpoint (Apache SSL) and certbot need access |
-    | `/var/www/html` | `:z` | Shared — certbot writes ACME challenges; Apache serves them |
-    | `/etc/apache2/sites-available/default-ssl.conf` | `:z` | Single file mount — entrypoint wrapper patches it with LE cert paths |
-    | psconfig volume | `:Z` | Private — only testpoint accesses this |
-
-#### 2) Deploy the testpoint with automatic SSL patching (recommended)
-
-**Prerequisites:** Ensure `/opt/perfsonar-tp/tools_scripts` exists from Step 2 (bootstrap):
-
-```bash
-ls -la /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
-```
-
-If the file is missing, run the Step 2 bootstrap first:
-
-```bash
-curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
-    | bash -s -- /opt/perfsonar-tp
-```
-
-Deploy using the compose file with automatic Apache SSL certificate patching. This approach uses an entrypoint wrapper
-that auto-discovers Let's Encrypt certificates on container startup and automatically patches the Apache configuration.
-
-Download the auto-patching compose file:
-
-```bash
-curl -fsSL \
-    https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/docker-compose.testpoint-le-auto.yml \
-    -o /opt/perfsonar-tp/docker-compose.yml
-```
-
-??? note "The SERVER_FQDN use is optional"
-
-    **Note:** The `SERVER_FQDN` environment variable is **optional**. The entrypoint wrapper will auto-discover certificates in `/etc/letsencrypt/live` 
-    and use the first one found. Only set `SERVER_FQDN` if you have multiple certificates and need to specify which one to use.
-
-    If you want to explicitly set the FQDN (optional):
-
-    ```bash
-    # Optional: only needed if you have multiple certificates
-    sed -i 's/# - SERVER_FQDN=.*/- SERVER_FQDN=<YOUR_FQDN>/' /opt/perfsonar-tp/docker-compose.yml
-    ```
-
-Start the containers:
-
-```bash
-cd /opt/perfsonar-tp
-podman-compose up -d
-```
-
-At this point, the testpoint is running with self-signed certificates. The certbot container is also running but won't
-renew anything until you obtain the initial certificates.
-
-#### Ensure containers restart automatically on reboot (systemd units for testpoint & certbot - REQUIRED)
-
-!!! warning "podman-compose limitation with systemd containers"
-
-    The perfSONAR testpoint image runs **systemd internally** and requires the `--systemd=always` flag to function
-    correctly. **podman-compose does not support this flag**, which causes containers to crash-loop after reboot with exit
-    code 255.
-    
-    You **must** use the systemd unit approach below instead of relying on compose alone.
-    
-    Install and enable the systemd units so containers start on boot with proper systemd support:
-
-```bash
-# install-systemd-units.sh was already downloaded to tools_scripts/ in Step 2
-# --with-certbot adds the certbot renewal unit; --health-monitor adds the health watchdog
+# --with-certbot adds the renewal timer; --health-monitor adds the health watchdog
 /opt/perfsonar-tp/tools_scripts/install-systemd-units.sh \
     --install-dir /opt/perfsonar-tp \
     --with-certbot \
     --health-monitor
 
-# Enable and start services
-systemctl enable --now perfsonar-testpoint.service perfsonar-certbot.service
-
-# Verify services
-systemctl status perfsonar-testpoint.service perfsonar-certbot.service --no-pager
-podman ps
+systemctl start perfsonar-testpoint.service
+systemctl status perfsonar-testpoint.service --no-pager
+systemctl list-timers perfsonar-certbot.timer --no-pager
 ```
+
+Until you obtain a certificate, the testpoint serves its own (self-signed) certificate.
 
 #### 3) Obtain your first Let's Encrypt certificate (one-time)
 
-Use Certbot in standalone mode to obtain the initial certificates. The perfsonar-testpoint image is patched to NOT
-listen on port 80, so port 80 is available for Certbot's HTTP-01 challenge.
-
-**Important:** Stop the certbot sidecar temporarily to free port 80:
-
-```bash
-podman stop certbot
-
-```
-
-Now run Certbot standalone with host networking to bind port 80:
+Make sure port 80 is open inbound to the host, then:
 
 ```bash
 podman run --rm --net=host \
     -v /etc/letsencrypt:/etc/letsencrypt:z \
-    -v /var/www/html:/var/www/html:z \
-    docker.io/certbot/certbot:latest certonly \
+    docker.io/certbot/certbot:v5.10.0 certonly \
     --standalone --agree-tos --non-interactive \
     -d <SERVER_FQDN> -d <ALT_FQDN> \
     -m <LETSENCRYPT_EMAIL>
+
+# The testpoint picks up the certificate when it starts
+systemctl restart perfsonar-testpoint.service
 ```
 
-??? info "Certbot command explained"
+Replace `<SERVER_FQDN>` with the host name (e.g. `psum05.aglt2.org`), add one `-d` per additional name, and use an
+address that should receive expiry notices. `:z` (not `:Z`) gives the directory a shared SELinux label, so both the
+certbot and testpoint containers can read it.
 
-    **Podman options:**
-    
-    - `--rm` - Remove container after it exits
-    - `--net=host` - Use host network (allows binding port 80)
-    - `-v /etc/letsencrypt:/etc/letsencrypt:z` - Mount certificate storage with a shared SELinux label (`:z`, so the testpoint container can also read it; `:Z` would lock it out)
-    - `-v /var/www/html:/var/www/html:z` - Mount webroot for HTTP-01 challenge
-
-    **Certbot options:**
-
-    - `certonly` - Obtain certificate only, don't install it
-    - `--standalone` - Run standalone HTTP server on port 80 for ACME HTTP-01 challenge
-    - `--agree-tos` - Agree to Let's Encrypt Terms of Service
-    - `--non-interactive` - Don't prompt for input (required for automation)
-    - `-d <FQDN>` - Domain name(s) for the certificate (repeat for each domain/SAN)
-    - `-m <EMAIL>` - Email for renewal notifications and account recovery
-
-Replace:
-
-- `<SERVER_FQDN>` with your primary hostname (e.g., `psum05.aglt2.org`)
-- `<ALT_FQDN>` with additional FQDNs if needed (one `-d` flag per FQDN)
-- `<LETSENCRYPT_EMAIL>` with your email for certificate notifications
-
-After successful issuance, restart the perfsonar-testpoint container to trigger the automatic patching:
+Check which certificate Apache uses:
 
 ```bash
-podman restart perfsonar-testpoint
+podman exec perfsonar-testpoint journalctl -u osg-container-setup -o cat | grep TLS
+echo | openssl s_client -connect <SERVER_FQDN>:443 -servername <SERVER_FQDN> 2>/dev/null \
+    | openssl x509 -noout -issuer -enddate
 ```
 
-Check the logs to verify the SSL config was patched:
+#### 4) Renewals
+
+`perfsonar-certbot.timer` runs `certbot renew` twice a day. After a renewal, the service reloads Apache in the
+testpoint (`podman exec perfsonar-testpoint systemctl reload apache2`), so the new certificate is used without a
+restart. certbot gets no access to the host's Podman socket. Test renewal with:
 
 ```bash
-podman logs perfsonar-testpoint 2>&1 | grep -A5 "Patching Apache"
+podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:z \
+    docker.io/certbot/certbot:v5.10.0 renew --dry-run
+journalctl -u perfsonar-certbot.service --no-pager | tail
 ```
 
-You should see output confirming the certificate paths were updated.
+!!! note "Existing Option B installations"
 
-#### 4) Restart the certbot sidecar for automatic renewals
+    Hosts installed before November 2026 mount `/var/www/html` and `/etc/apache2/sites-available/default-ssl.conf`
+    from the host, start through `testpoint-entrypoint-wrapper.sh`, and run a long-running `certbot` container with
+    the host's Podman socket. `update-perfsonar-deployment.sh` reports this; to convert the host, run
 
-Now that certificates are in place, restart the certbot sidecar to enable automatic renewals:
-
-```bash
-podman start certbot
-
-```
-
-The certbot container runs a renewal loop that checks for expiring certificates every 12 hours.
-
-**Automatic certificate reload:** After each successful certificate renewal, certbot runs a deploy hook script
-(`certbot-deploy-hook.sh`) that reloads Apache inside the `perfsonar-testpoint` container (`systemctl reload apache2`),
-so the new certificate is used without restarting the container. Only if the reload fails does the hook restart the
-container. The deploy hook uses the mounted Podman socket (`/run/podman/podman.sock`) to reach the host's container
-runtime through the Podman REST API (using Python, since the `podman` CLI is not present in the certbot image).
-This needs:
-
-- `podman.socket` enabled on the host (`systemctl enable --now podman.socket`; `install-systemd-units.sh --with-certbot`
-  and `update-perfsonar-deployment.sh --apply` do this);
-- SELinux label confinement disabled for the certbot container: `security_opt: label=disable` in the compose file,
-  `--security-opt label=disable` in `perfsonar-certbot.service` (written by `install-systemd-units.sh` v1.6.0 and
-  later). Without it, SELinux denies executing the hook and connecting to the socket, so renewed certificates are
-  never loaded.
-
-**Note:** The certbot container in this setup uses **host networking mode** (via `network_mode: host` in the compose
-file) so it can bind directly to port 80 for HTTP-01 challenges during renewals. This works because the perfsonar-
-testpoint Apache is patched to NOT listen on port 80. Both containers share the host network namespace without conflict.
-
-Test renewal with a dry-run:
-
-```bash
-podman exec certbot certbot renew --dry-run
-```
-
-If successful, certificates will auto-renew before expiry, and Apache in the testpoint will load the new certificates
-automatically. You can verify this behavior by checking the certbot logs after a renewal:
-
-```bash
-podman logs certbot 2>&1 | grep -A5 "deploy hook"
-
-```
-
----
-
-??? info "Alternative: Manual SSL Patching (without automatic entrypoint wrapper)"
-
-    If you prefer not to use the automatic patching entrypoint wrapper, you can use the standard compose file and manually
-    patch the Apache SSL configuration after obtaining certificates.
-    
-    1. Use `docker-compose.testpoint-le.yml` instead of `docker-compose.testpoint-le-auto.yml`
-    1. After obtaining Let's Encrypt certificates, run:
     ```bash
-    /opt/perfsonar-tp/tools_scripts/patch_apache_ssl_for_letsencrypt.sh <SERVER_FQDN>
-    ```
-    1. Reload Apache in the running container:
-    ```bash
-    podman exec perfsonar-testpoint apachectl -k graceful
+    /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply --restart
     ```
 
-This approach requires manual intervention after initial certificate issuance and any time the container is recreated.
-The automatic approach (using the entrypoint wrapper) eliminates this manual step.
+    The host copies of `/var/www/html` and `default-ssl.conf` are left in place; remove them once the host runs
+    the new units.
 
-??? warning "Troubleshooting: Container fails with 'executable file not found' error"
+### Persistent registration state
 
-    **Error:** `Error: unable to start container: crun: executable file /opt/perfsonar-tp/tools_scripts/testpoint-
-    entrypoint-wrapper.sh not found`
-    
-    **Cause:** The `/opt/perfsonar-tp/tools_scripts` directory doesn't exist or the entrypoint wrapper wasn't downloaded.
-    
-    **Fix:** Run the Step 2 bootstrap script to fetch all helper scripts:
-    
-    ```bash
-    curl -fsSL \
-        https://raw.githubusercontent.com/osg-htc/networking/master/docs/perfsonar/tools_scripts/install_tools_scripts.sh \
-        | bash -s -- /opt/perfsonar-tp
-    
-    ```
-    
-    Then verify the entrypoint wrapper exists:
-    
-    ```bash
-    ls -la /opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh
-    
-    ```
-    
-    If you've already started the container and it failed, remove it before retrying:
-    
-    ```bash
-    
-    podman-compose down
-    podman-compose up -d
-    
-    ```
+`install-systemd-units.sh` (1.9.0 and later) keeps these on the host, so they survive container restarts and image
+updates (in both options):
+
+| Host path | In the container | Contents |
+| --- | --- | --- |
+| `/opt/perfsonar-tp/conf/lsregistrationdaemon.conf` | `/etc/perfsonar/lsregistrationdaemon.conf` | Lookup Service settings (site, administrator, communities, location) |
+| `/opt/perfsonar-tp/state/lsregistrationdaemon` | `/var/lib/perfsonar/lsregistrationdaemon` | LS client UUID and record keys |
+| `/opt/perfsonar-tp/state/psconfig` | `/var/lib/perfsonar/psconfig` | pSConfig agent state |
+
+On first install they are copied from the running container (keeping its current settings), else from the image.
+Edit the LS settings with `perfSONAR-update-lsregistration.sh` (Step 7), which writes the host file.
 
 ---
 
@@ -1112,10 +898,14 @@ podman exec -it perfsonar-testpoint psconfig remote list
 
     Update your site wiki or change log with assigned mesh names, feed  URLs, and support contacts.
 
-1. **Update Lookup Service registration inside the container:**
+1. **Set the Lookup Service registration:**
 
-    Use the helper script to edit `/etc/perfsonar/lsregistrationdaemon.conf` inside the running `perfsonar-testpoint`
-    container and restart the daemon only if needed. Install and run examples below, pick which type you want (root shell):
+    Without a site name, administrator and communities the host registers anonymously, and pwa-next and the central
+    dashboards cannot place it. The helper edits `/etc/perfsonar/lsregistrationdaemon.conf`: on current
+    installations that is the host file `/opt/perfsonar-tp/conf/lsregistrationdaemon.conf`, which persists across
+    restarts (see [Persistent registration state](#persistent-registration-state)); then it restarts the daemon in the
+    container. The orchestrator asks for these values (Step 8.1, or `--ls-site-name`, `--ls-admin-name`,
+    `--ls-admin-email`, `--ls-project`). Examples (root shell):
 
     ```bash
     # Preview changes only (uses the copy from /opt/perfsonar-tp/tools_scripts)
@@ -1511,7 +1301,8 @@ chmod 0755 /tmp/update-perfsonar-deployment.sh
 | SELinux fix | On LE deployments with SELinux Enforcing: detects stale private MCS labels on `/etc/letsencrypt` and `/var/www/html` and resets them to shared `container_file_t:s0`; immediately restarts Apache inside the container if needed | Only with `--apply` |
 | 4 — Container | Restarts the testpoint if compose, config or the service unit changed. On hosts with `perfsonar-testpoint.service` (orchestrator / `install-systemd-units.sh` installs) this is always `systemctl restart`, never `podman-compose` | Only with `--restart` |
 | 5 — Systemd | Refreshes systemd units and auto-update timer | Only with `--update-systemd` |
-| Let's Encrypt | On LE hosts: repairs a missing or outdated certbot unit (SELinux `label=disable`), enables `podman.socket`, warns when certbot is not running or a certificate is expired or expires within 14 days | Repairs only with `--apply` |
+| Testpoint unit | Direct units: reports stale mounts and options; with a current image also host `/var/www/html` / `default-ssl.conf` mounts, the entrypoint wrapper, and LS/pSConfig state that is not persisted. Regenerates the unit with the image it runs | Repairs only with `--apply` |
+| Let's Encrypt | On LE hosts: replaces a missing certbot unit or the old long-running certbot container with `perfsonar-certbot.timer`, checks the timer's last run, warns when a certificate is expired or expires within 14 days, and checks that Apache serves the certificate on disk | Repairs only with `--apply` |
 
 Hosts whose `perfsonar-testpoint.service` runs `podman-compose up` (installed with the older
 `install-systemd-service.sh`) stay compose-managed: the updater keeps that unit and restarts through it,
@@ -1587,7 +1378,7 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
 
     **Common causes:**
 
-    - Missing entrypoint wrapper: Ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
+    - Missing entrypoint wrapper (images before 5.2.6-osg2 only): ensure `/opt/perfsonar-tp/tools_scripts/testpoint-entrypoint-wrapper.sh` exists
     - SELinux denials: Check `ausearch -m avc -ts recent` and consider temporarily setting to permissive mode for testing
     - Incorrect bind-mount paths: Verify all host directories exist and have correct permissions
     - Cgroup issues: Ensure `cgroupns: private` is set and no manual cgroup bind-mounts exist
@@ -1896,8 +1687,8 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
 
     # 4. Fix Apache log rotation in the running container (no restart): switches logrotate to
     #    copytruncate and, if Apache is still writing to the renamed access.log.1, reloads it.
-    #    New containers get this at start: from the entrypoint wrapper (direct units and the
-    #    testpoint-le-auto compose file) or from the compose unit's ExecStartPost.
+    #    New containers get this at start: current images ship copytruncate; older ones get it
+    #    from the entrypoint wrapper or from the compose unit's ExecStartPost.
     /opt/perfsonar-tp/tools_scripts/perfSONAR-fix-apache-logrotate.sh
     ```
 
@@ -1997,65 +1788,46 @@ scripts in `tools_scripts/` to their latest versions, so the report uses the cur
     - DNS not propagated: Wait for DNS changes to propagate globally
     - Rate limiting: Let's Encrypt has rate limits; wait if you've hit them
 
-??? failure "Let's Encrypt certificate expired: certbot is not running"
+??? failure "Let's Encrypt certificate expired: certificates are not renewed"
 
-    **Symptoms:** `openssl s_client -connect <fqdn>:443` shows an expired Let's Encrypt certificate;
-    `podman ps -a` shows the `certbot` container exited long ago, or there is no `perfsonar-certbot.service`.
-    `update-perfsonar-deployment.sh` (v1.11.0 and later) reports this under "Let's Encrypt checks".
+    **Symptoms:** `openssl s_client -connect <fqdn>:443` shows an expired Let's Encrypt certificate.
+    `update-perfsonar-deployment.sh` reports it under "Let's Encrypt checks".
 
-    **Cause:** On hosts whose systemd unit runs the testpoint with `podman run`, certbot needs its own unit. Hosts
-    that never had `perfsonar-certbot.service` (or where the old certbot container stopped) never renew the
-    certificate.
+    **Check the renewal timer:**
 
-    **Fix:**
+    ```bash
+    systemctl list-timers perfsonar-certbot.timer --no-pager
+    journalctl -u perfsonar-certbot.service --no-pager | tail -30
+    ```
+
+    **Fix:** if the timer is missing (no `perfsonar-certbot.timer`, or an old long-running `certbot` container that
+    stopped), regenerate the units:
 
     ```bash
     /opt/perfsonar-tp/tools_scripts/update-perfsonar-deployment.sh --apply --restart --yes
+    systemctl start perfsonar-certbot.service    # renew now
     ```
 
-    This regenerates the units with `install-systemd-units.sh --force --with-certbot`, enables `podman.socket` and
-    restarts certbot. certbot renews an expired certificate right away (standalone HTTP-01 on port 80, which the
-    testpoint's Apache leaves free); the deploy hook then reloads Apache. Check with `podman logs --tail 30 certbot`.
+    certbot renews an expired certificate right away (standalone HTTP-01 on port 80, which the testpoint leaves
+    free), and the service then reloads Apache. If the run fails, the journal shows why; the usual causes are port 80
+    blocked inbound, or DNS for the name no longer pointing at the host.
 
 ??? failure "Certificate not loaded after renewal"
 
-    **Symptoms:** Old certificate still in use after automatic renewal.
-    
-    **Diagnostic steps:**
-    
+    **Symptoms:** the file in `/etc/letsencrypt/live/<fqdn>/` is new, but Apache still serves the old certificate.
+    `update-perfsonar-deployment.sh` reports this ("Apache serves ...") and reloads Apache with `--apply`.
+
     ```bash
-    # Check certificate files
-    ls -la /etc/letsencrypt/live/<fqdn>/
+    # Which certificate the container chose at start
+    podman exec perfsonar-testpoint journalctl -u osg-container-setup -o cat | grep TLS
 
-    # Verify deploy hook is configured
-    podman logs certbot 2>&1 | grep "deploy hook"
-
-    # Run the deploy hook by hand (reloads Apache in the testpoint)
-    podman exec certbot /etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh
-
-    # Look for SELinux denials of the hook or the Podman socket
-    ausearch -m avc -ts recent | grep -i certbot
-
-    # Load the new certificate by hand
+    # Load the new certificate
     podman exec perfsonar-testpoint systemctl reload apache2
-
     ```
 
-    **Solutions:**
-
-    - Verify deploy hook script exists and is executable: `/opt/perfsonar-tp/tools_scripts/certbot-deploy-hook.sh`
-    - Ensure deploy hook is mounted in container at: `/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh`
-    - Verify Podman socket is mounted in certbot container: `podman exec certbot ls /run/podman/podman.sock`, and that
-      `podman.socket` is active on the host: `systemctl is-active podman.socket` (enable it with
-      `systemctl enable --now podman.socket`)
-    - `Permission denied` for the hook or the socket (exit code 126, or `[Errno 13]`): the certbot container needs
-      `security_opt: label=disable` (compose) or `--security-opt label=disable` (`perfsonar-certbot.service`). Run
-      `update-perfsonar-deployment.sh --apply --restart` to regenerate an old certbot unit.
-    - Check deploy hook logs: `journalctl -u perfsonar-certbot.service | grep deploy`
-    - Load the certificate by hand if the deploy hook fails: `podman exec perfsonar-testpoint systemctl reload apache2`
-
-    **Note:** Certbot automatically executes scripts in `/etc/letsencrypt/renewal-hooks/deploy/` when certificates are
-    renewed. The deploy hook uses the Podman REST API via Python (not the `podman` CLI, which is absent from the Alpine-based certbot image).
+    `perfsonar-certbot.service` reloads Apache after each renewal (its log says "Apache reloaded with the renewed
+    certificate"). Hosts still running the old long-running `certbot` container depend on its deploy hook reaching
+    the testpoint through `podman.socket`; convert them with `update-perfsonar-deployment.sh --apply --restart`.
 
 ### perfSONAR Service Issues
 
