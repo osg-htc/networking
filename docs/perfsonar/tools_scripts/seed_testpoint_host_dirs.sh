@@ -34,7 +34,7 @@ set -euo pipefail
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 # Usage: seed_testpoint_host_dirs.sh [--runtime docker|podman] [--base /opt/perfsonar-tp] [--with-le] [--version|--help]
 
-VERSION="2.0.2"
+VERSION="2.1.0"
 PROG_NAME="$(basename "$0")"
 RUNTIME=""
 BASE_DIR="/opt/perfsonar-tp"
