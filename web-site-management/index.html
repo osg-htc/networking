@@ -2584,10 +2584,10 @@ pip<span class="w"> </span>install<span class="w"> </span>mkdocs<span class="w">
 <p><code>mkdocs build --clean</code> (fail on build errors)</p>
 </li>
 <li>
-<p>Run link checks and the <code>verify-site-scripts.sh</code> script to assert docs/site parity for changed files (optional if not keeping <code>site/</code> in repo)</p>
+<p>Run link checks and <code>verify-site-scripts.sh</code> (script checksums and version headers)</p>
 </li>
 <li>
-<p>Run <code>autoupdate-scripts-sha.sh</code> to update <code>*.sha256</code> files when scripts change in docs.</p>
+<p>Run <code>bash .github/scripts/update-script-checksums.sh</code> to update the <code>*.sha256</code> files and <code>scripts.sha256</code> when scripts change in docs, and commit them with the script.</p>
 </li>
 <li>
 <p>CI publish step (if you want to auto-deploy): use <code>peaceiris/actions-gh-pages</code> or <code>JamesIves/github-pages-deploy-action</code> to publish the <code>site/</code> directory to the <code>gh-pages</code> branch or a host.</p>
@@ -2614,10 +2614,10 @@ pip<span class="w"> </span>install<span class="w"> </span>mkdocs<span class="w">
 <h2 id="actions-we-automated">Actions we automated<a class="headerlink" href="#actions-we-automated" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
-<p>CI verification: <code>.github/scripts/verify-site-scripts.sh</code> — verifies <code>docs/</code> script copies and <code>site/</code> parity for changed scripts.</p>
+<p>CI verification: <code>.github/scripts/verify-site-scripts.sh</code> (workflow <code>verify-site-scripts.yml</code>, on every PR and push to master) — checks every script in <code>docs/perfsonar/tools_scripts</code>: its <code>&lt;script&gt;.sha256</code> (<code>&lt;sha256&gt;  &lt;script&gt;</code>), the entries in <code>scripts.sha256</code>, and that the <code># Version:</code> header matches a <code>VERSION=</code> variable. It only reads; it never commits.</p>
 </li>
 <li>
-<p>Autoupdate: <code>.github/scripts/autoupdate-scripts-sha.sh</code> — updates per script <code>*.sha256</code> and <code>scripts.sha256</code> when a script in <code>docs/</code> changes in a PR.</p>
+<p>Checksum update (run locally): after changing a script, run <code>bash .github/scripts/update-script-checksums.sh</code> and commit the updated <code>*.sha256</code> files and <code>scripts.sha256</code> with the script. CI fails, and prints this command, when they are out of date.</p>
 </li>
 </ul>
 <h2 id="migration-next-steps">Migration / Next steps<a class="headerlink" href="#migration-next-steps" title="Permanent link">&para;</a></h2>
