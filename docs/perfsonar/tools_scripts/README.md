@@ -18,15 +18,17 @@ for your site — they are not interchangeable:
 
 | Tool | Version | Purpose | Documentation |
 |------|---------|---------|---------------|
-| **perfSONAR-orchestrator.sh** | v1.1.4 | Container testpoint orchestrator | [Container deployment](#container-based-deployment-orchestrator) |
+| **perfSONAR-orchestrator.sh** | v1.4.0 | Container testpoint orchestrator | [Container deployment](#container-based-deployment-orchestrator) |
 | **perfSONAR-toolkit-install.sh** | v1.2.2 | RPM toolkit guided installer | [RPM toolkit deployment](#rpm-toolkit-installer) |
 | **fasterdata-tuning.sh** | v1.3.1 | Host & NIC tuning (ESnet Fasterdata) | [Fasterdata Tuning Guide](fasterdata-tuning.md) |
 | **perfSONAR-pbr-nm.sh** | — | Multi-NIC policy-based routing | [Multiple NIC Guidance](../multiple-nic-guidance.md) |
-| **perfSONAR-update-lsregistration.sh** | — | LS registration management | [LS Registration Tools](README-lsregistration.md) |
+| **perfSONAR-update-lsregistration.sh** | v1.2.0 | LS registration management | [LS Registration Tools](README-lsregistration.md) |
 | **perfSONAR-auto-enroll-psconfig.sh** | — | Automatic pSConfig enrollment (container + RPM) | [Installation Guides](../../personas/quick-deploy/landing.md) |
 | **install_tools_scripts.sh** | — | Bulk installer for all scripts | [Installation](#installation) |
 | **install-systemd-service.sh** | — | Container auto-start on boot | [Container Management](#container-management) |
 | **perfSONAR-install-flowd-go.sh** | v1.6.0 | SciTags flowd-go installer | [SciTags & Fireflies](../scitags-fireflies.md) |
+| **install-systemd-units.sh** | v1.9.0 | systemd units for the testpoint, certbot renewal timer, auto-update and health monitor | [Option B](../../personas/quick-deploy/install-perfsonar-testpoint.md#option-b-testpoint-lets-encrypt) |
+| **update-perfsonar-deployment.sh** | v1.19.0 | Update and repair an existing deployment | [Updating](../../personas/quick-deploy/install-perfsonar-testpoint.md#updating-an-existing-deployment) |
 | **perfSONAR-configure-exporter-acls.sh** | v0.2.0 | Restrict exporter endpoints to monitoring CIDRs (toolkit and container) | [Exporter access](../../personas/quick-deploy/install-perfsonar-testpoint.md#exporter-access) |
 
 **Latest Updates**: v1.0.0 (Feb 2026) adds `perfSONAR-toolkit-install.sh` for RPM-based toolkit deployments.

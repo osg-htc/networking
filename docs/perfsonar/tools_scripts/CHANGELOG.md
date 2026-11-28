@@ -1,6 +1,36 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+## [Unreleased] - 2026-11-28 (image fixes reach Let's Encrypt hosts; persistent LS registration)
+
+Needs an OSG testpoint image with the label feature `tls-auto` / `state-dirs`
+(osg-htc/perfsonar-testpoint-docker, 5.2.6-osg2 and later). With older images
+the previous behaviour is kept.
+
+- install-systemd-units.sh 1.9.0: Option B mounts only `/etc/letsencrypt`
+  (read-only); no `/var/www/html` (it hid image files such as
+  `host_exporter.wsgi`) and no host `default-ssl.conf` (seeded once, so image
+  fixes never reached it); no entrypoint wrapper. LS settings, LS client
+  UUID/keys and pSConfig agent state persist under `/opt/perfsonar-tp/conf` and
+  `/opt/perfsonar-tp/state`, seeded from the running container. Certbot runs
+  from `perfsonar-certbot.timer` with a pinned image and no Podman socket; the
+  host reloads Apache after a renewal. New `--image`, `--certbot-image`.
+- perfSONAR-auto-update.sh 1.1.0: follows the image the container runs (a host
+  on another tag was restarted every night); certbot sidecar updates restart
+  the certbot unit, not the testpoint.
+- update-perfsonar-deployment.sh 1.19.0: reports the old Option B mounts,
+  wrapper, unpersisted state and certbot sidecar; `--apply` converts the host,
+  keeping its image.
+- perfSONAR-update-lsregistration.sh 1.2.0: writes a bind-mounted
+  `lsregistrationdaemon.conf` in place on the host.
+- perfSONAR-orchestrator.sh 1.4.0: Step 8.1 sets site, administrator and
+  communities for the Lookup Service (`--ls-*` options); Option B uses the
+  pinned certbot image and the renewal timer.
+- seed_testpoint_host_dirs.sh 2.1.0: nothing extra to seed for `--with-le` with
+  such images.
+- Docs: Option B rewritten; new "Persistent registration state" section;
+  certificate troubleshooting for the timer.
+
 ## [Unreleased] - 2026-11-20 (Lookup Service registration on multi-NIC hosts)
 
 ### Added
