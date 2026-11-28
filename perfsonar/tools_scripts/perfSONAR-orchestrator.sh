@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Version: 1.4.0 - 2026-11-28
+#   - New Step 8.1, Lookup Service registration: site name, administrator
+#     name and email, and communities (--ls-site-name, --ls-admin-name,
+#     --ls-admin-email, --ls-project, repeatable; prompted for when missing on
+#     a terminal). Written with perfSONAR-update-lsregistration.sh into the
+#     host copy that install-systemd-units.sh >= 1.9.0 mounts, so it survives
+#     restarts. Without them the host registers with no site or communities
+#     and pwa-next cannot place it.
+#   - Option B: the first certificate is requested with the pinned certbot
+#     image and no webroot; renewals run from perfsonar-certbot.timer
+#     (install-systemd-units.sh 1.9.0), so podman.socket is not enabled and
+#     no certbot container is restarted.
 # Version: 1.3.0 - 2026-11-14
 #   - New --no-firewall: skip Step 7 (perfSONAR-install-nftables.sh) without a
 #     prompt, for sites whose configuration management owns the host firewall.
@@ -94,6 +106,10 @@ set -euo pipefail
 #   --no-epel              Do not enable EPEL in Step 1 (podman-compose and fail2ban
 #                          then need EPEL or a local mirror configured beforehand)
 #   --experiment-id N       SciTags experiment ID for flowd-go (1-14; interactive prompt if omitted)
+#   --ls-site-name NAME    Lookup Service: site name (e.g. "AGLT2")
+#   --ls-admin-name NAME   Lookup Service: administrator name
+#   --ls-admin-email ADDR  Lookup Service: administrator email
+#   --ls-project NAME      Lookup Service community/project, repeatable (e.g. WLCG, OSG, ATLAS)
 #
 # Log:
 #   /var/log/perfsonar-orchestrator.log
@@ -111,6 +127,12 @@ FLOWD_GO_EXPERIMENT_ID=""
 DEPLOY_OPTION="A"         # A or B
 LE_FQDN=""
 LE_EMAIL=""
+LS_SITE_NAME=""
+LS_ADMIN_NAME=""
+LS_ADMIN_EMAIL=""
+LS_PROJECTS=()
+# Same pinned image as install-systemd-units.sh uses for renewals.
+CERTBOT_IMAGE="docker.io/certbot/certbot:v5.10.0"
 
 # Recommended package set for minimal EL9/EL10. Packages in EPEL_PACKAGES come
 # only from EPEL; the rest are in BaseOS/AppStream.
@@ -174,6 +196,10 @@ parse_cli() {
       --no-firewall) NO_FIREWALL=true; shift;;
       --no-epel) ENABLE_EPEL=false; shift;;
       --experiment-id) FLOWD_GO_EXPERIMENT_ID="${2:-}"; shift 2;;
+      --ls-site-name) LS_SITE_NAME="${2:-}"; shift 2;;
+      --ls-admin-name) LS_ADMIN_NAME="${2:-}"; shift 2;;
+      --ls-admin-email) LS_ADMIN_EMAIL="${2:-}"; shift 2;;
+      --ls-project) LS_PROJECTS+=("${2:-}"); shift 2;;
       *) echo "Unknown arg: $1" >&2; exit 2;;
     esac
   done
@@ -528,14 +554,13 @@ step_deploy_option_b() {
     # Free port 80 for the one-time standalone issuance.
     run systemctl stop perfsonar-certbot.service || true
     run podman stop certbot || true
-    run mkdir -p /etc/letsencrypt /var/www/html
+    run mkdir -p /etc/letsencrypt
     
     # Build certbot command with all FQDNs as SANs
     local certbot_cmd=(
       podman run --rm --net=host
       -v /etc/letsencrypt:/etc/letsencrypt:z
-      -v /var/www/html:/var/www/html:z
-      docker.io/certbot/certbot:latest certonly
+      "$CERTBOT_IMAGE" certonly
       --standalone --agree-tos --non-interactive
       -m "$LE_EMAIL"
     )
@@ -550,7 +575,7 @@ step_deploy_option_b() {
       log "  3. DNS not properly configured (verify: dig +short <fqdn>)"
       log "You can retry manually later with:"
       log "  podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:z \\"
-      log "    certbot/certbot certonly --standalone --agree-tos --non-interactive \\"
+      log "    $CERTBOT_IMAGE certonly --standalone --agree-tos --non-interactive \\"
       for fqdn in "${fqdns[@]}"; do
         log "    -d $fqdn \\"
       done
@@ -558,17 +583,13 @@ step_deploy_option_b() {
       log "Continuing installation — certificate can be obtained later."
     fi
     
+    # The testpoint picks up the certificate when it starts.
     run systemctl restart perfsonar-testpoint || true
-    # Renewals run in the systemd-managed certbot container (unit written by
-    # install-systemd-units.sh --with-certbot); its deploy hook reloads Apache
-    # in the testpoint through the Podman socket.
-    run systemctl enable --now podman.socket || true
-    run systemctl reset-failed perfsonar-certbot.service || true
-    if ! run systemctl restart perfsonar-certbot.service; then
-      log "WARNING: perfsonar-certbot.service failed to start; check: systemctl status perfsonar-certbot.service"
-    fi
-    sleep 5
-    run podman exec certbot certbot renew --dry-run || true
+    # Renewals: perfsonar-certbot.timer (install-systemd-units.sh --with-certbot)
+    # runs certbot twice a day and reloads Apache after a renewal.
+    run systemctl enable --now perfsonar-certbot.timer || true
+    run podman run --rm --net=host -v /etc/letsencrypt:/etc/letsencrypt:z \
+      "$CERTBOT_IMAGE" renew --dry-run || true
   else
     log "Skipping certificate issuance (missing --fqdn/--email or no FQDNs detected). You can do this later."
   fi
@@ -584,6 +605,58 @@ step_deploy() {
     B|b) step_deploy_option_b ;;
     *) log "Unknown option $DEPLOY_OPTION; defaulting to A"; step_deploy_option_a ;;
   esac
+}
+
+# Step 8.1: Lookup Service registration. Without a site name, administrator
+# and communities the host registers anonymously and pwa-next/psetf cannot
+# place it.
+step_lsregistration() {
+  local helper=/opt/perfsonar-tp/tools_scripts/perfSONAR-update-lsregistration.sh
+  local interactive=false
+  if [ "$NON_INTERACTIVE" != true ] && [ "$AUTO_YES" != true ] && [ -t 0 ] && [ -t 1 ]; then
+    interactive=true
+  fi
+  if [ "$interactive" = true ]; then
+    [ -n "$LS_SITE_NAME" ] || read -r -p "Lookup Service site name (e.g. AGLT2): " LS_SITE_NAME
+    [ -n "$LS_ADMIN_NAME" ] || read -r -p "Administrator name: " LS_ADMIN_NAME
+    [ -n "$LS_ADMIN_EMAIL" ] || read -r -p "Administrator email: " LS_ADMIN_EMAIL
+    if [ ${#LS_PROJECTS[@]} -eq 0 ]; then
+      local reply
+      read -r -p "Communities, comma separated (e.g. WLCG,OSG,ATLAS): " reply
+      IFS=',' read -r -a LS_PROJECTS <<< "$reply"
+    fi
+  fi
+  local p projects=()
+  for p in "${LS_PROJECTS[@]}"; do
+    p="${p#"${p%%[![:space:]]*}"}"; p="${p%"${p##*[![:space:]]}"}"
+    [ -n "$p" ] && projects+=("$p")
+  done
+
+  local missing=()
+  [ -n "$LS_SITE_NAME" ] || missing+=("site name (--ls-site-name)")
+  [ -n "$LS_ADMIN_NAME" ] || missing+=("administrator name (--ls-admin-name)")
+  [ -n "$LS_ADMIN_EMAIL" ] || missing+=("administrator email (--ls-admin-email)")
+  [ ${#projects[@]} -gt 0 ] || missing+=("communities (--ls-project)")
+  if [ ${#missing[@]} -gt 0 ]; then
+    log "WARNING: Lookup Service registration is incomplete; missing: ${missing[*]}"
+    log "  The host will register without them. Set them later with:"
+    log "  $helper update --site-name NAME --admin-name NAME --admin-email ADDR --project WLCG --project OSG"
+    [ -z "$LS_SITE_NAME$LS_ADMIN_NAME$LS_ADMIN_EMAIL" ] && [ ${#projects[@]} -eq 0 ] && return 0
+  fi
+  if ! confirm "Step 8.1: Write Lookup Service registration settings?"; then
+    log "Skipping Lookup Service registration."
+    return
+  fi
+  local args=(update)
+  [ -n "$LS_SITE_NAME" ] && args+=(--site-name "$LS_SITE_NAME")
+  [ -n "$LS_ADMIN_NAME" ] && args+=(--admin-name "$LS_ADMIN_NAME")
+  [ -n "$LS_ADMIN_EMAIL" ] && args+=(--admin-email "$LS_ADMIN_EMAIL")
+  for p in "${projects[@]}"; do args+=(--project "$p"); done
+  if [ ! -x "$helper" ]; then
+    log "WARNING: $helper not found; Lookup Service settings not written"
+    return
+  fi
+  run "$helper" "${args[@]}" || log "WARNING: perfSONAR-update-lsregistration.sh failed; see above"
 }
 
 step_flowd_go() {
@@ -674,6 +747,7 @@ main() {
   step_security
   step_resolver_check
   step_deploy
+  step_lsregistration
   step_auto_update
   step_flowd_go
   step_psconfig

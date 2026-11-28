@@ -13,16 +13,20 @@
 # Options:
 #   --install-dir PATH    Installation directory (default: /opt/perfsonar-tp)
 #   --with-certbot        Let's Encrypt deployment (Option B): install the certbot
-#                         service and add the LE bind mounts (/var/www/html,
-#                         /etc/letsencrypt and the single Apache default-ssl.conf
-#                         file) to the testpoint unit. Without this flag the
-#                         testpoint unit mounts only what Option A needs.
+#                         renewal timer and mount /etc/letsencrypt into the
+#                         testpoint. With an image that chooses its certificate
+#                         itself (label feature "tls-auto", OSG images from
+#                         5.2.6-osg2) that is the only LE mount; with older images
+#                         /var/www/html and the single Apache default-ssl.conf
+#                         file are mounted too, and the entrypoint wrapper
+#                         patches that file. Without this flag the testpoint
+#                         unit mounts only what Option A needs.
 #                         LE mode is also chosen automatically (unless
 #                         --no-certbot is given) when perfsonar-certbot.service
 #                         exists, when the existing testpoint unit mounts
 #                         /etc/letsencrypt, or when docker-compose.yml has a
 #                         certbot service and /etc/letsencrypt/live has a
-#                         certificate. LE mode also enables podman.socket.
+#                         certificate.
 #   --no-certbot          Force Option A (testpoint-only) mounts even if a
 #                         certbot unit from a previous install is present.
 #   --convert-from-compose
@@ -39,7 +43,22 @@
 #   --health-monitor      Install perfSONAR-health-monitor.sh and a systemd
 #                         timer that runs every 5 minutes to detect an
 #                         'unhealthy' container and restart it automatically
+#   --image IMAGE         Testpoint image (default: the OSG :production image;
+#                         also settable as PERFSONAR_TP_IMAGE). For trials and
+#                         pinning; perfsonar-auto-update.sh follows whatever
+#                         image the container runs.
+#   --certbot-image IMAGE Certbot image for the renewal timer (default: a pinned
+#                         docker.io/certbot/certbot version, see CERTBOT_IMAGE).
 #   --help                Show this help message
+#
+# State kept on the host (images with label feature "state-dirs"):
+#   $INSTALL_DIR/conf/lsregistrationdaemon.conf -> /etc/perfsonar/lsregistrationdaemon.conf
+#   $INSTALL_DIR/state/lsregistrationdaemon     -> /var/lib/perfsonar/lsregistrationdaemon
+#   $INSTALL_DIR/state/psconfig                 -> /var/lib/perfsonar/psconfig
+# so Lookup Service settings, the LS client UUID and record keys, and the
+# pSConfig agent state survive container restarts and image updates. On first
+# use they are copied from the running container (keeping its current
+# settings), else from the image.
 #
 # Requirements:
 #   - Root privileges (sudo)
@@ -47,10 +66,26 @@
 #   - perfSONAR testpoint scripts in installation directory
 #
 # Author: OSG perfSONAR deployment tools
-# Version: 1.8.0
+# Version: 1.9.0
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
 # Version history:
+#   1.9.0 - With a "tls-auto" image (the image picks the LE certificate
+#           itself): Option B mounts only /etc/letsencrypt (read-only); no
+#           /var/www/html (it hid image files, e.g. host_exporter.wsgi) and no
+#           host default-ssl.conf (seeded once, so image fixes never reached
+#           it); the container starts with the image's own command instead of
+#           the entrypoint wrapper.
+#         - With a "state-dirs" image: persist lsregistrationdaemon.conf, the LS
+#           client UUID/keys and pSConfig agent state under $INSTALL_DIR
+#           (seeded from the running container). Before, every restart lost LS
+#           registration settings, so hosts showed no site or communities.
+#         - Certbot runs from a timer (twice a day, pinned image, podman run
+#           --rm) instead of a long-running sidecar with the host's Podman
+#           socket and label=disable. After a renewal the timer's service
+#           reloads Apache in the testpoint with podman exec on the host.
+#           podman.socket is no longer enabled.
+#         - --image and --certbot-image options.
 #   1.8.0 - Mount $INSTALL_DIR/conf/exporter-allow.conf over the image's
 #           /etc/apache2/osg/exporter-allow.conf when it exists (site list for
 #           the exporter ACLs; written by perfSONAR-configure-exporter-acls.sh).
@@ -142,7 +177,9 @@ FORCE=false
 CONVERT_FROM_COMPOSE=false
 AUTO_UPDATE=false
 HEALTH_MONITOR=false
-TP_IMAGE="hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production"
+TP_IMAGE="${PERFSONAR_TP_IMAGE:-hub.opensciencegrid.org/osg-htc/perfsonar-testpoint:production}"
+# Pinned; update deliberately (perfsonar-auto-update.sh does not track it).
+CERTBOT_IMAGE="docker.io/certbot/certbot:v5.10.0"
 LE_SSL_CONF="/etc/apache2/sites-available/default-ssl.conf"
 
 # Parse arguments
@@ -176,6 +213,14 @@ while [[ $# -gt 0 ]]; do
             HEALTH_MONITOR=true
             shift
             ;;
+        --image)
+            TP_IMAGE="$2"
+            shift 2
+            ;;
+        --certbot-image)
+            CERTBOT_IMAGE="$2"
+            shift 2
+            ;;
         --help)
             sed -n '2,/^# Requirements:/p' "$0" | grep "^#" | sed 's/^# \?//'
             exit 0
@@ -190,6 +235,7 @@ done
 
 TESTPOINT_SERVICE="/etc/systemd/system/perfsonar-testpoint.service"
 CERTBOT_SERVICE="/etc/systemd/system/perfsonar-certbot.service"
+CERTBOT_TIMER="/etc/systemd/system/perfsonar-certbot.timer"
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
@@ -275,7 +321,7 @@ if [[ "$NO_CERTBOT" == "true" ]]; then
     WITH_CERTBOT=false
     if [[ -f "$CERTBOT_SERVICE" ]]; then
         echo "==> NOTE: $CERTBOT_SERVICE still exists; disable it if no longer needed:"
-        echo "      systemctl disable --now perfsonar-certbot.service"
+        echo "      systemctl disable --now perfsonar-certbot.timer perfsonar-certbot.service"
     fi
 fi
 
@@ -299,6 +345,31 @@ copy_file_from_image() {
         return 0
     fi
     podman rm -f -v "$cname" >/dev/null 2>&1 || true
+    return 1
+}
+
+# Features of the testpoint image (label org.osg-htc.testpoint.features).
+image_has_feature() {
+    local feats
+    podman image exists "$TP_IMAGE" 2>/dev/null || podman pull -q "$TP_IMAGE" >/dev/null 2>&1 || true
+    feats=$(podman image inspect "$TP_IMAGE" \
+            --format '{{ index .Labels "org.osg-htc.testpoint.features" }}' 2>/dev/null || true)
+    [[ " $feats " == *" $1 "* ]]
+}
+
+# Copy $src from the running testpoint container to $dst, else from the image.
+copy_from_running_or_image() {
+    local src="$1" dst="$2"
+    if podman container exists perfsonar-testpoint 2>/dev/null && \
+       [[ "$(podman inspect perfsonar-testpoint --format '{{.State.Running}}' 2>/dev/null)" == "true" ]] && \
+       podman cp "perfsonar-testpoint:$src" "$dst" >/dev/null 2>&1; then
+        echo "    Copied $src from the running container to $dst"
+        return 0
+    fi
+    if copy_file_from_image "$src" "$dst"; then
+        echo "    Copied $src from $TP_IMAGE to $dst"
+        return 0
+    fi
     return 1
 }
 
@@ -342,7 +413,15 @@ prepare_host_mounts() {
     fi
     mkdir -p "$INSTALL_DIR/psconfig"
 
-    if [[ "$WITH_CERTBOT" == "true" ]]; then
+    if [[ "$WITH_CERTBOT" == "true" && "$TLS_AUTO" == "true" ]]; then
+        mkdir -p /etc/letsencrypt
+        fix_shared_selinux_label /etc/letsencrypt
+        if [[ -e /var/www/html || -e "$LE_SSL_CONF" ]]; then
+            echo "    NOTE: /var/www/html and $LE_SSL_CONF are no longer mounted (the image"
+            echo "          chooses its certificate itself). They are left on the host; remove"
+            echo "          them when you no longer need them."
+        fi
+    elif [[ "$WITH_CERTBOT" == "true" ]]; then
         mkdir -p /var/www/html /etc/letsencrypt "$(dirname "$LE_SSL_CONF")"
         if [[ ! -f "$LE_SSL_CONF" ]]; then
             echo "    Copying $LE_SSL_CONF from $TP_IMAGE"
@@ -355,15 +434,29 @@ prepare_host_mounts() {
         fi
         fix_shared_selinux_label /var/www/html
         fix_shared_selinux_label /etc/letsencrypt
-        local hook="$INSTALL_DIR/tools_scripts/certbot-deploy-hook.sh"
-        if [[ ! -f "$hook" ]]; then
-            echo "ERROR: $hook not found (the certbot unit mounts it). Run install_tools_scripts.sh first." >&2
-            exit 1
-        fi
-        chmod 0755 "$hook"
     fi
 
-    if [[ ! -x "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh" ]]; then
+    # Persisted Lookup Service and pSConfig agent state (see header).
+    if [[ "$STATE_DIRS" == "true" ]]; then
+        local d
+        mkdir -p "$INSTALL_DIR/conf"
+        if [[ ! -f "$INSTALL_DIR/conf/lsregistrationdaemon.conf" ]]; then
+            copy_from_running_or_image /etc/perfsonar/lsregistrationdaemon.conf \
+                "$INSTALL_DIR/conf/lsregistrationdaemon.conf" || \
+                echo "    WARNING: could not seed $INSTALL_DIR/conf/lsregistrationdaemon.conf; the image's default is used"
+        fi
+        for d in lsregistrationdaemon psconfig; do
+            if [[ ! -d "$INSTALL_DIR/state/$d" ]]; then
+                mkdir -p "$INSTALL_DIR/state"
+                # podman cp creates the directory with the container's contents.
+                if ! copy_from_running_or_image "/var/lib/perfsonar/$d" "$INSTALL_DIR/state/$d"; then
+                    mkdir -p "$INSTALL_DIR/state/$d"
+                fi
+            fi
+        done
+    fi
+
+    if [[ "$TLS_AUTO" != "true" && ! -x "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh" ]]; then
         if [[ -f "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh" ]]; then
             chmod 0755 "$INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh"
         else
@@ -399,10 +492,20 @@ build_testpoint_mounts() {
         TP_MOUNTS+=("-v $INSTALL_DIR/conf/exporter-allow.conf:/etc/apache2/osg/exporter-allow.conf:ro,z")
     fi
 
-    if [[ "$WITH_CERTBOT" == "true" ]]; then
-        # Option B: webroot for HTTP-01 challenges, certificates, and ONLY the
-        # SSL vhost file the entrypoint wrapper patches. The rest of Apache's
-        # configuration stays inside the container image.
+    if [[ "$STATE_DIRS" == "true" ]]; then
+        [[ -f "$INSTALL_DIR/conf/lsregistrationdaemon.conf" ]] && \
+            TP_MOUNTS+=("-v $INSTALL_DIR/conf/lsregistrationdaemon.conf:/etc/perfsonar/lsregistrationdaemon.conf:z")
+        TP_MOUNTS+=("-v $INSTALL_DIR/state/lsregistrationdaemon:/var/lib/perfsonar/lsregistrationdaemon:Z")
+        TP_MOUNTS+=("-v $INSTALL_DIR/state/psconfig:/var/lib/perfsonar/psconfig:Z")
+    fi
+
+    if [[ "$WITH_CERTBOT" == "true" && "$TLS_AUTO" == "true" ]]; then
+        # Option B, current images: certificates only; the image writes its
+        # own TLS settings (osg-container-setup).
+        TP_MOUNTS+=("-v /etc/letsencrypt:/etc/letsencrypt:ro,z")
+    elif [[ "$WITH_CERTBOT" == "true" ]]; then
+        # Option B, older images: webroot, certificates, and ONLY the SSL vhost
+        # file the entrypoint wrapper patches.
         TP_MOUNTS+=("-v /var/www/html:/var/www/html:z")
         TP_MOUNTS+=("-v /etc/letsencrypt:/etc/letsencrypt:z")
         TP_MOUNTS+=("-v $LE_SSL_CONF:$LE_SSL_CONF:z")
@@ -425,6 +528,11 @@ build_testpoint_mounts() {
 
 # Create perfsonar-testpoint service (skip if already present and only --auto-update was requested)
 if [[ "$SKIP_SERVICE_UNITS" == "false" ]]; then
+TLS_AUTO=false
+STATE_DIRS=false
+image_has_feature tls-auto && TLS_AUTO=true
+image_has_feature state-dirs && STATE_DIRS=true
+echo "==> Image: $TP_IMAGE (tls-auto: $TLS_AUTO, state-dirs: $STATE_DIRS)"
 prepare_host_mounts
 build_testpoint_mounts
 
@@ -432,6 +540,13 @@ if [[ "$WITH_CERTBOT" == "true" ]]; then
     echo "==> Mode: Let's Encrypt (Option B) — testpoint + certbot"
 else
     echo "==> Mode: testpoint only (Option A)"
+fi
+
+# Older images need the entrypoint wrapper (Apache/LE patching); current ones
+# start with their own command.
+TP_COMMAND=""
+if [[ "$TLS_AUTO" != "true" ]]; then
+    TP_COMMAND=" \\"$'\n'"  $INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh"
 fi
 
 MOUNT_LINES=""
@@ -463,8 +578,7 @@ ${MOUNT_LINES}  --cap-add=NET_RAW --cap-add=SYS_ADMIN --cap-add=SYS_PTRACE \\
   --health-cmd "pscheduler troubleshoot --quick" \\
   --health-interval 60s --health-timeout 30s \\
   --health-retries 3 --health-start-period 120s \\
-  $TP_IMAGE \\
-  $INSTALL_DIR/tools_scripts/testpoint-entrypoint-wrapper.sh
+  $TP_IMAGE${TP_COMMAND}
 ExecStop=/usr/bin/podman stop -t 10 perfsonar-testpoint
 ExecStopPost=/usr/bin/podman rm -f -v perfsonar-testpoint
 
@@ -474,51 +588,51 @@ EOF
 
 echo "==> ✓ Created $TESTPOINT_SERVICE"
 
-# Create certbot service if requested
+# Create the certbot renewal timer if requested
 if [[ "$WITH_CERTBOT" == "true" ]]; then
-    # The deploy hook reaches the testpoint through the host's Podman socket.
-    echo "==> Enabling podman.socket (the certbot deploy hook uses /run/podman/podman.sock)"
-    systemctl enable --now podman.socket >/dev/null 2>&1 || \
-        echo "    WARNING: could not enable podman.socket; renewed certificates will not be loaded automatically"
-    if [[ ! -S /run/podman/podman.sock ]]; then
-        echo "    WARNING: /run/podman/podman.sock does not exist; check: systemctl status podman.socket"
+    # Replace a long-running certbot sidecar from installs before 1.9.0. It
+    # mounted the host's Podman socket (full control of the host's containers)
+    # with SELinux separation disabled, and tracked certbot:latest.
+    if [[ -f "$CERTBOT_SERVICE" ]] && grep -qE '^Type=simple|podman\.sock' "$CERTBOT_SERVICE"; then
+        echo "==> Stopping the long-running certbot sidecar (replaced by perfsonar-certbot.timer)"
+        systemctl disable --now perfsonar-certbot.service >/dev/null 2>&1 || true
     fi
+    podman rm -f certbot >/dev/null 2>&1 || true
 
-    # label=disable: like the compose files' security_opt. With SELinux label
-    # confinement the container may neither execute the bind-mounted deploy
-    # hook (usr_t) nor connect to the Podman socket.
-    # Wants=, not Requires=: certbot renews on its own (standalone, port 80),
-    # and a testpoint restart must not stop certbot while its hook runs.
+    # Renewal: certbot renew (standalone, port 80) in a throw-away container.
+    # Its deploy hook only leaves a marker in /etc/letsencrypt; the host then
+    # reloads Apache in the testpoint, so certbot needs no access to Podman.
     cat > "$CERTBOT_SERVICE" << EOF
 [Unit]
-Description=perfSONAR Certbot Renewal Container
-After=perfsonar-testpoint.service podman.socket
-Wants=perfsonar-testpoint.service podman.socket
+Description=perfSONAR Let's Encrypt certificate renewal (certbot)
+After=network-online.target perfsonar-testpoint.service
+Wants=network-online.target
 
 [Service]
-Type=simple
-Restart=always
-RestartSec=10
-ExecStartPre=-/usr/bin/podman rm -f -v certbot
-ExecStart=/usr/bin/podman run --name certbot \\
-  --replace \\
+Type=oneshot
+ExecStartPre=-/usr/bin/podman rm -f certbot
+ExecStart=/usr/bin/podman run --rm --name certbot \\
   --network host \\
-  --security-opt label=disable \\
-  --entrypoint=/bin/sh \\
-  -v /run/podman/podman.sock:/run/podman/podman.sock:ro \\
-  -v /var/www/html:/var/www/html:z \\
   -v /etc/letsencrypt:/etc/letsencrypt:z \\
-  -v $INSTALL_DIR/tools_scripts/certbot-deploy-hook.sh:/etc/letsencrypt/renewal-hooks/deploy/certbot-deploy-hook.sh:ro \\
-  docker.io/certbot/certbot:latest \\
-  -c "trap 'exit 0' TERM; while :; do certbot renew; sleep 12h & wait \$\$!; done"
-ExecStop=/usr/bin/podman stop -t 10 certbot
-ExecStopPost=/usr/bin/podman rm -f -v certbot
-
-[Install]
-WantedBy=multi-user.target
+  $CERTBOT_IMAGE \\
+  renew --quiet --deploy-hook "touch /etc/letsencrypt/.osg-renewed"
+ExecStartPost=/bin/sh -c 'if [ -e /etc/letsencrypt/.osg-renewed ]; then rm -f /etc/letsencrypt/.osg-renewed; /usr/bin/podman exec perfsonar-testpoint sh -c "systemctl reload apache2 || apachectl graceful" && echo "Apache reloaded with the renewed certificate"; fi'
 EOF
 
-    echo "==> ✓ Created $CERTBOT_SERVICE"
+    cat > "$CERTBOT_TIMER" << EOF
+[Unit]
+Description=perfSONAR Let's Encrypt renewal, twice a day
+
+[Timer]
+OnCalendar=*-*-* 00/12:00:00
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    echo "==> ✓ Created $CERTBOT_SERVICE and $CERTBOT_TIMER ($CERTBOT_IMAGE)"
 fi
 
 fi  # end SKIP_SERVICE_UNITS guard
@@ -533,8 +647,8 @@ if [[ "$SKIP_SERVICE_UNITS" == "false" ]]; then
     systemctl enable perfsonar-testpoint.service
 
     if [[ "$WITH_CERTBOT" == "true" ]]; then
-        echo "==> Enabling perfsonar-certbot service"
-        systemctl enable perfsonar-certbot.service
+        echo "==> Enabling perfsonar-certbot.timer"
+        systemctl enable --now perfsonar-certbot.timer
     fi
 
     echo ""
@@ -543,19 +657,19 @@ if [[ "$SKIP_SERVICE_UNITS" == "false" ]]; then
     echo "Useful commands:"
     echo "  Start services:   systemctl start perfsonar-testpoint.service"
     if [[ "$WITH_CERTBOT" == "true" ]]; then
-        echo "                    systemctl start perfsonar-certbot.service"
+        echo "                    (certificate renewal: perfsonar-certbot.timer, twice a day)"
     fi
     echo "  Stop services:    systemctl stop perfsonar-testpoint.service"
     if [[ "$WITH_CERTBOT" == "true" ]]; then
-        echo "                    systemctl stop perfsonar-certbot.service"
+        echo "                    systemctl disable --now perfsonar-certbot.timer"
     fi
     echo "  Check status:     systemctl status perfsonar-testpoint.service"
     if [[ "$WITH_CERTBOT" == "true" ]]; then
-        echo "                    systemctl status perfsonar-certbot.service"
+        echo "                    systemctl list-timers perfsonar-certbot.timer"
     fi
     echo "  View logs:        journalctl -u perfsonar-testpoint.service -f"
     if [[ "$WITH_CERTBOT" == "true" ]]; then
-        echo "                    journalctl -u perfsonar-certbot.service -f"
+        echo "                    journalctl -u perfsonar-certbot.service"
     fi
     echo "  Check containers: podman ps"
     echo ""

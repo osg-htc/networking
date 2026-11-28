@@ -6,10 +6,23 @@ set -euo pipefail
 # Update an existing perfSONAR deployment (container or RPM toolkit) to the
 # latest helper scripts, configuration files, and templates.
 #
-# Version: 1.18.0 - 2026-11-27
+# Version: 1.19.0 - 2026-11-28
 # Author: Shawn McKee, University of Michigan
 # Acknowledgements: Supported by IRIS-HEP and OSG-LHC
 #
+# Version: 1.19.0 - 2026-11-28 (with install-systemd-units.sh 1.9.0)
+#   - Direct units: with an image that chooses its TLS certificate itself
+#     (label feature "tls-auto"), mounts of /var/www/html and of the host's
+#     default-ssl.conf, and the entrypoint wrapper, are reported as stale
+#     (they hid image files and kept image fixes out). With a "state-dirs"
+#     image, a unit that does not persist LS registration and pSConfig state
+#     is stale. --apply regenerates the unit, keeping the image it runs.
+#   - Let's Encrypt: a long-running certbot sidecar (host Podman socket,
+#     label=disable, certbot:latest) is reported; --apply replaces it with
+#     perfsonar-certbot.timer. In timer mode podman.socket is not required and
+#     no certbot container is expected; the timer and its last result are
+#     checked instead. Testpoint restarts no longer restart the certbot unit
+#     unless it is the old sidecar.
 # Version: 1.18.0 - 2026-11-27
 #   - Exporter ACL check. Toolkit: an ACL file written by
 #     perfSONAR-configure-exporter-acls.sh older than 0.2.0 covers only
@@ -238,7 +251,7 @@ set -euo pipefail
 #   # Non-interactive full update:
 #   update-perfsonar-deployment.sh --apply --restart --yes
 
-VERSION="1.18.0"
+VERSION="1.19.0"
 
 # Captured before parse_args so exec-relaunch can pass identical arguments.
 ORIGINAL_ARGS=()
@@ -259,6 +272,7 @@ SKIP_RESTART=false   # set when the unit cannot start as-is
 UNIT_KIND="none"      # direct (podman run) | compose (podman-compose) | other | none
 TESTPOINT_UNIT="/etc/systemd/system/perfsonar-testpoint.service"
 CERTBOT_UNIT="/etc/systemd/system/perfsonar-certbot.service"
+CERTBOT_TIMER="/etc/systemd/system/perfsonar-certbot.timer"
 COMPOSE_CHANGED=false
 CONFIG_CHANGED=false
 SERVICE_FILE_CHANGED=false
@@ -1095,6 +1109,33 @@ fix_container_selinux_labels() {
 # This function detects and patches the deployed service file in-place.
 # phase4_container_restart handles daemon-reload + service restart.
 
+# Image named in the direct unit's ExecStart.
+unit_image() {
+    grep -oE '[a-z0-9.-]+(:[0-9]+)?/[^ ;\\]*perfsonar-testpoint[^ ;\\]*' "$TESTPOINT_UNIT" 2>/dev/null | sed -n 1p || true
+}
+
+# Does image $1 have OSG feature $2 (label org.osg-htc.testpoint.features)?
+# Only looks at local images; never pulls.
+image_has_feature() {
+    local feats
+    [[ -n "$1" ]] || return 1
+    feats=$($RUNTIME image inspect "$1" \
+            --format '{{ index .Labels "org.osg-htc.testpoint.features" }}' 2>/dev/null || true)
+    [[ " $feats " == *" $2 "* ]]
+}
+
+# The certbot unit is the long-running sidecar of install-systemd-units.sh < 1.9.0.
+certbot_is_sidecar() {
+    [[ -f "$CERTBOT_UNIT" ]] && grep -qE '^Type=simple|podman\.sock' "$CERTBOT_UNIT"
+}
+
+# Arguments that keep the unit's current image when re-running the installer.
+installer_image_args() {
+    local img
+    img=$(unit_image)
+    [[ -n "$img" ]] && printf -- '--image\n%s\n' "$img"
+}
+
 fix_stale_service_file() {
     if [[ "$DEPLOY_TYPE" != "container" ]]; then
         return
@@ -1156,6 +1197,20 @@ fix_stale_service_file() {
     if grep -q 'io.containers.autoupdate' "$svc"; then
         stale+=("io.containers.autoupdate label (podman-auto-update fails on it; perfsonar-auto-update.timer handles updates)")
     fi
+    # install-systemd-units.sh < 1.9.0 with a current image (see 1.19.0 notes).
+    local img
+    img=$(unit_image)
+    if image_has_feature "$img" tls-auto; then
+        if grep -qE -- '-v /var/www/html:|-v /etc/apache2/sites-available/default-ssl.conf:' "$svc"; then
+            stale+=("host /var/www/html or default-ssl.conf mounted (the image chooses its certificate itself; these hide image files and fixes)")
+        fi
+        if grep -q 'testpoint-entrypoint-wrapper.sh' "$svc"; then
+            stale+=("starts through testpoint-entrypoint-wrapper.sh (not needed with this image)")
+        fi
+    fi
+    if image_has_feature "$img" state-dirs && ! grep -q -- ':/var/lib/perfsonar/lsregistrationdaemon' "$svc"; then
+        stale+=("LS registration and pSConfig state not persisted (lost at every restart)")
+    fi
 
     if [[ ${#stale[@]} -gt 0 ]]; then
         changed "  Service file is out of date:"
@@ -1164,8 +1219,10 @@ fix_stale_service_file() {
         done
         CHANGES_FOUND=1
         local installer="$TOOLS_DIR/install-systemd-units.sh"
+        local img_args=()
+        mapfile -t img_args < <(installer_image_args)
         if [[ "$DRY_RUN" == true ]]; then
-            info "  [DRY-RUN] Would run: $installer --install-dir $BASE_DIR --force"
+            info "  [DRY-RUN] Would run: $installer --install-dir $BASE_DIR --force ${img_args[*]}"
             echo
             return
         fi
@@ -1179,7 +1236,7 @@ fix_stale_service_file() {
             echo
             return
         fi
-        if bash "$installer" --install-dir "$BASE_DIR" --force 2>&1 | sed 's/^/    /'; then
+        if bash "$installer" --install-dir "$BASE_DIR" --force "${img_args[@]}" 2>&1 | sed 's/^/    /'; then
             ok "  ✓ Regenerated $svc"
             SERVICE_FILE_CHANGED=true
         else
@@ -1243,7 +1300,7 @@ print_container_restart_hint() {
     local prefix="${1:-    }"
     if [[ "$SYSTEMD_MANAGED" == true ]]; then
         echo "${prefix}systemctl daemon-reload && systemctl restart perfsonar-testpoint.service"
-        if [[ -f "$CERTBOT_UNIT" ]]; then
+        if certbot_is_sidecar; then
             echo "${prefix}systemctl restart perfsonar-certbot.service"
         fi
     else
@@ -1281,7 +1338,7 @@ restart_via_systemd() {
         journalctl -u perfsonar-testpoint.service -n 20 --no-pager 2>&1 | sed 's/^/    /' || true
         return 1
     fi
-    if [[ -f "$CERTBOT_UNIT" ]]; then
+    if certbot_is_sidecar; then
         info "  Restarting perfsonar-certbot.service..."
         systemctl restart perfsonar-certbot.service 2>&1 | sed 's/^/    /' || true
     fi
@@ -1622,11 +1679,10 @@ check_letsencrypt() {
         local problems=()
         if [[ ! -f "$CERTBOT_UNIT" ]]; then
             problems+=("no perfsonar-certbot.service: the certificate is never renewed")
-        else
-            grep -q -- 'label=disable' "$CERTBOT_UNIT" || \
-                problems+=("certbot unit lacks --security-opt label=disable (SELinux blocks the deploy hook, so Apache never loads renewed certificates)")
-            grep -q '^Requires=perfsonar-testpoint' "$CERTBOT_UNIT" && \
-                problems+=("certbot unit has Requires=perfsonar-testpoint.service (a testpoint restart stops certbot)")
+        elif certbot_is_sidecar; then
+            problems+=("long-running certbot sidecar with the host's Podman socket and certbot:latest (replaced by perfsonar-certbot.timer)")
+        elif [[ ! -f "$CERTBOT_TIMER" ]]; then
+            problems+=("no perfsonar-certbot.timer: the certificate is never renewed")
         fi
         if [[ ${#problems[@]} -gt 0 ]]; then
             local p
@@ -1634,8 +1690,10 @@ check_letsencrypt() {
             for p in "${problems[@]}"; do changed "    - $p"; done
             CHANGES_FOUND=1
             local installer="$TOOLS_DIR/install-systemd-units.sh"
+            local img_args=()
+            mapfile -t img_args < <(installer_image_args)
             if [[ "$DRY_RUN" == true ]]; then
-                info "  [DRY-RUN] Would run: $installer --install-dir $BASE_DIR --force --with-certbot"
+                info "  [DRY-RUN] Would run: $installer --install-dir $BASE_DIR --force --with-certbot ${img_args[*]}"
             elif [[ "$APPLY" != true ]]; then
                 warn "  Run with --apply to regenerate the certbot unit."
             elif [[ ! -f "$installer" ]]; then
@@ -1643,18 +1701,20 @@ check_letsencrypt() {
             else
                 local before_sum after_sum
                 before_sum=$(md5sum "$TESTPOINT_UNIT" 2>/dev/null | cut -d' ' -f1)
-                if bash "$installer" --install-dir "$BASE_DIR" --force --with-certbot 2>&1 | sed 's/^/    /'; then
+                if bash "$installer" --install-dir "$BASE_DIR" --force --with-certbot "${img_args[@]}" 2>&1 | sed 's/^/    /'; then
                     ok "  ✓ Regenerated $CERTBOT_UNIT"
                     after_sum=$(md5sum "$TESTPOINT_UNIT" 2>/dev/null | cut -d' ' -f1)
                     if [[ "$before_sum" != "$after_sum" ]]; then
                         SERVICE_FILE_CHANGED=true
                     fi
                     systemctl daemon-reload >/dev/null 2>&1 || true
-                    if [[ "$RESTART" == true ]]; then
-                        info "  Restarting perfsonar-certbot.service..."
-                        systemctl restart perfsonar-certbot.service 2>&1 | sed 's/^/    /' || true
-                    else
-                        warn "  Start it with: systemctl restart perfsonar-certbot.service"
+                    if certbot_is_sidecar; then
+                        if [[ "$RESTART" == true ]]; then
+                            info "  Restarting perfsonar-certbot.service..."
+                            systemctl restart perfsonar-certbot.service 2>&1 | sed 's/^/    /' || true
+                        else
+                            warn "  Start it with: systemctl restart perfsonar-certbot.service"
+                        fi
                     fi
                 else
                     warn "  install-systemd-units.sh failed; see output above"
@@ -1665,8 +1725,10 @@ check_letsencrypt() {
         fi
     fi
 
-    # 2. Podman socket for the deploy hook
-    if systemctl is-active --quiet podman.socket 2>/dev/null; then
+    # 2. Podman socket for the deploy hook (old sidecar and compose only)
+    if [[ "$UNIT_KIND" == "direct" ]] && ! certbot_is_sidecar; then
+        :
+    elif systemctl is-active --quiet podman.socket 2>/dev/null; then
         ok "  podman.socket active"
     else
         changed "  podman.socket is not active: the deploy hook cannot reach the testpoint,"
@@ -1685,10 +1747,27 @@ check_letsencrypt() {
         fi
     fi
 
-    # 3. Is certbot running?
+    # 3. Is certbot running (sidecar), or its timer enabled and passing?
     local running
     running=$($RUNTIME ps --filter name='^certbot$' --format '{{.Names}}' 2>/dev/null || true)
-    if [[ -n "$running" ]]; then
+    if [[ -f "$CERTBOT_TIMER" ]] && ! certbot_is_sidecar; then
+        local result last
+        if systemctl is-enabled --quiet perfsonar-certbot.timer 2>/dev/null; then
+            result=$(systemctl show perfsonar-certbot.service -p Result --value 2>/dev/null || true)
+            last=$(systemctl show perfsonar-certbot.service -p ExecMainExitTimestamp --value 2>/dev/null || true)
+            if [[ -z "$last" ]]; then
+                ok "  perfsonar-certbot.timer enabled (no renewal run yet)"
+            elif [[ "$result" == "success" ]]; then
+                ok "  perfsonar-certbot.timer enabled; last run $last succeeded"
+            else
+                warn "  perfsonar-certbot.timer enabled, but the last run ($last) ended with: $result"
+                warn "  Check: journalctl -u perfsonar-certbot.service"
+            fi
+        else
+            warn "  perfsonar-certbot.timer is not enabled: certificates are not renewed."
+            warn "  Enable it with: systemctl enable --now perfsonar-certbot.timer"
+        fi
+    elif [[ -n "$running" ]]; then
         ok "  certbot container running"
     else
         warn "  certbot container is not running: certificates are not being renewed."
@@ -1706,7 +1785,7 @@ check_letsencrypt() {
         if ! openssl x509 -noout -checkend 0 -in "$cert" >/dev/null 2>&1; then
             warn "  Certificate $name EXPIRED on $end"
         elif ! openssl x509 -noout -checkend 1209600 -in "$cert" >/dev/null 2>&1; then
-            warn "  Certificate $name expires within 14 days ($end); certbot should renew it — check its log: podman logs certbot"
+            warn "  Certificate $name expires within 14 days ($end); certbot should renew it — check: journalctl -u perfsonar-certbot.service (or podman logs certbot)"
         else
             ok "  Certificate $name valid until $end"
         fi

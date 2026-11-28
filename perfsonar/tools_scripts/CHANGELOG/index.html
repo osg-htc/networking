@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#unreleased-2026-11-20-lookup-service-registration-on-multi-nic-hosts" class="md-skip">
+        <a href="#unreleased-2026-11-28-image-fixes-reach-lets-encrypt-hosts-persistent-ls-registration" class="md-skip">
           Skip to content
         </a>
       
@@ -2356,6 +2356,35 @@
 <!-- markdownlint-disable MD024 -->
 <!-- Keep-a-changelog style: each release repeats the same section headings. -->
 
+<h2 id="unreleased-2026-11-28-image-fixes-reach-lets-encrypt-hosts-persistent-ls-registration">[Unreleased] - 2026-11-28 (image fixes reach Let's Encrypt hosts; persistent LS registration)<a class="headerlink" href="#unreleased-2026-11-28-image-fixes-reach-lets-encrypt-hosts-persistent-ls-registration" title="Permanent link">&para;</a></h2>
+<p>Needs an OSG testpoint image with the label feature <code>tls-auto</code> / <code>state-dirs</code>
+(osg-htc/perfsonar-testpoint-docker, 5.2.6-osg2 and later). With older images
+the previous behaviour is kept.</p>
+<ul>
+<li>install-systemd-units.sh 1.9.0: Option B mounts only <code>/etc/letsencrypt</code>
+  (read-only); no <code>/var/www/html</code> (it hid image files such as
+  <code>host_exporter.wsgi</code>) and no host <code>default-ssl.conf</code> (seeded once, so image
+  fixes never reached it); no entrypoint wrapper. LS settings, LS client
+  UUID/keys and pSConfig agent state persist under <code>/opt/perfsonar-tp/conf</code> and
+  <code>/opt/perfsonar-tp/state</code>, seeded from the running container. Certbot runs
+  from <code>perfsonar-certbot.timer</code> with a pinned image and no Podman socket; the
+  host reloads Apache after a renewal. New <code>--image</code>, <code>--certbot-image</code>.</li>
+<li>perfSONAR-auto-update.sh 1.1.0: follows the image the container runs (a host
+  on another tag was restarted every night); certbot sidecar updates restart
+  the certbot unit, not the testpoint.</li>
+<li>update-perfsonar-deployment.sh 1.19.0: reports the old Option B mounts,
+  wrapper, unpersisted state and certbot sidecar; <code>--apply</code> converts the host,
+  keeping its image.</li>
+<li>perfSONAR-update-lsregistration.sh 1.2.0: writes a bind-mounted
+  <code>lsregistrationdaemon.conf</code> in place on the host.</li>
+<li>perfSONAR-orchestrator.sh 1.4.0: Step 8.1 sets site, administrator and
+  communities for the Lookup Service (<code>--ls-*</code> options); Option B uses the
+  pinned certbot image and the renewal timer.</li>
+<li>seed_testpoint_host_dirs.sh 2.1.0: nothing extra to seed for <code>--with-le</code> with
+  such images.</li>
+<li>Docs: Option B rewritten; new "Persistent registration state" section;
+  certificate troubleshooting for the timer.</li>
+</ul>
 <h2 id="unreleased-2026-11-20-lookup-service-registration-on-multi-nic-hosts">[Unreleased] - 2026-11-20 (Lookup Service registration on multi-NIC hosts)<a class="headerlink" href="#unreleased-2026-11-20-lookup-service-registration-on-multi-nic-hosts" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
